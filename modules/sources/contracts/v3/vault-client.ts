@@ -1,9 +1,9 @@
 import { ViemClient } from '../../viem-client';
-import { OnchainPoolData, fetchPoolData } from './fetch-pool-data';
+import { OnchainDataV3, fetchPoolData } from './fetch-pool-data';
 import { ProtocolFees, fetchProtocolFees } from './fetch-protocol-fees';
 
 export interface VaultClient {
-    fetchPoolData: (pools: string[], blockNumber?: bigint) => Promise<{ [address: string]: OnchainPoolData }>;
+    fetchPoolData: (pools: string[], blockNumber?: bigint) => Promise<{ [address: string]: OnchainDataV3 }>;
     fetchProtocolFees: (blockNumber?: bigint) => Promise<ProtocolFees>;
 }
 

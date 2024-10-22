@@ -150,6 +150,8 @@ model PrismaPoolToken {
 
     dynamicData         PrismaPoolTokenDynamicData?
 
+    scalingFactor               String?
+
     @@index([poolId, chain])
     @@index([address, chain])
     @@index([nestedPoolId, chain])

@@ -1,61 +1,23 @@
 import _ from 'lodash';
-import { Chain } from '@prisma/client';
-import { prisma } from '../../../prisma/prisma-client';
-import { SubgraphPoolUpsertData } from '../transformers/subgraph-pool-upsert';
-import { formatUnits } from 'viem';
-import { OnchainPoolUpdateData } from '../transformers/onchain-pool-update';
-import { OnchainCowAmmPoolUpdateData } from '../transformers/onchain-cow-amm-pool-update';
+import { PoolDynamicUpsertData } from '../../../prisma/prisma-types';
 
-type EnrichedTokenData<T> = T extends { poolTokenDynamicData: infer U }
-    ? U extends any[]
-        ? {
-              poolDynamicData: U[number] & { totalLiquidity: number };
-              poolTokenDynamicData: (U[number] & { balanceUSD: number })[];
-          }
-        : never
-    : never;
+export const enrichPoolUpsertsUsd = (
+    data: PoolDynamicUpsertData,
+    prices: { [address: string]: number },
+): PoolDynamicUpsertData => {
+    const poolTokenDynamicData = data.poolTokenDynamicData.map((token) => ({
+        ...token,
+        balanceUSD: parseFloat(token.balance) * prices[token.id.split('-')[1]] || 0,
+    }));
 
-/**
- * Takes pool data for the DB upserts and enriches them with USD values:
- *  - pool tokens balances in USD
- *  - pool liquidity in USD
- *
- * @param upsertData
- * @param chain
- * @returns
- */
-export async function poolUpsertsUsd<
-    T extends OnchainCowAmmPoolUpdateData | OnchainPoolUpdateData | Exclude<SubgraphPoolUpsertData, null>,
->(
-    upsertData: T[],
-    chain: Chain,
-    allTokens: { address: string; decimals: number }[],
-): Promise<(T & EnrichedTokenData<T>)[]> {
-    // Get the token prices needed for calculating token balances and total liquidity
-    const dbPrices = await prisma.prismaTokenCurrentPrice.findMany({
-        where: {
-            tokenAddress: { in: allTokens.map((token) => token.address) },
-            chain: chain,
-        },
-    });
-    const prices = Object.fromEntries(dbPrices.map((price) => [price.tokenAddress, price.price]));
+    const poolDynamicData = {
+        ...data.poolDynamicData,
+        totalLiquidity: poolTokenDynamicData.reduce((acc, token) => acc + Number(token.balanceUSD), 0),
+    };
 
-    return upsertData.map((pool) => {
-        const poolTokenDynamicData = pool.poolTokenDynamicData.map((token) => ({
-            ...token,
-            balanceUSD: parseFloat(token.balance) * prices[token.id.split('-')[1]] || 0,
-        }));
-
-        const poolDynamicData = {
-            ...pool.poolDynamicData,
-            // TODO: do we need to filter out BPTs?
-            totalLiquidity: poolTokenDynamicData.reduce((acc, token) => acc + Number(token.balanceUSD), 0),
-        };
-
-        return {
-            ...pool,
-            poolDynamicData,
-            poolTokenDynamicData,
-        };
-    }) as (T & EnrichedTokenData<T>)[];
-}
+    return {
+        ...data,
+        poolDynamicData,
+        poolTokenDynamicData,
+    };
+};

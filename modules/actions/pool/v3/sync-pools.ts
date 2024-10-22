@@ -1,14 +1,14 @@
 import { Chain, PrismaPoolType } from '@prisma/client';
 import { prisma } from '../../../../prisma/prisma-client';
-import { onchainPoolUpdate } from '../../../sources/transformers/onchain-pool-update';
-import { poolUpsertsUsd } from '../../../sources/enrichers/pool-upserts-usd';
+import { enrichPoolUpsertsUsd } from '../../../sources/enrichers/pool-upserts-usd';
 import { type VaultClient, getVaultClient, getPoolsClient } from '../../../sources/contracts';
 import { syncDynamicTypeDataForPools } from './type-data/sync-dynamic-type-data-for-pools';
 import { ViemClient } from '../../../sources/viem-client';
+import { applyOnchainDataUpdateV3 } from '../../../sources/enrichers/apply-onchain-data';
 
 const syncVaultData = async (
     vaultClient: VaultClient,
-    chain = 'SEPOLIA' as Chain,
+    chain: Chain,
     ids: string[],
     blockNumber: bigint,
 ) => {
@@ -25,10 +25,22 @@ const syncVaultData = async (
 
     // Get the data for the tables about pools
     const dbUpdates = Object.keys(onchainData).map((id) =>
-        onchainPoolUpdate(onchainData[id], allTokens, chain, id, blockNumber),
+        applyOnchainDataUpdateV3(onchainData[id], allTokens, chain, id, blockNumber),
     );
 
-    const poolsWithUSD = await poolUpsertsUsd(dbUpdates, chain, allTokens);
+    // Get the prices
+    const prices = await prisma.prismaTokenCurrentPrice
+        .findMany({
+            where: {
+                chain: chain,
+            },
+        })
+        .then((prices) => Object.fromEntries(prices.map((price) => [price.tokenAddress, price.price])));
+
+    const poolsWithUSD = dbUpdates.map((upsert) => enrichPoolUpsertsUsd(
+        { poolDynamicData: upsert.poolDynamicData, poolTokenDynamicData: upsert.poolTokenDynamicData },
+        prices,
+    ));
 
     // Update pools data to the database
     for (const { poolDynamicData, poolTokenDynamicData } of poolsWithUSD) {
@@ -36,8 +48,8 @@ const syncVaultData = async (
             await prisma.prismaPoolDynamicData.update({
                 where: {
                     poolId_chain: {
-                        poolId: poolDynamicData.poolId,
-                        chain: poolDynamicData.chain,
+                        poolId: poolDynamicData.id,
+                        chain: chain,
                     },
                 },
                 data: poolDynamicData,

@@ -1,6 +1,19 @@
 import { Prisma, PrismaToken, PrismaTokenTypeOption, PrismaPoolEvent } from '@prisma/client';
-import { transformDocument } from '@prisma/client/runtime';
-import { types } from 'util';
+
+export type PoolUpsertData = {
+    pool: Prisma.PrismaPoolCreateInput;
+    tokens: Prisma.PrismaTokenCreateInput[];
+    hook?: Prisma.HookCreateInput;
+    poolDynamicData: Prisma.PrismaPoolDynamicDataCreateInput;
+    poolToken: Prisma.PrismaPoolTokenCreateManyInput[];
+    poolTokenDynamicData: Prisma.PrismaPoolTokenDynamicDataCreateManyInput[];
+    poolExpandedTokens: Prisma.PrismaPoolExpandedTokensCreateManyInput[];
+};
+
+export type PoolDynamicUpsertData = {
+    poolDynamicData: Prisma.PrismaPoolDynamicDataCreateInput;
+    poolTokenDynamicData: Prisma.PrismaPoolTokenDynamicDataCreateManyInput[];
+};
 
 export type SwapEvent = PrismaPoolEvent & {
     type: 'SWAP';

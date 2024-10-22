@@ -1,10 +1,11 @@
 import { Chain } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
 import { fetchCowAmmData } from '../../sources/contracts';
-import { poolUpsertsUsd } from '../../sources/enrichers/pool-upserts-usd';
+import { enrichPoolUpsertsUsd } from '../../sources/enrichers';
+import { poolUpsertTransformerCowAmm } from '../../sources/transformers';
 import type { CowAmmSubgraphClient } from '../../sources/subgraphs';
 import type { ViemClient } from '../../sources/types';
-import { SubgraphPoolUpsertData, subgraphPoolUpsert } from '../../sources/transformers/subgraph-pool-upsert';
+import { applyOnchainDataUpdateCowAmm } from '../../sources/enrichers/apply-onchain-data';
 
 /**
  * Gets a list of pool ids and fetches the data from the subgraph and rpc, and then upserts into the database.
@@ -19,113 +20,64 @@ export const upsertPools = async (
     viemClient: ViemClient,
     cowAmmSubgraphClient: CowAmmSubgraphClient,
     chain: Chain,
-    blockNumber?: bigint,
+    blockNumber: bigint,
 ) => {
-    const pools = await cowAmmSubgraphClient.getAllPools({ id_in: ids });
+    const sgPools = await cowAmmSubgraphClient.getAllPools({ id_in: ids, blockNumber: String(blockNumber) });
 
     // Get onchain data for the pools
     const onchainData = await fetchCowAmmData(
-        pools.map((pool) => pool.id),
+        sgPools.map((pool) => pool.id),
         viemClient,
         blockNumber,
     );
 
-    // Needed to get the token decimals for the USD calculations,
-    // Keeping it external, because we fetch these tokens in the upsert pools function
-    const allTokens = await prisma.prismaToken.findMany({
-        where: {
-            chain: chain,
-        },
-    });
-
-    // Add tokens if any are missing in the DB
-    const poolTokens = pools.flatMap((pool) => {
-        return [
-            ...pool.tokens.map((token) => ({
-                address: token.address,
-                decimals: token.decimals,
-                name: token.name,
-                symbol: token.symbol,
-                chain: chain,
-            })),
-            {
-                address: pool.id,
-                decimals: 18,
-                name: pool.name,
-                symbol: pool.symbol,
+    // Get the prices
+    const prices = await prisma.prismaTokenCurrentPrice
+        .findMany({
+            where: {
                 chain: chain,
             },
-        ];
-    });
+        })
+        .then((prices) => Object.fromEntries(prices.map((price) => [price.tokenAddress, price.price])));
 
-    const missingTokens = poolTokens.filter(
-        (poolToken) => !allTokens.find((token) => token.address === poolToken.address),
-    );
-    if (missingTokens.length > 0) {
-        await prisma.prismaToken.createMany({
-            data: missingTokens.map((token) => ({
-                address: token.address,
-                decimals: token.decimals,
-                symbol: token.symbol,
-                name: token.name,
+    const pools = sgPools
+        .map((fragment) => poolUpsertTransformerCowAmm(fragment, chain, blockNumber))
+        .map((upsert) => {
+            const update = applyOnchainDataUpdateCowAmm(
+                onchainData[upsert.pool.id],
+                upsert.tokens,
                 chain,
-            })),
-            skipDuplicates: true,
-        });
-    }
-
-    // Get the data for the tables about pools
-    // TODO: add cow amm to subgraph v3 transformer before passing to subgraphPoolUpsert
-    const dbPools = pools
-        .map((poolData) =>
-            subgraphPoolUpsert(
-                {
-                    ...poolData,
-                    factory: {
-                        id: poolData.factory.id,
-                        type: 'COW_AMM' as any,
-                        version: 1,
-                    },
-                    address: poolData.id,
-                    pauseManager: '',
-                    rateProviders: poolData.tokens.map(({ address }) => ({
-                        address: '0x0000000000000000000000000000000000000000',
-                        token: { address },
-                    })),
-                    pauseWindowEndTime: '',
-                    tokens: poolData.tokens.map((token) => ({
-                        ...token,
-                        totalProtocolSwapFee: '0',
-                        totalProtocolYieldFee: '0',
-                        paysYieldFees: false,
-                    })),
-                },
-                {
-                    ...onchainData[poolData.id],
-                    isPoolPaused: false,
-                    isPoolInRecoveryMode: false,
-                    tokens: onchainData[poolData.id].tokens.map((token) => ({
-                        ...token,
-                        rateProvider: '',
-                        rate: 1n,
-                        paysYieldFees: false,
-                        isErc4626: false,
-                        scalingFactor: undefined,
-                    })),
-                },
-                chain,
+                upsert.pool.id,
                 blockNumber,
-            ),
-        )
-        .filter((item): item is Exclude<SubgraphPoolUpsertData, null> => Boolean(item));
-
-    const poolsWithUSD = await poolUpsertsUsd(dbPools, chain, allTokens);
+            );
+            return {
+                ...upsert,
+                poolDynamicData: update.poolDynamicData,
+                poolTokenDynamicData: update.poolTokenDynamicData,
+            };
+        })
+        .map((upsert) => {
+            const update = enrichPoolUpsertsUsd(
+                { poolDynamicData: upsert.poolDynamicData, poolTokenDynamicData: upsert.poolTokenDynamicData },
+                prices,
+            );
+            return {
+                ...upsert,
+                poolDynamicData: update.poolDynamicData,
+                poolTokenDynamicData: update.poolTokenDynamicData,
+            };
+        });
 
     // Upserts pools to the database
     // TODO: extract to a DB helper
-    for (const { pool, poolToken, poolDynamicData, poolTokenDynamicData, poolExpandedTokens } of poolsWithUSD) {
+    for (const { pool, tokens, poolToken, poolDynamicData, poolTokenDynamicData, poolExpandedTokens } of pools) {
         try {
             await prisma.$transaction([
+                prisma.prismaToken.createMany({
+                    data: tokens,
+                    skipDuplicates: true,
+                }),
+
                 prisma.prismaPool.upsert({
                     where: { id_chain: { id: pool.id, chain: pool.chain } },
                     create: pool,

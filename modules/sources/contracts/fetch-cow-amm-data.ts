@@ -9,20 +9,21 @@ const cowAmmAbi = parseAbi([
     'function getFinalTokens() view returns (address[])',
 ]);
 
-export interface CowAmmOnchainData {
+export interface OnchainDataCowAmm {
     totalSupply: bigint;
     swapFee: bigint;
     tokens: {
         address: string;
         balance: bigint;
     }[];
+    blockNumber: bigint;
 }
 
 export async function fetchCowAmmData(
     pools: string[],
     client: ViemClient,
-    blockNumber?: bigint,
-): Promise<{ [address: string]: CowAmmOnchainData }> {
+    blockNumber: bigint,
+): Promise<{ [address: string]: OnchainDataCowAmm }> {
     const contracts = pools
         .map((pool) => [
             {
@@ -68,7 +69,7 @@ export async function fetchCowAmmData(
         .flat();
 
     // Get balances
-    const balanceResults = (await multicallViem(client, balances)) as Record<
+    const balanceResults = (await multicallViem(client, balances, blockNumber)) as Record<
         string,
         {
             tokenBalances: { [token: string]: string };
@@ -89,6 +90,7 @@ export async function fetchCowAmmData(
                 swapFee: BigInt(poolResults['swapFee']),
                 totalSupply: BigInt(poolResults['totalSupply']),
                 tokens,
+                blockNumber,
             },
         };
     });
