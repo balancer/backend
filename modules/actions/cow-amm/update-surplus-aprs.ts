@@ -1,12 +1,5 @@
-import { Chain, PrismaPoolAprType, PrismaPoolSnapshot } from '@prisma/client';
+import { PrismaPoolAprType, PrismaPoolSnapshot } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
-
-type SurplusDynamicData = {
-    poolId: string;
-    chain: Chain;
-    totalLiquidity: number;
-    surplus24h: number;
-};
 
 const midnight = (daysAgo: number) => Math.floor(Date.now() / 1000 / 86400) * 86400 - 86400 * daysAgo;
 
@@ -57,15 +50,9 @@ export const updateSurplusAPRs = async () => {
             pools.flatMap((pool) => ({
                 poolId: pool.id,
                 chain: pool.chain,
-                totalLiquidity: pool.dynamicData?.totalLiquidity,
-                surplus24h: pool.dynamicData?.surplus24h,
+                totalLiquidity: pool.dynamicData?.totalLiquidity ?? 0,
+                surplus24h: pool.dynamicData?.surplus24h ?? 0,
             })),
-        )
-        .then((pools) =>
-            pools.filter(
-                (pool): pool is SurplusDynamicData =>
-                    pool.totalLiquidity !== undefined && pool.surplus24h !== undefined,
-            ),
         );
 
     const mapLatestSnapshots = latestSnapshots.reduce((acc, snapshot) => {
