@@ -45,13 +45,22 @@ export const poolUpsertTransformerV3 = (
             createTime: Number(poolData.blockTimestamp),
             liquidityManagement: poolData.liquidityManagement,
         },
-        tokens: poolData.tokens.map((token) => ({
-            address: token.address,
-            decimals: token.decimals,
-            symbol: token.symbol,
-            name: token.name,
-            chain,
-        })),
+        tokens: [
+            ...poolData.tokens.map((token) => ({
+                address: token.address,
+                decimals: token.decimals,
+                symbol: token.symbol,
+                name: token.name,
+                chain,
+            })),
+            {
+                address: poolData.id,
+                decimals: 18,
+                symbol: poolData.symbol,
+                name: poolData.name,
+                chain,
+            },
+        ],
         hook: undefined,
         poolDynamicData: {
             id: poolData.id,
