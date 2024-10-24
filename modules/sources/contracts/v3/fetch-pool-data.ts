@@ -4,8 +4,6 @@ import VaultV3Abi from '../abis/VaultV3';
 import { formatEther } from 'viem';
 import type { PoolDynamicUpsertData } from '../../../../prisma/prisma-types';
 
-export type { PoolDynamicUpsertData };
-
 // TODO: Find out if we need to do that,
 // or can somehow get the correct type infered automatically from the viem's result set?
 type PoolConfig = AbiParameterToPrimitiveType<ExtractAbiFunction<typeof VaultV3Abi, 'getPoolConfig'>['outputs'][0]>;
