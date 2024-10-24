@@ -59,6 +59,7 @@ export const upsertPools = async (
         .map((fragment) => poolUpsertTransformerV3(fragment, chain, blockNumber))
         .map((upsert) => {
             const update = applyOnchainDataUpdateV3(
+                upsert,
                 onchainData[upsert.pool.id],
                 upsert.tokens,
                 chain,
