@@ -206,8 +206,8 @@ export default <NetworkData>{
             },
             rETH: {
                 tokenAddress: '0x9bcef72be871e61ed4fbbc7630889bee758eb81d',
-                sourceUrl: 'https://rocketpool.net/api/mainnet/payload',
-                path: 'rethAPR',
+                sourceUrl: 'https://api.rocketpool.net/mainnet/reth/apr',
+                path: 'yearlyAPR',
                 isIbYield: true,
             },
             overnightDAIPlus: {
