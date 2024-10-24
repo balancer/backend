@@ -61,6 +61,7 @@ export const applyOnchainDataUpdateV3 = (
 };
 
 export const applyOnchainDataUpdateCowAmm = (
+    data: Partial<PoolUpsertData> = {},
     onchainPoolData: OnchainDataCowAmm,
     allTokens: { address: string; decimals: number }[],
     chain: Chain,
@@ -86,14 +87,27 @@ export const applyOnchainDataUpdateCowAmm = (
             swapEnabled: true,
             totalLiquidity: 0,
         },
-        poolTokenDynamicData: onchainPoolData.tokens.map((tokenData) => ({
-            id: `${poolId}-${tokenData.address.toLowerCase()}`,
-            poolTokenId: `${poolId}-${tokenData.address.toLowerCase()}`,
-            chain: chain,
-            balance: formatUnits(tokenData.balance, decimals[tokenData.address.toLowerCase()]),
-            blockNumber: Number(blockNumber),
-            priceRate: '1',
-            balanceUSD: 0,
-        })),
+        poolTokenDynamicData:
+            data.poolTokenDynamicData?.map((token) => {
+                const tokenData = onchainPoolData.tokens?.find(
+                    (t) => t.address.toLowerCase() === token.poolTokenId.split('-')[1],
+                );
+                return {
+                    ...token,
+                    balance: formatUnits(tokenData?.balance ?? 0n, decimals[token.poolTokenId.split('-')[1]]),
+                    priceRate: '1',
+                    blockNumber: Number(blockNumber),
+                    balanceUSD: 0,
+                };
+            }) ||
+            onchainPoolData.tokens?.map((tokenData) => ({
+                id: `${poolId}-${tokenData.address.toLowerCase()}`,
+                poolTokenId: `${poolId}-${tokenData.address.toLowerCase()}`,
+                chain: chain,
+                balance: formatUnits(tokenData.balance, decimals[tokenData.address.toLowerCase()]),
+                priceRate: '1',
+                blockNumber: Number(blockNumber),
+                balanceUSD: 0,
+            })),
     };
 };

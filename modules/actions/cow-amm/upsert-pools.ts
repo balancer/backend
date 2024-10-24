@@ -44,6 +44,7 @@ export const upsertPools = async (
         .map((fragment) => poolUpsertTransformerCowAmm(fragment, chain, blockNumber))
         .map((upsert) => {
             const update = applyOnchainDataUpdateCowAmm(
+                upsert,
                 onchainData[upsert.pool.id],
                 upsert.tokens,
                 chain,
