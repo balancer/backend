@@ -329,8 +329,8 @@ export default <NetworkData>{
             },
             rETH: {
                 tokenAddress: '0xae78736cd615f374d3085123a210448e74fc6393',
-                sourceUrl: 'https://rocketpool.net/api/mainnet/payload',
-                path: 'rethAPR',
+                sourceUrl: 'https://api.rocketpool.net/mainnet/reth/apr',
+                path: 'yearlyAPR',
                 isIbYield: true,
             },
             USDR: {
