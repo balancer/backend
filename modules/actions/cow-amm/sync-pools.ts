@@ -35,7 +35,9 @@ export const syncPools = async (ids: string[], viemClient: ViemClient, chain: Ch
         .then((prices) => Object.fromEntries(prices.map((price) => [price.tokenAddress, price.price])));
 
     // Get the data for the tables about pools
-    const dbPools = ids.map((id) => applyOnchainDataUpdateCowAmm(onchainData[id], allTokens, chain, id, blockNumber));
+    const dbPools = ids.map((id) =>
+        applyOnchainDataUpdateCowAmm({}, onchainData[id], allTokens, chain, id, blockNumber),
+    );
 
     const poolsWithUSD = dbPools.map((upsert) =>
         enrichPoolUpsertsUsd(
