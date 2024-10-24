@@ -456,6 +456,11 @@ export default [
     },
     {
         inputs: [],
+        name: 'InvalidTokenDecimals',
+        type: 'error',
+    },
+    {
+        inputs: [],
         name: 'InvalidTokenType',
         type: 'error',
     },
@@ -2406,6 +2411,11 @@ export default [
     },
     {
         inputs: [],
+        name: 'InvalidTokenDecimals',
+        type: 'error',
+    },
+    {
+        inputs: [],
         name: 'InvalidTokenType',
         type: 'error',
     },
@@ -3612,6 +3622,25 @@ export default [
                 internalType: 'uint256',
                 name: 'dynamicSwapFeePercentage',
                 type: 'uint256',
+            },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
+        ],
+        name: 'getAddLiquidityCalledFlag',
+        outputs: [
+            {
+                internalType: 'bool',
+                name: '',
+                type: 'bool',
             },
         ],
         stateMutability: 'view',
