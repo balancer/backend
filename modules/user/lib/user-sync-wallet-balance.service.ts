@@ -13,6 +13,7 @@ import { AllNetworkConfigs } from '../../network/network-config';
 import { getEvents } from '../../web3/events';
 import { CowAmmController } from '../../controllers';
 import { Prisma } from '@prisma/client';
+import { BALANCES_SYNC_BLOCKS_MARGIN } from '../../../config';
 
 export class UserSyncWalletBalanceService {
     beetsBarService?: BeetsBarSubgraphService;
@@ -155,7 +156,7 @@ export class UserSyncWalletBalanceService {
             throw new Error('UserWalletBalanceService: syncBalances called before initBalances');
         }
 
-        const fromBlock = syncStatus.blockNumber + 1;
+        const fromBlock = syncStatus.blockNumber - BALANCES_SYNC_BLOCKS_MARGIN;
 
         // no new blocks have been minted, needed for slow networks
         if (fromBlock > latestBlock) {

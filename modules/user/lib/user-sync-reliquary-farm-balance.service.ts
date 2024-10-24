@@ -15,6 +15,7 @@ import { Reliquary } from '../../web3/types/Reliquary';
 import { UserStakedBalanceService, UserSyncUserBalanceInput } from '../user-types';
 import { networkContext } from '../../network/network-context.service';
 import { ReliquarySubgraphService } from '../../subgraphs/reliquary-subgraph/reliquary.service';
+import { BALANCES_SYNC_BLOCKS_MARGIN } from '../../../config';
 
 type ReliquaryPosition = {
     amount: BigNumber;
@@ -83,7 +84,7 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
             (farm) => !networkContext.data.reliquary!.excludedFarmIds.includes(farm.pid.toString()),
         );
 
-        const startBlock = status.blockNumber + 1;
+        const startBlock = status.blockNumber - BALANCES_SYNC_BLOCKS_MARGIN;
         const endBlock =
             latestBlock - startBlock > networkContext.data.rpcMaxBlockRange
                 ? startBlock + networkContext.data.rpcMaxBlockRange

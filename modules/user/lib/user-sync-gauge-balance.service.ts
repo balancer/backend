@@ -12,6 +12,7 @@ import ERC20Abi from '../../web3/abi/ERC20.json';
 import { AddressZero } from '@ethersproject/constants';
 import { getEvents } from '../../web3/events';
 import { GaugeSubgraphService } from '../../subgraphs/gauge-subgraph/gauge-subgraph.service';
+import { BALANCES_SYNC_BLOCKS_MARGIN } from '../../../config';
 
 export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
     get chain() {
@@ -132,7 +133,7 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
         ).map((gauge) => gauge.gaugeAddress);
 
         // we sync at most 10k blocks at a time
-        const startBlock = status.blockNumber + 1;
+        const startBlock = status.blockNumber - BALANCES_SYNC_BLOCKS_MARGIN;
 
         // no new blocks have been minted, needed for slow networks
         if (startBlock > latestBlock) {
