@@ -5,7 +5,6 @@ fragment Factory on Factory {
     pools {
         id
         address
-        weights
     }
 }
 
@@ -18,8 +17,12 @@ fragment TypePool on Pool {
         type
         version
     }
-    weights
-    amp
+    stableParams {
+        amp
+    }
+    weightedParams {
+        weights
+    }
 }
 
 query Pools(

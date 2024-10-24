@@ -22,7 +22,7 @@ export const poolUpsertTransformerV3 = (
         case PoolType.Stable:
             type = PrismaPoolType.STABLE;
             typeData = {
-                amp: poolData.amp,
+                amp: poolData.stableParams!.amp,
             } as StableData;
             break;
         default:
@@ -99,7 +99,7 @@ export const poolUpsertTransformerV3 = (
             chain,
             blockNumber: Number(blockNumber),
             balance: token.balance,
-            weight: poolData.weights ? poolData.weights[token.index] ?? null : null,
+            weight: poolData.weightedParams ? poolData.weightedParams.weights[token.index] ?? null : null,
             balanceUSD: 0, // enriched later
             priceRate: '1.0', // enriched later
         })),
