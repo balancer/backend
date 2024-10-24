@@ -25,13 +25,22 @@ export const poolUpsertTransformerCowAmm = (
         createTime: Number(poolFragment.blockTimestamp),
         liquidityManagement: {},
     },
-    tokens: poolFragment.tokens.map((token) => ({
-        address: token.address,
-        decimals: token.decimals,
-        symbol: token.symbol,
-        name: token.name,
-        chain,
-    })),
+    tokens: [
+        ...poolFragment.tokens.map((token) => ({
+            address: token.address,
+            decimals: token.decimals,
+            symbol: token.symbol,
+            name: token.name,
+            chain,
+        })),
+        {
+            address: poolFragment.id,
+            decimals: 18,
+            symbol: poolFragment.symbol,
+            name: poolFragment.name,
+            chain,
+        },
+    ],
     hook: undefined,
     poolDynamicData: {
         id: poolFragment.id,
