@@ -17,6 +17,7 @@ import { UserStakedBalanceService, UserSyncUserBalanceInput } from '../user-type
 import { PrismaPoolStakingType } from '@prisma/client';
 import { networkContext } from '../../network/network-context.service';
 import { MasterchefSubgraphService } from '../../subgraphs/masterchef-subgraph/masterchef.service';
+import { BALANCES_SYNC_BLOCKS_MARGIN } from '../../../config';
 
 export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceService {
     constructor(
@@ -51,7 +52,7 @@ export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceSe
         const latestBlock = await networkContext.provider.getBlockNumber();
         const farms = await this.masterchefService.getAllFarms({});
 
-        const startBlock = status.blockNumber + 1;
+        const startBlock = status.blockNumber - BALANCES_SYNC_BLOCKS_MARGIN;
         const endBlock =
             latestBlock - startBlock > networkContext.data.rpcMaxBlockRange
                 ? startBlock + networkContext.data.rpcMaxBlockRange
