@@ -25,6 +25,7 @@ export const applyOnchainDataUpdateV3 = (
             isPaused: onchainPoolData.isPoolPaused,
             isInRecoveryMode: onchainPoolData.isPoolInRecoveryMode,
             totalShares: formatEther(onchainPoolData.totalSupply),
+            totalSharesNum: parseFloat(formatEther(onchainPoolData.totalSupply)),
             blockNumber: Number(blockNumber),
             swapFee: formatEther(onchainPoolData.swapFee ?? 0n),
             aggregateSwapFee: formatEther(onchainPoolData.aggregateSwapFee ?? 0n),
