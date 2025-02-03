@@ -67,6 +67,10 @@ export default <NetworkData>{
         },
     },
     ybAprConfig: {
+        susds: {
+            oracle: '0x65d946e533748a998b1f0e430803e39a6388f7a1',
+            token: '0x5875eee11cf8398102fdad704c9e96607675467a',
+        },
         morpho: {
             tokens: {},
         },

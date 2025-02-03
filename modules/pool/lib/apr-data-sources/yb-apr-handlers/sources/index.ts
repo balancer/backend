@@ -20,6 +20,7 @@ export * from './teth';
 export * from './morpho-apr-handler';
 export * from './morpho-token-apr-handler';
 export * from './usdl-apr-handler';
+export * from './susds-apr-handler';
 // These need a refactor, because they depend on the network context
 export * from './sftmx-apr-handler';
 export * from './sts-apr-handler';
