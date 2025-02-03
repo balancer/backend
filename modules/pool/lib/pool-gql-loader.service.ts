@@ -47,6 +47,7 @@ import { fixedNumber } from '../../view-helpers/fixed-number';
 import { chainToChainId as chainToIdMap } from '../../network/chain-id-to-chain';
 import { GithubContentService } from '../../content/github-content.service';
 import { ElementData, FxData, GyroData, StableData, QuantAmmWeightedData } from '../subgraph-mapper';
+import { LBPoolData } from '../pool-data';
 import { ZERO_ADDRESS } from '@balancer/sdk';
 import { tokenService } from '../../token/token.service';
 import { mapHookToGqlHook } from '../../sources/transformers';
@@ -918,6 +919,7 @@ export class PoolGqlLoaderService {
                 return {
                     __typename: 'GqlPoolLiquidityBootstrapping',
                     ...poolWithoutTypeData,
+                    ...(typeData as LBPoolData),
                     ...mappedData,
                 };
             case 'GYRO':

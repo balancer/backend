@@ -12,6 +12,12 @@ export const schema = gql`
 
     scalar Bytes
 
+    input CreateLBPInput {
+        metadata: LBPMetadataInput!
+        poolContract: LBPoolInput!
+        saleToken: LBPSaleTokenInput!
+    }
+
     scalar Date
 
     """
@@ -1509,9 +1515,14 @@ export const schema = gql`
         chain: GqlChain!
         createTime: Int!
         decimals: Int!
+        description: String
+        discord: String
         displayTokens: [GqlPoolTokenDisplay!]! @deprecated(reason: "Use poolTokens instead")
         dynamicData: GqlPoolDynamicData!
+        endTime: Int
+        endWeights: [Int!]
         factory: Bytes
+        farcaster: String
         hasAnyAllowedBuffer: Boolean!
         hasErc4626: Boolean!
         hasNestedErc4626: Boolean!
@@ -1539,6 +1550,8 @@ export const schema = gql`
         poolTokens: [GqlPoolTokenDetail!]!
         protocolVersion: Int!
         staking: GqlPoolStaking
+        startTime: Int
+        startWeights: [Int!]
 
         """
         Account empowered to set static swap fees for a pool (when 0 on V2 swap fees are immutable, on V3 delegate to governance)
@@ -1546,6 +1559,7 @@ export const schema = gql`
         swapFeeManager: Bytes
         symbol: String!
         tags: [String]
+        telegram: String
 
         """
         All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
@@ -1555,7 +1569,9 @@ export const schema = gql`
         userBalance: GqlPoolUserBalance
         vaultVersion: Int! @deprecated(reason: "use protocolVersion instead")
         version: Int!
+        website: String
         withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
+        x: String
     }
 
     type GqlPoolMetaStable implements GqlPoolBase {
@@ -3771,6 +3787,27 @@ export const schema = gql`
 
     scalar JSON
 
+    input LBPMetadataInput {
+        description: String!
+        discord: String!
+        farcaster: String!
+        name: String!
+        telegram: String!
+        website: String!
+        x: String!
+    }
+
+    input LBPSaleTokenInput {
+        address: String!
+        chain: String!
+        logo: String!
+    }
+
+    input LBPoolInput {
+        address: String!
+        chain: GqlChain!
+    }
+
     """
     Liquidity management settings for v3 pools.
     """
@@ -3808,6 +3845,7 @@ export const schema = gql`
     type Mutation {
         beetsPoolLoadReliquarySnapshotsForAllFarms(chain: GqlChain!): String!
         beetsSyncFbeetsRatio: String!
+        createLBP(input: CreateLBPInput!): Boolean!
         poolLoadOnChainDataForAllPools(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
         poolLoadSnapshotsForPools(poolIds: [String!]!, reload: Boolean): String!
         poolReloadAllPoolAprs(chain: GqlChain!): String!

@@ -1,0 +1,31 @@
+# Input types for the mutation
+input LBPoolInput {
+    address: String!
+    chain: GqlChain!
+}
+
+input LBPMetadataInput {
+    name: String!
+    description: String!
+    website: String!
+    x: String!
+    discord: String!
+    telegram: String!
+    farcaster: String!
+}
+
+input LBPSaleTokenInput {
+    address: String!
+    chain: String!
+    logo: String!
+}
+
+input CreateLBPInput {
+    poolContract: LBPoolInput!
+    metadata: LBPMetadataInput!
+    saleToken: LBPSaleTokenInput!
+}
+
+type Mutation {
+    createLBP(input: CreateLBPInput!): Boolean!
+}
