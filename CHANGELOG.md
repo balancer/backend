@@ -1,5 +1,11 @@
 # backend
 
+## 1.31.2
+
+### Patch Changes
+
+-   84247db: sUSDs - base
+
 ## 1.31.1
 
 ### Patch Changes
