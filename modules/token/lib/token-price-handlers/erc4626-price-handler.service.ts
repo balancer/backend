@@ -5,6 +5,7 @@ import { prisma } from '../../../../prisma/prisma-client';
 import _ from 'lodash';
 import { tokenAndPrice, updatePrices } from './price-handler-helper';
 import { Chain } from '@prisma/client';
+import { fetchErc20Headers } from '../../../sources/contracts';
 
 export class ERC4626PriceHandlerService implements TokenPriceHandler {
     public readonly exitIfFails = false;
@@ -54,10 +55,12 @@ export class ERC4626PriceHandlerService implements TokenPriceHandler {
             for (const erc4626Token of erc4626TokensForChain) {
                 const dbToken = acceptedTokens.find((t) => t.address === erc4626Token.address);
                 const underlying = erc4626Token.underlyingTokenAddress;
-                if (!dbToken || !underlying || !underlyingMap[underlying]) {
-                    console.error(
-                        `ERC4626PriceHandlerService: Underlying price for ERC4626 ${erc4626Token.symbol} (underlying address: ${erc4626Token.underlyingTokenAddress}) on ${chain} not found`,
-                    );
+                if (!dbToken || !underlying) {
+                    // Missing token or faulty erc4626Token
+                    continue;
+                }
+                if (!underlyingMap[underlying]) {
+                    // Missing underlying price, skip
                     continue;
                 }
                 try {
