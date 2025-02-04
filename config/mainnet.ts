@@ -329,6 +329,12 @@ export default <NetworkData>{
             address: '0xd11c452fc99cf405034ee446803b6f6c1f6d5ed8',
         },
         defaultHandlers: {
+            yUSD: {
+                tokenAddress: '0x1ce7d9942ff78c328a4181b9f3826fee6d845a97',
+                sourceUrl: 'https://ctrl.yield.fi/t/apy',
+                path: 'apy',
+                isIbYield: true,
+            },
             uniETH: {
                 tokenAddress: '0xf1376bcef0f78459c0ed0ba5ddce976f1ddf51f4',
                 sourceUrl: 'https://app.bedrock.technology/unieth/api/v1/e2ls/apy',

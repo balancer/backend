@@ -164,6 +164,12 @@ export default <NetworkData>{
             token: '0xbc404429558292ee2d769e57d57d6e74bbd2792d',
         },
         defaultHandlers: {
+            yUSD: {
+                tokenAddress: '0x895e15020c3f52ddd4d8e9514eb83c39f53b1579',
+                sourceUrl: 'https://ctrl.yield.fi/t/apy',
+                path: 'apy',
+                isIbYield: true,
+            },
             usdm: {
                 tokenAddress: '0x57f5e098cad7a3d1eed53991d4d66c45c9af7812',
                 sourceUrl: 'https://apy.prod.mountainprotocol.com',

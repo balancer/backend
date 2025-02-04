@@ -177,6 +177,12 @@ export default <NetworkData>{
         },
         etherfi: '0x5a7facb970d094b6c7ff1df0ea68d99e6e73cbff',
         defaultHandlers: {
+            yUSD: {
+                tokenAddress: '0x895e15020c3f52ddd4d8e9514eb83c39f53b1579',
+                sourceUrl: 'https://ctrl.yield.fi/t/apy',
+                path: 'apy',
+                isIbYield: true,
+            },
             wstEth: {
                 tokenAddress: '0x1f32b1c2345538c0c6f582fcb022739c4a194ebb',
                 sourceUrl: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
