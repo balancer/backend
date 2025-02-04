@@ -1,5 +1,14 @@
 # backend
 
+## 1.31.3
+
+### Patch Changes
+
+-   1adfe6a: fix missing underlying error handling
+-   b9386ee: new stable surge hook on sepolia
+-   7bd85d9: ignore common issue when underlying is not priced
+-   4acac18: yUSD APR
+
 ## 1.31.2
 
 ### Patch Changes
