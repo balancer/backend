@@ -1,5 +1,5 @@
 import { Chain, PrismaPoolType } from '@prisma/client';
-import { PoolType } from '../subgraphs/balancer-v3-pools/generated/types';
+import { PoolType, SepoliaTypePoolFragment } from '../subgraphs/balancer-v3-pools/generated/types';
 import { StableData } from '../../pool/subgraph-mapper';
 import { fx, gyro, element, stable } from '../../pool/pool-data';
 import { V3JoinedSubgraphPool } from '../subgraphs';
@@ -40,9 +40,11 @@ export const poolUpsertTransformerV3 = (
             break;
         case PoolType.StableSurge:
             type = PrismaPoolType.STABLE;
-            typeData = {
-                amp: poolData.stableSurgeParams!.amp,
-            } as StableData;
+            if ((poolData as SepoliaTypePoolFragment).stableSurgeParams) {
+                typeData = {
+                    amp: (poolData as SepoliaTypePoolFragment).stableSurgeParams!.amp,
+                } as StableData;
+            }
             break;
         case PoolType.Gyro2:
             type = PrismaPoolType.GYRO;
