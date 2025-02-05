@@ -157,6 +157,8 @@ export const schema = gql`
     type GqlHook {
         address: String!
         config: HookConfig
+        dynamicData: GqlHookData @deprecated
+        enableHookAdjustedAmounts: Boolean! @deprecated
         name: String!
 
         """
@@ -168,6 +170,23 @@ export const schema = gql`
         The review for this hook if applicable.
         """
         reviewData: GqlHookReviewData
+        shouldCallAfterAddLiquidity: Boolean! @deprecated
+        shouldCallAfterInitialize: Boolean! @deprecated
+        shouldCallAfterRemoveLiquidity: Boolean! @deprecated
+        shouldCallAfterSwap: Boolean! @deprecated
+        shouldCallBeforeAddLiquidity: Boolean! @deprecated
+        shouldCallBeforeInitialize: Boolean! @deprecated
+        shouldCallBeforeRemoveLiquidity: Boolean! @deprecated
+        shouldCallBeforeSwap: Boolean! @deprecated
+        shouldCallComputeDynamicSwapFee: Boolean! @deprecated
+    }
+
+    type GqlHookData {
+        addLiquidityFeePercentage: String
+        maxSurgeFeePercentage: String
+        removeLiquidityFeePercentage: String
+        surgeThresholdPercentage: String
+        swapFeePercentage: String
     }
 
     """

@@ -153,11 +153,42 @@ export interface GqlHook {
     __typename?: 'GqlHook';
     address: Scalars['String'];
     config?: Maybe<HookConfig>;
+    /** @deprecated Field no longer supported */
+    dynamicData?: Maybe<GqlHookData>;
+    /** @deprecated Field no longer supported */
+    enableHookAdjustedAmounts: Scalars['Boolean'];
     name: Scalars['String'];
     /** Hook type specific params */
     params?: Maybe<HookParams>;
     /** The review for this hook if applicable. */
     reviewData?: Maybe<GqlHookReviewData>;
+    /** @deprecated Field no longer supported */
+    shouldCallAfterAddLiquidity: Scalars['Boolean'];
+    /** @deprecated Field no longer supported */
+    shouldCallAfterInitialize: Scalars['Boolean'];
+    /** @deprecated Field no longer supported */
+    shouldCallAfterRemoveLiquidity: Scalars['Boolean'];
+    /** @deprecated Field no longer supported */
+    shouldCallAfterSwap: Scalars['Boolean'];
+    /** @deprecated Field no longer supported */
+    shouldCallBeforeAddLiquidity: Scalars['Boolean'];
+    /** @deprecated Field no longer supported */
+    shouldCallBeforeInitialize: Scalars['Boolean'];
+    /** @deprecated Field no longer supported */
+    shouldCallBeforeRemoveLiquidity: Scalars['Boolean'];
+    /** @deprecated Field no longer supported */
+    shouldCallBeforeSwap: Scalars['Boolean'];
+    /** @deprecated Field no longer supported */
+    shouldCallComputeDynamicSwapFee: Scalars['Boolean'];
+}
+
+export interface GqlHookData {
+    __typename?: 'GqlHookData';
+    addLiquidityFeePercentage?: Maybe<Scalars['String']>;
+    maxSurgeFeePercentage?: Maybe<Scalars['String']>;
+    removeLiquidityFeePercentage?: Maybe<Scalars['String']>;
+    surgeThresholdPercentage?: Maybe<Scalars['String']>;
+    swapFeePercentage?: Maybe<Scalars['String']>;
 }
 
 /** Represents the review data for the hook */
@@ -3035,6 +3066,7 @@ export type ResolversTypes = ResolversObject<{
     GqlHistoricalTokenPrice: ResolverTypeWrapper<GqlHistoricalTokenPrice>;
     GqlHistoricalTokenPriceEntry: ResolverTypeWrapper<GqlHistoricalTokenPriceEntry>;
     GqlHook: ResolverTypeWrapper<Omit<GqlHook, 'params'> & { params?: Maybe<ResolversTypes['HookParams']> }>;
+    GqlHookData: ResolverTypeWrapper<GqlHookData>;
     GqlHookReviewData: ResolverTypeWrapper<GqlHookReviewData>;
     GqlLatestSyncedBlocks: ResolverTypeWrapper<GqlLatestSyncedBlocks>;
     GqlNestedPool: ResolverTypeWrapper<GqlNestedPool>;
@@ -3244,6 +3276,7 @@ export type ResolversParentTypes = ResolversObject<{
     GqlHistoricalTokenPrice: GqlHistoricalTokenPrice;
     GqlHistoricalTokenPriceEntry: GqlHistoricalTokenPriceEntry;
     GqlHook: Omit<GqlHook, 'params'> & { params?: Maybe<ResolversParentTypes['HookParams']> };
+    GqlHookData: GqlHookData;
     GqlHookReviewData: GqlHookReviewData;
     GqlLatestSyncedBlocks: GqlLatestSyncedBlocks;
     GqlNestedPool: GqlNestedPool;
@@ -3533,9 +3566,32 @@ export type GqlHookResolvers<
 > = ResolversObject<{
     address?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     config?: Resolver<Maybe<ResolversTypes['HookConfig']>, ParentType, ContextType>;
+    dynamicData?: Resolver<Maybe<ResolversTypes['GqlHookData']>, ParentType, ContextType>;
+    enableHookAdjustedAmounts?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
     name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     params?: Resolver<Maybe<ResolversTypes['HookParams']>, ParentType, ContextType>;
     reviewData?: Resolver<Maybe<ResolversTypes['GqlHookReviewData']>, ParentType, ContextType>;
+    shouldCallAfterAddLiquidity?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+    shouldCallAfterInitialize?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+    shouldCallAfterRemoveLiquidity?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+    shouldCallAfterSwap?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+    shouldCallBeforeAddLiquidity?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+    shouldCallBeforeInitialize?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+    shouldCallBeforeRemoveLiquidity?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+    shouldCallBeforeSwap?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+    shouldCallComputeDynamicSwapFee?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+    __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type GqlHookDataResolvers<
+    ContextType = ResolverContext,
+    ParentType extends ResolversParentTypes['GqlHookData'] = ResolversParentTypes['GqlHookData'],
+> = ResolversObject<{
+    addLiquidityFeePercentage?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    maxSurgeFeePercentage?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    removeLiquidityFeePercentage?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    surgeThresholdPercentage?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    swapFeePercentage?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -5798,6 +5854,7 @@ export type Resolvers<ContextType = ResolverContext> = ResolversObject<{
     GqlHistoricalTokenPrice?: GqlHistoricalTokenPriceResolvers<ContextType>;
     GqlHistoricalTokenPriceEntry?: GqlHistoricalTokenPriceEntryResolvers<ContextType>;
     GqlHook?: GqlHookResolvers<ContextType>;
+    GqlHookData?: GqlHookDataResolvers<ContextType>;
     GqlHookReviewData?: GqlHookReviewDataResolvers<ContextType>;
     GqlLatestSyncedBlocks?: GqlLatestSyncedBlocksResolvers<ContextType>;
     GqlNestedPool?: GqlNestedPoolResolvers<ContextType>;
