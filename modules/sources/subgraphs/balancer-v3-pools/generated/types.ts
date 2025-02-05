@@ -339,6 +339,8 @@ export type Pool = {
     id: Scalars['Bytes'];
     /** Parameters for Stable pools (null for other pool types) */
     stableParams?: Maybe<StableParams>;
+    /** Parameters for StableSurge pools (null for other pool types) */
+    stableSurgeParams?: Maybe<StableSurgeParams>;
     /** Parameters for Weighted pools (null for other pool types) */
     weightedParams?: Maybe<WeightedParams>;
 };
@@ -347,6 +349,7 @@ export enum PoolType {
     Gyro2 = 'Gyro2',
     GyroE = 'GyroE',
     Stable = 'Stable',
+    StableSurge = 'StableSurge',
     Weighted = 'Weighted',
 }
 
@@ -459,6 +462,27 @@ export type Pool_Filter = {
     stableParams_not_starts_with_nocase?: InputMaybe<Scalars['String']>;
     stableParams_starts_with?: InputMaybe<Scalars['String']>;
     stableParams_starts_with_nocase?: InputMaybe<Scalars['String']>;
+    stableSurgeParams?: InputMaybe<Scalars['String']>;
+    stableSurgeParams_?: InputMaybe<StableSurgeParams_Filter>;
+    stableSurgeParams_contains?: InputMaybe<Scalars['String']>;
+    stableSurgeParams_contains_nocase?: InputMaybe<Scalars['String']>;
+    stableSurgeParams_ends_with?: InputMaybe<Scalars['String']>;
+    stableSurgeParams_ends_with_nocase?: InputMaybe<Scalars['String']>;
+    stableSurgeParams_gt?: InputMaybe<Scalars['String']>;
+    stableSurgeParams_gte?: InputMaybe<Scalars['String']>;
+    stableSurgeParams_in?: InputMaybe<Array<Scalars['String']>>;
+    stableSurgeParams_lt?: InputMaybe<Scalars['String']>;
+    stableSurgeParams_lte?: InputMaybe<Scalars['String']>;
+    stableSurgeParams_not?: InputMaybe<Scalars['String']>;
+    stableSurgeParams_not_contains?: InputMaybe<Scalars['String']>;
+    stableSurgeParams_not_contains_nocase?: InputMaybe<Scalars['String']>;
+    stableSurgeParams_not_ends_with?: InputMaybe<Scalars['String']>;
+    stableSurgeParams_not_ends_with_nocase?: InputMaybe<Scalars['String']>;
+    stableSurgeParams_not_in?: InputMaybe<Array<Scalars['String']>>;
+    stableSurgeParams_not_starts_with?: InputMaybe<Scalars['String']>;
+    stableSurgeParams_not_starts_with_nocase?: InputMaybe<Scalars['String']>;
+    stableSurgeParams_starts_with?: InputMaybe<Scalars['String']>;
+    stableSurgeParams_starts_with_nocase?: InputMaybe<Scalars['String']>;
     weightedParams?: InputMaybe<Scalars['String']>;
     weightedParams_?: InputMaybe<WeightedParams_Filter>;
     weightedParams_contains?: InputMaybe<Scalars['String']>;
@@ -513,6 +537,11 @@ export enum Pool_OrderBy {
     StableParams = 'stableParams',
     StableParamsAmp = 'stableParams__amp',
     StableParamsId = 'stableParams__id',
+    StableSurgeParams = 'stableSurgeParams',
+    StableSurgeParamsAmp = 'stableSurgeParams__amp',
+    StableSurgeParamsId = 'stableSurgeParams__id',
+    StableSurgeParamsMaxSurgeFeePercentage = 'stableSurgeParams__maxSurgeFeePercentage',
+    StableSurgeParamsSurgeThresholdPercentage = 'stableSurgeParams__surgeThresholdPercentage',
     WeightedParams = 'weightedParams',
     WeightedParamsId = 'weightedParams__id',
 }
@@ -531,6 +560,8 @@ export type Query = {
     pools: Array<Pool>;
     stableParams?: Maybe<StableParams>;
     stableParams_collection: Array<StableParams>;
+    stableSurgeParams?: Maybe<StableSurgeParams>;
+    stableSurgeParams_collection: Array<StableSurgeParams>;
     weightedParams?: Maybe<WeightedParams>;
     weightedParams_collection: Array<WeightedParams>;
 };
@@ -619,6 +650,22 @@ export type QueryStableParams_CollectionArgs = {
     where?: InputMaybe<StableParams_Filter>;
 };
 
+export type QueryStableSurgeParamsArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type QueryStableSurgeParams_CollectionArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<StableSurgeParams_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<StableSurgeParams_Filter>;
+};
+
 export type QueryWeightedParamsArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
@@ -673,6 +720,66 @@ export enum StableParams_OrderBy {
     Id = 'id',
 }
 
+export type StableSurgeParams = {
+    __typename?: 'StableSurgeParams';
+    /** Amplification parameter */
+    amp: Scalars['BigInt'];
+    /** Unique identifier for the StableSurgeParams */
+    id: Scalars['Bytes'];
+    /** Maximum surge fee percentage */
+    maxSurgeFeePercentage: Scalars['BigDecimal'];
+    /** Surge threshold percentage */
+    surgeThresholdPercentage: Scalars['BigDecimal'];
+};
+
+export type StableSurgeParams_Filter = {
+    /** Filter for the block changed event. */
+    _change_block?: InputMaybe<BlockChangedFilter>;
+    amp?: InputMaybe<Scalars['BigInt']>;
+    amp_gt?: InputMaybe<Scalars['BigInt']>;
+    amp_gte?: InputMaybe<Scalars['BigInt']>;
+    amp_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    amp_lt?: InputMaybe<Scalars['BigInt']>;
+    amp_lte?: InputMaybe<Scalars['BigInt']>;
+    amp_not?: InputMaybe<Scalars['BigInt']>;
+    amp_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    and?: InputMaybe<Array<InputMaybe<StableSurgeParams_Filter>>>;
+    id?: InputMaybe<Scalars['Bytes']>;
+    id_contains?: InputMaybe<Scalars['Bytes']>;
+    id_gt?: InputMaybe<Scalars['Bytes']>;
+    id_gte?: InputMaybe<Scalars['Bytes']>;
+    id_in?: InputMaybe<Array<Scalars['Bytes']>>;
+    id_lt?: InputMaybe<Scalars['Bytes']>;
+    id_lte?: InputMaybe<Scalars['Bytes']>;
+    id_not?: InputMaybe<Scalars['Bytes']>;
+    id_not_contains?: InputMaybe<Scalars['Bytes']>;
+    id_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
+    maxSurgeFeePercentage?: InputMaybe<Scalars['BigDecimal']>;
+    maxSurgeFeePercentage_gt?: InputMaybe<Scalars['BigDecimal']>;
+    maxSurgeFeePercentage_gte?: InputMaybe<Scalars['BigDecimal']>;
+    maxSurgeFeePercentage_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    maxSurgeFeePercentage_lt?: InputMaybe<Scalars['BigDecimal']>;
+    maxSurgeFeePercentage_lte?: InputMaybe<Scalars['BigDecimal']>;
+    maxSurgeFeePercentage_not?: InputMaybe<Scalars['BigDecimal']>;
+    maxSurgeFeePercentage_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    or?: InputMaybe<Array<InputMaybe<StableSurgeParams_Filter>>>;
+    surgeThresholdPercentage?: InputMaybe<Scalars['BigDecimal']>;
+    surgeThresholdPercentage_gt?: InputMaybe<Scalars['BigDecimal']>;
+    surgeThresholdPercentage_gte?: InputMaybe<Scalars['BigDecimal']>;
+    surgeThresholdPercentage_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    surgeThresholdPercentage_lt?: InputMaybe<Scalars['BigDecimal']>;
+    surgeThresholdPercentage_lte?: InputMaybe<Scalars['BigDecimal']>;
+    surgeThresholdPercentage_not?: InputMaybe<Scalars['BigDecimal']>;
+    surgeThresholdPercentage_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+};
+
+export enum StableSurgeParams_OrderBy {
+    Amp = 'amp',
+    Id = 'id',
+    MaxSurgeFeePercentage = 'maxSurgeFeePercentage',
+    SurgeThresholdPercentage = 'surgeThresholdPercentage',
+}
+
 export type Subscription = {
     __typename?: 'Subscription';
     /** Access to subgraph metadata */
@@ -687,6 +794,8 @@ export type Subscription = {
     pools: Array<Pool>;
     stableParams?: Maybe<StableParams>;
     stableParams_collection: Array<StableParams>;
+    stableSurgeParams?: Maybe<StableSurgeParams>;
+    stableSurgeParams_collection: Array<StableSurgeParams>;
     weightedParams?: Maybe<WeightedParams>;
     weightedParams_collection: Array<WeightedParams>;
 };
@@ -773,6 +882,22 @@ export type SubscriptionStableParams_CollectionArgs = {
     skip?: InputMaybe<Scalars['Int']>;
     subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<StableParams_Filter>;
+};
+
+export type SubscriptionStableSurgeParamsArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type SubscriptionStableSurgeParams_CollectionArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<StableSurgeParams_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<StableSurgeParams_Filter>;
 };
 
 export type SubscriptionWeightedParamsArgs = {

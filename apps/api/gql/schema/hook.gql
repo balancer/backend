@@ -1,19 +1,30 @@
 """
-Collection of hook specific data. Percentage format is 0.01 -> 0.01%.
+StableSurge hook specific params. Percentage format is 0.01 -> 0.01%.
 """
-type GqlHookData {
-    swapFeePercentage: String
-    addLiquidityFeePercentage: String
-    removeLiquidityFeePercentage: String
+type StableSurgeHookParams {
     surgeThresholdPercentage: String
     maxSurgeFeePercentage: String
 }
 
 """
-Hook data
+ExitFee hook specific params. Percentage format is 0.01 -> 0.01%.
 """
-type GqlHook {
-    address: String!
+type ExitFeeHookParams {
+    exitFeePercentage: String
+}
+
+"""
+FeeTaking hook specific params. Percentage format is 0.01 -> 0.01%
+"""
+type FeeTakingHookParams {
+    swapFeePercentage: String
+    addLiquidityFeePercentage: String
+    removeLiquidityFeePercentage: String
+}
+
+union HookParams = StableSurgeHookParams | ExitFeeHookParams | FeeTakingHookParams
+
+type HookConfig {
     """
     True when hook can change the amounts send to the vault. Necessary to deduct the fees.
     """
@@ -27,10 +38,19 @@ type GqlHook {
     shouldCallAfterRemoveLiquidity: Boolean!
     shouldCallBeforeRemoveLiquidity: Boolean!
     shouldCallComputeDynamicSwapFee: Boolean!
+}
+
+"""
+Hook data
+"""
+type GqlHook {
+    address: String!
+    name: String!
+    config: HookConfig
     """
-    Data points changing over time
+    Hook type specific params
     """
-    dynamicData: GqlHookData
+    params: HookParams
     """
     The review for this hook if applicable.
     """

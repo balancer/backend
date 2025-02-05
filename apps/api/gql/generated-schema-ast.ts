@@ -34,6 +34,22 @@ export const schema = gql`
         warnings: [String!]!
     }
 
+    """
+    ExitFee hook specific params. Percentage format is 0.01 -> 0.01%.
+    """
+    type ExitFeeHookParams {
+        exitFeePercentage: String
+    }
+
+    """
+    FeeTaking hook specific params. Percentage format is 0.01 -> 0.01%
+    """
+    type FeeTakingHookParams {
+        addLiquidityFeePercentage: String
+        removeLiquidityFeePercentage: String
+        swapFeePercentage: String
+    }
+
     type GqlBalancePoolAprItem {
         apr: GqlPoolAprValue!
         id: ID!
@@ -140,41 +156,18 @@ export const schema = gql`
     """
     type GqlHook {
         address: String!
+        config: HookConfig
+        name: String!
 
         """
-        Data points changing over time
+        Hook type specific params
         """
-        dynamicData: GqlHookData
-
-        """
-        True when hook can change the amounts send to the vault. Necessary to deduct the fees.
-        """
-        enableHookAdjustedAmounts: Boolean!
+        params: HookParams
 
         """
         The review for this hook if applicable.
         """
         reviewData: GqlHookReviewData
-        shouldCallAfterAddLiquidity: Boolean!
-        shouldCallAfterInitialize: Boolean!
-        shouldCallAfterRemoveLiquidity: Boolean!
-        shouldCallAfterSwap: Boolean!
-        shouldCallBeforeAddLiquidity: Boolean!
-        shouldCallBeforeInitialize: Boolean!
-        shouldCallBeforeRemoveLiquidity: Boolean!
-        shouldCallBeforeSwap: Boolean!
-        shouldCallComputeDynamicSwapFee: Boolean!
-    }
-
-    """
-    Collection of hook specific data. Percentage format is 0.01 -> 0.01%.
-    """
-    type GqlHookData {
-        addLiquidityFeePercentage: String
-        maxSurgeFeePercentage: String
-        removeLiquidityFeePercentage: String
-        surgeThresholdPercentage: String
-        swapFeePercentage: String
     }
 
     """
@@ -3652,6 +3645,24 @@ export const schema = gql`
         type: GqlPoolType!
     }
 
+    type HookConfig {
+        """
+        True when hook can change the amounts send to the vault. Necessary to deduct the fees.
+        """
+        enableHookAdjustedAmounts: Boolean!
+        shouldCallAfterAddLiquidity: Boolean!
+        shouldCallAfterInitialize: Boolean!
+        shouldCallAfterRemoveLiquidity: Boolean!
+        shouldCallAfterSwap: Boolean!
+        shouldCallBeforeAddLiquidity: Boolean!
+        shouldCallBeforeInitialize: Boolean!
+        shouldCallBeforeRemoveLiquidity: Boolean!
+        shouldCallBeforeSwap: Boolean!
+        shouldCallComputeDynamicSwapFee: Boolean!
+    }
+
+    union HookParams = ExitFeeHookParams | FeeTakingHookParams | StableSurgeHookParams
+
     scalar JSON
 
     """
@@ -4039,6 +4050,14 @@ export const schema = gql`
         Returns all pools with veBAL gauges that can be voted on.
         """
         veBalGetVotingList: [GqlVotingPool!]!
+    }
+
+    """
+    StableSurge hook specific params. Percentage format is 0.01 -> 0.01%.
+    """
+    type StableSurgeHookParams {
+        maxSurgeFeePercentage: String
+        surgeThresholdPercentage: String
     }
 
     type Token {

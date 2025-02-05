@@ -52,7 +52,7 @@ import { SanityContentService } from '../../content/sanity-content.service';
 import { ElementData, FxData, GyroData, StableData } from '../subgraph-mapper';
 import { ZERO_ADDRESS } from '@balancer/sdk';
 import { tokenService } from '../../token/token.service';
-import { HookData } from '../../sources/transformers';
+import { HookData, mapHookToGqlHook } from '../../sources/transformers';
 import { GraphQLError } from 'graphql';
 
 const isToken = (text: string) => text.match(/^0x[0-9a-fA-F]{40}$/);
@@ -320,7 +320,7 @@ export class PoolGqlLoaderService {
         return {
             ...pool,
             liquidityManagement: (pool.liquidityManagement as LiquidityManagement) || undefined,
-            hook: pool.hook as HookData as GqlHook,
+            hook: mapHookToGqlHook(pool.hook as HookData),
             incentivized: pool.categories.some((category) => category === 'INCENTIVIZED'),
             vaultVersion: pool.protocolVersion,
             decimals: 18,
@@ -706,7 +706,7 @@ export class PoolGqlLoaderService {
             vaultVersion: poolWithoutTypeData.protocolVersion,
             categories: pool.categories as GqlPoolFilterCategory[],
             tags: pool.categories,
-            hook: pool.hook as HookData as GqlHook,
+            hook: mapHookToGqlHook(pool.hook as HookData),
             liquidityManagement: (pool.liquidityManagement as LiquidityManagement) || undefined,
             hasErc4626: pool.allTokens.some((token) => token.token.types.some((type) => type.type === 'ERC4626')),
             hasNestedErc4626: pool.allTokens.some((token) =>
