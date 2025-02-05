@@ -23,6 +23,26 @@ fragment TypePool on Pool {
     weightedParams {
         weights
     }
+    gyro2Params {
+        sqrtAlpha
+        sqrtBeta
+    }
+    gyroEParams {
+        alpha
+        beta
+        c
+        s
+        lambda
+        tauAlphaX
+        tauAlphaY
+        tauBetaX
+        tauBetaY
+        u
+        v
+        w
+        z
+        dSq
+    }
 }
 
 query Pools(

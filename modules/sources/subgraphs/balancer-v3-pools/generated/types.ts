@@ -1003,6 +1003,24 @@ export type TypePoolFragment = {
     factory: { __typename?: 'Factory'; id: string; type: PoolType; version: number };
     stableParams?: { __typename?: 'StableParams'; amp: string } | null;
     weightedParams?: { __typename?: 'WeightedParams'; weights: Array<string> } | null;
+    gyro2Params?: { __typename?: 'Gyro2Params'; sqrtAlpha: string; sqrtBeta: string } | null;
+    gyroEParams?: {
+        __typename?: 'GyroEParams';
+        alpha: string;
+        beta: string;
+        c: string;
+        s: string;
+        lambda: string;
+        tauAlphaX: string;
+        tauAlphaY: string;
+        tauBetaX: string;
+        tauBetaY: string;
+        u: string;
+        v: string;
+        w: string;
+        z: string;
+        dSq: string;
+    } | null;
 };
 
 export type PoolsQueryVariables = Exact<{
@@ -1023,6 +1041,24 @@ export type PoolsQuery = {
         factory: { __typename?: 'Factory'; id: string; type: PoolType; version: number };
         stableParams?: { __typename?: 'StableParams'; amp: string } | null;
         weightedParams?: { __typename?: 'WeightedParams'; weights: Array<string> } | null;
+        gyro2Params?: { __typename?: 'Gyro2Params'; sqrtAlpha: string; sqrtBeta: string } | null;
+        gyroEParams?: {
+            __typename?: 'GyroEParams';
+            alpha: string;
+            beta: string;
+            c: string;
+            s: string;
+            lambda: string;
+            tauAlphaX: string;
+            tauAlphaY: string;
+            tauBetaX: string;
+            tauBetaY: string;
+            u: string;
+            v: string;
+            w: string;
+            z: string;
+            dSq: string;
+        } | null;
     }>;
 };
 
@@ -1051,6 +1087,26 @@ export const TypePoolFragmentDoc = gql`
         }
         weightedParams {
             weights
+        }
+        gyro2Params {
+            sqrtAlpha
+            sqrtBeta
+        }
+        gyroEParams {
+            alpha
+            beta
+            c
+            s
+            lambda
+            tauAlphaX
+            tauAlphaY
+            tauBetaX
+            tauBetaY
+            u
+            v
+            w
+            z
+            dSq
         }
     }
 `;
