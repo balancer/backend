@@ -15,7 +15,7 @@ export const poolUpsertTransformerV3 = (
     blockNumber: bigint,
 ): PoolUpsertData => {
     let type: PrismaPoolType;
-    let typeData: ReturnType<typeof typeDataMapper[keyof typeof typeDataMapper]> | {} = {};
+    let typeData: ReturnType<(typeof typeDataMapper)[keyof typeof typeDataMapper]> | {} = {};
 
     // expand the nested tokens
     const allTokens = _.flattenDeep(
@@ -36,6 +36,12 @@ export const poolUpsertTransformerV3 = (
             type = PrismaPoolType.STABLE;
             typeData = {
                 amp: poolData.stableParams!.amp,
+            } as StableData;
+            break;
+        case PoolType.StableSurge:
+            type = PrismaPoolType.STABLE;
+            typeData = {
+                amp: poolData.stableSurgeParams!.amp,
             } as StableData;
             break;
         case PoolType.Gyro2:

@@ -20,6 +20,9 @@ fragment TypePool on Pool {
     stableParams {
         amp
     }
+    stableSurgeParams {
+        amp
+    }
     weightedParams {
         weights
     }
