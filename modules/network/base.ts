@@ -1,13 +1,16 @@
 import { ethers } from 'ethers';
 import { DeploymentEnv, NetworkConfig, NetworkData } from './network-config-types';
-import { BoostedPoolAprService } from '../pool/lib/apr-data-sources/nested-pool-apr.service';
-import { SwapFeeAprService } from '../pool/lib/apr-data-sources/';
-import { GaugeAprService } from '../pool/lib/apr-data-sources/ve-bal-gauge-apr.service';
+import {
+    SwapFeeAprService,
+    GaugeAprService,
+    BoostedPoolAprService,
+    YbTokensAprService,
+    MorphoRewardsAprService,
+} from '../pool/lib/apr-data-sources/';
 import { UserSyncGaugeBalanceService } from '../user/lib/user-sync-gauge-balance.service';
 import { every } from '../../apps/scheduler/intervals';
 import { GithubContentService } from '../content/github-content.service';
 import { env } from '../../apps/env';
-import { YbTokensAprService } from '../pool/lib/apr-data-sources/yb-tokens-apr.service';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import config from '../../config';
 import { UserSyncAuraBalanceService } from '../user/lib/user-sync-aura-balance.service';
@@ -23,6 +26,7 @@ export const baseNetworkConfig: NetworkConfig = {
         new BoostedPoolAprService(),
         new SwapFeeAprService(),
         new GaugeAprService(),
+        new MorphoRewardsAprService(),
     ],
     userStakedBalanceServices: [new UserSyncGaugeBalanceService(), new UserSyncAuraBalanceService()],
     services: {

@@ -137,10 +137,10 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         return PoolController().syncHookData(chain);
     } else if (job === 'sync-sts-data') {
         return StakedSonicController().syncSonicStakingData();
-    } else if (job === 'sync-pool-aprs') {
+    } else if (job === 'reload-pool-aprs') {
         initRequestScopedContext();
         setRequestScopedContextValue('chainId', chainId);
-        return poolService.updatePoolAprs(chain);
+        return poolService.reloadAllPoolAprs(chain);
     } else if (job === 'update-prices') {
         return tokenService.updateTokenPrices([chain]);
     }

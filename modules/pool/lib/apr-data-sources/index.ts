@@ -5,3 +5,4 @@ export * from './ve-bal-gauge-apr.service';
 export * from './yb-tokens-apr.service';
 export * from './vebal-protocol-apr.service';
 export * from './vebal-voting-apr.service';
+export * from './morpho-rewards-apr.service';

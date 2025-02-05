@@ -18,7 +18,6 @@ export * from './dforce-apr-handler';
 export * from './defillama-apr-handler';
 export * from './teth';
 export * from './morpho-apr-handler';
-export * from './morpho-token-apr-handler';
 export * from './usdl-apr-handler';
 export * from './susds-apr-handler';
 // These need a refactor, because they depend on the network context

@@ -4,12 +4,9 @@ import { prisma } from '../../../../prisma/prisma-client';
 import { prismaBulkExecuteOperations } from '../../../../prisma/prisma-util';
 import { Chain, PrismaPoolAprItemGroup, PrismaPoolAprType } from '@prisma/client';
 import { YbAprHandlers, TokenApr } from './yb-apr-handlers';
-import { MorphoTokenAprHandler } from './yb-apr-handlers/sources';
 import { tokenService } from '../../../token/token.service';
 import { collectsYieldFee, tokenCollectsYieldFee } from '../pool-utils';
 import { YbAprConfig } from '../../../network/apr-config-types';
-
-const MORPHO_TOKEN = '0x58d97b57bb95320f9a05dc918aef65434969c2b2';
 
 export class YbTokensAprService implements PoolAprService {
     private ybTokensAprHandlers: YbAprHandlers;
@@ -132,32 +129,6 @@ export class YbTokensAprService implements PoolAprService {
                     rewardTokenAddress: token.address,
                     rewardTokenSymbol: token.token.symbol,
                 };
-
-                // Custom APR for MORPHO vaults, hardcoding, because it's complicated to get it from the API
-                if (data.group === PrismaPoolAprItemGroup.MORPHO) {
-                    const morphoTokensShare = tokenAprs
-                        .filter((t) => t.group === 'MORPHO')
-                        .reduce((acc, t) => acc + t.share, 0);
-
-                    const morphoRate = await new MorphoTokenAprHandler().getAprs();
-                    const morphoId = `${pool.id}-morpho`;
-                    const morphoData = {
-                        ...data,
-                        id: morphoId,
-                        apr: morphoRate[MORPHO_TOKEN].apr * morphoTokensShare,
-                        type: PrismaPoolAprType.IB_YIELD,
-                        title: 'MORPHO APR',
-                        rewardTokenAddress: MORPHO_TOKEN,
-                        rewardTokenSymbol: 'MORPHO',
-                    };
-                    operations.push(
-                        prisma.prismaPoolAprItem.upsert({
-                            where: { id_chain: { id: morphoId, chain: pool.chain } },
-                            create: morphoData,
-                            update: morphoData,
-                        }),
-                    );
-                }
 
                 operations.push(
                     prisma.prismaPoolAprItem.upsert({

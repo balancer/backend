@@ -49,6 +49,7 @@
         "lodash": "^4.17.21",
         "memory-cache": "^0.2.0",
         "moment-timezone": "^0.5.47",
+        "murmurhash": "^2.0.1",
         "prisma": "^6.3.0",
         "stellate": "2.7.1",
         "ts-dotenv": "^0.8.4",
