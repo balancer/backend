@@ -75,6 +75,10 @@ export class PoolService {
         return this.poolGqlLoaderService.getAggregatorPools(args);
     }
 
+    public async aggregatorPools(args: QueryPoolGetPoolsArgs): Promise<GqlPoolAggregator[]> {
+        return this.poolGqlLoaderService.aggregatorPools(args);
+    }
+
     public async getPoolsCount(args: QueryPoolGetPoolsArgs): Promise<number> {
         return this.poolGqlLoaderService.getPoolsCount(args);
     }

@@ -5,6 +5,7 @@ import type { ViemClient } from '../../../sources/viem-client';
 import type { Chain, PrismaPool } from '@prisma/client';
 import { HookData } from '../../../sources/transformers';
 import { prismaBulkExecuteOperations } from '../../../../prisma/prisma-util';
+import { GqlHookType } from '../../../../apps/api/gql/generated-schema';
 
 /**
  * Gets and stores known hooks data
@@ -29,16 +30,27 @@ export const syncHookData = async (
             continue;
         }
         const keys = Object.keys(hooksTypes) as HookType[];
-        const hookType = keys.find((key) => hooksTypes[key]?.includes(hookData.address));
+        const hookKey = keys.find((key) => hooksTypes[key]?.includes(hookData.address));
+        let hookType: GqlHookType | undefined = undefined;
+        switch (hookKey) {
+            case 'feeTakingHook':
+                hookType = 'FEE_TAKING';
+            case 'exitFeeHook':
+                hookType = 'EXIT_FEE';
+            case 'stableSurgeHook':
+                hookType = 'STABLE_SURGE';
+            default:
+                hookType = undefined;
+        }
 
-        if (!hookType) {
+        if (!hookType || !hookKey) {
             continue;
         }
 
         // Get hooks data
         const data = await fetchHookData(viemClient, hookData.address, hookType, pool.address);
 
-        const name = `${hookType.charAt(0).toUpperCase()}${hookType.slice(1)}`;
+        const name = `${hookKey.charAt(0).toUpperCase()}${hookKey.slice(1)}`;
 
         operations.push(
             prisma.prismaPool.update({
@@ -47,6 +59,7 @@ export const syncHookData = async (
                     hook: {
                         ...(hookData as HookData),
                         name,
+                        type: hookType,
                         dynamicData: data,
                     },
                 },

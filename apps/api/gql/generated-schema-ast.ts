@@ -50,6 +50,21 @@ export const schema = gql`
         swapFeePercentage: String
     }
 
+    input GqlAggregatorPoolFilter {
+        chainIn: [GqlChain!]
+        chainNotIn: [GqlChain!]
+        createTime: GqlPoolTimePeriod
+        idIn: [String!]
+        idNotIn: [String!]
+        includeHooks: [GqlHookType!]
+        minTvl: Float
+        poolTypeIn: [GqlPoolType!]
+        poolTypeNotIn: [GqlPoolType!]
+        protocolVersionIn: [Int!]
+        tokensIn: [String!]
+        tokensNotIn: [String!]
+    }
+
     type GqlBalancePoolAprItem {
         apr: GqlPoolAprValue!
         id: ID!
@@ -179,6 +194,7 @@ export const schema = gql`
         shouldCallBeforeRemoveLiquidity: Boolean! @deprecated
         shouldCallBeforeSwap: Boolean! @deprecated
         shouldCallComputeDynamicSwapFee: Boolean! @deprecated
+        type: GqlHookType!
     }
 
     type GqlHookData {
@@ -207,6 +223,13 @@ export const schema = gql`
         Warnings associated with the hook
         """
         warnings: [String!]!
+    }
+
+    enum GqlHookType {
+        EXIT_FEE
+        FEE_TAKING
+        MEV
+        STABLE_SURGE
     }
 
     type GqlLatestSyncedBlocks {
@@ -1284,8 +1307,8 @@ export const schema = gql`
         chainIn: [GqlChain!]
         chainNotIn: [GqlChain!]
         createTime: GqlPoolTimePeriod
-        filterIn: [String!]
-        filterNotIn: [String!]
+        filterIn: [String!] @deprecated(reason: "unused")
+        filterNotIn: [String!] @deprecated(reason: "unused")
         hasHook: Boolean
         idIn: [String!]
         idNotIn: [String!]
@@ -3751,6 +3774,16 @@ export const schema = gql`
     }
 
     type Query {
+        """
+        Returns all pools for a given filter, specific for aggregators
+        """
+        aggregatorPools(
+            first: Int
+            orderBy: GqlPoolOrderBy
+            orderDirection: GqlPoolOrderDirection
+            skip: Int
+            where: GqlAggregatorPoolFilter
+        ): [GqlPoolAggregator!]!
         beetsGetFbeetsRatio: String!
         beetsPoolGetReliquaryFarmSnapshots(id: String!, range: GqlPoolSnapshotDataRange!): [GqlReliquaryFarmSnapshot!]!
         blocksGetAverageBlockTime: Float! @deprecated
@@ -3774,7 +3807,7 @@ export const schema = gql`
             orderDirection: GqlPoolOrderDirection
             skip: Int
             where: GqlPoolFilter
-        ): [GqlPoolAggregator!]!
+        ): [GqlPoolAggregator!]! @deprecated(reason: "Use aggregatorPools instead")
 
         """
         Will de deprecated in favor of poolEvents

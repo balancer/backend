@@ -53,6 +53,21 @@ export interface FeeTakingHookParams {
     swapFeePercentage?: Maybe<Scalars['String']>;
 }
 
+export interface GqlAggregatorPoolFilter {
+    chainIn?: InputMaybe<Array<GqlChain>>;
+    chainNotIn?: InputMaybe<Array<GqlChain>>;
+    createTime?: InputMaybe<GqlPoolTimePeriod>;
+    idIn?: InputMaybe<Array<Scalars['String']>>;
+    idNotIn?: InputMaybe<Array<Scalars['String']>>;
+    includeHooks?: InputMaybe<Array<GqlHookType>>;
+    minTvl?: InputMaybe<Scalars['Float']>;
+    poolTypeIn?: InputMaybe<Array<GqlPoolType>>;
+    poolTypeNotIn?: InputMaybe<Array<GqlPoolType>>;
+    protocolVersionIn?: InputMaybe<Array<Scalars['Int']>>;
+    tokensIn?: InputMaybe<Array<Scalars['String']>>;
+    tokensNotIn?: InputMaybe<Array<Scalars['String']>>;
+}
+
 export interface GqlBalancePoolAprItem {
     __typename?: 'GqlBalancePoolAprItem';
     apr: GqlPoolAprValue;
@@ -180,6 +195,7 @@ export interface GqlHook {
     shouldCallBeforeSwap: Scalars['Boolean'];
     /** @deprecated Field no longer supported */
     shouldCallComputeDynamicSwapFee: Scalars['Boolean'];
+    type: GqlHookType;
 }
 
 export interface GqlHookData {
@@ -201,6 +217,8 @@ export interface GqlHookReviewData {
     /** Warnings associated with the hook */
     warnings: Array<Scalars['String']>;
 }
+
+export type GqlHookType = 'EXIT_FEE' | 'FEE_TAKING' | 'MEV' | 'STABLE_SURGE';
 
 export interface GqlLatestSyncedBlocks {
     __typename?: 'GqlLatestSyncedBlocks';
@@ -2598,6 +2616,8 @@ export interface PoolForBatchSwap {
 
 export interface Query {
     __typename?: 'Query';
+    /** Returns all pools for a given filter, specific for aggregators */
+    aggregatorPools: Array<GqlPoolAggregator>;
     beetsGetFbeetsRatio: Scalars['String'];
     beetsPoolGetReliquaryFarmSnapshots: Array<GqlReliquaryFarmSnapshot>;
     /** @deprecated Field no longer supported */
@@ -2612,7 +2632,10 @@ export interface Query {
     latestSyncedBlocks: GqlLatestSyncedBlocks;
     /** Getting swap, add and remove events with paging */
     poolEvents: Array<GqlPoolEvent>;
-    /** Returns all pools for a given filter, specific for aggregators */
+    /**
+     * Returns all pools for a given filter, specific for aggregators
+     * @deprecated Use aggregatorPools instead
+     */
     poolGetAggregatorPools: Array<GqlPoolAggregator>;
     /**
      * Will de deprecated in favor of poolEvents
@@ -2712,6 +2735,14 @@ export interface Query {
     veBalGetUserBalances: Array<GqlVeBalBalance>;
     /** Returns all pools with veBAL gauges that can be voted on. */
     veBalGetVotingList: Array<GqlVotingPool>;
+}
+
+export interface QueryAggregatorPoolsArgs {
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<GqlPoolOrderBy>;
+    orderDirection?: InputMaybe<GqlPoolOrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    where?: InputMaybe<GqlAggregatorPoolFilter>;
 }
 
 export interface QueryBeetsPoolGetReliquaryFarmSnapshotsArgs {
@@ -3051,6 +3082,7 @@ export type ResolversTypes = ResolversObject<{
     ExitFeeHookParams: ResolverTypeWrapper<ExitFeeHookParams>;
     FeeTakingHookParams: ResolverTypeWrapper<FeeTakingHookParams>;
     Float: ResolverTypeWrapper<Scalars['Float']>;
+    GqlAggregatorPoolFilter: GqlAggregatorPoolFilter;
     GqlBalancePoolAprItem: ResolverTypeWrapper<
         Omit<GqlBalancePoolAprItem, 'apr'> & { apr: ResolversTypes['GqlPoolAprValue'] }
     >;
@@ -3068,6 +3100,7 @@ export type ResolversTypes = ResolversObject<{
     GqlHook: ResolverTypeWrapper<Omit<GqlHook, 'params'> & { params?: Maybe<ResolversTypes['HookParams']> }>;
     GqlHookData: ResolverTypeWrapper<GqlHookData>;
     GqlHookReviewData: ResolverTypeWrapper<GqlHookReviewData>;
+    GqlHookType: GqlHookType;
     GqlLatestSyncedBlocks: ResolverTypeWrapper<GqlLatestSyncedBlocks>;
     GqlNestedPool: ResolverTypeWrapper<GqlNestedPool>;
     GqlPoolAddRemoveEventV3: ResolverTypeWrapper<GqlPoolAddRemoveEventV3>;
@@ -3267,6 +3300,7 @@ export type ResolversParentTypes = ResolversObject<{
     ExitFeeHookParams: ExitFeeHookParams;
     FeeTakingHookParams: FeeTakingHookParams;
     Float: Scalars['Float'];
+    GqlAggregatorPoolFilter: GqlAggregatorPoolFilter;
     GqlBalancePoolAprItem: Omit<GqlBalancePoolAprItem, 'apr'> & { apr: ResolversParentTypes['GqlPoolAprValue'] };
     GqlBalancePoolAprSubItem: Omit<GqlBalancePoolAprSubItem, 'apr'> & { apr: ResolversParentTypes['GqlPoolAprValue'] };
     GqlBigNumber: Scalars['GqlBigNumber'];
@@ -3580,6 +3614,7 @@ export type GqlHookResolvers<
     shouldCallBeforeRemoveLiquidity?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
     shouldCallBeforeSwap?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
     shouldCallComputeDynamicSwapFee?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+    type?: Resolver<ResolversTypes['GqlHookType'], ParentType, ContextType>;
     __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -5556,6 +5591,12 @@ export type QueryResolvers<
     ContextType = ResolverContext,
     ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query'],
 > = ResolversObject<{
+    aggregatorPools?: Resolver<
+        Array<ResolversTypes['GqlPoolAggregator']>,
+        ParentType,
+        ContextType,
+        RequireFields<QueryAggregatorPoolsArgs, never>
+    >;
     beetsGetFbeetsRatio?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     beetsPoolGetReliquaryFarmSnapshots?: Resolver<
         Array<ResolversTypes['GqlReliquaryFarmSnapshot']>,

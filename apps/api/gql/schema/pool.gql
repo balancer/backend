@@ -24,6 +24,17 @@ extend type Query {
         orderBy: GqlPoolOrderBy
         orderDirection: GqlPoolOrderDirection
         where: GqlPoolFilter
+    ): [GqlPoolAggregator!]! @deprecated(reason: "Use aggregatorPools instead")
+
+    """
+    Returns all pools for a given filter, specific for aggregators
+    """
+    aggregatorPools(
+        first: Int
+        skip: Int
+        orderBy: GqlPoolOrderBy
+        orderDirection: GqlPoolOrderDirection
+        where: GqlAggregatorPoolFilter
     ): [GqlPoolAggregator!]!
     """
     Returns the number of pools for a given filter.
@@ -1549,8 +1560,8 @@ input GqlPoolFilter {
     poolTypeNotIn: [GqlPoolType!]
     idIn: [String!]
     idNotIn: [String!]
-    filterIn: [String!]
-    filterNotIn: [String!]
+    filterIn: [String!] @deprecated(reason: "unused")
+    filterNotIn: [String!] @deprecated(reason: "unused")
     chainIn: [GqlChain!]
     chainNotIn: [GqlChain!]
     createTime: GqlPoolTimePeriod
@@ -1558,6 +1569,21 @@ input GqlPoolFilter {
     protocolVersionIn: [Int!]
     minTvl: Float
     hasHook: Boolean
+}
+
+input GqlAggregatorPoolFilter {
+    tokensIn: [String!]
+    tokensNotIn: [String!]
+    poolTypeIn: [GqlPoolType!]
+    poolTypeNotIn: [GqlPoolType!]
+    idIn: [String!]
+    idNotIn: [String!]
+    chainIn: [GqlChain!]
+    chainNotIn: [GqlChain!]
+    createTime: GqlPoolTimePeriod
+    protocolVersionIn: [Int!]
+    includeHooks: [GqlHookType!]
+    minTvl: Float
 }
 
 type GqlPoolTokenExpanded {
