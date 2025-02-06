@@ -27,7 +27,6 @@ export const resolvers = {
         ...vebalResolver.Query,
     },
     Mutation: {
-        ...blocksResolver.Mutation,
         ...contentResolver.Mutation,
         ...poolResolver.Mutation,
         ...protocolResolver.Mutation,

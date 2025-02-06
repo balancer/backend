@@ -33,7 +33,11 @@ export const fetchHookData = async (
 
     // Parse all results bignumber values to percentages
     for (const key of Object.keys(results)) {
-        results[key] = formatEther(results[key]);
+        try {
+            results[key] = formatEther(results[key]);
+        } catch (e) {
+            console.error(`Error parsing hook data for ${address} ${key} ${results[key]}`, e);
+        }
     }
 
     return results;

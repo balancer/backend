@@ -1,30 +1,42 @@
-import { Resolvers } from '../../../../schema';
-import { isAdminRoute } from '../../../../modules/auth/auth-context';
-import { blocksSubgraphService } from '../../../../modules/subgraphs/blocks-subgraph/blocks-subgraph.service';
+import { Resolvers } from '../generated-schema';
+import { chainIdToChain } from '../../../../modules/network/chain-id-to-chain';
+import { blockNumbers } from '../../../../modules/block-numbers';
+import { GraphQLError } from 'graphql';
+import { env } from '../../../env';
 
 const balancerResolvers: Resolvers = {
     Query: {
         blocksGetAverageBlockTime: async (parent, {}, context) => {
-            return blocksSubgraphService.getAverageBlockTime();
+            const chainId = context.chainId || env.DEFAULT_CHAIN_ID;
+            const chain = chainIdToChain[chainId];
+
+            const service = blockNumbers();
+            const blocksPerDay = await service.getBlocksPerDay(chain);
+            return 86400 / blocksPerDay;
         },
         blocksGetBlocksPerSecond: async (parent, {}, context) => {
-            const avgBlockTime = await blocksSubgraphService.getAverageBlockTime();
-            return 1 / avgBlockTime;
+            const chainId = context.chainId || env.DEFAULT_CHAIN_ID;
+            const chain = chainIdToChain[chainId];
+
+            const service = blockNumbers();
+            const blocksPerDay = await service.getBlocksPerDay(chain);
+            return blocksPerDay / 86400;
         },
         blocksGetBlocksPerDay: async (parent, {}, context) => {
-            return blocksSubgraphService.getBlocksPerDay();
+            const chainId = context.chainId || env.DEFAULT_CHAIN_ID;
+            const chain = chainIdToChain[chainId];
+
+            const service = blockNumbers();
+            const blocksPerDay = await service.getBlocksPerDay(chain);
+            return blocksPerDay;
         },
         blocksGetBlocksPerYear: async (parent, {}, context) => {
-            return blocksSubgraphService.getBlocksPerYear();
-        },
-    },
-    Mutation: {
-        cacheAverageBlockTime: async (parent, {}, context) => {
-            isAdminRoute(context);
+            const chainId = context.chainId || env.DEFAULT_CHAIN_ID;
+            const chain = chainIdToChain[chainId];
 
-            await blocksSubgraphService.cacheAverageBlockTime();
-
-            return 'success';
+            const service = blockNumbers();
+            const blocksPerDay = await service.getBlocksPerDay(chain);
+            return blocksPerDay * 365;
         },
     },
 };

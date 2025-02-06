@@ -11,6 +11,11 @@ import {
 import { PathWithAmount } from '../path';
 import { MathSol, abs } from './math';
 
+import { HookState } from '@balancer-labs/balancer-maths';
+import { LiquidityManagement } from '../../../types';
+
+import { parseEther, parseUnits } from 'viem';
+
 export function checkInputs(
     tokenIn: Token,
     tokenOut: Token,
@@ -70,4 +75,51 @@ export function getOutputAmount(paths: PathWithAmount[]): TokenAmount {
     }
     const amounts = paths.map((path) => path.outputAmount);
     return amounts.reduce((a, b) => a.add(b));
+}
+
+export function getHookState(pool: any): HookState | undefined {
+    if (pool.hook === undefined || pool.hook === null) {
+        return undefined;
+    }
+
+    if (pool.hook.name === 'ExitFee') {
+        // api for this hook is an Object with removeLiquidityFeePercentage key & fee as string
+        const dynamicData = pool.hook.dynamicData as { removeLiquidityFeePercentage: string };
+
+        return {
+            tokens: pool.tokens.map((token: { address: string }) => token.address),
+            // ExitFeeHook will always have dynamicData as part of the API response
+            removeLiquidityHookFeePercentage: parseEther(dynamicData.removeLiquidityFeePercentage),
+            hookType: pool.hook.name,
+        };
+    }
+
+    if (pool.hook.name === 'DirectionalFee') {
+        // this hook does not require a hook state to be passed
+        return {
+            hookType: pool.hook.name,
+        } as HookState;
+    }
+
+    if (pool.hook.name === 'StableSurge') {
+        return {
+            // amp onchain precision is 1000. Api returns 200 means onchain value is 200000
+            amp: parseUnits(pool.typeData.amp, 3),
+            // 18 decimal precision.
+            surgeThresholdPercentage: parseEther(pool.hook.dynamicData.surgeThresholdPercentage),
+            hookType: pool.hook.name,
+        };
+    }
+
+    throw new Error(`${pool.hook.name} hook not implemented`);
+}
+
+export function isLiquidityManagement(value: any): value is LiquidityManagement {
+    return (
+        value &&
+        typeof value.disableUnbalancedLiquidity === 'boolean' &&
+        typeof value.enableAddLiquidityCustom === 'boolean' &&
+        typeof value.enableDonation === 'boolean' &&
+        typeof value.enableRemoveLiquidityCustom === 'boolean'
+    );
 }

@@ -5,16 +5,25 @@ import { Token, TokenAmount } from '@balancer/sdk';
 import { Chain } from '@prisma/client';
 import { parseEther, parseUnits, Address } from 'viem';
 import { TokenPairData } from '../../../modules/sources/contracts/v3/fetch-tokenpair-data';
-import { StablePool } from '../../../modules/sor/sorV2/lib/poolsV3';
+import { StablePoolV3 } from '../../../modules/sor/sorV2/lib/poolsV3';
 import { StableBasePoolToken } from '../../../modules/sor/sorV2/lib/poolsV3/stable/stableBasePoolToken';
+import { LiquidityManagement } from '../../../modules/sor/types';
+import { HookState } from '@balancer-labs/balancer-maths';
 
-export const StablePoolFactory = Factory.define<StablePool>(({ params }) => {
+export const StablePoolFactory = Factory.define<StablePoolV3>(({ params }) => {
     const chain: Chain = params.chain || faker.helpers.arrayElement<Chain>(['MAINNET', 'SEPOLIA']);
     const id = params.id || (faker.finance.ethereumAddress() as Address);
     const address = params.address || id;
     const amp = params.amp || parseUnits(faker.number.int({ min: 1, max: 500 }).toString(), 3);
     const swapFee = params.swapFee || parseEther(faker.number.float({ min: 0.0001, max: 0.01 }).toString());
     const totalShares = params.totalShares || parseEther(faker.number.int({ min: 1000, max: 1000000 }).toString());
+    const hookState = params.hookState ?? null;
+    const liquidityManagement = params.liquidityManagement ?? {
+        disableUnbalancedLiquidity: false,
+        enableAddLiquidityCustom: false,
+        enableDonation: false,
+        enableRemoveLiquidityCustom: false,
+    };
 
     const tokens =
         params.tokens ||
@@ -44,5 +53,16 @@ export const StablePoolFactory = Factory.define<StablePool>(({ params }) => {
             spotPrice: faker.number.int({ min: 1, max: 1000 }).toString(),
         }));
 
-    return new StablePool(id, address, chain, amp, swapFee, tokens, totalShares, tokenPairs);
+    return new StablePoolV3(
+        id,
+        address,
+        chain,
+        amp,
+        swapFee,
+        tokens,
+        totalShares,
+        tokenPairs,
+        liquidityManagement as LiquidityManagement,
+        hookState as HookState,
+    );
 });

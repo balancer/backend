@@ -16,6 +16,9 @@ import {
 import { chainIdToChain } from '../modules/network/chain-id-to-chain';
 
 import { backsyncSwaps } from './subgraph-syncing/backsync-swaps';
+import { poolService } from '../modules/pool/pool.service';
+import { initRequestScopedContext, setRequestScopedContextValue } from '../modules/context/request-scoped-context';
+import { tokenService } from '../modules/token/token.service';
 
 // TODO needed?
 const sftmxController = SftmxController();
@@ -74,6 +77,8 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         return sftmxController.syncSftmxWithdrawalrequests(chain);
     } else if (job === 'sync-sftmx-staking-snapshots') {
         return sftmxController.syncSftmxStakingSnapshots(chain);
+    } else if (job === 'sync-bpt-balances') {
+        return UserBalancesController().syncBalances(chain);
     } else if (job === 'sync-user-balances-v2') {
         return UserBalancesController().syncUserBalancesFromV2Subgraph(chain);
     } else if (job === 'sync-user-balances-v3') {
@@ -132,6 +137,12 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         return PoolController().syncHookData(chain);
     } else if (job === 'sync-sts-data') {
         return StakedSonicController().syncSonicStakingData();
+    } else if (job === 'sync-pool-aprs') {
+        initRequestScopedContext();
+        setRequestScopedContextValue('chainId', chainId);
+        return poolService.updatePoolAprs(chain);
+    } else if (job === 'update-prices') {
+        return tokenService.updateTokenPrices([chain]);
     }
     // Maintenance
     else if (job === 'sync-fx-quote-tokens') {

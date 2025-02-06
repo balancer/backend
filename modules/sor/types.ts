@@ -1,5 +1,10 @@
 import { Chain } from '@prisma/client';
-import { GqlSorSwapType, GqlSorGetSwapsResponse, GqlSorSwapOptionsInput, GqlSwapCallDataInput } from '../../schema';
+import {
+    GqlSorSwapType,
+    GqlSorGetSwapsResponse,
+    GqlSorSwapOptionsInput,
+    GqlSwapCallDataInput,
+} from '../../apps/api/gql/generated-schema';
 import { TokenAmount } from '@balancer/sdk';
 export interface GetSwapsInput {
     chain: Chain;
@@ -41,4 +46,11 @@ export interface SwapResult {
 
 export interface SwapService {
     getSwapResult(inputs: GetSwapsInput): Promise<SwapResult>;
+}
+
+export interface LiquidityManagement {
+    disableUnbalancedLiquidity: boolean;
+    enableAddLiquidityCustom: boolean;
+    enableDonation: boolean;
+    enableRemoveLiquidityCustom: boolean;
 }

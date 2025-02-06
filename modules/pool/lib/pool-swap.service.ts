@@ -12,13 +12,11 @@ import {
     QueryPoolGetBatchSwapsArgs,
     QueryPoolGetJoinExitsArgs,
     QueryPoolGetSwapsArgs,
-} from '../../../schema';
+} from '../../../apps/api/gql/generated-schema';
 import { Chain, PrismaPoolSwap } from '@prisma/client';
 import _ from 'lodash';
-import { isSupportedInt, prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
-import { PrismaPoolBatchSwapWithSwaps, prismaPoolMinimal } from '../../../prisma/prisma-types';
+import { PrismaPoolBatchSwapWithSwaps } from '../../../prisma/prisma-types';
 import { networkContext } from '../../network/network-context.service';
-import * as Sentry from '@sentry/node';
 import { AllNetworkConfigsKeyedOnChain } from '../../network/network-config';
 
 export class PoolSwapService {

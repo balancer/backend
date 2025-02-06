@@ -1,8 +1,10 @@
-import { Resolvers } from '../../../../schema';
+import { Resolvers } from '../generated-schema';
 import { userService } from '../../../../modules/user/user.service';
 import { getRequiredAccountAddress, isAdminRoute } from '../../../../modules/auth/auth-context';
 import { tokenService } from '../../../../modules/token/token.service';
 import { headerChain } from '../../../../modules/context/header-chain';
+import { UserBalancesController } from '../../../../modules/controllers';
+import { GraphQLError } from 'graphql';
 
 const resolvers: Resolvers = {
     Query: {
@@ -11,7 +13,9 @@ const resolvers: Resolvers = {
             if (!chains && currentChain) {
                 chains = [currentChain];
             } else if (!chains) {
-                throw new Error('userGetPoolBalances error: Provide "chains" param');
+                throw new GraphQLError('Provide "chains" param', {
+                    extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
+                });
             }
             const accountAddress = address || getRequiredAccountAddress(context);
             const tokenPrices = await tokenService.getTokenPricesForChains(chains);
@@ -32,7 +36,9 @@ const resolvers: Resolvers = {
             if (!chain && currentChain) {
                 chain = currentChain;
             } else if (!chain) {
-                throw new Error('userGetPoolJoinExits error: Provide "chain" param');
+                throw new GraphQLError('Provide "chain" param', {
+                    extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
+                });
             }
             const accountAddress = address || getRequiredAccountAddress(context);
 
@@ -44,7 +50,9 @@ const resolvers: Resolvers = {
             if (!chain && currentChain) {
                 chain = currentChain;
             } else if (!chain) {
-                throw new Error('userGetSwaps error: Provide "chain" param');
+                throw new GraphQLError('Provide "chain" param', {
+                    extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
+                });
             }
             const accountAddress = address || getRequiredAccountAddress(context);
             return userService.getUserSwaps(accountAddress, poolId, chain, first, skip);
@@ -54,7 +62,9 @@ const resolvers: Resolvers = {
             if (!chains && currentChain) {
                 chains = [currentChain];
             } else if (!chains) {
-                throw new Error('userGetStaking error: Provide "chains" param');
+                throw new GraphQLError('Provide "chains" param', {
+                    extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
+                });
             }
             const accountAddress = address || getRequiredAccountAddress(context);
 
@@ -65,14 +75,27 @@ const resolvers: Resolvers = {
         userSyncChangedWalletBalancesForAllPools: async (parent, {}, context) => {
             isAdminRoute(context);
 
-            await userService.syncChangedWalletBalancesForAllPools();
+            const chain = headerChain();
+            if (!chain) {
+                throw new GraphQLError('Provide "chainId" param', {
+                    extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
+                });
+            }
+
+            await UserBalancesController().syncBalances(chain);
 
             return 'success';
         },
-        userInitWalletBalancesForAllPools: async (parent, {}, context) => {
+        userInitWalletBalancesForAllPools: async (parent, { chain }, context) => {
             isAdminRoute(context);
 
-            await userService.initWalletBalancesForAllPools();
+            if (!chain) {
+                throw new GraphQLError('Provide "chain" param', {
+                    extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
+                });
+            }
+
+            await UserBalancesController().syncBalances(chain);
 
             return 'success';
         },

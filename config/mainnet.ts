@@ -26,7 +26,7 @@ export default <NetworkData>{
         cowAmm: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmQ3c9CTJBZdgy3uTLB929ARZucMUCf6piZBDxSgBKnf6m`,
         balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmQ5TT2yYBZgoUxsat3bKmNe5Fr9LW9YAtDs8aeuc1BRhj`,
         balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmZpnxr5Qz2tc6EKgGuvBG3xSbXN3LbCLhqpawLWvndPH6`,
-        balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmVGssjwfVAP8b2buqVVKz5sdb69ryyvxED5qQPGeW8Yk2`,
+        balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmdPwbLFKysWBCFffnmTkX4aWs7D5oNNVnvKSStf1KL3gL`,
         blocks: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/9A6bkprqEG2XsZUYJ5B2XXp6ymz9fNcn4tVPxMWDztYC`,
         gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmNrMRgSeUUkQsvhE6ExBEPETZ6P2jiJL3SzXftNQcAEcW`,
         aura: 'https://data.aura.finance/graphql',
@@ -211,6 +211,13 @@ export default <NetworkData>{
                             stataEthUSDe: '0x5f9d59db355b4a60501544637b00e94082ca575b',
                         },
                     },
+                    pyUSD: {
+                        underlyingAssetAddress: '0x6c3ea9036406852006290770bedfcaba0e23a0e8',
+                        aTokenAddress: '0x0c0d01abf3e6adfca0989ebba9d6e85dd58eab1e',
+                        wrappedTokens: {
+                            waEthPYUSD: '0xb51edddd8c47856d81c8681ea71404cec93e92c6',
+                        },
+                    },
                 },
             },
             lido: {
@@ -322,6 +329,12 @@ export default <NetworkData>{
             address: '0xd11c452fc99cf405034ee446803b6f6c1f6d5ed8',
         },
         defaultHandlers: {
+            yUSD: {
+                tokenAddress: '0x1ce7d9942ff78c328a4181b9f3826fee6d845a97',
+                sourceUrl: 'https://ctrl.yield.fi/t/apy',
+                path: 'apy',
+                isIbYield: true,
+            },
             uniETH: {
                 tokenAddress: '0xf1376bcef0f78459c0ed0ba5ddce976f1ddf51f4',
                 sourceUrl: 'https://app.bedrock.technology/unieth/api/v1/e2ls/apy',
@@ -435,6 +448,12 @@ export default <NetworkData>{
                 tokenAddress: '0xa1290d69c65a6fe4df752f95823fae25cb99e5a7',
                 sourceUrl: 'https://universe.kelpdao.xyz/rseth/apy',
                 path: 'value',
+                isIbYield: true,
+            },
+            hgETH: {
+                tokenAddress: '0xc824a08db624942c5e5f330d56530cd1598859fd',
+                sourceUrl: 'https://universe.kelpdao.xyz/rseth/gainApy',
+                path: 'hgETH',
                 isIbYield: true,
             },
             sDOLA: {

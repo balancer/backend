@@ -2,7 +2,6 @@ import * as Sentry from '@sentry/node';
 import { Express, NextFunction } from 'express';
 import { tokenService } from '../../modules/token/token.service';
 import { poolService } from '../../modules/pool/pool.service';
-import { blocksSubgraphService } from '../../modules/subgraphs/blocks-subgraph/blocks-subgraph.service';
 import { userService } from '../../modules/user/user.service';
 import { protocolService } from '../../modules/protocol/protocol.service';
 import { datastudioService } from '../../modules/datastudio/datastudio.service';
@@ -14,7 +13,6 @@ import { cronsMetricPublisher } from '../../modules/metrics/metrics.client';
 import moment from 'moment';
 import { cronsDurationMetricPublisher } from '../../modules/metrics/cron-duration-metrics.client';
 import { syncLatestFXPrices } from '../../modules/token/latest-fx-price';
-import { AllNetworkConfigs, AllNetworkConfigsKeyedOnChain } from '../../modules/network/network-config';
 import { chainIdToChain } from '../../modules/network/chain-id-to-chain';
 import { Chain } from '@prisma/client';
 import {
@@ -27,10 +25,12 @@ import {
     EventController,
     StakingController,
     StakedSonicController,
+    UserBalancesController,
 } from '../../modules/controllers';
 import { updateVolumeAndFees } from '../../modules/actions/pool/update-volume-and-fees';
 import { TokenController } from '../../modules/controllers/token-controller';
 import { SubgraphMonitorController } from '../../modules/controllers/subgraph-monitor-controller';
+import config from '../../config';
 
 const runningJobs: Set<string> = new Set();
 
@@ -117,13 +117,7 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
             await runIfNotAlreadyRunning(name, chainId, () => PoolController().syncChangedPoolsV2(chain), res, next);
             break;
         case 'user-sync-wallet-balances-for-all-pools':
-            await runIfNotAlreadyRunning(
-                name,
-                chainId,
-                () => userService.syncChangedWalletBalancesForAllPools(),
-                res,
-                next,
-            );
+            await runIfNotAlreadyRunning(name, chainId, () => UserBalancesController().syncBalances(chain), res, next);
             break;
         case 'user-sync-staked-balances':
             await runIfNotAlreadyRunning(name, chainId, () => userService.syncChangedStakedBalances(chain), res, next);
@@ -132,7 +126,7 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
             await runIfNotAlreadyRunning(
                 name,
                 chainId,
-                () => tokenService.updateTokenPrices(Object.keys(AllNetworkConfigsKeyedOnChain) as Chain[]),
+                () => tokenService.updateTokenPrices(Object.keys(config) as Chain[]),
                 res,
                 next,
             );
@@ -182,9 +176,6 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
                 next,
             );
             break;
-        case 'cache-average-block-time':
-            await runIfNotAlreadyRunning(name, chainId, () => blocksSubgraphService.cacheAverageBlockTime(), res, next);
-            break;
         case 'sync-staking-for-pools':
             await runIfNotAlreadyRunning(name, chainId, () => StakingController().syncStaking(chain), res, next);
             break;
@@ -211,7 +202,6 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
                 name,
                 chainId,
                 () => {
-                    const chain = chainIdToChain[chainId];
                     return datastudioService.feedPoolData(chain);
                 },
                 res,
@@ -256,9 +246,7 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
                 name,
                 chainId,
                 () => {
-                    const config = AllNetworkConfigs[chainId].data;
-                    const subgraphUrl = config.subgraphs.balancer;
-                    const chain = config.chain.prismaId;
+                    const subgraphUrl = config[chain].subgraphs.balancer;
                     return syncLatestFXPrices(subgraphUrl, chain);
                 },
                 res,

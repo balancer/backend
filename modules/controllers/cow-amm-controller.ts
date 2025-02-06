@@ -13,8 +13,7 @@ import {
 import { syncSnapshots } from '../actions/snapshots/sync-snapshots';
 import { Chain, PrismaLastBlockSyncedCategory } from '@prisma/client';
 import { updateVolumeAndFees } from '../actions/pool/update-volume-and-fees';
-import moment from 'moment';
-import { upsertBptBalances } from '../actions/cow-amm/upsert-bpt-balances';
+import { syncBptBalancesFromSubgraph } from '../actions/user/bpt-balances/helpers/sync-bpt-balances-from-subgraph';
 import { getLastSyncedBlock, upsertLastSyncedBlock } from '../actions/pool/last-synced-block';
 import { updateLifetimeValues } from '../actions/pool/update-liftetime-values';
 
@@ -47,7 +46,7 @@ export function CowAmmController(tracer?: any) {
 
             const ids = await upsertPools(newPools, viemClient, subgraphClient, chain, blockNumber);
             // Initialize balances for the new pools
-            await upsertBptBalances(subgraphClient, chain, ids);
+            await syncBptBalancesFromSubgraph(ids, subgraphClient, chain);
 
             return ids;
         },
@@ -87,19 +86,30 @@ export function CowAmmController(tracer?: any) {
             const toBlock = await viemClient.getBlockNumber();
 
             // no new blocks have been minted, needed for slow networks
-            if (fromBlock > toBlock) {
+            if (fromBlock > Number(toBlock)) {
                 return [];
             }
 
             let poolsToSync: string[] = [];
 
             if (fromBlock > 1) {
-                const changedPools = await fetchChangedPools(viemClient, chain, fromBlock, Number(toBlock));
+                const rpcMaxBlockRange = config[chain].rpcMaxBlockRange;
+                const range = Number(toBlock) - fromBlock;
+                const numBatches = Math.ceil(range / rpcMaxBlockRange);
 
-                if (changedPools.length === 0) {
+                const allChangedPools = new Set<string>();
+
+                for (let i = 0; i < numBatches; i++) {
+                    const from = fromBlock + (i > 0 ? 1 : 0) + i * rpcMaxBlockRange;
+                    const to = Math.min(fromBlock + (i + 1) * rpcMaxBlockRange, Number(toBlock));
+                    const changedPools = await fetchChangedPools(viemClient, chain, from, to);
+                    changedPools.forEach((pool) => allChangedPools.add(pool));
+                }
+
+                if (allChangedPools.size === 0) {
                     return [];
                 }
-                poolsToSync = changedPools;
+                poolsToSync = Array.from(allChangedPools);
             } else {
                 poolsToSync = await prisma.prismaPool
                     .findMany({
@@ -170,7 +180,7 @@ export function CowAmmController(tracer?: any) {
                 return false;
             }
 
-            await upsertBptBalances(subgraphClient, chain);
+            await syncBptBalancesFromSubgraph([], subgraphClient, chain);
 
             return true;
         },

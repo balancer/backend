@@ -13,6 +13,8 @@ export default <NetworkData>{
     subgraphs: {
         startDate: '2023-07-10',
         balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmRKBwBwPKtFz4mQp5jvH44USVprM4C77Nr4m77UGCbGv9`,
+        balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmWREXT4GScDzeudK7i7uRYc2D6mPaVyw863KtDUrNgZU1`,
+        balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/Qmc2eE1d3ebwjY17f4y9yPe9A814yPR22koc6qxMomkxAT`,
         cowAmm: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmVRCjhFz7XXJoeJ5t4FdysN2JaBVdUCvpTVoMzXRNjA87`,
         blocks: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/6f2Z8rTvsBQinEMwRSBxbyg3BP2LTFiEA1hjPZxmy3xs`,
         gauge: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/CfBvJNYsbKZdxXzaCtNc6dUbHH6TjDupprjKKo9gnmwg`,
@@ -57,17 +59,28 @@ export default <NetworkData>{
             balancerQueriesAddress: '0x300ab2038eac391f26d9f895dc61f8f66a548833',
         },
         v3: {
-            vaultAddress: '0xba12222222228d8ba445958a75a0704d566bf2c8',
-            routerAddress: '0xba12222222228d8ba445958a75a0704d566bf2c8',
+            vaultAddress: '0xba1333333333a1ba1108e8412f11850a5c319ba9',
+            protocolFeeController: '0xa731c23d7c95436baaae9d52782f966e1ed07cc8',
+            routerAddress: '0x76578ecf9a141296ec657847fb45b0585bcda3a6',
             defaultSwapFeePercentage: '0.5',
-            defaultYieldFeePercentage: '0.5',
+            defaultYieldFeePercentage: '0.1',
         },
     },
     ybAprConfig: {
+        susds: {
+            oracle: '0x65d946e533748a998b1f0e430803e39a6388f7a1',
+            token: '0x5875eee11cf8398102fdad704c9e96607675467a',
+        },
         morpho: {
             tokens: {},
         },
         defaultHandlers: {
+            yUSD: {
+                tokenAddress: '0x895e15020c3f52ddd4d8e9514eb83c39f53b1579',
+                sourceUrl: 'https://ctrl.yield.fi/t/apy',
+                path: 'apy',
+                isIbYield: true,
+            },
             cbETH: {
                 tokenAddress: '0x2ae3f1ec7f1f5012cfeab0185bfc7aa3cf0dec22',
                 sourceUrl: 'https://api.exchange.coinbase.com/wrapped-assets/CBETH/',

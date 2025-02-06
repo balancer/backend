@@ -23,6 +23,26 @@ fragment TypePool on Pool {
     weightedParams {
         weights
     }
+    gyro2Params {
+        sqrtAlpha
+        sqrtBeta
+    }
+    gyroEParams {
+        alpha
+        beta
+        c
+        s
+        lambda
+        tauAlphaX
+        tauAlphaY
+        tauBetaX
+        tauBetaY
+        u
+        v
+        w
+        z
+        dSq
+    }
 }
 
 query Pools(
@@ -42,5 +62,64 @@ query Pools(
         block: $block
     ) {
         ...TypePool
+    }
+}
+
+fragment SepoliaTypePool on Pool {
+    id
+    address
+    factory {
+        id
+        type
+        version
+    }
+    stableParams {
+        amp
+    }
+    stableSurgeParams {
+        amp
+    }
+    weightedParams {
+        weights
+    }
+    gyro2Params {
+        sqrtAlpha
+        sqrtBeta
+    }
+    gyroEParams {
+        alpha
+        beta
+        c
+        s
+        lambda
+        tauAlphaX
+        tauAlphaY
+        tauBetaX
+        tauBetaY
+        u
+        v
+        w
+        z
+        dSq
+    }
+}
+
+query SepoliaPools(
+    $skip: Int
+    $first: Int
+    $orderBy: Pool_orderBy
+    $orderDirection: OrderDirection
+    $where: Pool_filter
+    $block: Block_height
+) {
+    pools(
+        skip: $skip
+        first: $first
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        where: $where
+        block: $block
+    ) {
+        ...SepoliaTypePool
     }
 }

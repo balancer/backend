@@ -13,6 +13,8 @@ export default <NetworkData>{
     subgraphs: {
         startDate: '2021-08-23',
         balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmPbjY6L1NhPjpBv7wDTfG9EPx5FpCuBqeg1XxByzBTLcs`,
+        balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmS6suakkYyKgEtDmMjwpbUzzHNmju7Rh5hSteZbCtTfgV`,
+        balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmNpXtC2WRG8AGTFzwQT7QwrWJNmSuhnRu3tNAYP6KRDZG`,
         cowAmm: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmUDGSJXdMzG4ezDzf1LvXVb2igwY6rnaNFLC62ZJZ3Pbv`,
         blocks: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/JBnWrv9pvBvSi2pUZzba3VweGBTde6s44QvsDABP47Gt`,
         gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmT3h6pogdPkxfWsBxKNtpq7kR9fqKaQ9jGxe7fZx7MUVE`,
@@ -54,10 +56,11 @@ export default <NetworkData>{
             balancerQueriesAddress: '0xe39b5e3b6d74016b2f6a9673d7d7493b6df549d5',
         },
         v3: {
-            vaultAddress: '0xba12222222228d8ba445958a75a0704d566bf2c8',
-            routerAddress: '0xba12222222228d8ba445958a75a0704d566bf2c8',
+            vaultAddress: '0xba1333333333a1ba1108e8412f11850a5c319ba9',
+            protocolFeeController: '0xa731c23d7c95436baaae9d52782f966e1ed07cc8',
+            routerAddress: '0x0f08eef2c785aa5e7539684af04755dec1347b7c',
             defaultSwapFeePercentage: '0.5',
-            defaultYieldFeePercentage: '0.5',
+            defaultYieldFeePercentage: '0.1',
         },
     },
     multicall: '0x80c7dd17b01855a6d2347444a0fcc36136a314de',
@@ -161,6 +164,12 @@ export default <NetworkData>{
             token: '0xbc404429558292ee2d769e57d57d6e74bbd2792d',
         },
         defaultHandlers: {
+            yUSD: {
+                tokenAddress: '0x895e15020c3f52ddd4d8e9514eb83c39f53b1579',
+                sourceUrl: 'https://ctrl.yield.fi/t/apy',
+                path: 'apy',
+                isIbYield: true,
+            },
             usdm: {
                 tokenAddress: '0x57f5e098cad7a3d1eed53991d4d66c45c9af7812',
                 sourceUrl: 'https://apy.prod.mountainprotocol.com',

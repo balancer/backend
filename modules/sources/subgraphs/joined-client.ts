@@ -13,7 +13,7 @@ export type V3JoinedSubgraphPool = ReturnType<V3JoinedSubgraphClient['getAllInit
 
 export const getV3JoinedSubgraphClient = (vaultSubgraphUrl: string, poolsSubgraphUrl: string, chain: Chain) => {
     const vaultSubgraphClient = getVaultSubgraphClient(vaultSubgraphUrl, chain);
-    const poolsSubgraphClient = getPoolsSubgraphClient(poolsSubgraphUrl);
+    const poolsSubgraphClient = getPoolsSubgraphClient(poolsSubgraphUrl, chain);
 
     return {
         getAllInitializedPools: async (where?: PoolsQueryVariables['where']) => {
@@ -21,7 +21,7 @@ export const getV3JoinedSubgraphClient = (vaultSubgraphUrl: string, poolsSubgrap
             const vaultPoolsMap = vaultPools.reduce((acc, pool) => {
                 acc[pool.id] = pool;
                 return acc;
-            }, {} as Record<string, typeof vaultPools[0]>);
+            }, {} as Record<string, (typeof vaultPools)[0]>);
             const vaultPoolIds = Object.keys(vaultPoolsMap);
             const pools = await poolsSubgraphClient.getAllPools({ id_in: vaultPoolIds });
             return pools.map((pool) => ({

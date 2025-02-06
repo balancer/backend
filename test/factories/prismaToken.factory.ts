@@ -4,19 +4,20 @@ import { createRandomAddress } from '../utils';
 import { PrismaPoolTokenWithDynamicData } from '../../prisma/prisma-types';
 import { ZERO_ADDRESS } from '@balancer/sdk';
 
-export const prismaPoolTokenFactory = Factory.define<PrismaPoolTokenWithDynamicData>(({ params }) => {
+export const prismaPoolTokenFactory = Factory.define<PrismaPoolTokenWithDynamicData>(({ sequence, params }) => {
     const tokenAddress = params?.address || createRandomAddress();
     const poolId = params?.poolId || createRandomAddress();
+    const decimals = params?.token?.decimals ?? 18;
     return {
         id: poolId + '-' + tokenAddress,
         address: tokenAddress,
         poolId: poolId,
         chain: 'SEPOLIA',
-        index: 0,
+        index: sequence ? sequence - 1 : 0,
         nestedPoolId: null,
         priceRateProvider: ZERO_ADDRESS,
         exemptFromProtocolYieldFee: false,
-        token: prismaTokenFactory.build({ address: tokenAddress }),
+        token: prismaTokenFactory.build({ address: tokenAddress, decimals }),
         balance: '10.000000000000000000',
         balanceUSD: 10,
         weight: '0.5',

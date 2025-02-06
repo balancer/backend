@@ -1,5 +1,128 @@
 # backend
 
+## 1.31.3
+
+### Patch Changes
+
+-   1adfe6a: fix missing underlying error handling
+-   b9386ee: new stable surge hook on sepolia
+-   7bd85d9: ignore common issue when underlying is not priced
+-   4acac18: yUSD APR
+
+## 1.31.2
+
+### Patch Changes
+
+-   84247db: sUSDs - base
+
+## 1.31.1
+
+### Patch Changes
+
+-   0f5c061: aave pyUSD APR
+
+## 1.31.0
+
+### Minor Changes
+
+-   e047a6c: replacing blocks subgraph with data from events
+
+### Patch Changes
+
+-   a29f079: hgETH APR
+
+## 1.30.0
+
+### Minor Changes
+
+-   05bbbc0: historical price range ALL
+
+### Patch Changes
+
+-   5377366: prisma sentry setup
+-   f6de49e: complete v3 config arb/base
+
+## 1.29.3
+
+### Patch Changes
+
+-   3f534d2: add silo apr handler
+-   338311f: SOR - Fix LBPs not being picked up
+
+## 1.29.2
+
+### Patch Changes
+
+-   ed867e5: add generalized erc4626 price handler
+-   9d1a4b3: v3 on base and arbitrum
+
+## 1.29.1
+
+### Patch Changes
+
+-   1848cec: add beefy apr handler
+-   0c7924b: rekt token pricing to 0
+-   e1c0170: expose exempt from yield fee
+-   43b8dea: SOR - Fix buffer unwrapRate scaling
+
+## 1.29.0
+
+### Minor Changes
+
+-   628235a: apollo v4
+
+### Patch Changes
+
+-   0052e91: add graphql-tag
+-   45f5127: temp disable savax
+-   36939bb: disable apollo default explorer on prod
+-   a5223df: add v3 jobs to sonic
+-   5bd786e: more hook addresses
+-   9e90ebe: remove beetswars apr from fantom
+-   b3b0f10: SOR - Assert behavior for tokens with 0 decimals
+-   18abe26: sepolia hooks config
+-   1455479: remove dependency to AllNetworkConfigsKeyedOnChain
+-   896cca6: SOR - Add StablePool for Balancer v2
+
+## 1.28.2
+
+### Patch Changes
+
+-   3b3ba2c: fix liquidity 24hrs ago, fix price for data studio for beets
+
+## 1.28.1
+
+### Patch Changes
+
+-   a4f25c3: fix isLiquidityManagement in SOR
+
+## 1.28.0
+
+### Minor Changes
+
+-   331cf71: This pr adds hooks to the SOR (DirectionalFee, StableSurge, ExitFee)
+
+### Patch Changes
+
+-   7126cf3: bpt balances syncing refactor
+-   7481c31: can add points to tokens
+
+## 1.27.9
+
+### Patch Changes
+
+-   304bea4: reference config some data-only files
+-   6f949b9: fix env config for sentry
+-   faa2e26: respect max block range for changed pools
+
+## 1.27.8
+
+### Patch Changes
+
+-   31efe9e: remove totalFee and totalVolume from protocol metrics
+-   946041a: use freshbeets pool on sonic to price beets
+-   231e527: set totals to 0 instead
+
 ## 1.27.7
 
 ### Patch Changes

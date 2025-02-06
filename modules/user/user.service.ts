@@ -1,6 +1,6 @@
 import { Chain, PrismaPoolStaking, PrismaPoolStakingType } from '@prisma/client';
 import { prisma } from '../../prisma/prisma-client';
-import { GqlPoolJoinExit, GqlPoolSwap } from '../../schema';
+import { GqlPoolJoinExit, GqlPoolSwap } from '../../apps/api/gql/generated-schema';
 import { PoolSwapService } from '../pool/lib/pool-swap.service';
 import { tokenService } from '../token/token.service';
 import { UserBalanceService } from './lib/user-balance.service';
@@ -51,16 +51,8 @@ export class UserService {
         return this.userBalanceService.getUserStaking(address, chains);
     }
 
-    public async initWalletBalancesForAllPools() {
-        await this.walletSyncService.initBalancesForPools();
-    }
-
     public async initWalletBalancesForPool(poolId: string) {
         await this.walletSyncService.initBalancesForPool(poolId);
-    }
-
-    public async syncChangedWalletBalancesForAllPools() {
-        await this.walletSyncService.syncChangedBalancesForAllPools();
     }
 
     public async initStakedBalances(stakingTypes: PrismaPoolStakingType[], chain: Chain) {

@@ -1,5 +1,5 @@
 import { Chain, PrismaPoolType } from '@prisma/client';
-import { PoolType } from '../subgraphs/balancer-v3-pools/generated/types';
+import { PoolType, SepoliaTypePoolFragment } from '../subgraphs/balancer-v3-pools/generated/types';
 import { StableData } from '../../pool/subgraph-mapper';
 import { fx, gyro, element, stable } from '../../pool/pool-data';
 import { V3JoinedSubgraphPool } from '../subgraphs';
@@ -15,7 +15,7 @@ export const poolUpsertTransformerV3 = (
     blockNumber: bigint,
 ): PoolUpsertData => {
     let type: PrismaPoolType;
-    let typeData: ReturnType<typeof typeDataMapper[keyof typeof typeDataMapper]> | {} = {};
+    let typeData: ReturnType<(typeof typeDataMapper)[keyof typeof typeDataMapper]> | {} = {};
 
     // expand the nested tokens
     const allTokens = _.flattenDeep(
@@ -37,6 +37,26 @@ export const poolUpsertTransformerV3 = (
             typeData = {
                 amp: poolData.stableParams!.amp,
             } as StableData;
+            break;
+        case PoolType.StableSurge:
+            type = PrismaPoolType.STABLE;
+            if ((poolData as SepoliaTypePoolFragment).stableSurgeParams) {
+                typeData = {
+                    amp: (poolData as SepoliaTypePoolFragment).stableSurgeParams!.amp,
+                } as StableData;
+            }
+            break;
+        case PoolType.Gyro2:
+            type = PrismaPoolType.GYRO;
+            typeData = {
+                ...poolData.gyro2Params,
+            };
+            break;
+        case PoolType.GyroE:
+            type = PrismaPoolType.GYROE;
+            typeData = {
+                ...poolData.gyroEParams,
+            };
             break;
         default:
             type = PrismaPoolType.UNKNOWN;

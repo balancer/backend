@@ -16,12 +16,10 @@ import {
     QueryPoolGetJoinExitsArgs,
     QueryPoolGetPoolsArgs,
     QueryPoolGetSwapsArgs,
-} from '../../schema';
-import { blocksSubgraphService } from '../subgraphs/blocks-subgraph/blocks-subgraph.service';
+} from '../../apps/api/gql/generated-schema';
 import { tokenService } from '../token/token.service';
 import { userService } from '../user/user.service';
 import { PoolAprUpdaterService } from './lib/pool-apr-updater.service';
-import { PoolCreatorService } from './lib/pool-creator.service';
 import { PoolGqlLoaderService } from './lib/pool-gql-loader.service';
 import { PoolOnChainDataService, PoolOnChainDataServiceOptions } from './lib/pool-on-chain-data.service';
 import { PoolSnapshotService } from './lib/pool-snapshot.service';
@@ -42,15 +40,14 @@ import {
     syncReliquaryStakingForPools,
 } from '../actions/pool/staking';
 import { MasterchefSubgraphService } from '../subgraphs/masterchef-subgraph/masterchef.service';
-import { AllNetworkConfigsKeyedOnChain } from '../network/network-config';
 import { GaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
 import { deleteAuraStakingForAllPools, syncAuraStakingForPools } from '../actions/pool/staking/sync-aura-staking';
 import { AuraSubgraphService } from '../sources/subgraphs/aura/aura.service';
 import { syncVebalStakingForPools } from '../actions/pool/staking/sync-vebal-staking';
+import config from '../../config';
 
 export class PoolService {
     constructor(
-        private readonly poolCreatorService: PoolCreatorService,
         private readonly poolOnChainDataService: PoolOnChainDataService,
         private readonly poolUsdDataService: PoolUsdDataService,
         private readonly poolGqlLoaderService: PoolGqlLoaderService,
@@ -142,12 +139,6 @@ export class PoolService {
         return [];
     }
 
-    public async syncAllPoolsFromSubgraph(): Promise<string[]> {
-        const blockNumber = await networkContext.provider.getBlockNumber();
-
-        return this.poolCreatorService.syncAllPoolsFromSubgraph(blockNumber);
-    }
-
     public async reloadStakingForAllPools(stakingTypes: PrismaPoolStakingType[], chain: Chain): Promise<void> {
         await deleteMasterchefStakingForAllPools(stakingTypes, chain);
         await deleteReliquaryStakingForAllPools(stakingTypes, chain);
@@ -176,33 +167,33 @@ export class PoolService {
      */
     public async syncStakingForPools(chains: Chain[]) {
         for (const chain of chains) {
-            const networkconfig = AllNetworkConfigsKeyedOnChain[chain];
-            if (networkconfig.data.subgraphs.masterchef) {
+            const networkconfig = config[chain];
+            if (networkconfig.subgraphs.masterchef) {
                 await syncMasterchefStakingForPools(
                     chain,
-                    new MasterchefSubgraphService(networkconfig.data.subgraphs.masterchef),
-                    networkconfig.data.masterchef?.excludedFarmIds || [],
-                    networkconfig.data.fbeets?.address || '',
-                    networkconfig.data.fbeets?.farmId || '',
-                    networkconfig.data.fbeets?.poolId || '',
+                    new MasterchefSubgraphService(networkconfig.subgraphs.masterchef),
+                    networkconfig.masterchef?.excludedFarmIds || [],
+                    networkconfig.fbeets?.address || '',
+                    networkconfig.fbeets?.farmId || '',
+                    networkconfig.fbeets?.poolId || '',
                 );
             }
-            if (networkconfig.data.subgraphs.reliquary) {
+            if (networkconfig.subgraphs.reliquary) {
                 await syncReliquaryStakingForPools(
                     chain,
-                    new ReliquarySubgraphService(networkconfig.data.subgraphs.reliquary),
-                    networkconfig.data.reliquary?.address || '',
-                    networkconfig.data.reliquary?.excludedFarmIds || [],
+                    new ReliquarySubgraphService(networkconfig.subgraphs.reliquary),
+                    networkconfig.reliquary?.address || '',
+                    networkconfig.reliquary?.excludedFarmIds || [],
                 );
             }
-            if (networkconfig.data.subgraphs.gauge && networkContext.data.bal?.address) {
+            if (networkconfig.subgraphs.gauge && networkContext.data.bal?.address) {
                 await syncGaugeStakingForPools(
-                    new GaugeSubgraphService(networkconfig.data.subgraphs.gauge),
+                    new GaugeSubgraphService(networkconfig.subgraphs.gauge),
                     networkContext.data.bal.address,
                 );
             }
-            if (networkconfig.data.subgraphs.aura) {
-                await syncAuraStakingForPools(chain, new AuraSubgraphService(networkconfig.data.subgraphs.aura));
+            if (networkconfig.subgraphs.aura) {
+                await syncAuraStakingForPools(chain, new AuraSubgraphService(networkconfig.subgraphs.aura));
             }
 
             if (chain === 'MAINNET') {
@@ -255,9 +246,8 @@ const optionsResolverForPoolOnChainDataService: () => PoolOnChainDataServiceOpti
 };
 
 export const poolService = new PoolService(
-    new PoolCreatorService(userService),
     new PoolOnChainDataService(optionsResolverForPoolOnChainDataService),
-    new PoolUsdDataService(tokenService, blocksSubgraphService),
+    new PoolUsdDataService(tokenService),
     new PoolGqlLoaderService(),
     new PoolAprUpdaterService(),
     new PoolSwapService(tokenService),

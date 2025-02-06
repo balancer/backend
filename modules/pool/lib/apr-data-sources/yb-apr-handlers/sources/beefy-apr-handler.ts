@@ -21,16 +21,19 @@ export class BeefyAprHandler implements AprHandler {
     async getAprs() {
         try {
             const { data: aprData } = await axios.get<VaultApr>(this.sourceUrl);
-            const aprs = Object.values(this.tokens).map(({ address, vaultId, isIbYield }) => {
-                const apr = aprData[vaultId]?.vaultApr ?? 0;
-                return {
-                    [address]: {
-                        apr,
-                        isIbYield: isIbYield ?? false,
-                        group: this.group,
-                    },
-                };
-            });
+            const aprs = Object.values(this.tokens)
+                .map(({ address, vaultId, isIbYield }) => {
+                    const apr = aprData[vaultId] ?? 0;
+                    return {
+                        [address]: {
+                            apr,
+                            isIbYield: isIbYield ?? false,
+                            group: this.group,
+                        },
+                    };
+                })
+                .flat()
+                .reduce((acc, curr) => ({ ...acc, ...curr }), {});
 
             return aprs;
         } catch (error) {
@@ -40,15 +43,4 @@ export class BeefyAprHandler implements AprHandler {
     }
 }
 
-type VaultApr = Record<
-    string,
-    {
-        vaultApr: number;
-        compoundingsPerYear: number;
-        beefyPerformanceFee: number;
-        vaultApy: number;
-        lpFee: number;
-        tradingApr: number;
-        totalApy: number;
-    }
->;
+type VaultApr = Record<string, number>;

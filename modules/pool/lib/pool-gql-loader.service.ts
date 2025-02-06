@@ -37,7 +37,7 @@ import {
     GqlPoolAggregator,
     LiquidityManagement,
     GqlHook,
-} from '../../../schema';
+} from '../../../apps/api/gql/generated-schema';
 import { addressesMatch } from '../../web3/addresses';
 import _ from 'lodash';
 import { prisma } from '../../../prisma/prisma-client';
@@ -52,7 +52,8 @@ import { SanityContentService } from '../../content/sanity-content.service';
 import { ElementData, FxData, GyroData, StableData } from '../subgraph-mapper';
 import { ZERO_ADDRESS } from '@balancer/sdk';
 import { tokenService } from '../../token/token.service';
-import { HookData } from '../../sources/transformers';
+import { HookData, mapHookToGqlHook } from '../../sources/transformers';
+import { GraphQLError } from 'graphql';
 
 const isToken = (text: string) => text.match(/^0x[0-9a-fA-F]{40}$/);
 const isPoolId = (text: string) => isToken(text) || text.match(/^0x[0-9a-fA-F]{64}$/);
@@ -68,11 +69,11 @@ export class PoolGqlLoaderService {
         });
 
         if (!pool) {
-            throw new Error('Pool with id does not exist');
+            throw new GraphQLError('Pool with id does not exist', { extensions: { code: 'NOT_FOUND' } });
         }
 
         if (pool.type === 'UNKNOWN') {
-            throw new Error('Pool exists, but has an unknown type');
+            throw new GraphQLError('Pool exists, but has an unknown type', { extensions: { code: 'NOT_FOUND' } });
         }
 
         const mappedPool = this.mapPoolToGqlPool(
@@ -319,7 +320,7 @@ export class PoolGqlLoaderService {
         return {
             ...pool,
             liquidityManagement: (pool.liquidityManagement as LiquidityManagement) || undefined,
-            hook: pool.hook as HookData as GqlHook,
+            hook: mapHookToGqlHook(pool.hook as HookData),
             incentivized: pool.categories.some((category) => category === 'INCENTIVIZED'),
             vaultVersion: pool.protocolVersion,
             decimals: 18,
@@ -705,7 +706,7 @@ export class PoolGqlLoaderService {
             vaultVersion: poolWithoutTypeData.protocolVersion,
             categories: pool.categories as GqlPoolFilterCategory[],
             tags: pool.categories,
-            hook: pool.hook as HookData as GqlHook,
+            hook: mapHookToGqlHook(pool.hook as HookData),
             liquidityManagement: (pool.liquidityManagement as LiquidityManagement) || undefined,
             hasErc4626: pool.allTokens.some((token) => token.token.types.some((type) => type.type === 'ERC4626')),
             hasNestedErc4626: pool.allTokens.some((token) =>
@@ -851,6 +852,7 @@ export class PoolGqlLoaderService {
                 (type) => type.type === 'WHITE_LISTED' || type.type === 'PHANTOM_BPT' || type.type === 'BPT',
             ),
             isErc4626: poolToken.token.types.some((type) => type.type === 'ERC4626'),
+            isExemptFromProtocolYieldFee: poolToken.exemptFromProtocolYieldFee,
             scalingFactor: poolToken.scalingFactor,
             tradable: !poolToken.token.types.find((type) => type.type === 'PHANTOM_BPT' || type.type === 'BPT'),
             chain: poolToken.chain,

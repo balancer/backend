@@ -26,7 +26,6 @@ export const fantomNetworkConfig: NetworkConfig = {
         new SwapFeeAprService(),
         new MasterchefFarmAprService(fantomNetworkData.beets!.address),
         new ReliquaryFarmAprService(fantomNetworkData.beets!.address),
-        new BeetswarsGaugeVotingAprService(),
     ],
     userStakedBalanceServices: [
         new UserSyncMasterchefFarmBalanceService(
@@ -76,10 +75,6 @@ export const fantomNetworkConfig: NetworkConfig = {
         {
             name: 'sync-new-pools-from-subgraph',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(6, 'minutes') : every(2, 'minutes'),
-        },
-        {
-            name: 'cache-average-block-time',
-            interval: every(1, 'hours'),
         },
         {
             name: 'sync-staking-for-pools',

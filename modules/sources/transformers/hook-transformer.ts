@@ -1,3 +1,4 @@
+import { GqlHook, HookParams } from '../../../apps/api/gql/generated-schema';
 import { V3JoinedSubgraphPool } from '../subgraphs';
 import { zeroAddress } from 'viem';
 
@@ -37,5 +38,45 @@ export const hookTransformer = (poolData: V3JoinedSubgraphPool): HookData | unde
     return {
         address: hook.address.toLowerCase(),
         ...hookFlags,
+    };
+};
+
+export const mapHookToGqlHook = (hookData: HookData): GqlHook | undefined => {
+    if (!hookData || !hookData.name) {
+        return undefined;
+    }
+
+    return {
+        address: hookData.address,
+        name: hookData.name,
+        config: {
+            enableHookAdjustedAmounts: hookData.enableHookAdjustedAmounts,
+            shouldCallAfterSwap: hookData.shouldCallAfterSwap,
+            shouldCallBeforeSwap: hookData.shouldCallBeforeSwap,
+            shouldCallAfterInitialize: hookData.shouldCallAfterInitialize,
+            shouldCallBeforeInitialize: hookData.shouldCallBeforeInitialize,
+            shouldCallAfterAddLiquidity: hookData.shouldCallAfterAddLiquidity,
+            shouldCallBeforeAddLiquidity: hookData.shouldCallBeforeAddLiquidity,
+            shouldCallAfterRemoveLiquidity: hookData.shouldCallAfterRemoveLiquidity,
+            shouldCallBeforeRemoveLiquidity: hookData.shouldCallBeforeRemoveLiquidity,
+            shouldCallComputeDynamicSwapFee: hookData.shouldCallComputeDynamicSwapFee,
+        },
+        reviewData: hookData.reviewData,
+        params: {
+            __typename: `${hookData.name}Params`,
+            ...hookData.dynamicData,
+        } as HookParams,
+        // Deprecated
+        enableHookAdjustedAmounts: hookData.enableHookAdjustedAmounts,
+        shouldCallAfterSwap: hookData.shouldCallAfterSwap,
+        shouldCallBeforeSwap: hookData.shouldCallBeforeSwap,
+        shouldCallAfterInitialize: hookData.shouldCallAfterInitialize,
+        shouldCallBeforeInitialize: hookData.shouldCallBeforeInitialize,
+        shouldCallAfterAddLiquidity: hookData.shouldCallAfterAddLiquidity,
+        shouldCallBeforeAddLiquidity: hookData.shouldCallBeforeAddLiquidity,
+        shouldCallAfterRemoveLiquidity: hookData.shouldCallAfterRemoveLiquidity,
+        shouldCallBeforeRemoveLiquidity: hookData.shouldCallBeforeRemoveLiquidity,
+        shouldCallComputeDynamicSwapFee: hookData.shouldCallComputeDynamicSwapFee,
+        dynamicData: hookData.dynamicData,
     };
 };

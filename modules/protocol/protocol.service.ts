@@ -4,13 +4,9 @@ import { Cache } from 'memory-cache';
 import { Chain, PrismaLastBlockSyncedCategory, PrismaUserBalanceType } from '@prisma/client';
 import _ from 'lodash';
 import { networkContext } from '../network/network-context.service';
-import { AllNetworkConfigs, AllNetworkConfigsKeyedOnChain } from '../network/network-config';
-import { GqlProtocolMetricsAggregated, GqlProtocolMetricsChain } from '../../schema';
-import { GraphQLClient } from 'graphql-request';
-import { getSdk } from '../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
+import { GqlProtocolMetricsAggregated, GqlProtocolMetricsChain } from '../../apps/api/gql/generated-schema';
 import axios from 'axios';
-import { tokenService } from '../token/token.service';
-import { getV2SubgraphClient } from '../subgraphs/balancer-subgraph';
+import config from '../../config';
 
 interface LatestSyncedBlocks {
     userWalletSyncBlock: string;
@@ -70,11 +66,6 @@ export class ProtocolService {
     public async cacheProtocolMetrics(chain: Chain): Promise<GqlProtocolMetricsChain> {
         const oneDayAgo = moment().subtract(24, 'hours').unix();
 
-        const client = getV2SubgraphClient(AllNetworkConfigsKeyedOnChain[chain].data.subgraphs.balancer, chain);
-
-        const { balancers } = await client.BalancerProtocolData({});
-        const { totalSwapFee, totalSwapVolume } = balancers[0];
-
         const pools = await prisma.prismaPool.findMany({
             where: {
                 type: {
@@ -125,15 +116,15 @@ export class ProtocolService {
 
         const yieldCapture24h = _.sumBy(pools, (pool) => (!pool.dynamicData ? 0 : pool.dynamicData.yieldCapture24h));
 
-        const balancerV1Tvl = await this.getBalancerV1Tvl(`${AllNetworkConfigsKeyedOnChain[chain].data.chain.id}`);
-        const sftmxTvl = await this.getSftmXTVL(`${AllNetworkConfigsKeyedOnChain[chain].data.chain.id}`);
-        const stsTVL = await this.getStsTVL(`${AllNetworkConfigsKeyedOnChain[chain].data.chain.id}`);
+        const balancerV1Tvl = await this.getBalancerV1Tvl(chain);
+        const sftmxTvl = await this.getSftmXTVL(chain);
+        const stsTVL = await this.getStsTVL(chain);
 
         const protocolData = {
-            chainId: `${AllNetworkConfigsKeyedOnChain[chain].data.chain.id}`,
+            chainId: `${config[chain].chain.id}`,
             totalLiquidity: `${totalLiquidity + balancerV1Tvl + sftmxTvl + stsTVL}`,
-            totalSwapFee,
-            totalSwapVolume,
+            totalSwapFee: '0',
+            totalSwapVolume: '0',
             poolCount: `${poolCount}`,
             swapVolume24h: `${swapVolume24h}`,
             swapFee24h: `${swapFee24h}`,
@@ -166,46 +157,46 @@ export class ProtocolService {
         };
     }
 
-    private async getSftmXTVL(chainId: string): Promise<number> {
-        if (chainId !== '250') {
+    private async getSftmXTVL(chain: Chain): Promise<number> {
+        if (chain !== 'FANTOM') {
             return 0;
         }
 
-        const tokenAddress = AllNetworkConfigs[chainId].data.weth.address;
+        const tokenAddress = config[chain].weth.address;
         const ftmPrice = await prisma.prismaTokenCurrentPrice.findFirst({
             where: { tokenAddress, chain: 'FANTOM' },
         });
 
-        if (AllNetworkConfigs[chainId].data.sftmx) {
+        if (config[chain].sftmx) {
             const stakingData = await prisma.prismaSftmxStakingData.findUniqueOrThrow({
-                where: { id: AllNetworkConfigs[chainId].data.sftmx!.stakingContractAddress },
+                where: { id: config[chain].sftmx!.stakingContractAddress },
             });
             return parseFloat(stakingData.totalFtm) * (ftmPrice?.price || 0);
         }
         return 0;
     }
 
-    private async getStsTVL(chainId: string): Promise<number> {
-        if (chainId !== '146') {
+    private async getStsTVL(chain: Chain): Promise<number> {
+        if (chain !== 'SONIC') {
             return 0;
         }
 
-        const tokenAddress = AllNetworkConfigs[chainId].data.weth.address;
+        const tokenAddress = config[chain].weth.address;
         const sPrice = await prisma.prismaTokenCurrentPrice.findFirst({
             where: { tokenAddress, chain: 'SONIC' },
         });
 
-        if (AllNetworkConfigs[chainId].data.sts) {
+        if (config[chain].sts) {
             const stakingData = await prisma.prismaStakedSonicData.findUniqueOrThrow({
-                where: { id: AllNetworkConfigs[chainId].data.sts!.address },
+                where: { id: config[chain].sts!.address },
             });
             return parseFloat(stakingData.totalAssets) * (sPrice?.price || 0);
         }
         return 0;
     }
 
-    private async getBalancerV1Tvl(chainId: string): Promise<number> {
-        if (chainId !== '1') {
+    private async getBalancerV1Tvl(chain: Chain): Promise<number> {
+        if (chain !== 'MAINNET') {
             return 0;
         }
 

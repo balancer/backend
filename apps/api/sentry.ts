@@ -1,8 +1,6 @@
+import { PrismaInstrumentation } from '@prisma/instrumentation';
 import * as Sentry from '@sentry/node';
 import { env } from '../env';
-import { ApolloServerPlugin } from 'apollo-server-plugin-base';
-import { ApolloError } from 'apollo-server-express';
-import { ResolverContext } from './gql/resolver-context';
 
 // Ensure to call this before importing any other modules!
 export const initApiSentry = () => {
@@ -14,6 +12,10 @@ export const initApiSentry = () => {
         integrations: [
             Sentry.captureConsoleIntegration({
                 levels: ['error', 'warn'],
+            }),
+            Sentry.prismaIntegration({
+                // Override the default instrumentation that Sentry uses
+                prismaInstrumentation: new PrismaInstrumentation(),
             }),
         ],
 
@@ -51,48 +53,4 @@ export const initApiSentry = () => {
             return event;
         },
     });
-};
-
-// Ref: https://blog.sentry.io/handling-graphql-errors-using-sentry/
-export const apolloSentryPlugin: ApolloServerPlugin<ResolverContext> = {
-    async requestDidStart({ request, context }) {
-        return {
-            // This will send any errors captured by Apollo Server to Sentry
-            async didEncounterErrors(ctx) {
-                for (const err of ctx.errors) {
-                    // Only report internal server errors,
-                    // all errors extending ApolloError should be user-facing
-                    if (err instanceof ApolloError) {
-                        continue;
-                    }
-
-                    // Ignore specific errors
-                    if (err.message === 'SOR queryBatchSwap failed') {
-                        continue;
-                    }
-
-                    // Potentially set transaction name to the operation name,
-                    // add tags and fingerprint to group errors
-
-                    // Sentry.withScope((scope) => {
-                    //     let name = request.operationName;
-                    //     if (!name) {
-                    //         name = request.query
-                    //             ?.substring(
-                    //                 request.query?.indexOf('{') + 1,
-                    //                 request.query?.indexOf('(') || request.query?.length,
-                    //             )
-                    //             .replace(/\n/g, '')
-                    //             .replace(/\s/g, '');
-                    //     }
-                    //     scope.setTransactionName(`POST /graphql ${name}`);
-                    //     Sentry.captureException(err);
-                    // });
-
-                    Sentry.captureException(err);
-                }
-            },
-            async willSendResponse({ context }) {},
-        };
-    },
 };
