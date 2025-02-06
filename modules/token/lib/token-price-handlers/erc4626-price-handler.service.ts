@@ -64,7 +64,7 @@ export class ERC4626PriceHandlerService implements TokenPriceHandler {
                     continue;
                 }
                 try {
-                    const price = Number((rateMap[erc4626Token.address] * underlyingMap[underlying].price).toFixed(2));
+                    const price = Number((rateMap[erc4626Token.address] * underlyingMap[underlying].price).toFixed(20));
 
                     updatedTokens.push(dbToken);
                     tokenAndPrices.push({
