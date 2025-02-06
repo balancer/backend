@@ -1,12 +1,12 @@
-import { PoolAprService } from '../../../pool-types';
-import { PrismaPoolWithTokens } from '../../../../../prisma/prisma-types';
+import { PoolAprService } from '../../pool-types';
+import { PrismaPoolWithTokens } from '../../../../prisma/prisma-types';
 import axios from 'axios';
-import { prisma } from '../../../../../prisma/prisma-client';
-import { networkContext } from '../../../../network/network-context.service';
+import { prisma } from '../../../../prisma/prisma-client';
+import { networkContext } from '../../../network/network-context.service';
 import { PrismaPoolAprType } from '@prisma/client';
 
 export class BeetswarsGaugeVotingAprService implements PoolAprService {
-    private readonly FRESH_BEETS_POOL_ID = '0x9e4341acef4147196e99d648c5e43b3fc9d026780002000000000000000005ec';
+    private readonly FRESH_BEETS_POOL_ID = '0x10ac2f9dae6539e77e372adb14b1bf8fbd16b3e8000200000000000000000005';
 
     public getAprServiceName(): string {
         return 'BeetswarsGaugeVotingAprService';
@@ -26,8 +26,7 @@ export class BeetswarsGaugeVotingAprService implements PoolAprService {
             const votingAprs = raw.filter((apr) => apr && isFinite(apr));
 
             const minApr = 0;
-            // const maxApr = votingAprs[votingAprs.length - 1] / 100;
-            const maxApr = 0;
+            const maxApr = votingAprs[votingAprs.length - 1] / 100;
 
             const itemId = `${this.FRESH_BEETS_POOL_ID}-voting-apr`;
 

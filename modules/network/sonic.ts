@@ -12,7 +12,7 @@ import config from '../../config';
 import { GithubContentService } from '../content/github-content.service';
 import { ReliquaryFarmAprService } from '../pool/lib/apr-data-sources/fantom/reliquary-farm-apr.service';
 import { UserSyncReliquaryFarmBalanceService } from '../user/lib/user-sync-reliquary-farm-balance.service';
-import { MaBeetsVotingAprService } from '../pool/lib/apr-data-sources/mabeets-voting-apr.service';
+import { BeetswarsGaugeVotingAprService } from '../pool/lib/apr-data-sources/beetswars-gauge-voting-apr';
 
 const sonicNetworkData: NetworkData = config.SONIC;
 
@@ -26,7 +26,7 @@ export const sonicNetworkConfig: NetworkConfig = {
         new SwapFeeAprService(),
         new GaugeAprService(),
         new ReliquaryFarmAprService(sonicNetworkData.beets!.address),
-        new MaBeetsVotingAprService(),
+        new BeetswarsGaugeVotingAprService(),
     ],
     userStakedBalanceServices: [
         new UserSyncGaugeBalanceService(),

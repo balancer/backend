@@ -10,7 +10,7 @@ import { every } from '../../apps/scheduler/intervals';
 import { SanityContentService } from '../content/sanity-content.service';
 import { env } from '../../apps/env';
 import { YbTokensAprService } from '../pool/lib/apr-data-sources/yb-tokens-apr.service';
-import { BeetswarsGaugeVotingAprService } from '../pool/lib/apr-data-sources/fantom/beetswars-gauge-voting-apr';
+import { BeetswarsGaugeVotingAprService } from '../pool/lib/apr-data-sources/beetswars-gauge-voting-apr';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import config from '../../config';
 
