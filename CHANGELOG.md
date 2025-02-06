@@ -1,5 +1,15 @@
 # backend
 
+## 1.31.4
+
+### Patch Changes
+
+-   adc2d53: add beetswars mabeets apr
+-   a222383: hook type specific return types
+-   257eac0: fix small pricing issues with 4626
+-   40861c6: backward compatibility for hooks on FE
+-   09ec9d2: adding gyro pools to SG
+
 ## 1.31.3
 
 ### Patch Changes
