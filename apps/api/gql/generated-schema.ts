@@ -172,6 +172,7 @@ export interface GqlHook {
     dynamicData?: Maybe<GqlHookData>;
     /** @deprecated Field no longer supported */
     enableHookAdjustedAmounts: Scalars['Boolean'];
+    /** @deprecated unused */
     name: Scalars['String'];
     /** Hook type specific params */
     params?: Maybe<HookParams>;
@@ -218,7 +219,7 @@ export interface GqlHookReviewData {
     warnings: Array<Scalars['String']>;
 }
 
-export type GqlHookType = 'EXIT_FEE' | 'FEE_TAKING' | 'MEV' | 'STABLE_SURGE';
+export type GqlHookType = 'EXIT_FEE' | 'FEE_TAKING' | 'MEV' | 'STABLE_SURGE' | 'UNKNOWN';
 
 export interface GqlLatestSyncedBlocks {
     __typename?: 'GqlLatestSyncedBlocks';

@@ -6,23 +6,24 @@ import { ViemClient } from '../../types';
 import { feeTakingHook } from './fee-taking-hook';
 import { exitFeeHook } from './exit-fee-hook';
 import { stableSurgeHook } from './stable-surge-hook';
+import { GqlHookType } from '../../../../apps/api/gql/generated-schema';
 
 export const fetchHookData = async (
     client: ViemClient,
     address: string,
-    type: HookType,
+    type: GqlHookType,
     poolAddress: string,
 ): Promise<Record<string, string>> => {
     let calls: ViemMulticallCall[] = [];
 
     switch (type) {
-        case 'feeTakingHook':
+        case 'FEE_TAKING':
             calls = [...calls, ...feeTakingHook(address)];
             break;
-        case 'exitFeeHook':
+        case 'EXIT_FEE':
             calls = [...calls, ...exitFeeHook(address)];
             break;
-        case 'stableSurgeHook':
+        case 'STABLE_SURGE':
             calls = [...calls, ...stableSurgeHook(address, poolAddress)];
             break;
         default:

@@ -31,7 +31,7 @@ export const syncHookData = async (
         }
         const keys = Object.keys(hooksTypes) as HookType[];
         const hookKey = keys.find((key) => hooksTypes[key]?.includes(hookData.address));
-        let hookType: GqlHookType | undefined = undefined;
+        let hookType: GqlHookType = 'UNKNOWN';
         switch (hookKey) {
             case 'feeTakingHook':
                 hookType = 'FEE_TAKING';
@@ -40,7 +40,7 @@ export const syncHookData = async (
             case 'stableSurgeHook':
                 hookType = 'STABLE_SURGE';
             default:
-                hookType = undefined;
+                hookType = 'UNKNOWN';
         }
 
         if (!hookType || !hookKey) {

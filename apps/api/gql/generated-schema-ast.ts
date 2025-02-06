@@ -174,7 +174,7 @@ export const schema = gql`
         config: HookConfig
         dynamicData: GqlHookData @deprecated
         enableHookAdjustedAmounts: Boolean! @deprecated
-        name: String!
+        name: String! @deprecated(reason: "unused")
 
         """
         Hook type specific params
@@ -230,6 +230,7 @@ export const schema = gql`
         FEE_TAKING
         MEV
         STABLE_SURGE
+        UNKNOWN
     }
 
     type GqlLatestSyncedBlocks {

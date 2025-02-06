@@ -100,4 +100,5 @@ enum GqlHookType {
     EXIT_FEE
     STABLE_SURGE
     MEV
+    UNKNOWN
 }
