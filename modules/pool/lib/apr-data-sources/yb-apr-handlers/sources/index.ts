@@ -1,5 +1,6 @@
 export * from './default-apr-handler';
 export * from './aave-apr-handler';
+export * from './avalon-apr-handler';
 export * from './euler-apr-handler';
 export * from './gearbox-apr-handler';
 export * from './idle-apr-handler';

@@ -3,6 +3,7 @@ export interface YbAprConfig {
         tokens: { [wrapper: string]: string };
     };
     aave?: AaveAprConfig;
+    avalon?: AvalonAprConfig;
     bloom?: BloomAprConfig;
     beefy?: BeefyAprConfig;
     sftmx?: SftmxAprConfig;
@@ -46,6 +47,22 @@ export interface YbAprConfig {
 
 export interface AaveAprConfig {
     [version: string]: {
+        subgraphUrl: string;
+        tokens: {
+            [underlyingAssetName: string]: {
+                underlyingAssetAddress: string;
+                aTokenAddress: string;
+                wrappedTokens: {
+                    [wrappedTokenName: string]: string;
+                };
+                isIbYield?: boolean;
+            };
+        };
+    };
+}
+
+export interface AvalonAprConfig {
+    [market: string]: {
         subgraphUrl: string;
         tokens: {
             [underlyingAssetName: string]: {

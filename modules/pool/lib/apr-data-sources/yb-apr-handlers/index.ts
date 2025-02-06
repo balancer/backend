@@ -6,6 +6,7 @@ export type { AprHandler, AprHandlerConstructor, TokenApr };
 
 const sourceToHandler = {
     aave: sources.AaveAprHandler,
+    avalon: sources.AvalonAprHandler,
     beefy: sources.BeefyAprHandler,
     // euler: sources.EulerAprHandler, // Removed, pools rekt
     // gearbox: sources.GearboxAprHandler, // Removed, endpoint is down
@@ -57,7 +58,7 @@ export class YbAprHandlers {
             }
 
             // Handle nested configs
-            if (source === 'aave' || source === 'defaultHandlers') {
+            if (source === 'aave' || source === 'avalon' || source === 'defaultHandlers') {
                 for (const nestedConfig of Object.values(config)) {
                     handlers.push(new Handler(nestedConfig as any));
                 }
