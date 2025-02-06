@@ -104,35 +104,6 @@ export interface GqlFeaturePoolGroupItemExternalLink {
     image: Scalars['String'];
 }
 
-/** Configuration options for SOR V2 */
-export interface GqlGraphTraversalConfigInput {
-    /**
-     * Max number of paths to return (can be less)
-     *
-     * Default: 5
-     */
-    approxPathsToReturn?: InputMaybe<Scalars['Int']>;
-    /**
-     * The max hops in a path.
-     *
-     * Default: 6
-     */
-    maxDepth?: InputMaybe<Scalars['Int']>;
-    /**
-     * Limit non boosted hop tokens in a boosted path.
-     *
-     * Default: 2
-     */
-    maxNonBoostedHopTokensInBoostedPath?: InputMaybe<Scalars['Int']>;
-    /**
-     * Limit of "non-boosted" pools for efficiency.
-     *
-     * Default: 6
-     */
-    maxNonBoostedPathDepth?: InputMaybe<Scalars['Int']>;
-    poolIdsToInclude?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
-}
-
 export interface GqlHistoricalTokenPrice {
     __typename?: 'GqlHistoricalTokenPrice';
     address: Scalars['String'];
@@ -2032,29 +2003,6 @@ export interface GqlSorGetSwapPaths {
     vaultVersion: Scalars['Int'];
 }
 
-export interface GqlSorGetSwapsResponse {
-    __typename?: 'GqlSorGetSwapsResponse';
-    effectivePrice: Scalars['AmountHumanReadable'];
-    effectivePriceReversed: Scalars['AmountHumanReadable'];
-    marketSp: Scalars['String'];
-    priceImpact: Scalars['AmountHumanReadable'];
-    returnAmount: Scalars['AmountHumanReadable'];
-    returnAmountConsideringFees: Scalars['BigDecimal'];
-    returnAmountFromSwaps?: Maybe<Scalars['BigDecimal']>;
-    returnAmountScaled: Scalars['BigDecimal'];
-    routes: Array<GqlSorSwapRoute>;
-    swapAmount: Scalars['AmountHumanReadable'];
-    swapAmountForSwaps?: Maybe<Scalars['BigDecimal']>;
-    swapAmountScaled: Scalars['BigDecimal'];
-    swapType: GqlSorSwapType;
-    swaps: Array<GqlSorSwap>;
-    tokenAddresses: Array<Scalars['String']>;
-    tokenIn: Scalars['String'];
-    tokenInAmount: Scalars['AmountHumanReadable'];
-    tokenOut: Scalars['String'];
-    tokenOutAmount: Scalars['AmountHumanReadable'];
-}
-
 /** A path of a swap. A swap can have multiple paths. Used as input to execute the swap via b-sdk */
 export interface GqlSorPath {
     __typename?: 'GqlSorPath';
@@ -2090,13 +2038,6 @@ export interface GqlSorSwap {
     poolId: Scalars['String'];
     /** UserData used in this swap, generally uses defaults. */
     userData: Scalars['String'];
-}
-
-export interface GqlSorSwapOptionsInput {
-    forceRefresh?: InputMaybe<Scalars['Boolean']>;
-    maxPools?: InputMaybe<Scalars['Int']>;
-    queryBatchSwap?: InputMaybe<Scalars['Boolean']>;
-    timestamp?: InputMaybe<Scalars['Int']>;
 }
 
 /** The swap routes including pool information. Used to display by the UI */
@@ -2656,8 +2597,6 @@ export interface Query {
     sftmxGetWithdrawalRequests: Array<GqlSftmxWithdrawalRequests>;
     /** Get swap quote from the SOR v2 for the V2 vault */
     sorGetSwapPaths: GqlSorGetSwapPaths;
-    /** Get swap quote from the SOR, queries both the old and new SOR */
-    sorGetSwaps: GqlSorGetSwapsResponse;
     /** Get the staking data and status for stS */
     stsGetGqlStakedSonicData: GqlStakedSonicData;
     /** Get snapshots for sftmx staking for a specific range */
@@ -2828,15 +2767,6 @@ export interface QuerySorGetSwapPathsArgs {
     tokenIn: Scalars['String'];
     tokenOut: Scalars['String'];
     useProtocolVersion?: InputMaybe<Scalars['Int']>;
-}
-
-export interface QuerySorGetSwapsArgs {
-    chain?: InputMaybe<GqlChain>;
-    swapAmount: Scalars['BigDecimal'];
-    swapOptions: GqlSorSwapOptionsInput;
-    swapType: GqlSorSwapType;
-    tokenIn: Scalars['String'];
-    tokenOut: Scalars['String'];
 }
 
 export interface QueryStsGetStakedSonicSnapshotsArgs {
@@ -3062,7 +2992,6 @@ export type ResolversTypes = ResolversObject<{
     GqlContentNewsItem: ResolverTypeWrapper<GqlContentNewsItem>;
     GqlContentNewsItemSource: GqlContentNewsItemSource;
     GqlFeaturePoolGroupItemExternalLink: ResolverTypeWrapper<GqlFeaturePoolGroupItemExternalLink>;
-    GqlGraphTraversalConfigInput: GqlGraphTraversalConfigInput;
     GqlHistoricalTokenPrice: ResolverTypeWrapper<GqlHistoricalTokenPrice>;
     GqlHistoricalTokenPriceEntry: ResolverTypeWrapper<GqlHistoricalTokenPriceEntry>;
     GqlHook: ResolverTypeWrapper<Omit<GqlHook, 'params'> & { params?: Maybe<ResolversTypes['HookParams']> }>;
@@ -3204,10 +3133,8 @@ export type ResolversTypes = ResolversObject<{
     GqlSftmxWithdrawalRequests: ResolverTypeWrapper<GqlSftmxWithdrawalRequests>;
     GqlSorCallData: ResolverTypeWrapper<GqlSorCallData>;
     GqlSorGetSwapPaths: ResolverTypeWrapper<GqlSorGetSwapPaths>;
-    GqlSorGetSwapsResponse: ResolverTypeWrapper<GqlSorGetSwapsResponse>;
     GqlSorPath: ResolverTypeWrapper<GqlSorPath>;
     GqlSorSwap: ResolverTypeWrapper<GqlSorSwap>;
-    GqlSorSwapOptionsInput: GqlSorSwapOptionsInput;
     GqlSorSwapRoute: ResolverTypeWrapper<GqlSorSwapRoute>;
     GqlSorSwapRouteHop: ResolverTypeWrapper<GqlSorSwapRouteHop>;
     GqlSorSwapType: GqlSorSwapType;
@@ -3272,7 +3199,6 @@ export type ResolversParentTypes = ResolversObject<{
     GqlBigNumber: Scalars['GqlBigNumber'];
     GqlContentNewsItem: GqlContentNewsItem;
     GqlFeaturePoolGroupItemExternalLink: GqlFeaturePoolGroupItemExternalLink;
-    GqlGraphTraversalConfigInput: GqlGraphTraversalConfigInput;
     GqlHistoricalTokenPrice: GqlHistoricalTokenPrice;
     GqlHistoricalTokenPriceEntry: GqlHistoricalTokenPriceEntry;
     GqlHook: Omit<GqlHook, 'params'> & { params?: Maybe<ResolversParentTypes['HookParams']> };
@@ -3393,10 +3319,8 @@ export type ResolversParentTypes = ResolversObject<{
     GqlSftmxWithdrawalRequests: GqlSftmxWithdrawalRequests;
     GqlSorCallData: GqlSorCallData;
     GqlSorGetSwapPaths: GqlSorGetSwapPaths;
-    GqlSorGetSwapsResponse: GqlSorGetSwapsResponse;
     GqlSorPath: GqlSorPath;
     GqlSorSwap: GqlSorSwap;
-    GqlSorSwapOptionsInput: GqlSorSwapOptionsInput;
     GqlSorSwapRoute: GqlSorSwapRoute;
     GqlSorSwapRouteHop: GqlSorSwapRouteHop;
     GqlStakedSonicData: GqlStakedSonicData;
@@ -5056,32 +4980,6 @@ export type GqlSorGetSwapPathsResolvers<
     __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type GqlSorGetSwapsResponseResolvers<
-    ContextType = ResolverContext,
-    ParentType extends ResolversParentTypes['GqlSorGetSwapsResponse'] = ResolversParentTypes['GqlSorGetSwapsResponse'],
-> = ResolversObject<{
-    effectivePrice?: Resolver<ResolversTypes['AmountHumanReadable'], ParentType, ContextType>;
-    effectivePriceReversed?: Resolver<ResolversTypes['AmountHumanReadable'], ParentType, ContextType>;
-    marketSp?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    priceImpact?: Resolver<ResolversTypes['AmountHumanReadable'], ParentType, ContextType>;
-    returnAmount?: Resolver<ResolversTypes['AmountHumanReadable'], ParentType, ContextType>;
-    returnAmountConsideringFees?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
-    returnAmountFromSwaps?: Resolver<Maybe<ResolversTypes['BigDecimal']>, ParentType, ContextType>;
-    returnAmountScaled?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
-    routes?: Resolver<Array<ResolversTypes['GqlSorSwapRoute']>, ParentType, ContextType>;
-    swapAmount?: Resolver<ResolversTypes['AmountHumanReadable'], ParentType, ContextType>;
-    swapAmountForSwaps?: Resolver<Maybe<ResolversTypes['BigDecimal']>, ParentType, ContextType>;
-    swapAmountScaled?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
-    swapType?: Resolver<ResolversTypes['GqlSorSwapType'], ParentType, ContextType>;
-    swaps?: Resolver<Array<ResolversTypes['GqlSorSwap']>, ParentType, ContextType>;
-    tokenAddresses?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
-    tokenIn?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    tokenInAmount?: Resolver<ResolversTypes['AmountHumanReadable'], ParentType, ContextType>;
-    tokenOut?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    tokenOutAmount?: Resolver<ResolversTypes['AmountHumanReadable'], ParentType, ContextType>;
-    __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-}>;
-
 export type GqlSorPathResolvers<
     ContextType = ResolverContext,
     ParentType extends ResolversParentTypes['GqlSorPath'] = ResolversParentTypes['GqlSorPath'],
@@ -5677,12 +5575,6 @@ export type QueryResolvers<
         ContextType,
         RequireFields<QuerySorGetSwapPathsArgs, 'chain' | 'swapAmount' | 'swapType' | 'tokenIn' | 'tokenOut'>
     >;
-    sorGetSwaps?: Resolver<
-        ResolversTypes['GqlSorGetSwapsResponse'],
-        ParentType,
-        ContextType,
-        RequireFields<QuerySorGetSwapsArgs, 'swapAmount' | 'swapOptions' | 'swapType' | 'tokenIn' | 'tokenOut'>
-    >;
     stsGetGqlStakedSonicData?: Resolver<ResolversTypes['GqlStakedSonicData'], ParentType, ContextType>;
     stsGetStakedSonicSnapshots?: Resolver<
         Array<ResolversTypes['GqlStakedSonicSnapshot']>,
@@ -5933,7 +5825,6 @@ export type Resolvers<ContextType = ResolverContext> = ResolversObject<{
     GqlSftmxWithdrawalRequests?: GqlSftmxWithdrawalRequestsResolvers<ContextType>;
     GqlSorCallData?: GqlSorCallDataResolvers<ContextType>;
     GqlSorGetSwapPaths?: GqlSorGetSwapPathsResolvers<ContextType>;
-    GqlSorGetSwapsResponse?: GqlSorGetSwapsResponseResolvers<ContextType>;
     GqlSorPath?: GqlSorPathResolvers<ContextType>;
     GqlSorSwap?: GqlSorSwapResolvers<ContextType>;
     GqlSorSwapRoute?: GqlSorSwapRouteResolvers<ContextType>;

@@ -104,40 +104,6 @@ export const schema = gql`
         image: String!
     }
 
-    """
-    Configuration options for SOR V2
-    """
-    input GqlGraphTraversalConfigInput {
-        """
-        Max number of paths to return (can be less)
-
-        Default: 5
-        """
-        approxPathsToReturn: Int
-
-        """
-        The max hops in a path.
-
-        Default: 6
-        """
-        maxDepth: Int
-
-        """
-        Limit non boosted hop tokens in a boosted path.
-
-        Default: 2
-        """
-        maxNonBoostedHopTokensInBoostedPath: Int
-
-        """
-        Limit of "non-boosted" pools for efficiency.
-
-        Default: 6
-        """
-        maxNonBoostedPathDepth: Int
-        poolIdsToInclude: [String]
-    }
-
     type GqlHistoricalTokenPrice {
         address: String!
         chain: GqlChain!
@@ -2935,28 +2901,6 @@ export const schema = gql`
         vaultVersion: Int! @deprecated(reason: "Use protocolVersion instead")
     }
 
-    type GqlSorGetSwapsResponse {
-        effectivePrice: AmountHumanReadable!
-        effectivePriceReversed: AmountHumanReadable!
-        marketSp: String!
-        priceImpact: AmountHumanReadable!
-        returnAmount: AmountHumanReadable!
-        returnAmountConsideringFees: BigDecimal!
-        returnAmountFromSwaps: BigDecimal
-        returnAmountScaled: BigDecimal!
-        routes: [GqlSorSwapRoute!]!
-        swapAmount: AmountHumanReadable!
-        swapAmountForSwaps: BigDecimal
-        swapAmountScaled: BigDecimal!
-        swapType: GqlSorSwapType!
-        swaps: [GqlSorSwap!]!
-        tokenAddresses: [String!]!
-        tokenIn: String!
-        tokenInAmount: AmountHumanReadable!
-        tokenOut: String!
-        tokenOutAmount: AmountHumanReadable!
-    }
-
     """
     A path of a swap. A swap can have multiple paths. Used as input to execute the swap via b-sdk
     """
@@ -3025,13 +2969,6 @@ export const schema = gql`
         UserData used in this swap, generally uses defaults.
         """
         userData: String!
-    }
-
-    input GqlSorSwapOptionsInput {
-        forceRefresh: Boolean
-        maxPools: Int
-        queryBatchSwap: Boolean
-        timestamp: Int
     }
 
     """
@@ -3922,41 +3859,6 @@ export const schema = gql`
             """
             useProtocolVersion: Int
         ): GqlSorGetSwapPaths!
-
-        """
-        Get swap quote from the SOR, queries both the old and new SOR
-        """
-        sorGetSwaps(
-            """
-            The Chain to query
-            """
-            chain: GqlChain
-
-            """
-            The amount to swap, in human form.
-            """
-            swapAmount: BigDecimal!
-
-            """
-            Options for the swap
-            """
-            swapOptions: GqlSorSwapOptionsInput!
-
-            """
-            SwapType either exact_in or exact_out (also givenIn or givenOut)
-            """
-            swapType: GqlSorSwapType!
-
-            """
-            Token address of the tokenIn
-            """
-            tokenIn: String!
-
-            """
-            Token address of the tokenOut
-            """
-            tokenOut: String!
-        ): GqlSorGetSwapsResponse!
 
         """
         Get the staking data and status for stS

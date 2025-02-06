@@ -1,7 +1,7 @@
 import { tokenService } from '../token/token.service';
 import { Chain } from '@prisma/client';
 import { chainToChainId as chainToIdMap } from '../network/chain-id-to-chain';
-import { GqlSorGetSwapPaths, GqlSorGetSwapsResponse, GqlSorSwapType } from '../../apps/api/gql/generated-schema';
+import { GqlSorGetSwapPaths } from '../../apps/api/gql/generated-schema';
 import { replaceZeroAddressWithEth } from '../web3/addresses';
 import { Address } from 'viem';
 import { Token, TokenAmount } from '@balancer/sdk';
@@ -55,35 +55,5 @@ export const swapPathsZeroResponse = (tokenIn: string, tokenOut: string, chain: 
         priceImpact: {
             error: 'No swaps found',
         },
-    };
-};
-
-export const zeroResponse = (
-    swapType: GqlSorSwapType,
-    tokenIn: string,
-    tokenOut: string,
-    swapAmount: string,
-    chain: Chain,
-): GqlSorGetSwapsResponse => {
-    return {
-        marketSp: '0',
-        tokenAddresses: [],
-        swaps: [],
-        tokenIn: replaceZeroAddressWithEth(tokenIn, chain),
-        tokenOut: replaceZeroAddressWithEth(tokenOut, chain),
-        swapType,
-        tokenInAmount: swapType === 'EXACT_IN' ? swapAmount : '0',
-        tokenOutAmount: swapType === 'EXACT_IN' ? '0' : swapAmount,
-        swapAmount: swapType === 'EXACT_IN' ? '0' : swapAmount,
-        swapAmountScaled: '0',
-        swapAmountForSwaps: '0',
-        returnAmount: '0',
-        returnAmountScaled: '0',
-        returnAmountConsideringFees: '0',
-        returnAmountFromSwaps: '0',
-        routes: [],
-        effectivePrice: '0',
-        effectivePriceReversed: '0',
-        priceImpact: '0',
     };
 };

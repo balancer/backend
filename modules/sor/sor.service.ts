@@ -1,13 +1,8 @@
 import config from '../../config';
-import {
-    GqlSorGetSwapPaths,
-    GqlSorGetSwapsResponse,
-    QuerySorGetSwapPathsArgs,
-    QuerySorGetSwapsArgs,
-} from '../../apps/api/gql/generated-schema';
+import { GqlSorGetSwapPaths, QuerySorGetSwapPathsArgs } from '../../apps/api/gql/generated-schema';
 import { sorV2Service } from './sorV2/sorPathService';
 import { GetSwapsV2Input as GetSwapPathsInput } from './types';
-import { getToken, getTokenAmountHuman, swapPathsZeroResponse, zeroResponse } from './utils';
+import { getToken, getTokenAmountHuman, swapPathsZeroResponse } from './utils';
 
 export class SorService {
     async getSorSwapPaths(args: QuerySorGetSwapPathsArgs): Promise<GqlSorGetSwapPaths> {
@@ -74,58 +69,6 @@ export class SorService {
         }
 
         return this.getBestSwapPathVersion(getSwapPathsInput);
-    }
-
-    async getSorSwaps(args: QuerySorGetSwapsArgs): Promise<GqlSorGetSwapsResponse> {
-        console.log('getSorSwaps args', JSON.stringify(args));
-        const tokenIn = args.tokenIn.toLowerCase();
-        const tokenOut = args.tokenOut.toLowerCase();
-        const amountToken = args.swapType === 'EXACT_IN' ? tokenIn : tokenOut;
-        const emptyResponse = zeroResponse(
-            args.swapType,
-            args.tokenIn,
-            args.tokenOut,
-            args.swapAmount,
-            args.chain || 'MAINNET', // doesn't matter, because it's a zero response
-        );
-
-        if (parseFloat(args.swapAmount) <= 0) {
-            return emptyResponse;
-        }
-
-        // check if tokens addresses exist
-        try {
-            await getToken(tokenIn, args.chain!);
-            await getToken(tokenOut, args.chain!);
-        } catch (e) {
-            console.log(e);
-            return emptyResponse;
-        }
-
-        // Use TokenAmount to help follow scaling requirements in later logic
-        // args.swapAmount is HumanScale
-        const amount = await getTokenAmountHuman(amountToken, args.swapAmount, args.chain!);
-
-        const swapResult = await sorV2Service.getSwapResult({
-            chain: args.chain!,
-            swapAmount: amount,
-            swapOptions: args.swapOptions,
-            swapType: args.swapType,
-            tokenIn: tokenIn,
-            tokenOut: tokenOut,
-        });
-
-        if (!swapResult || !swapResult.isValid) return emptyResponse;
-
-        try {
-            // Updates with latest onchain data before returning
-            return swapResult.getSorSwapResponse(
-                args.swapOptions.queryBatchSwap ? args.swapOptions.queryBatchSwap : false,
-            );
-        } catch (err) {
-            console.log(`Error Retrieving QuerySwap`, err);
-            return emptyResponse;
-        }
     }
 
     private async getBestSwapPathVersion(input: Omit<GetSwapPathsInput, 'protocolVersion'>) {

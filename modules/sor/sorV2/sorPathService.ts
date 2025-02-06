@@ -12,13 +12,12 @@ import {
 import { Chain, Prisma, PrismaPoolType } from '@prisma/client';
 import { PrismaPoolAndHookWithDynamic, prismaPoolAndHookWithDynamic } from '../../../prisma/prisma-types';
 import { prisma } from '../../../prisma/prisma-client';
-import { GetSwapsInput, GetSwapsV2Input as GetSwapPathsInput, SwapResult, SwapService } from '../types';
+import { GetSwapsV2Input as GetSwapPathsInput } from '../types';
 import { poolsToIgnore } from '../constants';
 import { chainToChainId as chainToIdMap } from '../../network/chain-id-to-chain';
 import * as Sentry from '@sentry/node';
 import { Address, formatUnits } from 'viem';
 import { sorGetPathsWithPools } from './lib/static';
-import { SwapResultV2 } from './swapResultV2';
 import { poolService } from '../../pool/pool.service';
 import { replaceZeroAddressWithEth } from '../../web3/addresses';
 import { getToken, swapPathsZeroResponse } from '../utils';
@@ -38,82 +37,15 @@ import {
 } from '@balancer/sdk';
 import { PathWithAmount } from './lib/path';
 import { calculatePriceImpact, getInputAmount, getOutputAmount } from './lib/utils/helpers';
-import { SwapLocal } from './lib/swapLocal';
 import { Cache } from 'memory-cache';
 import config from '../../../config';
 
-class SorPathService implements SwapService {
+class SorPathService {
     private cache = new Cache<
         string,
         { pools: PrismaPoolAndHookWithDynamic[]; underlyingTokens: { address: string; decimals: number }[] }
     >();
     private readonly SOR_POOLS_CACHE_KEY = `sor:pools`;
-
-    // This is only used for the old SOR service
-    public async getSwapResult(
-        { chain, tokenIn, tokenOut, swapType, swapAmount, graphTraversalConfig }: GetSwapsInput,
-        maxNonBoostedPathDepth = 4,
-    ): Promise<SwapResult> {
-        const protocolVersion = 2;
-
-        try {
-            const { pools: poolsFromDb, underlyingTokens } = await this.getBasePoolsFromDb(
-                chain,
-                protocolVersion,
-                false,
-            );
-            const tIn = await getToken(tokenIn as Address, chain);
-            const tOut = await getToken(tokenOut as Address, chain);
-            const swapKind = this.mapSwapTypeToSwapKind(swapType);
-            const config = graphTraversalConfig
-                ? {
-                      graphTraversalConfig: {
-                          maxNonBoostedPathDepth,
-                          ...graphTraversalConfig,
-                      },
-                  }
-                : {
-                      graphTraversalConfig: {
-                          maxNonBoostedPathDepth,
-                      },
-                  };
-            const paths = await sorGetPathsWithPools(
-                tIn,
-                tOut,
-                swapKind,
-                swapAmount.amount,
-                poolsFromDb,
-                underlyingTokens,
-                protocolVersion,
-                config,
-            );
-            if (!paths && maxNonBoostedPathDepth < 5) {
-                return this.getSwapResult(arguments[0], maxNonBoostedPathDepth + 1);
-            }
-            if (!paths) {
-                return new SwapResultV2(null, chain);
-            }
-
-            const swap = new SwapLocal({ paths, swapKind });
-
-            return new SwapResultV2(swap, chain);
-        } catch (err: any) {
-            console.log(
-                `SOR_V2_ERROR ${err.message} - tokenIn: ${tokenIn} - tokenOut: ${tokenOut} - swapAmount: ${swapAmount.amount} - swapType: ${swapType} - chain: ${chain}`,
-            );
-            Sentry.captureException(err.message, {
-                tags: {
-                    service: 'sorV2',
-                    tokenIn,
-                    tokenOut,
-                    swapAmount: swapAmount.amount,
-                    swapType,
-                    chain,
-                },
-            });
-            return new SwapResultV2(null, chain);
-        }
-    }
 
     // The new SOR service
     public async getSorSwapPaths(input: GetSwapPathsInput, maxNonBoostedPathDepth = 4): Promise<GqlSorGetSwapPaths> {

@@ -1,34 +1,5 @@
 extend type Query {
     """
-    Get swap quote from the SOR, queries both the old and new SOR
-    """
-    sorGetSwaps(
-        """
-        The Chain to query
-        """
-        chain: GqlChain
-        """
-        Token address of the tokenIn
-        """
-        tokenIn: String!
-        """
-        Token address of the tokenOut
-        """
-        tokenOut: String!
-        """
-        SwapType either exact_in or exact_out (also givenIn or givenOut)
-        """
-        swapType: GqlSorSwapType!
-        """
-        The amount to swap, in human form.
-        """
-        swapAmount: BigDecimal! #expected in human readable form
-        """
-        Options for the swap
-        """
-        swapOptions: GqlSorSwapOptionsInput!
-    ): GqlSorGetSwapsResponse!
-    """
     Get swap quote from the SOR v2 for the V2 vault
     """
     sorGetSwapPaths(
@@ -261,66 +232,6 @@ input GqlSwapCallDataInput {
     Who receives the output amount.
     """
     receiver: String!
-}
-
-input GqlSorSwapOptionsInput {
-    timestamp: Int #used for caching purposes
-    maxPools: Int
-    forceRefresh: Boolean #don't use any cached responses
-    queryBatchSwap: Boolean #run queryBatchSwap to update with onchain values
-}
-
-"""
-Configuration options for SOR V2
-"""
-input GqlGraphTraversalConfigInput {
-    """
-    The max hops in a path.
-
-    Default: 6
-    """
-    maxDepth: Int
-    """
-    Limit of "non-boosted" pools for efficiency.
-
-    Default: 6
-    """
-    maxNonBoostedPathDepth: Int
-    """
-    Limit non boosted hop tokens in a boosted path.
-
-    Default: 2
-    """
-    maxNonBoostedHopTokensInBoostedPath: Int
-    """
-    Max number of paths to return (can be less)
-
-    Default: 5
-    """
-    approxPathsToReturn: Int # default 5
-    poolIdsToInclude: [String]
-}
-
-type GqlSorGetSwapsResponse {
-    tokenIn: String!
-    tokenOut: String!
-    tokenAddresses: [String!]!
-    swapType: GqlSorSwapType!
-    swaps: [GqlSorSwap!]!
-    tokenInAmount: AmountHumanReadable!
-    tokenOutAmount: AmountHumanReadable!
-    swapAmount: AmountHumanReadable!
-    swapAmountScaled: BigDecimal!
-    swapAmountForSwaps: BigDecimal
-    returnAmount: AmountHumanReadable!
-    returnAmountScaled: BigDecimal!
-    returnAmountFromSwaps: BigDecimal
-    returnAmountConsideringFees: BigDecimal!
-    marketSp: String!
-    routes: [GqlSorSwapRoute!]!
-    effectivePrice: AmountHumanReadable!
-    effectivePriceReversed: AmountHumanReadable!
-    priceImpact: AmountHumanReadable!
 }
 
 """

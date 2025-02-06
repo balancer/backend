@@ -1,20 +1,6 @@
 import { Chain } from '@prisma/client';
-import {
-    GqlSorSwapType,
-    GqlSorGetSwapsResponse,
-    GqlSorSwapOptionsInput,
-    GqlSwapCallDataInput,
-} from '../../apps/api/gql/generated-schema';
+import { GqlSorSwapType, GqlSwapCallDataInput } from '../../apps/api/gql/generated-schema';
 import { TokenAmount } from '@balancer/sdk';
-export interface GetSwapsInput {
-    chain: Chain;
-    tokenIn: string;
-    tokenOut: string;
-    swapType: GqlSorSwapType;
-    swapAmount: TokenAmount;
-    swapOptions: GqlSorSwapOptionsInput;
-    graphTraversalConfig?: GraphTraversalConfig;
-}
 
 export interface GetSwapsV2Input {
     chain: Chain;
@@ -35,17 +21,6 @@ export interface GraphTraversalConfig {
     maxDepth?: number;
     maxNonBoostedHopTokensInBoostedPath?: number;
     maxNonBoostedPathDepth?: number;
-}
-
-export interface SwapResult {
-    getSorSwapResponse(queryFirst: boolean): Promise<GqlSorGetSwapsResponse>;
-    isValid: boolean;
-    outputAmount: bigint;
-    inputAmount: bigint;
-}
-
-export interface SwapService {
-    getSwapResult(inputs: GetSwapsInput): Promise<SwapResult>;
 }
 
 export interface LiquidityManagement {
