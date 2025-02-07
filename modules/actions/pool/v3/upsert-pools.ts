@@ -36,17 +36,24 @@ export const upsertPools = async (
 
     const enrichedTokensWithErc4626Data = await fetchErc4626AndUnderlyingTokenData(allTokens, getViemClient(chain));
 
-    try {
-        await prisma.prismaToken.createMany({
-            data: enrichedTokensWithErc4626Data,
-            skipDuplicates: true,
-        });
-    } catch (e) {
-        console.error('Error creating tokens', e);
-    }
-
     // update ERC4626 type data
     for (const token of enrichedTokensWithErc4626Data) {
+        await prisma.prismaToken.upsert({
+            where: {
+                address_chain: {
+                    address: token.address,
+                    chain: chain,
+                },
+            },
+            create: {
+                ...token,
+                chain,
+            },
+            update: {
+                ...token,
+            },
+        });
+
         if (token.underlyingTokenAddress) {
             await prisma.prismaTokenType.upsert({
                 where: {
