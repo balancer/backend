@@ -107,6 +107,7 @@ export function getHookState(pool: any): HookState | undefined {
             amp: parseUnits(pool.typeData.amp, 3),
             // 18 decimal precision.
             surgeThresholdPercentage: parseEther(pool.hook.dynamicData.surgeThresholdPercentage),
+            maxSurgeFeePercentage: parseEther(pool.hook.dynamicData.maxSurgeFeePercentage),
             hookType: pool.hook.name,
         };
     }
