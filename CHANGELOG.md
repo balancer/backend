@@ -1,5 +1,18 @@
 # backend
 
+## 1.32.0
+
+### Minor Changes
+
+-   b19f649: remove old SOR query
+-   0771d8d: morpho rewards
+
+### Patch Changes
+
+-   6ebbbd0: add avalon apr
+-   6843d0e: removing block SG urls from config
+-   42bb0e9: new wrapper for usdcn on arb
+
 ## 1.31.4
 
 ### Patch Changes
