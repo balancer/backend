@@ -16,7 +16,6 @@ export default <NetworkData>{
         balancer: 'https://api.studio.thegraph.com/query/24660/balancer-sepolia-v2/version/latest',
         balancerV3: 'https://api.studio.thegraph.com/query/75376/balancer-v3-sepolia/version/latest',
         balancerPoolsV3: 'https://api.studio.thegraph.com/query/75376/balancer-pools-v3-sepolia/version/latest',
-        blocks: `https://api.studio.thegraph.com/query/48427/bleu-sepolia-blocks/version/latest`,
         gauge: `https://api.studio.thegraph.com/query/24660/balancer-gauges-sepolia/version/latest`,
     },
     eth: {

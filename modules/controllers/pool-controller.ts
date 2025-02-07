@@ -91,7 +91,7 @@ export function PoolController(tracer?: any) {
 
         async updateLiquidity24hAgoV2(chain: Chain) {
             const {
-                subgraphs: { balancer, blocks },
+                subgraphs: { balancer },
             } = config[chain];
 
             // Guard against unconfigured chains
@@ -282,7 +282,7 @@ export function PoolController(tracer?: any) {
         },
         async updateLiquidity24hAgoV3(chain: Chain) {
             const {
-                subgraphs: { balancerV3, blocks },
+                subgraphs: { balancerV3 },
             } = config[chain];
 
             // Guard against unconfigured chains

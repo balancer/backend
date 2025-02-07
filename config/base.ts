@@ -16,7 +16,6 @@ export default <NetworkData>{
         balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmWREXT4GScDzeudK7i7uRYc2D6mPaVyw863KtDUrNgZU1`,
         balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/Qmc2eE1d3ebwjY17f4y9yPe9A814yPR22koc6qxMomkxAT`,
         cowAmm: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmVRCjhFz7XXJoeJ5t4FdysN2JaBVdUCvpTVoMzXRNjA87`,
-        blocks: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/6f2Z8rTvsBQinEMwRSBxbyg3BP2LTFiEA1hjPZxmy3xs`,
         gauge: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/CfBvJNYsbKZdxXzaCtNc6dUbHH6TjDupprjKKo9gnmwg`,
         aura: 'https://data.aura.finance/graphql',
     },

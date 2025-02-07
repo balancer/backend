@@ -64,7 +64,6 @@ export interface NetworkData {
         balancer: string;
         balancerV3?: string;
         balancerPoolsV3?: string;
-        blocks: string;
         masterchef?: string;
         reliquary?: string;
         sftmx?: string;
