@@ -22,7 +22,7 @@
         "@aws-sdk/client-cloudwatch": "^3.734.0",
         "@aws-sdk/client-secrets-manager": "^3.734.0",
         "@aws-sdk/client-sqs": "^3.734.0",
-        "@balancer-labs/balancer-maths": "^0.0.20",
+        "@balancer-labs/balancer-maths": "^0.0.21",
         "@balancer/sdk": "^1.4.1",
         "@ethersproject/address": "^5.7.0",
         "@ethersproject/bignumber": "^5.7.0",
