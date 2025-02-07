@@ -88,6 +88,7 @@ export default <NetworkData>{
                         wrappedTokens: {
                             stataArbUSDCn: '0xbde67e089886ec0e615d6f054bc6f746189a3d56',
                             stataArbUSDCn2: '0x7cfadfd5645b50be87d546f42699d863648251ad',
+                            waArbUSDCn: '0x7f6501d3b98ee91f9b9535e4b0ac710fb0f9e0bc',
                         },
                     },
                     USDT: {
