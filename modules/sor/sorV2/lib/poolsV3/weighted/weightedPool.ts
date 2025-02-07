@@ -92,11 +92,6 @@ export class WeightedPoolV3 implements BasePoolV3 {
         //transform
         const hookState = getHookState(pool);
 
-        // typeguard
-        if (!isLiquidityManagement(pool.liquidityManagement)) {
-            throw new Error('LiquidityManagement must be of type LiquidityManagement and cannot be null');
-        }
-
         return new WeightedPoolV3(
             pool.id as Hex,
             pool.address,
@@ -106,7 +101,7 @@ export class WeightedPoolV3 implements BasePoolV3 {
             parseEther(pool.dynamicData.totalShares),
             poolTokens,
             pool.dynamicData.tokenPairsData as TokenPairData[],
-            pool.liquidityManagement,
+            pool.liquidityManagement as unknown as LiquidityManagement,
             hookState,
         );
     }

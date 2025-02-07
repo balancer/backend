@@ -95,11 +95,6 @@ export class StablePoolV3 implements BasePoolV3 {
         //transform
         const hookState = getHookState(pool);
 
-        // typeguard
-        if (!isLiquidityManagement(pool.liquidityManagement)) {
-            throw new Error('LiquidityManagement must be of type LiquidityManagement and cannot be null');
-        }
-
         return new StablePoolV3(
             pool.id as Hex,
             pool.address,
@@ -109,7 +104,7 @@ export class StablePoolV3 implements BasePoolV3 {
             poolTokens,
             totalShares,
             pool.dynamicData.tokenPairsData as TokenPairData[],
-            pool.liquidityManagement,
+            pool.liquidityManagement as unknown as LiquidityManagement,
             hookState,
         );
     }
