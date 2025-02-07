@@ -38,7 +38,7 @@ export const syncHookData = async (
         // Get hooks data
         const data = await fetchHookData(viemClient, hookData.address, hookType, pool.address);
 
-        const name = `${hookType.charAt(0).toUpperCase()}${hookType.slice(1)}`;
+        const name = `${hookType.charAt(0).toUpperCase()}${hookType.slice(1, -4)}`;
 
         operations.push(
             prisma.prismaPool.update({
