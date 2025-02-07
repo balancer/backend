@@ -40,13 +40,14 @@ describe('sor debugging', () => {
 
     it('sor v3', async () => {
         const useProtocolVersion = 3;
-        const chain = Chain.MAINNET;
+        const chain = Chain.SEPOLIA;
 
         const chainId = Object.keys(chainIdToChain).find((key) => chainIdToChain[key] === chain) as string;
         initRequestScopedContext();
         setRequestScopedContextValue('chainId', chainId);
         // only do once before starting to debug
         // await PoolController().reloadPoolsV3(chain);
+        // await PoolController().syncHookData(chain);
         // await TokenController().syncErc4626Tokens(chain);
         // await TokenController().syncErc4626UnwrapRates(chain);
 
@@ -56,12 +57,12 @@ describe('sor debugging', () => {
 
         const swaps = await sorService.getSorSwapPaths({
             chain,
-            tokenIn: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', // USDC
-            tokenOut: '0x7204b7dbf9412567835633b6f00c3edc3a8d6330', // csUSDC
+            tokenIn: '0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8', // USDCaave
+            tokenOut: '0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0', // USDTaave
             swapType: 'EXACT_IN',
-            swapAmount: '1000',
+            swapAmount: '10000',
             useProtocolVersion,
-            // poolIds: ['0x10a04efba5b880e169920fd4348527c64fb29d4d'], // boosted
+            poolIds: ['0x9b677c72a1160e1e03fe542bfd2b0f373fa94a8c'], // boosted
         });
 
         console.log(swaps.returnAmount);
