@@ -46,6 +46,11 @@ export const mapHookToGqlHook = (hookData: HookData): GqlHook | undefined => {
         return undefined;
     }
 
+    // Supported hooks are those defined in the graphql schema
+    if (!['StableSurgeHook', 'FeeTakingHook', 'ExitFeeHook'].includes(hookData.name)) {
+        return undefined;
+    }
+
     return {
         address: hookData.address,
         name: hookData.name,
