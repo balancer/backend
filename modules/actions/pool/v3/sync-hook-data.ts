@@ -14,7 +14,7 @@ import { GqlHookType } from '../../../../apps/api/gql/generated-schema';
  */
 export const syncHookData = async (
     pools: PrismaPool[],
-    hooksTypes: { [type in GqlHookType]?: string[] },
+    hooks: Record<string, GqlHookType>,
     viemClient: ViemClient,
     chain: Chain,
 ): Promise<void> => {
@@ -29,11 +29,12 @@ export const syncHookData = async (
             continue;
         }
 
-        const keys = Object.keys(hooksTypes) as GqlHookType[];
-        const hookType = keys.find((key) => hooksTypes[key]?.includes(hookData.address));
+        let hookType: GqlHookType = 'UNKNOWN';
 
-        if (!hookType) {
-            continue;
+        try {
+            hookType = hooks[hookData.address];
+        } catch (e) {
+            console.log(`Error getting hook type for ${hookData.address}`, e);
         }
 
         // Get hooks data

@@ -1,5 +1,4 @@
 import type { Chain } from '@prisma/client';
-import type { BigNumber } from 'ethers';
 import type { PoolAprService } from '../pool/pool-types';
 import type { UserStakedBalanceService } from '../user/user-types';
 import type { BaseProvider } from '@ethersproject/providers';
@@ -122,9 +121,7 @@ export interface NetworkData {
             tokenAdmin?: string;
         };
     };
-    hooks?: {
-        [type in GqlHookType]?: string[];
-    };
+    hooks?: Record<string, GqlHookType>;
     multicall: string;
     multicall3: string;
     masterchef?: {
