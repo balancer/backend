@@ -226,11 +226,15 @@ export const schema = gql`
     }
 
     enum GqlHookType {
+        DIRECTIONAL_FEE
         EXIT_FEE
         FEE_TAKING
-        MEV
+        LOTTERY
+        MEV_CAPTURE
+        NFTLIQUIDITY_POSITION
         STABLE_SURGE
         UNKNOWN
+        VEBAL_DISCOUNT
     }
 
     type GqlLatestSyncedBlocks {

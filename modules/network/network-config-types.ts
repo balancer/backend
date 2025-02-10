@@ -3,7 +3,7 @@ import type { BigNumber } from 'ethers';
 import type { PoolAprService } from '../pool/pool-types';
 import type { UserStakedBalanceService } from '../user/user-types';
 import type { BaseProvider } from '@ethersproject/providers';
-import type { GqlChain } from '../../apps/api/gql/generated-schema';
+import type { GqlChain, GqlHookType } from '../../apps/api/gql/generated-schema';
 import type { ContentService } from '../content/content-types';
 import type { YbAprConfig } from './apr-config-types';
 import type { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
@@ -123,9 +123,7 @@ export interface NetworkData {
         };
     };
     hooks?: {
-        feeTakingHook?: string[];
-        exitFeeHook?: string[];
-        stableSurgeHook?: string[];
+        [type in GqlHookType]?: string[];
     };
     multicall: string;
     multicall3: string;
@@ -157,5 +155,3 @@ export interface NetworkData {
         };
     };
 }
-
-export type HookType = keyof NonNullable<NetworkData['hooks']>;

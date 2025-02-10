@@ -1,5 +1,4 @@
 import { formatEther } from 'viem';
-import type { HookType } from '../../../network/network-config-types';
 import type { ViemMulticallCall } from '../../../web3/multicaller-viem';
 import { multicallViem } from '../../../web3/multicaller-viem';
 import { ViemClient } from '../../types';

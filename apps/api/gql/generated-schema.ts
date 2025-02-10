@@ -219,7 +219,16 @@ export interface GqlHookReviewData {
     warnings: Array<Scalars['String']>;
 }
 
-export type GqlHookType = 'EXIT_FEE' | 'FEE_TAKING' | 'MEV' | 'STABLE_SURGE' | 'UNKNOWN';
+export type GqlHookType =
+    | 'DIRECTIONAL_FEE'
+    | 'EXIT_FEE'
+    | 'FEE_TAKING'
+    | 'LOTTERY'
+    | 'MEV_CAPTURE'
+    | 'NFTLIQUIDITY_POSITION'
+    | 'STABLE_SURGE'
+    | 'UNKNOWN'
+    | 'VEBAL_DISCOUNT';
 
 export interface GqlLatestSyncedBlocks {
     __typename?: 'GqlLatestSyncedBlocks';
