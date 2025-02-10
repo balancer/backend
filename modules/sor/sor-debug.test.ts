@@ -62,7 +62,8 @@ describe('sor debugging', () => {
             swapType: 'EXACT_IN',
             swapAmount: '10000',
             useProtocolVersion,
-            poolIds: ['0x9b677c72a1160e1e03fe542bfd2b0f373fa94a8c'], // boosted
+            considerPoolsWithHooks: true,
+            // poolIds: ['0x9b677c72a1160e1e03fe542bfd2b0f373fa94a8c'], // boosted
         });
 
         console.log(swaps.returnAmount);
