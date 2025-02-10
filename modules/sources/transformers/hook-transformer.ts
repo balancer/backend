@@ -1,10 +1,11 @@
-import { GqlHook, HookParams } from '../../../apps/api/gql/generated-schema';
+import { GqlHook, GqlHookType, HookParams } from '../../../apps/api/gql/generated-schema';
 import { V3JoinedSubgraphPool } from '../subgraphs';
 import { zeroAddress } from 'viem';
 
 export type HookData = {
     address: string;
     name?: string;
+    type: GqlHookType;
     enableHookAdjustedAmounts: boolean;
     shouldCallAfterSwap: boolean;
     shouldCallBeforeSwap: boolean;
@@ -37,6 +38,7 @@ export const hookTransformer = (poolData: V3JoinedSubgraphPool): HookData | unde
 
     return {
         address: hook.address.toLowerCase(),
+        type: 'UNKNOWN',
         ...hookFlags,
     };
 };
@@ -46,9 +48,15 @@ export const mapHookToGqlHook = (hookData: HookData): GqlHook | undefined => {
         return undefined;
     }
 
+    // Supported hooks are those defined in the graphql schema
+    if (!['StableSurgeHook', 'FeeTakingHook', 'ExitFeeHook'].includes(hookData.name)) {
+        return undefined;
+    }
+
     return {
         address: hookData.address,
         name: hookData.name,
+        type: hookData.type,
         config: {
             enableHookAdjustedAmounts: hookData.enableHookAdjustedAmounts,
             shouldCallAfterSwap: hookData.shouldCallAfterSwap,

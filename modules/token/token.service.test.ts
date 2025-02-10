@@ -30,7 +30,7 @@ test('debug token price', async () => {
     await tokenService.updateTokenPrices([chain]);
     const prices = await tokenService.getCurrentTokenPrices([chain]);
 
-    console.log(prices.find((price) => price.tokenAddress === '0x0c4e186eae8acaa7f7de1315d5ad174be39ec987'));
+    console.log(prices.find((price) => price.tokenAddress === '0x016c306e103fbf48ec24810d078c65ad13c5f11b'));
     const b = 123;
     console.log(b);
     expect(1 + 2).toBe(3);

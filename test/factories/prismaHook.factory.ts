@@ -7,10 +7,10 @@ import { HookData } from '../../modules/sources/transformers/hook-transformer';
 class PrismaHookFactory extends Factory<HookData> {}
 
 export const hookFactory = PrismaHookFactory.define(({ params }) => {
-
     return {
         address: createRandomAddress(),
         name: 'Test Hook',
+        type: 'UNKNOWN',
         enableHookAdjustedAmounts: false,
         shouldCallAfterSwap: false,
         shouldCallBeforeSwap: false,
@@ -21,7 +21,7 @@ export const hookFactory = PrismaHookFactory.define(({ params }) => {
         shouldCallAfterRemoveLiquidity: false,
         shouldCallBeforeRemoveLiquidity: false,
         shouldCallComputeDynamicSwapFee: false,
-        dynamicData:  {},
+        dynamicData: {},
         reviewData: {
             summary: '',
             reviewFile: '',

@@ -1,10 +1,10 @@
 import { fetchHookData } from '../../../sources/contracts/hooks/fetch-hook-data';
 import { prisma } from '../../../../prisma/prisma-client';
-import type { HookType } from '../../../network/network-config-types';
 import type { ViemClient } from '../../../sources/viem-client';
 import type { Chain, PrismaPool } from '@prisma/client';
 import { HookData } from '../../../sources/transformers';
 import { prismaBulkExecuteOperations } from '../../../../prisma/prisma-util';
+import { GqlHookType } from '../../../../apps/api/gql/generated-schema';
 
 /**
  * Gets and stores known hooks data
@@ -14,7 +14,7 @@ import { prismaBulkExecuteOperations } from '../../../../prisma/prisma-util';
  */
 export const syncHookData = async (
     pools: PrismaPool[],
-    hooksTypes: { feeTakingHook?: string[]; exitFeeHook?: string[]; stableSurgeHook?: string[] },
+    hooks: Record<string, GqlHookType>,
     viemClient: ViemClient,
     chain: Chain,
 ): Promise<void> => {
@@ -28,17 +28,19 @@ export const syncHookData = async (
         if (!hookData) {
             continue;
         }
-        const keys = Object.keys(hooksTypes) as HookType[];
-        const hookType = keys.find((key) => hooksTypes[key]?.includes(hookData.address));
 
-        if (!hookType) {
-            continue;
+        let hookType: GqlHookType = 'UNKNOWN';
+
+        try {
+            hookType = hooks[hookData.address];
+        } catch (e) {
+            console.log(`Error getting hook type for ${hookData.address}`, e);
         }
 
         // Get hooks data
         const data = await fetchHookData(viemClient, hookData.address, hookType, pool.address);
 
-        const name = `${hookType.charAt(0).toUpperCase()}${hookType.slice(1, -4)}`;
+        const name = ``;
 
         operations.push(
             prisma.prismaPool.update({
@@ -47,6 +49,7 @@ export const syncHookData = async (
                     hook: {
                         ...(hookData as HookData),
                         name,
+                        type: hookType,
                         dynamicData: data,
                     },
                 },

@@ -14,9 +14,7 @@ import { Chain, PrismaLastBlockSyncedCategory } from '@prisma/client';
 import { getVaultClient } from '../sources/contracts/v3/vault-client';
 import { upsertPools as upsertPoolsV3 } from '../actions/pool/v3/upsert-pools';
 import { syncPools as syncPoolsV3 } from '../actions/pool/v3/sync-pools';
-import { getChangedPoolsV3 } from '../sources/logs/get-changed-pools';
 import { syncTokenPairs } from '../actions/pool/v3/sync-tokenpairs';
-import { HookType } from '../network/network-config-types';
 import { syncHookData } from '../actions/pool/v3/sync-hook-data';
 import { getLastSyncedBlock, upsertLastSyncedBlock } from '../actions/pool/last-synced-block';
 

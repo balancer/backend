@@ -53,7 +53,8 @@ Hook data
 """
 type GqlHook {
     address: String!
-    name: String!
+    name: String! @deprecated(reason: "unused")
+    type: GqlHookType!
     config: HookConfig
     """
     Hook type specific params
@@ -92,4 +93,16 @@ type GqlHookReviewData {
     Warnings associated with the hook
     """
     warnings: [String!]!
+}
+
+enum GqlHookType {
+    FEE_TAKING
+    EXIT_FEE
+    STABLE_SURGE
+    MEV_CAPTURE
+    LOTTERY
+    VEBAL_DISCOUNT
+    DIRECTIONAL_FEE
+    NFTLIQUIDITY_POSITION
+    UNKNOWN
 }

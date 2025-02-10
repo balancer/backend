@@ -37,6 +37,8 @@ import {
     GqlPoolAggregator,
     LiquidityManagement,
     GqlHook,
+    QueryPoolGetAggregatorPoolsArgs,
+    QueryAggregatorPoolsArgs,
 } from '../../../apps/api/gql/generated-schema';
 import { addressesMatch } from '../../web3/addresses';
 import _ from 'lodash';
@@ -239,6 +241,54 @@ export class PoolGqlLoaderService {
         }
 
         return gqlPools;
+    }
+
+    public async aggregatorPools(args: QueryAggregatorPoolsArgs): Promise<GqlPoolAggregator[]> {
+        // add limits per default
+        args.first = args.first || 1000;
+        args.skip = args.skip || 0;
+
+        const defaultFilter = {
+            dynamicData: {
+                swapEnabled: true,
+                isPaused: false,
+                isInRecoveryMode: false,
+            },
+        };
+
+        const aggregatorQueryArgs = this.mapAggregatorArgsToPoolQuery(args);
+
+        const pools = await prisma.prismaPool.findMany({
+            ...aggregatorQueryArgs,
+            where: {
+                ...aggregatorQueryArgs.where,
+                ...defaultFilter,
+            },
+            include: {
+                ...this.getPoolInclude(),
+            },
+        });
+        const gqlPools = pools.map((pool) => this.mapPoolToAggregatorPool(pool));
+        const filteredPools = [];
+
+        for (const mappedPool of gqlPools) {
+            // if a pool has a hook, we skip it if either there are no included hooks, or its type does not match an included hook
+            if (mappedPool.hook) {
+                if (!args.where?.includeHooks || !args.where.includeHooks.includes(mappedPool.hook.type)) {
+                    continue;
+                }
+            }
+
+            // load rate provider data into PoolTokenDetail model
+            await this.enrichWithRateproviderData(mappedPool);
+
+            // load underlying token info into PoolTokenDetail
+            await this.enrichWithErc4626Data(mappedPool);
+
+            filteredPools.push(mappedPool);
+        }
+
+        return filteredPools;
     }
 
     public async getPools(args: QueryPoolGetPoolsArgs): Promise<GqlPoolMinimal[]> {
@@ -614,6 +664,129 @@ export class PoolGqlLoaderService {
                         },
                     },
                 ],
+            },
+        };
+    }
+
+    private mapAggregatorArgsToPoolQuery(args: QueryAggregatorPoolsArgs): Prisma.PrismaPoolFindManyArgs {
+        let orderBy: Prisma.PrismaPoolOrderByWithRelationInput = {};
+        const orderDirection = args.orderDirection || 'desc';
+
+        switch (args.orderBy) {
+            case 'totalLiquidity':
+                orderBy = { dynamicData: { totalLiquidity: orderDirection } };
+                break;
+            case 'totalShares':
+                orderBy = { dynamicData: { totalSharesNum: orderDirection } };
+                break;
+            case 'volume24h':
+                orderBy = { dynamicData: { volume24h: orderDirection } };
+                break;
+            case 'fees24h':
+                orderBy = { dynamicData: { fees24h: orderDirection } };
+                break;
+            case 'apr':
+                orderBy = { dynamicData: { apr: orderDirection } };
+                break;
+        }
+
+        const baseQuery: Prisma.PrismaPoolFindManyArgs = {
+            take: args.first || undefined,
+            skip: args.skip || undefined,
+            orderBy,
+        };
+
+        if (!args.where) {
+            return {
+                ...baseQuery,
+                where: {
+                    NOT: {
+                        categories: {
+                            has: 'BLACK_LISTED',
+                        },
+                    },
+                    dynamicData: {
+                        totalSharesNum: {
+                            gt: 0.000000000001,
+                        },
+                    },
+                },
+            };
+        }
+
+        const where = args.where || {};
+
+        const allTokensFilter = [];
+        where?.tokensIn?.forEach((token) => {
+            allTokensFilter.push({
+                allTokens: {
+                    some: {
+                        token: {
+                            address: {
+                                equals: token.toLowerCase(),
+                            },
+                        },
+                    },
+                },
+            });
+        });
+
+        if (where?.tokensNotIn) {
+            allTokensFilter.push({
+                allTokens: {
+                    every: {
+                        token: {
+                            address: {
+                                notIn: where.tokensNotIn.map((t) => t.toLowerCase()) || undefined,
+                            },
+                        },
+                    },
+                },
+            });
+        }
+
+        const filterArgs: Prisma.PrismaPoolWhereInput = {
+            dynamicData: {
+                totalSharesNum: {
+                    gt: 0.000000000001,
+                },
+                totalLiquidity: {
+                    gt: where?.minTvl || undefined,
+                },
+            },
+            chain: {
+                in: where?.chainIn || undefined,
+                notIn: where?.chainNotIn || undefined,
+            },
+            protocolVersion: {
+                in: where?.protocolVersionIn || undefined,
+            },
+            type: {
+                in: where?.poolTypeIn || undefined,
+                notIn: where?.poolTypeNotIn || undefined,
+            },
+            createTime: {
+                gt: where?.createTime?.gt || undefined,
+                lt: where?.createTime?.lt || undefined,
+            },
+            AND: allTokensFilter,
+            id: {
+                in: where?.idIn?.map((id) => id.toLowerCase()) || undefined,
+                notIn: where?.idNotIn?.map((id) => id.toLowerCase()) || undefined,
+            },
+        };
+
+        return {
+            ...baseQuery,
+            where: {
+                ...filterArgs,
+                allTokens: {
+                    some: {
+                        token: {
+                            address: filterArgs.allTokens?.some?.token?.address,
+                        },
+                    },
+                },
             },
         };
     }
