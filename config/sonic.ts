@@ -113,6 +113,14 @@ export default <NetworkData>{
                 },
             },
         },
+        defaultHandlers: {
+            wOS: {
+                tokenAddress: '0x9f0df7799f6fdad409300080cff680f5a23df4b1',
+                sourceUrl: 'https://api.originprotocol.com/api/v2/os/apr/trailing/7?146',
+                path: 'apr',
+                isIbYield: true,
+            },
+        },
     },
     datastudio: {
         main: {
