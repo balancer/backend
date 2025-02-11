@@ -19,6 +19,9 @@ export default <NetworkData>{
         gauge: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/CfBvJNYsbKZdxXzaCtNc6dUbHH6TjDupprjKKo9gnmwg`,
         aura: 'https://data.aura.finance/graphql',
     },
+    hooks: {
+        ['0xb2007b8b7e0260042517f635cfd8e6dd2dd7f007']: 'STABLE_SURGE',
+    },
     gyro: {
         config: '0x8a5eb9a5b726583a213c7e4de2403d2dfd42c8a6',
     },

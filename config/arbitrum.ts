@@ -19,6 +19,9 @@ export default <NetworkData>{
         gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmT3h6pogdPkxfWsBxKNtpq7kR9fqKaQ9jGxe7fZx7MUVE`,
         aura: 'https://data.aura.finance/graphql',
     },
+    hooks: {
+        ['0x0fa0f9990d7969a7ae6f9961d663e4a201ed6417']: 'STABLE_SURGE',
+    },
     eth: {
         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
         addressFormatted: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
