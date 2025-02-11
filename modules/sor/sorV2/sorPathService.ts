@@ -481,7 +481,6 @@ class SorPathService {
                     notIn: [...poolIdsToExclude, ...poolsToIgnore],
                 },
                 type,
-                ...(considerPoolsWithHooks ? {} : { hook: { equals: Prisma.AnyNull } }),
             },
             include: prismaPoolAndHookWithDynamic.include,
         });
