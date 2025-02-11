@@ -1,5 +1,13 @@
 # backend
 
+## 1.32.2
+
+### Patch Changes
+
+-   f0391f1: production stableSurge amp
+-   67cbe5a: SOR - Update stable surge hook support
+-   72f0db1: StableSurge production addresses
+
 ## 1.32.1
 
 ### Patch Changes
