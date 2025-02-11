@@ -273,9 +273,12 @@ export class PoolGqlLoaderService {
 
         for (const mappedPool of gqlPools) {
             // if a pool has a hook, we skip it if either there are no included hooks, or its type does not match an included hook
+            // always include MEV_CAPTURE hook
             if (mappedPool.hook) {
-                if (!args.where?.includeHooks || !args.where.includeHooks.includes(mappedPool.hook.type)) {
-                    continue;
+                if (mappedPool.hook.type !== 'MEV_CAPTURE') {
+                    if (!args.where?.includeHooks || !args.where.includeHooks.includes(mappedPool.hook.type)) {
+                        continue;
+                    }
                 }
             }
 
