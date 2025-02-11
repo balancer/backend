@@ -39,6 +39,7 @@ import { PathWithAmount } from './lib/path';
 import { calculatePriceImpact, getInputAmount, getOutputAmount } from './lib/utils/helpers';
 import { Cache } from 'memory-cache';
 import config from '../../../config';
+import { HookData } from '../../sources/transformers';
 
 class SorPathService {
     private cache = new Cache<
@@ -505,7 +506,11 @@ class SorPathService {
             include: prismaPoolAndHookWithDynamic.include,
         });
 
-        const allPools = [...pools, ...lbps];
+        // always include MEV_CAPTURE hooks, even if considerPoolsWithHooks is false and we dont want to include hooks
+        const allPools = [
+            ...pools.filter((pool) => considerPoolsWithHooks || (pool.hook as HookData).type === 'MEV_CAPTURE'),
+            ...lbps,
+        ];
 
         const underlyingTokens = await this.getUnderlyingTokensFromDBPools(allPools, chain);
         const result = { pools: allPools, underlyingTokens };
