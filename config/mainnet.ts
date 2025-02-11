@@ -390,6 +390,12 @@ export default <NetworkData>{
                 path: 'data.smaApr',
                 isIbYield: true,
             },
+            inwstETHs: {
+                tokenAddress: '0x8e0789d39db454dbe9f4a77acef6dc7c69f6d552',
+                sourceUrl: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
+                path: 'data.smaApr',
+                isIbYield: true,
+            },
             cbETH: {
                 tokenAddress: '0xbe9895146f7af43049ca1c1ae358b0541ea49704',
                 sourceUrl: 'https://api.exchange.coinbase.com/wrapped-assets/CBETH/',
