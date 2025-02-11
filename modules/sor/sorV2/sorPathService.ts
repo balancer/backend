@@ -507,7 +507,9 @@ class SorPathService {
 
         // always include MEV_CAPTURE hooks, even if considerPoolsWithHooks is false and we dont want to include hooks
         const allPools = [
-            ...pools.filter((pool) => considerPoolsWithHooks || (pool.hook as HookData).type === 'MEV_CAPTURE'),
+            ...pools.filter(
+                (pool) => considerPoolsWithHooks || !pool.hook || (pool.hook as HookData).type === 'MEV_CAPTURE',
+            ),
             ...lbps,
         ];
 
