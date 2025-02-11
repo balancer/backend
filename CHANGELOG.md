@@ -1,5 +1,14 @@
 # backend
 
+## 1.32.1
+
+### Patch Changes
+
+-   a32c701: hotfix for unsupported hooks in the schema
+-   672adf9: fix underlying token upsert
+-   9eb01c7: new aggregator query, add hook type
+-   d7d0be8: SG deployments for stable surge
+
 ## 1.32.0
 
 ### Minor Changes
