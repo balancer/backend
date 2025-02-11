@@ -951,12 +951,16 @@ export type PoolSnapshot = {
     swapsCount: Scalars['BigInt'];
     /** Timestamp when this snapshot was taken */
     timestamp: Scalars['Int'];
+    /** Total dynamic swap fees collected for each token at the time of the snapshot */
+    totalDynamicSwapFees: Array<Scalars['BigDecimal']>;
     /** Total protocol swap fees collected for each token at the time of the snapshot */
     totalProtocolSwapFees: Array<Scalars['BigDecimal']>;
     /** Total protocol yield fees collected for each token at the time of the snapshot */
     totalProtocolYieldFees: Array<Scalars['BigDecimal']>;
     /** Total shares of the Pool at the time of the snapshot */
     totalShares: Scalars['BigDecimal'];
+    /** Total static swap fees collected for each token at the time of the snapshot */
+    totalStaticSwapFees: Array<Scalars['BigDecimal']>;
     /** Total swap fees collected for each token at the time of the snapshot */
     totalSwapFees: Array<Scalars['BigDecimal']>;
     /** Total swap volumes for each token at the time of the snapshot */
@@ -1027,6 +1031,12 @@ export type PoolSnapshot_Filter = {
     timestamp_lte?: InputMaybe<Scalars['Int']>;
     timestamp_not?: InputMaybe<Scalars['Int']>;
     timestamp_not_in?: InputMaybe<Array<Scalars['Int']>>;
+    totalDynamicSwapFees?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    totalDynamicSwapFees_contains?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    totalDynamicSwapFees_contains_nocase?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    totalDynamicSwapFees_not?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    totalDynamicSwapFees_not_contains?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    totalDynamicSwapFees_not_contains_nocase?: InputMaybe<Array<Scalars['BigDecimal']>>;
     totalProtocolSwapFees?: InputMaybe<Array<Scalars['BigDecimal']>>;
     totalProtocolSwapFees_contains?: InputMaybe<Array<Scalars['BigDecimal']>>;
     totalProtocolSwapFees_contains_nocase?: InputMaybe<Array<Scalars['BigDecimal']>>;
@@ -1047,6 +1057,12 @@ export type PoolSnapshot_Filter = {
     totalShares_lte?: InputMaybe<Scalars['BigDecimal']>;
     totalShares_not?: InputMaybe<Scalars['BigDecimal']>;
     totalShares_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    totalStaticSwapFees?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    totalStaticSwapFees_contains?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    totalStaticSwapFees_contains_nocase?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    totalStaticSwapFees_not?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    totalStaticSwapFees_not_contains?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    totalStaticSwapFees_not_contains_nocase?: InputMaybe<Array<Scalars['BigDecimal']>>;
     totalSwapFees?: InputMaybe<Array<Scalars['BigDecimal']>>;
     totalSwapFees_contains?: InputMaybe<Array<Scalars['BigDecimal']>>;
     totalSwapFees_contains_nocase?: InputMaybe<Array<Scalars['BigDecimal']>>;
@@ -1089,9 +1105,11 @@ export enum PoolSnapshot_OrderBy {
     PoolTransactionHash = 'pool__transactionHash',
     SwapsCount = 'swapsCount',
     Timestamp = 'timestamp',
+    TotalDynamicSwapFees = 'totalDynamicSwapFees',
     TotalProtocolSwapFees = 'totalProtocolSwapFees',
     TotalProtocolYieldFees = 'totalProtocolYieldFees',
     TotalShares = 'totalShares',
+    TotalStaticSwapFees = 'totalStaticSwapFees',
     TotalSwapFees = 'totalSwapFees',
     TotalSwapVolumes = 'totalSwapVolumes',
 }
@@ -1126,12 +1144,20 @@ export type PoolToken = {
     scalingFactor: Scalars['BigInt'];
     /** Symbol of the token */
     symbol: Scalars['String'];
+    /** Total dynamic swap fees collected for this token */
+    totalDynamicSwapFee: Scalars['BigDecimal'];
     /** Total protocol swap fees collected for this token */
     totalProtocolSwapFee: Scalars['BigDecimal'];
     /** Total protocol yield fees collected for this token */
     totalProtocolYieldFee: Scalars['BigDecimal'];
+    /** Total static swap fees collected for this token */
+    totalStaticSwapFee: Scalars['BigDecimal'];
     /** Total swap fees collected for this token */
     totalSwapFee: Scalars['BigDecimal'];
+    /** Total base swap fees collected using static swap fee */
+    totalSwapFeeBase: Scalars['BigDecimal'];
+    /** Total difference in swap fees collected due to dynamic fees */
+    totalSwapFeeDelta: Scalars['BigDecimal'];
     /** Protocol swap fees pending collection in the Vault */
     vaultProtocolSwapFeeBalance: Scalars['BigDecimal'];
     /** Protocol yield fees pending collection in the Vault */
@@ -1320,6 +1346,14 @@ export type PoolToken_Filter = {
     symbol_not_starts_with_nocase?: InputMaybe<Scalars['String']>;
     symbol_starts_with?: InputMaybe<Scalars['String']>;
     symbol_starts_with_nocase?: InputMaybe<Scalars['String']>;
+    totalDynamicSwapFee?: InputMaybe<Scalars['BigDecimal']>;
+    totalDynamicSwapFee_gt?: InputMaybe<Scalars['BigDecimal']>;
+    totalDynamicSwapFee_gte?: InputMaybe<Scalars['BigDecimal']>;
+    totalDynamicSwapFee_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    totalDynamicSwapFee_lt?: InputMaybe<Scalars['BigDecimal']>;
+    totalDynamicSwapFee_lte?: InputMaybe<Scalars['BigDecimal']>;
+    totalDynamicSwapFee_not?: InputMaybe<Scalars['BigDecimal']>;
+    totalDynamicSwapFee_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
     totalProtocolSwapFee?: InputMaybe<Scalars['BigDecimal']>;
     totalProtocolSwapFee_gt?: InputMaybe<Scalars['BigDecimal']>;
     totalProtocolSwapFee_gte?: InputMaybe<Scalars['BigDecimal']>;
@@ -1336,7 +1370,31 @@ export type PoolToken_Filter = {
     totalProtocolYieldFee_lte?: InputMaybe<Scalars['BigDecimal']>;
     totalProtocolYieldFee_not?: InputMaybe<Scalars['BigDecimal']>;
     totalProtocolYieldFee_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    totalStaticSwapFee?: InputMaybe<Scalars['BigDecimal']>;
+    totalStaticSwapFee_gt?: InputMaybe<Scalars['BigDecimal']>;
+    totalStaticSwapFee_gte?: InputMaybe<Scalars['BigDecimal']>;
+    totalStaticSwapFee_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    totalStaticSwapFee_lt?: InputMaybe<Scalars['BigDecimal']>;
+    totalStaticSwapFee_lte?: InputMaybe<Scalars['BigDecimal']>;
+    totalStaticSwapFee_not?: InputMaybe<Scalars['BigDecimal']>;
+    totalStaticSwapFee_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
     totalSwapFee?: InputMaybe<Scalars['BigDecimal']>;
+    totalSwapFeeBase?: InputMaybe<Scalars['BigDecimal']>;
+    totalSwapFeeBase_gt?: InputMaybe<Scalars['BigDecimal']>;
+    totalSwapFeeBase_gte?: InputMaybe<Scalars['BigDecimal']>;
+    totalSwapFeeBase_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    totalSwapFeeBase_lt?: InputMaybe<Scalars['BigDecimal']>;
+    totalSwapFeeBase_lte?: InputMaybe<Scalars['BigDecimal']>;
+    totalSwapFeeBase_not?: InputMaybe<Scalars['BigDecimal']>;
+    totalSwapFeeBase_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    totalSwapFeeDelta?: InputMaybe<Scalars['BigDecimal']>;
+    totalSwapFeeDelta_gt?: InputMaybe<Scalars['BigDecimal']>;
+    totalSwapFeeDelta_gte?: InputMaybe<Scalars['BigDecimal']>;
+    totalSwapFeeDelta_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    totalSwapFeeDelta_lt?: InputMaybe<Scalars['BigDecimal']>;
+    totalSwapFeeDelta_lte?: InputMaybe<Scalars['BigDecimal']>;
+    totalSwapFeeDelta_not?: InputMaybe<Scalars['BigDecimal']>;
+    totalSwapFeeDelta_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
     totalSwapFee_gt?: InputMaybe<Scalars['BigDecimal']>;
     totalSwapFee_gte?: InputMaybe<Scalars['BigDecimal']>;
     totalSwapFee_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
@@ -1431,9 +1489,13 @@ export enum PoolToken_OrderBy {
     PriceRate = 'priceRate',
     ScalingFactor = 'scalingFactor',
     Symbol = 'symbol',
+    TotalDynamicSwapFee = 'totalDynamicSwapFee',
     TotalProtocolSwapFee = 'totalProtocolSwapFee',
     TotalProtocolYieldFee = 'totalProtocolYieldFee',
+    TotalStaticSwapFee = 'totalStaticSwapFee',
     TotalSwapFee = 'totalSwapFee',
+    TotalSwapFeeBase = 'totalSwapFeeBase',
+    TotalSwapFeeDelta = 'totalSwapFeeDelta',
     VaultProtocolSwapFeeBalance = 'vaultProtocolSwapFeeBalance',
     VaultProtocolYieldFeeBalance = 'vaultProtocolYieldFeeBalance',
     Volume = 'volume',
@@ -2188,9 +2250,13 @@ export enum RateProvider_OrderBy {
     TokenPriceRate = 'token__priceRate',
     TokenScalingFactor = 'token__scalingFactor',
     TokenSymbol = 'token__symbol',
+    TokenTotalDynamicSwapFee = 'token__totalDynamicSwapFee',
     TokenTotalProtocolSwapFee = 'token__totalProtocolSwapFee',
     TokenTotalProtocolYieldFee = 'token__totalProtocolYieldFee',
+    TokenTotalStaticSwapFee = 'token__totalStaticSwapFee',
     TokenTotalSwapFee = 'token__totalSwapFee',
+    TokenTotalSwapFeeBase = 'token__totalSwapFeeBase',
+    TokenTotalSwapFeeDelta = 'token__totalSwapFeeDelta',
     TokenVaultProtocolSwapFeeBalance = 'token__vaultProtocolSwapFeeBalance',
     TokenVaultProtocolYieldFeeBalance = 'token__vaultProtocolYieldFeeBalance',
     TokenVolume = 'token__volume',
@@ -2482,6 +2548,8 @@ export type Swap = {
     blockNumber: Scalars['BigInt'];
     /** Timestamp of the block when the swap occurred */
     blockTimestamp: Scalars['BigInt'];
+    /** Indicates whether the swap fee is dynamic */
+    hasDynamicSwapFee: Scalars['Boolean'];
     /** Unique identifier for the Swap */
     id: Scalars['Bytes'];
     /** Log index of the swap event in the transaction */
@@ -2490,6 +2558,10 @@ export type Swap = {
     pool: Scalars['Bytes'];
     /** Amount of swap fees */
     swapFeeAmount: Scalars['BigDecimal'];
+    /** Base fee amount calculated using static swap fee */
+    swapFeeBaseAmount: Scalars['BigDecimal'];
+    /** Difference between actual fee amount and base fee amount due to dynamic fees */
+    swapFeeDeltaAmount: Scalars['BigDecimal'];
     /** Swap fee percentage */
     swapFeePercentage: Scalars['BigDecimal'];
     /** Address of the token used for swap fees */
@@ -2532,6 +2604,10 @@ export type Swap_Filter = {
     blockTimestamp_lte?: InputMaybe<Scalars['BigInt']>;
     blockTimestamp_not?: InputMaybe<Scalars['BigInt']>;
     blockTimestamp_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    hasDynamicSwapFee?: InputMaybe<Scalars['Boolean']>;
+    hasDynamicSwapFee_in?: InputMaybe<Array<Scalars['Boolean']>>;
+    hasDynamicSwapFee_not?: InputMaybe<Scalars['Boolean']>;
+    hasDynamicSwapFee_not_in?: InputMaybe<Array<Scalars['Boolean']>>;
     id?: InputMaybe<Scalars['Bytes']>;
     id_contains?: InputMaybe<Scalars['Bytes']>;
     id_gt?: InputMaybe<Scalars['Bytes']>;
@@ -2569,6 +2645,22 @@ export type Swap_Filter = {
     swapFeeAmount_lte?: InputMaybe<Scalars['BigDecimal']>;
     swapFeeAmount_not?: InputMaybe<Scalars['BigDecimal']>;
     swapFeeAmount_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    swapFeeBaseAmount?: InputMaybe<Scalars['BigDecimal']>;
+    swapFeeBaseAmount_gt?: InputMaybe<Scalars['BigDecimal']>;
+    swapFeeBaseAmount_gte?: InputMaybe<Scalars['BigDecimal']>;
+    swapFeeBaseAmount_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    swapFeeBaseAmount_lt?: InputMaybe<Scalars['BigDecimal']>;
+    swapFeeBaseAmount_lte?: InputMaybe<Scalars['BigDecimal']>;
+    swapFeeBaseAmount_not?: InputMaybe<Scalars['BigDecimal']>;
+    swapFeeBaseAmount_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    swapFeeDeltaAmount?: InputMaybe<Scalars['BigDecimal']>;
+    swapFeeDeltaAmount_gt?: InputMaybe<Scalars['BigDecimal']>;
+    swapFeeDeltaAmount_gte?: InputMaybe<Scalars['BigDecimal']>;
+    swapFeeDeltaAmount_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    swapFeeDeltaAmount_lt?: InputMaybe<Scalars['BigDecimal']>;
+    swapFeeDeltaAmount_lte?: InputMaybe<Scalars['BigDecimal']>;
+    swapFeeDeltaAmount_not?: InputMaybe<Scalars['BigDecimal']>;
+    swapFeeDeltaAmount_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
     swapFeePercentage?: InputMaybe<Scalars['BigDecimal']>;
     swapFeePercentage_gt?: InputMaybe<Scalars['BigDecimal']>;
     swapFeePercentage_gte?: InputMaybe<Scalars['BigDecimal']>;
@@ -2699,10 +2791,13 @@ export type Swap_Filter = {
 export enum Swap_OrderBy {
     BlockNumber = 'blockNumber',
     BlockTimestamp = 'blockTimestamp',
+    HasDynamicSwapFee = 'hasDynamicSwapFee',
     Id = 'id',
     LogIndex = 'logIndex',
     Pool = 'pool',
     SwapFeeAmount = 'swapFeeAmount',
+    SwapFeeBaseAmount = 'swapFeeBaseAmount',
+    SwapFeeDeltaAmount = 'swapFeeDeltaAmount',
     SwapFeePercentage = 'swapFeePercentage',
     SwapFeeToken = 'swapFeeToken',
     TokenAmountIn = 'tokenAmountIn',
