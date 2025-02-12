@@ -3,8 +3,9 @@ import { fetchSonicStakingData } from '../../sources/contracts/fetch-sts-staking
 import { StsSubgraphService } from '../../sources/subgraphs/sts-subgraph/sts.service';
 import { Address, formatEther } from 'viem';
 import { ViemClient } from '../../sources/viem-client';
+import { blockNumbers } from '../../block-numbers';
 
-interface ApiResponse {
+interface SonicApiResponse {
     success: boolean;
     data: {
         apr: number;
@@ -20,9 +21,18 @@ export async function syncStakingData(
 ) {
     const stakingDataOnchain = await fetchSonicStakingData(stakingContractAddress, viemClient);
     const validators = await subgraphService.getAllValidators();
+    const latestStakingData = await subgraphService.getStakingData();
+    const block24HrsAgo = await blockNumbers().getBlock('SONIC', Date.now() - 24 * 60 * 60 * 1000);
+    const stakingData24hrsAgo = await subgraphService.getStakingData(block24HrsAgo);
+
+    let protocolRevenue24hrs = 0;
+    if (latestStakingData && stakingData24hrsAgo) {
+        protocolRevenue24hrs =
+            parseFloat(latestStakingData.totalProtocolFee) - parseFloat(stakingData24hrsAgo.totalProtocolFee);
+    }
 
     const response = await fetch(baseAprUrl);
-    const data = (await response.json()) as ApiResponse;
+    const data = (await response.json()) as SonicApiResponse;
     if (!data.success) {
         throw new Error('Failed to fetch sonic staking APR');
     }

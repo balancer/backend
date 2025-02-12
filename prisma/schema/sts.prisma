@@ -6,6 +6,7 @@ model PrismaStakedSonicData {
     totalAssetsPool         String
     stakingApr              String
     exchangeRate            String
+    protocolFee24h          String
 
 
     delegatedValidators     PrismaStakedSonicDelegatedValidator[]
@@ -33,4 +34,5 @@ model PrismaSonicStakingDataSnapshot {
     totalAssetsDelegated    String
     totalAssets             String
     exchangeRate            String
+    protocolFee24h          String
 }

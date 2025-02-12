@@ -1,19 +1,5 @@
-query SonicStakings(
-    $skip: Int
-    $first: Int
-    $orderBy: SonicStaking_orderBy
-    $orderDirection: OrderDirection
-    $where: SonicStaking_filter
-    $block: Block_height
-) {
-    sonicStakings(
-        skip: $skip
-        first: $first
-        orderBy: $orderBy
-        orderDirection: $orderDirection
-        where: $where
-        block: $block
-    ) {
+query SonicStaking($id: ID!, $block: Block_height) {
+    sonicStaking(id: $id, block: $block) {
         ...SonicStaking
     }
 }
@@ -74,6 +60,5 @@ fragment SonicStakingSnapshot on SonicStakingSnapshot {
     totalAssets
     totalDelegated
     exchangeRate
-    rewardsClaimed24h
     protocolFee24h
 }
