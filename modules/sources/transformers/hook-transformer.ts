@@ -24,6 +24,18 @@ export type HookData = {
     };
 };
 
+const typeToParamsType = {
+    STABLE_SURGE: 'StableSurgeHookParams',
+    FEE_TAKING: 'FeeTakingHookParams',
+    EXIT_FEE: 'ExitFeeHookParams',
+    DIRECTIONAL_FEE: undefined,
+    LOTTERY: undefined,
+    VEBAL_DISCOUNT: undefined,
+    MEV_CAPTURE: undefined,
+    NFTLIQUIDITY_POSITION: undefined,
+    UNKNOWN: undefined,
+};
+
 export const hookTransformer = (poolData: V3JoinedSubgraphPool): HookData | undefined => {
     // By default v3 pools have a hook config with the address 0x0
     // We don't want to store this in the database because it's not doing anything
@@ -44,18 +56,15 @@ export const hookTransformer = (poolData: V3JoinedSubgraphPool): HookData | unde
 };
 
 export const mapHookToGqlHook = (hookData: HookData): GqlHook | undefined => {
-    if (!hookData || !hookData.name) {
+    if (!hookData || !hookData.type) {
         return undefined;
     }
 
-    // Supported hooks are those defined in the graphql schema
-    if (!['StableSurgeHook', 'FeeTakingHook', 'ExitFeeHook'].includes(hookData.name)) {
-        return undefined;
-    }
+    const paramsTypename = typeToParamsType[hookData.type];
 
     return {
         address: hookData.address,
-        name: hookData.name,
+        name: hookData.name || '',
         type: hookData.type,
         config: {
             enableHookAdjustedAmounts: hookData.enableHookAdjustedAmounts,
@@ -70,10 +79,13 @@ export const mapHookToGqlHook = (hookData: HookData): GqlHook | undefined => {
             shouldCallComputeDynamicSwapFee: hookData.shouldCallComputeDynamicSwapFee,
         },
         reviewData: hookData.reviewData,
-        params: {
-            __typename: `${hookData.name}Params`,
-            ...hookData.dynamicData,
-        } as HookParams,
+        params:
+            (paramsTypename &&
+                ({
+                    __typename: paramsTypename,
+                    ...hookData.dynamicData,
+                } as HookParams)) ||
+            undefined,
         // Deprecated
         enableHookAdjustedAmounts: hookData.enableHookAdjustedAmounts,
         shouldCallAfterSwap: hookData.shouldCallAfterSwap,
