@@ -88,8 +88,10 @@ export default <NetworkData>{
             markets: [
                 '0x87178fe8698c7eda8aa207083c3d66aea569ab98', //solvbtc market 13
                 '0x52fc9e0a68b6a4c9b57b9d1d99fb71449a99dcd8', // solvbtc.bbn market 13
-                '0x016C306e103FbF48EC24810D078C65aD13c5f11B', // wS market 25
+                '0x016c306e103fbf48ec24810d078c65ad13c5f11b', // wS market 25
                 '0x219656f33c58488d09d518badf50aa8cdcaca2aa', // wETH market 26
+                '0x5954ce6671d97d24b782920ddcdbb4b1e63ab2de', // usdc market 23
+                '0x6c49b18333a1135e9a376560c07e6d1fd0350eaf', // Ws market 28
             ],
         },
         avalon: {
