@@ -3102,6 +3102,11 @@ export const schema = gql`
         exchangeRate: String!
 
         """
+        The total protocol fee collected in the last 24 hours.
+        """
+        protocolFee24h: String!
+
+        """
         The current rebasing APR for stS.
         """
         stakingApr: String!
@@ -3140,6 +3145,11 @@ export const schema = gql`
         """
         exchangeRate: String!
         id: ID!
+
+        """
+        The total protocol fee collected during that day.
+        """
+        protocolFee24h: String!
 
         """
         The timestamp of the snapshot. Timestamp is end of day midnight.
