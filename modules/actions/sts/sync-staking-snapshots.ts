@@ -2,6 +2,7 @@ import { Address } from 'viem';
 import { prisma } from '../../../prisma/prisma-client';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { StsSubgraphService } from '../../sources/subgraphs/sts-subgraph/sts.service';
+import { p } from 'msw/lib/glossary-dc3fd077';
 
 export async function syncSonicStakingSnapshots(
     stakingContractAddress: Address,
@@ -25,6 +26,7 @@ export async function syncSonicStakingSnapshots(
             totalAssets: snapshot.totalAssets,
             exchangeRate: snapshot.exchangeRate,
             sonicStakingId: stakingContractAddress,
+            protocolFee24h: snapshot.protocolFee24h,
         };
         operations.push(
             prisma.prismaSonicStakingDataSnapshot.upsert({

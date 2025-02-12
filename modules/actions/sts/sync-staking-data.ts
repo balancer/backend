@@ -25,9 +25,9 @@ export async function syncStakingData(
     const block24HrsAgo = await blockNumbers().getBlock('SONIC', Date.now() - 24 * 60 * 60 * 1000);
     const stakingData24hrsAgo = await subgraphService.getStakingData(block24HrsAgo);
 
-    let protocolRevenue24hrs = 0;
+    let protocolFee24hrs = 0;
     if (latestStakingData && stakingData24hrsAgo) {
-        protocolRevenue24hrs =
+        protocolFee24hrs =
             parseFloat(latestStakingData.totalProtocolFee) - parseFloat(stakingData24hrsAgo.totalProtocolFee);
     }
 
@@ -51,6 +51,7 @@ export async function syncStakingData(
             totalAssetsPool: stakingDataOnchain.totalPool,
             exchangeRate: stakingDataOnchain.exchangeRate,
             stakingApr: `${stakingApr}`,
+            protocolFee24h: `${protocolFee24hrs}`,
         },
         update: {
             id: stakingContractAddress,
@@ -59,6 +60,7 @@ export async function syncStakingData(
             totalAssetsPool: stakingDataOnchain.totalPool,
             exchangeRate: stakingDataOnchain.exchangeRate,
             stakingApr: `${stakingApr}`,
+            protocolFee24h: `${protocolFee24hrs}`,
         },
     });
 

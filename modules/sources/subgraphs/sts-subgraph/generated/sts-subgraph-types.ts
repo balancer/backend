@@ -537,7 +537,6 @@ export type SonicStakingSnapshotsQuery = {
         totalAssets: string;
         totalDelegated: string;
         exchangeRate: string;
-        rewardsClaimed24h: string;
         protocolFee24h: string;
     }>;
 };
@@ -554,7 +553,6 @@ export type SonicStakingSnapshotFragment = {
     totalAssets: string;
     totalDelegated: string;
     exchangeRate: string;
-    rewardsClaimed24h: string;
     protocolFee24h: string;
 };
 
@@ -577,7 +575,6 @@ export const SonicStakingSnapshotFragmentDoc = gql`
         totalAssets
         totalDelegated
         exchangeRate
-        rewardsClaimed24h
         protocolFee24h
     }
 `;
