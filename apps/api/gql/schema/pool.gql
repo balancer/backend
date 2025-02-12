@@ -1320,7 +1320,19 @@ type GqlPoolTokenDetail {
     """
     If it is an ERC4626 token, this defines whether we allow it to use the buffer for pool operations.
     """
-    isBufferAllowed: Boolean!
+    isBufferAllowed: Boolean! @deprecated(reason: "Use useUnderlyingForAddRemove and useWrappedForAddRemove instead")
+    """
+    If it is an ERC4626 token, this defines whether we allow underlying tokens to be used for add/remove operations.
+    """
+    useUnderlyingForAddRemove: Boolean
+    """
+    If it is an ERC4626 token, this defines whether we allow the wrapped tokens to be used for add/remove operations.
+    """
+    useWrappedForAddRemove: Boolean
+    """
+    If it is an ERC4626 token, this defines whether we can use wrap/unwrap through the buffer in swap paths for this token.
+    """
+    canUseBufferForSwaps: Boolean
     """
     The ERC4626 review data for the token
     """
@@ -1336,11 +1348,11 @@ type GqlPoolTokenDetail {
     """
     Is the token tradable
     """
-    tradable: Boolean
+    tradable: Boolean @deprecated(reason: "Unused")
     """
     The priority of the token, can be used for sorting.
     """
-    priority: Int
+    priority: Int @deprecated(reason: "Unused")
     chain: GqlChain
     chainId: Int
 }
@@ -1568,7 +1580,7 @@ input GqlPoolFilter {
     userAddress: String
     protocolVersionIn: [Int!]
     minTvl: Float
-    hasHook: Boolean
+    hasHook: Boolean @deprecated(reason: "use tags to filter instead")
 }
 
 input GqlAggregatorPoolFilter {

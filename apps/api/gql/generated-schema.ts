@@ -1584,6 +1584,8 @@ export interface GqlPoolTokenDetail {
     balance: Scalars['BigDecimal'];
     /** USD Balance of the pool token. */
     balanceUSD: Scalars['BigDecimal'];
+    /** If it is an ERC4626 token, this defines whether we can use wrap/unwrap through the buffer in swap paths for this token. */
+    canUseBufferForSwaps?: Maybe<Scalars['Boolean']>;
     chain?: Maybe<GqlChain>;
     chainId?: Maybe<Scalars['Int']>;
     /** Coingecko ID */
@@ -1600,7 +1602,10 @@ export interface GqlPoolTokenDetail {
     index: Scalars['Int'];
     /** Whether the token is in the allow list. */
     isAllowed: Scalars['Boolean'];
-    /** If it is an ERC4626 token, this defines whether we allow it to use the buffer for pool operations. */
+    /**
+     * If it is an ERC4626 token, this defines whether we allow it to use the buffer for pool operations.
+     * @deprecated Use useUnderlyingForAddRemove and useWrappedForAddRemove instead
+     */
     isBufferAllowed: Scalars['Boolean'];
     /** Whether the token is considered an ERC4626 token. */
     isErc4626: Scalars['Boolean'];
@@ -1618,16 +1623,26 @@ export interface GqlPoolTokenDetail {
     priceRateProvider?: Maybe<Scalars['String']>;
     /** Additional data for the price rate provider, such as reviews or warnings. */
     priceRateProviderData?: Maybe<GqlPriceRateProviderData>;
-    /** The priority of the token, can be used for sorting. */
+    /**
+     * The priority of the token, can be used for sorting.
+     * @deprecated Unused
+     */
     priority?: Maybe<Scalars['Int']>;
     /** Conversion factor used to adjust for token decimals for uniform precision in calculations. V3 only. */
     scalingFactor?: Maybe<Scalars['BigDecimal']>;
     /** Symbol of the pool token. */
     symbol: Scalars['String'];
-    /** Is the token tradable */
+    /**
+     * Is the token tradable
+     * @deprecated Unused
+     */
     tradable?: Maybe<Scalars['Boolean']>;
     /** If it is an ERC4626, this will be the underlying token if present in the API. */
     underlyingToken?: Maybe<GqlToken>;
+    /** If it is an ERC4626 token, this defines whether we allow underlying tokens to be used for add/remove operations. */
+    useUnderlyingForAddRemove?: Maybe<Scalars['Boolean']>;
+    /** If it is an ERC4626 token, this defines whether we allow the wrapped tokens to be used for add/remove operations. */
+    useWrappedForAddRemove?: Maybe<Scalars['Boolean']>;
     /** The weight of the token in the pool if it is a weighted pool, null otherwise */
     weight?: Maybe<Scalars['BigDecimal']>;
 }
@@ -4643,6 +4658,7 @@ export type GqlPoolTokenDetailResolvers<
     address?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     balance?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
     balanceUSD?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
+    canUseBufferForSwaps?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
     chain?: Resolver<Maybe<ResolversTypes['GqlChain']>, ParentType, ContextType>;
     chainId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
     coingeckoId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -4666,6 +4682,8 @@ export type GqlPoolTokenDetailResolvers<
     symbol?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     tradable?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
     underlyingToken?: Resolver<Maybe<ResolversTypes['GqlToken']>, ParentType, ContextType>;
+    useUnderlyingForAddRemove?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+    useWrappedForAddRemove?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
     weight?: Resolver<Maybe<ResolversTypes['BigDecimal']>, ParentType, ContextType>;
     __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;

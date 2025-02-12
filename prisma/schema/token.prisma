@@ -150,6 +150,10 @@ model PrismaErc4626ReviewData {
     summary             String
     reviewFile          String
     warnings            String
+
+    canUseBufferForSwaps        Boolean     @default(false)
+    useUnderlyingForAddRemove   Boolean     @default(false)
+    useWrappedForAddRemove      Boolean     @default(true)
     
     @@index([chain, erc4626Address])
     @@index([assetAddress])

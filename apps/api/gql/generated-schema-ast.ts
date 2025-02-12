@@ -1280,7 +1280,7 @@ export const schema = gql`
         createTime: GqlPoolTimePeriod
         filterIn: [String!] @deprecated(reason: "unused")
         filterNotIn: [String!] @deprecated(reason: "unused")
-        hasHook: Boolean
+        hasHook: Boolean @deprecated(reason: "use tags to filter instead")
         idIn: [String!]
         idNotIn: [String!]
         minTvl: Float
@@ -2228,6 +2228,11 @@ export const schema = gql`
         USD Balance of the pool token.
         """
         balanceUSD: BigDecimal!
+
+        """
+        If it is an ERC4626 token, this defines whether we can use wrap/unwrap through the buffer in swap paths for this token.
+        """
+        canUseBufferForSwaps: Boolean
         chain: GqlChain
         chainId: Int
 
@@ -2270,6 +2275,7 @@ export const schema = gql`
         If it is an ERC4626 token, this defines whether we allow it to use the buffer for pool operations.
         """
         isBufferAllowed: Boolean!
+            @deprecated(reason: "Use useUnderlyingForAddRemove and useWrappedForAddRemove instead")
 
         """
         Whether the token is considered an ERC4626 token.
@@ -2314,7 +2320,7 @@ export const schema = gql`
         """
         The priority of the token, can be used for sorting.
         """
-        priority: Int
+        priority: Int @deprecated(reason: "Unused")
 
         """
         Conversion factor used to adjust for token decimals for uniform precision in calculations. V3 only.
@@ -2329,12 +2335,22 @@ export const schema = gql`
         """
         Is the token tradable
         """
-        tradable: Boolean
+        tradable: Boolean @deprecated(reason: "Unused")
 
         """
         If it is an ERC4626, this will be the underlying token if present in the API.
         """
         underlyingToken: GqlToken
+
+        """
+        If it is an ERC4626 token, this defines whether we allow underlying tokens to be used for add/remove operations.
+        """
+        useUnderlyingForAddRemove: Boolean
+
+        """
+        If it is an ERC4626 token, this defines whether we allow the wrapped tokens to be used for add/remove operations.
+        """
+        useWrappedForAddRemove: Boolean
 
         """
         The weight of the token in the pool if it is a weighted pool, null otherwise

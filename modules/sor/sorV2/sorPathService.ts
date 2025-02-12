@@ -529,9 +529,20 @@ class SorPathService {
         pools: PrismaPoolAndHookWithDynamic[],
         chain: Chain,
     ): Promise<{ address: string; decimals: number }[]> {
-        const underlyingTokenAddresses = pools
-            .flatMap((pool) => pool.tokens.map((token) => token.token.underlyingTokenAddress))
-            .filter((address) => address !== null);
+        const tokensWithUnderlying = pools.flatMap((pool) =>
+            pool.tokens.filter((token) => token.token.underlyingTokenAddress !== null),
+        );
+
+        const erc4626ThatCanBeUsedForSwaps = await prisma.prismaErc4626ReviewData.findMany({
+            where: {
+                chain,
+                erc4626Address: { in: tokensWithUnderlying.map((token) => token.address) },
+                canUseBufferForSwaps: true,
+            },
+        });
+
+        const underlyingTokenAddresses = erc4626ThatCanBeUsedForSwaps.map((data) => data.assetAddress);
+
         const underlyingTokens = await prisma.prismaToken.findMany({
             where: {
                 chain,
@@ -540,6 +551,7 @@ class SorPathService {
                 },
             },
         });
+
         if (underlyingTokens.length !== underlyingTokenAddresses.length) {
             underlyingTokenAddresses.forEach((address) => {
                 if (!underlyingTokens.find((token) => token.address === address)) {

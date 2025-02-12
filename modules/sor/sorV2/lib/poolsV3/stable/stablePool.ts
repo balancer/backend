@@ -59,24 +59,32 @@ export class StablePoolV3 implements BasePoolV3 {
             const scale18 = parseEther(poolToken.balance);
             const tokenAmount = TokenAmount.fromScale18Amount(token, scale18);
 
-            if (poolToken.token.underlyingTokenAddress && poolToken.token.isBufferAllowed) {
+            if (poolToken.token.underlyingTokenAddress) {
                 const underlyingToken = underlyingTokens.find(
                     (token) => token.address === poolToken.token.underlyingTokenAddress,
                 );
-                if (!underlyingToken) {
-                    throw new Error('Underlying token not found');
+                if (underlyingToken) {
+                    const unwrapRateDecimals = 18 - poolToken.token.decimals + underlyingToken.decimals;
+                    poolTokens.push(
+                        new Erc4626PoolToken(
+                            token,
+                            tokenAmount.amount,
+                            poolToken.index,
+                            parseEther(poolToken.priceRate),
+                            parseUnits(poolToken.token.unwrapRate, unwrapRateDecimals),
+                            poolToken.token.underlyingTokenAddress,
+                        ),
+                    );
+                } else {
+                    poolTokens.push(
+                        new StableBasePoolToken(
+                            token,
+                            tokenAmount.amount,
+                            poolToken.index,
+                            parseEther(poolToken.priceRate),
+                        ),
+                    );
                 }
-                const unwrapRateDecimals = 18 - poolToken.token.decimals + underlyingToken.decimals;
-                poolTokens.push(
-                    new Erc4626PoolToken(
-                        token,
-                        tokenAmount.amount,
-                        poolToken.index,
-                        parseEther(poolToken.priceRate),
-                        parseUnits(poolToken.token.unwrapRate, unwrapRateDecimals),
-                        poolToken.token.underlyingTokenAddress,
-                    ),
-                );
             } else {
                 poolTokens.push(
                     new StableBasePoolToken(

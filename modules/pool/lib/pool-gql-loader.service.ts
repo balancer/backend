@@ -37,7 +37,6 @@ import {
     GqlPoolAggregator,
     LiquidityManagement,
     GqlHook,
-    QueryPoolGetAggregatorPoolsArgs,
     QueryAggregatorPoolsArgs,
 } from '../../../apps/api/gql/generated-schema';
 import { addressesMatch } from '../../web3/addresses';
@@ -120,6 +119,9 @@ export class PoolGqlLoaderService {
                         ...erc4626ReviewData,
                         warnings: erc4626ReviewData.warnings?.split(',') || [],
                     };
+                    token.useUnderlyingForAddRemove = erc4626ReviewData.useUnderlyingForAddRemove;
+                    token.useWrappedForAddRemove = erc4626ReviewData.useUnderlyingForAddRemove;
+                    token.canUseBufferForSwaps = erc4626ReviewData.canUseBufferForSwaps;
                 }
             }
 
@@ -150,7 +152,9 @@ export class PoolGqlLoaderService {
                                 ...erc4626ReviewData,
                                 warnings: erc4626ReviewData.warnings?.split(',') || [],
                             };
-                        }
+                            nestedToken.useUnderlyingForAddRemove = erc4626ReviewData.useUnderlyingForAddRemove;
+                            nestedToken.useWrappedForAddRemove = erc4626ReviewData.useUnderlyingForAddRemove;
+                            nestedToken.canUseBufferForSwaps = erc4626ReviewData.canUseBufferForSwaps;
                     }
                 }
             }
