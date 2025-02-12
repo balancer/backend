@@ -155,6 +155,7 @@ export class PoolGqlLoaderService {
                             nestedToken.useUnderlyingForAddRemove = erc4626ReviewData.useUnderlyingForAddRemove;
                             nestedToken.useWrappedForAddRemove = erc4626ReviewData.useUnderlyingForAddRemove;
                             nestedToken.canUseBufferForSwaps = erc4626ReviewData.canUseBufferForSwaps;
+                        }
                     }
                 }
             }
