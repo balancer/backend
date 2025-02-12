@@ -1,5 +1,17 @@
 # backend
 
+## 1.33.0
+
+### Minor Changes
+
+-   72b5d51: integrate useUnderlyingForAddRemove, useWrappedForAddRemove and canUseBufferForSwaps in queries and SOR
+
+### Patch Changes
+
+-   b070ffe: APR inwstETHs
+-   3ac8b70: handle hook param types in graphql
+-   5d2d347: add sts protocol fees
+
 ## 1.32.2
 
 ### Patch Changes
