@@ -1,3 +1,23 @@
+query SonicStakings(
+    $skip: Int
+    $first: Int
+    $orderBy: SonicStaking_orderBy
+    $orderDirection: OrderDirection
+    $where: SonicStaking_filter
+    $block: Block_height
+) {
+    sonicStakings(
+        skip: $skip
+        first: $first
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        where: $where
+        block: $block
+    ) {
+        ...SonicStaking
+    }
+}
+
 query Validators(
     $skip: Int
     $first: Int
@@ -38,6 +58,10 @@ query SonicStakingSnapshots(
     }
 }
 
+fragment SonicStaking on SonicStaking {
+    totalProtocolFee
+}
+
 fragment Validator on Validator {
     id
     amountAssetsDelegated
@@ -50,4 +74,6 @@ fragment SonicStakingSnapshot on SonicStakingSnapshot {
     totalAssets
     totalDelegated
     exchangeRate
+    rewardsClaimed24h
+    protocolFee24h
 }

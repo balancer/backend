@@ -41,6 +41,15 @@ export class StsSubgraphService {
         return validators;
     }
 
+    public async getStakingData(block?: number): Promise<SonicStakingFragment[]> {
+        const response = await this.sdk.SonicStaking({
+            id: '0xe5da20f15420ad15de0fa650600afc998bbe3955',
+            block: block ? { number: block } : undefined,
+        });
+
+        return response.sonicStaking;
+    }
+
     public async getAllStakingSnapshots(): Promise<SonicStakingSnapshotFragment[]> {
         const limit = 1000;
         let hasMore = true;
