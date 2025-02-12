@@ -145,15 +145,15 @@ export const mainnetNetworkConfig: NetworkConfig = {
         },
         {
             name: 'sync-rate-provider-reviews',
-            interval: every(1, 'hours'),
+            interval: every(15, 'minutes'),
         },
         {
             name: 'sync-hook-reviews',
-            interval: every(1, 'hours'),
+            interval: every(15, 'minutes'),
         },
         {
             name: 'sync-erc4626-data',
-            interval: every(1, 'hours'),
+            interval: every(15, 'minutes'),
         },
         // APRs
         {
