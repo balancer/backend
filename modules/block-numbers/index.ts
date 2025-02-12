@@ -10,6 +10,10 @@ export const blockNumbers = (db = prisma) => ({
      * @returns
      */
     async getBlock(chain: Chain, timestamp: number) {
+        if (timestamp < 0 || timestamp > Date.now() / 1000 + 10 * 365 * 24 * 60 * 60) {
+            return undefined;
+        }
+
         const [event] = await db.$queryRawUnsafe<{ blockNumber: number }[]>(`
             SELECT "blockNumber"
             FROM "PartitionedPoolEvent"
