@@ -100,6 +100,12 @@ export class YbTokensAprService implements PoolAprService {
                     if (underlyingApr) {
                         userApr = ((1 + token.apr) * (1 + underlyingApr.apr) - 1) * token.share;
                     }
+                } else if (token.token.underlyingTokenAddress) {
+                    // When underlying has yield
+                    const underlyingApr = aprs.get(token.token.underlyingTokenAddress);
+                    if (underlyingApr) {
+                        userApr = ((1 + token.apr) * (1 + underlyingApr.apr) - 1) * token.share;
+                    }
                 }
 
                 let fee = 0;
