@@ -2127,6 +2127,8 @@ export interface GqlStakedSonicData {
     exchangeRate: Scalars['String'];
     /** The total protocol fee collected in the last 24 hours. */
     protocolFee24h: Scalars['String'];
+    /** The total rewards claimed in the last 24 hours. */
+    rewardsClaimed24h: Scalars['String'];
     /** The current rebasing APR for stS. */
     stakingApr: Scalars['String'];
     /** Total amount of S in custody of stS. Delegated S plus pool S. */
@@ -2152,6 +2154,8 @@ export interface GqlStakedSonicSnapshot {
     id: Scalars['ID'];
     /** The total protocol fee collected during that day. */
     protocolFee24h: Scalars['String'];
+    /** The total rewards claimed during that day. */
+    rewardsClaimed24h: Scalars['String'];
     /** The timestamp of the snapshot. Timestamp is end of day midnight. */
     timestamp: Scalars['Int'];
     /** Total amount of S in custody of stS. Delegated S plus pool S. */
@@ -5106,6 +5110,7 @@ export type GqlStakedSonicDataResolvers<
     delegatedValidators?: Resolver<Array<ResolversTypes['GqlStakedSonicDelegatedValidator']>, ParentType, ContextType>;
     exchangeRate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     protocolFee24h?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+    rewardsClaimed24h?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     stakingApr?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     totalAssets?: Resolver<ResolversTypes['AmountHumanReadable'], ParentType, ContextType>;
     totalAssetsDelegated?: Resolver<ResolversTypes['AmountHumanReadable'], ParentType, ContextType>;
@@ -5129,6 +5134,7 @@ export type GqlStakedSonicSnapshotResolvers<
     exchangeRate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
     protocolFee24h?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+    rewardsClaimed24h?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     timestamp?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     totalAssets?: Resolver<ResolversTypes['AmountHumanReadable'], ParentType, ContextType>;
     totalAssetsDelegated?: Resolver<ResolversTypes['AmountHumanReadable'], ParentType, ContextType>;

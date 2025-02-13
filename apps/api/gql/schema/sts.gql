@@ -32,6 +32,10 @@ type GqlStakedSonicData {
     """
     protocolFee24h: String!
     """
+    The total rewards claimed in the last 24 hours.
+    """
+    rewardsClaimed24h: String!
+    """
     Current exchange rate for stS -> S
     """
     exchangeRate: String!
@@ -87,4 +91,8 @@ type GqlStakedSonicSnapshot {
     The total protocol fee collected during that day.
     """
     protocolFee24h: String!
+    """
+    The total rewards claimed during that day.
+    """
+    rewardsClaimed24h: String!
 }

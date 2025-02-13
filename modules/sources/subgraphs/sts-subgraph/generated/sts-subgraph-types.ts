@@ -501,7 +501,7 @@ export type SonicStakingQueryVariables = Exact<{
 
 export type SonicStakingQuery = {
     __typename?: 'Query';
-    sonicStaking?: { __typename?: 'SonicStaking'; totalProtocolFee: string } | null;
+    sonicStaking?: { __typename?: 'SonicStaking'; totalProtocolFee: string; totalRewardsClaimed: string } | null;
 };
 
 export type ValidatorsQueryVariables = Exact<{
@@ -538,10 +538,15 @@ export type SonicStakingSnapshotsQuery = {
         totalDelegated: string;
         exchangeRate: string;
         protocolFee24h: string;
+        rewardsClaimed24h: string;
     }>;
 };
 
-export type SonicStakingFragment = { __typename?: 'SonicStaking'; totalProtocolFee: string };
+export type SonicStakingFragment = {
+    __typename?: 'SonicStaking';
+    totalProtocolFee: string;
+    totalRewardsClaimed: string;
+};
 
 export type ValidatorFragment = { __typename?: 'Validator'; id: string; amountAssetsDelegated: string };
 
@@ -554,11 +559,13 @@ export type SonicStakingSnapshotFragment = {
     totalDelegated: string;
     exchangeRate: string;
     protocolFee24h: string;
+    rewardsClaimed24h: string;
 };
 
 export const SonicStakingFragmentDoc = gql`
     fragment SonicStaking on SonicStaking {
         totalProtocolFee
+        totalRewardsClaimed
     }
 `;
 export const ValidatorFragmentDoc = gql`
@@ -576,6 +583,7 @@ export const SonicStakingSnapshotFragmentDoc = gql`
         totalDelegated
         exchangeRate
         protocolFee24h
+        rewardsClaimed24h
     }
 `;
 export const SonicStakingDocument = gql`

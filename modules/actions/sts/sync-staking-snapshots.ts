@@ -27,6 +27,7 @@ export async function syncSonicStakingSnapshots(
         });
 
         const protocolFee24hrsUsd = parseFloat(snapshot.protocolFee24h) * (sPrice?.price || 0);
+        const rewardsClaimed24hUsd = parseFloat(snapshot.rewardsClaimed24h) * (sPrice?.price || 0);
 
         const snapshotData = {
             id: snapshot.id,
@@ -37,6 +38,7 @@ export async function syncSonicStakingSnapshots(
             exchangeRate: snapshot.exchangeRate,
             sonicStakingId: stakingContractAddress,
             protocolFee24h: `${protocolFee24hrsUsd}`,
+            rewardsClaimed24h: `${rewardsClaimed24hUsd}`,
         };
         operations.push(
             prisma.prismaSonicStakingDataSnapshot.upsert({

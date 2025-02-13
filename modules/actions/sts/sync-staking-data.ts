@@ -28,9 +28,12 @@ export async function syncStakingData(
     const stakingData24hrsAgo = await subgraphService.getStakingData(block24HrsAgo);
 
     let protocolFee24hrs = 0;
+    let rewardsClaimed24hrs = 0;
     if (latestStakingData && stakingData24hrsAgo) {
         protocolFee24hrs =
             parseFloat(latestStakingData.totalProtocolFee) - parseFloat(stakingData24hrsAgo.totalProtocolFee);
+        rewardsClaimed24hrs =
+            parseFloat(latestStakingData.totalRewardsClaimed) - parseFloat(stakingData24hrsAgo.totalRewardsClaimed);
     }
 
     const sPrice = await prisma.prismaTokenCurrentPrice.findFirst({
@@ -41,6 +44,7 @@ export async function syncStakingData(
     });
 
     protocolFee24hrs = protocolFee24hrs * (sPrice?.price || 0);
+    rewardsClaimed24hrs = rewardsClaimed24hrs * (sPrice?.price || 0);
 
     const response = await fetch(baseAprUrl);
     const data = (await response.json()) as SonicApiResponse;
@@ -63,6 +67,7 @@ export async function syncStakingData(
             exchangeRate: stakingDataOnchain.exchangeRate,
             stakingApr: `${stakingApr}`,
             protocolFee24h: `${protocolFee24hrs}`,
+            rewardsClaimed24h: `${rewardsClaimed24hrs}`,
         },
         update: {
             id: stakingContractAddress,
@@ -72,6 +77,7 @@ export async function syncStakingData(
             exchangeRate: stakingDataOnchain.exchangeRate,
             stakingApr: `${stakingApr}`,
             protocolFee24h: `${protocolFee24hrs}`,
+            rewardsClaimed24h: `${rewardsClaimed24hrs}`,
         },
     });
 

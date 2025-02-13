@@ -3107,6 +3107,11 @@ export const schema = gql`
         protocolFee24h: String!
 
         """
+        The total rewards claimed in the last 24 hours.
+        """
+        rewardsClaimed24h: String!
+
+        """
         The current rebasing APR for stS.
         """
         stakingApr: String!
@@ -3150,6 +3155,11 @@ export const schema = gql`
         The total protocol fee collected during that day.
         """
         protocolFee24h: String!
+
+        """
+        The total rewards claimed during that day.
+        """
+        rewardsClaimed24h: String!
 
         """
         The timestamp of the snapshot. Timestamp is end of day midnight.

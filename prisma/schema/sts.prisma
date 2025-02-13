@@ -7,6 +7,7 @@ model PrismaStakedSonicData {
     stakingApr              String
     exchangeRate            String
     protocolFee24h          String           @default("0")
+    rewardsClaimed24h       String           @default("0")
 
 
     delegatedValidators     PrismaStakedSonicDelegatedValidator[]
@@ -35,4 +36,5 @@ model PrismaSonicStakingDataSnapshot {
     totalAssets             String
     exchangeRate            String
     protocolFee24h          String      @default("0")
+    rewardsClaimed24h       String      @default("0")
 }

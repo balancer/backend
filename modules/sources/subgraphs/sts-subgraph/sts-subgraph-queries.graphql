@@ -46,6 +46,7 @@ query SonicStakingSnapshots(
 
 fragment SonicStaking on SonicStaking {
     totalProtocolFee
+    totalRewardsClaimed
 }
 
 fragment Validator on Validator {
@@ -61,4 +62,5 @@ fragment SonicStakingSnapshot on SonicStakingSnapshot {
     totalDelegated
     exchangeRate
     protocolFee24h
+    rewardsClaimed24h
 }
