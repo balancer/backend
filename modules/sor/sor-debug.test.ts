@@ -4,6 +4,7 @@ import { initRequestScopedContext, setRequestScopedContextValue } from '../conte
 import { chainIdToChain } from '../network/chain-id-to-chain';
 import { PoolController } from '../controllers/pool-controller';
 import { TokenController } from '../controllers/token-controller';
+import { ContentController } from '../controllers/content-controller';
 import { sorService } from './sor.service';
 
 describe('sor debugging', () => {
@@ -40,7 +41,7 @@ describe('sor debugging', () => {
 
     it('sor v3', async () => {
         const useProtocolVersion = 3;
-        const chain = Chain.SEPOLIA;
+        const chain = Chain.ARBITRUM;
 
         const chainId = Object.keys(chainIdToChain).find((key) => chainIdToChain[key] === chain) as string;
         initRequestScopedContext();
@@ -50,6 +51,7 @@ describe('sor debugging', () => {
         // await PoolController().syncHookData(chain);
         // await TokenController().syncErc4626Tokens(chain);
         // await TokenController().syncErc4626UnwrapRates(chain);
+        // await ContentController().syncErc4626Data();
 
         // to update liquidity values, first update the token prices through a mutation
         // yarn dev; yarn mutation 'tokenReloadTokenPrices(chains: [MAINNET])' 1
@@ -57,13 +59,12 @@ describe('sor debugging', () => {
 
         const swaps = await sorService.getSorSwapPaths({
             chain,
-            tokenIn: '0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8', // USDCaave
-            tokenOut: '0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0', // USDTaave
+            tokenIn: '0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9', // USDT0
+            tokenOut: '0x7788a3538c5fc7f9c7c8a74eac4c898fc8d87d92', // sUSDx
             swapType: 'EXACT_IN',
-            swapAmount: '10000',
+            swapAmount: '5',
             useProtocolVersion,
-            considerPoolsWithHooks: true,
-            // poolIds: ['0x9b677c72a1160e1e03fe542bfd2b0f373fa94a8c'], // boosted
+            poolIds: ['0xc2b0d1a1b4cdda10185859b5a5c543024c2df869'], // boosted
         });
 
         console.log(swaps.returnAmount);
