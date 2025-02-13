@@ -11,6 +11,7 @@ export const initWorkerSentry = () => {
             Sentry.captureConsoleIntegration({
                 levels: ['error', 'warn'],
             }),
+            Sentry.prismaIntegration(),
         ],
 
         // Add Tracing by setting tracesSampleRate
