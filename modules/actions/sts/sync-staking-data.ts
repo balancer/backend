@@ -1,9 +1,11 @@
 import { prisma } from '../../../prisma/prisma-client';
 import { fetchSonicStakingData } from '../../sources/contracts/fetch-sts-staking-data';
 import { StsSubgraphService } from '../../sources/subgraphs/sts-subgraph/sts.service';
-import { Address, formatEther } from 'viem';
+import { Address } from 'viem';
 import { ViemClient } from '../../sources/viem-client';
 import { blockNumbers } from '../../block-numbers';
+import moment from 'moment';
+import config from '../../../config';
 
 interface SonicApiResponse {
     success: boolean;
@@ -22,7 +24,7 @@ export async function syncStakingData(
     const stakingDataOnchain = await fetchSonicStakingData(stakingContractAddress, viemClient);
     const validators = await subgraphService.getAllValidators();
     const latestStakingData = await subgraphService.getStakingData();
-    const block24HrsAgo = await blockNumbers().getBlock('SONIC', Date.now() - 24 * 60 * 60 * 1000);
+    const block24HrsAgo = await blockNumbers().getBlock('SONIC', moment().unix() - 24 * 60 * 60);
     const stakingData24hrsAgo = await subgraphService.getStakingData(block24HrsAgo);
 
     let protocolFee24hrs = 0;
@@ -30,6 +32,15 @@ export async function syncStakingData(
         protocolFee24hrs =
             parseFloat(latestStakingData.totalProtocolFee) - parseFloat(stakingData24hrsAgo.totalProtocolFee);
     }
+
+    const sPrice = await prisma.prismaTokenCurrentPrice.findFirst({
+        where: {
+            chain: 'SONIC',
+            tokenAddress: config['SONIC'].weth.address,
+        },
+    });
+
+    protocolFee24hrs = protocolFee24hrs * (sPrice?.price || 0);
 
     const response = await fetch(baseAprUrl);
     const data = (await response.json()) as SonicApiResponse;
