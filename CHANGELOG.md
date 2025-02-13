@@ -1,5 +1,14 @@
 # backend
 
+## 1.33.3
+
+### Patch Changes
+
+-   c61054e: add sts rewards claimed
+-   57e96d3: Bump balancer maths dependency to v0.0.22
+-   9e83d67: autodiscovery for aave aprs
+-   0600f58: apply underlying APR if any
+
 ## 1.33.2
 
 ### Patch Changes
