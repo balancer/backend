@@ -1,7 +1,11 @@
 import { ViemClient } from '../types';
 import VaultV3 from '../contracts/abis/VaultV3';
 
-const events = VaultV3.filter((i) => i.type === 'event' && ['PoolBalanceChanged', 'Swap'].includes(i.name));
+const events = VaultV3.filter(
+    (i) =>
+        i.type === 'event' &&
+        ['SwapFeePercentageChanged', 'PoolPausedStateChanged', 'PoolRecoveryModeStateChanged'].includes(i.name),
+);
 
 /**
  * Extracts pool IDs from PoolBalanceChanged and Swap events changing the pool state
@@ -29,6 +33,7 @@ export const getChangedPoolsV3 = async (
     // Get pools and make them unique
     const changedPools = logs
         .map((log) => (log as any).args.pool)
-        .filter((value, index, self) => self.indexOf(value) === index);
+        .filter((value, index, self) => self.indexOf(value) === index)
+        .map((pool: string) => pool.toLowerCase());
     return changedPools as string[];
 };

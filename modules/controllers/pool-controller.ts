@@ -17,6 +17,7 @@ import { syncPools as syncPoolsV3 } from '../actions/pool/v3/sync-pools';
 import { syncTokenPairs } from '../actions/pool/v3/sync-tokenpairs';
 import { syncHookData } from '../actions/pool/v3/sync-hook-data';
 import { getLastSyncedBlock, upsertLastSyncedBlock } from '../actions/pool/last-synced-block';
+import { getChangedPoolsV3 } from '../sources/logs';
 
 export function PoolController(tracer?: any) {
     return {
@@ -256,13 +257,21 @@ export function PoolController(tracer?: any) {
                 where: { chain, protocolVersion: 3 },
             });
 
-            // RPC for some reason isn't working, maybe event signatures are wrong?
-            // const changedPools = await getChangedPoolsV3(vaultAddress, viemClient, BigInt(fromBlock), BigInt(toBlock));
-            const changedPoolsIds = await subgraphClient
+            const changedPoolsInSG = await subgraphClient
                 .getAllInitializedPools({
                     _change_block: { number_gte: fromBlock },
                 })
                 .then((pools) => pools.map((pool) => pool.id.toLowerCase()));
+
+            // Scan for events missing in the SG
+            const rpcToBlock = await viemClient.getBlockNumber();
+            const changedPoolsInRPC = await getChangedPoolsV3(
+                vaultAddress,
+                viemClient,
+                BigInt(fromBlock),
+                BigInt(rpcToBlock),
+            );
+            const changedPoolsIds = [...changedPoolsInSG, ...changedPoolsInRPC];
 
             const poolsToSync = pools.filter((pool) => changedPoolsIds.includes(pool.id.toLowerCase())); // only sync pools that are in the database
             if (poolsToSync.length === 0) {
