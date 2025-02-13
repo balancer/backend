@@ -1,5 +1,13 @@
 # backend
 
+## 1.33.2
+
+### Patch Changes
+
+-   c5b2389: track vault events directly
+-   9792fe8: throw on invalid timestamp
+-   95b4614: enable sentry prisma tracing
+
 ## 1.33.1
 
 ### Patch Changes
