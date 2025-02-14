@@ -122,7 +122,7 @@ export class YbTokensAprService implements PoolAprService {
 
                 const yieldType: PrismaPoolAprType = 'IB_YIELD';
 
-                const itemId = `${pool.id}-${token.token.symbol}-yield-apr`;
+                const itemId = `${token.poolId}-${token.address}-yield-apr`;
 
                 const data = {
                     id: itemId,
