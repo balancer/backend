@@ -1,5 +1,13 @@
 # backend
 
+## 1.33.4
+
+### Patch Changes
+
+-   023ff12: fixes gyro math implementation
+-   435fbdb: fix onchain pause/recovery state syncing
+-   f678d67: fix duplicated APR entries
+
 ## 1.33.3
 
 ### Patch Changes
