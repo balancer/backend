@@ -153,24 +153,30 @@ export function checkAssetBounds(
 function maxBalances0(p: GyroEParams, d: DerivedGyroEParams, r: Vector2) {
     const termXp1 = MathGyro.divXpU(d.tauBeta.x - d.tauAlpha.x, d.dSq);
     const termXp2 = MathGyro.divXpU(d.tauBeta.y - d.tauAlpha.y, d.dSq);
-    let xp = MathGyro.mulDownXpToNpU(MathGyro.mulDownMagU(MathGyro.mulDownMagU(r.y, p.lambda), p.c), termXp1);
-    xp =
-        xp +
-        (termXp2 > 0n
-            ? MathGyro.mulDownMagU(r.y, p.s)
-            : MathGyro.mulDownXpToNpU(MathGyro.mulUpMagU(r.x, p.s), termXp2));
+    let xp = MathGyro.mulDownXpToNpU(
+        MathGyro.mulDownMagU(MathGyro.mulDownMagU(r.y, p.lambda), p.c),
+        termXp1
+    );
+    xp = xp + (
+        termXp2 > 0n
+            ? MathGyro.mulDownXpToNpU(MathGyro.mulDownMagU(r.y, p.s), termXp2)
+            : MathGyro.mulDownXpToNpU(MathGyro.mulUpMagU(r.x, p.s), termXp2)
+    );
     return xp;
 }
 
 function maxBalances1(p: GyroEParams, d: DerivedGyroEParams, r: Vector2) {
     const termXp1 = MathGyro.divXpU(d.tauBeta.x - d.tauAlpha.x, d.dSq);
     const termXp2 = MathGyro.divXpU(d.tauBeta.y - d.tauAlpha.y, d.dSq);
-    let yp = MathGyro.mulDownXpToNpU(MathGyro.mulDownMagU(MathGyro.mulDownMagU(r.y, p.lambda), p.s), termXp1);
-    yp =
-        yp +
-        (termXp2 > 0n
-            ? MathGyro.mulDownMagU(r.y, p.c)
-            : MathGyro.mulDownXpToNpU(MathGyro.mulUpMagU(r.x, p.c), termXp2));
+    let yp = MathGyro.mulDownXpToNpU(
+        MathGyro.mulDownMagU(MathGyro.mulDownMagU(r.y, p.lambda), p.s),
+        termXp1
+    );
+    yp = yp + (
+        termXp2 > 0n
+            ? MathGyro.mulDownXpToNpU(MathGyro.mulDownMagU(r.y, p.c), termXp2)
+            : MathGyro.mulDownXpToNpU(MathGyro.mulUpMagU(r.x, p.c), termXp2)
+    );
     return yp;
 }
 
