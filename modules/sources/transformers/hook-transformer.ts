@@ -1,6 +1,8 @@
+import { Chain } from '@prisma/client';
 import { GqlHook, GqlHookType, HookParams } from '../../../apps/api/gql/generated-schema';
 import { V3JoinedSubgraphPool } from '../subgraphs';
 import { zeroAddress } from 'viem';
+import config from '../../../config';
 
 export type HookData = {
     address: string;
@@ -36,7 +38,7 @@ const typeToParamsType = {
     UNKNOWN: undefined,
 };
 
-export const hookTransformer = (poolData: V3JoinedSubgraphPool): HookData | undefined => {
+export const hookTransformer = (poolData: V3JoinedSubgraphPool, chain: Chain): HookData | undefined => {
     // By default v3 pools have a hook config with the address 0x0
     // We don't want to store this in the database because it's not doing anything
     const hookConfig =
@@ -47,10 +49,11 @@ export const hookTransformer = (poolData: V3JoinedSubgraphPool): HookData | unde
     }
 
     const { hook, ...hookFlags } = hookConfig;
+    const hookTypes = config[chain].hooks;
 
     return {
         address: hook.address.toLowerCase(),
-        type: 'UNKNOWN',
+        type: hookTypes?.[hook.address] || 'UNKNOWN',
         ...hookFlags,
     };
 };
