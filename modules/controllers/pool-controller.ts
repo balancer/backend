@@ -157,6 +157,7 @@ export function PoolController(tracer?: any) {
                 balancer: {
                     v3: { vaultAddress },
                 },
+                hooks,
             } = config[chain];
 
             // Guard against unconfigured chains
@@ -184,6 +185,13 @@ export function PoolController(tracer?: any) {
                 chain,
                 latestBlock,
             );
+
+            if (hooks) {
+                const poolsWithHooks = await prisma.prismaPool.findMany({
+                    where: { chain, id: { in: added }, hook: { not: {} } },
+                });
+                await syncHookData(poolsWithHooks, hooks, viemClient, chain);
+            }
 
             return added;
         },
