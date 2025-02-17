@@ -56,10 +56,8 @@ export class Router {
                     const pathWithAmount = new PathWithAmount(path.tokens, path.pools, path.isBuffer, amount);
                     /**
                      * Remove paths that return 0 amount
-                     * It usually happens when low swapAmounts are provided and return amounts round down to zero
-                     * This is specially relevant for GivenOut swaps, because the path with smallest inputAmount is selected as best path
+                     * It usually happens when low swapAmounts are provided and return amounts rounded down to zero
                      */
-                    //
                     const calculatedAmount =
                         pathWithAmount.swapKind === SwapKind.GivenIn
                             ? pathWithAmount.outputAmount
