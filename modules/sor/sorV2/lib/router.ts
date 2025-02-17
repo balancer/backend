@@ -53,8 +53,21 @@ export class Router {
         swapAmounts.forEach((amount, i) => {
             validPaths.forEach((path) => {
                 try {
-                    quotePathsByRatio[i].push(new PathWithAmount(path.tokens, path.pools, path.isBuffer, amount));
-                    selectedPaths.push(path);
+                    const pathWithAmount = new PathWithAmount(path.tokens, path.pools, path.isBuffer, amount);
+                    /**
+                     * Remove paths that return 0 amount
+                     * It usually happens when low swapAmounts are provided and return amounts round down to zero
+                     * This is specially relevant for GivenOut swaps, because the path with smallest inputAmount is selected as best path
+                     */
+                    //
+                    const calculatedAmount =
+                        pathWithAmount.swapKind === SwapKind.GivenIn
+                            ? pathWithAmount.outputAmount
+                            : pathWithAmount.inputAmount;
+                    if (calculatedAmount.amount > 0n) {
+                        quotePathsByRatio[i].push(pathWithAmount);
+                        selectedPaths.push(path);
+                    }
                 } catch {
                     // console.log('Invalid path:');
                     // console.log(path.tokens.map((token) => token.symbol).join(' -> '));
@@ -71,9 +84,21 @@ export class Router {
         quotePathsByRatio.forEach((quotePaths) => {
             quotePaths.sort((a, b) => {
                 if (swapKind === SwapKind.GivenIn) {
-                    return Number(b.outputAmount.amount) - Number(a.outputAmount.amount);
+                    if (b.outputAmount.amount > a.outputAmount.amount) {
+                        return 1;
+                    } else if (b.outputAmount.amount < a.outputAmount.amount) {
+                        return -1;
+                    } else {
+                        return 0;
+                    }
                 } else {
-                    return Number(a.inputAmount.amount) - Number(b.inputAmount.amount);
+                    if (a.inputAmount.amount > b.inputAmount.amount) {
+                        return 1;
+                    } else if (a.inputAmount.amount < b.inputAmount.amount) {
+                        return -1;
+                    } else {
+                        return 0;
+                    }
                 }
             });
         });
