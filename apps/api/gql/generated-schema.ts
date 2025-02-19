@@ -195,7 +195,6 @@ export type GqlHookType =
     | 'EXIT_FEE'
     | 'FEE_TAKING'
     | 'LOTTERY'
-    | 'MEV_CAPTURE'
     | 'MEV_TAX'
     | 'NFTLIQUIDITY_POSITION'
     | 'STABLE_SURGE'

@@ -34,7 +34,6 @@ const typeToParamsType = {
     DIRECTIONAL_FEE: undefined,
     LOTTERY: undefined,
     VEBAL_DISCOUNT: undefined,
-    MEV_CAPTURE: undefined,
     NFTLIQUIDITY_POSITION: undefined,
     UNKNOWN: undefined,
 };
