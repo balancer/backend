@@ -2,9 +2,7 @@ import { formatEther } from 'viem';
 import type { ViemMulticallCall } from '../../../web3/multicaller-viem';
 import { multicallViem } from '../../../web3/multicaller-viem';
 import { ViemClient } from '../../types';
-import { feeTakingHook } from './fee-taking-hook';
-import { exitFeeHook } from './exit-fee-hook';
-import { stableSurgeHook } from './stable-surge-hook';
+import * as hooks from '../hooks';
 import { GqlHookType } from '../../../../apps/api/gql/generated-schema';
 
 export const fetchHookData = async (
@@ -17,13 +15,16 @@ export const fetchHookData = async (
 
     switch (type) {
         case 'FEE_TAKING':
-            calls = [...calls, ...feeTakingHook(address)];
+            calls = [...calls, ...hooks.feeTakingHook(address)];
             break;
         case 'EXIT_FEE':
-            calls = [...calls, ...exitFeeHook(address)];
+            calls = [...calls, ...hooks.exitFeeHook(address)];
             break;
         case 'STABLE_SURGE':
-            calls = [...calls, ...stableSurgeHook(address, poolAddress)];
+            calls = [...calls, ...hooks.stableSurgeHook(address, poolAddress)];
+            break;
+        case 'MEV_TAX':
+            calls = [...calls, ...hooks.mevTaxHook(address, poolAddress)];
             break;
         default:
             break;
@@ -39,6 +40,8 @@ export const fetchHookData = async (
             console.error(`Error parsing hook data for ${address} ${key} ${results[key]}`, e);
         }
     }
+
+    console.log('Hook data', results);
 
     return results;
 };
