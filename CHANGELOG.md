@@ -1,5 +1,14 @@
 # backend
 
+## 1.33.5
+
+### Patch Changes
+
+-   6a1f961: mev tax gql schema
+-   b58723c: set hook type for new pools
+-   9f87409: mev tax hook
+-   389d867: return all voting gauges
+
 ## 1.33.4
 
 ### Patch Changes
