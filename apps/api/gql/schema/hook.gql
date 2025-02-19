@@ -22,7 +22,16 @@ type FeeTakingHookParams {
     removeLiquidityFeePercentage: String
 }
 
-union HookParams = StableSurgeHookParams | ExitFeeHookParams | FeeTakingHookParams
+"""
+MevTax hook specific params. Percentage format is 0.01 -> 0.01%.
+"""
+type MevTaxHookParams {
+    maxMevSwapFeePercentage: String
+    mevTaxMultiplier: String
+    mevTaxThreshold: String
+}
+
+union HookParams = MevTaxHookParams | StableSurgeHookParams | ExitFeeHookParams | FeeTakingHookParams
 
 type HookConfig {
     """
@@ -99,7 +108,7 @@ enum GqlHookType {
     FEE_TAKING
     EXIT_FEE
     STABLE_SURGE
-    MEV_CAPTURE
+    MEV_TAX
     LOTTERY
     VEBAL_DISCOUNT
     DIRECTIONAL_FEE

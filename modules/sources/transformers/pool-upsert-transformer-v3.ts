@@ -79,7 +79,7 @@ export const poolUpsertTransformerV3 = (
             version: poolData.factory.version,
             createTime: Number(poolData.blockTimestamp),
             liquidityManagement: poolData.liquidityManagement,
-            hook: hookTransformer(poolData),
+            hook: hookTransformer(poolData, chain),
         },
         tokens: [
             ...poolData.tokens.map((token) => ({

@@ -71,6 +71,7 @@ export default <NetworkData>{
         ['0x4b8540ae9f341656dcb7959c2abd8830f3d95738']: 'VEBAL_DISCOUNT',
         ['0xd68372e85d8a14afa5fdb3d506bf765939aaf382']: 'DIRECTIONAL_FEE',
         ['0xd06dd26c7209cfe0752725f068299be69a7c9549']: 'NFTLIQUIDITY_POSITION',
+        ['0x18b10fe9ec4815c31c4ab04fa6f91dce0695132f']: 'MEV_TAX',
     },
     multicall: '0x25eef291876194aefad0d60dff89e268b90754bb',
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',

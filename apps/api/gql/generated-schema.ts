@@ -195,7 +195,7 @@ export type GqlHookType =
     | 'EXIT_FEE'
     | 'FEE_TAKING'
     | 'LOTTERY'
-    | 'MEV_CAPTURE'
+    | 'MEV_TAX'
     | 'NFTLIQUIDITY_POSITION'
     | 'STABLE_SURGE'
     | 'UNKNOWN'
@@ -2468,7 +2468,7 @@ export interface HookConfig {
     shouldCallComputeDynamicSwapFee: Scalars['Boolean'];
 }
 
-export type HookParams = ExitFeeHookParams | FeeTakingHookParams | StableSurgeHookParams;
+export type HookParams = ExitFeeHookParams | FeeTakingHookParams | MevTaxHookParams | StableSurgeHookParams;
 
 /** Liquidity management settings for v3 pools. */
 export interface LiquidityManagement {
@@ -2481,6 +2481,14 @@ export interface LiquidityManagement {
     enableDonation?: Maybe<Scalars['Boolean']>;
     /** Whether this pool support additional, custom remove liquditiy operations apart from proportional, unbalanced and single asset. */
     enableRemoveLiquidityCustom?: Maybe<Scalars['Boolean']>;
+}
+
+/** MevTax hook specific params. Percentage format is 0.01 -> 0.01%. */
+export interface MevTaxHookParams {
+    __typename?: 'MevTaxHookParams';
+    maxMevSwapFeePercentage?: Maybe<Scalars['String']>;
+    mevTaxMultiplier?: Maybe<Scalars['String']>;
+    mevTaxThreshold?: Maybe<Scalars['String']>;
 }
 
 export interface Mutation {
@@ -3234,11 +3242,13 @@ export type ResolversTypes = ResolversObject<{
     HookParams:
         | ResolversTypes['ExitFeeHookParams']
         | ResolversTypes['FeeTakingHookParams']
+        | ResolversTypes['MevTaxHookParams']
         | ResolversTypes['StableSurgeHookParams'];
     ID: ResolverTypeWrapper<Scalars['ID']>;
     Int: ResolverTypeWrapper<Scalars['Int']>;
     JSON: ResolverTypeWrapper<Scalars['JSON']>;
     LiquidityManagement: ResolverTypeWrapper<LiquidityManagement>;
+    MevTaxHookParams: ResolverTypeWrapper<MevTaxHookParams>;
     Mutation: ResolverTypeWrapper<{}>;
     PoolForBatchSwap: ResolverTypeWrapper<PoolForBatchSwap>;
     Query: ResolverTypeWrapper<{}>;
@@ -3417,11 +3427,13 @@ export type ResolversParentTypes = ResolversObject<{
     HookParams:
         | ResolversParentTypes['ExitFeeHookParams']
         | ResolversParentTypes['FeeTakingHookParams']
+        | ResolversParentTypes['MevTaxHookParams']
         | ResolversParentTypes['StableSurgeHookParams'];
     ID: Scalars['ID'];
     Int: Scalars['Int'];
     JSON: Scalars['JSON'];
     LiquidityManagement: LiquidityManagement;
+    MevTaxHookParams: MevTaxHookParams;
     Mutation: {};
     PoolForBatchSwap: PoolForBatchSwap;
     Query: {};
@@ -5381,7 +5393,7 @@ export type HookParamsResolvers<
     ParentType extends ResolversParentTypes['HookParams'] = ResolversParentTypes['HookParams'],
 > = ResolversObject<{
     __resolveType: TypeResolveFn<
-        'ExitFeeHookParams' | 'FeeTakingHookParams' | 'StableSurgeHookParams',
+        'ExitFeeHookParams' | 'FeeTakingHookParams' | 'MevTaxHookParams' | 'StableSurgeHookParams',
         ParentType,
         ContextType
     >;
@@ -5399,6 +5411,16 @@ export type LiquidityManagementResolvers<
     enableAddLiquidityCustom?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
     enableDonation?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
     enableRemoveLiquidityCustom?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+    __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type MevTaxHookParamsResolvers<
+    ContextType = ResolverContext,
+    ParentType extends ResolversParentTypes['MevTaxHookParams'] = ResolversParentTypes['MevTaxHookParams'],
+> = ResolversObject<{
+    maxMevSwapFeePercentage?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    mevTaxMultiplier?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    mevTaxThreshold?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -5933,6 +5955,7 @@ export type Resolvers<ContextType = ResolverContext> = ResolversObject<{
     HookParams?: HookParamsResolvers<ContextType>;
     JSON?: GraphQLScalarType;
     LiquidityManagement?: LiquidityManagementResolvers<ContextType>;
+    MevTaxHookParams?: MevTaxHookParamsResolvers<ContextType>;
     Mutation?: MutationResolvers<ContextType>;
     PoolForBatchSwap?: PoolForBatchSwapResolvers<ContextType>;
     Query?: QueryResolvers<ContextType>;

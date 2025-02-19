@@ -196,7 +196,7 @@ export const schema = gql`
         EXIT_FEE
         FEE_TAKING
         LOTTERY
-        MEV_CAPTURE
+        MEV_TAX
         NFTLIQUIDITY_POSITION
         STABLE_SURGE
         UNKNOWN
@@ -3681,7 +3681,7 @@ export const schema = gql`
         shouldCallComputeDynamicSwapFee: Boolean!
     }
 
-    union HookParams = ExitFeeHookParams | FeeTakingHookParams | StableSurgeHookParams
+    union HookParams = ExitFeeHookParams | FeeTakingHookParams | MevTaxHookParams | StableSurgeHookParams
 
     scalar JSON
 
@@ -3708,6 +3708,15 @@ export const schema = gql`
         Whether this pool support additional, custom remove liquditiy operations apart from proportional, unbalanced and single asset.
         """
         enableRemoveLiquidityCustom: Boolean
+    }
+
+    """
+    MevTax hook specific params. Percentage format is 0.01 -> 0.01%.
+    """
+    type MevTaxHookParams {
+        maxMevSwapFeePercentage: String
+        mevTaxMultiplier: String
+        mevTaxThreshold: String
     }
 
     type Mutation {
