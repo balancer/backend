@@ -197,6 +197,7 @@ export const schema = gql`
         FEE_TAKING
         LOTTERY
         MEV_CAPTURE
+        MEV_TAX
         NFTLIQUIDITY_POSITION
         STABLE_SURGE
         UNKNOWN

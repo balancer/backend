@@ -30,6 +30,7 @@ const typeToParamsType = {
     STABLE_SURGE: 'StableSurgeHookParams',
     FEE_TAKING: 'FeeTakingHookParams',
     EXIT_FEE: 'ExitFeeHookParams',
+    MEV_TAX: 'MevTaxHookParams',
     DIRECTIONAL_FEE: undefined,
     LOTTERY: undefined,
     VEBAL_DISCOUNT: undefined,

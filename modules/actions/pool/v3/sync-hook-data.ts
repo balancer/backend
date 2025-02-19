@@ -1,4 +1,4 @@
-import { fetchHookData } from '../../../sources/contracts/hooks/fetch-hook-data';
+import { fetchHookData } from '../../../sources/contracts/v3/fetch-hook-data';
 import { prisma } from '../../../../prisma/prisma-client';
 import type { ViemClient } from '../../../sources/viem-client';
 import type { Chain, PrismaPool } from '@prisma/client';
