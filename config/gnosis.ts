@@ -40,7 +40,7 @@ export default <NetworkData>{
     rpcUrl: env.DRPC_API_KEY
         ? `https://lb.drpc.org/ogrpc?network=gnosis&dkey=${env.DRPC_API_KEY}`
         : 'https://gnosis.drpc.org',
-    rpcMaxBlockRange: 2000,
+    rpcMaxBlockRange: 10000,
     protocolToken: 'bal',
     bal: {
         address: '0x7ef541e2a22058048904fe5744f9c7e4c57af717',

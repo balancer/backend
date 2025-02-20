@@ -35,7 +35,7 @@ export default <NetworkData>{
     rpcUrl: env.DRPC_API_KEY
         ? `https://lb.drpc.org/ogrpc?network=fraxtal&dkey=${env.DRPC_API_KEY}`
         : 'https://rpc.frax.com/',
-    rpcMaxBlockRange: 5000,
+    rpcMaxBlockRange: 10000,
     protocolToken: 'bal',
     bal: {
         address: '0x2fc7447f6cf71f9aa9e7ff8814b37e55b268ec91',

@@ -33,7 +33,7 @@ export default <NetworkData>{
     rpcUrl: env.DRPC_API_KEY
         ? `https://lb.drpc.org/ogrpc?network=mode&dkey=${env.DRPC_API_KEY}`
         : 'https://mainnet.mode.network',
-    rpcMaxBlockRange: 5000,
+    rpcMaxBlockRange: 10000,
     protocolToken: 'bal',
     bal: {
         address: '0xd08a2917653d4e460893203471f0000826fb4034',
