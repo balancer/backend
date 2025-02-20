@@ -103,7 +103,7 @@ export class VeBalVotingListService {
         const gaugesWithStaking = await prisma.prismaVotingGauge.findMany({
             where: {
                 stakingGaugeId: { not: null },
-                // OR: [{ status: 'ACTIVE' }, { relativeWeight: { not: '0' } }],
+                OR: [{ status: 'ACTIVE' }, { relativeWeight: { not: '0' } }],
             },
             select: {
                 id: true,

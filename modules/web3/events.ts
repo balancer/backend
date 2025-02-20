@@ -10,7 +10,7 @@ export const getEvents = async (
     rpcUrl: string,
     rpcMaxBlockRange: number,
     abi?: any,
-    maxAddresses = 500,
+    maxAddresses = 4000,
 ): Promise<Event[]> => {
     let iEvents: Interface;
     if (abi && abi.length > 0) {
