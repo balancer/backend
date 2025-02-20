@@ -35,7 +35,7 @@ export default <NetworkData>{
     rpcUrl: env.DRPC_API_KEY
         ? `https://lb.drpc.org/ogrpc?network=optimism&dkey=${env.DRPC_BEETS_API_KEY}`
         : 'https://mainnet.optimism.io',
-    rpcMaxBlockRange: 2000,
+    rpcMaxBlockRange: 10000,
     protocolToken: 'beets',
     beets: {
         address: '0xb4bc46bc6cb217b59ea8f4530bae26bf69f677f0',
