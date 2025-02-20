@@ -1,5 +1,13 @@
 # backend
 
+## 1.33.6
+
+### Patch Changes
+
+-   88f6327: vebal active gauges only
+-   0cce480: increase rpc batch size
+-   a7d76ee: tune rpc limits
+
 ## 1.33.5
 
 ### Patch Changes
