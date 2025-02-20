@@ -9,7 +9,6 @@ fragment Swap on Swap {
     tokenAmountOut
     swapFeeAmount
     swapFeeToken
-    swapFeeDeltaAmount
     user {
         id
     }
@@ -36,5 +35,46 @@ query Swaps(
         block: $block
     ) {
         ...Swap
+    }
+}
+
+fragment SepoliaSwap on Swap {
+    id
+    pool
+    tokenIn
+    tokenInSymbol
+    tokenOut
+    tokenOutSymbol
+    tokenAmountIn
+    tokenAmountOut
+    swapFeeAmount
+    swapFeeToken
+    swapFeeDeltaAmount
+    user {
+        id
+    }
+    blockNumber
+    logIndex
+    blockTimestamp
+    transactionHash
+}
+
+query SepoliaSwaps(
+    $skip: Int
+    $first: Int
+    $orderBy: Swap_orderBy
+    $orderDirection: OrderDirection
+    $where: Swap_filter
+    $block: Block_height
+) {
+    swaps(
+        skip: $skip
+        first: $first
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        where: $where
+        block: $block
+    ) {
+        ...SepoliaSwap
     }
 }
