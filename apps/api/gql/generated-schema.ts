@@ -2947,6 +2947,10 @@ export interface QueryVeBalGetUserBalancesArgs {
     chains?: InputMaybe<Array<GqlChain>>;
 }
 
+export interface QueryVeBalGetVotingListArgs {
+    includeKilled?: InputMaybe<Scalars['Boolean']>;
+}
+
 /** StableSurge hook specific params. Percentage format is 0.01 -> 0.01%. */
 export interface StableSurgeHookParams {
     __typename?: 'StableSurgeHookParams';
@@ -5800,7 +5804,12 @@ export type QueryResolvers<
         ContextType,
         RequireFields<QueryVeBalGetUserBalancesArgs, 'address'>
     >;
-    veBalGetVotingList?: Resolver<Array<ResolversTypes['GqlVotingPool']>, ParentType, ContextType>;
+    veBalGetVotingList?: Resolver<
+        Array<ResolversTypes['GqlVotingPool']>,
+        ParentType,
+        ContextType,
+        RequireFields<QueryVeBalGetVotingListArgs, never>
+    >;
 }>;
 
 export type StableSurgeHookParamsResolvers<

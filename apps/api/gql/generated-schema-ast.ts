@@ -4053,7 +4053,7 @@ export const schema = gql`
         """
         Returns all pools with veBAL gauges that can be voted on.
         """
-        veBalGetVotingList: [GqlVotingPool!]!
+        veBalGetVotingList(includeKilled: Boolean): [GqlVotingPool!]!
     }
 
     """
