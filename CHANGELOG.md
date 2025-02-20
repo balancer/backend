@@ -1,5 +1,11 @@
 # backend
 
+## 1.33.7
+
+### Patch Changes
+
+-   bf20bd2: include killed gauges in voting gauges list
+
 ## 1.33.6
 
 ### Patch Changes
