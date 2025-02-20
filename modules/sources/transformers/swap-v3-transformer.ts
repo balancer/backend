@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { SwapFragment } from '../subgraphs/balancer-v3-vault/generated/types';
+import { SepoliaSwapFragment, SwapFragment } from '../subgraphs/balancer-v3-vault/generated/types';
 import { Chain } from '@prisma/client';
 import { SwapEvent } from '../../../prisma/prisma-types';
 import { prisma } from '../../../prisma/prisma-client';
@@ -11,7 +11,7 @@ import { prisma } from '../../../prisma/prisma-client';
  * @param chain
  * @returns
  */
-export async function swapV3Transformer(swaps: SwapFragment[], chain: Chain): Promise<SwapEvent[]> {
+export async function swapV3Transformer(swaps: SepoliaSwapFragment[], chain: Chain): Promise<SwapEvent[]> {
     return swaps.map((swap) => ({
         id: swap.id, // tx + logIndex
         tx: swap.transactionHash,
@@ -30,11 +30,15 @@ export async function swapV3Transformer(swaps: SwapFragment[], chain: Chain): Pr
                 amount: swap.swapFeeAmount,
                 valueUSD: '0', // Will be calculated later
             },
-            dynamicFee: {
-                address: swap.swapFeeToken,
-                amount: swap.swapFeeDeltaAmount,
-                valueUSD: '0', // Will be calculated later
-            },
+            ...(swap.swapFeeDeltaAmount
+                ? {
+                      dynamicFee: {
+                          address: swap.swapFeeToken,
+                          amount: swap.swapFeeDeltaAmount,
+                          valueUSD: '0', // Will be calculated later
+                      },
+                  }
+                : {}),
             tokenIn: {
                 address: swap.tokenIn,
                 amount: swap.tokenAmountIn,
