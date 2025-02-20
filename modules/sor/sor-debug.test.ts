@@ -10,7 +10,7 @@ import { sorService } from './sor.service';
 describe('sor debugging', () => {
     it('sor v2', async () => {
         const useProtocolVersion = 2;
-        const chain = Chain.GNOSIS;
+        const chain = Chain.ARBITRUM;
 
         const chainId = Object.keys(chainIdToChain).find((key) => chainIdToChain[key] === chain) as string;
         initRequestScopedContext();
@@ -23,10 +23,10 @@ describe('sor debugging', () => {
 
         const swaps = await sorService.getSorSwapPaths({
             chain,
-            tokenIn: '0xfa771dd0237e80c22ab8fbfd98c1904663b46e36', // sCRC
-            tokenOut: '0x6a023ccd1ff6f2045c3309768ead9e68f978f6e1', // WETH
-            swapType: 'EXACT_IN',
-            swapAmount: '10',
+            tokenIn: '0xaf88d065e77c8cc2239327c5edb3a432268e5831', // USDC
+            tokenOut: '0x82af49447d8a07e3bd95bd0d56f35241523fbab1', // WETH
+            swapType: 'EXACT_OUT',
+            swapAmount: '0.00000040526107834',
             useProtocolVersion,
             // callDataInput: {
             //     receiver: '0xb5e6b895734409Df411a052195eb4EE7e40d8696',
