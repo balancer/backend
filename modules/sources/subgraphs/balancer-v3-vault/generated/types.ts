@@ -3419,6 +3419,7 @@ export type SwapFragment = {
     tokenAmountOut: string;
     swapFeeAmount: string;
     swapFeeToken: string;
+    swapFeeDeltaAmount: string;
     blockNumber: string;
     logIndex: string;
     blockTimestamp: string;
@@ -3449,6 +3450,7 @@ export type SwapsQuery = {
         tokenAmountOut: string;
         swapFeeAmount: string;
         swapFeeToken: string;
+        swapFeeDeltaAmount: string;
         blockNumber: string;
         logIndex: string;
         blockTimestamp: string;
@@ -3658,6 +3660,7 @@ export const SwapFragmentDoc = gql`
         tokenAmountOut
         swapFeeAmount
         swapFeeToken
+        swapFeeDeltaAmount
         user {
             id
         }
