@@ -15,12 +15,12 @@ export class VeBalVotingListService {
         This methods is used by veBalGetVotingList resolver that is consumed by some partners
         We should avoid breaking changes in the involved schema
     */
-    public async getVotingListWithHardcodedPools(): Promise<GqlVotingPool[]> {
-        return [...(await this.getVotingList()), ...hardCodedPools];
+    public async getVotingListWithHardcodedPools(includeKilled?: boolean): Promise<GqlVotingPool[]> {
+        return [...(await this.getVotingList(includeKilled)), ...hardCodedPools];
     }
 
-    public async getVotingList(): Promise<GqlVotingPool[]> {
-        const validGauges = await this.getValidVotingGauges();
+    public async getVotingList(includeKilled?: boolean): Promise<GqlVotingPool[]> {
+        const validGauges = await this.getValidVotingGauges(includeKilled);
         const validVotingGaugesByPoolId = keyBy(validGauges, (gauge) => gauge.stakingGauge!.staking.poolId);
 
         let poolIds = Object.keys(validVotingGaugesByPoolId);
@@ -96,14 +96,14 @@ export class VeBalVotingListService {
         return pools;
     }
 
-    public async getValidVotingGauges() {
+    public async getValidVotingGauges(includeKilled?: boolean) {
         // A gauge should be included in the voting list when:
         //  - it is alive (not killed)
         //  - it is killed and has valid votes (the users should be able to reallocate votes)
         const gaugesWithStaking = await prisma.prismaVotingGauge.findMany({
             where: {
                 stakingGaugeId: { not: null },
-                OR: [{ status: 'ACTIVE' }, { relativeWeight: { not: '0' } }],
+                ...(includeKilled ? {} : { OR: [{ status: 'ACTIVE' }, { relativeWeight: { not: '0' } }] }),
             },
             select: {
                 id: true,

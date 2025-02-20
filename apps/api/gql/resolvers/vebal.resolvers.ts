@@ -67,8 +67,8 @@ const resolvers: Resolvers = {
             Schema changes would affect those partners so, in case we need it, it would be better to keep the current schema and create a new endpoint with a
             new schema that we consume from our FEs
          */
-        veBalGetVotingList: async (parent, {}, context) => {
-            return veBalVotingListService.getVotingListWithHardcodedPools();
+        veBalGetVotingList: async (parent, { includeKilled }, context) => {
+            return veBalVotingListService.getVotingListWithHardcodedPools(!!includeKilled);
         },
     },
     Mutation: {
