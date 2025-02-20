@@ -9,6 +9,7 @@ fragment Swap on Swap {
     tokenAmountOut
     swapFeeAmount
     swapFeeToken
+    swapFeeDeltaAmount
     user {
         id
     }

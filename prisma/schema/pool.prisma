@@ -241,6 +241,7 @@ model PrismaPoolAprRange {
 
 enum PrismaPoolAprType {
     SWAP_FEE
+    DYNAMIC_SWAP_FEE_24H
     SWAP_FEE_24H
     SWAP_FEE_7D
     SWAP_FEE_30D

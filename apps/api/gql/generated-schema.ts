@@ -410,6 +410,8 @@ export interface GqlPoolAprItem {
 export type GqlPoolAprItemType =
     /** APR that pools earns when BPT is staked on AURA. */
     | 'AURA'
+    /** Dynamic swap fee APR based on data from the last 24h */
+    | 'DYNAMIC_SWAP_FEE_24H'
     /** Represents the yield from an IB (Interest-Bearing) asset APR in a pool. */
     | 'IB_YIELD'
     /** APR in a pool that can be earned through locking, i.e. veBAL */

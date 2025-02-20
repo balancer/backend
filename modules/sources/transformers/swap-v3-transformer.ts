@@ -30,6 +30,11 @@ export async function swapV3Transformer(swaps: SwapFragment[], chain: Chain): Pr
                 amount: swap.swapFeeAmount,
                 valueUSD: '0', // Will be calculated later
             },
+            dynamicFee: {
+                address: swap.swapFeeToken,
+                amount: swap.swapFeeDeltaAmount,
+                valueUSD: '0', // Will be calculated later
+            },
             tokenIn: {
                 address: swap.tokenIn,
                 amount: swap.tokenAmountIn,
