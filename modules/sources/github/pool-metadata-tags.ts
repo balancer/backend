@@ -37,6 +37,9 @@ export const getPoolMetadataTags = async (
                             existingTags[pool.id] = new Set();
                         }
                         existingTags[pool.id].add(tag.id.toUpperCase());
+                        if (tag.id.toLowerCase().startsWith('points_')) {
+                            existingTags[pool.id].add(`POINTS`);
+                        }
                     });
                 }
             }
