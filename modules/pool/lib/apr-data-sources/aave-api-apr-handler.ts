@@ -1,30 +1,35 @@
+import _ from 'lodash';
 import { prisma } from '../../../../prisma/prisma-client';
 import { PrismaPoolWithTokens } from '../../../../prisma/prisma-types';
-import { BeefyAprConfig } from '../../../network/apr-config-types';
 import { PoolAprService } from '../../pool-types';
-import { AprHandler } from './yb-apr-handlers/types';
-import axios from 'axios';
+import { Chain } from '@prisma/client';
+import { chainToChainId } from '../../../network/chain-id-to-chain';
+
+type AaveIncentive = {
+    [key: string]: {
+        tokenInfo: {
+            supplyApr: number;
+            book: Record<string, string | number>;
+        };
+        supplyIncentives: {
+            apr: number;
+            rewardToken: {
+                symbol: string;
+                address: string;
+            };
+        }[];
+    };
+};
 
 export class AaveApiAprService implements PoolAprService {
-    // tokens: {
-    //     [tokenName: string]: {
-    //         address: string;
-    //         vaultId: string;
-    //         isIbYield?: boolean;
-    //     };
-    // };
-    // sourceUrl: string;
-    // group = 'AAVE';
-
-    base = 'https://api.beefy.finance/aave/apr';
+    base = 'https://apps.aavechan.com/api/aave-all-incentives?chainId=';
 
     public getAprServiceName(): string {
         return 'AaveApiAprServices';
     }
 
     public async updateAprForPools(pools: PrismaPoolWithTokens[]): Promise<void> {
-        const aprItems = await this.getAprItems(pools);
-
+        const aprItems = await this.getAprItemsForSupplyIncentives(pools);
         await prisma.$transaction(
             aprItems.map((item) =>
                 prisma.prismaPoolAprItem.upsert({
@@ -38,8 +43,75 @@ export class AaveApiAprService implements PoolAprService {
         );
     }
 
-    private async getAprItems(pools: PrismaPoolWithTokens[]) {
-        // Get Morpho rewards
+    private async getAprItemsForSupplyIncentives(pools: PrismaPoolWithTokens[]): Promise<
+        {
+            id: string;
+            chain: Chain;
+            poolId: string;
+            title: string;
+            apr: number;
+            type: 'MERKL';
+            rewardTokenAddress: string;
+            rewardTokenSymbol: string;
+        }[]
+    > {
+        const poolsByChain = _.groupBy(pools, 'chain');
+
+        const aprItems: {
+            id: string;
+            chain: Chain;
+            poolId: string;
+            title: string;
+            apr: number;
+            type: 'MERKL';
+            rewardTokenAddress: string;
+            rewardTokenSymbol: string;
+        }[] = [];
+
+        for (const chain in poolsByChain) {
+            const aaveIncentivesForChain = (await fetch(`${this.base}${chainToChainId[chain]}`).then((res) =>
+                res.json(),
+            )) as AaveIncentive;
+
+            for (const incentiveTokenName in aaveIncentivesForChain) {
+                if (
+                    aaveIncentivesForChain[incentiveTokenName].tokenInfo.book.STATA_TOKEN &&
+                    aaveIncentivesForChain[incentiveTokenName].supplyIncentives.length > 0
+                ) {
+                    const incentivizedToken = aaveIncentivesForChain[incentiveTokenName].tokenInfo.book['STATA_TOKEN']
+                        .toString()
+                        .toLowerCase();
+                    const supplyIncentivesForToken = aaveIncentivesForChain[incentiveTokenName].supplyIncentives;
+
+                    const poolsWithIncentivizedTokenToken = poolsByChain[chain].filter((pool) =>
+                        pool.tokens.find((token) => token.address === incentivizedToken),
+                    );
+
+                    for (const pool of poolsWithIncentivizedTokenToken) {
+                        const tvl = pool.tokens.map((t) => t.balanceUSD).reduce((a, b) => a + b, 0);
+                        const tokenTvl =
+                            pool.tokens.find((token) => token.address === incentivizedToken)?.balanceUSD || 0;
+
+                        const tokenShareOfPoolTvl = tokenTvl === 0 || tvl === 0 ? 0 : tokenTvl / tvl;
+
+                        for (const incentive of supplyIncentivesForToken) {
+                            aprItems.push({
+                                id: `${pool.id}-${incentivizedToken}-${incentive.rewardToken.address}`,
+                                chain: pool.chain,
+                                poolId: pool.id,
+                                title: `${incentive.rewardToken.symbol} APR`,
+                                apr: (incentive.apr / 100) * tokenShareOfPoolTvl,
+                                type: 'MERKL',
+                                rewardTokenAddress: incentive.rewardToken.address,
+                                rewardTokenSymbol: incentive.rewardToken.symbol,
+                            });
+                        }
+                    }
+                }
+            }
+        }
+
+        return aprItems;
     }
 }
 
