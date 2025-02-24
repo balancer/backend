@@ -63,6 +63,9 @@ export default <NetworkData>{
             defaultYieldFeePercentage: '0.25',
         },
     },
+    hooks: {
+        ['0x8a83aa9bb7c4cff14ae0aecec0fb9ef234901c0c']: 'STABLE_SURGE',
+    },
     multicall: '0xca11bde05977b3631167028862be2a173976ca11',
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',
     reliquary: {
