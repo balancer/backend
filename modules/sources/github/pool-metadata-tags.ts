@@ -26,11 +26,8 @@ export const getPoolMetadataTags = async (
         }
 
         if (tag.tokens) {
-            console.log('tag.tokens', tag.tokens);
             for (const chainId in tag.tokens) {
-                console.log(chainId);
                 for (const tokenAddress of tag.tokens[chainId]) {
-                    console.log(tokenAddress);
                     const chain = chainIdToChain[chainId];
                     const poolsWithToken = await prisma.prismaPool.findMany({
                         where: { chain: chain, allTokens: { some: { tokenAddress: tokenAddress.toLowerCase() } } },
@@ -40,6 +37,9 @@ export const getPoolMetadataTags = async (
                             existingTags[pool.id] = new Set();
                         }
                         existingTags[pool.id].add(tag.id.toUpperCase());
+                        if (tag.id.toLowerCase().startsWith('points_')) {
+                            existingTags[pool.id].add(`POINTS`);
+                        }
                     });
                 }
             }

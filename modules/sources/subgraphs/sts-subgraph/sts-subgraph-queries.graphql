@@ -1,3 +1,9 @@
+query SonicStaking($id: ID!, $block: Block_height) {
+    sonicStaking(id: $id, block: $block) {
+        ...SonicStaking
+    }
+}
+
 query Validators(
     $skip: Int
     $first: Int
@@ -38,6 +44,11 @@ query SonicStakingSnapshots(
     }
 }
 
+fragment SonicStaking on SonicStaking {
+    totalProtocolFee
+    totalRewardsClaimed
+}
+
 fragment Validator on Validator {
     id
     amountAssetsDelegated
@@ -50,4 +61,6 @@ fragment SonicStakingSnapshot on SonicStakingSnapshot {
     totalAssets
     totalDelegated
     exchangeRate
+    protocolFee24h
+    rewardsClaimed24h
 }

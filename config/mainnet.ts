@@ -26,9 +26,12 @@ export default <NetworkData>{
         cowAmm: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmQ3c9CTJBZdgy3uTLB929ARZucMUCf6piZBDxSgBKnf6m`,
         balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmQ5TT2yYBZgoUxsat3bKmNe5Fr9LW9YAtDs8aeuc1BRhj`,
         balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmZpnxr5Qz2tc6EKgGuvBG3xSbXN3LbCLhqpawLWvndPH6`,
-        balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmdPwbLFKysWBCFffnmTkX4aWs7D5oNNVnvKSStf1KL3gL`,
+        balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmNTXdPySmUWBLCK7SQy9PSptipwgxcez8ZZMtFAsqMpqz`,
         gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmNrMRgSeUUkQsvhE6ExBEPETZ6P2jiJL3SzXftNQcAEcW`,
         aura: 'https://data.aura.finance/graphql',
+    },
+    hooks: {
+        ['0xb18fa0cb5de8cecb8899aae6e38b1b7ed77885da']: 'STABLE_SURGE',
     },
     eth: {
         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -51,7 +54,7 @@ export default <NetworkData>{
     rpcUrl: env.DRPC_API_KEY
         ? `https://lb.drpc.org/ogrpc?network=ethereum&dkey=${env.DRPC_API_KEY}`
         : 'https://rpc.ankr.com/eth',
-    rpcMaxBlockRange: 700,
+    rpcMaxBlockRange: 10000,
     protocolToken: 'bal',
     bal: {
         address: '0xba100000625a3754423978a60c9317c58a424e3d',
@@ -383,6 +386,12 @@ export default <NetworkData>{
             },
             wstETH: {
                 tokenAddress: '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0',
+                sourceUrl: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
+                path: 'data.smaApr',
+                isIbYield: true,
+            },
+            inwstETHs: {
+                tokenAddress: '0x8e0789d39db454dbe9f4a77acef6dc7c69f6d552',
                 sourceUrl: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
                 path: 'data.smaApr',
                 isIbYield: true,

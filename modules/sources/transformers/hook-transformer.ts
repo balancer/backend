@@ -1,6 +1,8 @@
+import { Chain } from '@prisma/client';
 import { GqlHook, GqlHookType, HookParams } from '../../../apps/api/gql/generated-schema';
 import { V3JoinedSubgraphPool } from '../subgraphs';
 import { zeroAddress } from 'viem';
+import config from '../../../config';
 
 export type HookData = {
     address: string;
@@ -24,7 +26,19 @@ export type HookData = {
     };
 };
 
-export const hookTransformer = (poolData: V3JoinedSubgraphPool): HookData | undefined => {
+const typeToParamsType = {
+    STABLE_SURGE: 'StableSurgeHookParams',
+    FEE_TAKING: 'FeeTakingHookParams',
+    EXIT_FEE: 'ExitFeeHookParams',
+    MEV_TAX: 'MevTaxHookParams',
+    DIRECTIONAL_FEE: undefined,
+    LOTTERY: undefined,
+    VEBAL_DISCOUNT: undefined,
+    NFTLIQUIDITY_POSITION: undefined,
+    UNKNOWN: undefined,
+};
+
+export const hookTransformer = (poolData: V3JoinedSubgraphPool, chain: Chain): HookData | undefined => {
     // By default v3 pools have a hook config with the address 0x0
     // We don't want to store this in the database because it's not doing anything
     const hookConfig =
@@ -35,27 +49,25 @@ export const hookTransformer = (poolData: V3JoinedSubgraphPool): HookData | unde
     }
 
     const { hook, ...hookFlags } = hookConfig;
+    const hookTypes = config[chain].hooks;
 
     return {
         address: hook.address.toLowerCase(),
-        type: 'UNKNOWN',
+        type: hookTypes?.[hook.address] || 'UNKNOWN',
         ...hookFlags,
     };
 };
 
 export const mapHookToGqlHook = (hookData: HookData): GqlHook | undefined => {
-    if (!hookData || !hookData.name) {
+    if (!hookData || !hookData.type) {
         return undefined;
     }
 
-    // Supported hooks are those defined in the graphql schema
-    if (!['StableSurgeHook', 'FeeTakingHook', 'ExitFeeHook'].includes(hookData.name)) {
-        return undefined;
-    }
+    const paramsTypename = typeToParamsType[hookData.type];
 
     return {
         address: hookData.address,
-        name: hookData.name,
+        name: hookData.name || '',
         type: hookData.type,
         config: {
             enableHookAdjustedAmounts: hookData.enableHookAdjustedAmounts,
@@ -70,10 +82,13 @@ export const mapHookToGqlHook = (hookData: HookData): GqlHook | undefined => {
             shouldCallComputeDynamicSwapFee: hookData.shouldCallComputeDynamicSwapFee,
         },
         reviewData: hookData.reviewData,
-        params: {
-            __typename: `${hookData.name}Params`,
-            ...hookData.dynamicData,
-        } as HookParams,
+        params:
+            (paramsTypename &&
+                ({
+                    __typename: paramsTypename,
+                    ...hookData.dynamicData,
+                } as HookParams)) ||
+            undefined,
         // Deprecated
         enableHookAdjustedAmounts: hookData.enableHookAdjustedAmounts,
         shouldCallAfterSwap: hookData.shouldCallAfterSwap,

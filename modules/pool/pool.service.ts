@@ -194,6 +194,8 @@ export class PoolService {
                 await syncGaugeStakingForPools(
                     new GaugeSubgraphService(networkconfig.subgraphs.gauge),
                     networkContext.data.bal.address,
+                    chain,
+                    networkconfig.gaugeControllerAddress,
                 );
             }
             if (networkconfig.subgraphs.aura) {

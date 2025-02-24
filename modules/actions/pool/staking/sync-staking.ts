@@ -39,6 +39,8 @@ export const syncStaking = async (chains: Chain[]) => {
             await syncGaugeStakingForPools(
                 new GaugeSubgraphService(networkconfig.subgraphs.gauge),
                 networkconfig.bal.address,
+                chain,
+                networkconfig.gaugeControllerAddress,
             );
         }
         if (networkconfig.subgraphs.aura) {

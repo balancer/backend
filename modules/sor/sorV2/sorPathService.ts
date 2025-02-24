@@ -39,6 +39,7 @@ import { PathWithAmount } from './lib/path';
 import { calculatePriceImpact, getInputAmount, getOutputAmount } from './lib/utils/helpers';
 import { Cache } from 'memory-cache';
 import config from '../../../config';
+import { HookData } from '../../sources/transformers';
 
 class SorPathService {
     private cache = new Cache<
@@ -480,7 +481,6 @@ class SorPathService {
                     notIn: [...poolIdsToExclude, ...poolsToIgnore],
                 },
                 type,
-                ...(considerPoolsWithHooks ? {} : { hook: { equals: Prisma.AnyNull } }),
             },
             include: prismaPoolAndHookWithDynamic.include,
         });
@@ -505,7 +505,13 @@ class SorPathService {
             include: prismaPoolAndHookWithDynamic.include,
         });
 
-        const allPools = [...pools, ...lbps];
+        // always include MEV_TAX hooks, even if considerPoolsWithHooks is false and we dont want to include hooks
+        const allPools = [
+            ...pools.filter(
+                (pool) => considerPoolsWithHooks || !pool.hook || (pool.hook as HookData).type === 'MEV_TAX',
+            ),
+            ...lbps,
+        ];
 
         const underlyingTokens = await this.getUnderlyingTokensFromDBPools(allPools, chain);
         const result = { pools: allPools, underlyingTokens };
@@ -523,9 +529,20 @@ class SorPathService {
         pools: PrismaPoolAndHookWithDynamic[],
         chain: Chain,
     ): Promise<{ address: string; decimals: number }[]> {
-        const underlyingTokenAddresses = pools
-            .flatMap((pool) => pool.tokens.map((token) => token.token.underlyingTokenAddress))
-            .filter((address) => address !== null);
+        const tokensWithUnderlying = pools.flatMap((pool) =>
+            pool.tokens.filter((token) => token.token.underlyingTokenAddress !== null),
+        );
+
+        const erc4626ThatCanBeUsedForSwaps = await prisma.prismaErc4626ReviewData.findMany({
+            where: {
+                chain,
+                erc4626Address: { in: tokensWithUnderlying.map((token) => token.address) },
+                canUseBufferForSwaps: true,
+            },
+        });
+
+        const underlyingTokenAddresses = erc4626ThatCanBeUsedForSwaps.map((data) => data.assetAddress);
+
         const underlyingTokens = await prisma.prismaToken.findMany({
             where: {
                 chain,
@@ -534,6 +551,7 @@ class SorPathService {
                 },
             },
         });
+
         if (underlyingTokens.length !== underlyingTokenAddresses.length) {
             underlyingTokenAddresses.forEach((address) => {
                 if (!underlyingTokens.find((token) => token.address === address)) {

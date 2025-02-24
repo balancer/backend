@@ -1,5 +1,88 @@
 # backend
 
+## 1.33.7
+
+### Patch Changes
+
+-   bf20bd2: include killed gauges in voting gauges list
+
+## 1.33.6
+
+### Patch Changes
+
+-   88f6327: vebal active gauges only
+-   0cce480: increase rpc batch size
+-   a7d76ee: tune rpc limits
+
+## 1.33.5
+
+### Patch Changes
+
+-   6a1f961: mev tax gql schema
+-   b58723c: set hook type for new pools
+-   9f87409: mev tax hook
+-   389d867: return all voting gauges
+
+## 1.33.4
+
+### Patch Changes
+
+-   023ff12: fixes gyro math implementation
+-   435fbdb: fix onchain pause/recovery state syncing
+-   f678d67: fix duplicated APR entries
+
+## 1.33.3
+
+### Patch Changes
+
+-   c61054e: add sts rewards claimed
+-   57e96d3: Bump balancer maths dependency to v0.0.22
+-   9e83d67: autodiscovery for aave aprs
+-   0600f58: apply underlying APR if any
+
+## 1.33.2
+
+### Patch Changes
+
+-   c5b2389: track vault events directly
+-   9792fe8: throw on invalid timestamp
+-   95b4614: enable sentry prisma tracing
+
+## 1.33.1
+
+### Patch Changes
+
+-   449f719: validate timestamp
+
+## 1.33.0
+
+### Minor Changes
+
+-   72b5d51: integrate useUnderlyingForAddRemove, useWrappedForAddRemove and canUseBufferForSwaps in queries and SOR
+
+### Patch Changes
+
+-   b070ffe: APR inwstETHs
+-   3ac8b70: handle hook param types in graphql
+-   5d2d347: add sts protocol fees
+
+## 1.32.2
+
+### Patch Changes
+
+-   f0391f1: production stableSurge amp
+-   67cbe5a: SOR - Update stable surge hook support
+-   72f0db1: StableSurge production addresses
+
+## 1.32.1
+
+### Patch Changes
+
+-   a32c701: hotfix for unsupported hooks in the schema
+-   672adf9: fix underlying token upsert
+-   9eb01c7: new aggregator query, add hook type
+-   d7d0be8: SG deployments for stable surge
+
 ## 1.32.0
 
 ### Minor Changes

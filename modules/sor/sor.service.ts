@@ -57,7 +57,7 @@ export class SorService {
                       wethIsEth: wethIsEth,
                   }
                 : undefined,
-            considerPoolsWithHooks: args.considerPoolsWithHooks ?? false,
+            considerPoolsWithHooks: args.considerPoolsWithHooks ?? true,
             poolIds: args.poolIds ?? undefined,
         };
 

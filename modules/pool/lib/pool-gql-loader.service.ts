@@ -37,7 +37,6 @@ import {
     GqlPoolAggregator,
     LiquidityManagement,
     GqlHook,
-    QueryPoolGetAggregatorPoolsArgs,
     QueryAggregatorPoolsArgs,
 } from '../../../apps/api/gql/generated-schema';
 import { addressesMatch } from '../../web3/addresses';
@@ -120,6 +119,9 @@ export class PoolGqlLoaderService {
                         ...erc4626ReviewData,
                         warnings: erc4626ReviewData.warnings?.split(',') || [],
                     };
+                    token.useUnderlyingForAddRemove = erc4626ReviewData.useUnderlyingForAddRemove;
+                    token.useWrappedForAddRemove = erc4626ReviewData.useUnderlyingForAddRemove;
+                    token.canUseBufferForSwaps = erc4626ReviewData.canUseBufferForSwaps;
                 }
             }
 
@@ -150,6 +152,9 @@ export class PoolGqlLoaderService {
                                 ...erc4626ReviewData,
                                 warnings: erc4626ReviewData.warnings?.split(',') || [],
                             };
+                            nestedToken.useUnderlyingForAddRemove = erc4626ReviewData.useUnderlyingForAddRemove;
+                            nestedToken.useWrappedForAddRemove = erc4626ReviewData.useUnderlyingForAddRemove;
+                            nestedToken.canUseBufferForSwaps = erc4626ReviewData.canUseBufferForSwaps;
                         }
                     }
                 }
@@ -273,9 +278,12 @@ export class PoolGqlLoaderService {
 
         for (const mappedPool of gqlPools) {
             // if a pool has a hook, we skip it if either there are no included hooks, or its type does not match an included hook
+            // always include MEV_TAX hook
             if (mappedPool.hook) {
-                if (!args.where?.includeHooks || !args.where.includeHooks.includes(mappedPool.hook.type)) {
-                    continue;
+                if (mappedPool.hook.type !== 'MEV_TAX') {
+                    if (!args.where?.includeHooks || !args.where.includeHooks.includes(mappedPool.hook.type)) {
+                        continue;
+                    }
                 }
             }
 

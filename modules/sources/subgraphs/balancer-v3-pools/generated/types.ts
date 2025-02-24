@@ -1002,6 +1002,7 @@ export type TypePoolFragment = {
     address: string;
     factory: { __typename?: 'Factory'; id: string; type: PoolType; version: number };
     stableParams?: { __typename?: 'StableParams'; amp: string } | null;
+    stableSurgeParams?: { __typename?: 'StableSurgeParams'; amp: string } | null;
     weightedParams?: { __typename?: 'WeightedParams'; weights: Array<string> } | null;
     gyro2Params?: { __typename?: 'Gyro2Params'; sqrtAlpha: string; sqrtBeta: string } | null;
     gyroEParams?: {
@@ -1040,6 +1041,7 @@ export type PoolsQuery = {
         address: string;
         factory: { __typename?: 'Factory'; id: string; type: PoolType; version: number };
         stableParams?: { __typename?: 'StableParams'; amp: string } | null;
+        stableSurgeParams?: { __typename?: 'StableSurgeParams'; amp: string } | null;
         weightedParams?: { __typename?: 'WeightedParams'; weights: Array<string> } | null;
         gyro2Params?: { __typename?: 'Gyro2Params'; sqrtAlpha: string; sqrtBeta: string } | null;
         gyroEParams?: {
@@ -1151,6 +1153,9 @@ export const TypePoolFragmentDoc = gql`
             version
         }
         stableParams {
+            amp
+        }
+        stableSurgeParams {
             amp
         }
         weightedParams {

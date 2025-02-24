@@ -10,6 +10,9 @@ export const syncErc4626Reviews = async (): Promise<void> => {
         name: item.name,
         assetAddress: item.asset.toLowerCase(),
         summary: item.summary,
+        canUseBufferForSwaps: item.canUseBufferForSwaps,
+        useUnderlyingForAddRemove: item.useUnderlyingForAddRemove,
+        useWrappedForAddRemove: item.useWrappedForAddRemove,
         reviewFile: item.review,
         warnings: item.warnings.join(','),
     }));

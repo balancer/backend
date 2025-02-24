@@ -40,9 +40,9 @@ export const poolUpsertTransformerV3 = (
             break;
         case PoolType.StableSurge:
             type = PrismaPoolType.STABLE;
-            if ((poolData as SepoliaTypePoolFragment).stableSurgeParams) {
+            if (poolData.stableSurgeParams) {
                 typeData = {
-                    amp: (poolData as SepoliaTypePoolFragment).stableSurgeParams!.amp,
+                    amp: poolData.stableSurgeParams!.amp,
                 } as StableData;
             }
             break;
@@ -79,7 +79,7 @@ export const poolUpsertTransformerV3 = (
             version: poolData.factory.version,
             createTime: Number(poolData.blockTimestamp),
             liquidityManagement: poolData.liquidityManagement,
-            hook: hookTransformer(poolData),
+            hook: hookTransformer(poolData, chain),
         },
         tokens: [
             ...poolData.tokens.map((token) => ({

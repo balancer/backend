@@ -11,6 +11,9 @@ interface Erc4626Review {
             asset: string;
             summary: string;
             review: string;
+            canUseBufferForSwaps: boolean;
+            useUnderlyingForAddRemove: boolean;
+            useWrappedForAddRemove: boolean;
             warnings: string[];
         };
     };

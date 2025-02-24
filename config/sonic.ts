@@ -17,7 +17,7 @@ export default <NetworkData>{
         balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmddFGnsFRhucWWk7ozsqw72mtDcS84UoqB5a2s6Rb7q2o`,
         gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmSRNzwTmLu55ZxxyxYULS5T1Kar7upz1jzL5FsMzLpB2e`,
         reliquary: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmUM8aU6H3gFx6JL65GQV5baPPjczU9hUb6VRiDQ1jEp3B`,
-        sts: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/Qmf7YfRPHCaSf6jeNbu8HUAWQ9Wba5ovk4HEPNaA8NTbvW`,
+        sts: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmYmPEGqVZPyJKRah4NVbCYtxkHrXq3QzqBrnVQYBt15MU`,
     },
     eth: {
         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -35,7 +35,7 @@ export default <NetworkData>{
         excludedTokenAddresses: [],
     },
     rpcUrl: `https://lb.drpc.org/ogrpc?network=sonic&dkey=${env.DRPC_BEETS_API_KEY}`,
-    rpcMaxBlockRange: 2000,
+    rpcMaxBlockRange: 10000,
     protocolToken: 'beets',
     beets: {
         address: '0x2d0e0814e62d80056181f5cd932274405966e4f0',
@@ -88,8 +88,10 @@ export default <NetworkData>{
             markets: [
                 '0x87178fe8698c7eda8aa207083c3d66aea569ab98', //solvbtc market 13
                 '0x52fc9e0a68b6a4c9b57b9d1d99fb71449a99dcd8', // solvbtc.bbn market 13
-                '0x016C306e103FbF48EC24810D078C65aD13c5f11B', // wS market 25
+                '0x016c306e103fbf48ec24810d078c65ad13c5f11b', // wS market 25
                 '0x219656f33c58488d09d518badf50aa8cdcaca2aa', // wETH market 26
+                '0x5954ce6671d97d24b782920ddcdbb4b1e63ab2de', // usdc market 23
+                '0x6c49b18333a1135e9a376560c07e6d1fd0350eaf', // Ws market 28
             ],
         },
         avalon: {

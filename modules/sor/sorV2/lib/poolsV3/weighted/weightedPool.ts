@@ -62,26 +62,34 @@ export class WeightedPoolV3 implements BasePoolV3 {
             );
             const scale18 = parseEther(poolToken.balance);
             const tokenAmount = TokenAmount.fromScale18Amount(token, scale18);
-            if (poolToken.token.underlyingTokenAddress && poolToken.token.isBufferAllowed) {
+            if (poolToken.token.underlyingTokenAddress) {
                 const underlyingToken = underlyingTokens.find(
                     (token) => token.address === poolToken.token.underlyingTokenAddress,
                 );
-                if (!underlyingToken) {
-                    throw new Error('Underlying token not found');
+                if (underlyingToken) {
+                    const unwrapRateDecimals = 18 - poolToken.token.decimals + underlyingToken.decimals;
+                    // erc4626 token
+                    poolTokens.push(
+                        new WeightedErc4626PoolToken(
+                            token,
+                            tokenAmount.amount,
+                            poolToken.index,
+                            parseEther(poolToken.priceRate),
+                            parseUnits(poolToken.token.unwrapRate, unwrapRateDecimals),
+                            poolToken.token.underlyingTokenAddress,
+                            parseEther(poolToken.weight),
+                        ),
+                    );
+                } else {
+                    poolTokens.push(
+                        new WeightedBasePoolToken(
+                            token,
+                            tokenAmount.amount,
+                            poolToken.index,
+                            parseEther(poolToken.weight),
+                        ),
+                    );
                 }
-                const unwrapRateDecimals = 18 - poolToken.token.decimals + underlyingToken.decimals;
-                // erc4626 token
-                poolTokens.push(
-                    new WeightedErc4626PoolToken(
-                        token,
-                        tokenAmount.amount,
-                        poolToken.index,
-                        parseEther(poolToken.priceRate),
-                        parseUnits(poolToken.token.unwrapRate, unwrapRateDecimals),
-                        poolToken.token.underlyingTokenAddress,
-                        parseEther(poolToken.weight),
-                    ),
-                );
             } else {
                 poolTokens.push(
                     new WeightedBasePoolToken(token, tokenAmount.amount, poolToken.index, parseEther(poolToken.weight)),
@@ -92,11 +100,6 @@ export class WeightedPoolV3 implements BasePoolV3 {
         //transform
         const hookState = getHookState(pool);
 
-        // typeguard
-        if (!isLiquidityManagement(pool.liquidityManagement)) {
-            throw new Error('LiquidityManagement must be of type LiquidityManagement and cannot be null');
-        }
-
         return new WeightedPoolV3(
             pool.id as Hex,
             pool.address,
@@ -106,7 +109,7 @@ export class WeightedPoolV3 implements BasePoolV3 {
             parseEther(pool.dynamicData.totalShares),
             poolTokens,
             pool.dynamicData.tokenPairsData as TokenPairData[],
-            pool.liquidityManagement,
+            pool.liquidityManagement as unknown as LiquidityManagement,
             hookState,
         );
     }

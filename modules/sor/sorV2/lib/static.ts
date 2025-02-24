@@ -1,6 +1,6 @@
 import { Router } from './router';
 import { PrismaPoolAndHookWithDynamic } from '../../../../prisma/prisma-types';
-import { checkInputs } from './utils/helpers';
+import { checkInputs, isLiquidityManagement } from './utils/helpers';
 import {
     ComposableStablePool,
     FxPool,
@@ -32,6 +32,13 @@ export async function sorGetPathsWithPools(
     const basePools: BasePool[] = [];
 
     for (const prismaPool of prismaPools) {
+        // typeguard
+        if (prismaPool.protocolVersion === 3) {
+            if (!isLiquidityManagement(prismaPool.liquidityManagement)) {
+                console.log('LiquidityManagement incorrect for pool', prismaPool.id);
+                continue;
+            }
+        }
         switch (prismaPool.type) {
             case 'WEIGHTED':
             /// LBPs can be handled like weighted pools

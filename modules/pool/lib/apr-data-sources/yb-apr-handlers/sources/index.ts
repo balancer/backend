@@ -28,3 +28,4 @@ export * from './ovix-apr-handler';
 export * from './bloom-apr-handler';
 export * as MakerGnosis from './maker-gnosis-apr-handler'; // Not used, not sure why it's not referenced anywhere ???
 export * from './silo-apr-handler';
+export * as AaveAuto from './aave-auto-apr-handler';

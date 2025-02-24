@@ -5,7 +5,7 @@ extend type Query {
     """
     Returns all pools with veBAL gauges that can be voted on.
     """
-    veBalGetVotingList: [GqlVotingPool!]!
+    veBalGetVotingList(includeKilled: Boolean): [GqlVotingPool!]!
     veBalGetUser(chain: GqlChain, address: String!): GqlVeBalUserData!
 }
 

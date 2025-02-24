@@ -196,7 +196,7 @@ export const schema = gql`
         EXIT_FEE
         FEE_TAKING
         LOTTERY
-        MEV_CAPTURE
+        MEV_TAX
         NFTLIQUIDITY_POSITION
         STABLE_SURGE
         UNKNOWN
@@ -643,6 +643,11 @@ export const schema = gql`
         APR that pools earns when BPT is staked on AURA.
         """
         AURA
+
+        """
+        Dynamic swap fee APR based on data from the last 24h
+        """
+        DYNAMIC_SWAP_FEE_24H
 
         """
         Represents the yield from an IB (Interest-Bearing) asset APR in a pool.
@@ -1280,7 +1285,7 @@ export const schema = gql`
         createTime: GqlPoolTimePeriod
         filterIn: [String!] @deprecated(reason: "unused")
         filterNotIn: [String!] @deprecated(reason: "unused")
-        hasHook: Boolean
+        hasHook: Boolean @deprecated(reason: "use tags to filter instead")
         idIn: [String!]
         idNotIn: [String!]
         minTvl: Float
@@ -2228,6 +2233,11 @@ export const schema = gql`
         USD Balance of the pool token.
         """
         balanceUSD: BigDecimal!
+
+        """
+        If it is an ERC4626 token, this defines whether we can use wrap/unwrap through the buffer in swap paths for this token.
+        """
+        canUseBufferForSwaps: Boolean
         chain: GqlChain
         chainId: Int
 
@@ -2270,6 +2280,7 @@ export const schema = gql`
         If it is an ERC4626 token, this defines whether we allow it to use the buffer for pool operations.
         """
         isBufferAllowed: Boolean!
+            @deprecated(reason: "Use useUnderlyingForAddRemove and useWrappedForAddRemove instead")
 
         """
         Whether the token is considered an ERC4626 token.
@@ -2314,7 +2325,7 @@ export const schema = gql`
         """
         The priority of the token, can be used for sorting.
         """
-        priority: Int
+        priority: Int @deprecated(reason: "Unused")
 
         """
         Conversion factor used to adjust for token decimals for uniform precision in calculations. V3 only.
@@ -2329,12 +2340,22 @@ export const schema = gql`
         """
         Is the token tradable
         """
-        tradable: Boolean
+        tradable: Boolean @deprecated(reason: "Unused")
 
         """
         If it is an ERC4626, this will be the underlying token if present in the API.
         """
         underlyingToken: GqlToken
+
+        """
+        If it is an ERC4626 token, this defines whether we allow underlying tokens to be used for add/remove operations.
+        """
+        useUnderlyingForAddRemove: Boolean
+
+        """
+        If it is an ERC4626 token, this defines whether we allow the wrapped tokens to be used for add/remove operations.
+        """
+        useWrappedForAddRemove: Boolean
 
         """
         The weight of the token in the pool if it is a weighted pool, null otherwise
@@ -3086,6 +3107,16 @@ export const schema = gql`
         exchangeRate: String!
 
         """
+        The total protocol fee collected in the last 24 hours.
+        """
+        protocolFee24h: String!
+
+        """
+        The total rewards claimed in the last 24 hours.
+        """
+        rewardsClaimed24h: String!
+
+        """
         The current rebasing APR for stS.
         """
         stakingApr: String!
@@ -3124,6 +3155,16 @@ export const schema = gql`
         """
         exchangeRate: String!
         id: ID!
+
+        """
+        The total protocol fee collected during that day.
+        """
+        protocolFee24h: String!
+
+        """
+        The total rewards claimed during that day.
+        """
+        rewardsClaimed24h: String!
 
         """
         The timestamp of the snapshot. Timestamp is end of day midnight.
@@ -3645,7 +3686,7 @@ export const schema = gql`
         shouldCallComputeDynamicSwapFee: Boolean!
     }
 
-    union HookParams = ExitFeeHookParams | FeeTakingHookParams | StableSurgeHookParams
+    union HookParams = ExitFeeHookParams | FeeTakingHookParams | MevTaxHookParams | StableSurgeHookParams
 
     scalar JSON
 
@@ -3672,6 +3713,15 @@ export const schema = gql`
         Whether this pool support additional, custom remove liquditiy operations apart from proportional, unbalanced and single asset.
         """
         enableRemoveLiquidityCustom: Boolean
+    }
+
+    """
+    MevTax hook specific params. Percentage format is 0.01 -> 0.01%.
+    """
+    type MevTaxHookParams {
+        maxMevSwapFeePercentage: String
+        mevTaxMultiplier: String
+        mevTaxThreshold: String
     }
 
     type Mutation {
@@ -4008,7 +4058,7 @@ export const schema = gql`
         """
         Returns all pools with veBAL gauges that can be voted on.
         """
-        veBalGetVotingList: [GqlVotingPool!]!
+        veBalGetVotingList(includeKilled: Boolean): [GqlVotingPool!]!
     }
 
     """

@@ -112,6 +112,8 @@ export type SonicStaking = {
     totalAssets: Scalars['BigDecimal'];
     totalDelegated: Scalars['BigDecimal'];
     totalPool: Scalars['BigDecimal'];
+    totalProtocolFee: Scalars['BigDecimal'];
+    totalRewardsClaimed: Scalars['BigDecimal'];
     validators?: Maybe<Array<Validator>>;
 };
 
@@ -127,10 +129,14 @@ export type SonicStakingSnapshot = {
     __typename?: 'SonicStakingSnapshot';
     exchangeRate: Scalars['BigDecimal'];
     id: Scalars['Bytes'];
+    protocolFee24h: Scalars['BigDecimal'];
+    rewardsClaimed24h: Scalars['BigDecimal'];
     snapshotTimestamp: Scalars['Int'];
     totalAssets: Scalars['BigDecimal'];
     totalDelegated: Scalars['BigDecimal'];
     totalPool: Scalars['BigDecimal'];
+    totalProtocolFee: Scalars['BigDecimal'];
+    totalRewardsClaimed: Scalars['BigDecimal'];
 };
 
 export type SonicStakingSnapshot_Filter = {
@@ -156,6 +162,22 @@ export type SonicStakingSnapshot_Filter = {
     id_not_contains?: InputMaybe<Scalars['Bytes']>;
     id_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
     or?: InputMaybe<Array<InputMaybe<SonicStakingSnapshot_Filter>>>;
+    protocolFee24h?: InputMaybe<Scalars['BigDecimal']>;
+    protocolFee24h_gt?: InputMaybe<Scalars['BigDecimal']>;
+    protocolFee24h_gte?: InputMaybe<Scalars['BigDecimal']>;
+    protocolFee24h_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    protocolFee24h_lt?: InputMaybe<Scalars['BigDecimal']>;
+    protocolFee24h_lte?: InputMaybe<Scalars['BigDecimal']>;
+    protocolFee24h_not?: InputMaybe<Scalars['BigDecimal']>;
+    protocolFee24h_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    rewardsClaimed24h?: InputMaybe<Scalars['BigDecimal']>;
+    rewardsClaimed24h_gt?: InputMaybe<Scalars['BigDecimal']>;
+    rewardsClaimed24h_gte?: InputMaybe<Scalars['BigDecimal']>;
+    rewardsClaimed24h_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    rewardsClaimed24h_lt?: InputMaybe<Scalars['BigDecimal']>;
+    rewardsClaimed24h_lte?: InputMaybe<Scalars['BigDecimal']>;
+    rewardsClaimed24h_not?: InputMaybe<Scalars['BigDecimal']>;
+    rewardsClaimed24h_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
     snapshotTimestamp?: InputMaybe<Scalars['Int']>;
     snapshotTimestamp_gt?: InputMaybe<Scalars['Int']>;
     snapshotTimestamp_gte?: InputMaybe<Scalars['Int']>;
@@ -188,15 +210,35 @@ export type SonicStakingSnapshot_Filter = {
     totalPool_lte?: InputMaybe<Scalars['BigDecimal']>;
     totalPool_not?: InputMaybe<Scalars['BigDecimal']>;
     totalPool_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    totalProtocolFee?: InputMaybe<Scalars['BigDecimal']>;
+    totalProtocolFee_gt?: InputMaybe<Scalars['BigDecimal']>;
+    totalProtocolFee_gte?: InputMaybe<Scalars['BigDecimal']>;
+    totalProtocolFee_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    totalProtocolFee_lt?: InputMaybe<Scalars['BigDecimal']>;
+    totalProtocolFee_lte?: InputMaybe<Scalars['BigDecimal']>;
+    totalProtocolFee_not?: InputMaybe<Scalars['BigDecimal']>;
+    totalProtocolFee_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    totalRewardsClaimed?: InputMaybe<Scalars['BigDecimal']>;
+    totalRewardsClaimed_gt?: InputMaybe<Scalars['BigDecimal']>;
+    totalRewardsClaimed_gte?: InputMaybe<Scalars['BigDecimal']>;
+    totalRewardsClaimed_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    totalRewardsClaimed_lt?: InputMaybe<Scalars['BigDecimal']>;
+    totalRewardsClaimed_lte?: InputMaybe<Scalars['BigDecimal']>;
+    totalRewardsClaimed_not?: InputMaybe<Scalars['BigDecimal']>;
+    totalRewardsClaimed_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
 };
 
 export enum SonicStakingSnapshot_OrderBy {
     exchangeRate = 'exchangeRate',
     id = 'id',
+    protocolFee24h = 'protocolFee24h',
+    rewardsClaimed24h = 'rewardsClaimed24h',
     snapshotTimestamp = 'snapshotTimestamp',
     totalAssets = 'totalAssets',
     totalDelegated = 'totalDelegated',
     totalPool = 'totalPool',
+    totalProtocolFee = 'totalProtocolFee',
+    totalRewardsClaimed = 'totalRewardsClaimed',
 }
 
 export type SonicStaking_Filter = {
@@ -246,6 +288,22 @@ export type SonicStaking_Filter = {
     totalPool_lte?: InputMaybe<Scalars['BigDecimal']>;
     totalPool_not?: InputMaybe<Scalars['BigDecimal']>;
     totalPool_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    totalProtocolFee?: InputMaybe<Scalars['BigDecimal']>;
+    totalProtocolFee_gt?: InputMaybe<Scalars['BigDecimal']>;
+    totalProtocolFee_gte?: InputMaybe<Scalars['BigDecimal']>;
+    totalProtocolFee_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    totalProtocolFee_lt?: InputMaybe<Scalars['BigDecimal']>;
+    totalProtocolFee_lte?: InputMaybe<Scalars['BigDecimal']>;
+    totalProtocolFee_not?: InputMaybe<Scalars['BigDecimal']>;
+    totalProtocolFee_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    totalRewardsClaimed?: InputMaybe<Scalars['BigDecimal']>;
+    totalRewardsClaimed_gt?: InputMaybe<Scalars['BigDecimal']>;
+    totalRewardsClaimed_gte?: InputMaybe<Scalars['BigDecimal']>;
+    totalRewardsClaimed_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
+    totalRewardsClaimed_lt?: InputMaybe<Scalars['BigDecimal']>;
+    totalRewardsClaimed_lte?: InputMaybe<Scalars['BigDecimal']>;
+    totalRewardsClaimed_not?: InputMaybe<Scalars['BigDecimal']>;
+    totalRewardsClaimed_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
     validators_?: InputMaybe<Validator_Filter>;
 };
 
@@ -255,6 +313,8 @@ export enum SonicStaking_OrderBy {
     totalAssets = 'totalAssets',
     totalDelegated = 'totalDelegated',
     totalPool = 'totalPool',
+    totalProtocolFee = 'totalProtocolFee',
+    totalRewardsClaimed = 'totalRewardsClaimed',
     validators = 'validators',
 }
 
@@ -394,6 +454,8 @@ export enum Validator_OrderBy {
     sonicStaking__totalAssets = 'sonicStaking__totalAssets',
     sonicStaking__totalDelegated = 'sonicStaking__totalDelegated',
     sonicStaking__totalPool = 'sonicStaking__totalPool',
+    sonicStaking__totalProtocolFee = 'sonicStaking__totalProtocolFee',
+    sonicStaking__totalRewardsClaimed = 'sonicStaking__totalRewardsClaimed',
 }
 
 export type _Block_ = {
@@ -432,6 +494,16 @@ export enum _SubgraphErrorPolicy_ {
     deny = 'deny',
 }
 
+export type SonicStakingQueryVariables = Exact<{
+    id: Scalars['ID'];
+    block?: InputMaybe<Block_Height>;
+}>;
+
+export type SonicStakingQuery = {
+    __typename?: 'Query';
+    sonicStaking?: { __typename?: 'SonicStaking'; totalProtocolFee: string; totalRewardsClaimed: string } | null;
+};
+
 export type ValidatorsQueryVariables = Exact<{
     skip?: InputMaybe<Scalars['Int']>;
     first?: InputMaybe<Scalars['Int']>;
@@ -465,7 +537,15 @@ export type SonicStakingSnapshotsQuery = {
         totalAssets: string;
         totalDelegated: string;
         exchangeRate: string;
+        protocolFee24h: string;
+        rewardsClaimed24h: string;
     }>;
+};
+
+export type SonicStakingFragment = {
+    __typename?: 'SonicStaking';
+    totalProtocolFee: string;
+    totalRewardsClaimed: string;
 };
 
 export type ValidatorFragment = { __typename?: 'Validator'; id: string; amountAssetsDelegated: string };
@@ -478,8 +558,16 @@ export type SonicStakingSnapshotFragment = {
     totalAssets: string;
     totalDelegated: string;
     exchangeRate: string;
+    protocolFee24h: string;
+    rewardsClaimed24h: string;
 };
 
+export const SonicStakingFragmentDoc = gql`
+    fragment SonicStaking on SonicStaking {
+        totalProtocolFee
+        totalRewardsClaimed
+    }
+`;
 export const ValidatorFragmentDoc = gql`
     fragment Validator on Validator {
         id
@@ -494,7 +582,17 @@ export const SonicStakingSnapshotFragmentDoc = gql`
         totalAssets
         totalDelegated
         exchangeRate
+        protocolFee24h
+        rewardsClaimed24h
     }
+`;
+export const SonicStakingDocument = gql`
+    query SonicStaking($id: ID!, $block: Block_height) {
+        sonicStaking(id: $id, block: $block) {
+            ...SonicStaking
+        }
+    }
+    ${SonicStakingFragmentDoc}
 `;
 export const ValidatorsDocument = gql`
     query Validators(
@@ -551,6 +649,20 @@ const defaultWrapper: SdkFunctionWrapper = (action, _operationName, _operationTy
 
 export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = defaultWrapper) {
     return {
+        SonicStaking(
+            variables: SonicStakingQueryVariables,
+            requestHeaders?: Dom.RequestInit['headers'],
+        ): Promise<SonicStakingQuery> {
+            return withWrapper(
+                (wrappedRequestHeaders) =>
+                    client.request<SonicStakingQuery>(SonicStakingDocument, variables, {
+                        ...requestHeaders,
+                        ...wrappedRequestHeaders,
+                    }),
+                'SonicStaking',
+                'query',
+            );
+        },
         Validators(
             variables?: ValidatorsQueryVariables,
             requestHeaders?: Dom.RequestInit['headers'],

@@ -6,6 +6,7 @@ import {
     SonicStakingSnapshotFragment,
     Validator_OrderBy,
     ValidatorFragment,
+    SonicStakingFragment,
 } from './generated/sts-subgraph-types';
 
 export class StsSubgraphService {
@@ -39,6 +40,15 @@ export class StsSubgraphService {
         }
 
         return validators;
+    }
+
+    public async getStakingData(block?: number): Promise<SonicStakingFragment | undefined> {
+        const response = await this.sdk.SonicStaking({
+            id: '0xe5da20f15420ad15de0fa650600afc998bbe3955',
+            block: block ? { number: block } : undefined,
+        });
+
+        return response.sonicStaking ? response.sonicStaking : undefined;
     }
 
     public async getAllStakingSnapshots(): Promise<SonicStakingSnapshotFragment[]> {

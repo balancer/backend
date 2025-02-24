@@ -15,6 +15,8 @@ import { HookState } from '@balancer-labs/balancer-maths';
 import { LiquidityManagement } from '../../../types';
 
 import { parseEther, parseUnits } from 'viem';
+import { PrismaPoolAndHookWithDynamic } from '../../../../../prisma/prisma-types';
+import { HookData } from '../../../../sources/transformers';
 
 export function checkInputs(
     tokenIn: Token,
@@ -77,41 +79,53 @@ export function getOutputAmount(paths: PathWithAmount[]): TokenAmount {
     return amounts.reduce((a, b) => a.add(b));
 }
 
-export function getHookState(pool: any): HookState | undefined {
-    if (pool.hook === undefined || pool.hook === null) {
+export function getHookState(pool: PrismaPoolAndHookWithDynamic): HookState | undefined {
+    if (!pool.hook) {
         return undefined;
     }
 
-    if (pool.hook.name === 'ExitFee') {
-        // api for this hook is an Object with removeLiquidityFeePercentage key & fee as string
-        const dynamicData = pool.hook.dynamicData as { removeLiquidityFeePercentage: string };
+    const hookData = pool.hook as HookData;
 
-        return {
-            tokens: pool.tokens.map((token: { address: string }) => token.address),
-            // ExitFeeHook will always have dynamicData as part of the API response
-            removeLiquidityHookFeePercentage: parseEther(dynamicData.removeLiquidityFeePercentage),
-            hookType: pool.hook.name,
-        };
+    switch (hookData.type) {
+        case 'EXIT_FEE': {
+            // api for this hook is an Object with removeLiquidityFeePercentage key & fee as string
+            const dynamicData = hookData.dynamicData as { removeLiquidityFeePercentage: string };
+
+            return {
+                tokens: pool.tokens.map((token: { address: string }) => token.address),
+                // ExitFeeHook will always have dynamicData as part of the API response
+                removeLiquidityHookFeePercentage: parseEther(dynamicData.removeLiquidityFeePercentage),
+                hookType: 'ExitFee',
+            };
+        }
+        case 'DIRECTIONAL_FEE': {
+            // this hook does not require a hook state to be passed
+            return {
+                hookType: 'DirectionalFee',
+            } as HookState;
+        }
+        case 'STABLE_SURGE': {
+            const typeData = pool.typeData as { amp: string };
+            const dynamicData = hookData.dynamicData as {
+                surgeThresholdPercentage: string;
+                maxSurgeFeePercentage: string;
+            };
+            return {
+                // amp onchain precision is 1000. Api returns 200 means onchain value is 200000
+                amp: parseUnits(typeData.amp, 3),
+                // 18 decimal precision.
+                surgeThresholdPercentage: parseEther(dynamicData.surgeThresholdPercentage),
+                maxSurgeFeePercentage: parseEther(dynamicData.maxSurgeFeePercentage),
+                hookType: 'StableSurge',
+            };
+        }
+        default:
+            if (hookData.type) {
+                console.warn(`pool ${pool.id} with hook type ${hookData.type} not implemented`);
+            }
+
+            return undefined;
     }
-
-    if (pool.hook.name === 'DirectionalFee') {
-        // this hook does not require a hook state to be passed
-        return {
-            hookType: pool.hook.name,
-        } as HookState;
-    }
-
-    if (pool.hook.name === 'StableSurge') {
-        return {
-            // amp onchain precision is 1000. Api returns 200 means onchain value is 200000
-            amp: parseUnits(pool.typeData.amp, 3),
-            // 18 decimal precision.
-            surgeThresholdPercentage: parseEther(pool.hook.dynamicData.surgeThresholdPercentage),
-            hookType: pool.hook.name,
-        };
-    }
-
-    throw new Error(`${pool.hook.name} hook not implemented`);
 }
 
 export function isLiquidityManagement(value: any): value is LiquidityManagement {

@@ -1,4 +1,4 @@
-import { Chain, Prisma } from '@prisma/client';
+import { Chain } from '@prisma/client';
 import { prisma } from '../../prisma/prisma-client';
 
 export const blockNumbers = (db = prisma) => ({
@@ -10,6 +10,10 @@ export const blockNumbers = (db = prisma) => ({
      * @returns
      */
     async getBlock(chain: Chain, timestamp: number) {
+        if (timestamp < 0 || timestamp > Date.now() / 1000 + 10 * 365 * 24 * 60 * 60) {
+            throw new Error(`Invalid timestamp ${timestamp}`);
+        }
+
         const [event] = await db.$queryRawUnsafe<{ blockNumber: number }[]>(`
             SELECT "blockNumber"
             FROM "PartitionedPoolEvent"

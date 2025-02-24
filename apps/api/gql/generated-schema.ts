@@ -195,7 +195,7 @@ export type GqlHookType =
     | 'EXIT_FEE'
     | 'FEE_TAKING'
     | 'LOTTERY'
-    | 'MEV_CAPTURE'
+    | 'MEV_TAX'
     | 'NFTLIQUIDITY_POSITION'
     | 'STABLE_SURGE'
     | 'UNKNOWN'
@@ -410,6 +410,8 @@ export interface GqlPoolAprItem {
 export type GqlPoolAprItemType =
     /** APR that pools earns when BPT is staked on AURA. */
     | 'AURA'
+    /** Dynamic swap fee APR based on data from the last 24h */
+    | 'DYNAMIC_SWAP_FEE_24H'
     /** Represents the yield from an IB (Interest-Bearing) asset APR in a pool. */
     | 'IB_YIELD'
     /** APR in a pool that can be earned through locking, i.e. veBAL */
@@ -1584,6 +1586,8 @@ export interface GqlPoolTokenDetail {
     balance: Scalars['BigDecimal'];
     /** USD Balance of the pool token. */
     balanceUSD: Scalars['BigDecimal'];
+    /** If it is an ERC4626 token, this defines whether we can use wrap/unwrap through the buffer in swap paths for this token. */
+    canUseBufferForSwaps?: Maybe<Scalars['Boolean']>;
     chain?: Maybe<GqlChain>;
     chainId?: Maybe<Scalars['Int']>;
     /** Coingecko ID */
@@ -1600,7 +1604,10 @@ export interface GqlPoolTokenDetail {
     index: Scalars['Int'];
     /** Whether the token is in the allow list. */
     isAllowed: Scalars['Boolean'];
-    /** If it is an ERC4626 token, this defines whether we allow it to use the buffer for pool operations. */
+    /**
+     * If it is an ERC4626 token, this defines whether we allow it to use the buffer for pool operations.
+     * @deprecated Use useUnderlyingForAddRemove and useWrappedForAddRemove instead
+     */
     isBufferAllowed: Scalars['Boolean'];
     /** Whether the token is considered an ERC4626 token. */
     isErc4626: Scalars['Boolean'];
@@ -1618,16 +1625,26 @@ export interface GqlPoolTokenDetail {
     priceRateProvider?: Maybe<Scalars['String']>;
     /** Additional data for the price rate provider, such as reviews or warnings. */
     priceRateProviderData?: Maybe<GqlPriceRateProviderData>;
-    /** The priority of the token, can be used for sorting. */
+    /**
+     * The priority of the token, can be used for sorting.
+     * @deprecated Unused
+     */
     priority?: Maybe<Scalars['Int']>;
     /** Conversion factor used to adjust for token decimals for uniform precision in calculations. V3 only. */
     scalingFactor?: Maybe<Scalars['BigDecimal']>;
     /** Symbol of the pool token. */
     symbol: Scalars['String'];
-    /** Is the token tradable */
+    /**
+     * Is the token tradable
+     * @deprecated Unused
+     */
     tradable?: Maybe<Scalars['Boolean']>;
     /** If it is an ERC4626, this will be the underlying token if present in the API. */
     underlyingToken?: Maybe<GqlToken>;
+    /** If it is an ERC4626 token, this defines whether we allow underlying tokens to be used for add/remove operations. */
+    useUnderlyingForAddRemove?: Maybe<Scalars['Boolean']>;
+    /** If it is an ERC4626 token, this defines whether we allow the wrapped tokens to be used for add/remove operations. */
+    useWrappedForAddRemove?: Maybe<Scalars['Boolean']>;
     /** The weight of the token in the pool if it is a weighted pool, null otherwise */
     weight?: Maybe<Scalars['BigDecimal']>;
 }
@@ -2110,6 +2127,10 @@ export interface GqlStakedSonicData {
     delegatedValidators: Array<GqlStakedSonicDelegatedValidator>;
     /** Current exchange rate for stS -> S */
     exchangeRate: Scalars['String'];
+    /** The total protocol fee collected in the last 24 hours. */
+    protocolFee24h: Scalars['String'];
+    /** The total rewards claimed in the last 24 hours. */
+    rewardsClaimed24h: Scalars['String'];
     /** The current rebasing APR for stS. */
     stakingApr: Scalars['String'];
     /** Total amount of S in custody of stS. Delegated S plus pool S. */
@@ -2133,6 +2154,10 @@ export interface GqlStakedSonicSnapshot {
     /** Current exchange rate for stS -> S */
     exchangeRate: Scalars['String'];
     id: Scalars['ID'];
+    /** The total protocol fee collected during that day. */
+    protocolFee24h: Scalars['String'];
+    /** The total rewards claimed during that day. */
+    rewardsClaimed24h: Scalars['String'];
     /** The timestamp of the snapshot. Timestamp is end of day midnight. */
     timestamp: Scalars['Int'];
     /** Total amount of S in custody of stS. Delegated S plus pool S. */
@@ -2445,7 +2470,7 @@ export interface HookConfig {
     shouldCallComputeDynamicSwapFee: Scalars['Boolean'];
 }
 
-export type HookParams = ExitFeeHookParams | FeeTakingHookParams | StableSurgeHookParams;
+export type HookParams = ExitFeeHookParams | FeeTakingHookParams | MevTaxHookParams | StableSurgeHookParams;
 
 /** Liquidity management settings for v3 pools. */
 export interface LiquidityManagement {
@@ -2458,6 +2483,14 @@ export interface LiquidityManagement {
     enableDonation?: Maybe<Scalars['Boolean']>;
     /** Whether this pool support additional, custom remove liquditiy operations apart from proportional, unbalanced and single asset. */
     enableRemoveLiquidityCustom?: Maybe<Scalars['Boolean']>;
+}
+
+/** MevTax hook specific params. Percentage format is 0.01 -> 0.01%. */
+export interface MevTaxHookParams {
+    __typename?: 'MevTaxHookParams';
+    maxMevSwapFeePercentage?: Maybe<Scalars['String']>;
+    mevTaxMultiplier?: Maybe<Scalars['String']>;
+    mevTaxThreshold?: Maybe<Scalars['String']>;
 }
 
 export interface Mutation {
@@ -2916,6 +2949,10 @@ export interface QueryVeBalGetUserBalancesArgs {
     chains?: InputMaybe<Array<GqlChain>>;
 }
 
+export interface QueryVeBalGetVotingListArgs {
+    includeKilled?: InputMaybe<Scalars['Boolean']>;
+}
+
 /** StableSurge hook specific params. Percentage format is 0.01 -> 0.01%. */
 export interface StableSurgeHookParams {
     __typename?: 'StableSurgeHookParams';
@@ -3211,11 +3248,13 @@ export type ResolversTypes = ResolversObject<{
     HookParams:
         | ResolversTypes['ExitFeeHookParams']
         | ResolversTypes['FeeTakingHookParams']
+        | ResolversTypes['MevTaxHookParams']
         | ResolversTypes['StableSurgeHookParams'];
     ID: ResolverTypeWrapper<Scalars['ID']>;
     Int: ResolverTypeWrapper<Scalars['Int']>;
     JSON: ResolverTypeWrapper<Scalars['JSON']>;
     LiquidityManagement: ResolverTypeWrapper<LiquidityManagement>;
+    MevTaxHookParams: ResolverTypeWrapper<MevTaxHookParams>;
     Mutation: ResolverTypeWrapper<{}>;
     PoolForBatchSwap: ResolverTypeWrapper<PoolForBatchSwap>;
     Query: ResolverTypeWrapper<{}>;
@@ -3394,11 +3433,13 @@ export type ResolversParentTypes = ResolversObject<{
     HookParams:
         | ResolversParentTypes['ExitFeeHookParams']
         | ResolversParentTypes['FeeTakingHookParams']
+        | ResolversParentTypes['MevTaxHookParams']
         | ResolversParentTypes['StableSurgeHookParams'];
     ID: Scalars['ID'];
     Int: Scalars['Int'];
     JSON: Scalars['JSON'];
     LiquidityManagement: LiquidityManagement;
+    MevTaxHookParams: MevTaxHookParams;
     Mutation: {};
     PoolForBatchSwap: PoolForBatchSwap;
     Query: {};
@@ -4643,6 +4684,7 @@ export type GqlPoolTokenDetailResolvers<
     address?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     balance?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
     balanceUSD?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
+    canUseBufferForSwaps?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
     chain?: Resolver<Maybe<ResolversTypes['GqlChain']>, ParentType, ContextType>;
     chainId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
     coingeckoId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -4666,6 +4708,8 @@ export type GqlPoolTokenDetailResolvers<
     symbol?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     tradable?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
     underlyingToken?: Resolver<Maybe<ResolversTypes['GqlToken']>, ParentType, ContextType>;
+    useUnderlyingForAddRemove?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+    useWrappedForAddRemove?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
     weight?: Resolver<Maybe<ResolversTypes['BigDecimal']>, ParentType, ContextType>;
     __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
@@ -5083,6 +5127,8 @@ export type GqlStakedSonicDataResolvers<
 > = ResolversObject<{
     delegatedValidators?: Resolver<Array<ResolversTypes['GqlStakedSonicDelegatedValidator']>, ParentType, ContextType>;
     exchangeRate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+    protocolFee24h?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+    rewardsClaimed24h?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     stakingApr?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     totalAssets?: Resolver<ResolversTypes['AmountHumanReadable'], ParentType, ContextType>;
     totalAssetsDelegated?: Resolver<ResolversTypes['AmountHumanReadable'], ParentType, ContextType>;
@@ -5105,6 +5151,8 @@ export type GqlStakedSonicSnapshotResolvers<
 > = ResolversObject<{
     exchangeRate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+    protocolFee24h?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+    rewardsClaimed24h?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     timestamp?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     totalAssets?: Resolver<ResolversTypes['AmountHumanReadable'], ParentType, ContextType>;
     totalAssetsDelegated?: Resolver<ResolversTypes['AmountHumanReadable'], ParentType, ContextType>;
@@ -5351,7 +5399,7 @@ export type HookParamsResolvers<
     ParentType extends ResolversParentTypes['HookParams'] = ResolversParentTypes['HookParams'],
 > = ResolversObject<{
     __resolveType: TypeResolveFn<
-        'ExitFeeHookParams' | 'FeeTakingHookParams' | 'StableSurgeHookParams',
+        'ExitFeeHookParams' | 'FeeTakingHookParams' | 'MevTaxHookParams' | 'StableSurgeHookParams',
         ParentType,
         ContextType
     >;
@@ -5369,6 +5417,16 @@ export type LiquidityManagementResolvers<
     enableAddLiquidityCustom?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
     enableDonation?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
     enableRemoveLiquidityCustom?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+    __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type MevTaxHookParamsResolvers<
+    ContextType = ResolverContext,
+    ParentType extends ResolversParentTypes['MevTaxHookParams'] = ResolversParentTypes['MevTaxHookParams'],
+> = ResolversObject<{
+    maxMevSwapFeePercentage?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    mevTaxMultiplier?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    mevTaxThreshold?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -5748,7 +5806,12 @@ export type QueryResolvers<
         ContextType,
         RequireFields<QueryVeBalGetUserBalancesArgs, 'address'>
     >;
-    veBalGetVotingList?: Resolver<Array<ResolversTypes['GqlVotingPool']>, ParentType, ContextType>;
+    veBalGetVotingList?: Resolver<
+        Array<ResolversTypes['GqlVotingPool']>,
+        ParentType,
+        ContextType,
+        RequireFields<QueryVeBalGetVotingListArgs, never>
+    >;
 }>;
 
 export type StableSurgeHookParamsResolvers<
@@ -5903,6 +5966,7 @@ export type Resolvers<ContextType = ResolverContext> = ResolversObject<{
     HookParams?: HookParamsResolvers<ContextType>;
     JSON?: GraphQLScalarType;
     LiquidityManagement?: LiquidityManagementResolvers<ContextType>;
+    MevTaxHookParams?: MevTaxHookParamsResolvers<ContextType>;
     Mutation?: MutationResolvers<ContextType>;
     PoolForBatchSwap?: PoolForBatchSwapResolvers<ContextType>;
     Query?: QueryResolvers<ContextType>;
