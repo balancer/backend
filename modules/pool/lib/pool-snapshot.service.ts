@@ -29,7 +29,7 @@ export class PoolSnapshotService {
         const timestamp = this.getTimestampForRange(range);
 
         return prisma.prismaPoolSnapshot.findMany({
-            where: { poolId, timestamp: { gte: timestamp }, chain },
+            where: { poolId, timestamp: { gt: timestamp }, chain },
             orderBy: { timestamp: 'asc' },
         });
     }
