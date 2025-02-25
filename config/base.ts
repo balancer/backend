@@ -77,6 +77,18 @@ export default <NetworkData>{
             tokens: {},
         },
         defaultHandlers: {
+            'sp-ysUSDC': {
+                tokenAddress: '0xffe8b2295cef70290819a8193834cc7900bcef5f',
+                sourceUrl: 'https://www.superform.xyz/api/proxy/stats/vault/supervault/vL7k-5ZgYCoFgi6kz2jIJ/',
+                path: 'apy',
+                isIbYield: true,
+            },
+            ysUSDC: {
+                tokenAddress: '0xe9f2a5f9f3c846f29066d7fb3564f8e6b6b2d65b',
+                sourceUrl: 'https://www.superform.xyz/api/proxy/stats/vault/supervault/zLVQbgScIbXJuSz-NNsK-/',
+                path: 'apy',
+                isIbYield: true,
+            },
             yUSD: {
                 tokenAddress: '0x895e15020c3f52ddd4d8e9514eb83c39f53b1579',
                 sourceUrl: 'https://ctrl.yield.fi/t/apy',
