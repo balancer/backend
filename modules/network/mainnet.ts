@@ -17,6 +17,7 @@ import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer
 import config from '../../config';
 import { UserSyncAuraBalanceService } from '../user/lib/user-sync-aura-balance.service';
 import { UserSyncVebalLockBalanceService } from '../user/lib/user-sync-vebal-lock-balance.service';
+import { AaveApiAprService } from '../pool/lib/apr-data-sources/aave-api-apr-handler';
 
 export const data: NetworkData = config.MAINNET;
 
@@ -32,6 +33,7 @@ export const mainnetNetworkConfig: NetworkConfig = {
         new VeBalProtocolAprService(data.rpcUrl),
         new VeBalVotingAprService(),
         new MorphoRewardsAprService(),
+        new AaveApiAprService(),
     ],
     userStakedBalanceServices: [
         new UserSyncGaugeBalanceService(),

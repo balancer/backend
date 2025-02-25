@@ -14,6 +14,7 @@ import { env } from '../../apps/env';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import config from '../../config';
 import { UserSyncAuraBalanceService } from '../user/lib/user-sync-aura-balance.service';
+import { AaveApiAprService } from '../pool/lib/apr-data-sources/aave-api-apr-handler';
 
 const baseNetworkData: NetworkData = config.BASE;
 
@@ -27,6 +28,7 @@ export const baseNetworkConfig: NetworkConfig = {
         new SwapFeeAprService(),
         new GaugeAprService(),
         new MorphoRewardsAprService(),
+        new AaveApiAprService(),
     ],
     userStakedBalanceServices: [new UserSyncGaugeBalanceService(), new UserSyncAuraBalanceService()],
     services: {

@@ -69,7 +69,7 @@ export class AaveApiAprService implements PoolAprService {
         }[] = [];
 
         for (const chain in poolsByChain) {
-            const aprItemsForChain = await this.fetchAprForChain(chain, poolsByChain[chain]);
+            const aprItemsForChain = await this.fetchAprForChain(chainToChainId[chain], poolsByChain[chain]);
             aprItems.push(...aprItemsForChain);
             if (chain === 'MAINNET') {
                 // also fetch lido prime instance items on mainnet
@@ -81,7 +81,7 @@ export class AaveApiAprService implements PoolAprService {
         return aprItems;
     }
 
-    private async fetchAprForChain(chain: string, pools: PrismaPoolWithTokens[]) {
+    private async fetchAprForChain(chainId: string, pools: PrismaPoolWithTokens[]) {
         const aprItems: {
             id: string;
             chain: Chain;
@@ -93,7 +93,7 @@ export class AaveApiAprService implements PoolAprService {
             rewardTokenSymbol: string;
         }[] = [];
 
-        const aaveIncentivesForChain = (await fetch(`${this.base}${chainToChainId[chain]}`).then((res) =>
+        const aaveIncentivesForChain = (await fetch(`${this.base}${chainId}`).then((res) =>
             res.json(),
         )) as AaveIncentive;
 
