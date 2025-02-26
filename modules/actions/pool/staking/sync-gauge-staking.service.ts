@@ -11,7 +11,6 @@
 import { prisma } from '../../../../prisma/prisma-client';
 import { prismaBulkExecuteOperations } from '../../../../prisma/prisma-util';
 import { Chain, PrismaPoolStakingType } from '@prisma/client';
-import { networkContext } from '../../../network/network-context.service';
 import { GaugeSubgraphService, LiquidityGaugeStatus } from '../../../subgraphs/gauge-subgraph/gauge-subgraph.service';
 import gaugeControllerAbi from '../../../vebal/abi/gaugeController.json';
 import childChainGaugeV2Abi from './abi/ChildChainGaugeV2.json';
@@ -20,9 +19,9 @@ import mainnetLiquidityGaugeAbi from './abi/MainnetLiquidityGauge.json';
 import { BigNumber } from '@ethersproject/bignumber';
 import { formatUnits } from '@ethersproject/units';
 import type { JsonFragment } from '@ethersproject/abi';
-import { Multicaller3 } from '../../../web3/multicaller3';
 import { getInflationRate } from '../../../vebal/balancer-token-admin.service';
 import _ from 'lodash';
+import { Multicaller3Viem } from '../../../web3/multicaller-viem';
 
 interface GaugeRewardData {
     [address: string]: {
@@ -48,10 +47,12 @@ interface GaugeBalDistributionData {
 export const syncGaugeStakingForPools = async (
     gaugeSubgraphService: GaugeSubgraphService,
     balAddressInput: string,
+    chain: Chain,
+    gaugeControllerAddress?: string,
 ): Promise<void> => {
     const balAddress = balAddressInput.toLowerCase();
 
-    const balMulticaller = new Multicaller3([
+    const balMulticaller = new Multicaller3Viem(chain, [
         ...childChainGaugeV2Abi.filter((abi) => abi.name === 'totalSupply'),
         ...childChainGaugeV2Abi.filter((abi) => abi.name === 'working_supply'),
         ...childChainGaugeV2Abi.filter((abi) => abi.name === 'inflation_rate'),
@@ -59,24 +60,25 @@ export const syncGaugeStakingForPools = async (
         gaugeControllerAbi.find((abi) => abi.name === 'gauge_relative_weight'),
     ] as JsonFragment[]);
 
-    const rewardsMulticallerV1 = new Multicaller3([
+    const rewardsMulticallerV1 = new Multicaller3Viem(chain, [
         ...childChainGaugeV1Abi.filter((abi) => abi.name === 'reward_data'),
     ]);
 
-    const rewardsMulticallerV2 = new Multicaller3([
+    const rewardsMulticallerV2 = new Multicaller3Viem(chain, [
         ...childChainGaugeV2Abi.filter((abi) => abi.name === 'reward_data'),
     ]);
 
     // Getting data from the DB and subgraph
 
     const dbPools = await prisma.prismaPool.findMany({
-        where: { chain: networkContext.chain },
+        where: { chain },
         include: { staking: { include: { gauge: { include: { rewards: true } } } } },
     });
 
     const poolAddresses = dbPools.map((pool) => pool.address);
     const { liquidityGauges: subgraphGauges } = await gaugeSubgraphService.getAllGaugesForPoolAddresses(poolAddresses);
 
+    console.log(subgraphGauges.find((g) => g.id === '0x5a7f39435fd9c381e4932fa2047c9a5136a5e3e7'));
     /*
     TODO This can result in multiple preferential gauges for a pool 
     because its a manual two-step process to set them (set new preferential and unset old preferential)
@@ -90,7 +92,7 @@ export const syncGaugeStakingForPools = async (
             : !gauge.isPreferentialGauge
             ? 'ACTIVE'
             : ('PREFERRED' as LiquidityGaugeStatus),
-        version: gauge.streamer || networkContext.chain == 'MAINNET' ? 1 : (2 as 1 | 2),
+        version: gauge.streamer || chain == 'MAINNET' ? 1 : (2 as 1 | 2),
         tokens: gauge.tokens || [],
         createTime: gauge.gauge?.addedTimestamp,
     }));
@@ -99,9 +101,9 @@ export const syncGaugeStakingForPools = async (
         const preferredGaugesForPool = gaugesForDb.filter((g) => gauge.poolId === g.poolId && g.status === 'PREFERRED');
         if (preferredGaugesForPool.length > 1) {
             console.error(
-                `Pool ${gauge.poolId} on ${
-                    networkContext.chain
-                } has multiple preferred gauges: ${preferredGaugesForPool.map((gauge) => gauge.id)}`,
+                `Pool ${gauge.poolId} on ${chain} has multiple preferred gauges: ${preferredGaugesForPool.map(
+                    (gauge) => gauge.id,
+                )}`,
             );
         }
     }
@@ -118,7 +120,7 @@ export const syncGaugeStakingForPools = async (
                         .filter((address): address is string => !!address),
                 ],
             },
-            chain: networkContext.chain,
+            chain,
         },
     });
 
@@ -128,6 +130,8 @@ export const syncGaugeStakingForPools = async (
         balMulticaller,
         rewardsMulticallerV1,
         rewardsMulticallerV2,
+        chain,
+        gaugeControllerAddress,
     );
 
     // Prepare DB operations
@@ -145,10 +149,10 @@ export const syncGaugeStakingForPools = async (
         if (!dbStaking) {
             operations.push(
                 prisma.prismaPoolStaking.upsert({
-                    where: { id_chain: { id: gauge.id, chain: networkContext.chain } },
+                    where: { id_chain: { id: gauge.id, chain } },
                     create: {
                         id: gauge.id,
-                        chain: networkContext.chain,
+                        chain,
                         poolId: gauge.poolId,
                         type: 'GAUGE',
                         address: gauge.id,
@@ -170,12 +174,12 @@ export const syncGaugeStakingForPools = async (
         ) {
             operations.push(
                 prisma.prismaPoolStakingGauge.upsert({
-                    where: { id_chain: { id: gauge.id, chain: networkContext.chain } },
+                    where: { id_chain: { id: gauge.id, chain } },
                     create: {
                         id: gauge.id,
                         stakingId: gauge.id,
                         gaugeAddress: gauge.id,
-                        chain: networkContext.chain,
+                        chain,
                         status: gauge.status,
                         version: gauge.version,
                         workingSupply: workingSupply,
@@ -203,7 +207,7 @@ export const syncGaugeStakingForPools = async (
             if (Number(rewardPerSecond) > 0) {
                 const poolId = subgraphGauges.find((gauge) => gauge.id === gaugeId)?.poolId;
                 console.error(
-                    `Could not find reward token (${tokenAddress}) in DB for gauge ${gaugeId} of pool ${poolId} on chain ${networkContext.chain}`,
+                    `Could not find reward token (${tokenAddress}) in DB for gauge ${gaugeId} of pool ${poolId} on chain ${chain}`,
                 );
             }
             continue;
@@ -216,7 +220,7 @@ export const syncGaugeStakingForPools = async (
                 prisma.prismaPoolStakingGaugeReward.upsert({
                     create: {
                         id,
-                        chain: networkContext.chain,
+                        chain,
                         gaugeId,
                         tokenAddress,
                         rewardPerSecond,
@@ -226,7 +230,7 @@ export const syncGaugeStakingForPools = async (
                         rewardPerSecond,
                         isVeBalemissions,
                     },
-                    where: { id_chain: { id, chain: networkContext.chain } },
+                    where: { id_chain: { id, chain } },
                 }),
             );
         }
@@ -238,9 +242,11 @@ export const syncGaugeStakingForPools = async (
 const getOnchainRewardTokensData = async (
     gauges: { id: string; version: 1 | 2; tokens: { id: string; decimals: number }[] }[],
     balAddress: string,
-    balMulticaller: Multicaller3,
-    rewardsMulticallerV1: Multicaller3,
-    rewardsMulticallerV2: Multicaller3,
+    balMulticaller: Multicaller3Viem,
+    rewardsMulticallerV1: Multicaller3Viem,
+    rewardsMulticallerV2: Multicaller3Viem,
+    chain: Chain,
+    gaugeControllerAddress?: string,
 ): Promise<
     {
         id: string;
@@ -257,10 +263,10 @@ const getOnchainRewardTokensData = async (
         if (gauge.version === 2) {
             balMulticaller.call(`${gauge.id}.rate`, gauge.id, 'inflation_rate', [currentWeek], true);
             balMulticaller.call(`${gauge.id}.workingSupply`, gauge.id, 'working_supply', [], true);
-        } else if (networkContext.chain === Chain.MAINNET) {
+        } else if (chain === Chain.MAINNET && gaugeControllerAddress) {
             balMulticaller.call(
                 `${gauge.id}.weight`,
-                networkContext.data.gaugeControllerAddress!,
+                gaugeControllerAddress,
                 'gauge_relative_weight',
                 [gauge.id],
                 true,
@@ -334,7 +340,7 @@ const getOnchainRewardTokensData = async (
                     const id = `${gaugeAddress}-${tokenAddress}-reward`.toLowerCase();
                     const { rate, period_finish } = rewardsData[gaugeAddress].rewardData[tokenAddress];
                     const rewardPerSecond =
-                        period_finish && period_finish.toNumber() > now
+                        period_finish && Number(period_finish) > now
                             ? formatUnits(rate!, decimals[tokenAddress])
                             : '0.0';
                     const { totalSupply } = balData[gaugeAddress];

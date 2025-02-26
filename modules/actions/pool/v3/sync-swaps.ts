@@ -3,7 +3,11 @@ import { prisma } from '../../../../prisma/prisma-client';
 import { V3VaultSubgraphClient } from '../../../sources/subgraphs';
 import _ from 'lodash';
 import { swapV3Transformer } from '../../../sources/transformers/swap-v3-transformer';
-import { OrderDirection, Swap_OrderBy } from '../../../sources/subgraphs/balancer-v3-vault/generated/types';
+import {
+    OrderDirection,
+    SepoliaSwapFragment,
+    Swap_OrderBy,
+} from '../../../sources/subgraphs/balancer-v3-vault/generated/types';
 import { swapsUsd } from '../../../sources/enrichers/swaps-usd';
 
 /**
@@ -36,15 +40,17 @@ export async function syncSwaps(
 
     const where = latestEvent?.blockNumber ? { blockNumber_gte: String(latestEvent.blockNumber) } : {};
 
+    const subgraphFn = chain === 'SEPOLIA' ? vaultSubgraphClient.SepoliaSwaps : vaultSubgraphClient.Swaps;
+
     // Get events
-    const { swaps } = await vaultSubgraphClient.Swaps({
+    const { swaps } = await subgraphFn({
         first: 1000,
         where,
         orderBy: Swap_OrderBy.BlockNumber,
         orderDirection: OrderDirection.Asc,
     });
 
-    const dbSwaps = await swapV3Transformer(swaps, chain);
+    const dbSwaps = await swapV3Transformer(swaps as SepoliaSwapFragment[], chain);
 
     // TODO: parse batchSwaps, if needed
 

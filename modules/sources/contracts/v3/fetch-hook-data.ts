@@ -41,7 +41,5 @@ export const fetchHookData = async (
         }
     }
 
-    console.log('Hook data', results);
-
     return results;
 };

@@ -11,6 +11,7 @@ import { YbTokensAprService } from '../pool/lib/apr-data-sources/yb-tokens-apr.s
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import config from '../../config';
 import { UserSyncAuraBalanceService } from '../user/lib/user-sync-aura-balance.service';
+import { AaveApiAprService } from '../pool/lib/apr-data-sources/aave-api-apr-handler';
 
 const gnosisNetworkData: NetworkData = config.GNOSIS;
 
@@ -23,6 +24,7 @@ export const gnosisNetworkConfig: NetworkConfig = {
         new BoostedPoolAprService(),
         new SwapFeeAprService(),
         new GaugeAprService(),
+        new AaveApiAprService(),
     ],
     userStakedBalanceServices: [new UserSyncGaugeBalanceService(), new UserSyncAuraBalanceService()],
     services: {

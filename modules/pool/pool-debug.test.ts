@@ -14,16 +14,16 @@ import { Prisma } from '@prisma/client';
 import { tokensTransformer } from '../sources/transformers';
 
 test('debug aprs', async () => {
-    const chain = 'SONIC';
-    const chainId = '146';
+    const chain = 'MAINNET';
+    const chainId = '1';
 
     initRequestScopedContext();
     setRequestScopedContextValue('chainId', chainId);
 
     //only do once before starting to debug
-    // await PoolController().addPoolsV2(chain);
+    // await PoolController().reloadPoolsV3(chain);
     // await PoolController().syncOnchainDataForAllPoolsV2(chain);
-    // await PoolController().updateLiquidityValuesForActivePools(chain);
+    await PoolController().updateLiquidityValuesForActivePools(chain);
     // await poolService.reloadStakingForAllPools(['GAUGE'], chain);
     // await userService.initStakedBalances(['GAUGE'], chain);
     // // await CowAmmController().reloadPools('MAINNET');
@@ -41,15 +41,19 @@ test('debug aprs', async () => {
 
     // await poolService.syncStakingForPools([chain]);
 
-    await poolService.reloadAllPoolAprs(chain);
+    try {
+        await poolService.reloadAllPoolAprs(chain);
+    } catch (e) {
+        console.log(e);
+    }
     const aprs = await prisma.prismaPoolAprItem.findMany({
-        where: { chain: chain, poolId: '0x10ac2f9dae6539e77e372adb14b1bf8fbd16b3e8000200000000000000000005' },
+        where: { chain: chain, poolId: '0x64b84023cfe8397df83c67eaccc2c03ecda4aee5' },
     });
     console.log(aprs);
 
     // await poolService.updatePoolAprs('MAINNET');
     // expect(aprs[0].apr).toBeGreaterThan(0);
-});
+}, 100000000);
 
 // describe('pool debugging', () => {
 //     it('query pools', async () => {

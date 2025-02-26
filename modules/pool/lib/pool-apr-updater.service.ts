@@ -33,7 +33,7 @@ export class PoolAprUpdaterService {
             where: {
                 chain: chain,
                 type: {
-                    notIn: ['SURPLUS_30D', 'SURPLUS_7D', 'SWAP_FEE_30D', 'SWAP_FEE_7D'],
+                    notIn: ['SURPLUS_30D', 'SURPLUS_7D', 'SWAP_FEE_30D', 'SWAP_FEE_7D', 'DYNAMIC_SWAP_FEE_24H'],
                 },
             },
             select: { poolId: true, apr: true },

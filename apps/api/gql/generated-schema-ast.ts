@@ -645,6 +645,11 @@ export const schema = gql`
         AURA
 
         """
+        Dynamic swap fee APR based on data from the last 24h
+        """
+        DYNAMIC_SWAP_FEE_24H
+
+        """
         Represents the yield from an IB (Interest-Bearing) asset APR in a pool.
         """
         IB_YIELD

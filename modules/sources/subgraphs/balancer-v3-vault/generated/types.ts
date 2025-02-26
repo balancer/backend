@@ -3457,6 +3457,58 @@ export type SwapsQuery = {
     }>;
 };
 
+export type SepoliaSwapFragment = {
+    __typename?: 'Swap';
+    id: string;
+    pool: string;
+    tokenIn: string;
+    tokenInSymbol: string;
+    tokenOut: string;
+    tokenOutSymbol: string;
+    tokenAmountIn: string;
+    tokenAmountOut: string;
+    swapFeeAmount: string;
+    swapFeeToken: string;
+    swapFeeDeltaAmount: string;
+    blockNumber: string;
+    logIndex: string;
+    blockTimestamp: string;
+    transactionHash: string;
+    user: { __typename?: 'User'; id: string };
+};
+
+export type SepoliaSwapsQueryVariables = Exact<{
+    skip?: InputMaybe<Scalars['Int']>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<Swap_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    where?: InputMaybe<Swap_Filter>;
+    block?: InputMaybe<Block_Height>;
+}>;
+
+export type SepoliaSwapsQuery = {
+    __typename?: 'Query';
+    swaps: Array<{
+        __typename?: 'Swap';
+        id: string;
+        pool: string;
+        tokenIn: string;
+        tokenInSymbol: string;
+        tokenOut: string;
+        tokenOutSymbol: string;
+        tokenAmountIn: string;
+        tokenAmountOut: string;
+        swapFeeAmount: string;
+        swapFeeToken: string;
+        swapFeeDeltaAmount: string;
+        blockNumber: string;
+        logIndex: string;
+        blockTimestamp: string;
+        transactionHash: string;
+        user: { __typename?: 'User'; id: string };
+    }>;
+};
+
 export type UserFragment = {
     __typename?: 'User';
     id: string;
@@ -3667,6 +3719,28 @@ export const SwapFragmentDoc = gql`
         transactionHash
     }
 `;
+export const SepoliaSwapFragmentDoc = gql`
+    fragment SepoliaSwap on Swap {
+        id
+        pool
+        tokenIn
+        tokenInSymbol
+        tokenOut
+        tokenOutSymbol
+        tokenAmountIn
+        tokenAmountOut
+        swapFeeAmount
+        swapFeeToken
+        swapFeeDeltaAmount
+        user {
+            id
+        }
+        blockNumber
+        logIndex
+        blockTimestamp
+        transactionHash
+    }
+`;
 export const UserFragmentDoc = gql`
     fragment User on User {
         id
@@ -3834,6 +3908,28 @@ export const SwapsDocument = gql`
     }
     ${SwapFragmentDoc}
 `;
+export const SepoliaSwapsDocument = gql`
+    query SepoliaSwaps(
+        $skip: Int
+        $first: Int
+        $orderBy: Swap_orderBy
+        $orderDirection: OrderDirection
+        $where: Swap_filter
+        $block: Block_height
+    ) {
+        swaps(
+            skip: $skip
+            first: $first
+            orderBy: $orderBy
+            orderDirection: $orderDirection
+            where: $where
+            block: $block
+        ) {
+            ...SepoliaSwap
+        }
+    }
+    ${SepoliaSwapFragmentDoc}
+`;
 export const UsersDocument = gql`
     query Users(
         $skip: Int
@@ -3956,6 +4052,20 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
                         ...wrappedRequestHeaders,
                     }),
                 'Swaps',
+                'query',
+            );
+        },
+        SepoliaSwaps(
+            variables?: SepoliaSwapsQueryVariables,
+            requestHeaders?: Dom.RequestInit['headers'],
+        ): Promise<SepoliaSwapsQuery> {
+            return withWrapper(
+                (wrappedRequestHeaders) =>
+                    client.request<SepoliaSwapsQuery>(SepoliaSwapsDocument, variables, {
+                        ...requestHeaders,
+                        ...wrappedRequestHeaders,
+                    }),
+                'SepoliaSwaps',
                 'query',
             );
         },
