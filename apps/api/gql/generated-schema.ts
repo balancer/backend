@@ -2432,6 +2432,8 @@ export interface GqlVotingGaugeToken {
     logoURI: Scalars['String'];
     /** The symbol of the token. */
     symbol: Scalars['String'];
+    /** Underlying token address */
+    underlyingTokenAddress?: Maybe<Scalars['String']>;
     /** If it is a weighted pool, the weigh of the token is shown here in %. 0.5 = 50%. */
     weight?: Maybe<Scalars['String']>;
 }
@@ -2447,6 +2449,7 @@ export interface GqlVotingPool {
     gauge: GqlVotingGauge;
     /** Pool ID */
     id: Scalars['ID'];
+    protocolVersion: Scalars['Int'];
     /** The symbol of the pool. */
     symbol: Scalars['String'];
     /** The tokens inside the pool. */
@@ -5359,6 +5362,7 @@ export type GqlVotingGaugeTokenResolvers<
     address?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     logoURI?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     symbol?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+    underlyingTokenAddress?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     weight?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
@@ -5371,6 +5375,7 @@ export type GqlVotingPoolResolvers<
     chain?: Resolver<ResolversTypes['GqlChain'], ParentType, ContextType>;
     gauge?: Resolver<ResolversTypes['GqlVotingGauge'], ParentType, ContextType>;
     id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+    protocolVersion?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     symbol?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     tokens?: Resolver<Array<ResolversTypes['GqlVotingGaugeToken']>, ParentType, ContextType>;
     type?: Resolver<ResolversTypes['GqlPoolType'], ParentType, ContextType>;

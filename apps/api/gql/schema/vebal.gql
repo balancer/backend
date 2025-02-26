@@ -69,6 +69,7 @@ type GqlVotingPool {
     The type of the pool.
     """
     type: GqlPoolType!
+    protocolVersion: Int!
 
     """
     The tokens inside the pool.
@@ -101,6 +102,10 @@ type GqlVotingGaugeToken {
     The URL to the token logo.
     """
     logoURI: String!
+    """
+    Underlying token address
+    """
+    underlyingTokenAddress: String
 }
 
 """

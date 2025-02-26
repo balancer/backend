@@ -13,6 +13,7 @@ const cronPool1: GqlVotingPool = {
     id: '0x6910c4e32d425a834fb61e983c8083a84b0ebd01000200000000000000000532',
     address: '0x6910c4e32d425a834fb61e983c8083a84b0ebd01',
     type: 'UNKNOWN',
+    protocolVersion: 2,
     tokens: [
         {
             address: '0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0',
@@ -44,6 +45,7 @@ const cronPool2: GqlVotingPool = {
     id: '0x0018c32d85d8aebea2efbe0b0f4a4eb9e4f1c8c900020000000000000000050c',
     address: '0x0018c32d85d8aebea2efbe0b0f4a4eb9e4f1c8c9',
     type: 'UNKNOWN',
+    protocolVersion: 2,
     tokens: [
         {
             address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
