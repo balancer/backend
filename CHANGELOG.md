@@ -1,5 +1,22 @@
 # backend
 
+## 1.33.8
+
+### Patch Changes
+
+-   8004599: dynamic swap fee
+-   66b2de2: use multicall with viem for gauges syncing
+-   e88fccd: add points tag to all points pools
+-   f70f431: set erc4626 default flags
+-   303ef6e: add aave aci incentive APRs
+-   aaa703c: SOR - Fix swap given out for small swap amounts
+-   303ef6e: add aave incentive apr
+-   0f4cc8b: exclude dynamic fee from total apr
+-   37a347f: patch swap types
+-   ded54cb: SOR - Update considerPoolWithHooks default to true
+-   22ff428: superposition APRs
+-   1c174ed: match number of snapshots to range
+
 ## 1.33.7
 
 ### Patch Changes
