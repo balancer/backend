@@ -3625,6 +3625,11 @@ export const schema = gql`
         symbol: String!
 
         """
+        Underlying token address
+        """
+        underlyingTokenAddress: String
+
+        """
         If it is a weighted pool, the weigh of the token is shown here in %. 0.5 = 50%.
         """
         weight: String
@@ -3653,6 +3658,7 @@ export const schema = gql`
         Pool ID
         """
         id: ID!
+        protocolVersion: Int!
 
         """
         The symbol of the pool.

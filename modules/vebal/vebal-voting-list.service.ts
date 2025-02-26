@@ -43,11 +43,13 @@ export class VeBalVotingListService {
                 symbol: pool.symbol,
                 address: pool.address,
                 type: pool.type,
+                protocolVersion: pool.protocolVersion,
                 tokens: pool.tokens.map((token) => ({
                     address: token.address,
                     weight: token.weight,
                     symbol: token.token.symbol,
                     logoURI: token.token.logoURI || '',
+                    underlyingTokenAddress: token.token.underlyingTokenAddress,
                 })),
                 gauge: {
                     address: votingGauge.id,
@@ -67,22 +69,10 @@ export class VeBalVotingListService {
             where: {
                 id: { in: poolIds },
             },
-            select: {
-                id: true,
-                chain: true,
-                address: true,
-                type: true,
-                symbol: true,
+            include: {
                 tokens: {
-                    select: {
-                        address: true,
-                        weight: true,
-                        token: {
-                            select: {
-                                symbol: true,
-                                logoURI: true,
-                            },
-                        },
+                    include: {
+                        token: true,
                     },
                 },
             },
