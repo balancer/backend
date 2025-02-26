@@ -505,16 +505,36 @@ class SorPathService {
             include: prismaPoolAndHookWithDynamic.include,
         });
 
-        // always include MEV_TAX hooks, even if considerPoolsWithHooks is false and we dont want to include hooks
-        const allPools = [
-            ...pools.filter(
-                (pool) => considerPoolsWithHooks || !pool.hook || (pool.hook as HookData).type === 'MEV_TAX',
-            ),
+        let filteredPools = [
+            ...pools.filter((pool) => {
+                // always include pools with no hook
+                if (!pool.hook) {
+                    return true;
+                }
+
+                // always include pools with MEV_TAX hooks
+                const hook = pool.hook as HookData;
+                if (hook.type === 'MEV_TAX') {
+                    return true;
+                }
+
+                // if considerPoolsWithHooks is false, filter out all pools with hooks
+                if (!considerPoolsWithHooks) {
+                    return false;
+                }
+
+                // if considerPoolsWithHooks is true, filter out pools with non supported hook types
+                const isSupportedHookType = hook.type !== undefined;
+                if (!isSupportedHookType) {
+                    console.log('Pool has unsupported hook type', pool.id, hook.type);
+                }
+                return isSupportedHookType;
+            }),
             ...lbps,
         ];
 
-        const underlyingTokens = await this.getUnderlyingTokensFromDBPools(allPools, chain);
-        const result = { pools: allPools, underlyingTokens };
+        const underlyingTokens = await this.getUnderlyingTokensFromDBPools(filteredPools, chain);
+        const result = { pools: filteredPools, underlyingTokens };
 
         // cache for 10s
         this.cache.put(
