@@ -16,6 +16,7 @@ import { UserStakedBalanceService, UserSyncUserBalanceInput } from '../user-type
 import { networkContext } from '../../network/network-context.service';
 import { ReliquarySubgraphService } from '../../subgraphs/reliquary-subgraph/reliquary.service';
 import { BALANCES_SYNC_BLOCKS_MARGIN } from '../../../config';
+import { floatToExactString } from '../../common/numbers';
 
 type ReliquaryPosition = {
     amount: BigNumber;
@@ -136,14 +137,14 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
                             },
                         },
                         update: {
-                            balance: update.amount,
+                            balance: floatToExactString(update.amount),
                             balanceNum: parseFloat(update.amount),
                             stakingId: `reliquary-${update.farmId}`,
                         },
                         create: {
                             id: `reliquary-${update.farmId}-${userAddress}`,
                             chain: networkContext.chain,
-                            balance: update.amount,
+                            balance: floatToExactString(update.amount),
                             balanceNum: parseFloat(update.amount),
                             userAddress: userAddress,
                             poolId: pool!.id,
