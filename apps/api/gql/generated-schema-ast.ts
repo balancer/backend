@@ -1066,6 +1066,10 @@ export const schema = gql`
         lifetimeSwapFees: BigDecimal!
         lifetimeVolume: BigDecimal!
         poolId: ID!
+        protocolFees24h: BigDecimal!
+        protocolFees48h: BigDecimal!
+        protocolYieldCapture24h: BigDecimal!
+        protocolYieldCapture48h: BigDecimal!
         sharePriceAth: BigDecimal!
         sharePriceAthTimestamp: Int!
         sharePriceAtl: BigDecimal!

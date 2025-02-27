@@ -104,5 +104,5 @@ export class UserService {
 export const userService = new UserService(
     new UserBalanceService(),
     new UserSyncWalletBalanceService(),
-    new PoolSwapService(tokenService),
+    new PoolSwapService(),
 );

@@ -1,11 +1,9 @@
 import { prisma } from '../../../prisma/prisma-client';
-import moment from 'moment-timezone';
 import {
     JoinExit_OrderBy,
     OrderDirection,
     Swap_OrderBy,
 } from '../../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
-import { tokenService, TokenService } from '../../token/token.service';
 import {
     GqlPoolJoinExit,
     GqlPoolSwap,
@@ -16,19 +14,10 @@ import {
 import { Chain, PrismaPoolSwap } from '@prisma/client';
 import _ from 'lodash';
 import { PrismaPoolBatchSwapWithSwaps } from '../../../prisma/prisma-types';
-import { networkContext } from '../../network/network-context.service';
 import { AllNetworkConfigsKeyedOnChain } from '../../network/network-config';
 
 export class PoolSwapService {
-    constructor(private readonly tokenService: TokenService) {}
-
-    private get balancerSubgraphService() {
-        return networkContext.services.balancerSubgraphService;
-    }
-
-    private get chain() {
-        return networkContext.chain;
-    }
+    constructor() {}
 
     public async getJoinExits(args: QueryPoolGetJoinExitsArgs): Promise<GqlPoolJoinExit[]> {
         const first = !args.first || args.first > 100 ? 10 : args.first;

@@ -35,6 +35,9 @@ export async function updateVolumeAndFees(chain: Chain, poolIds?: string[]) {
     const operations: any[] = [];
 
     for (const pool of pools) {
+        const protocolYieldFeePercentage = parseFloat(pool.dynamicData?.protocolYieldFee || '0');
+        const protocolSwapFeePercentage = parseFloat(pool.dynamicData?.protocolSwapFee || '0');
+
         const volume24h = _.sumBy(
             swapEvents.filter((swap) => swap.blockTimestamp >= yesterday && swap.poolId === pool.id),
             (swap) => swap.valueUSD,
@@ -65,6 +68,14 @@ export async function updateVolumeAndFees(chain: Chain, poolIds?: string[]) {
             (swap) => parseFloat((swap as SwapEvent).payload.surplus?.valueUSD || '0'),
         );
 
+        let protocolFees24h = fees24h * protocolSwapFeePercentage;
+        let protocolFees48h = fees48h * protocolSwapFeePercentage;
+
+        if (pool.dynamicData?.isInRecoveryMode || pool.type === 'LIQUIDITY_BOOTSTRAPPING') {
+            protocolFees24h = 0;
+            protocolFees48h = 0;
+        }
+
         if (
             pool.dynamicData &&
             (pool.dynamicData.volume24h !== volume24h ||
@@ -72,12 +83,23 @@ export async function updateVolumeAndFees(chain: Chain, poolIds?: string[]) {
                 pool.dynamicData.surplus24h !== surplus24h ||
                 pool.dynamicData.volume48h !== volume48h ||
                 pool.dynamicData.fees48h !== fees48h ||
-                pool.dynamicData.surplus48h !== surplus48h)
+                pool.dynamicData.surplus48h !== surplus48h ||
+                pool.dynamicData.protocolFees24h !== protocolFees24h ||
+                pool.dynamicData.protocolFees48h !== protocolFees48h)
         ) {
             operations.push(
                 prisma.prismaPoolDynamicData.update({
                     where: { id_chain: { id: pool.id, chain: pool.chain } },
-                    data: { volume24h, fees24h, volume48h, fees48h, surplus24h, surplus48h },
+                    data: {
+                        volume24h,
+                        fees24h,
+                        volume48h,
+                        fees48h,
+                        surplus24h,
+                        surplus48h,
+                        protocolFees24h,
+                        protocolFees48h,
+                    },
                 }),
             );
         }
@@ -140,10 +162,13 @@ async function updateYieldCaptureForAllPools(chain: Chain) {
                 yieldCapture48h = yieldForUser48h;
             }
 
+            let protocolYieldCapture24h = yieldCapture24h - yieldForUser24h;
+            let protocolYieldCapture48h = yieldCapture48h - yieldForUser48h;
+
             operations.push(
                 prisma.prismaPoolDynamicData.update({
                     where: { id_chain: { id: pool.id, chain: pool.chain } },
-                    data: { yieldCapture24h, yieldCapture48h },
+                    data: { yieldCapture24h, yieldCapture48h, protocolYieldCapture24h, protocolYieldCapture48h },
                 }),
             );
         }
