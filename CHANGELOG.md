@@ -1,5 +1,12 @@
 # backend
 
+## 1.33.9
+
+### Patch Changes
+
+-   fc5c318: SOR - Skip pools with non-supported hook types
+-   fa5a482: add protocolVersion and underlyingTokenAddress to vebal list
+
 ## 1.33.8
 
 ### Patch Changes
