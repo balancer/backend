@@ -160,9 +160,9 @@ export class PoolGqlLoaderService {
                             nestedToken.useWrappedForAddRemove = erc4626ReviewData.useUnderlyingForAddRemove;
                             nestedToken.canUseBufferForSwaps = erc4626ReviewData.canUseBufferForSwaps;
                         } else {
-                            token.useUnderlyingForAddRemove = false;
-                            token.useWrappedForAddRemove = true;
-                            token.canUseBufferForSwaps = false;
+                            nestedToken.useUnderlyingForAddRemove = false;
+                            nestedToken.useWrappedForAddRemove = true;
+                            nestedToken.canUseBufferForSwaps = false;
                         }
                     }
                 }

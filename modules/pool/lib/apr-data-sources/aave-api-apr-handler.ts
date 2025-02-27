@@ -5,20 +5,32 @@ import { PoolAprService } from '../../pool-types';
 import { Chain } from '@prisma/client';
 import { chainToChainId } from '../../../network/chain-id-to-chain';
 
+type Incentives = {
+    tokenInfo: ReserveToken;
+    supplyIncentives: IncentiveInfo[];
+};
+
+type IncentiveInfo = {
+    apr: number;
+    rewardToken: Token;
+};
+
+type ReserveToken = Token & {
+    supplyApr?: number;
+};
+
+export type Token = {
+    symbol: string;
+    address: string;
+    book?: BookType;
+};
+
+export type BookType = {
+    STATA_TOKEN?: string;
+};
+
 type AaveIncentive = {
-    [key: string]: {
-        tokenInfo: {
-            supplyApr: number;
-            book: Record<string, string | number>;
-        };
-        supplyIncentives: {
-            apr: number;
-            rewardToken: {
-                symbol: string;
-                address: string;
-            };
-        }[];
-    };
+    [key: string]: Incentives;
 };
 
 export class AaveApiAprService implements PoolAprService {
@@ -99,10 +111,12 @@ export class AaveApiAprService implements PoolAprService {
 
         for (const incentiveTokenName in aaveIncentivesForChain) {
             if (
-                aaveIncentivesForChain[incentiveTokenName].tokenInfo.book.STATA_TOKEN &&
+                aaveIncentivesForChain[incentiveTokenName].tokenInfo.book?.STATA_TOKEN &&
                 aaveIncentivesForChain[incentiveTokenName].supplyIncentives.length > 0
             ) {
-                const incentivizedToken = aaveIncentivesForChain[incentiveTokenName].tokenInfo.book['STATA_TOKEN']
+                const incentivizedToken = aaveIncentivesForChain[
+                    incentiveTokenName
+                ].tokenInfo.book.STATA_TOKEN.toLowerCase()
                     .toString()
                     .toLowerCase();
                 const supplyIncentivesForToken = aaveIncentivesForChain[incentiveTokenName].supplyIncentives;
