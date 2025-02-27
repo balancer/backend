@@ -693,6 +693,10 @@ export interface GqlPoolDynamicData {
     lifetimeSwapFees: Scalars['BigDecimal'];
     lifetimeVolume: Scalars['BigDecimal'];
     poolId: Scalars['ID'];
+    protocolFees24h: Scalars['BigDecimal'];
+    protocolFees48h: Scalars['BigDecimal'];
+    protocolYieldCapture24h: Scalars['BigDecimal'];
+    protocolYieldCapture48h: Scalars['BigDecimal'];
     sharePriceAth: Scalars['BigDecimal'];
     sharePriceAthTimestamp: Scalars['Int'];
     sharePriceAtl: Scalars['BigDecimal'];
@@ -3963,6 +3967,10 @@ export type GqlPoolDynamicDataResolvers<
     lifetimeSwapFees?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
     lifetimeVolume?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
     poolId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+    protocolFees24h?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
+    protocolFees48h?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
+    protocolYieldCapture24h?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
+    protocolYieldCapture48h?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
     sharePriceAth?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
     sharePriceAthTimestamp?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     sharePriceAtl?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;

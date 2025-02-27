@@ -255,6 +255,6 @@ export const poolService = new PoolService(
     new PoolUsdDataService(tokenService),
     new PoolGqlLoaderService(),
     new PoolAprUpdaterService(),
-    new PoolSwapService(tokenService),
+    new PoolSwapService(),
     new PoolSnapshotService(coingeckoDataService),
 );

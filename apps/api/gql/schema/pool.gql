@@ -660,6 +660,10 @@ type GqlPoolDynamicData {
     """
     surplus24h: BigDecimal!
     yieldCapture24h: BigDecimal!
+
+    protocolFees24h: BigDecimal!
+    protocolYieldCapture24h: BigDecimal!
+
     apr: GqlPoolApr! @deprecated(reason: "Use aprItems instead")
     aprItems: [GqlPoolAprItem!]!
 
@@ -678,6 +682,9 @@ type GqlPoolDynamicData {
     """
     surplus48h: BigDecimal!
     yieldCapture48h: BigDecimal!
+
+    protocolFees48h: BigDecimal!
+    protocolYieldCapture48h: BigDecimal!
 
     lifetimeVolume: BigDecimal!
     lifetimeSwapFees: BigDecimal!
