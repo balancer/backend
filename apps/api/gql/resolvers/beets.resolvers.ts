@@ -3,14 +3,25 @@ import { beetsService } from '../../../../modules/beets/beets.service';
 import { getRequiredAccountAddress, isAdminRoute } from '../../../../modules/auth/auth-context';
 import { userService } from '../../../../modules/user/user.service';
 import { poolService } from '../../../../modules/pool/pool.service';
+import { headerChain } from '../../../../modules/context/header-chain';
+import { GraphQLError } from 'graphql';
 
 const beetsResolvers: Resolvers = {
     Query: {
         beetsGetFbeetsRatio: async (parent, {}, context) => {
             return beetsService.getFbeetsRatio();
         },
-        beetsPoolGetReliquaryFarmSnapshots: async (parent, { id, range }, context) => {
-            const snapshots = await poolService.getSnapshotsForReliquaryFarm(parseFloat(id), range);
+        beetsPoolGetReliquaryFarmSnapshots: async (parent, { id, range, chain }, context) => {
+            const currentChain = headerChain();
+            if (!chain && currentChain) {
+                chain = currentChain;
+            } else if (!chain) {
+                throw new GraphQLError('Provide "chain" param', {
+                    extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
+                });
+            }
+
+            const snapshots = await poolService.getSnapshotsForReliquaryFarm(parseFloat(id), range, chain);
 
             return snapshots.map((snapshot) => ({
                 id: snapshot.id,
@@ -45,10 +56,10 @@ const beetsResolvers: Resolvers = {
 
             return 'success';
         },
-        beetsPoolLoadReliquarySnapshotsForAllFarms: async (parent, args, context) => {
+        beetsPoolLoadReliquarySnapshotsForAllFarms: async (parent, { chain }, context) => {
             isAdminRoute(context);
 
-            await poolService.loadReliquarySnapshotsForAllFarms();
+            await poolService.loadReliquarySnapshotsForAllFarms(chain);
 
             return 'success';
         },

@@ -212,7 +212,7 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
             await runIfNotAlreadyRunning(
                 name,
                 chainId,
-                () => poolService.syncLatestReliquarySnapshotsForAllFarms(),
+                () => poolService.syncLatestReliquarySnapshotsForAllFarms(chain),
                 res,
                 next,
             );

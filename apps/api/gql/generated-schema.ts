@@ -2530,6 +2530,10 @@ export interface Mutation {
     veBalSyncTotalSupply: Scalars['String'];
 }
 
+export interface MutationBeetsPoolLoadReliquarySnapshotsForAllFarmsArgs {
+    chain: GqlChain;
+}
+
 export interface MutationPoolLoadOnChainDataForAllPoolsArgs {
     chains: Array<GqlChain>;
 }
@@ -2731,6 +2735,7 @@ export interface QueryAggregatorPoolsArgs {
 }
 
 export interface QueryBeetsPoolGetReliquaryFarmSnapshotsArgs {
+    chain?: InputMaybe<GqlChain>;
     id: Scalars['String'];
     range: GqlPoolSnapshotDataRange;
 }
@@ -5439,7 +5444,12 @@ export type MutationResolvers<
     ContextType = ResolverContext,
     ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation'],
 > = ResolversObject<{
-    beetsPoolLoadReliquarySnapshotsForAllFarms?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+    beetsPoolLoadReliquarySnapshotsForAllFarms?: Resolver<
+        ResolversTypes['String'],
+        ParentType,
+        ContextType,
+        RequireFields<MutationBeetsPoolLoadReliquarySnapshotsForAllFarmsArgs, 'chain'>
+    >;
     beetsSyncFbeetsRatio?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     poolLoadOnChainDataForAllPools?: Resolver<
         Array<ResolversTypes['GqlPoolMutationResult']>,

@@ -18,7 +18,6 @@ import {
     QueryPoolGetSwapsArgs,
 } from '../../apps/api/gql/generated-schema';
 import { tokenService } from '../token/token.service';
-import { userService } from '../user/user.service';
 import { PoolAprUpdaterService } from './lib/pool-apr-updater.service';
 import { PoolGqlLoaderService } from './lib/pool-gql-loader.service';
 import { PoolOnChainDataService, PoolOnChainDataServiceOptions } from './lib/pool-on-chain-data.service';
@@ -132,10 +131,10 @@ export class PoolService {
         return this.poolSnapshotService.getSnapshotsForPool(poolId, chain, range);
     }
 
-    public async getSnapshotsForReliquaryFarm(id: number, range: GqlPoolSnapshotDataRange) {
-        if (networkContext.data.subgraphs.reliquary) {
+    public async getSnapshotsForReliquaryFarm(id: number, range: GqlPoolSnapshotDataRange, chain: Chain) {
+        if (config[chain].subgraphs.reliquary) {
             const reliquarySnapshotService = new ReliquarySnapshotService(
-                new ReliquarySubgraphService(networkContext.data.subgraphs.reliquary),
+                new ReliquarySubgraphService(config[chain].subgraphs.reliquary),
             );
 
             return reliquarySnapshotService.getSnapshotsForFarm(id, range);
@@ -151,7 +150,7 @@ export class PoolService {
 
         // if we reload staking for reliquary, we also need to reload the snapshots because they are deleted while reloading
         if (stakingTypes.includes('RELIQUARY')) {
-            this.loadReliquarySnapshotsForAllFarms();
+            this.loadReliquarySnapshotsForAllFarms(chain);
         }
         // reload it for all pools
         await this.syncStakingForPools([this.chain]);
@@ -190,10 +189,10 @@ export class PoolService {
                     networkconfig.reliquary?.excludedFarmIds || [],
                 );
             }
-            if (networkconfig.subgraphs.gauge && networkContext.data.bal?.address) {
+            if (networkconfig.subgraphs.gauge && networkconfig.bal?.address) {
                 await syncGaugeStakingForPools(
                     new GaugeSubgraphService(networkconfig.subgraphs.gauge),
-                    networkContext.data.bal.address,
+                    networkconfig.bal.address,
                     chain,
                     networkconfig.gaugeControllerAddress,
                 );
@@ -218,20 +217,20 @@ export class PoolService {
         await syncIncentivizedCategory();
     }
 
-    public async syncLatestReliquarySnapshotsForAllFarms() {
-        if (networkContext.data.subgraphs.reliquary) {
+    public async syncLatestReliquarySnapshotsForAllFarms(chain: Chain) {
+        if (config[chain].subgraphs.reliquary) {
             const reliquarySnapshotService = new ReliquarySnapshotService(
-                new ReliquarySubgraphService(networkContext.data.subgraphs.reliquary),
+                new ReliquarySubgraphService(config[chain].subgraphs.reliquary),
             );
             await reliquarySnapshotService.syncLatestSnapshotsForAllFarms();
         }
     }
 
-    public async loadReliquarySnapshotsForAllFarms() {
+    public async loadReliquarySnapshotsForAllFarms(chain: Chain) {
         loadReliquarySnapshotsForAllFarms(
-            this.chain,
-            networkContext.data.subgraphs.reliquary,
-            networkContext.data.reliquary?.excludedFarmIds,
+            chain,
+            config[chain].subgraphs.reliquary,
+            config[chain].reliquary?.excludedFarmIds,
         );
     }
 
