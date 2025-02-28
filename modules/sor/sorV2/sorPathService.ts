@@ -448,7 +448,14 @@ class SorPathService {
                     protocolVersion,
                     type,
                 },
-                include: prismaPoolAndHookWithDynamic.include,
+                include: {
+                    dynamicData: true,
+                    tokens: {
+                        include: {
+                            token: true,
+                        },
+                    },
+                },
             });
             const underlyingTokens = await this.getUnderlyingTokensFromDBPools(pools, chain);
             return { pools, underlyingTokens };
@@ -482,7 +489,14 @@ class SorPathService {
                 },
                 type,
             },
-            include: prismaPoolAndHookWithDynamic.include,
+            include: {
+                dynamicData: true,
+                tokens: {
+                    include: {
+                        token: true,
+                    },
+                },
+            },
         });
 
         const lbps = await prisma.prismaPool.findMany({
