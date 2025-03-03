@@ -1066,6 +1066,10 @@ export const schema = gql`
         lifetimeSwapFees: BigDecimal!
         lifetimeVolume: BigDecimal!
         poolId: ID!
+        protocolFees24h: BigDecimal!
+        protocolFees48h: BigDecimal!
+        protocolYieldCapture24h: BigDecimal!
+        protocolYieldCapture48h: BigDecimal!
         sharePriceAth: BigDecimal!
         sharePriceAthTimestamp: Int!
         sharePriceAtl: BigDecimal!
@@ -3731,7 +3735,7 @@ export const schema = gql`
     }
 
     type Mutation {
-        beetsPoolLoadReliquarySnapshotsForAllFarms: String!
+        beetsPoolLoadReliquarySnapshotsForAllFarms(chain: GqlChain!): String!
         beetsSyncFbeetsRatio: String!
         poolLoadOnChainDataForAllPools(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
         poolLoadSnapshotsForPools(poolIds: [String!]!, reload: Boolean): String!
@@ -3783,7 +3787,11 @@ export const schema = gql`
             where: GqlAggregatorPoolFilter
         ): [GqlPoolAggregator!]!
         beetsGetFbeetsRatio: String!
-        beetsPoolGetReliquaryFarmSnapshots(id: String!, range: GqlPoolSnapshotDataRange!): [GqlReliquaryFarmSnapshot!]!
+        beetsPoolGetReliquaryFarmSnapshots(
+            chain: GqlChain
+            id: String!
+            range: GqlPoolSnapshotDataRange!
+        ): [GqlReliquaryFarmSnapshot!]!
         blocksGetAverageBlockTime: Float! @deprecated
         blocksGetBlocksPerDay: Float! @deprecated
         blocksGetBlocksPerSecond: Float! @deprecated

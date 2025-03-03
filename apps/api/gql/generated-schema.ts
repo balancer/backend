@@ -693,6 +693,10 @@ export interface GqlPoolDynamicData {
     lifetimeSwapFees: Scalars['BigDecimal'];
     lifetimeVolume: Scalars['BigDecimal'];
     poolId: Scalars['ID'];
+    protocolFees24h: Scalars['BigDecimal'];
+    protocolFees48h: Scalars['BigDecimal'];
+    protocolYieldCapture24h: Scalars['BigDecimal'];
+    protocolYieldCapture48h: Scalars['BigDecimal'];
     sharePriceAth: Scalars['BigDecimal'];
     sharePriceAthTimestamp: Scalars['Int'];
     sharePriceAtl: Scalars['BigDecimal'];
@@ -2530,6 +2534,10 @@ export interface Mutation {
     veBalSyncTotalSupply: Scalars['String'];
 }
 
+export interface MutationBeetsPoolLoadReliquarySnapshotsForAllFarmsArgs {
+    chain: GqlChain;
+}
+
 export interface MutationPoolLoadOnChainDataForAllPoolsArgs {
     chains: Array<GqlChain>;
 }
@@ -2731,6 +2739,7 @@ export interface QueryAggregatorPoolsArgs {
 }
 
 export interface QueryBeetsPoolGetReliquaryFarmSnapshotsArgs {
+    chain?: InputMaybe<GqlChain>;
     id: Scalars['String'];
     range: GqlPoolSnapshotDataRange;
 }
@@ -3958,6 +3967,10 @@ export type GqlPoolDynamicDataResolvers<
     lifetimeSwapFees?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
     lifetimeVolume?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
     poolId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+    protocolFees24h?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
+    protocolFees48h?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
+    protocolYieldCapture24h?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
+    protocolYieldCapture48h?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
     sharePriceAth?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
     sharePriceAthTimestamp?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     sharePriceAtl?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
@@ -5439,7 +5452,12 @@ export type MutationResolvers<
     ContextType = ResolverContext,
     ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation'],
 > = ResolversObject<{
-    beetsPoolLoadReliquarySnapshotsForAllFarms?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+    beetsPoolLoadReliquarySnapshotsForAllFarms?: Resolver<
+        ResolversTypes['String'],
+        ParentType,
+        ContextType,
+        RequireFields<MutationBeetsPoolLoadReliquarySnapshotsForAllFarmsArgs, 'chain'>
+    >;
     beetsSyncFbeetsRatio?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     poolLoadOnChainDataForAllPools?: Resolver<
         Array<ResolversTypes['GqlPoolMutationResult']>,

@@ -116,6 +116,13 @@ export class ProtocolService {
 
         const yieldCapture24h = _.sumBy(pools, (pool) => (!pool.dynamicData ? 0 : pool.dynamicData.yieldCapture24h));
 
+        const protocolSwapFees24h = _.sumBy(pools, (pool) =>
+            !pool.dynamicData ? 0 : pool.dynamicData.protocolFees24h,
+        );
+        const protocolYieldCapture24h = _.sumBy(pools, (pool) =>
+            !pool.dynamicData ? 0 : pool.dynamicData.protocolYieldCapture24h,
+        );
+
         const balancerV1Tvl = await this.getBalancerV1Tvl(chain);
         const sftmxTvl = await this.getSftmXTVL(chain);
         const stsTVL = await this.getStsTVL(chain);
@@ -129,6 +136,8 @@ export class ProtocolService {
             swapVolume24h: `${swapVolume24h}`,
             swapFee24h: `${swapFee24h}`,
             yieldCapture24h: `${yieldCapture24h}`,
+            protocolSwapFee24h: `${protocolSwapFees24h}`,
+            protocolYieldCapture24h: `${protocolYieldCapture24h}`,
             numLiquidityProviders: `${holdersQueryResponse._sum.holdersCount || '0'}`,
         };
 

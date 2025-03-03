@@ -331,6 +331,12 @@ export default <NetworkData>{
             address: '0xd11c452fc99cf405034ee446803b6f6c1f6d5ed8',
         },
         defaultHandlers: {
+            slpETHApr: {
+                tokenAddress: '0x3976d71e7ddfbab9bd120ec281b7d35fa0f28528',
+                sourceUrl: 'https://api-data.loopfi.xyz/api/getData',
+                path: 'loop.slpETHApr',
+                scale: 1,
+            },
             yUSD: {
                 tokenAddress: '0x1ce7d9942ff78c328a4181b9f3826fee6d845a97',
                 sourceUrl: 'https://ctrl.yield.fi/t/apy',

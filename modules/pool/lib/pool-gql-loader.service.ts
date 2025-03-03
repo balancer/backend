@@ -1221,6 +1221,10 @@ export class PoolGqlLoaderService {
             fees24hAthTimestamp,
             fees24hAth,
             fees24hAtlTimestamp,
+            protocolFees24h,
+            protocolFees48h,
+            protocolYieldCapture24h,
+            protocolYieldCapture48h,
         } = pool.dynamicData!;
 
         const newAprItemsSchema = this.buildAprItems(pool);
@@ -1356,6 +1360,10 @@ export class PoolGqlLoaderService {
             fees24hAtlTimestamp,
             volume24hAthTimestamp,
             volume24hAtlTimestamp,
+            protocolYieldCapture24h: `${fixedNumber(protocolYieldCapture24h || 0, 2)}`,
+            protocolYieldCapture48h: `${fixedNumber(protocolYieldCapture48h || 0, 2)}`,
+            protocolFees24h: `${fixedNumber(protocolFees24h || 0, 2)}`,
+            protocolFees48h: `${fixedNumber(protocolFees48h || 0, 2)}`,
             aprItems: newAprItemsSchema,
             apr: {
                 apr:
