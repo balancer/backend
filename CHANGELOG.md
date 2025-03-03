@@ -1,5 +1,16 @@
 # backend
 
+## 1.33.10
+
+### Patch Changes
+
+-   bcd7fcb: decrease base block range to 25k
+-   2f93349: function converting numbers to exact string representation without scientific notation
+-   9fc20ee: trimming the jungle
+-   f77d47a: add protocol revenue to metrics
+-   8b8b99e: slpETHApr
+-   5198473: reliquary queries use chain param
+
 ## 1.33.9
 
 ### Patch Changes
