@@ -13,8 +13,8 @@ export default <NetworkData>{
     subgraphs: {
         startDate: '2024-12-12',
         balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmW3NWk8gTu3d1uyfmb3FBK3WjXCbkukWk4bmx8Ad1ccEy`,
-        balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmSgCPJD4YNcwoEw9LoXtcGS6jiMTYmqz1h4Yor12kTjUG`,
-        balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmddFGnsFRhucWWk7ozsqw72mtDcS84UoqB5a2s6Rb7q2o`,
+        balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmY4bpCvNPQnF3v7xrGLHma3cevwbhdTcfGHvNbki9FLhv`,
+        balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmWSa6f9ZVvo8XeFywbdB179dkPbghAki1dVmXa7kwa1Yn`,
         gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmSRNzwTmLu55ZxxyxYULS5T1Kar7upz1jzL5FsMzLpB2e`,
         reliquary: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmUM8aU6H3gFx6JL65GQV5baPPjczU9hUb6VRiDQ1jEp3B`,
         sts: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmYmPEGqVZPyJKRah4NVbCYtxkHrXq3QzqBrnVQYBt15MU`,
