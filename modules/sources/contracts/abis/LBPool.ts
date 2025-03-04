@@ -1,910 +1,946 @@
 export default [
     {
+        inputs: [],
+        stateMutability: 'view',
         type: 'function',
         name: 'DOMAIN_SEPARATOR',
-        inputs: [],
         outputs: [
             {
+                internalType: 'bytes32',
                 name: '',
                 type: 'bytes32',
-                internalType: 'bytes32',
             },
         ],
-        stateMutability: 'view',
     },
     {
+        inputs: [],
+        stateMutability: 'view',
         type: 'function',
         name: 'PERMIT_TYPEHASH',
-        inputs: [],
         outputs: [
             {
+                internalType: 'bytes32',
                 name: '',
                 type: 'bytes32',
-                internalType: 'bytes32',
             },
         ],
-        stateMutability: 'view',
     },
     {
-        type: 'function',
-        name: 'allowance',
         inputs: [
             {
+                internalType: 'address',
                 name: 'owner',
                 type: 'address',
-                internalType: 'address',
             },
             {
+                internalType: 'address',
                 name: 'spender',
                 type: 'address',
-                internalType: 'address',
-            },
-        ],
-        outputs: [
-            {
-                name: '',
-                type: 'uint256',
-                internalType: 'uint256',
             },
         ],
         stateMutability: 'view',
+        type: 'function',
+        name: 'allowance',
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
+        ],
     },
     {
-        type: 'function',
-        name: 'balanceOf',
         inputs: [
             {
+                internalType: 'address',
                 name: 'account',
                 type: 'address',
-                internalType: 'address',
-            },
-        ],
-        outputs: [
-            {
-                name: '',
-                type: 'uint256',
-                internalType: 'uint256',
             },
         ],
         stateMutability: 'view',
+        type: 'function',
+        name: 'balanceOf',
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
+        ],
     },
     {
-        type: 'function',
-        name: 'computeBalance',
         inputs: [
             {
+                internalType: 'uint256[]',
                 name: 'balancesLiveScaled18',
                 type: 'uint256[]',
-                internalType: 'uint256[]',
             },
             {
+                internalType: 'uint256',
                 name: 'tokenInIndex',
                 type: 'uint256',
-                internalType: 'uint256',
             },
             {
+                internalType: 'uint256',
                 name: 'invariantRatio',
                 type: 'uint256',
-                internalType: 'uint256',
             },
         ],
+        stateMutability: 'view',
+        type: 'function',
+        name: 'computeBalance',
         outputs: [
             {
+                internalType: 'uint256',
                 name: 'newBalance',
                 type: 'uint256',
-                internalType: 'uint256',
             },
         ],
-        stateMutability: 'view',
     },
     {
-        type: 'function',
-        name: 'computeInvariant',
         inputs: [
             {
+                internalType: 'uint256[]',
                 name: 'balancesLiveScaled18',
                 type: 'uint256[]',
-                internalType: 'uint256[]',
             },
             {
+                internalType: 'enum Rounding',
                 name: 'rounding',
                 type: 'uint8',
-                internalType: 'enum Rounding',
-            },
-        ],
-        outputs: [
-            {
-                name: '',
-                type: 'uint256',
-                internalType: 'uint256',
             },
         ],
         stateMutability: 'view',
+        type: 'function',
+        name: 'computeInvariant',
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
+        ],
     },
     {
+        inputs: [],
+        stateMutability: 'view',
         type: 'function',
         name: 'eip712Domain',
-        inputs: [],
         outputs: [
             {
+                internalType: 'bytes1',
                 name: 'fields',
                 type: 'bytes1',
-                internalType: 'bytes1',
             },
             {
+                internalType: 'string',
                 name: 'name',
                 type: 'string',
-                internalType: 'string',
             },
             {
+                internalType: 'string',
                 name: 'version',
                 type: 'string',
-                internalType: 'string',
             },
             {
+                internalType: 'uint256',
                 name: 'chainId',
                 type: 'uint256',
-                internalType: 'uint256',
             },
             {
+                internalType: 'address',
                 name: 'verifyingContract',
                 type: 'address',
-                internalType: 'address',
             },
             {
+                internalType: 'bytes32',
                 name: 'salt',
                 type: 'bytes32',
-                internalType: 'bytes32',
             },
             {
+                internalType: 'uint256[]',
                 name: 'extensions',
                 type: 'uint256[]',
-                internalType: 'uint256[]',
             },
         ],
-        stateMutability: 'view',
     },
     {
+        inputs: [],
+        stateMutability: 'view',
         type: 'function',
         name: 'getAggregateFeePercentages',
-        inputs: [],
         outputs: [
             {
+                internalType: 'uint256',
                 name: 'aggregateSwapFeePercentage',
                 type: 'uint256',
-                internalType: 'uint256',
             },
             {
+                internalType: 'uint256',
                 name: 'aggregateYieldFeePercentage',
                 type: 'uint256',
-                internalType: 'uint256',
             },
         ],
-        stateMutability: 'view',
     },
     {
+        inputs: [],
+        stateMutability: 'view',
         type: 'function',
         name: 'getCurrentLiveBalances',
-        inputs: [],
         outputs: [
             {
+                internalType: 'uint256[]',
                 name: 'balancesLiveScaled18',
                 type: 'uint256[]',
-                internalType: 'uint256[]',
             },
         ],
-        stateMutability: 'view',
     },
     {
+        inputs: [],
+        stateMutability: 'view',
         type: 'function',
         name: 'getGradualWeightUpdateParams',
-        inputs: [],
         outputs: [
             {
+                internalType: 'uint256',
                 name: 'startTime',
                 type: 'uint256',
-                internalType: 'uint256',
             },
             {
+                internalType: 'uint256',
                 name: 'endTime',
                 type: 'uint256',
-                internalType: 'uint256',
             },
             {
+                internalType: 'uint256[]',
                 name: 'startWeights',
                 type: 'uint256[]',
-                internalType: 'uint256[]',
             },
             {
+                internalType: 'uint256[]',
                 name: 'endWeights',
                 type: 'uint256[]',
-                internalType: 'uint256[]',
             },
         ],
-        stateMutability: 'view',
     },
     {
+        inputs: [],
+        stateMutability: 'view',
         type: 'function',
         name: 'getLBPoolDynamicData',
-        inputs: [],
         outputs: [
             {
+                internalType: 'struct LBPoolDynamicData',
                 name: 'data',
                 type: 'tuple',
-                internalType: 'struct LBPoolDynamicData',
                 components: [
                     {
+                        internalType: 'uint256[]',
                         name: 'balancesLiveScaled18',
                         type: 'uint256[]',
-                        internalType: 'uint256[]',
                     },
                     {
+                        internalType: 'uint256[]',
                         name: 'normalizedWeights',
                         type: 'uint256[]',
-                        internalType: 'uint256[]',
                     },
                     {
+                        internalType: 'uint256',
                         name: 'staticSwapFeePercentage',
                         type: 'uint256',
-                        internalType: 'uint256',
                     },
                     {
+                        internalType: 'uint256',
                         name: 'totalSupply',
                         type: 'uint256',
-                        internalType: 'uint256',
                     },
                     {
+                        internalType: 'bool',
                         name: 'isPoolInitialized',
                         type: 'bool',
-                        internalType: 'bool',
                     },
                     {
+                        internalType: 'bool',
                         name: 'isPoolPaused',
                         type: 'bool',
-                        internalType: 'bool',
                     },
                     {
+                        internalType: 'bool',
                         name: 'isPoolInRecoveryMode',
                         type: 'bool',
-                        internalType: 'bool',
                     },
                     {
+                        internalType: 'bool',
                         name: 'isSwapEnabled',
                         type: 'bool',
-                        internalType: 'bool',
                     },
                 ],
             },
         ],
-        stateMutability: 'view',
     },
     {
+        inputs: [],
+        stateMutability: 'view',
         type: 'function',
         name: 'getLBPoolImmutableData',
-        inputs: [],
         outputs: [
             {
+                internalType: 'struct LBPoolImmutableData',
                 name: 'data',
                 type: 'tuple',
-                internalType: 'struct LBPoolImmutableData',
                 components: [
                     {
+                        internalType: 'contract IERC20[]',
                         name: 'tokens',
                         type: 'address[]',
-                        internalType: 'contract IERC20[]',
                     },
                     {
+                        internalType: 'uint256[]',
                         name: 'decimalScalingFactors',
                         type: 'uint256[]',
-                        internalType: 'uint256[]',
                     },
                     {
+                        internalType: 'uint256[]',
                         name: 'startWeights',
                         type: 'uint256[]',
-                        internalType: 'uint256[]',
                     },
                     {
+                        internalType: 'uint256[]',
                         name: 'endWeights',
                         type: 'uint256[]',
-                        internalType: 'uint256[]',
                     },
                     {
+                        internalType: 'uint256',
                         name: 'startTime',
                         type: 'uint256',
-                        internalType: 'uint256',
                     },
                     {
+                        internalType: 'uint256',
                         name: 'endTime',
                         type: 'uint256',
-                        internalType: 'uint256',
                     },
                     {
+                        internalType: 'uint256',
+                        name: 'projectTokenIndex',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'reserveTokenIndex',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'bool',
                         name: 'isProjectTokenSwapInBlocked',
                         type: 'bool',
-                        internalType: 'bool',
                     },
                 ],
             },
         ],
-        stateMutability: 'view',
     },
     {
+        inputs: [],
+        stateMutability: 'view',
         type: 'function',
         name: 'getNormalizedWeights',
-        inputs: [],
         outputs: [
             {
+                internalType: 'uint256[]',
                 name: '',
                 type: 'uint256[]',
-                internalType: 'uint256[]',
             },
         ],
-        stateMutability: 'view',
     },
     {
+        inputs: [],
+        stateMutability: 'view',
+        type: 'function',
+        name: 'getProjectToken',
+        outputs: [
+            {
+                internalType: 'contract IERC20',
+                name: '',
+                type: 'address',
+            },
+        ],
+    },
+    {
+        inputs: [],
+        stateMutability: 'view',
+        type: 'function',
+        name: 'getReserveToken',
+        outputs: [
+            {
+                internalType: 'contract IERC20',
+                name: '',
+                type: 'address',
+            },
+        ],
+    },
+    {
+        inputs: [],
+        stateMutability: 'view',
         type: 'function',
         name: 'getStaticSwapFeePercentage',
-        inputs: [],
         outputs: [
             {
+                internalType: 'uint256',
                 name: '',
                 type: 'uint256',
-                internalType: 'uint256',
             },
         ],
-        stateMutability: 'view',
     },
     {
+        inputs: [],
+        stateMutability: 'view',
         type: 'function',
         name: 'getTokenInfo',
-        inputs: [],
         outputs: [
             {
+                internalType: 'contract IERC20[]',
                 name: 'tokens',
                 type: 'address[]',
-                internalType: 'contract IERC20[]',
             },
             {
+                internalType: 'struct TokenInfo[]',
                 name: 'tokenInfo',
                 type: 'tuple[]',
-                internalType: 'struct TokenInfo[]',
                 components: [
                     {
+                        internalType: 'enum TokenType',
                         name: 'tokenType',
                         type: 'uint8',
-                        internalType: 'enum TokenType',
                     },
                     {
+                        internalType: 'contract IRateProvider',
                         name: 'rateProvider',
                         type: 'address',
-                        internalType: 'contract IRateProvider',
                     },
                     {
+                        internalType: 'bool',
                         name: 'paysYieldFees',
                         type: 'bool',
-                        internalType: 'bool',
                     },
                 ],
             },
             {
+                internalType: 'uint256[]',
                 name: 'balancesRaw',
                 type: 'uint256[]',
-                internalType: 'uint256[]',
             },
             {
+                internalType: 'uint256[]',
                 name: 'lastBalancesLiveScaled18',
                 type: 'uint256[]',
-                internalType: 'uint256[]',
             },
         ],
-        stateMutability: 'view',
     },
     {
+        inputs: [],
+        stateMutability: 'view',
         type: 'function',
         name: 'getTokens',
-        inputs: [],
         outputs: [
             {
+                internalType: 'contract IERC20[]',
                 name: 'tokens',
                 type: 'address[]',
-                internalType: 'contract IERC20[]',
             },
         ],
-        stateMutability: 'view',
     },
     {
+        inputs: [],
+        stateMutability: 'view',
         type: 'function',
         name: 'getTrustedRouter',
-        inputs: [],
         outputs: [
             {
+                internalType: 'address',
                 name: '',
                 type: 'address',
-                internalType: 'address',
             },
         ],
-        stateMutability: 'view',
     },
     {
+        inputs: [],
+        stateMutability: 'view',
         type: 'function',
         name: 'getVault',
-        inputs: [],
         outputs: [
             {
+                internalType: 'contract IVault',
                 name: '',
                 type: 'address',
-                internalType: 'contract IVault',
             },
         ],
-        stateMutability: 'view',
     },
     {
+        inputs: [],
+        stateMutability: 'view',
         type: 'function',
         name: 'isProjectTokenSwapInBlocked',
-        inputs: [],
         outputs: [
             {
+                internalType: 'bool',
                 name: '',
                 type: 'bool',
-                internalType: 'bool',
             },
         ],
-        stateMutability: 'view',
     },
     {
+        inputs: [],
+        stateMutability: 'view',
         type: 'function',
         name: 'isSwapEnabled',
-        inputs: [],
         outputs: [
             {
+                internalType: 'bool',
                 name: '',
                 type: 'bool',
-                internalType: 'bool',
             },
         ],
-        stateMutability: 'view',
     },
     {
+        inputs: [],
+        stateMutability: 'view',
         type: 'function',
         name: 'name',
-        inputs: [],
         outputs: [
             {
+                internalType: 'string',
                 name: '',
                 type: 'string',
-                internalType: 'string',
             },
         ],
-        stateMutability: 'view',
     },
     {
-        type: 'function',
-        name: 'nonces',
         inputs: [
             {
+                internalType: 'address',
                 name: 'owner',
                 type: 'address',
-                internalType: 'address',
-            },
-        ],
-        outputs: [
-            {
-                name: '',
-                type: 'uint256',
-                internalType: 'uint256',
             },
         ],
         stateMutability: 'view',
+        type: 'function',
+        name: 'nonces',
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
+        ],
     },
     {
-        type: 'function',
-        name: 'onBeforeAddLiquidity',
         inputs: [
             {
+                internalType: 'address',
                 name: 'router',
                 type: 'address',
-                internalType: 'address',
             },
             {
+                internalType: 'address',
                 name: '',
                 type: 'address',
-                internalType: 'address',
             },
             {
+                internalType: 'enum AddLiquidityKind',
                 name: '',
                 type: 'uint8',
-                internalType: 'enum AddLiquidityKind',
             },
             {
+                internalType: 'uint256[]',
                 name: '',
                 type: 'uint256[]',
-                internalType: 'uint256[]',
             },
             {
+                internalType: 'uint256',
                 name: '',
                 type: 'uint256',
-                internalType: 'uint256',
             },
             {
+                internalType: 'uint256[]',
                 name: '',
                 type: 'uint256[]',
-                internalType: 'uint256[]',
             },
             {
+                internalType: 'bytes',
                 name: '',
                 type: 'bytes',
-                internalType: 'bytes',
-            },
-        ],
-        outputs: [
-            {
-                name: '',
-                type: 'bool',
-                internalType: 'bool',
             },
         ],
         stateMutability: 'view',
+        type: 'function',
+        name: 'onBeforeAddLiquidity',
+        outputs: [
+            {
+                internalType: 'bool',
+                name: '',
+                type: 'bool',
+            },
+        ],
     },
     {
+        inputs: [
+            {
+                internalType: 'uint256[]',
+                name: '',
+                type: 'uint256[]',
+            },
+            {
+                internalType: 'bytes',
+                name: '',
+                type: 'bytes',
+            },
+        ],
+        stateMutability: 'view',
         type: 'function',
         name: 'onBeforeInitialize',
-        inputs: [
-            {
-                name: '',
-                type: 'uint256[]',
-                internalType: 'uint256[]',
-            },
-            {
-                name: '',
-                type: 'bytes',
-                internalType: 'bytes',
-            },
-        ],
         outputs: [
             {
+                internalType: 'bool',
                 name: '',
                 type: 'bool',
-                internalType: 'bool',
             },
         ],
-        stateMutability: 'view',
     },
     {
-        type: 'function',
-        name: 'onBeforeRemoveLiquidity',
         inputs: [
             {
+                internalType: 'address',
                 name: '',
                 type: 'address',
-                internalType: 'address',
             },
             {
+                internalType: 'address',
                 name: '',
                 type: 'address',
-                internalType: 'address',
             },
             {
+                internalType: 'enum RemoveLiquidityKind',
                 name: '',
                 type: 'uint8',
-                internalType: 'enum RemoveLiquidityKind',
             },
             {
+                internalType: 'uint256',
                 name: '',
                 type: 'uint256',
-                internalType: 'uint256',
             },
             {
+                internalType: 'uint256[]',
                 name: '',
                 type: 'uint256[]',
-                internalType: 'uint256[]',
             },
             {
+                internalType: 'uint256[]',
                 name: '',
                 type: 'uint256[]',
-                internalType: 'uint256[]',
             },
             {
+                internalType: 'bytes',
                 name: '',
                 type: 'bytes',
-                internalType: 'bytes',
-            },
-        ],
-        outputs: [
-            {
-                name: '',
-                type: 'bool',
-                internalType: 'bool',
             },
         ],
         stateMutability: 'view',
+        type: 'function',
+        name: 'onBeforeRemoveLiquidity',
+        outputs: [
+            {
+                internalType: 'bool',
+                name: '',
+                type: 'bool',
+            },
+        ],
     },
     {
+        inputs: [
+            {
+                internalType: 'struct PoolSwapParams',
+                name: '',
+                type: 'tuple',
+                components: [
+                    {
+                        internalType: 'enum SwapKind',
+                        name: 'kind',
+                        type: 'uint8',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'amountGivenScaled18',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'uint256[]',
+                        name: 'balancesScaled18',
+                        type: 'uint256[]',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'indexIn',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'indexOut',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'address',
+                        name: 'router',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'bytes',
+                        name: 'userData',
+                        type: 'bytes',
+                    },
+                ],
+            },
+            {
+                internalType: 'address',
+                name: '',
+                type: 'address',
+            },
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
+        ],
+        stateMutability: 'view',
         type: 'function',
         name: 'onComputeDynamicSwapFeePercentage',
-        inputs: [
-            {
-                name: '',
-                type: 'tuple',
-                internalType: 'struct PoolSwapParams',
-                components: [
-                    {
-                        name: 'kind',
-                        type: 'uint8',
-                        internalType: 'enum SwapKind',
-                    },
-                    {
-                        name: 'amountGivenScaled18',
-                        type: 'uint256',
-                        internalType: 'uint256',
-                    },
-                    {
-                        name: 'balancesScaled18',
-                        type: 'uint256[]',
-                        internalType: 'uint256[]',
-                    },
-                    {
-                        name: 'indexIn',
-                        type: 'uint256',
-                        internalType: 'uint256',
-                    },
-                    {
-                        name: 'indexOut',
-                        type: 'uint256',
-                        internalType: 'uint256',
-                    },
-                    {
-                        name: 'router',
-                        type: 'address',
-                        internalType: 'address',
-                    },
-                    {
-                        name: 'userData',
-                        type: 'bytes',
-                        internalType: 'bytes',
-                    },
-                ],
-            },
-            {
-                name: '',
-                type: 'address',
-                internalType: 'address',
-            },
-            {
-                name: '',
-                type: 'uint256',
-                internalType: 'uint256',
-            },
-        ],
         outputs: [
             {
+                internalType: 'bool',
                 name: '',
                 type: 'bool',
-                internalType: 'bool',
             },
             {
+                internalType: 'uint256',
                 name: '',
                 type: 'uint256',
-                internalType: 'uint256',
             },
         ],
-        stateMutability: 'view',
     },
     {
-        type: 'function',
-        name: 'onRegister',
         inputs: [
             {
+                internalType: 'address',
                 name: '',
                 type: 'address',
-                internalType: 'address',
             },
             {
+                internalType: 'address',
                 name: 'pool',
                 type: 'address',
-                internalType: 'address',
             },
             {
+                internalType: 'struct TokenConfig[]',
                 name: 'tokenConfig',
                 type: 'tuple[]',
-                internalType: 'struct TokenConfig[]',
                 components: [
                     {
+                        internalType: 'contract IERC20',
                         name: 'token',
                         type: 'address',
-                        internalType: 'contract IERC20',
                     },
                     {
+                        internalType: 'enum TokenType',
                         name: 'tokenType',
                         type: 'uint8',
-                        internalType: 'enum TokenType',
                     },
                     {
+                        internalType: 'contract IRateProvider',
                         name: 'rateProvider',
                         type: 'address',
-                        internalType: 'contract IRateProvider',
                     },
                     {
+                        internalType: 'bool',
                         name: 'paysYieldFees',
                         type: 'bool',
-                        internalType: 'bool',
                     },
                 ],
             },
             {
+                internalType: 'struct LiquidityManagement',
                 name: '',
                 type: 'tuple',
-                internalType: 'struct LiquidityManagement',
                 components: [
                     {
+                        internalType: 'bool',
                         name: 'disableUnbalancedLiquidity',
                         type: 'bool',
-                        internalType: 'bool',
                     },
                     {
+                        internalType: 'bool',
                         name: 'enableAddLiquidityCustom',
                         type: 'bool',
-                        internalType: 'bool',
                     },
                     {
+                        internalType: 'bool',
                         name: 'enableRemoveLiquidityCustom',
                         type: 'bool',
-                        internalType: 'bool',
                     },
                     {
+                        internalType: 'bool',
                         name: 'enableDonation',
                         type: 'bool',
-                        internalType: 'bool',
                     },
                 ],
             },
         ],
+        stateMutability: 'view',
+        type: 'function',
+        name: 'onRegister',
         outputs: [
             {
+                internalType: 'bool',
                 name: '',
                 type: 'bool',
-                internalType: 'bool',
             },
         ],
-        stateMutability: 'view',
     },
     {
-        type: 'function',
-        name: 'onSwap',
         inputs: [
             {
+                internalType: 'struct PoolSwapParams',
                 name: 'request',
                 type: 'tuple',
-                internalType: 'struct PoolSwapParams',
                 components: [
                     {
+                        internalType: 'enum SwapKind',
                         name: 'kind',
                         type: 'uint8',
-                        internalType: 'enum SwapKind',
                     },
                     {
+                        internalType: 'uint256',
                         name: 'amountGivenScaled18',
                         type: 'uint256',
-                        internalType: 'uint256',
                     },
                     {
+                        internalType: 'uint256[]',
                         name: 'balancesScaled18',
                         type: 'uint256[]',
-                        internalType: 'uint256[]',
                     },
                     {
+                        internalType: 'uint256',
                         name: 'indexIn',
                         type: 'uint256',
-                        internalType: 'uint256',
                     },
                     {
+                        internalType: 'uint256',
                         name: 'indexOut',
                         type: 'uint256',
-                        internalType: 'uint256',
                     },
                     {
+                        internalType: 'address',
                         name: 'router',
                         type: 'address',
-                        internalType: 'address',
                     },
                     {
+                        internalType: 'bytes',
                         name: 'userData',
                         type: 'bytes',
-                        internalType: 'bytes',
                     },
                 ],
             },
         ],
+        stateMutability: 'view',
+        type: 'function',
+        name: 'onSwap',
         outputs: [
             {
+                internalType: 'uint256',
                 name: '',
                 type: 'uint256',
-                internalType: 'uint256',
             },
         ],
-        stateMutability: 'view',
     },
     {
+        inputs: [],
+        stateMutability: 'view',
         type: 'function',
         name: 'owner',
-        inputs: [],
         outputs: [
             {
+                internalType: 'address',
                 name: '',
                 type: 'address',
-                internalType: 'address',
             },
         ],
-        stateMutability: 'view',
     },
     {
+        inputs: [],
+        stateMutability: 'view',
         type: 'function',
         name: 'pendingOwner',
-        inputs: [],
         outputs: [
             {
+                internalType: 'address',
                 name: '',
                 type: 'address',
-                internalType: 'address',
             },
         ],
-        stateMutability: 'view',
     },
     {
-        type: 'function',
-        name: 'supportsInterface',
         inputs: [
             {
+                internalType: 'bytes4',
                 name: 'interfaceId',
                 type: 'bytes4',
-                internalType: 'bytes4',
             },
         ],
+        stateMutability: 'view',
+        type: 'function',
+        name: 'supportsInterface',
         outputs: [
             {
+                internalType: 'bool',
                 name: '',
                 type: 'bool',
-                internalType: 'bool',
             },
         ],
-        stateMutability: 'view',
     },
     {
+        inputs: [],
+        stateMutability: 'view',
         type: 'function',
         name: 'symbol',
-        inputs: [],
         outputs: [
             {
+                internalType: 'string',
                 name: '',
                 type: 'string',
-                internalType: 'string',
             },
         ],
-        stateMutability: 'view',
     },
     {
+        inputs: [],
+        stateMutability: 'view',
         type: 'function',
         name: 'totalSupply',
-        inputs: [],
         outputs: [
             {
+                internalType: 'uint256',
                 name: '',
                 type: 'uint256',
-                internalType: 'uint256',
             },
         ],
-        stateMutability: 'view',
     },
     {
+        inputs: [],
+        stateMutability: 'view',
         type: 'function',
         name: 'version',
-        inputs: [],
         outputs: [
             {
+                internalType: 'string',
                 name: '',
                 type: 'string',
-                internalType: 'string',
             },
         ],
-        stateMutability: 'view',
     },
 ] as const;

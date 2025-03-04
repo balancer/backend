@@ -10,4 +10,8 @@ export type LBPoolData = {
     startWeights: number[];
     endWeights: number[];
     isProjectTokenSwapInBlocked: boolean;
+    projectToken: string;
+    projectTokenIndex: string;
+    reserveToken: string;
+    reserveTokenIndex: string;
 };

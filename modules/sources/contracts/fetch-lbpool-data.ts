@@ -57,6 +57,10 @@ export async function fetchLBPoolData(pool: string, chain: Chain) {
                 startWeights: immutableData.startWeights.map((x) => Number(x) / 10 ** 18),
                 endWeights: immutableData.endWeights.map((x) => Number(x) / 10 ** 18),
                 isProjectTokenSwapInBlocked: immutableData.isProjectTokenSwapInBlocked,
+                projectTokenIndex: Number(immutableData.projectTokenIndex),
+                reserveTokenIndex: Number(immutableData.reserveTokenIndex),
+                projectToken: immutableData.tokens[Number(immutableData.projectTokenIndex)],
+                reserveToken: immutableData.tokens[Number(immutableData.reserveTokenIndex)],
             },
             tokens: immutableData.tokens.map((address, i) => ({
                 address,
