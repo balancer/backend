@@ -1,5 +1,11 @@
 # backend
 
+## 1.33.11
+
+### Patch Changes
+
+-   117526b: apxETH APR
+
 ## 1.33.10
 
 ### Patch Changes
