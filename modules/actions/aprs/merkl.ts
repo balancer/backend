@@ -11,7 +11,7 @@ interface MerklCampaign {
     apr: number;
     startTimestamp: number;
     endTimestamp: number;
-    type: 'balancerPool';
+    type: 'balancerPool' | 'balancerV3';
     typeInfo: {
         poolId: string;
     };
@@ -41,7 +41,7 @@ const fetchMerklCampaigns = async () => {
             });
         })
         .flat(2)
-        .filter((campaign) => campaign.type === 'balancerPool')
+        .filter((campaign) => campaign.type === 'balancerPool' || campaign.type === 'balancerV3')
         .filter((campaign) => campaign.campaignParameters.whitelist.length === 0)
         .filter((campaign) => Object.keys(chainIdToChain).includes(String(campaign.computeChainId)))
         .filter((campaign) => campaign.startTimestamp < now || campaign.endTimestamp > now);
