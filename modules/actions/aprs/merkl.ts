@@ -1,6 +1,7 @@
 import { PrismaPoolAprType } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
 import { chainIdToChain } from '../../network/chain-id-to-chain';
+import moment from 'moment';
 
 const url = 'https://api.merkl.xyz/v3/campaigns?types=1&live=true';
 
@@ -8,6 +9,8 @@ interface MerklCampaign {
     chainId: number;
     computeChainId: number;
     apr: number;
+    startTimestamp: number;
+    endTimestamp: number;
     type: 'balancerPool';
     typeInfo: {
         poolId: string;
@@ -27,6 +30,7 @@ interface MerklCampaigns {
 }
 
 const fetchMerklCampaigns = async () => {
+    const now = moment().unix();
     const response = await fetch(url);
     const data = (await response.json()) as MerklCampaigns;
     // Flatten the data
@@ -39,7 +43,8 @@ const fetchMerklCampaigns = async () => {
         .flat(2)
         .filter((campaign) => campaign.type === 'balancerPool')
         .filter((campaign) => campaign.campaignParameters.whitelist.length === 0)
-        .filter((campaign) => Object.keys(chainIdToChain).includes(String(campaign.computeChainId)));
+        .filter((campaign) => Object.keys(chainIdToChain).includes(String(campaign.computeChainId)))
+        .filter((campaign) => campaign.startTimestamp > now || campaign.endTimestamp < now);
 
     return campaigns;
 };
