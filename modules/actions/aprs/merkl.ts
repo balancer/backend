@@ -44,7 +44,7 @@ const fetchMerklCampaigns = async () => {
         .filter((campaign) => campaign.type === 'balancerPool')
         .filter((campaign) => campaign.campaignParameters.whitelist.length === 0)
         .filter((campaign) => Object.keys(chainIdToChain).includes(String(campaign.computeChainId)))
-        .filter((campaign) => campaign.startTimestamp > now || campaign.endTimestamp < now);
+        .filter((campaign) => campaign.startTimestamp < now || campaign.endTimestamp > now);
 
     return campaigns;
 };
