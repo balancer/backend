@@ -13,6 +13,7 @@ interface MerklCampaign {
     endTimestamp: number;
     type: 'balancerPool' | 'balancerV3';
     typeInfo: {
+        tokenAddress: string;
         poolId: string;
     };
     campaignParameters: {
@@ -58,7 +59,10 @@ export const syncMerklRewards = async () => {
             type: PrismaPoolAprType.MERKL,
             title: `Merkl Rewards`,
             chain: chainIdToChain[campaign.computeChainId],
-            poolId: campaign.typeInfo.poolId,
+            poolId:
+                campaign.type === 'balancerPool'
+                    ? campaign.typeInfo.poolId.toLowerCase()
+                    : campaign.typeInfo.tokenAddress.toLowerCase(),
             apr: campaign.apr / 100,
         }))
         .reduce((acc, item) => {
