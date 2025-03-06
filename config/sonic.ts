@@ -125,6 +125,12 @@ export default <NetworkData>{
                 path: 'apr',
                 isIbYield: true,
             },
+            wanS: {
+                tokenAddress: '0xfa85fe5a8f5560e9039c04f2b0a90de1415abd70',
+                sourceUrl: 'https://be.angles.fi/api/v2/angles/apr/trailing/7',
+                path: 'apy',
+                isIbYield: true,
+            },
         },
     },
     datastudio: {

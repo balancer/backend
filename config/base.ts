@@ -77,6 +77,11 @@ export default <NetworkData>{
             tokens: {},
         },
         defaultHandlers: {
+            sUSDz: {
+                tokenAddress: '0xe31ee12bdfdd0573d634124611e85338e2cbf0cf',
+                sourceUrl: 'https://rwa-api.anzen.finance/metrics/susdz_stats',
+                path: 'apy',
+            },
             'sp-ysUSDC': {
                 tokenAddress: '0xffe8b2295cef70290819a8193834cc7900bcef5f',
                 sourceUrl: 'https://www.superform.xyz/api/proxy/stats/vault/supervault/vL7k-5ZgYCoFgi6kz2jIJ/',
