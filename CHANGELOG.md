@@ -1,5 +1,12 @@
 # backend
 
+## 1.33.12
+
+### Patch Changes
+
+-   c5f0668: wanS APR
+-   62986b4: sUSDz APR
+
 ## 1.33.11
 
 ### Patch Changes
