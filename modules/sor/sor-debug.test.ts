@@ -39,9 +39,9 @@ describe('sor debugging', () => {
         expect(parseFloat(swaps.returnAmount)).toBeGreaterThan(0);
     }, 5000000);
 
-    it('sor v3', async () => {
+    it.only('sor v3', async () => {
         const useProtocolVersion = 3;
-        const chain = Chain.ARBITRUM;
+        const chain = Chain.SEPOLIA;
 
         const chainId = Object.keys(chainIdToChain).find((key) => chainIdToChain[key] === chain) as string;
         initRequestScopedContext();
@@ -59,12 +59,12 @@ describe('sor debugging', () => {
 
         const swaps = await sorService.getSorSwapPaths({
             chain,
-            tokenIn: '0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9', // USDT0
-            tokenOut: '0x7788a3538c5fc7f9c7c8a74eac4c898fc8d87d92', // sUSDx
+            tokenIn: '0xb19382073c7a0addbb56ac6af1808fa49e377b75', // BAL
+            tokenOut: '0xb77eb1a70a96fdaaeb31db1b42f2b8b5846b2613', // DAI
             swapType: 'EXACT_IN',
-            swapAmount: '5',
+            swapAmount: '0.01',
             useProtocolVersion,
-            poolIds: ['0xc2b0d1a1b4cdda10185859b5a5c543024c2df869'], // boosted
+            poolIds: ['0x80fd5bc9d4fa6c22132f8bb2d9d30b01c3336fb3'], // gyroECLP
         });
 
         console.log(swaps.returnAmount);
