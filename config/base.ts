@@ -41,7 +41,7 @@ export default <NetworkData>{
         excludedTokenAddresses: [],
     },
     rpcUrl: env.DRPC_API_KEY
-        ? `https://lb.drpc.org/ogrpc?network=base&dkey=${env.DRPC_API_KEY}`
+        ? `https://direct.drpc.org/ogrpc?network=base&dkey=${env.DRPC_API_KEY}`
         : 'https://base.gateway.tenderly.co/7mM7DbBouY1JjnQd9MMDsd',
     rpcMaxBlockRange: 25000,
     protocolToken: 'bal',

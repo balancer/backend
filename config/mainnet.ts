@@ -52,7 +52,7 @@ export default <NetworkData>{
         ],
     },
     rpcUrl: env.DRPC_API_KEY
-        ? `https://lb.drpc.org/ogrpc?network=ethereum&dkey=${env.DRPC_API_KEY}`
+        ? `https://direct.drpc.org/ogrpc?network=ethereum&dkey=${env.DRPC_API_KEY}`
         : 'https://rpc.ankr.com/eth',
     rpcMaxBlockRange: 10000,
     protocolToken: 'bal',
