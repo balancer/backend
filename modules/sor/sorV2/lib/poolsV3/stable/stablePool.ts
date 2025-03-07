@@ -56,8 +56,7 @@ export class StablePoolV3 implements BasePoolV3 {
                 poolToken.token.symbol,
                 poolToken.token.name,
             );
-            const scale18 = parseEther(poolToken.balance);
-            const tokenAmount = TokenAmount.fromScale18Amount(token, scale18);
+            const amount = parseUnits(poolToken.balance, poolToken.token.decimals);
 
             if (poolToken.token.underlyingTokenAddress) {
                 const underlyingToken = underlyingTokens.find(
@@ -68,7 +67,7 @@ export class StablePoolV3 implements BasePoolV3 {
                     poolTokens.push(
                         new Erc4626PoolToken(
                             token,
-                            tokenAmount.amount,
+                            amount,
                             poolToken.index,
                             parseEther(poolToken.priceRate),
                             parseUnits(poolToken.token.unwrapRate, unwrapRateDecimals),
@@ -77,22 +76,12 @@ export class StablePoolV3 implements BasePoolV3 {
                     );
                 } else {
                     poolTokens.push(
-                        new StableBasePoolToken(
-                            token,
-                            tokenAmount.amount,
-                            poolToken.index,
-                            parseEther(poolToken.priceRate),
-                        ),
+                        new StableBasePoolToken(token, amount, poolToken.index, parseEther(poolToken.priceRate)),
                     );
                 }
             } else {
                 poolTokens.push(
-                    new StableBasePoolToken(
-                        token,
-                        tokenAmount.amount,
-                        poolToken.index,
-                        parseEther(poolToken.priceRate),
-                    ),
+                    new StableBasePoolToken(token, amount, poolToken.index, parseEther(poolToken.priceRate)),
                 );
             }
         }
