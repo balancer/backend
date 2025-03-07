@@ -16,6 +16,7 @@ export class Erc4626PoolToken extends BasePoolToken {
     ) {
         super(token, amount, index);
         this.rate = rate;
+        this.scale18 = (this.amount * this.scalar * this.rate) / WAD;
         this.unwrapRate = unwrapRate;
         this.underlyingTokenAddress = underlyingTokenAddress;
     }
