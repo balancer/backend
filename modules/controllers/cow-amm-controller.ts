@@ -7,7 +7,7 @@ import { syncSnapshots } from '../actions/snapshots/sync-snapshots';
 import { Chain, PrismaLastBlockSyncedCategory } from '@prisma/client';
 import { updateVolumeAndFees } from '../actions/pool/update-volume-and-fees';
 import { syncBptBalancesFromSubgraph } from '../actions/user/bpt-balances/helpers/sync-bpt-balances-from-subgraph';
-import { getLastSyncedBlock, upsertLastSyncedBlock } from '../actions/pool/last-synced-block';
+import { getLastSyncedBlock, upsertLastSyncedBlock } from '../actions/last-synced-block';
 import { updateLifetimeValues } from '../actions/pool/update-liftetime-values';
 import { syncTokenPairs } from '../actions/pool/v3/sync-tokenpairs';
 
