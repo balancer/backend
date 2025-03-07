@@ -1,8 +1,7 @@
 import _ from 'lodash';
-import { SepoliaSwapFragment, SwapFragment } from '../subgraphs/balancer-v3-vault/generated/types';
+import { SwapFragment } from '../subgraphs/balancer-v3-vault/generated/types';
 import { Chain } from '@prisma/client';
 import { SwapEvent } from '../../../prisma/prisma-types';
-import { prisma } from '../../../prisma/prisma-client';
 
 /**
  * Takes V3 subgraph swaps and transforms them into DB entries
@@ -11,7 +10,7 @@ import { prisma } from '../../../prisma/prisma-client';
  * @param chain
  * @returns
  */
-export async function swapV3Transformer(swaps: SepoliaSwapFragment[], chain: Chain): Promise<SwapEvent[]> {
+export async function swapV3Transformer(swaps: SwapFragment[], chain: Chain): Promise<SwapEvent[]> {
     return swaps.map((swap) => ({
         id: swap.id, // tx + logIndex
         tx: swap.transactionHash,
