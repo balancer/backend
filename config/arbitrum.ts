@@ -38,9 +38,9 @@ export default <NetworkData>{
         excludedTokenAddresses: ['0x6dbf2155b0636cb3fd5359fccefb8a2c02b6cb51'], // plsRDNT, has coingecko entry but no price
     },
     rpcUrl: env.DRPC_API_KEY
-        ? `https://direct.drpc.org/ogrpc?network=arbitrum&dkey=${env.DRPC_API_KEY}`
+        ? `https://lb.drpc.org/ogrpc?network=arbitrum&dkey=${env.DRPC_API_KEY}`
         : 'https://1rpc.io/arb',
-    rpcMaxBlockRange: 1000000,
+    rpcMaxBlockRange: 100000,
     protocolToken: 'bal',
     bal: {
         address: '0x040d1edc9569d4bab2d15287dc5a4f10f56a56b8',
