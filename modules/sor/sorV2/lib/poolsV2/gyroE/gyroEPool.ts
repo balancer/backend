@@ -1,39 +1,18 @@
 import { Address, Hex, parseEther, parseUnits } from 'viem';
-import { PrismaPoolAndHookWithDynamic } from '../../../../../../prisma/prisma-types';
 import { Chain } from '@prisma/client';
+import { PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
+
+import { PrismaPoolAndHookWithDynamic } from '../../../../../../prisma/prisma-types';
 import { MathSol, WAD } from '../../utils/math';
 import { MathGyro, SWAP_LIMIT_FACTOR } from '../../utils/gyroHelpers/math';
 import { DerivedGyroEParams, GyroEParams, Vector2 } from './types';
 import { balancesFromTokenInOut, virtualOffset0, virtualOffset1 } from './gyroEMathHelpers';
 import { calculateInvariantWithError, calcOutGivenIn, calcInGivenOut } from './gyroEMath';
-import { BigintIsh, PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { chainToChainId as chainToIdMap } from '../../../../../network/chain-id-to-chain';
 import { GyroData } from '../../../../../pool/subgraph-mapper';
 import { TokenPairData } from '../../../../../pool/lib/pool-on-chain-tokenpair-data';
 import { BasePool } from '../basePool';
-import { BasePoolToken } from '../basePoolToken';
-
-export class GyroEPoolToken extends BasePoolToken {
-    public readonly rate: bigint;
-
-    public constructor(token: Token, amount: BigintIsh, index: number, rate: BigintIsh) {
-        super(token, amount, index);
-        this.rate = BigInt(rate);
-        this.scale18 = (this.amount * this.scalar * this.rate) / WAD;
-    }
-
-    public increase(amount: bigint): TokenAmount {
-        this.amount = this.amount + amount;
-        this.scale18 = (this.amount * this.scalar * this.rate) / WAD;
-        return this;
-    }
-
-    public decrease(amount: bigint): TokenAmount {
-        this.amount = this.amount - amount;
-        this.scale18 = (this.amount * this.scalar * this.rate) / WAD;
-        return this;
-    }
-}
+import { PoolTokenWithRate } from '../../utils/poolTokenWithRate';
 
 export class GyroEPool implements BasePool {
     public readonly chain: Chain;
@@ -42,15 +21,15 @@ export class GyroEPool implements BasePool {
     public readonly poolType: PoolType = PoolType.GyroE;
     public readonly poolTypeVersion: number;
     public readonly swapFee: bigint;
-    public readonly tokens: GyroEPoolToken[];
+    public readonly tokens: PoolTokenWithRate[];
     public readonly gyroEParams: GyroEParams;
     public readonly derivedGyroEParams: DerivedGyroEParams;
     public readonly tokenPairs: TokenPairData[];
 
-    private readonly tokenMap: Map<string, GyroEPoolToken>;
+    private readonly tokenMap: Map<string, PoolTokenWithRate>;
 
     static fromPrismaPool(pool: PrismaPoolAndHookWithDynamic): GyroEPool {
-        const poolTokens: GyroEPoolToken[] = [];
+        const poolTokens: PoolTokenWithRate[] = [];
 
         if (!pool.dynamicData || !pool.typeData) {
             throw new Error('No dynamic data for pool');
@@ -72,7 +51,7 @@ export class GyroEPool implements BasePool {
             const tokenAmount = TokenAmount.fromScale18Amount(token, scale18);
             const tokenRate = poolToken.priceRate;
 
-            poolTokens.push(new GyroEPoolToken(token, tokenAmount.amount, poolToken.index, parseEther(tokenRate)));
+            poolTokens.push(new PoolTokenWithRate(token, tokenAmount.amount, poolToken.index, parseEther(tokenRate)));
         }
 
         const gyroData = pool.typeData as GyroData;
@@ -120,7 +99,7 @@ export class GyroEPool implements BasePool {
         chain: Chain,
         poolTypeVersion: number,
         swapFee: bigint,
-        tokens: GyroEPoolToken[],
+        tokens: PoolTokenWithRate[],
         gyroEParams: GyroEParams,
         derivedGyroEParams: DerivedGyroEParams,
         tokenPairs: TokenPairData[],
@@ -168,7 +147,7 @@ export class GyroEPool implements BasePool {
             x: currentInvariant + invErr * 2n,
             y: currentInvariant,
         };
-        const inAmount = GyroEPoolToken.fromRawAmount(tokenIn, swapAmount.amount);
+        const inAmount = PoolTokenWithRate.fromRawAmount(tokenIn, swapAmount.amount);
         const inAmountLessFee = this.subtractSwapFeeAmount(inAmount);
         const inAmountWithRate = inAmountLessFee.mulDownFixed(tIn.rate);
         const outAmountScale18 = calcOutGivenIn(
@@ -219,7 +198,7 @@ export class GyroEPool implements BasePool {
             invariant,
         );
 
-        const inAmount = this.addSwapFeeAmount(GyroEPoolToken.fromScale18Amount(tokenIn, inAmountLessFee));
+        const inAmount = this.addSwapFeeAmount(PoolTokenWithRate.fromScale18Amount(tokenIn, inAmountLessFee));
 
         const inAmountWithRate = inAmount.divUpFixed(tIn.rate);
 
@@ -268,8 +247,8 @@ export class GyroEPool implements BasePool {
         tokenIn: Token,
         tokenOut: Token,
     ): {
-        tIn: GyroEPoolToken;
-        tOut: GyroEPoolToken;
+        tIn: PoolTokenWithRate;
+        tOut: PoolTokenWithRate;
     } {
         const tIn = this.tokenMap.get(tokenIn.wrapped);
         const tOut = this.tokenMap.get(tokenOut.wrapped);

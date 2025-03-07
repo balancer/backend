@@ -3,8 +3,8 @@ import { MAX_UINT256, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { BufferState, Vault } from '@balancer-labs/balancer-maths';
 
 import { BasePoolV3 } from '../../poolsV2/basePool';
-import { BasePoolToken } from '../../poolsV2/basePoolToken';
-import { Erc4626PoolToken } from '../../poolsV2/erc4626PoolToken';
+import { BasePoolToken } from '../../utils/basePoolToken';
+import { Erc4626PoolToken } from '../../utils/erc4626PoolToken';
 
 export class BufferPool implements BasePoolV3 {
     public readonly chainId: number;

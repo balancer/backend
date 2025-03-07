@@ -9,7 +9,7 @@ import { chainToChainId as chainToIdMap } from '../../../../../network/chain-id-
 import { GyroData } from '../../../../../pool/subgraph-mapper';
 import { TokenPairData } from '../../../../../pool/lib/pool-on-chain-tokenpair-data';
 import { BasePool } from '../basePool';
-import { BasePoolToken } from '../basePoolToken';
+import { BasePoolToken } from '../../utils/basePoolToken';
 
 export class Gyro3Pool implements BasePool {
     public readonly chain: Chain;

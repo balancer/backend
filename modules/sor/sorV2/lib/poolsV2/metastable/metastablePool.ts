@@ -1,6 +1,5 @@
 import { Chain } from '@prisma/client';
 import { Address, Hex, parseEther, parseUnits } from 'viem';
-import { ComposableStablePoolToken } from '../composableStable/composableStablePool';
 import { PrismaPoolAndHookWithDynamic } from '../../../../../../prisma/prisma-types';
 import { _calcInGivenOut, _calcOutGivenIn, _calculateInvariant } from '../composableStable/stableMath';
 import { MathSol, WAD } from '../../utils/math';
@@ -9,6 +8,7 @@ import { chainToChainId as chainToIdMap } from '../../../../../network/chain-id-
 import { StableData } from '../../../../../pool/subgraph-mapper';
 import { TokenPairData } from '../../../../../pool/lib/pool-on-chain-tokenpair-data';
 import { BasePool } from '../basePool';
+import { PoolTokenWithRate } from '../../utils/poolTokenWithRate';
 
 export class MetaStablePool implements BasePool {
     public readonly chain: Chain;
@@ -17,14 +17,14 @@ export class MetaStablePool implements BasePool {
     public readonly poolType: PoolType = PoolType.MetaStable;
     public readonly amp: bigint;
     public readonly swapFee: bigint;
-    public readonly tokens: ComposableStablePoolToken[];
+    public readonly tokens: PoolTokenWithRate[];
     public readonly tokenPairs: TokenPairData[];
 
-    private readonly tokenMap: Map<string, ComposableStablePoolToken>;
+    private readonly tokenMap: Map<string, PoolTokenWithRate>;
     private readonly tokenIndexMap: Map<string, number>;
 
     static fromPrismaPool(pool: PrismaPoolAndHookWithDynamic): MetaStablePool {
-        const poolTokens: ComposableStablePoolToken[] = [];
+        const poolTokens: PoolTokenWithRate[] = [];
 
         if (!pool.dynamicData) throw new Error('Stable pool has no dynamic data');
 
@@ -41,12 +41,7 @@ export class MetaStablePool implements BasePool {
             const tokenAmount = TokenAmount.fromScale18Amount(token, scale18);
 
             poolTokens.push(
-                new ComposableStablePoolToken(
-                    token,
-                    tokenAmount.amount,
-                    poolToken.index,
-                    parseEther(poolToken.priceRate),
-                ),
+                new PoolTokenWithRate(token, tokenAmount.amount, poolToken.index, parseEther(poolToken.priceRate)),
             );
         }
 
@@ -69,7 +64,7 @@ export class MetaStablePool implements BasePool {
         chain: Chain,
         amp: bigint,
         swapFee: bigint,
-        tokens: ComposableStablePoolToken[],
+        tokens: PoolTokenWithRate[],
         tokenPairs: TokenPairData[],
     ) {
         this.id = id;
@@ -199,10 +194,7 @@ export class MetaStablePool implements BasePool {
         return (tOut.amount * WAD) / tOut.rate;
     }
 
-    public getPoolTokens(
-        tokenIn: Token,
-        tokenOut: Token,
-    ): { tIn: ComposableStablePoolToken; tOut: ComposableStablePoolToken } {
+    public getPoolTokens(tokenIn: Token, tokenOut: Token): { tIn: PoolTokenWithRate; tOut: PoolTokenWithRate } {
         const tIn = this.tokenMap.get(tokenIn.wrapped);
         const tOut = this.tokenMap.get(tokenOut.wrapped);
 

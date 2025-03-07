@@ -1,23 +1,13 @@
 import { BigintIsh, Token, TokenAmount, WAD } from '@balancer/sdk';
 import { BasePoolToken } from './basePoolToken';
 
-export class Erc4626PoolToken extends BasePoolToken {
+export class PoolTokenWithRate extends BasePoolToken {
     public readonly rate: bigint;
-    public readonly unwrapRate: bigint;
-    public readonly underlyingTokenAddress: string;
 
-    public constructor(
-        token: Token,
-        amount: BigintIsh,
-        index: number,
-        rate: bigint,
-        unwrapRate: bigint,
-        underlyingTokenAddress: string,
-    ) {
+    public constructor(token: Token, amount: BigintIsh, index: number, rate: BigintIsh) {
         super(token, amount, index);
-        this.rate = rate;
-        this.unwrapRate = unwrapRate;
-        this.underlyingTokenAddress = underlyingTokenAddress;
+        this.rate = BigInt(rate);
+        this.scale18 = (this.amount * this.scalar * this.rate) / WAD;
     }
 
     public increase(amount: bigint): TokenAmount {

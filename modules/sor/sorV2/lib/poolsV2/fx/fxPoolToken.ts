@@ -2,7 +2,7 @@ import { parseUnits } from 'viem';
 import { WAD } from '../../utils/math';
 import { MathFx } from './helpers';
 import { BigintIsh, Token, TokenAmount } from '@balancer/sdk';
-import { BasePoolToken } from '../basePoolToken';
+import { BasePoolToken } from '../../utils/basePoolToken';
 
 export class FxPoolToken extends BasePoolToken {
     public readonly latestFXPrice: string;
