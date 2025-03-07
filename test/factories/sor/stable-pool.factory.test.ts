@@ -1,18 +1,19 @@
 import { parseEther, parseUnits } from 'viem';
 import { StablePoolFactory } from './stable-pool.factory';
-import { StablePool, StablePoolToken } from '../../../modules/sor/sorV2/lib/poolsV3';
+import { StablePoolV3 } from '../../../modules/sor/sorV2/lib/poolsV3';
 import { Token, TokenAmount } from '@balancer/sdk';
+import { PoolTokenWithRate } from '../../../modules/sor/sorV2/lib/utils/poolTokenWithRate';
 
 describe('SOR Stable pool factory', () => {
     it('Create Stable Pool', () => {
         const pool = StablePoolFactory.build();
-        expect(pool).toBeInstanceOf(StablePool);
+        expect(pool).toBeInstanceOf(StablePoolV3);
     });
 
     it('creates a StablePool with overridden values', () => {
         const token = new Token(1, '0xCustomTokenAddress', 18, 'CUS', 'Custom Token');
         const tokenAmount = TokenAmount.fromHumanAmount(token, '5000');
-        const customToken = new StablePoolToken(token, tokenAmount.amount, parseEther('1.0'), 0);
+        const customToken = new PoolTokenWithRate(token, tokenAmount.amount, 0, parseEther('1.0'));
 
         const stablePool = StablePoolFactory.build({
             id: '0xCustomId',
@@ -33,7 +34,7 @@ describe('SOR Stable pool factory', () => {
         });
 
         console.log(stablePool);
-        expect(stablePool).toBeInstanceOf(StablePool);
+        expect(stablePool).toBeInstanceOf(StablePoolV3);
         expect(stablePool.id).toBe('0xCustomId');
         expect(stablePool.address).toBe('0xCustomAddress');
         expect(stablePool.tokens[0].token.address).toBe('0xcustomtokenaddress');

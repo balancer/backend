@@ -1,6 +1,6 @@
 import { Address, Hex, parseEther, parseUnits } from 'viem';
 import { MAX_UINT256, SwapKind, Token, TokenAmount, WAD } from '@balancer/sdk';
-import { AddKind, RemoveKind, Vault, Weighted, WeightedState, HookState } from '@balancer-labs/balancer-maths';
+import { AddKind, RemoveKind, Vault, WeightedState, HookState } from '@balancer-labs/balancer-maths';
 import { Chain } from '@prisma/client';
 
 import { PrismaPoolAndHookWithDynamic } from '../../../../../../prisma/prisma-types';

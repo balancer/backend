@@ -1,5 +1,4 @@
 import { Address, Hex, parseEther, parseUnits } from 'viem';
-
 import { MAX_UINT256, PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { AddKind, RemoveKind, StableState, Vault, HookState } from '@balancer-labs/balancer-maths';
 import { Chain } from '@prisma/client';
@@ -11,14 +10,14 @@ import { TokenPairData } from '../../../../../sources/contracts/v3/fetch-tokenpa
 
 import { WAD } from '../../utils/math';
 import { BasePoolV3 } from '../../poolsV2/basePool';
-import { StableBasePoolToken } from './stableBasePoolToken';
-import { Erc4626PoolToken } from '../../poolsV2/erc4626PoolToken';
+import { PoolTokenWithRate } from '../../utils/poolTokenWithRate';
+import { Erc4626PoolToken } from '../../utils/erc4626PoolToken';
 
 import { getHookState } from '../../utils/helpers';
 
 import { LiquidityManagement } from '../../../../../sor/types';
 
-type StablePoolToken = StableBasePoolToken | Erc4626PoolToken;
+type StablePoolToken = PoolTokenWithRate | Erc4626PoolToken;
 
 export class StablePoolV3 implements BasePoolV3 {
     public readonly chain: Chain;
@@ -77,13 +76,11 @@ export class StablePoolV3 implements BasePoolV3 {
                     );
                 } else {
                     poolTokens.push(
-                        new StableBasePoolToken(token, amount, poolToken.index, parseEther(poolToken.priceRate)),
+                        new PoolTokenWithRate(token, amount, poolToken.index, parseEther(poolToken.priceRate)),
                     );
                 }
             } else {
-                poolTokens.push(
-                    new StableBasePoolToken(token, amount, poolToken.index, parseEther(poolToken.priceRate)),
-                );
+                poolTokens.push(new PoolTokenWithRate(token, amount, poolToken.index, parseEther(poolToken.priceRate)));
             }
         }
 
@@ -137,7 +134,7 @@ export class StablePoolV3 implements BasePoolV3 {
 
         // add BPT to tokenMap, so we can handle add/remove liquidity operations
         const bpt = new Token(tokens[0].token.chainId, this.id, 18, 'BPT', 'BPT');
-        this.tokenMap.set(bpt.address, new StableBasePoolToken(bpt, totalShares, -1, WAD));
+        this.tokenMap.set(bpt.address, new PoolTokenWithRate(bpt, totalShares, -1, WAD));
 
         this.vault = new Vault();
         this.poolState = this.getPoolState(hookState?.hookType);

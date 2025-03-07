@@ -1,7 +1,7 @@
 import { BigintIsh, Token, TokenAmount, WAD } from '@balancer/sdk';
-import { BasePoolToken } from '../../poolsV2/basePoolToken';
+import { BasePoolToken } from './basePoolToken';
 
-export class StableBasePoolToken extends BasePoolToken {
+export class PoolTokenWithRate extends BasePoolToken {
     public readonly rate: bigint;
 
     public constructor(token: Token, amount: BigintIsh, index: number, rate: BigintIsh) {

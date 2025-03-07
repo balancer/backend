@@ -2,13 +2,13 @@ import { Chain } from '@prisma/client';
 import { Address, Hex, parseEther, parseUnits } from 'viem';
 import { PrismaPoolAndHookWithDynamic } from '../../../../../../prisma/prisma-types';
 import { _calcInGivenOut, _calcOutGivenIn, _calculateInvariant } from '../composableStable/stableMath';
-import { MathSol, WAD } from '../../utils/math';
+import { MathSol } from '../../utils/math';
 import { PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { chainToChainId as chainToIdMap } from '../../../../../network/chain-id-to-chain';
 import { StableData } from '../../../../../pool/subgraph-mapper';
 import { TokenPairData } from '../../../../../pool/lib/pool-on-chain-tokenpair-data';
 import { BasePool } from '../basePool';
-import { BasePoolToken } from '../basePoolToken';
+import { BasePoolToken } from '../../utils/basePoolToken';
 
 export class StablePool implements BasePool {
     public readonly chain: Chain;
