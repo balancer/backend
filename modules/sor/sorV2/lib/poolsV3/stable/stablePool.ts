@@ -14,7 +14,7 @@ import { BasePoolV3 } from '../../poolsV2/basePool';
 import { StableBasePoolToken } from './stableBasePoolToken';
 import { Erc4626PoolToken } from '../../poolsV2/erc4626PoolToken';
 
-import { getHookState, isLiquidityManagement } from '../../utils/helpers';
+import { getHookState } from '../../utils/helpers';
 
 import { LiquidityManagement } from '../../../../../sor/types';
 
@@ -27,6 +27,7 @@ export class StablePoolV3 implements BasePoolV3 {
     public readonly poolType: PoolType = PoolType.Stable;
     public readonly amp: bigint;
     public readonly swapFee: bigint;
+    public readonly aggregateSwapFee: bigint;
     public readonly tokenPairs: TokenPairData[];
 
     public totalShares: bigint;
@@ -98,6 +99,7 @@ export class StablePoolV3 implements BasePoolV3 {
             pool.chain,
             amp,
             parseEther(pool.dynamicData.swapFee),
+            parseEther(pool.dynamicData.aggregateSwapFee),
             poolTokens,
             totalShares,
             pool.dynamicData.tokenPairsData as TokenPairData[],
@@ -112,6 +114,7 @@ export class StablePoolV3 implements BasePoolV3 {
         chain: Chain,
         amp: bigint,
         swapFee: bigint,
+        aggregateSwapFee: bigint,
         tokens: StablePoolToken[],
         totalShares: bigint,
         tokenPairs: TokenPairData[],
@@ -123,6 +126,7 @@ export class StablePoolV3 implements BasePoolV3 {
         this.address = address;
         this.amp = amp;
         this.swapFee = swapFee;
+        this.aggregateSwapFee = aggregateSwapFee;
         this.totalShares = totalShares;
 
         this.tokens = tokens.sort((a, b) => a.index - b.index);
@@ -321,7 +325,7 @@ export class StablePoolV3 implements BasePoolV3 {
             amp: this.amp,
             tokens: this.tokens.map((t) => t.token.address),
             scalingFactors: this.tokens.map((t) => t.scalar),
-            aggregateSwapFee: 0n,
+            aggregateSwapFee: this.aggregateSwapFee,
             supportsUnbalancedLiquidity: !this.liquidityManagement.disableUnbalancedLiquidity,
         };
 
