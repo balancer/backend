@@ -1,5 +1,11 @@
 # backend
 
+## 1.33.14
+
+### Patch Changes
+
+-   0729697: revert drpc to lb, reduce max block range
+
 ## 1.33.13
 
 ### Patch Changes
