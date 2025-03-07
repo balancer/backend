@@ -57,7 +57,7 @@ export class GaugeSubgraphService {
         return sharesQuery.gaugeShares;
     }
 
-    public async getAllGaugeShares(): Promise<GaugeShareFragment[]> {
+    public async getAllGaugeShares(where?: GaugeSharesQueryVariables['where']): Promise<GaugeShareFragment[]> {
         const allGaugeShares: GaugeShareFragment[] = [];
         let hasMore = true;
         let id = `0`;
@@ -67,7 +67,7 @@ export class GaugeSubgraphService {
             const gauges = await this.sdk.GaugeShares({
                 where: {
                     id_gt: id,
-                    balance_gt: '0',
+                    ...where,
                 },
                 orderBy: GaugeShare_OrderBy.id,
                 orderDirection: OrderDirection.asc,
