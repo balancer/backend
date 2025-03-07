@@ -65,7 +65,7 @@ export default <NetworkData>{
         ],
     },
     rpcUrl: env.DRPC_API_KEY
-        ? `https://lb.drpc.org/ogrpc?network=fantom&dkey=${env.DRPC_BEETS_API_KEY}`
+        ? `https://direct.drpc.org/ogrpc?network=fantom&dkey=${env.DRPC_BEETS_API_KEY}`
         : `https://rpc.ankr.com/fantom`,
     rpcMaxBlockRange: 10000,
     protocolToken: 'beets',
