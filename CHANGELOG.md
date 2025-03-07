@@ -1,5 +1,13 @@
 # backend
 
+## 1.33.13
+
+### Patch Changes
+
+-   966fa02: V3 SG deployments
+-   b1f67bb: use direct drpc links
+-   d5df719: sepolia swap type cleanup
+
 ## 1.33.12
 
 ### Patch Changes
