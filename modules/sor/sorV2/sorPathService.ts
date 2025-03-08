@@ -538,7 +538,7 @@ class SorPathService {
                 }
 
                 // if considerPoolsWithHooks is true, filter out pools with non supported hook types
-                const isSupportedHookType = hook.type !== undefined;
+                const isSupportedHookType = hook.type !== undefined && hook.type !== 'UNKNOWN';
                 if (!isSupportedHookType) {
                     console.log('Pool has unsupported hook type', pool.id, hook.type);
                 }
