@@ -39,9 +39,9 @@ describe('sor debugging', () => {
         expect(parseFloat(swaps.returnAmount)).toBeGreaterThan(0);
     }, 5000000);
 
-    it('sor v3', async () => {
+    it.only('sor v3', async () => {
         const useProtocolVersion = 3;
-        const chain = Chain.ARBITRUM;
+        const chain = Chain.SONIC;
 
         const chainId = Object.keys(chainIdToChain).find((key) => chainIdToChain[key] === chain) as string;
         initRequestScopedContext();
@@ -59,12 +59,12 @@ describe('sor debugging', () => {
 
         const swaps = await sorService.getSorSwapPaths({
             chain,
-            tokenIn: '0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9', // USDT0
-            tokenOut: '0x7788a3538c5fc7f9c7c8a74eac4c898fc8d87d92', // sUSDx
+            tokenIn: '0x0c4e186eae8acaa7f7de1315d5ad174be39ec987', // anS
+            tokenOut: '0x039e2fb66102314ce7b64ce5ce3e5183bc94ad38', // siloWS
             swapType: 'EXACT_IN',
-            swapAmount: '5',
+            swapAmount: '1',
             useProtocolVersion,
-            poolIds: ['0xc2b0d1a1b4cdda10185859b5a5c543024c2df869'], // boosted
+            poolIds: ['0x944d4ae892de4bfd38742cc8295d6d5164c5593c'], // boosted
         });
 
         console.log(swaps.returnAmount);

@@ -3,7 +3,7 @@ import { GqlPoolType } from '../../../../../../apps/api/gql/generated-schema';
 import { Chain } from '@prisma/client';
 import { MathSol, WAD } from '../../utils/math';
 import { Address, Hex, parseEther } from 'viem';
-import { BigintIsh, SwapKind, Token, TokenAmount } from '@balancer/sdk';
+import { SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { chainToChainId as chainToIdMap } from '../../../../../network/chain-id-to-chain';
 import { TokenPairData } from '../../../../../pool/lib/pool-on-chain-tokenpair-data';
 import { BasePool } from '../basePool';

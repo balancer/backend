@@ -1,5 +1,5 @@
 import { BigintIsh, Token } from '@balancer/sdk';
-import { Erc4626PoolToken } from '../../poolsV2/erc4626PoolToken';
+import { Erc4626PoolToken } from '../../utils/erc4626PoolToken';
 
 export class WeightedErc4626PoolToken extends Erc4626PoolToken {
     public readonly weight: bigint;

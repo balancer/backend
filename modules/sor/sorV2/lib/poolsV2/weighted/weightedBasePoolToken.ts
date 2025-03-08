@@ -1,5 +1,5 @@
 import { BigintIsh, Token, TokenAmount } from '@balancer/sdk';
-import { BasePoolToken } from '../basePoolToken';
+import { BasePoolToken } from '../../utils/basePoolToken';
 
 export class WeightedBasePoolToken extends BasePoolToken {
     public readonly weight: bigint;
