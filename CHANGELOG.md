@@ -1,5 +1,13 @@
 # backend
 
+## 1.33.15
+
+### Patch Changes
+
+-   a756608: SOR - Fix scale18 on erc4626 pool tokens
+-   81b21ee: filter out unknown hooks from sor list
+-   1778dba: new hook
+
 ## 1.33.14
 
 ### Patch Changes
