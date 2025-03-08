@@ -21,6 +21,7 @@ export default <NetworkData>{
     },
     hooks: {
         ['0xb2007b8b7e0260042517f635cfd8e6dd2dd7f007']: 'STABLE_SURGE',
+        ['0x97b05bafb3c592089d382ba7cfa7abb9d85f599e']: 'UNKNOWN',
     },
     gyro: {
         config: '0x8a5eb9a5b726583a213c7e4de2403d2dfd42c8a6',
