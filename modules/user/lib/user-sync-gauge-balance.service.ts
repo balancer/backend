@@ -3,18 +3,17 @@ import { prisma } from '../../../prisma/prisma-client';
 import _ from 'lodash';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import RewardsOnlyGaugeAbi from './abi/RewardsOnlyGauge.json';
-import { Multicaller } from '../../web3/multicaller';
 import { formatFixed } from '@ethersproject/bignumber';
 import { Chain, PrismaPoolStakingType } from '@prisma/client';
 import ERC20Abi from '../../web3/abi/ERC20.json';
-import { zeroAddress as AddressZero } from 'viem';
+import { formatEther, parseAbi, zeroAddress } from 'viem';
 import { getEvents } from '../../web3/events';
 import { GaugeSubgraphService } from '../../subgraphs/gauge-subgraph/gauge-subgraph.service';
 import { BALANCES_SYNC_BLOCKS_MARGIN } from '../../../config';
-import { getViemClient } from '../../sources/viem-client';
+import { getViemClient, ViemClient } from '../../sources/viem-client';
 import config from '../../../config';
-import { ethers } from 'ethers';
 import { getLastSyncedBlock } from '../../actions/last-synced-block';
+import { multicallViem } from '../../web3/multicaller-viem';
 
 export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
     constructor() {}
@@ -24,6 +23,25 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
             return;
         }
 
+        const { balances, blockNumber } = await this.balancesFromSG(chain);
+        return this.saveBalances(balances, blockNumber);
+    }
+
+    public async syncChangedStakedBalances(chain: Chain): Promise<void> {
+        // Check if RPC needs to be used
+        const client = getViemClient(chain);
+        const latestBlock = await client.getBlockNumber().then(Number);
+        const gaugeSubgraphService = new GaugeSubgraphService(config[chain].subgraphs.gauge!);
+        const sgBlock = await gaugeSubgraphService.lastSyncedBlock();
+        const lastSyncedBlock = await getLastSyncedBlock(chain, 'GAUGE_BALANCES');
+        const { balances, blockNumber } =
+            latestBlock - sgBlock > BALANCES_SYNC_BLOCKS_MARGIN
+                ? await this.balancesFromRPC(chain, client, lastSyncedBlock)
+                : await this.balancesFromSG(chain, lastSyncedBlock);
+        return this.saveBalances(balances, blockNumber);
+    }
+
+    private async balancesFromSG(chain: Chain, lastSyncedBlock?: number) {
         // Get pools from DB, some old gauges don't have pool ID associated with the share
         const pools = await prisma.prismaPool.findMany({
             select: { id: true, address: true },
@@ -36,7 +54,6 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
         // Get the shares
         const gaugeSubgraphService = new GaugeSubgraphService(config[chain].subgraphs.gauge!);
         const blockNumber = await gaugeSubgraphService.lastSyncedBlock();
-        const lastSyncedBlock = await getLastSyncedBlock(chain, 'GAUGE_BALANCES');
 
         console.log(`[GaugeBalancesSync] ${chain} from ${lastSyncedBlock} to ${blockNumber}`);
         const gaugeShares = await gaugeSubgraphService.getAllGaugeShares(
@@ -71,13 +88,101 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
             stakingId: share.gauge.id,
         }));
 
-        // Prepare inserts
+        return { balances, blockNumber };
+    }
+
+    private async balancesFromRPC(chain: Chain, client: ViemClient, lastSyncedBlock: number) {
+        const toBlock = await client.getBlockNumber().then(Number);
+
+        const gauges = await prisma.prismaPoolStaking.findMany({
+            select: { address: true, poolId: true },
+            where: { type: 'GAUGE' },
+        });
+
+        const gaugeToPoolMap = Object.fromEntries(gauges.map((gauge) => [gauge.address, gauge.poolId]));
+        const gaugeAddresses = Object.keys(gaugeToPoolMap);
+
+        console.log(`[GaugeBalancesSync] ${chain} RPC search from ${lastSyncedBlock} to ${toBlock}`);
+
+        // Get the events
+        const events = await getEvents(
+            lastSyncedBlock,
+            toBlock,
+            gaugeAddresses,
+            ['Transfer'],
+            config[chain].rpcUrl,
+            config[chain].rpcMaxBlockRange,
+            ERC20Abi,
+        );
+
+        const balancesToFetch = _.uniqBy(
+            events
+                .filter((event) => gaugeAddresses.includes(event.address.toLowerCase()))
+                .flatMap((event) => [
+                    { gaugeAddress: event.address, userAddress: event.args?.from as string },
+                    { gaugeAddress: event.address, userAddress: event.args?.to as string },
+                ])
+                .filter((entry) => entry.userAddress !== zeroAddress),
+            (entry) => entry.gaugeAddress + entry.userAddress,
+        );
+
+        console.log(`[GaugeBalancesSync] RPC found ${events.length} events for ${balancesToFetch.length} gauges`);
+
+        const results = await multicallViem(
+            client,
+            balancesToFetch.map((entry) => ({
+                path: entry.gaugeAddress + '-' + entry.userAddress,
+                abi: parseAbi(['function balanceOf(address) view returns (uint256)']),
+                address: entry.gaugeAddress as `0x${string}`,
+                functionName: 'balanceOf',
+                args: [entry.userAddress as `0x${string}`],
+            })),
+        );
+
+        const balances = Object.keys(results).map((id) => {
+            const [tokenAddress, userAddress] = id.toLowerCase().split('-');
+            const poolId = gaugeToPoolMap[tokenAddress];
+            const balance = formatEther(results[id]);
+
+            return {
+                id: id.toLowerCase(),
+                poolId,
+                chain,
+                balance,
+                balanceNum: parseFloat(balance),
+                tokenAddress,
+                userAddress,
+                stakingId: tokenAddress,
+            };
+        });
+
+        return { balances, blockNumber: toBlock };
+    }
+
+    private saveBalances(
+        balances: {
+            id: string;
+            chain: Chain;
+            balance: string;
+            balanceNum: number;
+            userAddress: string;
+            poolId: string;
+            tokenAddress: string;
+            stakingId: string;
+        }[],
+        blockNumber: number,
+    ) {
+        if (balances.length === 0) {
+            return;
+        }
+
         const obsoleteIDs = balances.filter((share) => share.balanceNum === 0).map(({ id }) => id);
         const userAddresses = _.uniq(balances.map((share) => share.userAddress)).map((userAddress) => ({
             address: userAddress,
         }));
+        const chain = balances[0].chain;
 
-        await prismaBulkExecuteOperations(
+        return prismaBulkExecuteOperations(
             [
                 prisma.prismaUser.createMany({
                     data: userAddresses,
@@ -89,7 +194,7 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
                         id: share.stakingId,
                         address: share.stakingId,
                         poolId: share.poolId,
-                        chain,
+                        chain: share.chain,
                         type: 'GAUGE',
                     })),
                     skipDuplicates: true,
@@ -100,7 +205,7 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
                         id: share.stakingId,
                         gaugeAddress: share.stakingId,
                         stakingId: share.stakingId,
-                        chain,
+                        chain: share.chain,
                     })),
                     skipDuplicates: true,
                 }),
@@ -152,10 +257,6 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
             ],
             true,
         );
-    }
-
-    public async syncChangedStakedBalances(chain: Chain): Promise<void> {
-        this.initStakedBalances(['GAUGE'], chain);
     }
 
     public async syncUserBalance({ userAddress, poolId, chain, poolAddress, staking }: UserSyncUserBalanceInput) {
