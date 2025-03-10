@@ -55,6 +55,7 @@ import { ZERO_ADDRESS } from '@balancer/sdk';
 import { tokenService } from '../../token/token.service';
 import { HookData, mapHookToGqlHook } from '../../sources/transformers';
 import { GraphQLError } from 'graphql';
+import { floatToExactString } from '../../common/numbers';
 
 const isToken = (text: string) => text.match(/^0x[0-9a-fA-F]{40}$/);
 const isPoolId = (text: string) => isToken(text) || text.match(/^0x[0-9a-fA-F]{64}$/);
@@ -1030,8 +1031,8 @@ export class PoolGqlLoaderService {
             id: `${poolToken.poolId}-${poolToken.token.address}`,
             ...poolToken.token,
             index: poolToken.index,
-            balance: String(parseFloat(poolToken.balance || '0') * nestedPercentage),
-            balanceUSD: String((poolToken.balanceUSD || 0) * nestedPercentage),
+            balance: floatToExactString(parseFloat(poolToken.balance || '0') * nestedPercentage),
+            balanceUSD: floatToExactString((poolToken.balanceUSD || 0) * nestedPercentage),
             priceRate: poolToken.priceRate || '1.0',
             priceRateProvider: poolToken.priceRateProvider,
             weight: poolToken.weight,
