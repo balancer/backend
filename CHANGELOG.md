@@ -1,5 +1,11 @@
 # backend
 
+## 1.33.16
+
+### Patch Changes
+
+-   121f0ce: fix pool token balance formatting
+
 ## 1.33.15
 
 ### Patch Changes
