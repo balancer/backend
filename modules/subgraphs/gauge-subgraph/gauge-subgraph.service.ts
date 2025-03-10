@@ -271,12 +271,12 @@ export class GaugeSubgraphService {
         return allRootGauges;
     }
 
-    public async getMetadata() {
+    public async lastSyncedBlock() {
         const { meta } = await this.sdk.GaugeGetMeta();
 
         if (!meta) {
             throw new Error('Missing meta data');
         }
-        return meta;
+        return Number(meta.block.number);
     }
 }

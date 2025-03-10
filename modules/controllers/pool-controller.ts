@@ -191,7 +191,7 @@ export function PoolController(tracer?: any) {
             let useSubgraph = true;
             try {
                 // Handle bad indexers etc.
-                toBlock = await subgraphClient.getMetadata().then((metadata) => metadata.block.number);
+                toBlock = await subgraphClient.lastSyncedBlock();
             } catch (e) {
                 useSubgraph = false;
             }

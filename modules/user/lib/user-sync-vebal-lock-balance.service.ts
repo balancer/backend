@@ -31,7 +31,7 @@ export class UserSyncVebalLockBalanceService implements UserStakedBalanceService
 
     private async syncBalances(init: boolean): Promise<void> {
         const subgraphVeBalHolders = await veBalLocksSubgraphService.getAllveBalHolders();
-        const metadata = await veBalLocksSubgraphService.getMetadata();
+        const blockNumber = await veBalLocksSubgraphService.lastSyncedBlock();
 
         let operations: any[] = [];
         // for mainnet, we get the vebal balance form the vebal contract
@@ -98,8 +98,8 @@ export class UserSyncVebalLockBalanceService implements UserStakedBalanceService
         operations.push(
             prisma.prismaUserBalanceSyncStatus.upsert({
                 where: { type_chain: { type: 'VEBAL', chain: 'MAINNET' } },
-                create: { type: 'VEBAL', chain: 'MAINNET', blockNumber: metadata.block.number },
-                update: { blockNumber: metadata.block.number },
+                create: { type: 'VEBAL', chain: 'MAINNET', blockNumber },
+                update: { blockNumber },
             }),
         );
         await prismaBulkExecuteOperations(operations, true, undefined);

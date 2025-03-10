@@ -11,7 +11,7 @@ import { getViemClient } from '../../../../sources/viem-client';
 /**
  *
  * @param poolIds needs a list of pools existing in the DB, some are deleted, like Linear pools
- * @param subgraphClient implementing getMetadata and getAllPoolSharesWithBalance
+ * @param subgraphClient implementing lastSyncedBlock and getAllPoolSharesWithBalance
  * @param chain
  * @param syncCategory used to store the last synced block in the DB based on the category, skipping the sync block when not provided
  * @returns the number of blocks synced
@@ -29,9 +29,7 @@ export const syncBptBalancesFromSubgraph = async (
     }
 
     // endBlock is the latest synced block on the subgraph
-    const {
-        block: { number: endBlock },
-    } = await subgraphClient.getMetadata();
+    const endBlock = await subgraphClient.lastSyncedBlock();
 
     // If the subgraph is not synced, throw
     const viemClient = getViemClient(chain);

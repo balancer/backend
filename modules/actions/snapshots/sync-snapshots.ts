@@ -7,7 +7,7 @@ import { computeDailyValues } from './lib/compute-daily-values';
 import { applyUSDValues } from './lib/apply-usd-values';
 
 type SnapshotsSubgraphClient = {
-    getMetadata: () => Promise<{ block: { number: number } }>;
+    lastSyncedBlock: () => Promise<number>;
     getAllSnapshots: (args: PoolSnapshot_Filter) => Promise<Prisma.PrismaPoolSnapshotUncheckedCreateInput[]>;
 };
 
@@ -21,7 +21,7 @@ export async function syncSnapshots(
     } = {},
 ): Promise<string[]> {
     const { poolIds = [], startFromLastSyncedBlock = true } = options;
-    const currentBlock = await subgraphClient.getMetadata().then((meta) => meta.block.number);
+    const currentBlock = await subgraphClient.lastSyncedBlock();
 
     let lastBlock = 0;
     if (startFromLastSyncedBlock) {

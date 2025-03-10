@@ -21,8 +21,8 @@ export function SubgraphMonitorController(tracer?: any) {
 
                     const subgraph = new GaugeSubgraphService(subgraphUrl as string);
 
-                    const meta = await subgraph.getMetadata();
-                    lag = Math.max(Number(latestBlock) - meta.block.number, 0);
+                    const blockNumber = await subgraph.lastSyncedBlock();
+                    lag = Math.max(Number(latestBlock) - blockNumber, 0);
 
                     let subgraphUrlClean = subgraphUrl;
                     if (subgraphUrl.includes('gateway')) {

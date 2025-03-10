@@ -35,9 +35,7 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
 
         // Get the shares
         const gaugeSubgraphService = new GaugeSubgraphService(config[chain].subgraphs.gauge!);
-        const {
-            block: { number: blockNumber },
-        } = await gaugeSubgraphService.getMetadata();
+        const blockNumber = await gaugeSubgraphService.lastSyncedBlock();
         const lastSyncedBlock = await getLastSyncedBlock(chain, 'GAUGE_BALANCES');
 
         console.log(`[GaugeBalancesSync] ${chain} from ${lastSyncedBlock} to ${blockNumber}`);
