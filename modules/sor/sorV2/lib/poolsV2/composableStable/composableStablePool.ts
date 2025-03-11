@@ -1,6 +1,6 @@
 import { PrismaPoolAndHookWithDynamic } from '../../../../../../prisma/prisma-types';
 import { Chain } from '@prisma/client';
-import { MathSol, WAD } from '../../utils/math';
+import { MathSol } from '../../utils/math';
 import { Address, Hex, parseEther, parseUnits } from 'viem';
 import {
     _calcBptInGivenExactTokensOut,
@@ -11,34 +11,12 @@ import {
     _calcTokenOutGivenExactBptIn,
     _calculateInvariant,
 } from './stableMath';
-import { BigintIsh, PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
+import { PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { chainToChainId as chainToIdMap } from '../../../../../network/chain-id-to-chain';
 import { StableData } from '../../../../../pool/subgraph-mapper';
 import { TokenPairData } from '../../../../../pool/lib/pool-on-chain-tokenpair-data';
 import { BasePool } from '../basePool';
-import { BasePoolToken } from '../basePoolToken';
-
-export class ComposableStablePoolToken extends BasePoolToken {
-    public readonly rate: bigint;
-
-    public constructor(token: Token, amount: BigintIsh, index: number, rate: BigintIsh) {
-        super(token, amount, index);
-        this.rate = BigInt(rate);
-        this.scale18 = (this.amount * this.scalar * this.rate) / WAD;
-    }
-
-    public increase(amount: bigint): TokenAmount {
-        this.amount = this.amount + amount;
-        this.scale18 = (this.amount * this.scalar * this.rate) / WAD;
-        return this;
-    }
-
-    public decrease(amount: bigint): TokenAmount {
-        this.amount = this.amount - amount;
-        this.scale18 = (this.amount * this.scalar * this.rate) / WAD;
-        return this;
-    }
-}
+import { PoolTokenWithRate } from '../../utils/poolTokenWithRate';
 
 export class ComposableStablePool implements BasePool {
     public readonly chain: Chain;
@@ -51,13 +29,13 @@ export class ComposableStablePool implements BasePool {
     public readonly tokenPairs: TokenPairData[];
 
     public totalShares: bigint;
-    public tokens: ComposableStablePoolToken[];
+    public tokens: PoolTokenWithRate[];
 
-    private readonly tokenMap: Map<string, ComposableStablePoolToken>;
+    private readonly tokenMap: Map<string, PoolTokenWithRate>;
     private readonly tokenIndexMap: Map<string, number>;
 
     static fromPrismaPool(pool: PrismaPoolAndHookWithDynamic): ComposableStablePool {
-        const poolTokens: ComposableStablePoolToken[] = [];
+        const poolTokens: PoolTokenWithRate[] = [];
 
         if (!pool.dynamicData) throw new Error('Stable pool has no dynamic data');
 
@@ -74,12 +52,7 @@ export class ComposableStablePool implements BasePool {
             const tokenAmount = TokenAmount.fromScale18Amount(token, scale18);
 
             poolTokens.push(
-                new ComposableStablePoolToken(
-                    token,
-                    tokenAmount.amount,
-                    poolToken.index,
-                    parseEther(poolToken.priceRate),
-                ),
+                new PoolTokenWithRate(token, tokenAmount.amount, poolToken.index, parseEther(poolToken.priceRate)),
             );
         }
 
@@ -104,7 +77,7 @@ export class ComposableStablePool implements BasePool {
         chain: Chain,
         amp: bigint,
         swapFee: bigint,
-        tokens: ComposableStablePoolToken[],
+        tokens: PoolTokenWithRate[],
         totalShares: bigint,
         tokenPairs: TokenPairData[],
     ) {
@@ -325,10 +298,7 @@ export class ComposableStablePool implements BasePool {
         return amountsWithoutBpt;
     }
 
-    public getPoolTokens(
-        tokenIn: Token,
-        tokenOut: Token,
-    ): { tIn: ComposableStablePoolToken; tOut: ComposableStablePoolToken } {
+    public getPoolTokens(tokenIn: Token, tokenOut: Token): { tIn: PoolTokenWithRate; tOut: PoolTokenWithRate } {
         const tIn = this.tokenMap.get(tokenIn.wrapped);
         const tOut = this.tokenMap.get(tokenOut.wrapped);
 

@@ -25,7 +25,7 @@ export default <NetworkData>{
         startDate: '2019-04-20',
         cowAmm: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmQ3c9CTJBZdgy3uTLB929ARZucMUCf6piZBDxSgBKnf6m`,
         balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmQ5TT2yYBZgoUxsat3bKmNe5Fr9LW9YAtDs8aeuc1BRhj`,
-        balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmcUVcWcDUByshbuyMtLfHf3ne6fVhXUUQddEGPHtgseEo`,
+        balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmcZiurwdwrNwtTn9daBFkEbiZMwHW3tKMWxTSX7F6oNmd`,
         balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmNTXdPySmUWBLCK7SQy9PSptipwgxcez8ZZMtFAsqMpqz`,
         gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmNrMRgSeUUkQsvhE6ExBEPETZ6P2jiJL3SzXftNQcAEcW`,
         aura: 'https://data.aura.finance/graphql',
@@ -52,9 +52,10 @@ export default <NetworkData>{
         ],
     },
     rpcUrl: env.DRPC_API_KEY
-        ? `https://direct.drpc.org/ogrpc?network=ethereum&dkey=${env.DRPC_API_KEY}`
+        ? `https://lb.drpc.org/ogrpc?network=ethereum&dkey=${env.DRPC_API_KEY}`
         : 'https://rpc.ankr.com/eth',
-    rpcMaxBlockRange: 10000,
+    rpcMaxBlockRange: 5000,
+    acceptableSGLag: 5, // ~1min
     protocolToken: 'bal',
     bal: {
         address: '0xba100000625a3754423978a60c9317c58a424e3d',

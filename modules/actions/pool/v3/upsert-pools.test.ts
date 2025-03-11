@@ -1,9 +1,11 @@
 import { getVaultClient } from '../../../sources/contracts';
+import { getPoolsClient } from '../../../sources/contracts';
 import { upsertPools } from './upsert-pools';
 import { chainIdToChain } from '../../../network/chain-id-to-chain';
 import config from '../../../../config';
 import { getV3JoinedSubgraphClient } from '../../../sources/subgraphs/joined-client';
 import { getViemClient } from '../../../sources/viem-client';
+import { getPoolsSubgraphClient, getVaultSubgraphClient } from '../../../sources/subgraphs';
 
 describe('upsert pools debug', () => {
     it('upsert boosted pool', async () => {
@@ -20,7 +22,9 @@ describe('upsert pools debug', () => {
             throw new Error(`Chain not configured: ${chain}`);
         }
 
-        const client = getV3JoinedSubgraphClient(balancerV3, balancerPoolsV3, chain);
+        const vaultSubgraphClient = getVaultSubgraphClient(balancerV3, chain);
+        const poolsSubgraphClient = getPoolsSubgraphClient(balancerPoolsV3, chain);
+        const client = getV3JoinedSubgraphClient(vaultSubgraphClient, poolsSubgraphClient);
         const allPools = await client.getAllInitializedPools();
         const pools = allPools.filter(
             (pool) =>
@@ -30,8 +34,9 @@ describe('upsert pools debug', () => {
 
         const viemClient = getViemClient(chain);
         const vaultClient = getVaultClient(viemClient, vaultAddress);
-        const latestBlock = await viemClient.getBlockNumber();
+        const poolsClient = getPoolsClient(viemClient);
+        const latestBlock = await viemClient.getBlockNumber().then(Number);
 
-        await upsertPools(pools, vaultClient, chain, latestBlock);
+        await upsertPools(pools, vaultClient, poolsClient, chain, latestBlock);
     }, 5000000);
 });

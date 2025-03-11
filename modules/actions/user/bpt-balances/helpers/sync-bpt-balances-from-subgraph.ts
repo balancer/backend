@@ -24,7 +24,7 @@ export const syncBptBalancesFromSubgraph = async (
 ) => {
     // Must have poolIds to sync
     if (poolIds.length === 0) {
-        console.log(`syncBptBalancesFromSubgraph ${syncCategory} on ${chain} no pools provided`);
+        console.log(`syncBptBalancesFromSubgraph ${syncCategory || ''} on ${chain} no pools provided`);
         return 0;
     }
 
@@ -38,7 +38,7 @@ export const syncBptBalancesFromSubgraph = async (
     const latestBlock = await viemClient.getBlockNumber();
     if (Number(latestBlock) - endBlock > 60) {
         throw new Error(
-            `syncBptBalancesFromSubgraph ${syncCategory} on ${chain} subgraph lagging behind by ${
+            `syncBptBalancesFromSubgraph ${syncCategory || ''} on ${chain} subgraph lagging behind by ${
                 Number(latestBlock) - endBlock
             } blocks`,
         );
@@ -47,17 +47,19 @@ export const syncBptBalancesFromSubgraph = async (
     // Get the balances synced block from the DB
     const startBlock = syncCategory ? await getLastSyncedBlock(chain, syncCategory) : 0;
     const fromBlock = Math.max(startBlock - BALANCES_SYNC_BLOCKS_MARGIN, 0);
-    const benchMessage = `syncBptBalancesFromSubgraph ${syncCategory} on ${chain} from ${fromBlock} to ${endBlock} for ${poolIds.length} pools`;
+    const benchMessage = `syncBptBalancesFromSubgraph ${
+        syncCategory || ''
+    } on ${chain} from ${fromBlock} to ${endBlock} for ${poolIds.length} pools`;
     console.log(benchMessage);
     console.time(benchMessage);
     const poolShares = await subgraphClient.getAllPoolSharesWithBalance(poolIds, [zeroAddress], fromBlock);
     console.timeEnd(benchMessage);
-    console.log(`syncBptBalancesFromSubgraph ${syncCategory} on ${chain} got ${poolShares.length} poolShares`);
+    console.log(`syncBptBalancesFromSubgraph ${syncCategory || ''} on ${chain} got ${poolShares.length} poolShares`);
     const operations = balancesToDb(poolShares, endBlock, syncCategory);
     try {
         await prisma.$transaction(operations);
     } catch (e: any) {
-        console.error(`syncBptBalancesFromSubgraph ${syncCategory}`, e.message);
+        console.error(`syncBptBalancesFromSubgraph ${syncCategory || ''}`, e.message);
         return 0;
     }
 

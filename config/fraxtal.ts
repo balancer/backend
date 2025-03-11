@@ -33,9 +33,10 @@ export default <NetworkData>{
         excludedTokenAddresses: [],
     },
     rpcUrl: env.DRPC_API_KEY
-        ? `https://direct.drpc.org/ogrpc?network=fraxtal&dkey=${env.DRPC_API_KEY}`
+        ? `https://lb.drpc.org/ogrpc?network=fraxtal&dkey=${env.DRPC_API_KEY}`
         : 'https://rpc.frax.com/',
     rpcMaxBlockRange: 10000,
+    acceptableSGLag: 30, // ~1min
     protocolToken: 'bal',
     bal: {
         address: '0x2fc7447f6cf71f9aa9e7ff8814b37e55b268ec91',

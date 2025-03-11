@@ -32,9 +32,10 @@ export default <NetworkData>{
         excludedTokenAddresses: [],
     },
     rpcUrl: env.DRPC_API_KEY
-        ? `https://direct.drpc.org/ogrpc?network=polygon&dkey=${env.DRPC_API_KEY}`
+        ? `https://lb.drpc.org/ogrpc?network=polygon&dkey=${env.DRPC_API_KEY}`
         : 'https://1rpc.io/matic',
     rpcMaxBlockRange: 10000,
+    acceptableSGLag: 30, // ~1min
     protocolToken: 'bal',
     bal: {
         address: '0x9a71012b13ca4d3d0cdc72a177df3ef03b0e76a3',

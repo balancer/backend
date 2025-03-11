@@ -1,5 +1,4 @@
 import { Address, Hex, parseEther, parseUnits } from 'viem';
-
 import { MAX_UINT256, PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { AddKind, RemoveKind, StableState, Vault, HookState } from '@balancer-labs/balancer-maths';
 import { Chain } from '@prisma/client';
@@ -11,14 +10,14 @@ import { TokenPairData } from '../../../../../sources/contracts/v3/fetch-tokenpa
 
 import { WAD } from '../../utils/math';
 import { BasePoolV3 } from '../../poolsV2/basePool';
-import { StableBasePoolToken } from './stableBasePoolToken';
-import { Erc4626PoolToken } from '../../poolsV2/erc4626PoolToken';
+import { PoolTokenWithRate } from '../../utils/poolTokenWithRate';
+import { Erc4626PoolToken } from '../../utils/erc4626PoolToken';
 
-import { getHookState, isLiquidityManagement } from '../../utils/helpers';
+import { getHookState } from '../../utils/helpers';
 
 import { LiquidityManagement } from '../../../../../sor/types';
 
-type StablePoolToken = StableBasePoolToken | Erc4626PoolToken;
+type StablePoolToken = PoolTokenWithRate | Erc4626PoolToken;
 
 export class StablePoolV3 implements BasePoolV3 {
     public readonly chain: Chain;
@@ -27,6 +26,7 @@ export class StablePoolV3 implements BasePoolV3 {
     public readonly poolType: PoolType = PoolType.Stable;
     public readonly amp: bigint;
     public readonly swapFee: bigint;
+    public readonly aggregateSwapFee: bigint;
     public readonly tokenPairs: TokenPairData[];
 
     public totalShares: bigint;
@@ -56,8 +56,7 @@ export class StablePoolV3 implements BasePoolV3 {
                 poolToken.token.symbol,
                 poolToken.token.name,
             );
-            const scale18 = parseEther(poolToken.balance);
-            const tokenAmount = TokenAmount.fromScale18Amount(token, scale18);
+            const amount = parseUnits(poolToken.balance, poolToken.token.decimals);
 
             if (poolToken.token.underlyingTokenAddress) {
                 const underlyingToken = underlyingTokens.find(
@@ -68,7 +67,7 @@ export class StablePoolV3 implements BasePoolV3 {
                     poolTokens.push(
                         new Erc4626PoolToken(
                             token,
-                            tokenAmount.amount,
+                            amount,
                             poolToken.index,
                             parseEther(poolToken.priceRate),
                             parseUnits(poolToken.token.unwrapRate, unwrapRateDecimals),
@@ -77,23 +76,11 @@ export class StablePoolV3 implements BasePoolV3 {
                     );
                 } else {
                     poolTokens.push(
-                        new StableBasePoolToken(
-                            token,
-                            tokenAmount.amount,
-                            poolToken.index,
-                            parseEther(poolToken.priceRate),
-                        ),
+                        new PoolTokenWithRate(token, amount, poolToken.index, parseEther(poolToken.priceRate)),
                     );
                 }
             } else {
-                poolTokens.push(
-                    new StableBasePoolToken(
-                        token,
-                        tokenAmount.amount,
-                        poolToken.index,
-                        parseEther(poolToken.priceRate),
-                    ),
-                );
+                poolTokens.push(new PoolTokenWithRate(token, amount, poolToken.index, parseEther(poolToken.priceRate)));
             }
         }
 
@@ -109,6 +96,7 @@ export class StablePoolV3 implements BasePoolV3 {
             pool.chain,
             amp,
             parseEther(pool.dynamicData.swapFee),
+            parseEther(pool.dynamicData.aggregateSwapFee),
             poolTokens,
             totalShares,
             pool.dynamicData.tokenPairsData as TokenPairData[],
@@ -123,6 +111,7 @@ export class StablePoolV3 implements BasePoolV3 {
         chain: Chain,
         amp: bigint,
         swapFee: bigint,
+        aggregateSwapFee: bigint,
         tokens: StablePoolToken[],
         totalShares: bigint,
         tokenPairs: TokenPairData[],
@@ -134,6 +123,7 @@ export class StablePoolV3 implements BasePoolV3 {
         this.address = address;
         this.amp = amp;
         this.swapFee = swapFee;
+        this.aggregateSwapFee = aggregateSwapFee;
         this.totalShares = totalShares;
 
         this.tokens = tokens.sort((a, b) => a.index - b.index);
@@ -144,7 +134,7 @@ export class StablePoolV3 implements BasePoolV3 {
 
         // add BPT to tokenMap, so we can handle add/remove liquidity operations
         const bpt = new Token(tokens[0].token.chainId, this.id, 18, 'BPT', 'BPT');
-        this.tokenMap.set(bpt.address, new StableBasePoolToken(bpt, totalShares, -1, WAD));
+        this.tokenMap.set(bpt.address, new PoolTokenWithRate(bpt, totalShares, -1, WAD));
 
         this.vault = new Vault();
         this.poolState = this.getPoolState(hookState?.hookType);
@@ -332,7 +322,7 @@ export class StablePoolV3 implements BasePoolV3 {
             amp: this.amp,
             tokens: this.tokens.map((t) => t.token.address),
             scalingFactors: this.tokens.map((t) => t.scalar),
-            aggregateSwapFee: 0n,
+            aggregateSwapFee: this.aggregateSwapFee,
             supportsUnbalancedLiquidity: !this.liquidityManagement.disableUnbalancedLiquidity,
         };
 

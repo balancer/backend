@@ -1,6 +1,6 @@
 import { Address, Hex, parseEther, parseUnits } from 'viem';
 import { MAX_UINT256, SwapKind, Token, TokenAmount, WAD } from '@balancer/sdk';
-import { AddKind, RemoveKind, Vault, Weighted, WeightedState, HookState } from '@balancer-labs/balancer-maths';
+import { AddKind, RemoveKind, Vault, WeightedState, HookState } from '@balancer-labs/balancer-maths';
 import { Chain } from '@prisma/client';
 
 import { PrismaPoolAndHookWithDynamic } from '../../../../../../prisma/prisma-types';
@@ -12,7 +12,7 @@ import { BasePoolV3 } from '../../poolsV2/basePool';
 import { WeightedBasePoolToken } from '../../poolsV2/weighted/weightedBasePoolToken';
 import { WeightedErc4626PoolToken } from './weightedErc4626PoolToken';
 
-import { getHookState, isLiquidityManagement } from '../../utils/helpers';
+import { getHookState } from '../../utils/helpers';
 
 import { LiquidityManagement } from '../../../../../sor/types';
 
@@ -25,6 +25,7 @@ export class WeightedPoolV3 implements BasePoolV3 {
     public readonly poolType: GqlPoolType = 'WEIGHTED';
     public readonly poolTypeVersion: number;
     public readonly swapFee: bigint;
+    public readonly aggregateSwapFee: bigint;
     public readonly totalShares: bigint;
     public readonly tokens: WeightedPoolToken[];
     public readonly tokenPairs: TokenPairData[];
@@ -106,6 +107,7 @@ export class WeightedPoolV3 implements BasePoolV3 {
             pool.chain,
             pool.version,
             parseEther(pool.dynamicData.swapFee),
+            parseEther(pool.dynamicData.aggregateSwapFee),
             parseEther(pool.dynamicData.totalShares),
             poolTokens,
             pool.dynamicData.tokenPairsData as TokenPairData[],
@@ -120,6 +122,7 @@ export class WeightedPoolV3 implements BasePoolV3 {
         chain: Chain,
         poolTypeVersion: number,
         swapFee: bigint,
+        aggregateSwapFee: bigint,
         totalShares: bigint,
         tokens: WeightedPoolToken[],
         tokenPairs: TokenPairData[],
@@ -131,6 +134,7 @@ export class WeightedPoolV3 implements BasePoolV3 {
         this.poolTypeVersion = poolTypeVersion;
         this.address = address;
         this.swapFee = swapFee;
+        this.aggregateSwapFee = aggregateSwapFee;
         this.totalShares = totalShares;
         this.tokens = tokens;
         this.tokenMap = new Map(tokens.map((token) => [token.token.address, token]));
@@ -325,7 +329,7 @@ export class WeightedPoolV3 implements BasePoolV3 {
             weights: this.tokens.map((t) => t.weight),
             tokens: this.tokens.map((t) => t.token.address),
             scalingFactors: this.tokens.map((t) => t.scalar),
-            aggregateSwapFee: 0n,
+            aggregateSwapFee: this.aggregateSwapFee,
             supportsUnbalancedLiquidity: !this.liquidityManagement.disableUnbalancedLiquidity,
         };
 

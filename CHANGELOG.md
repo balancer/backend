@@ -1,5 +1,38 @@
 # backend
 
+## 1.34.0
+
+### Minor Changes
+
+-   d88f9a1: cow-amm and v3 syncs from SG with RPC fallback
+
+### Patch Changes
+
+-   4d89ed0: gnosis SG rollback
+-   6946ecb: new hook address
+-   fdff810: new gnosis SG
+-   d893421: dynamic fee fixes
+
+## 1.33.16
+
+### Patch Changes
+
+-   121f0ce: fix pool token balance formatting
+
+## 1.33.15
+
+### Patch Changes
+
+-   a756608: SOR - Fix scale18 on erc4626 pool tokens
+-   81b21ee: filter out unknown hooks from sor list
+-   1778dba: new hook
+
+## 1.33.14
+
+### Patch Changes
+
+-   0729697: revert drpc to lb, reduce max block range
+
 ## 1.33.13
 
 ### Patch Changes

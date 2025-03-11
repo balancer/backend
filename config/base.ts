@@ -13,7 +13,7 @@ export default <NetworkData>{
     subgraphs: {
         startDate: '2023-07-10',
         balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmRKBwBwPKtFz4mQp5jvH44USVprM4C77Nr4m77UGCbGv9`,
-        balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmbFUZCqpeDvt9KT3UqpenhXfFW69tbKkC1tGjmPj7ZApc`,
+        balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmchLChWDwNZoaoYnEwBKDtrQymKKpWHa5gLn4vgsY9Bt7`,
         balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmWSgs9e3TUZYq2iYmYRjjp6t55N6aJS4Hk6C2rYvy9qXV`,
         cowAmm: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmVRCjhFz7XXJoeJ5t4FdysN2JaBVdUCvpTVoMzXRNjA87`,
         gauge: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/CfBvJNYsbKZdxXzaCtNc6dUbHH6TjDupprjKKo9gnmwg`,
@@ -21,6 +21,8 @@ export default <NetworkData>{
     },
     hooks: {
         ['0xb2007b8b7e0260042517f635cfd8e6dd2dd7f007']: 'STABLE_SURGE',
+        ['0x97b05bafb3c592089d382ba7cfa7abb9d85f599e']: 'UNKNOWN',
+        ['0xa64cde229697d500ecaceb0611d603ad21fe4ce5']: 'UNKNOWN',
     },
     gyro: {
         config: '0x8a5eb9a5b726583a213c7e4de2403d2dfd42c8a6',
@@ -41,9 +43,10 @@ export default <NetworkData>{
         excludedTokenAddresses: [],
     },
     rpcUrl: env.DRPC_API_KEY
-        ? `https://direct.drpc.org/ogrpc?network=base&dkey=${env.DRPC_API_KEY}`
+        ? `https://lb.drpc.org/ogrpc?network=base&dkey=${env.DRPC_API_KEY}`
         : 'https://base.gateway.tenderly.co/7mM7DbBouY1JjnQd9MMDsd',
     rpcMaxBlockRange: 25000,
+    acceptableSGLag: 30, // ~1min
     protocolToken: 'bal',
     bal: {
         address: '0x4158734d47fc9692176b5085e0f52ee0da5d47f1',
