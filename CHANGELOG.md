@@ -1,5 +1,11 @@
 # backend
 
+## 1.34.1
+
+### Patch Changes
+
+-   03d9cb9: sync reviews with hooks
+
 ## 1.34.0
 
 ### Minor Changes
