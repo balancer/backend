@@ -1,5 +1,18 @@
 # backend
 
+## 1.34.0
+
+### Minor Changes
+
+-   d88f9a1: cow-amm and v3 syncs from SG with RPC fallback
+
+### Patch Changes
+
+-   4d89ed0: gnosis SG rollback
+-   6946ecb: new hook address
+-   fdff810: new gnosis SG
+-   d893421: dynamic fee fixes
+
 ## 1.33.16
 
 ### Patch Changes
