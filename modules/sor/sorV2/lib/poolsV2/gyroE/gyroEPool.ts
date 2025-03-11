@@ -147,24 +147,27 @@ export class GyroEPool implements BasePool {
             x: currentInvariant + invErr * 2n,
             y: currentInvariant,
         };
-        const inAmount = PoolTokenWithRate.fromRawAmount(tokenIn, swapAmount.amount);
-        const inAmountLessFee = this.subtractSwapFeeAmount(inAmount);
-        const inAmountWithRate = inAmountLessFee.mulDownFixed(tIn.rate);
+        // swapAmount from PathWithAmount does not take rate into account - this step fixes scale18 so it properly considers rates
+        const swapAmountLive = new PoolTokenWithRate(tokenIn, swapAmount.amount, tIn.index, tIn.rate);
+        const inAmount = this.subtractSwapFeeAmount(swapAmountLive);
         const outAmountScale18 = calcOutGivenIn(
             orderedNormalizedBalances,
-            inAmountWithRate.scale18,
+            inAmount.scale18,
             tIn.index === 0,
             this.gyroEParams,
             this.derivedGyroEParams,
             invariant,
         );
 
-        const outAmountWithRate = TokenAmount.fromScale18Amount(tokenOut, outAmountScale18);
-
-        const outAmount = outAmountWithRate.divDownFixed(tOut.rate);
+        const outAmount = PoolTokenWithRate.fromScale18AmountWithRate(
+            tokenOut,
+            outAmountScale18,
+            tOut.rate,
+            tOut.index,
+        );
 
         if (mutateBalances) {
-            tIn.increase(swapAmount.amount);
+            tIn.increase(swapAmountLive.amount);
             tOut.decrease(outAmount.amount);
         }
 
@@ -178,6 +181,8 @@ export class GyroEPool implements BasePool {
         mutateBalances?: boolean,
     ): TokenAmount {
         const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
+        // swapAmount from PathWithAmount does not take rate into account - this step fixes scale18 so it properly considers rates
+        const swapAmountLive = new PoolTokenWithRate(tokenOut, swapAmount.amount, tOut.index, tOut.rate);
         const orderedNormalizedBalances = balancesFromTokenInOut(tIn.scale18, tOut.scale18, tIn.index === 0);
         const [currentInvariant, invErr] = calculateInvariantWithError(
             orderedNormalizedBalances,
@@ -191,23 +196,23 @@ export class GyroEPool implements BasePool {
 
         const inAmountLessFee = calcInGivenOut(
             orderedNormalizedBalances,
-            swapAmount.scale18,
+            swapAmountLive.scale18,
             tIn.index === 0,
             this.gyroEParams,
             this.derivedGyroEParams,
             invariant,
         );
 
-        const inAmount = this.addSwapFeeAmount(PoolTokenWithRate.fromScale18Amount(tokenIn, inAmountLessFee));
-
-        const inAmountWithRate = inAmount.divUpFixed(tIn.rate);
+        const inAmount = this.addSwapFeeAmount(
+            PoolTokenWithRate.fromScale18AmountWithRate(tokenIn, inAmountLessFee, tIn.rate, tIn.index, true),
+        );
 
         if (mutateBalances) {
-            tIn.decrease(inAmountWithRate.amount);
-            tOut.increase(swapAmount.amount);
+            tIn.decrease(inAmount.amount);
+            tOut.increase(swapAmountLive.amount);
         }
 
-        return inAmountWithRate;
+        return inAmount;
     }
 
     public getLimitAmountSwap(tokenIn: Token, tokenOut: Token, swapKind: SwapKind): bigint {

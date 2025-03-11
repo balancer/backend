@@ -170,7 +170,9 @@ export enum AddRemove_OrderBy {
     PoolFactory = 'pool__factory',
     PoolHoldersCount = 'pool__holdersCount',
     PoolId = 'pool__id',
+    PoolIsInRecoveryMode = 'pool__isInRecoveryMode',
     PoolIsInitialized = 'pool__isInitialized',
+    PoolIsPaused = 'pool__isPaused',
     PoolName = 'pool__name',
     PoolPauseManager = 'pool__pauseManager',
     PoolPauseWindowEndTime = 'pool__pauseWindowEndTime',
@@ -576,7 +578,9 @@ export enum HookConfig_OrderBy {
     PoolFactory = 'pool__factory',
     PoolHoldersCount = 'pool__holdersCount',
     PoolId = 'pool__id',
+    PoolIsInRecoveryMode = 'pool__isInRecoveryMode',
     PoolIsInitialized = 'pool__isInitialized',
+    PoolIsPaused = 'pool__isPaused',
     PoolName = 'pool__name',
     PoolPauseManager = 'pool__pauseManager',
     PoolPauseWindowEndTime = 'pool__pauseWindowEndTime',
@@ -724,7 +728,9 @@ export enum LiquidityManagement_OrderBy {
     PoolFactory = 'pool__factory',
     PoolHoldersCount = 'pool__holdersCount',
     PoolId = 'pool__id',
+    PoolIsInRecoveryMode = 'pool__isInRecoveryMode',
     PoolIsInitialized = 'pool__isInitialized',
+    PoolIsPaused = 'pool__isPaused',
     PoolName = 'pool__name',
     PoolPauseManager = 'pool__pauseManager',
     PoolPauseWindowEndTime = 'pool__pauseWindowEndTime',
@@ -765,8 +771,12 @@ export type Pool = {
     hookConfig: HookConfig;
     /** Unique identifier for the Pool */
     id: Scalars['Bytes'];
+    /** Indicates whether the Pool is in recovery mode */
+    isInRecoveryMode: Scalars['Boolean'];
     /** Indicates whether the Pool has been initialized */
     isInitialized: Scalars['Boolean'];
+    /** Indicates whether the Pool is currently paused */
+    isPaused: Scalars['Boolean'];
     /** Liquidity management settings for this Pool */
     liquidityManagement: LiquidityManagement;
     /** Name of the Pool */
@@ -918,7 +928,9 @@ export enum PoolShare_OrderBy {
     PoolFactory = 'pool__factory',
     PoolHoldersCount = 'pool__holdersCount',
     PoolId = 'pool__id',
+    PoolIsInRecoveryMode = 'pool__isInRecoveryMode',
     PoolIsInitialized = 'pool__isInitialized',
+    PoolIsPaused = 'pool__isPaused',
     PoolName = 'pool__name',
     PoolPauseManager = 'pool__pauseManager',
     PoolPauseWindowEndTime = 'pool__pauseWindowEndTime',
@@ -1088,7 +1100,9 @@ export enum PoolSnapshot_OrderBy {
     PoolFactory = 'pool__factory',
     PoolHoldersCount = 'pool__holdersCount',
     PoolId = 'pool__id',
+    PoolIsInRecoveryMode = 'pool__isInRecoveryMode',
     PoolIsInitialized = 'pool__isInitialized',
+    PoolIsPaused = 'pool__isPaused',
     PoolName = 'pool__name',
     PoolPauseManager = 'pool__pauseManager',
     PoolPauseWindowEndTime = 'pool__pauseWindowEndTime',
@@ -1448,7 +1462,9 @@ export enum PoolToken_OrderBy {
     NestedPoolFactory = 'nestedPool__factory',
     NestedPoolHoldersCount = 'nestedPool__holdersCount',
     NestedPoolId = 'nestedPool__id',
+    NestedPoolIsInRecoveryMode = 'nestedPool__isInRecoveryMode',
     NestedPoolIsInitialized = 'nestedPool__isInitialized',
+    NestedPoolIsPaused = 'nestedPool__isPaused',
     NestedPoolName = 'nestedPool__name',
     NestedPoolPauseManager = 'nestedPool__pauseManager',
     NestedPoolPauseWindowEndTime = 'nestedPool__pauseWindowEndTime',
@@ -1471,7 +1487,9 @@ export enum PoolToken_OrderBy {
     PoolFactory = 'pool__factory',
     PoolHoldersCount = 'pool__holdersCount',
     PoolId = 'pool__id',
+    PoolIsInRecoveryMode = 'pool__isInRecoveryMode',
     PoolIsInitialized = 'pool__isInitialized',
+    PoolIsPaused = 'pool__isPaused',
     PoolName = 'pool__name',
     PoolPauseManager = 'pool__pauseManager',
     PoolPauseWindowEndTime = 'pool__pauseWindowEndTime',
@@ -1601,10 +1619,18 @@ export type Pool_Filter = {
     id_not?: InputMaybe<Scalars['Bytes']>;
     id_not_contains?: InputMaybe<Scalars['Bytes']>;
     id_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
+    isInRecoveryMode?: InputMaybe<Scalars['Boolean']>;
+    isInRecoveryMode_in?: InputMaybe<Array<Scalars['Boolean']>>;
+    isInRecoveryMode_not?: InputMaybe<Scalars['Boolean']>;
+    isInRecoveryMode_not_in?: InputMaybe<Array<Scalars['Boolean']>>;
     isInitialized?: InputMaybe<Scalars['Boolean']>;
     isInitialized_in?: InputMaybe<Array<Scalars['Boolean']>>;
     isInitialized_not?: InputMaybe<Scalars['Boolean']>;
     isInitialized_not_in?: InputMaybe<Array<Scalars['Boolean']>>;
+    isPaused?: InputMaybe<Scalars['Boolean']>;
+    isPaused_in?: InputMaybe<Array<Scalars['Boolean']>>;
+    isPaused_not?: InputMaybe<Scalars['Boolean']>;
+    isPaused_not_in?: InputMaybe<Array<Scalars['Boolean']>>;
     liquidityManagement?: InputMaybe<Scalars['String']>;
     liquidityManagement_?: InputMaybe<LiquidityManagement_Filter>;
     liquidityManagement_contains?: InputMaybe<Scalars['String']>;
@@ -1819,7 +1845,9 @@ export enum Pool_OrderBy {
     HookAddress = 'hook__address',
     HookId = 'hook__id',
     Id = 'id',
+    IsInRecoveryMode = 'isInRecoveryMode',
     IsInitialized = 'isInitialized',
+    IsPaused = 'isPaused',
     LiquidityManagement = 'liquidityManagement',
     LiquidityManagementDisableUnbalancedLiquidity = 'liquidityManagement__disableUnbalancedLiquidity',
     LiquidityManagementEnableAddLiquidityCustom = 'liquidityManagement__enableAddLiquidityCustom',
@@ -2223,7 +2251,9 @@ export enum RateProvider_OrderBy {
     PoolFactory = 'pool__factory',
     PoolHoldersCount = 'pool__holdersCount',
     PoolId = 'pool__id',
+    PoolIsInRecoveryMode = 'pool__isInRecoveryMode',
     PoolIsInitialized = 'pool__isInitialized',
+    PoolIsPaused = 'pool__isPaused',
     PoolName = 'pool__name',
     PoolPauseManager = 'pool__pauseManager',
     PoolPauseWindowEndTime = 'pool__pauseWindowEndTime',

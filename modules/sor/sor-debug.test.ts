@@ -6,40 +6,51 @@ import { PoolController } from '../controllers/pool-controller';
 import { TokenController } from '../controllers/token-controller';
 import { ContentController } from '../controllers/content-controller';
 import { sorService } from './sor.service';
+import { tokenService } from '../token/token.service';
 
 describe('sor debugging', () => {
     it('sor v2', async () => {
         const useProtocolVersion = 2;
-        const chain = Chain.ARBITRUM;
+        const chain = Chain.SONIC;
 
         const chainId = Object.keys(chainIdToChain).find((key) => chainIdToChain[key] === chain) as string;
         initRequestScopedContext();
         setRequestScopedContextValue('chainId', chainId);
-        //only do once before starting to debug
+
+        // only do once before starting to debug
         // await PoolController().addPoolsV2(chain);
         // await PoolController().syncOnchainDataForAllPoolsV2(chain);
         // await PoolController().syncChangedPoolsV2(chain);
+
+        // to update liquidity values, first update the token prices: yarn vitest token.service.test.ts
         // await PoolController().updateLiquidityValuesForActivePools(chain);
 
         const swaps = await sorService.getSorSwapPaths({
             chain,
-            tokenIn: '0xaf88d065e77c8cc2239327c5edb3a432268e5831', // USDC
-            tokenOut: '0x82af49447d8a07e3bd95bd0d56f35241523fbab1', // WETH
+            tokenIn: '0xd3dce716f3ef535c5ff8d041c1a41c3bd89b97ae', // scUSD
+            tokenOut: '0x3bce5cb273f0f148010bbea2470e7b5df84c7812', // sETH
             swapType: 'EXACT_OUT',
-            swapAmount: '0.00000040526107834',
+            swapAmount: '1',
             useProtocolVersion,
             // callDataInput: {
             //     receiver: '0xb5e6b895734409Df411a052195eb4EE7e40d8696',
             //     sender: '0xb5e6b895734409Df411a052195eb4EE7e40d8696',
             //     slippagePercentage: '0.1',
             // },
+            poolIds: ['0xe7734b495a552ab6f4c78406e672cca7175181e10002000000000000000000c5'],
         });
 
         console.log(swaps.returnAmount);
+        for (const route of swaps.routes) {
+            for (const hop of route.hops) {
+                console.log(hop.pool.id);
+            }
+        }
+
         expect(parseFloat(swaps.returnAmount)).toBeGreaterThan(0);
     }, 5000000);
 
-    it.only('sor v3', async () => {
+    it('sor v3', async () => {
         const useProtocolVersion = 3;
         const chain = Chain.SONIC;
 
@@ -53,8 +64,7 @@ describe('sor debugging', () => {
         // await TokenController().syncErc4626UnwrapRates(chain);
         // await ContentController().syncErc4626Data();
 
-        // to update liquidity values, first update the token prices through a mutation
-        // yarn dev; yarn mutation 'tokenReloadTokenPrices(chains: [MAINNET])' 1
+        // to update liquidity values, first update the token prices: yarn vitest token.service.test.ts
         // await PoolController().updateLiquidityValuesForActivePools(chain);
 
         const swaps = await sorService.getSorSwapPaths({
