@@ -1,3 +1,5 @@
+// yarn vitest token.service.test.ts
+
 import { expect, test } from 'vitest';
 import { initRequestScopedContext, setRequestScopedContextValue } from '../context/request-scoped-context';
 import { AllNetworkConfigs } from '../network/network-config';
@@ -23,6 +25,12 @@ test('debug token price', async () => {
 
     initRequestScopedContext();
     setRequestScopedContextValue('chainId', chainId);
+
+    // swaps are required to populate coingecko IDs
+    // let swaps = await EventController().syncSwapsV3(chain);
+    // while (swaps.length > 1) {
+    //     swaps = await EventController().syncSwapsV3(chain);
+    // }
 
     // await tokenService.syncTokenContentData(chain);
     // await TokenController().syncErc4626Tokens(chain);
