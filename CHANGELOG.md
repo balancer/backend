@@ -1,5 +1,12 @@
 # backend
 
+## 1.34.2
+
+### Patch Changes
+
+-   56124d9: SOR - Fix gyroE tokens rates for exact out swaps
+-   aa451c1: fix dynamic aprs
+
 ## 1.34.1
 
 ### Patch Changes
