@@ -25,6 +25,7 @@ import { getChangedPoolsV3 } from '../sources/logs';
 import { getPoolsClient } from '../sources/contracts';
 import { syncBptBalancesFromSubgraph } from '../actions/user/bpt-balances/helpers/sync-bpt-balances-from-subgraph';
 import { updateVolumeAndFees } from '../actions/pool/update-volume-and-fees';
+import { syncHookReviews } from '../actions/content/sync-hook-reviews';
 
 export function PoolController(tracer?: any) {
     return {
@@ -256,6 +257,7 @@ export function PoolController(tracer?: any) {
                     where: { chain, id: { in: ids }, hook: { not: {} } },
                 });
                 await syncHookData(poolsWithHooks, hooks, viemClient, chain);
+                await syncHookReviews();
             }
 
             // Sync balances for the pools

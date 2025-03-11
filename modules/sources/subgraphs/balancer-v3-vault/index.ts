@@ -14,6 +14,7 @@ import {
     PoolBalancesQueryVariables,
     PoolSnapshotFragment,
     PoolSnapshot_Filter,
+    SwapsQueryVariables,
 } from './generated/types';
 import { Chain, Prisma } from '@prisma/client';
 import { snapshotToDb } from './transformers/snapshotToDb';
@@ -232,6 +233,32 @@ export function getVaultSubgraphClient(url: string, chain: Chain) {
                     hasMore = false;
                 } else {
                     id = response.pools[response.pools.length - 1].id;
+                }
+            }
+
+            return data;
+        },
+        async getAllSwaps({ where, block }: SwapsQueryVariables): Promise<SwapFragment[]> {
+            const limit = 1000;
+            let hasMore = true;
+            let id = `0x`;
+            let data: SwapFragment[] = [];
+
+            while (hasMore) {
+                const response = await sdk.Swaps({
+                    where: { ...where, id_gt: id },
+                    orderBy: Swap_OrderBy.Id,
+                    orderDirection: OrderDirection.Asc,
+                    first: limit,
+                    block,
+                });
+
+                data = [...data, ...response.swaps];
+
+                if (response.swaps.length < limit) {
+                    hasMore = false;
+                } else {
+                    id = response.swaps[response.swaps.length - 1].id;
                 }
             }
 
