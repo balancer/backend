@@ -8,6 +8,7 @@ import {
     VeBalProtocolAprService,
     VeBalVotingAprService,
     MorphoRewardsAprService,
+    DynamicSwapFeeFromEventsAprService,
 } from '../pool/lib/apr-data-sources';
 import { UserSyncGaugeBalanceService } from '../user/lib/user-sync-gauge-balance.service';
 import { every } from '../../apps/scheduler/intervals';
@@ -29,6 +30,7 @@ export const mainnetNetworkConfig: NetworkConfig = {
         new YbTokensAprService(data.ybAprConfig, data.chain.prismaId),
         new BoostedPoolAprService(),
         new SwapFeeAprService(),
+        new DynamicSwapFeeFromEventsAprService(),
         new GaugeAprService(),
         new VeBalProtocolAprService(data.rpcUrl),
         new VeBalVotingAprService(),

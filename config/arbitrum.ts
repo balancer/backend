@@ -13,7 +13,7 @@ export default <NetworkData>{
     subgraphs: {
         startDate: '2021-08-23',
         balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmPbjY6L1NhPjpBv7wDTfG9EPx5FpCuBqeg1XxByzBTLcs`,
-        balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmPpAKCPtE8wNnZAvVULuUQe4f6VeRb6DtT3JWpYAXugGc`,
+        balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmPHAu4eYkYVBbhcBErZbfNYPT2vadkJrgDTRnNiCHWWcs`,
         balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmVJkf86zu7f24p3RXA22mqNyB1qcLjSJdtYEQaSffNiB2`,
         cowAmm: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmUDGSJXdMzG4ezDzf1LvXVb2igwY6rnaNFLC62ZJZ3Pbv`,
         gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmT3h6pogdPkxfWsBxKNtpq7kR9fqKaQ9jGxe7fZx7MUVE`,

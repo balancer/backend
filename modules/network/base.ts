@@ -6,6 +6,7 @@ import {
     BoostedPoolAprService,
     YbTokensAprService,
     MorphoRewardsAprService,
+    DynamicSwapFeeFromEventsAprService,
 } from '../pool/lib/apr-data-sources/';
 import { UserSyncGaugeBalanceService } from '../user/lib/user-sync-gauge-balance.service';
 import { every } from '../../apps/scheduler/intervals';
@@ -26,6 +27,7 @@ export const baseNetworkConfig: NetworkConfig = {
         new YbTokensAprService(baseNetworkData.ybAprConfig, baseNetworkData.chain.prismaId),
         new BoostedPoolAprService(),
         new SwapFeeAprService(),
+        new DynamicSwapFeeFromEventsAprService(),
         new GaugeAprService(),
         new MorphoRewardsAprService(),
         new AaveApiAprService(),
