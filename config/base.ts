@@ -45,6 +45,7 @@ export default <NetworkData>{
         ? `https://lb.drpc.org/ogrpc?network=base&dkey=${env.DRPC_API_KEY}`
         : 'https://base.gateway.tenderly.co/7mM7DbBouY1JjnQd9MMDsd',
     rpcMaxBlockRange: 25000,
+    acceptableSGLag: 30, // ~1min
     protocolToken: 'bal',
     bal: {
         address: '0x4158734d47fc9692176b5085e0f52ee0da5d47f1',

@@ -20,6 +20,8 @@ import { poolService } from '../modules/pool/pool.service';
 import { initRequestScopedContext, setRequestScopedContextValue } from '../modules/context/request-scoped-context';
 import { tokenService } from '../modules/token/token.service';
 import { VeBalVotingListService } from '../modules/vebal/vebal-voting-list.service';
+import { PrismaLastBlockSyncedCategory } from '@prisma/client';
+import { upsertLastSyncedBlock } from '../modules/actions/pool/last-synced-block';
 
 // TODO needed?
 const sftmxController = SftmxController();
@@ -44,12 +46,11 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         return PoolController().syncOnchainDataForAllPoolsV2(chain);
     } else if (job === 'sync-changed-pools-v2') {
         return PoolController().syncChangedPoolsV2(chain);
-    } else if (job === 'add-pools-v3') {
-        return PoolController().addPoolsV3(chain);
     } else if (job === 'reload-pools-v3') {
-        return PoolController().reloadPoolsV3(chain);
+        await upsertLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.POOLS_V3, 0);
+        return PoolController().syncPoolsV3(chain);
     } else if (job === 'sync-pools-v3') {
-        return PoolController().syncChangedPoolsV3(chain);
+        return PoolController().syncPoolsV3(chain);
     } else if (job === 'update-liquidity-for-active-pools') {
         return PoolController().updateLiquidityValuesForActivePools(chain);
     } else if (job === 'sync-staking') {
@@ -84,14 +85,11 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         return UserBalancesController().syncUserBalancesFromV2Subgraph(chain);
     } else if (job === 'sync-user-balances-v3') {
         return UserBalancesController().syncUserBalancesFromV3Subgraph(chain);
-    } else if (job === 'load-onchain-data-v3') {
-        return PoolMutationController().loadOnchainDataForAllPoolsV3(chain);
-    } else if (job === 'add-cow-amm-pools') {
-        return CowAmmController().addPools(chain);
     } else if (job === 'sync-cow-amm-pools') {
         return CowAmmController().syncPools(chain);
     } else if (job === 'reload-cow-amm-pools') {
-        return CowAmmController().reloadPools(chain);
+        await upsertLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.COW_AMM_POOLS, 0);
+        return CowAmmController().syncPools(chain);
     } else if (job === 'sync-cow-amm-snapshots') {
         return CowAmmController().syncSnapshots(chain);
     } else if (job === 'sync-all-cow-amm-snapshots') {

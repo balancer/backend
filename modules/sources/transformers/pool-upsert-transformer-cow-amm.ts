@@ -7,7 +7,7 @@ import { parseEther, zeroAddress } from 'viem';
 export const poolUpsertTransformerCowAmm = (
     poolFragment: CowAmmPoolFragment,
     chain: Chain,
-    blockNumber: bigint,
+    blockNumber: number,
 ): PoolUpsertData => ({
     pool: {
         id: poolFragment.id.toLowerCase(),
@@ -54,7 +54,7 @@ export const poolUpsertTransformerCowAmm = (
         },
         totalShares: String(parseEther(poolFragment.totalShares)),
         totalSharesNum: Number(poolFragment.totalShares),
-        blockNumber: Number(blockNumber),
+        blockNumber,
         swapFee: poolFragment.swapFee,
         swapEnabled: true,
         holdersCount: Number(poolFragment.holdersCount),

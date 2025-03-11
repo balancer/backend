@@ -35,6 +35,7 @@ export default <NetworkData>{
         ? `https://lb.drpc.org/ogrpc?network=polygon-zkevm&dkey=${env.DRPC_API_KEY}`
         : 'https://zkevm-rpc.com',
     rpcMaxBlockRange: 10000,
+    acceptableSGLag: 30, // ~1min
     protocolToken: 'bal',
     bal: {
         address: '0x120ef59b80774f02211563834d8e3b72cb1649d6',
