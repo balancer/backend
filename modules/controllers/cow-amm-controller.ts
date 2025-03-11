@@ -2,20 +2,14 @@ import config from '../../config';
 import { prisma } from '../../prisma/prisma-client';
 import { getViemClient } from '../sources/viem-client';
 import { getCowAmmSubgraphClient } from '../sources/subgraphs';
-import {
-    fetchChangedPools,
-    fetchNewPools,
-    upsertPools,
-    syncSwaps,
-    syncJoinExits,
-    updateSurplusAPRs,
-} from '../actions/cow-amm';
+import { fetchChangedPools, upsertPools, syncSwaps, syncJoinExits, updateSurplusAPRs } from '../actions/cow-amm';
 import { syncSnapshots } from '../actions/snapshots/sync-snapshots';
 import { Chain, PrismaLastBlockSyncedCategory } from '@prisma/client';
 import { updateVolumeAndFees } from '../actions/pool/update-volume-and-fees';
 import { syncBptBalancesFromSubgraph } from '../actions/user/bpt-balances/helpers/sync-bpt-balances-from-subgraph';
 import { getLastSyncedBlock, upsertLastSyncedBlock } from '../actions/pool/last-synced-block';
 import { updateLifetimeValues } from '../actions/pool/update-liftetime-values';
+import { syncTokenPairs } from '../actions/pool/v3/sync-tokenpairs';
 
 export function CowAmmController(tracer?: any) {
     const getSubgraphClient = (chain: Chain) => {
@@ -34,103 +28,87 @@ export function CowAmmController(tracer?: any) {
     };
     return {
         /**
-         * Adds new pools found in subgraph to the database
-         *
-         * @param chainId
-         */
-        async addPools(chain: Chain) {
-            const subgraphClient = getSubgraphClient(chain);
-            const newPools = await fetchNewPools(subgraphClient, chain);
-            const viemClient = getViemClient(chain);
-            const blockNumber = await viemClient.getBlockNumber();
-
-            const ids = await upsertPools(newPools, viemClient, subgraphClient, chain, blockNumber);
-            // Initialize balances for the new pools
-            await syncBptBalancesFromSubgraph(ids, subgraphClient, chain);
-
-            return ids;
-        },
-        /**
-         * Takes all the pools from subgraph, enriches with onchain data and upserts them to the database
-         *
-         * @param chainId
-         */
-        async reloadPools(chain: Chain) {
-            const subgraphClient = getSubgraphClient(chain);
-            const allPools = await subgraphClient.getAllPools({ isInitialized: true });
-            const viemClient = getViemClient(chain);
-            const blockNumber = await viemClient.getBlockNumber();
-
-            await upsertPools(
-                allPools.map((pool) => pool.id),
-                viemClient,
-                subgraphClient,
-                chain,
-                blockNumber,
-            );
-
-            return allPools.map((pool) => pool.id);
-        },
-        /**
          * Syncs database pools state with the onchain state, based on the events
          *
          * @param chainId
          */
         async syncPools(chain: Chain) {
+            const {
+                rpcMaxBlockRange,
+                acceptableSGLag,
+                balancer: {
+                    v3: { routerAddress },
+                },
+            } = config[chain];
             const subgraphClient = getSubgraphClient(chain);
             const viemClient = getViemClient(chain);
 
-            let lastSyncBlock = await getLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.COW_AMM_POOLS);
-
-            const fromBlock = lastSyncBlock + 1;
-            const toBlock = await viemClient.getBlockNumber();
+            const lastSyncBlock = await getLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.COW_AMM_POOLS);
+            const fromBlock = Math.max(0, lastSyncBlock - 1);
+            const latestBlock = await viemClient.getBlockNumber().then(Number);
 
             // no new blocks have been minted, needed for slow networks
-            if (fromBlock > Number(toBlock)) {
+            if (fromBlock > Number(latestBlock)) {
                 return [];
             }
 
-            let poolsToSync: string[] = [];
+            let toBlock = latestBlock;
+            let useSubgraph = true;
+            try {
+                // Handle bad indexers etc.
+                toBlock = await subgraphClient.getMetadata().then((metadata) => metadata.block.number);
+            } catch (e) {
+                useSubgraph = false;
+            }
 
-            if (fromBlock > 1) {
-                const rpcMaxBlockRange = config[chain].rpcMaxBlockRange;
-                const range = Number(toBlock) - fromBlock;
-                const numBatches = Math.ceil(range / rpcMaxBlockRange);
+            // Check if subgraph is not lagging behind
+            if (useSubgraph && Math.abs(latestBlock - toBlock) > acceptableSGLag) {
+                useSubgraph = false;
+            }
 
-                const allChangedPools = new Set<string>();
+            const ids: string[] = [];
 
-                for (let i = 0; i < numBatches; i++) {
-                    const from = fromBlock + (i > 0 ? 1 : 0) + i * rpcMaxBlockRange;
-                    const to = Math.min(fromBlock + (i + 1) * rpcMaxBlockRange, Number(toBlock));
-                    const changedPools = await fetchChangedPools(viemClient, chain, from, to);
-                    changedPools.forEach((pool) => allChangedPools.add(pool));
-                }
-
-                if (allChangedPools.size === 0) {
-                    return [];
-                }
-                poolsToSync = Array.from(allChangedPools);
-            } else {
-                poolsToSync = await prisma.prismaPool
-                    .findMany({
-                        where: {
-                            chain,
-                            type: 'COW_AMM',
-                        },
-                        select: {
-                            id: true,
+            // Reload all pools if we are starting from the beginning
+            if (fromBlock === 0) {
+                const pools = await subgraphClient
+                    .getAllPools({ isInitialized: true })
+                    .then((pools) => pools.map((pool) => pool.id));
+                ids.push(...pools);
+            } else if (useSubgraph) {
+                const pools = await subgraphClient
+                    .getAllPools({
+                        isInitialized: true,
+                        _change_block: {
+                            number_gte: lastSyncBlock,
                         },
                     })
                     .then((pools) => pools.map((pool) => pool.id));
+                ids.push(...pools);
+            } else {
+                const pools = await fetchChangedPools(viemClient, chain, fromBlock, latestBlock, rpcMaxBlockRange);
+                ids.push(...pools);
             }
 
-            await upsertPools(poolsToSync, viemClient, subgraphClient, chain, toBlock);
-            await updateVolumeAndFees(chain, poolsToSync);
+            // When adding new pools, balances need to be added separately
+            // Since balance table has a constraint on poolId they cannot be added independently
+            const existingIds = await prisma.prismaPool
+                .findMany({
+                    where: { chain, protocolVersion: 3 },
+                    select: { id: true },
+                })
+                .then((pools) => pools.map(({ id }) => id));
+
+            await upsertPools(ids, viemClient, subgraphClient, chain, latestBlock);
+            await syncTokenPairs(ids, viemClient, routerAddress, chain);
+            await updateVolumeAndFees(chain, ids);
             await updateSurplusAPRs();
+            // Sync balances for the pools
+            const newIds = ids.filter((id) => !existingIds.includes(id));
+            await syncBptBalancesFromSubgraph(newIds, subgraphClient, chain);
 
-            await upsertLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.COW_AMM_POOLS, Number(toBlock));
+            await upsertLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.COW_AMM_POOLS, toBlock);
 
-            return poolsToSync;
+            return ids;
         },
         async syncSnapshots(chain: Chain) {
             const subgraphClient = getSubgraphClient(chain);

@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
 import { DeploymentEnv, NetworkConfig } from './network-config-types';
 import { BoostedPoolAprService } from '../pool/lib/apr-data-sources/nested-pool-apr.service';
-import { SwapFeeAprService } from '../pool/lib/apr-data-sources/';
+import { DynamicSwapFeeFromEventsAprService, SwapFeeAprService } from '../pool/lib/apr-data-sources/';
 import { GaugeAprService } from '../pool/lib/apr-data-sources/ve-bal-gauge-apr.service';
 import { UserSyncGaugeBalanceService } from '../user/lib/user-sync-gauge-balance.service';
 import { every } from '../../apps/scheduler/intervals';
@@ -23,6 +23,7 @@ export const arbitrumNetworkConfig: NetworkConfig = {
         new YbTokensAprService(arbitrumNetworkData.ybAprConfig, arbitrumNetworkData.chain.prismaId),
         new BoostedPoolAprService(),
         new SwapFeeAprService(),
+        new DynamicSwapFeeFromEventsAprService(),
         new GaugeAprService(),
         new AaveApiAprService(),
     ],
@@ -122,7 +123,6 @@ export const arbitrumNetworkConfig: NetworkConfig = {
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(1, 'minutes'),
         },
         // COW AMM
-        { name: 'add-new-cow-amm-pools', interval: every(5, 'minutes') },
         {
             name: 'sync-cow-amm-pools',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(2, 'minutes') : every(30, 'seconds'),
@@ -147,10 +147,6 @@ export const arbitrumNetworkConfig: NetworkConfig = {
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(60, 'minutes') : every(20, 'minutes'),
         },
         // V3 Jobs
-        {
-            name: 'add-pools-v3',
-            interval: every(2, 'minutes'),
-        },
         {
             name: 'sync-pools-v3',
             interval: every(30, 'seconds'),

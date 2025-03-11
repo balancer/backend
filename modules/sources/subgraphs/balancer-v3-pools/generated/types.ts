@@ -988,6 +988,18 @@ export enum _SubgraphErrorPolicy_ {
     Deny = 'deny',
 }
 
+export type MetadataQueryVariables = Exact<{ [key: string]: never }>;
+
+export type MetadataQuery = {
+    __typename?: 'Query';
+    meta?: {
+        __typename?: '_Meta_';
+        deployment: string;
+        hasIndexingErrors: boolean;
+        block: { __typename?: '_Block_'; number: number };
+    } | null;
+};
+
 export type FactoryFragment = {
     __typename?: 'Factory';
     id: string;
@@ -1223,6 +1235,17 @@ export const SepoliaTypePoolFragmentDoc = gql`
         }
     }
 `;
+export const MetadataDocument = gql`
+    query Metadata {
+        meta: _meta {
+            block {
+                number
+            }
+            deployment
+            hasIndexingErrors
+        }
+    }
+`;
 export const PoolsDocument = gql`
     query Pools(
         $skip: Int
@@ -1278,6 +1301,20 @@ const defaultWrapper: SdkFunctionWrapper = (action, _operationName, _operationTy
 
 export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = defaultWrapper) {
     return {
+        Metadata(
+            variables?: MetadataQueryVariables,
+            requestHeaders?: Dom.RequestInit['headers'],
+        ): Promise<MetadataQuery> {
+            return withWrapper(
+                (wrappedRequestHeaders) =>
+                    client.request<MetadataQuery>(MetadataDocument, variables, {
+                        ...requestHeaders,
+                        ...wrappedRequestHeaders,
+                    }),
+                'Metadata',
+                'query',
+            );
+        },
         Pools(variables?: PoolsQueryVariables, requestHeaders?: Dom.RequestInit['headers']): Promise<PoolsQuery> {
             return withWrapper(
                 (wrappedRequestHeaders) =>

@@ -9,7 +9,7 @@ export const applyOnchainDataUpdateV3 = (
     allTokens: { address: string; decimals: number }[],
     chain: Chain,
     poolId: string,
-    blockNumber: bigint,
+    blockNumber: number,
 ): PoolDynamicUpsertData => {
     const decimals = Object.fromEntries(allTokens.map((token) => [token.address, token.decimals]));
 
@@ -29,7 +29,7 @@ export const applyOnchainDataUpdateV3 = (
             isInRecoveryMode: onchainPoolData.isPoolInRecoveryMode,
             totalShares: formatEther(onchainPoolData.totalSupply),
             totalSharesNum: parseFloat(formatEther(onchainPoolData.totalSupply)),
-            blockNumber: Number(blockNumber),
+            blockNumber,
             swapFee: formatEther(onchainPoolData.swapFee ?? 0n),
             aggregateSwapFee: formatEther(onchainPoolData.aggregateSwapFee ?? 0n),
             aggregateYieldFee: formatEther(onchainPoolData.aggregateYieldFee ?? 0n),
@@ -70,7 +70,7 @@ export const applyOnchainDataUpdateCowAmm = (
     allTokens: { address: string; decimals: number }[],
     chain: Chain,
     poolId: string,
-    blockNumber: bigint,
+    blockNumber: number,
 ): PoolDynamicUpsertData => {
     const decimals = Object.fromEntries(allTokens.map((token) => [token.address, token.decimals]));
 
@@ -87,7 +87,7 @@ export const applyOnchainDataUpdateCowAmm = (
             },
             totalShares: formatEther(onchainPoolData.totalSupply),
             totalSharesNum: parseFloat(formatEther(onchainPoolData.totalSupply)),
-            blockNumber: Number(blockNumber),
+            blockNumber,
             swapFee: formatEther(onchainPoolData.swapFee),
             swapEnabled: true,
             totalLiquidity: 0,

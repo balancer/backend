@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
 import { DeploymentEnv, NetworkConfig, NetworkData } from './network-config-types';
 import { BoostedPoolAprService } from '../pool/lib/apr-data-sources/nested-pool-apr.service';
-import { SwapFeeAprService } from '../pool/lib/apr-data-sources';
+import { DynamicSwapFeeFromEventsAprService, SwapFeeAprService } from '../pool/lib/apr-data-sources';
 import { GaugeAprService } from '../pool/lib/apr-data-sources/ve-bal-gauge-apr.service';
 import { UserSyncGaugeBalanceService } from '../user/lib/user-sync-gauge-balance.service';
 import { every } from '../../apps/scheduler/intervals';
@@ -24,6 +24,7 @@ export const sonicNetworkConfig: NetworkConfig = {
         new YbTokensAprService(sonicNetworkData.ybAprConfig, sonicNetworkData.chain.prismaId),
         new BoostedPoolAprService(),
         new SwapFeeAprService(),
+        new DynamicSwapFeeFromEventsAprService(),
         new GaugeAprService(),
         new ReliquaryFarmAprService(sonicNetworkData.beets!.address),
         new BeetswarsGaugeVotingAprService(),
@@ -137,10 +138,6 @@ export const sonicNetworkConfig: NetworkConfig = {
         {
             name: 'sync-erc4626-unwrap-rate',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(60, 'minutes') : every(20, 'minutes'),
-        },
-        {
-            name: 'add-pools-v3',
-            interval: every(2, 'minutes'),
         },
         {
             name: 'sync-pools-v3',

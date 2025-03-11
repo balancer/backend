@@ -21,6 +21,16 @@ export const getPoolsSubgraphClient = (subgraphUrl: string, chain: Chain) => {
 
     return {
         ...sdk,
+        async getMetadata() {
+            return sdk.Metadata().then((response) => {
+                if (response && response.meta) {
+                    return response.meta;
+                } else {
+                    // Return a default value if meta is not present
+                    return Promise.reject('Error fetching metadata');
+                }
+            });
+        },
         async getAllPools(
             where: PoolsQueryVariables['where'],
         ): Promise<SepoliaTypePoolFragment[] | TypePoolFragment[]> {

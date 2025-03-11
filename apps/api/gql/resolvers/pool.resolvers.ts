@@ -12,6 +12,8 @@ import {
 } from '../../../../modules/controllers';
 import { chainIdToChain } from '../../../../modules/network/chain-id-to-chain';
 import { GraphQLError } from 'graphql';
+import { upsertLastSyncedBlock } from '../../../../modules/actions/pool/last-synced-block';
+import { PrismaLastBlockSyncedCategory } from '@prisma/client';
 
 const balancerResolvers: Resolvers = {
     Query: {
@@ -202,14 +204,16 @@ const balancerResolvers: Resolvers = {
 
             for (const chain of chains) {
                 try {
-                    await PoolController().reloadPoolsV3(chain);
+                    await upsertLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.POOLS_V3, 0);
+                    await PoolController().syncPoolsV3(chain);
                     result.push({ type: 'v3', chain, success: true, error: undefined });
                 } catch (e) {
                     result.push({ type: 'v3', chain, success: false, error: `${e}` });
                     console.log(`Could not reload v3 pools for chain ${chain}: ${e}`);
                 }
                 try {
-                    await CowAmmController().reloadPools(chain);
+                    await upsertLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.COW_AMM_POOLS, 0);
+                    await CowAmmController().syncPools(chain);
                     result.push({ type: 'cow', chain, success: true, error: undefined });
                 } catch (e) {
                     result.push({ type: 'cow', chain, success: false, error: `${e}` });

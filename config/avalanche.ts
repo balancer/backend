@@ -35,6 +35,7 @@ export default <NetworkData>{
         ? `https://lb.drpc.org/ogrpc?network=avalanche&dkey=${env.DRPC_API_KEY}`
         : 'https://rpc.ankr.com/avalanche',
     rpcMaxBlockRange: 10000,
+    acceptableSGLag: 30, // ~1min
     protocolToken: 'bal',
     bal: {
         address: '0xe15bcb9e0ea69e6ab9fa080c4c4a5632896298c3',

@@ -13,7 +13,7 @@ export default <NetworkData>{
     subgraphs: {
         startDate: '2021-08-23',
         balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmXXSKeLh14DnJgR1ncHhAHciqacfRshcHKXasAGy7LP4Y`,
-        balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmXiDY6kuu3LKu8FL2jHN5MQgXUrKm8rHE7D6Eqx7QEpvG`,
+        balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmX3JrRdSYhRWB8MszquB285J5bTzGEA79gekFJB9b3yA9`,
         balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmQ7DyZ3aKADmqRpc1pAet2XaEaRbVbiLPCFaazBdzkH99`,
         gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmPyH9BbVshMZRp5T7WBPnx1J5GVi46GX2NmheRQUkqF39`,
         aura: 'https://data.aura.finance/graphql',
@@ -41,6 +41,7 @@ export default <NetworkData>{
         ? `https://lb.drpc.org/ogrpc?network=gnosis&dkey=${env.DRPC_API_KEY}`
         : 'https://gnosis.drpc.org',
     rpcMaxBlockRange: 5000,
+    acceptableSGLag: 15, // ~1min
     protocolToken: 'bal',
     bal: {
         address: '0x7ef541e2a22058048904fe5744f9c7e4c57af717',

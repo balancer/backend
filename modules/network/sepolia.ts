@@ -121,10 +121,6 @@ export const sepoliaNetworkConfig: NetworkConfig = {
         },
         // V3 jobs
         {
-            name: 'add-pools-v3',
-            interval: every(2, 'minutes'),
-        },
-        {
             name: 'sync-pools-v3',
             interval: every(30, 'seconds'),
         },
@@ -145,7 +141,6 @@ export const sepoliaNetworkConfig: NetworkConfig = {
             interval: every(1, 'hours'),
         },
         // COW AMM
-        { name: 'add-new-cow-amm-pools', interval: every(5, 'minutes') },
         {
             name: 'sync-cow-amm-pools',
             interval: every(30, 'seconds'),
