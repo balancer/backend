@@ -9,12 +9,9 @@ import { chainToChainId as chainToIdMap } from '../../../../../network/chain-id-
 import { GyroData } from '../../../../../pool/subgraph-mapper';
 import { TokenPairData } from '../../../../../sources/contracts/v3/fetch-tokenpair-data';
 
-import { WAD } from '../../utils/math';
 import { BasePoolV3 } from '../../poolsV2/basePool';
-import { PoolTokenWithRate } from '../poolTokenWithRate';
-import { Erc4626PoolToken } from '../../poolsV2/erc4626PoolToken';
 
-import { getHookState } from '../../utils/helpers';
+import { Erc4626PoolToken, getHookState, PoolTokenWithRate, WAD } from '../../utils';
 
 import { LiquidityManagement } from '../../../../types';
 

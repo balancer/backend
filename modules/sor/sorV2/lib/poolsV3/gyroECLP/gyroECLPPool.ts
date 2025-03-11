@@ -9,15 +9,11 @@ import { chainToChainId as chainToIdMap } from '../../../../../network/chain-id-
 import { GyroData } from '../../../../../pool/subgraph-mapper';
 import { TokenPairData } from '../../../../../sources/contracts/v3/fetch-tokenpair-data';
 
-import { WAD } from '../../utils/math';
 import { BasePoolV3 } from '../../poolsV2/basePool';
-import { Erc4626PoolToken } from '../../poolsV2/erc4626PoolToken';
-
-import { getHookState } from '../../utils/helpers';
 
 import { LiquidityManagement } from '../../../../types';
-import { PoolTokenWithRate } from '../poolTokenWithRate';
 import { DerivedGyroEParams, GyroEParams } from '../../poolsV2/gyroE/types';
+import { Erc4626PoolToken, getHookState, PoolTokenWithRate, WAD } from '../../utils';
 
 type GyroPoolToken = PoolTokenWithRate | Erc4626PoolToken;
 
