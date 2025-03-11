@@ -321,11 +321,8 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
             );
             break;
         // V3 Jobs
-        case 'add-pools-v3':
-            await runIfNotAlreadyRunning(name, chainId, () => PoolController().addPoolsV3(chain), res, next);
-            break;
         case 'sync-pools-v3':
-            await runIfNotAlreadyRunning(name, chainId, () => PoolController().syncChangedPoolsV3(chain), res, next);
+            await runIfNotAlreadyRunning(name, chainId, () => PoolController().syncPoolsV3(chain), res, next);
             break;
         case 'sync-hook-data':
             await runIfNotAlreadyRunning(name, chainId, () => PoolController().syncHookData(chain), res, next);
@@ -371,9 +368,6 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
         //     );
         //     break;
         // COW AMM
-        case 'add-new-cow-amm-pools':
-            await runIfNotAlreadyRunning(name, chainId, () => CowAmmController().addPools(chain), res, next);
-            break;
         case 'sync-cow-amm-pools':
             await runIfNotAlreadyRunning(name, chainId, () => CowAmmController().syncPools(chain), res, next);
             break;

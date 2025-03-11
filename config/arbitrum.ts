@@ -41,6 +41,7 @@ export default <NetworkData>{
         ? `https://lb.drpc.org/ogrpc?network=arbitrum&dkey=${env.DRPC_API_KEY}`
         : 'https://1rpc.io/arb',
     rpcMaxBlockRange: 100000,
+    acceptableSGLag: 240, // ~1min
     protocolToken: 'bal',
     bal: {
         address: '0x040d1edc9569d4bab2d15287dc5a4f10f56a56b8',

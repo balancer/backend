@@ -185,7 +185,6 @@ export const mainnetNetworkConfig: NetworkConfig = {
         },
 
         // COW AMM
-        { name: 'add-new-cow-amm-pools', interval: every(5, 'minutes') },
         {
             name: 'sync-cow-amm-pools',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(2, 'minutes') : every(30, 'seconds'),
@@ -206,10 +205,6 @@ export const mainnetNetworkConfig: NetworkConfig = {
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(60, 'minutes') : every(20, 'minutes'),
         },
         // V3 jobs
-        {
-            name: 'add-pools-v3',
-            interval: every(2, 'minutes'),
-        },
         {
             name: 'sync-pools-v3',
             interval: every(30, 'seconds'),

@@ -55,6 +55,7 @@ export default <NetworkData>{
         ? `https://lb.drpc.org/ogrpc?network=ethereum&dkey=${env.DRPC_API_KEY}`
         : 'https://rpc.ankr.com/eth',
     rpcMaxBlockRange: 5000,
+    acceptableSGLag: 5, // ~1min
     protocolToken: 'bal',
     bal: {
         address: '0xba100000625a3754423978a60c9317c58a424e3d',

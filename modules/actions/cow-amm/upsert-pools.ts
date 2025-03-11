@@ -20,7 +20,7 @@ export const upsertPools = async (
     viemClient: ViemClient,
     cowAmmSubgraphClient: CowAmmSubgraphClient,
     chain: Chain,
-    blockNumber: bigint,
+    blockNumber: number,
 ) => {
     const sgPools = await cowAmmSubgraphClient.getAllPools({ id_in: ids });
 
@@ -28,7 +28,7 @@ export const upsertPools = async (
     const onchainData = await fetchCowAmmData(
         sgPools.map((pool) => pool.id),
         viemClient,
-        blockNumber,
+        BigInt(blockNumber),
     );
 
     // Get the prices

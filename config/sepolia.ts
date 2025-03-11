@@ -37,6 +37,7 @@ export default <NetworkData>{
         ? `https://lb.drpc.org/ogrpc?network=sepolia&dkey=${env.DRPC_API_KEY}`
         : 'https://gateway.tenderly.co/public/sepolia',
     rpcMaxBlockRange: 10000,
+    acceptableSGLag: 100, // ~1min
     protocolToken: 'bal',
     bal: {
         address: '0xb19382073c7A0aDdbb56Ac6AF1808Fa49e377B75',

@@ -12,7 +12,7 @@ import _ from 'lodash';
 export const poolUpsertTransformerV3 = (
     poolData: V3JoinedSubgraphPool,
     chain: Chain,
-    blockNumber: bigint,
+    blockNumber: number,
 ): PoolUpsertData => {
     let type: PrismaPoolType;
     let typeData: ReturnType<(typeof typeDataMapper)[keyof typeof typeDataMapper]> | {} = {};
@@ -109,7 +109,7 @@ export const poolUpsertTransformerV3 = (
             },
             totalShares: String(parseEther(poolData.totalShares)),
             totalSharesNum: Number(poolData.totalShares),
-            blockNumber: Number(blockNumber),
+            blockNumber,
             swapFee: '0', // enriched later
             swapEnabled: true,
             holdersCount: Number(poolData.holdersCount),

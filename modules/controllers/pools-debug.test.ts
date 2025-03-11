@@ -1,13 +1,12 @@
 import config from '../../config';
 import { prisma } from '../../prisma/prisma-client';
 import { PoolService, poolService } from '../pool/pool.service';
-import { getVaultClient } from '../sources/contracts';
-import { getV3JoinedSubgraphClient } from '../sources/subgraphs';
+import { getPoolsClient, getVaultClient } from '../sources/contracts';
+import { getPoolsSubgraphClient, getV3JoinedSubgraphClient, getVaultSubgraphClient } from '../sources/subgraphs';
 import { getViemClient } from '../sources/viem-client';
 import { CowAmmController } from './cow-amm-controller';
 import { PoolController } from './pool-controller';
 import { upsertPools as upsertPoolsV3 } from '../actions/pool/v3/upsert-pools';
-import { syncPools as syncPoolsV3 } from '../actions/pool/v3/sync-pools';
 import exp from 'constants';
 import { StakingController } from './staking-controller';
 
@@ -23,21 +22,15 @@ describe('pool controller debugging', () => {
 
         expect(pools.length).toBe(0);
 
-        await PoolController().reloadPoolsV3('SEPOLIA');
+        await PoolController().syncPoolsV3('SEPOLIA');
 
         pools = await poolService.getGqlPools({ where: { chainIn: ['SEPOLIA'], protocolVersionIn: [3] } });
 
         expect(pools.length).toBeGreaterThan(0);
     }, 5000000);
 
-    it('sync pools', async () => {
-        await CowAmmController().syncPools('MAINNET');
-        // await PoolController().syncChangedPoolsV2('MAINNET');
-        await PoolController().syncChangedPoolsV3('SEPOLIA');
-    }, 5000000);
-
     it('update surplus apr', async () => {
-        await CowAmmController().addPools('MAINNET');
+        await CowAmmController().syncPools('MAINNET');
         // await CowAmmController().addPools('MAINNET');
         await CowAmmController().syncSwaps('MAINNET');
         // await CowAmmController().syncSwaps('MAINNET');
@@ -47,7 +40,7 @@ describe('pool controller debugging', () => {
     }, 5000000);
 
     it('cow snapshots', async () => {
-        await CowAmmController().addPools('MAINNET');
+        await CowAmmController().syncPools('MAINNET');
         // await CowAmmController().addPools('MAINNET');
         await CowAmmController().syncSwaps('MAINNET');
         // await CowAmmController().syncSwaps('MAINNET');
@@ -75,23 +68,20 @@ describe('pool controller debugging', () => {
             throw new Error(`Chain not configured: ${chain}`);
         }
 
-        const client = getV3JoinedSubgraphClient(balancerV3, balancerPoolsV3, chain);
+        const vaultSubgraphClient = getVaultSubgraphClient(balancerV3, chain);
+        const poolsSubgraphClient = getPoolsSubgraphClient(balancerPoolsV3, chain);
+        const client = getV3JoinedSubgraphClient(vaultSubgraphClient, poolsSubgraphClient);
         const allPools = (await client.getAllInitializedPools()).filter(
             (pool) => pool.id.toLowerCase() === '0x3ddd1e7adc6a3c1a6cbcf2dc74c6f71b9b347713',
         );
 
         const viemClient = getViemClient(chain);
         const vaultClient = getVaultClient(viemClient, vaultAddress);
-        const latestBlock = await viemClient.getBlockNumber();
+        const poolsClient = getPoolsClient(viemClient);
+        const latestBlock = await viemClient.getBlockNumber().then(Number);
 
-        const pools = await upsertPoolsV3(allPools, vaultClient, chain, latestBlock);
-        const dbPools = await prisma.prismaPool.findMany({
-            where: {
-                id: { in: pools },
-            },
-        });
-        await syncPoolsV3(dbPools, viemClient, vaultAddress, chain, latestBlock);
-
+        const pools = await upsertPoolsV3(allPools, vaultClient, poolsClient, chain, latestBlock);
+        console.log(pools);
         // await upsertLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.POOLS_V3, latestBlock);
     }, 5000000);
 
