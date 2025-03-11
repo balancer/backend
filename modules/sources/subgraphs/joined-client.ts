@@ -15,17 +15,11 @@ export const getV3JoinedSubgraphClient = (
     poolsSubgraphClient: V3PoolsSubgraphClient,
 ) => {
     return {
-        getMetadata: async () => {
-            const vault = await vaultSubgraphClient.getMetadata();
-            const pools = await poolsSubgraphClient.getMetadata();
+        lastSyncedBlock: async () => {
+            const vault = await vaultSubgraphClient.lastSyncedBlock();
+            const pools = await poolsSubgraphClient.lastSyncedBlock();
 
-            return {
-                ...vault,
-                block: {
-                    ...vault.block,
-                    number: Math.min(vault.block.number, pools.block.number),
-                },
-            };
+            return Math.min(vault, pools);
         },
         getAllInitializedPools: async (where?: PoolsQueryVariables['where']) => {
             const vaultPools = await vaultSubgraphClient.getAllInitializedPools(where);
