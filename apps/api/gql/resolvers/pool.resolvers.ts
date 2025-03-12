@@ -12,7 +12,7 @@ import {
 } from '../../../../modules/controllers';
 import { chainIdToChain } from '../../../../modules/network/chain-id-to-chain';
 import { GraphQLError } from 'graphql';
-import { upsertLastSyncedBlock } from '../../../../modules/actions/pool/last-synced-block';
+import { upsertLastSyncedBlock } from '../../../../modules/actions/last-synced-block';
 import { PrismaLastBlockSyncedCategory } from '@prisma/client';
 
 const balancerResolvers: Resolvers = {

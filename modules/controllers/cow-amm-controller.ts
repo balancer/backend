@@ -7,7 +7,7 @@ import { syncSnapshots } from '../actions/snapshots/sync-snapshots';
 import { Chain, PrismaLastBlockSyncedCategory } from '@prisma/client';
 import { updateVolumeAndFees } from '../actions/pool/update-volume-and-fees';
 import { syncBptBalancesFromSubgraph } from '../actions/user/bpt-balances/helpers/sync-bpt-balances-from-subgraph';
-import { getLastSyncedBlock, upsertLastSyncedBlock } from '../actions/pool/last-synced-block';
+import { getLastSyncedBlock, upsertLastSyncedBlock } from '../actions/last-synced-block';
 import { updateLifetimeValues } from '../actions/pool/update-liftetime-values';
 import { syncTokenPairs } from '../actions/pool/v3/sync-tokenpairs';
 
@@ -56,7 +56,7 @@ export function CowAmmController(tracer?: any) {
             let useSubgraph = true;
             try {
                 // Handle bad indexers etc.
-                toBlock = await subgraphClient.getMetadata().then((metadata) => metadata.block.number);
+                toBlock = await subgraphClient.lastSyncedBlock();
             } catch (e) {
                 useSubgraph = false;
             }
@@ -101,7 +101,7 @@ export function CowAmmController(tracer?: any) {
             await upsertPools(ids, viemClient, subgraphClient, chain, latestBlock);
             await syncTokenPairs(ids, viemClient, routerAddress, chain);
             await updateVolumeAndFees(chain, ids);
-            await updateSurplusAPRs();
+            await updateSurplusAPRs(chain, ids);
             // Sync balances for the pools
             const newIds = ids.filter((id) => !existingIds.includes(id));
             await syncBptBalancesFromSubgraph(newIds, subgraphClient, chain);

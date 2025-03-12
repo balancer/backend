@@ -1,10 +1,9 @@
 import { fetchHookData } from '../../../sources/contracts/v3/fetch-hook-data';
 import { prisma } from '../../../../prisma/prisma-client';
 import type { ViemClient } from '../../../sources/viem-client';
-import type { Chain, PrismaPool } from '@prisma/client';
+import type { PrismaPool } from '@prisma/client';
 import { HookData } from '../../../sources/transformers';
 import { prismaBulkExecuteOperations } from '../../../../prisma/prisma-util';
-import { GqlHookType } from '../../../../apps/api/gql/generated-schema';
 
 /**
  * Gets and stores known hooks data
@@ -12,46 +11,45 @@ import { GqlHookType } from '../../../../apps/api/gql/generated-schema';
  * @param hooks - known hooks addresses
  * @param viemClient
  */
-export const syncHookData = async (
-    pools: PrismaPool[],
-    hooks: Record<string, GqlHookType>,
-    viemClient: ViemClient,
-    chain: Chain,
-): Promise<void> => {
+export const syncHookData = async (pools: PrismaPool[], viemClient: ViemClient): Promise<void> => {
     if (pools.length === 0) {
         return;
     }
-    const operations = [];
 
-    for (const pool of pools) {
-        const hookData = pool.hook as HookData | null;
-        if (!hookData) {
+    const poolsMap = new Map<string, PrismaPool>();
+    pools.forEach((pool) => poolsMap.set(pool.address, pool));
+
+    const hooksInput = pools.flatMap((pool) =>
+        pool.hook
+            ? [
+                  {
+                      address: pool.address,
+                      hook: pool.hook as HookData,
+                  },
+              ]
+            : [],
+    );
+
+    const data = await fetchHookData(viemClient, hooksInput);
+
+    const operations = [];
+    for (const poolAddress of Object.keys(data)) {
+        const pool = poolsMap.get(poolAddress);
+        if (!pool) {
             continue;
         }
 
-        let hookType: GqlHookType = 'UNKNOWN';
-
-        try {
-            hookType = hooks[hookData.address];
-        } catch (e) {
-            console.log(`Error getting hook type for ${hookData.address}`, e);
-        }
-
         // Get hooks data
-        const data = await fetchHookData(viemClient, hookData.address, hookType, pool.address);
-
-        const name = ``;
+        const hook = {
+            ...(pool.hook as HookData),
+            dynamicData: data[poolAddress],
+        };
 
         operations.push(
             prisma.prismaPool.update({
-                where: { id_chain: { id: pool.id, chain } },
+                where: { id_chain: { id: pool.id, chain: pool.chain } },
                 data: {
-                    hook: {
-                        ...(hookData as HookData),
-                        name,
-                        type: hookType,
-                        dynamicData: data,
-                    },
+                    hook,
                 },
             }),
         );

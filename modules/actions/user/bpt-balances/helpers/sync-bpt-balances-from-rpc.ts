@@ -8,7 +8,7 @@ import ERC20Abi from '../../../../web3/abi/ERC20.json';
 import { formatEther, parseAbi, zeroAddress } from 'viem';
 import { multicallViem } from '../../../../web3/multicaller-viem';
 import { balancesToDb } from './balances-to-db';
-import { getLastSyncedBlock } from '../../../pool/last-synced-block';
+import { getLastSyncedBlock } from '../../../last-synced-block';
 
 const rpcMaxBlockRange = (chain: Chain) => config[chain].rpcMaxBlockRange;
 

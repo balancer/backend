@@ -33,14 +33,14 @@ export class ReliquarySubgraphService {
         this.sdk = getSdk(new GraphQLClient(subgraphUrl));
     }
 
-    public async getMetadata() {
+    public async lastSyncedBlock() {
         const { meta } = await this.sdk.ReliquaryGetMeta();
 
         if (!meta) {
             throw new Error('Missing meta data');
         }
 
-        return meta;
+        return Number(meta.block.number);
     }
 
     public async getReliquary(args: ReliquaryQueryVariables): Promise<ReliquaryQuery> {

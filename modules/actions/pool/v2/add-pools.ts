@@ -9,7 +9,7 @@ import _ from 'lodash';
 import { syncPoolTypeOnchainData } from './sync-pool-type-onchain-data';
 
 export const addPools = async (subgraphService: V2SubgraphClient, chain: Chain): Promise<string[]> => {
-    const { block } = await subgraphService.legacyService.getMetadata();
+    const blockNumber = await subgraphService.legacyService.lastSyncedBlock();
 
     const existing = (await prisma.prismaPool.findMany({ where: { chain }, select: { id: true } })).map(
         (pool) => pool.id,
@@ -26,7 +26,7 @@ export const addPools = async (subgraphService: V2SubgraphClient, chain: Chain):
 
     const createdPools: string[] = [];
     for (const subgraphPool of newPools) {
-        const dbPool = await createPoolRecord(subgraphPool, chain, block.number, allNestedTypePools);
+        const dbPool = await createPoolRecord(subgraphPool, chain, blockNumber, allNestedTypePools);
         if (dbPool) {
             createdPools.push(subgraphPool.id);
             // When new FX pool is added, we need to get the quote token

@@ -21,7 +21,7 @@ export function getV2SubgraphClient(url: string, chain: Chain) {
         ...sdk,
         chain: chain,
         legacyService,
-        getMetadata: legacyService.getMetadata.bind(legacyService),
+        lastSyncedBlock: legacyService.lastSyncedBlock.bind(legacyService),
         getAllPoolSnapshots: legacyService.getAllPoolSnapshots.bind(legacyService),
         getAllPoolSharesWithBalance: legacyService.getAllPoolSharesWithBalance.bind(legacyService),
         async getSnapshotsForTimestamp(timestamp: number): Promise<BalancerPoolSnapshotFragment[]> {

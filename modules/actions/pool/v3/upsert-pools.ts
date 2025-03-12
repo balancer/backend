@@ -1,4 +1,4 @@
-import { Chain } from '@prisma/client';
+import { Chain, PrismaPool } from '@prisma/client';
 import { prisma } from '../../../../prisma/prisma-client';
 import { tokensTransformer } from '../../../sources/transformers/tokens-transformer';
 import { V3JoinedSubgraphPool } from '../../../sources/subgraphs';
@@ -8,6 +8,8 @@ import { poolUpsertTransformerV3 } from '../../../sources/transformers/pool-upse
 import { applyOnchainDataUpdateV3 } from '../../../sources/enrichers/apply-onchain-data';
 import { fetchErc4626AndUnderlyingTokenData } from '../../../sources/contracts/fetch-erc4626-token-data';
 import { getViemClient } from '../../../sources/viem-client';
+import { fetchHookData } from '../../../sources/contracts/v3/fetch-hook-data';
+import { HookData } from '../../../sources/transformers';
 
 /**
  * Gets and syncs all the pools state with the database
@@ -20,18 +22,33 @@ import { getViemClient } from '../../../sources/viem-client';
  * @param blockNumber
  */
 export const upsertPools = async (
+    dbPools: PrismaPool[],
     subgraphPools: V3JoinedSubgraphPool[],
     vaultClient: VaultClient,
     poolsClient: PoolsClient,
     chain: Chain,
     blockNumber: number,
 ) => {
+    const dbPoolsMap = dbPools.reduce((acc, pool) => {
+        acc.set(pool.id, pool);
+        return acc;
+    }, new Map<string, PrismaPool>());
+
     // Transform pools first
-    let pools = subgraphPools.map((fragment) => poolUpsertTransformerV3(fragment, chain, blockNumber));
+    let pools = subgraphPools.map((fragment) =>
+        poolUpsertTransformerV3(fragment, chain, blockNumber, dbPoolsMap.get(fragment.id)),
+    );
+
     const poolIds = pools.map((pool) => pool.pool.id);
+    const poolHooks = pools
+        .filter((pool) => pool.pool.hook)
+        .map((pool) => ({
+            address: pool.pool.address,
+            hook: pool.pool.hook as HookData,
+        }));
 
     // Fetch all necessary data in parallel
-    const [onchainData, poolTypeData, allTokens] = await Promise.all([
+    const [onchainData, poolTypeData, allTokens, hookData] = await Promise.all([
         vaultClient.fetchPoolData(poolIds, BigInt(blockNumber)),
         poolsClient.fetchPoolTypeData(
             pools.map((pool) => ({
@@ -41,6 +58,7 @@ export const upsertPools = async (
             BigInt(blockNumber),
         ),
         tokensTransformer(subgraphPools, chain),
+        fetchHookData(vaultClient.viemClient, poolHooks),
     ]);
 
     // Process token data and fetch prices in parallel
@@ -114,8 +132,9 @@ export const upsertPools = async (
             blockNumber,
         );
 
-        // Apply type data
+        // Apply type and hook data
         const typeData = poolTypeData.find((data) => data.id === upsert.pool.id)?.typeData || {};
+        const hookDynamicData = hookData[upsert.pool.address];
         const withTypeData = {
             ...upsert,
             pool: {
@@ -123,6 +142,10 @@ export const upsertPools = async (
                 typeData: {
                     ...(upsert.pool.typeData ? (upsert.pool.typeData as any) : {}),
                     ...typeData,
+                },
+                hook: {
+                    ...(upsert.pool.hook ? (upsert.pool.hook as HookData) : {}),
+                    ...(hookDynamicData ? { dynamicData: hookDynamicData } : {}),
                 },
             },
             poolToken: withOnchainData.poolToken,

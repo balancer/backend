@@ -1,9 +1,9 @@
-import { PrismaPoolAprType, PrismaPoolSnapshot } from '@prisma/client';
+import { Chain, PrismaPoolAprType, PrismaPoolSnapshot } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
 
 const midnight = (daysAgo: number) => Math.floor(Date.now() / 1000 / 86400) * 86400 - 86400 * daysAgo;
 
-const getSnapshotsByTimestamp = async (timestamp: number) => {
+const getSnapshotsByTimestamp = async (timestamp: number, chain?: Chain, ids?: string[]) => {
     // Leaving as an option to use raw SQL in case the prisma queries turn out to get slow
     // const snapshots = await prisma.$queryRaw<PrismaPoolSnapshot[]>`
     //     SELECT DISTINCT ON ("poolId") *
@@ -18,6 +18,14 @@ const getSnapshotsByTimestamp = async (timestamp: number) => {
         .findMany({
             where: {
                 type: 'COW_AMM',
+                chain: chain,
+                ...(ids
+                    ? {
+                          id: {
+                              in: ids,
+                          },
+                      }
+                    : {}),
             },
             include: {
                 snapshots: {
@@ -32,15 +40,23 @@ const getSnapshotsByTimestamp = async (timestamp: number) => {
     return snapshots;
 };
 
-export const updateSurplusAPRs = async () => {
+export const updateSurplusAPRs = async (chain?: Chain, ids?: string[]) => {
     // Find the snapshot
-    const latestSnapshots = await getSnapshotsByTimestamp(midnight(0));
-    const snapshots7d = await getSnapshotsByTimestamp(midnight(7));
-    const snapshots30d = await getSnapshotsByTimestamp(midnight(30));
+    const latestSnapshots = await getSnapshotsByTimestamp(midnight(0), chain, ids);
+    const snapshots7d = await getSnapshotsByTimestamp(midnight(7), chain, ids);
+    const snapshots30d = await getSnapshotsByTimestamp(midnight(30), chain, ids);
     const dynamicData = await prisma.prismaPool
         .findMany({
             where: {
                 type: 'COW_AMM',
+                chain: chain,
+                ...(ids
+                    ? {
+                          id: {
+                              in: ids,
+                          },
+                      }
+                    : {}),
             },
             include: {
                 dynamicData: true,
@@ -111,23 +127,23 @@ export const updateSurplusAPRs = async () => {
         title: 'Surplus APR',
     }));
 
-    await prisma.$transaction([
-        prisma.prismaPoolAprItem.deleteMany({
-            where: {
-                type: {
-                    in: [
-                        PrismaPoolAprType.SURPLUS,
-                        PrismaPoolAprType.SURPLUS_24H,
-                        PrismaPoolAprType.SURPLUS_7D,
-                        PrismaPoolAprType.SURPLUS_30D,
-                    ],
+    const operations = [];
+    for (const item of [...data, ...data24h, ...data7d, ...data30d]) {
+        operations.push(
+            prisma.prismaPoolAprItem.upsert({
+                where: {
+                    id_chain: {
+                        id: item.id,
+                        chain: item.chain,
+                    },
                 },
-            },
-        }),
-        prisma.prismaPoolAprItem.createMany({
-            data: [...data, ...data24h, ...data7d, ...data30d],
-        }),
-    ]);
+                create: item,
+                update: item,
+            }),
+        );
+    }
+
+    await prisma.$transaction(operations);
 
     return [...data, ...data24h, ...data7d, ...data30d].map(({ id, apr }) => ({ id, apr }));
 };

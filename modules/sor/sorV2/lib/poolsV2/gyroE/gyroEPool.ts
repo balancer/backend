@@ -148,11 +148,11 @@ export class GyroEPool implements BasePool {
             y: currentInvariant,
         };
         // swapAmount from PathWithAmount does not take rate into account - this step fixes scale18 so it properly considers rates
-        const swapAmountLive = new PoolTokenWithRate(tokenIn, swapAmount.amount, tIn.index, tIn.rate);
-        const inAmount = this.subtractSwapFeeAmount(swapAmountLive);
+        const swapAmountLessFee = this.subtractSwapFeeAmount(swapAmount);
+        const inAmountLive = new PoolTokenWithRate(tokenIn, swapAmountLessFee.amount, tIn.index, tIn.rate);
         const outAmountScale18 = calcOutGivenIn(
             orderedNormalizedBalances,
-            inAmount.scale18,
+            inAmountLive.scale18,
             tIn.index === 0,
             this.gyroEParams,
             this.derivedGyroEParams,
@@ -167,7 +167,7 @@ export class GyroEPool implements BasePool {
         );
 
         if (mutateBalances) {
-            tIn.increase(swapAmountLive.amount);
+            tIn.increase(inAmountLive.amount);
             tOut.decrease(outAmount.amount);
         }
 
@@ -182,7 +182,7 @@ export class GyroEPool implements BasePool {
     ): TokenAmount {
         const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
         // swapAmount from PathWithAmount does not take rate into account - this step fixes scale18 so it properly considers rates
-        const swapAmountLive = new PoolTokenWithRate(tokenOut, swapAmount.amount, tOut.index, tOut.rate);
+        const outAmountLive = new PoolTokenWithRate(tokenOut, swapAmount.amount, tOut.index, tOut.rate);
         const orderedNormalizedBalances = balancesFromTokenInOut(tIn.scale18, tOut.scale18, tIn.index === 0);
         const [currentInvariant, invErr] = calculateInvariantWithError(
             orderedNormalizedBalances,
@@ -196,7 +196,7 @@ export class GyroEPool implements BasePool {
 
         const inAmountLessFee = calcInGivenOut(
             orderedNormalizedBalances,
-            swapAmountLive.scale18,
+            outAmountLive.scale18,
             tIn.index === 0,
             this.gyroEParams,
             this.derivedGyroEParams,
@@ -209,7 +209,7 @@ export class GyroEPool implements BasePool {
 
         if (mutateBalances) {
             tIn.decrease(inAmount.amount);
-            tOut.increase(swapAmountLive.amount);
+            tOut.increase(outAmountLive.amount);
         }
 
         return inAmount;

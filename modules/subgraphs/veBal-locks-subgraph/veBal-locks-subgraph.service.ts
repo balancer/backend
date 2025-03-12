@@ -78,13 +78,13 @@ export class VeBalLocksSubgraphService {
         return locks;
     }
 
-    public async getMetadata() {
+    public async lastSyncedBlock() {
         const { meta } = await this.sdk.VebalGetMeta();
 
         if (!meta) {
             throw new Error('Missing meta data');
         }
-        return meta;
+        return Number(meta.block.number);
     }
 
     public get sdk() {
