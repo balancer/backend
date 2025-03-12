@@ -1,11 +1,11 @@
-import { Chain, PrismaPoolType } from '@prisma/client';
-import { PoolType, SepoliaTypePoolFragment } from '../subgraphs/balancer-v3-pools/generated/types';
+import { Chain, PrismaPool, PrismaPoolType } from '@prisma/client';
+import { PoolType } from '../subgraphs/balancer-v3-pools/generated/types';
 import { StableData } from '../../pool/subgraph-mapper';
 import { fx, gyro, element, stable } from '../../pool/pool-data';
 import { V3JoinedSubgraphPool } from '../subgraphs';
-import { parseEther, zeroAddress } from 'viem';
+import { parseEther } from 'viem';
 import { PoolUpsertData } from '../../../prisma/prisma-types';
-import { hookTransformer } from './hook-transformer';
+import { HookData, hookTransformer } from './hook-transformer';
 import _ from 'lodash';
 
 // Subgraph to DB format transformation
@@ -13,6 +13,7 @@ export const poolUpsertTransformerV3 = (
     poolData: V3JoinedSubgraphPool,
     chain: Chain,
     blockNumber: number,
+    dbPool?: PrismaPool,
 ): PoolUpsertData => {
     let type: PrismaPoolType;
     let typeData: ReturnType<(typeof typeDataMapper)[keyof typeof typeDataMapper]> | {} = {};
@@ -79,7 +80,10 @@ export const poolUpsertTransformerV3 = (
             version: poolData.factory.version,
             createTime: Number(poolData.blockTimestamp),
             liquidityManagement: poolData.liquidityManagement,
-            hook: hookTransformer(poolData, chain),
+            hook: {
+                ...(dbPool?.hook as HookData), // keep existing data
+                ...hookTransformer(poolData, chain),
+            },
         },
         tokens: [
             ...poolData.tokens.map((token) => ({

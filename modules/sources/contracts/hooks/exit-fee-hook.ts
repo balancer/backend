@@ -1,7 +1,7 @@
 import { ViemMulticallCall } from '../../../web3/multicaller-viem';
 import exitFeeHookAbi from '../abis/exit-fee-hook';
 
-export const exitFeeHook = (address: string): ViemMulticallCall[] => [
+export const exitFeeHook = (address: string, poolAddress: string): ViemMulticallCall[] => [
     {
         path: `removeLiquidityFeePercentage`,
         address: address as `0x${string}`,
