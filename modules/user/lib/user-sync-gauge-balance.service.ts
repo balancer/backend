@@ -141,8 +141,9 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
         );
 
         const balances = Object.keys(results).map((id) => {
-            const [tokenAddress, userAddress] = id.toLowerCase().split('-');
-            const poolId = gaugeToPoolMap[tokenAddress];
+            const [gaugeAddress, userAddress] = id.toLowerCase().split('-');
+            const poolId = gaugeToPoolMap[gaugeAddress];
+            const poolAddress = poolId.substring(0, 42);
             const balance = formatEther(results[id]);
 
             return {
@@ -151,9 +152,9 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
                 chain,
                 balance,
                 balanceNum: parseFloat(balance),
-                tokenAddress,
+                tokenAddress: poolAddress,
                 userAddress,
-                stakingId: tokenAddress,
+                stakingId: gaugeAddress,
             };
         });
 
