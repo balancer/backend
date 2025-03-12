@@ -27,14 +27,14 @@ export class BalancerSubgraphService {
         this.sdk = getSdk(new GraphQLClient(subgraphUrl));
     }
 
-    public async getMetadata() {
+    public async lastSyncedBlock() {
         const { meta } = await this.sdk.BalancerGetMeta();
 
         if (!meta) {
             throw new Error('Missing meta data');
         }
 
-        return meta;
+        return Number(meta.block.number);
     }
 
     public async getAllPoolSnapshots(

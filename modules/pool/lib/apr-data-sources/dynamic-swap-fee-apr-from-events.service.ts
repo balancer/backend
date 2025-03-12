@@ -55,9 +55,14 @@ export class DynamicSwapFeeFromEventsAprService implements PoolAprService {
 
         const operations = dynamicData.map((pool) => {
             let apr_24h = 0;
+            let protocolFee = parseFloat(pool.aggregateSwapFee);
+
+            if (pool.isInRecoveryMode) {
+                protocolFee = 0;
+            }
 
             if (pool.totalLiquidity > 0 && swapFeeDataMap[pool.poolId]) {
-                apr_24h = (swapFeeDataMap[pool.poolId].fees_24h * 365) / pool.totalLiquidity;
+                apr_24h = ((swapFeeDataMap[pool.poolId].fees_24h * 365) / pool.totalLiquidity) * (1 - protocolFee);
             }
             if (apr_24h > MAX_DB_INT) {
                 apr_24h = 0;

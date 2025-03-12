@@ -14,7 +14,7 @@ type NetworkSetup = {
 
 type NetworksWithFork = Extract<
     keyof typeof ChainId,
-    'MAINNET' | 'POLYGON' | 'FANTOM' | 'SEPOLIA' | 'OPTIMISM' | 'GNOSIS_CHAIN'
+    'MAINNET' | 'POLYGON' | 'FANTOM' | 'SEPOLIA' | 'OPTIMISM' | 'GNOSIS_CHAIN' | 'SONIC'
 >;
 
 const ANVIL_PORTS: Record<NetworksWithFork, number> = {
@@ -25,6 +25,7 @@ const ANVIL_PORTS: Record<NetworksWithFork, number> = {
     SEPOLIA: 8945,
     OPTIMISM: 9045,
     GNOSIS_CHAIN: 9145,
+    SONIC: 9245,
 };
 
 export const ANVIL_NETWORKS: Record<NetworksWithFork, NetworkSetup> = {
@@ -66,6 +67,12 @@ export const ANVIL_NETWORKS: Record<NetworksWithFork, NetworkSetup> = {
         fallBackRpc: 'https://rpc.ankr.com/gnosis',
         port: ANVIL_PORTS.GNOSIS_CHAIN,
         forkBlockNumber: 35214423n,
+    },
+    SONIC: {
+        rpcEnv: 'SONIC_RPC_URL',
+        fallBackRpc: 'https://sonic.drpc.org',
+        port: ANVIL_PORTS.SONIC,
+        forkBlockNumber: 13046437n,
     },
 };
 

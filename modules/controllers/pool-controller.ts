@@ -20,11 +20,12 @@ import { getVaultClient } from '../sources/contracts/v3/vault-client';
 import { upsertPools as upsertPoolsV3 } from '../actions/pool/v3/upsert-pools';
 import { syncTokenPairs } from '../actions/pool/v3/sync-tokenpairs';
 import { syncHookData } from '../actions/pool/v3/sync-hook-data';
-import { getLastSyncedBlock, upsertLastSyncedBlock } from '../actions/pool/last-synced-block';
+import { getLastSyncedBlock, upsertLastSyncedBlock } from '../actions/last-synced-block';
 import { getChangedPoolsV3 } from '../sources/logs';
 import { getPoolsClient } from '../sources/contracts';
 import { syncBptBalancesFromSubgraph } from '../actions/user/bpt-balances/helpers/sync-bpt-balances-from-subgraph';
 import { updateVolumeAndFees } from '../actions/pool/update-volume-and-fees';
+import { syncHookReviews } from '../actions/content/sync-hook-reviews';
 
 export function PoolController(tracer?: any) {
     return {
@@ -191,7 +192,7 @@ export function PoolController(tracer?: any) {
             let useSubgraph = true;
             try {
                 // Handle bad indexers etc.
-                toBlock = await subgraphClient.getMetadata().then((metadata) => metadata.block.number);
+                toBlock = await subgraphClient.lastSyncedBlock();
             } catch (e) {
                 useSubgraph = false;
             }
@@ -234,14 +235,12 @@ export function PoolController(tracer?: any) {
 
             // When adding new pools, balances need to be added separately
             // Since balance table has a constraint on poolId they cannot be added independently
-            const existingIds = await prisma.prismaPool
-                .findMany({
-                    where: { chain, protocolVersion: 3 },
-                    select: { id: true },
-                })
-                .then((pools) => pools.map(({ id }) => id));
+            const dbPools = await prisma.prismaPool.findMany({
+                where: { chain, protocolVersion: 3 },
+            });
 
             const ids = await upsertPoolsV3(
+                dbPools,
                 pools,
                 getVaultClient(viemClient, vaultAddress),
                 getPoolsClient(viemClient),
@@ -251,16 +250,14 @@ export function PoolController(tracer?: any) {
             await syncTokenPairs(ids, viemClient, routerAddress, chain);
             await updateVolumeAndFees(chain, ids);
 
-            if (hooks) {
-                const poolsWithHooks = await prisma.prismaPool.findMany({
-                    where: { chain, id: { in: ids }, hook: { not: {} } },
-                });
-                await syncHookData(poolsWithHooks, hooks, viemClient, chain);
-            }
-
             // Sync balances for the pools
+            const existingIds = dbPools.map(({ id }) => id);
             const newIds = ids.filter((id) => !existingIds.includes(id));
             await syncBptBalancesFromSubgraph(newIds, vaultSubgraphClient, chain);
+
+            if (hooks && newIds) {
+                await syncHookReviews();
+            }
 
             await upsertLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.POOLS_V3, toBlock);
 
@@ -307,7 +304,7 @@ export function PoolController(tracer?: any) {
 
             const viemClient = getViemClient(chain);
 
-            await syncHookData(poolsWithHooks, hooks, viemClient, chain);
+            await syncHookData(poolsWithHooks, viemClient);
         },
     };
 }

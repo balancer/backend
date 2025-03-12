@@ -63,7 +63,7 @@ export class UserSyncWalletBalanceService {
     }
 
     public async initBalancesForPool(poolId: string) {
-        const { block } = await this.balancerSubgraphService.getMetadata();
+        const blockNumber = await this.balancerSubgraphService.lastSyncedBlock();
 
         const shares = await this.balancerSubgraphService.getAllPoolSharesWithBalance([poolId], [AddressZero]);
 
@@ -76,8 +76,8 @@ export class UserSyncWalletBalanceService {
                 ...shares.map((share) => this.getPrismaUpsertForPoolShare(share)),
                 prisma.prismaUserBalanceSyncStatus.upsert({
                     where: { type_chain: { type: 'WALLET', chain: this.chain } },
-                    create: { type: 'WALLET', chain: this.chain, blockNumber: block.number },
-                    update: { blockNumber: block.number },
+                    create: { type: 'WALLET', chain: this.chain, blockNumber },
+                    update: { blockNumber },
                 }),
             ],
             true,

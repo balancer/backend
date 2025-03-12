@@ -21,7 +21,7 @@ import { initRequestScopedContext, setRequestScopedContextValue } from '../modul
 import { tokenService } from '../modules/token/token.service';
 import { VeBalVotingListService } from '../modules/vebal/vebal-voting-list.service';
 import { PrismaLastBlockSyncedCategory } from '@prisma/client';
-import { upsertLastSyncedBlock } from '../modules/actions/pool/last-synced-block';
+import { upsertLastSyncedBlock } from '../modules/actions/last-synced-block';
 
 // TODO needed?
 const sftmxController = SftmxController();

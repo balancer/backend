@@ -7,7 +7,7 @@ export function getBeetsBarSubgraphClient(url: string, chain: Chain) {
     const beetsBarService = new BeetsBarSubgraphService(url, chain);
 
     return {
-        getMetadata: beetsBarService.getMetadata.bind(beetsBarService),
+        lastSyncedBlock: beetsBarService.lastSyncedBlock.bind(beetsBarService),
         // Getting all balances from the BeetsBar
         async getAllPoolSharesWithBalance(poolIds: string[], excludedAddresses: string[], startBlock?: number) {
             // Haking the poolIds to pass the poolId and fbeets address
