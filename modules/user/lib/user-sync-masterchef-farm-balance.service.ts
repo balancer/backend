@@ -131,7 +131,7 @@ export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceSe
         if (!stakingTypes.includes('MASTER_CHEF')) {
             return;
         }
-        const { block } = await this.masterchefService.getMetadata();
+        const blockNumber = await this.masterchefService.lastSyncedBlock();
         console.log('initStakedBalances: loading subgraph users...');
         const farmUsers = await this.loadAllSubgraphUsers();
         console.log('initStakedBalances: finished loading subgraph users...');
@@ -177,8 +177,8 @@ export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceSe
                 }),
                 prisma.prismaUserBalanceSyncStatus.upsert({
                     where: { type_chain: { type: 'STAKED', chain: networkContext.chain } },
-                    create: { type: 'STAKED', chain: networkContext.chain, blockNumber: block.number },
-                    update: { blockNumber: block.number },
+                    create: { type: 'STAKED', chain: networkContext.chain, blockNumber },
+                    update: { blockNumber },
                 }),
             ],
             true,

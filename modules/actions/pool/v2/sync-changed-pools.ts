@@ -3,7 +3,7 @@ import { prisma } from '../../../../prisma/prisma-client';
 import { PoolOnChainDataService } from '../../../pool/lib/pool-on-chain-data.service';
 import { getChangedPoolsV2 } from '../../../sources/logs';
 import { getViemClient } from '../../../sources/viem-client';
-import { getLastSyncedBlock, upsertLastSyncedBlock } from '../last-synced-block';
+import { getLastSyncedBlock, upsertLastSyncedBlock } from '../../last-synced-block';
 import config from '../../../../config';
 
 export const syncChangedPools = async (

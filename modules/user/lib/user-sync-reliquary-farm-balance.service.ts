@@ -166,7 +166,7 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
         if (!stakingTypes.includes('RELIQUARY')) {
             return;
         }
-        const { block } = await this.reliquarySubgraphService.getMetadata();
+        const blockNumber = await this.reliquarySubgraphService.lastSyncedBlock();
         console.log('initStakedReliquaryBalances: loading subgraph relics...');
         const relics = await this.reliquarySubgraphService.getAllRelicsWithPaging({});
         const filteredRelics = relics.filter(
@@ -219,8 +219,8 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
                 }),
                 prisma.prismaUserBalanceSyncStatus.upsert({
                     where: { type_chain: { type: 'RELIQUARY', chain: networkContext.chain } },
-                    create: { type: 'RELIQUARY', chain: networkContext.chain, blockNumber: block.number },
-                    update: { blockNumber: block.number },
+                    create: { type: 'RELIQUARY', chain: networkContext.chain, blockNumber },
+                    update: { blockNumber },
                 }),
             ],
             true,

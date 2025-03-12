@@ -21,10 +21,10 @@ export const getPoolsSubgraphClient = (subgraphUrl: string, chain: Chain) => {
 
     return {
         ...sdk,
-        async getMetadata() {
+        async lastSyncedBlock() {
             return sdk.Metadata().then((response) => {
                 if (response && response.meta) {
-                    return response.meta;
+                    return Number(response.meta.block.number);
                 } else {
                     // Return a default value if meta is not present
                     return Promise.reject('Error fetching metadata');

@@ -20,7 +20,7 @@ import { getVaultClient } from '../sources/contracts/v3/vault-client';
 import { upsertPools as upsertPoolsV3 } from '../actions/pool/v3/upsert-pools';
 import { syncTokenPairs } from '../actions/pool/v3/sync-tokenpairs';
 import { syncHookData } from '../actions/pool/v3/sync-hook-data';
-import { getLastSyncedBlock, upsertLastSyncedBlock } from '../actions/pool/last-synced-block';
+import { getLastSyncedBlock, upsertLastSyncedBlock } from '../actions/last-synced-block';
 import { getChangedPoolsV3 } from '../sources/logs';
 import { getPoolsClient } from '../sources/contracts';
 import { syncBptBalancesFromSubgraph } from '../actions/user/bpt-balances/helpers/sync-bpt-balances-from-subgraph';
@@ -192,7 +192,7 @@ export function PoolController(tracer?: any) {
             let useSubgraph = true;
             try {
                 // Handle bad indexers etc.
-                toBlock = await subgraphClient.getMetadata().then((metadata) => metadata.block.number);
+                toBlock = await subgraphClient.lastSyncedBlock();
             } catch (e) {
                 useSubgraph = false;
             }

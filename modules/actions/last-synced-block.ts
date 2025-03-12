@@ -1,5 +1,5 @@
 import { Chain, PrismaLastBlockSyncedCategory } from '@prisma/client';
-import { prisma } from '../../../prisma/prisma-client';
+import { prisma } from '../../prisma/prisma-client';
 
 export const getLastSyncedBlock = async (chain: Chain, syncCategory: PrismaLastBlockSyncedCategory) => {
     const lastSyncBlock = (
