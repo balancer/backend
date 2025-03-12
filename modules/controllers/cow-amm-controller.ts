@@ -101,7 +101,7 @@ export function CowAmmController(tracer?: any) {
             await upsertPools(ids, viemClient, subgraphClient, chain, latestBlock);
             await syncTokenPairs(ids, viemClient, routerAddress, chain);
             await updateVolumeAndFees(chain, ids);
-            await updateSurplusAPRs();
+            await updateSurplusAPRs(chain, ids);
             // Sync balances for the pools
             const newIds = ids.filter((id) => !existingIds.includes(id));
             await syncBptBalancesFromSubgraph(newIds, subgraphClient, chain);
