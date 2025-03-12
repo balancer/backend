@@ -3,7 +3,7 @@
 import { ViemMulticallCall } from '../../../web3/multicaller-viem';
 import feeTakingHookAbi from '../abis/fee-taking-hook';
 
-export const feeTakingHook = (address: string): ViemMulticallCall[] => [
+export const feeTakingHook = (address: string, poolAddress: string): ViemMulticallCall[] => [
     {
         path: `swapFeePercentage`,
         address: address as `0x${string}`,

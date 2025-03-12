@@ -235,14 +235,12 @@ export function PoolController(tracer?: any) {
 
             // When adding new pools, balances need to be added separately
             // Since balance table has a constraint on poolId they cannot be added independently
-            const existingIds = await prisma.prismaPool
-                .findMany({
-                    where: { chain, protocolVersion: 3 },
-                    select: { id: true },
-                })
-                .then((pools) => pools.map(({ id }) => id));
+            const dbPools = await prisma.prismaPool.findMany({
+                where: { chain, protocolVersion: 3 },
+            });
 
             const ids = await upsertPoolsV3(
+                dbPools,
                 pools,
                 getVaultClient(viemClient, vaultAddress),
                 getPoolsClient(viemClient),
@@ -252,17 +250,14 @@ export function PoolController(tracer?: any) {
             await syncTokenPairs(ids, viemClient, routerAddress, chain);
             await updateVolumeAndFees(chain, ids);
 
-            if (hooks) {
-                const poolsWithHooks = await prisma.prismaPool.findMany({
-                    where: { chain, id: { in: ids }, hook: { not: {} } },
-                });
-                await syncHookData(poolsWithHooks, hooks, viemClient, chain);
-                await syncHookReviews();
-            }
-
             // Sync balances for the pools
+            const existingIds = dbPools.map(({ id }) => id);
             const newIds = ids.filter((id) => !existingIds.includes(id));
             await syncBptBalancesFromSubgraph(newIds, vaultSubgraphClient, chain);
+
+            if (hooks && newIds) {
+                await syncHookReviews();
+            }
 
             await upsertLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.POOLS_V3, toBlock);
 
@@ -309,7 +304,7 @@ export function PoolController(tracer?: any) {
 
             const viemClient = getViemClient(chain);
 
-            await syncHookData(poolsWithHooks, hooks, viemClient, chain);
+            await syncHookData(poolsWithHooks, viemClient);
         },
     };
 }
