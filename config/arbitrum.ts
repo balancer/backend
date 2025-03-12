@@ -21,6 +21,7 @@ export default <NetworkData>{
     },
     hooks: {
         ['0x0fa0f9990d7969a7ae6f9961d663e4a201ed6417']: 'STABLE_SURGE',
+        ['0x5b42ec6d40f7b7965be5308c70e2603c0281c1e9']: 'MEV_TAX',
     },
     eth: {
         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
