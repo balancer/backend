@@ -522,7 +522,7 @@ class SorPathService {
         let filteredPools = [
             ...pools.filter((pool) => {
                 // always include pools with no hook
-                if (!pool.hook) {
+                if (!pool.hook || Object.keys(pool.hook).length === 0) {
                     return true;
                 }
 

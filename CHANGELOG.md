@@ -1,5 +1,12 @@
 # backend
 
+## 1.35.1
+
+### Patch Changes
+
+-   07cd357: hook patch and dynamicData merge
+-   b9c2100: patch for dynamicdata upsert
+
 ## 1.35.0
 
 ### Minor Changes
