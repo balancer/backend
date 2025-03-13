@@ -9,7 +9,7 @@ import { StableData } from '../../../../../pool/subgraph-mapper';
 import { TokenPairData } from '../../../../../sources/contracts/v3/fetch-tokenpair-data';
 
 import { WAD } from '../../utils/math';
-import { BasePoolV3 } from '../../poolsV2/basePool';
+import { BasePoolMethodsV3 } from '../../poolsV2/basePool';
 import { PoolTokenWithRate } from '../../utils/poolTokenWithRate';
 import { Erc4626PoolToken } from '../../utils/erc4626PoolToken';
 
@@ -19,7 +19,7 @@ import { LiquidityManagement } from '../../../../../sor/types';
 
 type StablePoolToken = PoolTokenWithRate | Erc4626PoolToken;
 
-export class StablePoolV3 implements BasePoolV3 {
+export class StablePoolV3 implements BasePoolMethodsV3 {
     public readonly chain: Chain;
     public readonly id: Hex;
     public readonly address: string;

@@ -8,7 +8,7 @@ import { GqlPoolType } from '../../../../../../apps/api/gql/generated-schema';
 import { TokenPairData } from '../../../../../sources/contracts/v3/fetch-tokenpair-data';
 import { chainToChainId as chainToIdMap } from '../../../../../network/chain-id-to-chain';
 
-import { BasePoolV3 } from '../../poolsV2/basePool';
+import { BasePoolMethodsV3 } from '../../poolsV2/basePool';
 import { WeightedBasePoolToken } from '../../poolsV2/weighted/weightedBasePoolToken';
 import { WeightedErc4626PoolToken } from './weightedErc4626PoolToken';
 
@@ -18,7 +18,7 @@ import { LiquidityManagement } from '../../../../../sor/types';
 
 type WeightedPoolToken = WeightedBasePoolToken | WeightedErc4626PoolToken;
 
-export class WeightedPoolV3 implements BasePoolV3 {
+export class WeightedPoolV3 implements BasePoolMethodsV3 {
     public readonly chain: Chain;
     public readonly id: Hex;
     public readonly address: string;

@@ -9,16 +9,16 @@ import { chainToChainId as chainToIdMap } from '../../../../../network/chain-id-
 import { GyroData } from '../../../../../pool/subgraph-mapper';
 import { TokenPairData } from '../../../../../sources/contracts/v3/fetch-tokenpair-data';
 
-import { BasePoolV3 } from '../../poolsV2/basePool';
+import { BasePoolMethodsV3 } from '../../poolsV2/basePool';
 
 import { LiquidityManagement } from '../../../../types';
 import { DerivedGyroEParams, GyroEParams } from '../../poolsV2/gyroE/types';
 import { Erc4626PoolToken, getHookState, PoolTokenWithRate, WAD } from '../../utils';
-import { BasePoolCopy } from '../BasePoolCopy';
+import { BasePoolV3 } from '../basePoolV3';
 
 type GyroPoolToken = PoolTokenWithRate | Erc4626PoolToken;
 
-export class GyroECLPPool extends BasePoolCopy implements BasePoolV3 {
+export class GyroECLPPool extends BasePoolV3 implements BasePoolMethodsV3 {
     public readonly poolType: PoolType = PoolType.GyroE;
 
     // pool type specific params

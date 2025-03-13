@@ -9,7 +9,7 @@ import { TokenPairData } from '../../../../sources/contracts/v3/fetch-tokenpair-
 import { LiquidityManagement } from '../../../types';
 import { BasePoolToken } from '../utils';
 
-export class BasePoolCopy {
+export class BasePoolV3 {
     public readonly chain: Chain;
     public readonly id: Hex;
     public readonly address: string;

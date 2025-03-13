@@ -21,7 +21,7 @@ export interface BasePool {
     getPoolTokens(tokenIn: Token, tokenOut: Token): { tIn: BasePoolToken; tOut: BasePoolToken };
 }
 
-export interface BasePoolV3 extends BasePool {
+export interface BasePoolMethodsV3 extends BasePool {
     tokens: (BasePoolToken | Erc4626PoolToken)[];
     getPoolState(): PoolState | BufferState;
 }

@@ -9,7 +9,7 @@ import { chainToChainId as chainToIdMap } from '../../../../../network/chain-id-
 import { GyroData } from '../../../../../pool/subgraph-mapper';
 import { TokenPairData } from '../../../../../sources/contracts/v3/fetch-tokenpair-data';
 
-import { BasePoolV3 } from '../../poolsV2/basePool';
+import { BasePoolMethodsV3 } from '../../poolsV2/basePool';
 
 import { Erc4626PoolToken, getHookState, PoolTokenWithRate, WAD } from '../../utils';
 
@@ -17,7 +17,7 @@ import { LiquidityManagement } from '../../../../types';
 
 type GyroPoolToken = PoolTokenWithRate | Erc4626PoolToken;
 
-export class Gyro2CLPPool implements BasePoolV3 {
+export class Gyro2CLPPool implements BasePoolMethodsV3 {
     public readonly chain: Chain;
     public readonly id: Hex;
     public readonly address: string;
