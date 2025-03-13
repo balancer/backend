@@ -10,6 +10,7 @@ import { fetchErc4626AndUnderlyingTokenData } from '../../../sources/contracts/f
 import { getViemClient } from '../../../sources/viem-client';
 import { fetchHookData } from '../../../sources/contracts/v3/fetch-hook-data';
 import { HookData } from '../../../sources/transformers';
+import { PrismaPoolWithDynamic } from '../../../../prisma/prisma-types';
 
 /**
  * Gets and syncs all the pools state with the database
@@ -22,7 +23,7 @@ import { HookData } from '../../../sources/transformers';
  * @param blockNumber
  */
 export const upsertPools = async (
-    dbPools: PrismaPool[],
+    dbPools: PrismaPoolWithDynamic[],
     subgraphPools: V3JoinedSubgraphPool[],
     vaultClient: VaultClient,
     poolsClient: PoolsClient,
@@ -32,7 +33,7 @@ export const upsertPools = async (
     const dbPoolsMap = dbPools.reduce((acc, pool) => {
         acc.set(pool.id, pool);
         return acc;
-    }, new Map<string, PrismaPool>());
+    }, new Map<string, PrismaPoolWithDynamic>());
 
     // Transform pools first
     let pools = subgraphPools.map((fragment) =>

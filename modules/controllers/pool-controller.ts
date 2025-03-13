@@ -237,6 +237,9 @@ export function PoolController(tracer?: any) {
             // Since balance table has a constraint on poolId they cannot be added independently
             const dbPools = await prisma.prismaPool.findMany({
                 where: { chain, protocolVersion: 3 },
+                include: {
+                    dynamicData: true,
+                },
             });
 
             const ids = await upsertPoolsV3(
