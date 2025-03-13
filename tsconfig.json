@@ -11,7 +11,7 @@
         "outDir": "./dist",
         "skipLibCheck": true,
         "sourceMap": true,
-        "types": ["vitest/globals"],
+        "types": ["vitest/globals"]
     },
-    "exclude": ["node_modules", "debug", "**/*.spec.ts", "**/*.test.ts"]
+    "exclude": ["node_modules", "debug"]
 }
