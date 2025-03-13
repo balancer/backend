@@ -1,5 +1,27 @@
 # backend
 
+## 1.35.1
+
+### Patch Changes
+
+-   07cd357: hook patch and dynamicData merge
+-   b9c2100: patch for dynamicdata upsert
+
+## 1.35.0
+
+### Minor Changes
+
+-   f5511d9: syncing gauge balances from SG
+
+### Patch Changes
+
+-   d569bda: probable fix for APR update issues
+-   bd526b7: sync hook data on upsert
+-   3e1e147: SOR - Fix gyroE swap exact in by taking fee before rates
+-   14136c1: add mev hook addresses
+-   de04242: add new silo market apr
+-   3c36d96: fix rpc staked balances token address
+
 ## 1.34.2
 
 ### Patch Changes

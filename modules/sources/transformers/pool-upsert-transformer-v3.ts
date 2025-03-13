@@ -4,7 +4,7 @@ import { StableData } from '../../pool/subgraph-mapper';
 import { fx, gyro, element, stable } from '../../pool/pool-data';
 import { V3JoinedSubgraphPool } from '../subgraphs';
 import { parseEther } from 'viem';
-import { PoolUpsertData } from '../../../prisma/prisma-types';
+import { PoolUpsertData, PrismaPoolWithDynamic } from '../../../prisma/prisma-types';
 import { HookData, hookTransformer } from './hook-transformer';
 import _ from 'lodash';
 
@@ -13,7 +13,7 @@ export const poolUpsertTransformerV3 = (
     poolData: V3JoinedSubgraphPool,
     chain: Chain,
     blockNumber: number,
-    dbPool?: PrismaPool,
+    dbPool?: PrismaPoolWithDynamic,
 ): PoolUpsertData => {
     let type: PrismaPoolType;
     let typeData: ReturnType<(typeof typeDataMapper)[keyof typeof typeDataMapper]> | {} = {};
@@ -62,8 +62,15 @@ export const poolUpsertTransformerV3 = (
         default:
             type = PrismaPoolType.UNKNOWN;
     }
+
+    const { dynamicData: dbDynamicData, ...poolDbData } = dbPool || {};
+    let dynamicData: any = dbDynamicData ? { ...dbDynamicData } : undefined;
+    delete dynamicData?.poolId;
+    delete dynamicData?.chain;
+
     return {
         pool: {
+            ...poolDbData,
             id: poolData.id.toLowerCase(),
             chain: chain,
             protocolVersion: 3,
@@ -102,6 +109,8 @@ export const poolUpsertTransformerV3 = (
             },
         ],
         poolDynamicData: {
+            ...dynamicData, // keep existing data
+            tokenPairsData: dynamicData?.tokenPairsData || {},
             id: poolData.id,
             pool: {
                 connect: {
@@ -113,13 +122,13 @@ export const poolUpsertTransformerV3 = (
             },
             totalShares: String(parseEther(poolData.totalShares)),
             totalSharesNum: Number(poolData.totalShares),
-            blockNumber,
-            swapFee: '0', // enriched later
-            swapEnabled: true,
+            swapFee: dynamicData?.swapFee || '0', // enriched later
+            swapEnabled: dynamicData?.swapEnabled || true,
             holdersCount: Number(poolData.holdersCount),
-            totalLiquidity: 0,
-            isPaused: false,
-            isInRecoveryMode: false,
+            totalLiquidity: dynamicData?.totalLiquidity || 0,
+            isPaused: dynamicData?.isPaused || false,
+            isInRecoveryMode: dynamicData?.isInRecoveryMode || false,
+            blockNumber,
         },
         poolToken: poolData.tokens.map((token, i) => ({
             id: `${poolData.id}-${token.address}`.toLowerCase(),
