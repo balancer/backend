@@ -1,5 +1,4 @@
 export type PoolTypeData = {
-    id: string;
     typeData: StableTypeData;
 };
 

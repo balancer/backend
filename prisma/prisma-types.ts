@@ -3,13 +3,13 @@ import { Prisma, PrismaToken, PrismaTokenTypeOption, PrismaPoolEvent } from '@pr
 export type PoolUpsertData = {
     pool: Prisma.PrismaPoolCreateInput;
     tokens: Prisma.PrismaTokenCreateInput[];
-    poolDynamicData: Prisma.PrismaPoolDynamicDataCreateInput;
+    poolDynamicData: Omit<Prisma.PrismaPoolDynamicDataCreateInput, 'pool'>;
     poolToken: Prisma.PrismaPoolTokenCreateManyInput[];
     poolExpandedTokens: Prisma.PrismaPoolExpandedTokensCreateManyInput[];
 };
 
 export type PoolDynamicUpsertData = {
-    poolDynamicData: Prisma.PrismaPoolDynamicDataCreateInput;
+    poolDynamicData: Omit<Prisma.PrismaPoolDynamicDataCreateInput, 'pool'>;
     poolToken: Prisma.PrismaPoolTokenCreateManyInput[];
 };
 

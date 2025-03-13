@@ -1,5 +1,7 @@
 fragment VaultPool on Pool {
     id
+    isPaused
+    isInRecoveryMode
     address
     name
     symbol

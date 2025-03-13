@@ -988,6 +988,15 @@ export enum _SubgraphErrorPolicy_ {
     Deny = 'deny',
 }
 
+export type ChangedPoolsQueryVariables = Exact<{
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<Pool_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    where?: InputMaybe<Pool_Filter>;
+}>;
+
+export type ChangedPoolsQuery = { __typename?: 'Query'; pools: Array<{ __typename?: 'Pool'; id: string }> };
+
 export type MetadataQueryVariables = Exact<{ [key: string]: never }>;
 
 export type MetadataQuery = {
@@ -1235,6 +1244,13 @@ export const SepoliaTypePoolFragmentDoc = gql`
         }
     }
 `;
+export const ChangedPoolsDocument = gql`
+    query ChangedPools($first: Int, $orderBy: Pool_orderBy, $orderDirection: OrderDirection, $where: Pool_filter) {
+        pools(first: $first, orderBy: $orderBy, orderDirection: $orderDirection, where: $where) {
+            id
+        }
+    }
+`;
 export const MetadataDocument = gql`
     query Metadata {
         meta: _meta {
@@ -1301,6 +1317,20 @@ const defaultWrapper: SdkFunctionWrapper = (action, _operationName, _operationTy
 
 export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = defaultWrapper) {
     return {
+        ChangedPools(
+            variables?: ChangedPoolsQueryVariables,
+            requestHeaders?: Dom.RequestInit['headers'],
+        ): Promise<ChangedPoolsQuery> {
+            return withWrapper(
+                (wrappedRequestHeaders) =>
+                    client.request<ChangedPoolsQuery>(ChangedPoolsDocument, variables, {
+                        ...requestHeaders,
+                        ...wrappedRequestHeaders,
+                    }),
+                'ChangedPools',
+                'query',
+            );
+        },
         Metadata(
             variables?: MetadataQueryVariables,
             requestHeaders?: Dom.RequestInit['headers'],

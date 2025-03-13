@@ -44,14 +44,6 @@ export const poolUpsertTransformerCowAmm = (
     ],
     poolDynamicData: {
         id: poolFragment.id,
-        pool: {
-            connect: {
-                id_chain: {
-                    id: poolFragment.id,
-                    chain: chain,
-                },
-            },
-        },
         totalShares: String(parseEther(poolFragment.totalShares)),
         totalSharesNum: Number(poolFragment.totalShares),
         blockNumber,
