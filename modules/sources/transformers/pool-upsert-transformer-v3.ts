@@ -63,7 +63,10 @@ export const poolUpsertTransformerV3 = (
             type = PrismaPoolType.UNKNOWN;
     }
 
-    const { dynamicData, ...poolDbData } = dbPool || {};
+    const { dynamicData: dbDynamicData, ...poolDbData } = dbPool || {};
+    let dynamicData: any = dbDynamicData ? { ...dbDynamicData } : undefined;
+    delete dynamicData?.poolId;
+    delete dynamicData?.chain;
 
     return {
         pool: {
