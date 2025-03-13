@@ -1,15 +1,6 @@
 // yarn vitest gyroECLPPool.integration.test.ts
 
-import {
-    ExactInQueryOutput,
-    Swap,
-    SwapKind,
-    Token,
-    Address,
-    ExactOutQueryOutput,
-    ChainId,
-    CHAINS,
-} from '@balancer/sdk';
+import { ExactInQueryOutput, Swap, SwapKind, Token, Address, ExactOutQueryOutput, CHAINS } from '@balancer/sdk';
 import { createTestClient, Hex, http, parseUnits, TestClient } from 'viem';
 
 import { PrismaPoolAndHookWithDynamic } from '../../../../../../prisma/prisma-types';
