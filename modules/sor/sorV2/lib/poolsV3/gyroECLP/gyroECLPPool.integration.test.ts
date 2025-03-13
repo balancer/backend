@@ -42,7 +42,7 @@ describe('SOR V3 - GyroECLP Integration Tests', () => {
     beforeAll(async () => {
         // start fork to run queries against
         chainId = parseFloat(chainToIdMap['SEPOLIA']);
-        ({ rpcUrl } = await startFork(ANVIL_NETWORKS[ChainId[chainId]]));
+        ({ rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA));
         client = createTestClient({
             mode: 'anvil',
             chain: CHAINS[chainId],
