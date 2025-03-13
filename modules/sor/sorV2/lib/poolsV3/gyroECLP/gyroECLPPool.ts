@@ -21,8 +21,9 @@ export class GyroECLPPool implements BasePoolV3 {
     public readonly chain: Chain;
     public readonly id: Hex;
     public readonly address: string;
-    public readonly poolType: PoolType = PoolType.Stable;
+    public readonly poolType: PoolType = PoolType.GyroE;
     public readonly swapFee: bigint;
+    public readonly aggregateSwapFee: bigint;
     public readonly tokenPairs: TokenPairData[];
 
     public totalShares: bigint;
@@ -45,10 +46,10 @@ export class GyroECLPPool implements BasePoolV3 {
     ): GyroECLPPool {
         const poolTokens: GyroPoolToken[] = [];
 
-        if (!pool.dynamicData) throw new Error('Stable pool has no dynamic data');
+        if (!pool.dynamicData) throw new Error('GyroECLP pool has no dynamic data');
 
         for (const poolToken of pool.tokens) {
-            if (!poolToken.priceRate) throw new Error('Stable pool token does not have a price rate');
+            if (!poolToken.priceRate) throw new Error('GyroECLP pool token does not have a price rate');
             const token = new Token(
                 parseFloat(chainToIdMap[pool.chain]),
                 poolToken.address as Address,
@@ -128,6 +129,7 @@ export class GyroECLPPool implements BasePoolV3 {
             pool.address,
             pool.chain,
             parseEther(pool.dynamicData.swapFee),
+            parseEther(pool.dynamicData.aggregateSwapFee),
             poolTokens,
             totalShares,
             gyroEParams,
@@ -143,6 +145,7 @@ export class GyroECLPPool implements BasePoolV3 {
         address: string,
         chain: Chain,
         swapFee: bigint,
+        aggregateSwapFee: bigint,
         tokens: GyroPoolToken[],
         totalShares: bigint,
         gyroEParams: GyroEParams,
@@ -155,6 +158,7 @@ export class GyroECLPPool implements BasePoolV3 {
         this.id = id;
         this.address = address;
         this.swapFee = swapFee;
+        this.aggregateSwapFee = aggregateSwapFee;
         this.totalShares = totalShares;
         this.gyroEParams = gyroEParams;
         this.derivedGyroEParams = derivedGyroEParams;
@@ -354,7 +358,7 @@ export class GyroECLPPool implements BasePoolV3 {
             totalSupply: this.totalShares,
             tokens: this.tokens.map((t) => t.token.address),
             scalingFactors: this.tokens.map((t) => t.scalar),
-            aggregateSwapFee: 0n,
+            aggregateSwapFee: this.aggregateSwapFee,
             supportsUnbalancedLiquidity: !this.liquidityManagement.disableUnbalancedLiquidity,
             paramsAlpha: this.gyroEParams.alpha,
             paramsBeta: this.gyroEParams.beta,
