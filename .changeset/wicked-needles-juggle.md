@@ -1,5 +1,0 @@
----
-'backend': patch
----
-
-hotfix getRate
