@@ -1,7 +1,7 @@
 import { GenericContainer, StartedTestContainer } from 'testcontainers';
 import * as path from 'path';
 import { PrismaClient } from '@prisma/client';
-import { commandSync } from 'execa';
+import { execaCommandSync } from 'execa';
 import { setPrisma } from '../../prisma/prisma-client';
 
 export type TestDatabaseContainer = {
@@ -62,7 +62,7 @@ export async function createIndividualDatabaseSchemaForTest(
         dbConfig.password
     }@${postgres.getHost()}:${postgres.getMappedPort(5432)}/${dbConfig.dbName}?schema=${schema}`;
 
-    commandSync(`yarn prisma db push --schema ${prismaConfig.schemaFile} --skip-generate`, {
+    execaCommandSync(`yarn prisma db push --schema ${prismaConfig.schemaFile} --skip-generate`, {
         env: {
             DATABASE_URL: connectionString,
         },
