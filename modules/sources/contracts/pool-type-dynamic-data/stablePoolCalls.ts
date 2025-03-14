@@ -38,6 +38,6 @@ export const parseStableContractCalls = (result: {
 }): StableTypeData => {
     return {
         amp: String(result.amplificationParameter[0] / result.amplificationParameter[2]),
-        bptPriceRate: formatEther(result.getRate),
+        bptPriceRate: formatEther(result.getRate || 1000000000000000000n),
     };
 };
