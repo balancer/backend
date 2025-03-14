@@ -9,7 +9,7 @@ import { StableData } from '../../../../../pool/subgraph-mapper';
 import { TokenPairData } from '../../../../../sources/contracts/v3/fetch-tokenpair-data';
 
 import { WAD } from '../../utils/math';
-import { BasePoolMethodsV3 } from '../../poolsV2/basePool';
+import { BasePoolMethodsV3 } from '../basePoolMethodsV3';
 import { PoolTokenWithRate } from '../../utils/poolTokenWithRate';
 import { Erc4626PoolToken } from '../../utils/erc4626PoolToken';
 

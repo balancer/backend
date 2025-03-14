@@ -9,7 +9,7 @@ import { chainToChainId as chainToIdMap } from '../../../../../network/chain-id-
 import { GyroData } from '../../../../../pool/subgraph-mapper';
 import { TokenPairData } from '../../../../../sources/contracts/v3/fetch-tokenpair-data';
 
-import { BasePoolMethodsV3 } from '../../poolsV2/basePool';
+import { BasePoolMethodsV3 } from '../basePoolMethodsV3';
 
 import { LiquidityManagement } from '../../../../types';
 import { DerivedGyroEParams, GyroEParams } from '../../poolsV2/gyroE/types';

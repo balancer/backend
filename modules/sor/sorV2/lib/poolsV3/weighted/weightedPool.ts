@@ -7,7 +7,7 @@ import { PrismaPoolAndHookWithDynamic } from '../../../../../../prisma/prisma-ty
 import { TokenPairData } from '../../../../../sources/contracts/v3/fetch-tokenpair-data';
 import { chainToChainId as chainToIdMap } from '../../../../../network/chain-id-to-chain';
 
-import { BasePoolMethodsV3 } from '../../poolsV2/basePool';
+import { BasePoolMethodsV3 } from '../basePoolMethodsV3';
 import { WeightedBasePoolToken } from '../../poolsV2/weighted/weightedBasePoolToken';
 import { WeightedErc4626PoolToken } from './weightedErc4626PoolToken';
 
