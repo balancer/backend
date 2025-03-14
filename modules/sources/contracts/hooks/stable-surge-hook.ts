@@ -10,14 +10,14 @@ const abi = parseAbi([
 
 export const stableSurgeHook = (address: string, poolAddress: string): ViemMulticallCall[] => [
     {
-        path: `surgeThresholdPercentage`,
+        path: `${poolAddress}.surgeThresholdPercentage`,
         address: address as `0x${string}`,
         abi,
         functionName: 'getSurgeThresholdPercentage',
         args: [poolAddress],
     },
     {
-        path: `maxSurgeFeePercentage`,
+        path: `${poolAddress}.maxSurgeFeePercentage`,
         address: address as `0x${string}`,
         abi,
         functionName: 'getMaxSurgeFeePercentage',

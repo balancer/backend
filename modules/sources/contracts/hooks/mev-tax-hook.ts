@@ -3,20 +3,20 @@ import abi from '../abis/mev-tax-hook';
 
 export const mevTaxHook = (address: string, poolAddress: string): ViemMulticallCall[] => [
     {
-        path: `maxMevSwapFeePercentage`,
+        path: `${poolAddress}.maxMevSwapFeePercentage`,
         address: address as `0x${string}`,
         abi,
         functionName: 'getMaxMevSwapFeePercentage',
     },
     {
-        path: `mevTaxMultiplier`,
+        path: `${poolAddress}.mevTaxMultiplier`,
         address: address as `0x${string}`,
         abi,
         functionName: 'getPoolMevTaxMultiplier',
         args: [poolAddress],
     },
     {
-        path: `mevTaxThreshold`,
+        path: `${poolAddress}.mevTaxThreshold`,
         address: address as `0x${string}`,
         abi,
         functionName: 'getPoolMevTaxThreshold',
