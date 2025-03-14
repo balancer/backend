@@ -1,5 +1,12 @@
 # backend
 
+## 1.35.2
+
+### Patch Changes
+
+-   55484a9: SOR V3 - Add support for Gyro2CLP and GyroECLP
+-   7150047: hotfix getRate
+
 ## 1.35.1
 
 ### Patch Changes
