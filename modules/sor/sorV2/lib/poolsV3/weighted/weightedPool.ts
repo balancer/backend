@@ -123,7 +123,6 @@ export class WeightedPoolV3 extends BasePoolV3 implements BasePoolMethodsV3 {
         const bpt = new Token(tokens[0].token.chainId, this.id, 18, 'BPT', 'BPT');
         this.tokenMap.set(bpt.address, new WeightedBasePoolToken(bpt, totalShares, -1, 0n));
 
-        this.vault = new Vault();
         this.poolState = this.getPoolState(hookState?.hookType);
     }
 
