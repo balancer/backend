@@ -15,7 +15,7 @@ import { SwapKind, Token } from '@balancer/sdk';
 import { BasePool } from './poolsV2/basePool';
 import { SorSwapOptions } from './types';
 import { PathWithAmount } from './path';
-import { StablePoolV3, WeightedPoolV3 } from './poolsV3';
+import { Gyro2CLPPool, GyroECLPPool, StablePoolV3, WeightedPoolV3 } from './poolsV3';
 
 export async function sorGetPathsWithPools(
     tokenIn: Token,
@@ -79,13 +79,21 @@ export async function sorGetPathsWithPools(
                 basePools.push(FxPool.fromPrismaPool(prismaPool));
                 break;
             case 'GYRO':
-                basePools.push(Gyro2Pool.fromPrismaPool(prismaPool));
+                if (protocolVersion === 3) {
+                    basePools.push(Gyro2CLPPool.fromPrismaPool(prismaPool, underlyingTokens));
+                } else {
+                    basePools.push(Gyro2Pool.fromPrismaPool(prismaPool));
+                }
                 break;
             case 'GYRO3':
                 basePools.push(Gyro3Pool.fromPrismaPool(prismaPool));
                 break;
             case 'GYROE':
-                basePools.push(GyroEPool.fromPrismaPool(prismaPool));
+                if (protocolVersion === 3) {
+                    basePools.push(GyroECLPPool.fromPrismaPool(prismaPool, underlyingTokens));
+                } else {
+                    basePools.push(GyroEPool.fromPrismaPool(prismaPool));
+                }
                 break;
             default:
                 console.log('Unsupported pool type');

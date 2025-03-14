@@ -59,25 +59,25 @@ export class GyroEPool implements BasePool {
         const gyroEParams: GyroEParams = {
             alpha: parseEther(gyroData.alpha),
             beta: parseEther(gyroData.beta),
-            c: parseEther(gyroData.c!),
-            s: parseEther(gyroData.s!),
-            lambda: parseEther(gyroData.lambda!),
+            c: parseEther(gyroData.c),
+            s: parseEther(gyroData.s),
+            lambda: parseEther(gyroData.lambda),
         };
 
         const derivedGyroEParams: DerivedGyroEParams = {
             tauAlpha: {
-                x: parseUnits(gyroData.tauAlphaX!, 38),
-                y: parseUnits(gyroData.tauAlphaY!, 38),
+                x: parseUnits(gyroData.tauAlphaX, 38),
+                y: parseUnits(gyroData.tauAlphaY, 38),
             },
             tauBeta: {
-                x: parseUnits(gyroData.tauBetaX!, 38),
-                y: parseUnits(gyroData.tauBetaY!, 38),
+                x: parseUnits(gyroData.tauBetaX, 38),
+                y: parseUnits(gyroData.tauBetaY, 38),
             },
-            u: parseUnits(gyroData.u!, 38),
-            v: parseUnits(gyroData.v!, 38),
-            w: parseUnits(gyroData.w!, 38),
-            z: parseUnits(gyroData.z!, 38),
-            dSq: parseUnits(gyroData.dSq!, 38),
+            u: parseUnits(gyroData.u, 38),
+            v: parseUnits(gyroData.v, 38),
+            w: parseUnits(gyroData.w, 38),
+            z: parseUnits(gyroData.z, 38),
+            dSq: parseUnits(gyroData.dSq, 38),
         };
 
         return new GyroEPool(
