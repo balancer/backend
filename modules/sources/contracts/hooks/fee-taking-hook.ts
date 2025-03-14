@@ -5,19 +5,19 @@ import feeTakingHookAbi from '../abis/fee-taking-hook';
 
 export const feeTakingHook = (address: string, poolAddress: string): ViemMulticallCall[] => [
     {
-        path: `swapFeePercentage`,
+        path: `${poolAddress}.swapFeePercentage`,
         address: address as `0x${string}`,
         abi: feeTakingHookAbi,
         functionName: 'hookSwapFeePercentage',
     },
     {
-        path: `addLiquidityFeePercentage`,
+        path: `${poolAddress}.addLiquidityFeePercentage`,
         address: address as `0x${string}`,
         abi: feeTakingHookAbi,
         functionName: 'addLiquidityHookFeePercentage',
     },
     {
-        path: `removeLiquidityFeePercentage`,
+        path: `${poolAddress}.removeLiquidityFeePercentage`,
         address: address as `0x${string}`,
         abi: feeTakingHookAbi,
         functionName: 'removeLiquidityHookFeePercentage',
