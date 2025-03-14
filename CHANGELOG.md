@@ -1,5 +1,11 @@
 # backend
 
+## 1.35.3
+
+### Patch Changes
+
+-   e399fd0: hot fix hook syncs
+
 ## 1.35.2
 
 ### Patch Changes
