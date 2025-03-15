@@ -646,7 +646,7 @@ export class PoolGqlLoaderService {
                     : {}),
             },
             ...(where?.hasHook !== undefined && where.hasHook
-                ? { hook: { not: {} } }
+                ? { hook: { path: ['address'], string_starts_with: '0x' } }
                 : where?.hasHook !== undefined && !where.hasHook
                 ? { hook: { equals: Prisma.DbNull } }
                 : {}),
@@ -811,13 +811,15 @@ export class PoolGqlLoaderService {
     private mapPoolToAggregatorPool(pool: PrismaPoolWithExpandedNesting): GqlPoolAggregator {
         const { typeData, ...poolWithoutTypeData } = pool;
 
+        const hook = (pool.hook as HookData)?.address ? (pool.hook as HookData) : null;
+
         const mappedData = {
             decimals: 18,
             dynamicData: this.getPoolDynamicData(pool),
             poolTokens: pool.tokens.map((token) => this.mapPoolToken(token)),
             vaultVersion: poolWithoutTypeData.protocolVersion,
             liquidityManagement: (pool.liquidityManagement as LiquidityManagement) || undefined,
-            hook: pool.hook as HookData as GqlHook,
+            hook: hook as GqlHook,
         };
 
         switch (pool.type) {
@@ -1055,6 +1057,8 @@ export class PoolGqlLoaderService {
         const percentOfSupplyNested = totalShares > 0 ? parseFloat(tokenBalance) / totalShares : 0;
         const totalLiquidity = nestedPool.dynamicData?.totalLiquidity || 0;
 
+        const hook = (nestedPool.hook as HookData)?.address ? (nestedPool.hook as HookData) : null;
+
         return {
             ...nestedPool,
             owner: nestedPool.swapFeeManager, // Keep for backwards compatibility
@@ -1075,7 +1079,7 @@ export class PoolGqlLoaderService {
             ),
             swapFee: nestedPool.dynamicData?.swapFee || '0',
             bptPriceRate: (nestedPool.typeData as StableData).bptPriceRate || '1.0',
-            hook: (nestedPool.hook as HookData as GqlHook) || undefined,
+            hook: hook as GqlHook,
         };
     }
 
