@@ -1,5 +1,12 @@
 # backend
 
+## 1.35.4
+
+### Patch Changes
+
+-   aaf4202: hook loading fix
+-   65540be: fix nested hook loader
+
 ## 1.35.3
 
 ### Patch Changes
