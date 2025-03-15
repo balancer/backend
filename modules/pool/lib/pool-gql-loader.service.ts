@@ -1057,6 +1057,8 @@ export class PoolGqlLoaderService {
         const percentOfSupplyNested = totalShares > 0 ? parseFloat(tokenBalance) / totalShares : 0;
         const totalLiquidity = nestedPool.dynamicData?.totalLiquidity || 0;
 
+        const hook = (nestedPool.hook as HookData)?.address ? (nestedPool.hook as HookData) : null;
+
         return {
             ...nestedPool,
             owner: nestedPool.swapFeeManager, // Keep for backwards compatibility
@@ -1077,7 +1079,7 @@ export class PoolGqlLoaderService {
             ),
             swapFee: nestedPool.dynamicData?.swapFee || '0',
             bptPriceRate: (nestedPool.typeData as StableData).bptPriceRate || '1.0',
-            hook: (nestedPool.hook as HookData as GqlHook) || undefined,
+            hook: hook as GqlHook,
         };
     }
 
