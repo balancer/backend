@@ -646,7 +646,7 @@ export class PoolGqlLoaderService {
                     : {}),
             },
             ...(where?.hasHook !== undefined && where.hasHook
-                ? { hook: { not: {} } }
+                ? { hook: { path: ['address'], string_starts_with: '0x' } }
                 : where?.hasHook !== undefined && !where.hasHook
                 ? { hook: { equals: Prisma.DbNull } }
                 : {}),
@@ -811,13 +811,15 @@ export class PoolGqlLoaderService {
     private mapPoolToAggregatorPool(pool: PrismaPoolWithExpandedNesting): GqlPoolAggregator {
         const { typeData, ...poolWithoutTypeData } = pool;
 
+        const hook = (pool.hook as HookData)?.address ? (pool.hook as HookData) : null;
+
         const mappedData = {
             decimals: 18,
             dynamicData: this.getPoolDynamicData(pool),
             poolTokens: pool.tokens.map((token) => this.mapPoolToken(token)),
             vaultVersion: poolWithoutTypeData.protocolVersion,
             liquidityManagement: (pool.liquidityManagement as LiquidityManagement) || undefined,
-            hook: pool.hook as HookData as GqlHook,
+            hook: hook as GqlHook,
         };
 
         switch (pool.type) {
