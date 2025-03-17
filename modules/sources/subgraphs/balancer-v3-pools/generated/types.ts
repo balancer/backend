@@ -337,6 +337,8 @@ export type Pool = {
     gyroEParams?: Maybe<GyroEParams>;
     /** Unique identifier for the Pool */
     id: Scalars['Bytes'];
+    /** Parameters for QuantAMMWeighted pools (null for other pool types) */
+    quantAMMWeightedParams?: Maybe<QuantAmmWeightedParams>;
     /** Parameters for Stable pools (null for other pool types) */
     stableParams?: Maybe<StableParams>;
     /** Parameters for StableSurge pools (null for other pool types) */
@@ -348,6 +350,7 @@ export type Pool = {
 export enum PoolType {
     Gyro2 = 'Gyro2',
     GyroE = 'GyroE',
+    QuantAmmWeighted = 'QuantAMMWeighted',
     Stable = 'Stable',
     StableSurge = 'StableSurge',
     Weighted = 'Weighted',
@@ -441,6 +444,27 @@ export type Pool_Filter = {
     id_not_contains?: InputMaybe<Scalars['Bytes']>;
     id_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
     or?: InputMaybe<Array<InputMaybe<Pool_Filter>>>;
+    quantAMMWeightedParams?: InputMaybe<Scalars['String']>;
+    quantAMMWeightedParams_?: InputMaybe<QuantAmmWeightedParams_Filter>;
+    quantAMMWeightedParams_contains?: InputMaybe<Scalars['String']>;
+    quantAMMWeightedParams_contains_nocase?: InputMaybe<Scalars['String']>;
+    quantAMMWeightedParams_ends_with?: InputMaybe<Scalars['String']>;
+    quantAMMWeightedParams_ends_with_nocase?: InputMaybe<Scalars['String']>;
+    quantAMMWeightedParams_gt?: InputMaybe<Scalars['String']>;
+    quantAMMWeightedParams_gte?: InputMaybe<Scalars['String']>;
+    quantAMMWeightedParams_in?: InputMaybe<Array<Scalars['String']>>;
+    quantAMMWeightedParams_lt?: InputMaybe<Scalars['String']>;
+    quantAMMWeightedParams_lte?: InputMaybe<Scalars['String']>;
+    quantAMMWeightedParams_not?: InputMaybe<Scalars['String']>;
+    quantAMMWeightedParams_not_contains?: InputMaybe<Scalars['String']>;
+    quantAMMWeightedParams_not_contains_nocase?: InputMaybe<Scalars['String']>;
+    quantAMMWeightedParams_not_ends_with?: InputMaybe<Scalars['String']>;
+    quantAMMWeightedParams_not_ends_with_nocase?: InputMaybe<Scalars['String']>;
+    quantAMMWeightedParams_not_in?: InputMaybe<Array<Scalars['String']>>;
+    quantAMMWeightedParams_not_starts_with?: InputMaybe<Scalars['String']>;
+    quantAMMWeightedParams_not_starts_with_nocase?: InputMaybe<Scalars['String']>;
+    quantAMMWeightedParams_starts_with?: InputMaybe<Scalars['String']>;
+    quantAMMWeightedParams_starts_with_nocase?: InputMaybe<Scalars['String']>;
     stableParams?: InputMaybe<Scalars['String']>;
     stableParams_?: InputMaybe<StableParams_Filter>;
     stableParams_contains?: InputMaybe<Scalars['String']>;
@@ -534,6 +558,16 @@ export enum Pool_OrderBy {
     GyroEParamsW = 'gyroEParams__w',
     GyroEParamsZ = 'gyroEParams__z',
     Id = 'id',
+    QuantAmmWeightedParams = 'quantAMMWeightedParams',
+    QuantAmmWeightedParamsAbsoluteWeightGuardRail = 'quantAMMWeightedParams__absoluteWeightGuardRail',
+    QuantAmmWeightedParamsEpsilonMax = 'quantAMMWeightedParams__epsilonMax',
+    QuantAmmWeightedParamsId = 'quantAMMWeightedParams__id',
+    QuantAmmWeightedParamsLastInterpolationTimePossible = 'quantAMMWeightedParams__lastInterpolationTimePossible',
+    QuantAmmWeightedParamsLastUpdateIntervalTime = 'quantAMMWeightedParams__lastUpdateIntervalTime',
+    QuantAmmWeightedParamsMaxTradeSizeRatio = 'quantAMMWeightedParams__maxTradeSizeRatio',
+    QuantAmmWeightedParamsOracleStalenessThreshold = 'quantAMMWeightedParams__oracleStalenessThreshold',
+    QuantAmmWeightedParamsPoolRegistry = 'quantAMMWeightedParams__poolRegistry',
+    QuantAmmWeightedParamsUpdateInterval = 'quantAMMWeightedParams__updateInterval',
     StableParams = 'stableParams',
     StableParamsAmp = 'stableParams__amp',
     StableParamsId = 'stableParams__id',
@@ -544,6 +578,148 @@ export enum Pool_OrderBy {
     StableSurgeParamsSurgeThresholdPercentage = 'stableSurgeParams__surgeThresholdPercentage',
     WeightedParams = 'weightedParams',
     WeightedParamsId = 'weightedParams__id',
+}
+
+export type QuantAmmWeightedParams = {
+    __typename?: 'QuantAMMWeightedParams';
+    /** Absolute weight guard rail */
+    absoluteWeightGuardRail: Scalars['BigInt'];
+    /** Maximum epsilon value */
+    epsilonMax: Scalars['BigInt'];
+    /** Unique identifier for the QuantAMMWeightedParams */
+    id: Scalars['Bytes'];
+    /** Lambda values */
+    lambda: Array<Scalars['BigInt']>;
+    /** Last interpolation time possible */
+    lastInterpolationTimePossible: Scalars['BigInt'];
+    /** Last update interval time */
+    lastUpdateIntervalTime: Scalars['BigInt'];
+    /** Maximum trade size ratio */
+    maxTradeSizeRatio: Scalars['BigInt'];
+    /** Oracle staleness threshold */
+    oracleStalenessThreshold: Scalars['BigInt'];
+    /** Pool registry */
+    poolRegistry: Scalars['BigInt'];
+    /** Update interval */
+    updateInterval: Scalars['BigInt'];
+    /** Weight block multipliers */
+    weightBlockMultipliers: Array<Scalars['BigInt']>;
+    /** Weights at the last update interval */
+    weightsAtLastUpdateInterval: Array<Scalars['BigInt']>;
+};
+
+export type QuantAmmWeightedParams_Filter = {
+    /** Filter for the block changed event. */
+    _change_block?: InputMaybe<BlockChangedFilter>;
+    absoluteWeightGuardRail?: InputMaybe<Scalars['BigInt']>;
+    absoluteWeightGuardRail_gt?: InputMaybe<Scalars['BigInt']>;
+    absoluteWeightGuardRail_gte?: InputMaybe<Scalars['BigInt']>;
+    absoluteWeightGuardRail_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    absoluteWeightGuardRail_lt?: InputMaybe<Scalars['BigInt']>;
+    absoluteWeightGuardRail_lte?: InputMaybe<Scalars['BigInt']>;
+    absoluteWeightGuardRail_not?: InputMaybe<Scalars['BigInt']>;
+    absoluteWeightGuardRail_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    and?: InputMaybe<Array<InputMaybe<QuantAmmWeightedParams_Filter>>>;
+    epsilonMax?: InputMaybe<Scalars['BigInt']>;
+    epsilonMax_gt?: InputMaybe<Scalars['BigInt']>;
+    epsilonMax_gte?: InputMaybe<Scalars['BigInt']>;
+    epsilonMax_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    epsilonMax_lt?: InputMaybe<Scalars['BigInt']>;
+    epsilonMax_lte?: InputMaybe<Scalars['BigInt']>;
+    epsilonMax_not?: InputMaybe<Scalars['BigInt']>;
+    epsilonMax_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    id?: InputMaybe<Scalars['Bytes']>;
+    id_contains?: InputMaybe<Scalars['Bytes']>;
+    id_gt?: InputMaybe<Scalars['Bytes']>;
+    id_gte?: InputMaybe<Scalars['Bytes']>;
+    id_in?: InputMaybe<Array<Scalars['Bytes']>>;
+    id_lt?: InputMaybe<Scalars['Bytes']>;
+    id_lte?: InputMaybe<Scalars['Bytes']>;
+    id_not?: InputMaybe<Scalars['Bytes']>;
+    id_not_contains?: InputMaybe<Scalars['Bytes']>;
+    id_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
+    lambda?: InputMaybe<Array<Scalars['BigInt']>>;
+    lambda_contains?: InputMaybe<Array<Scalars['BigInt']>>;
+    lambda_contains_nocase?: InputMaybe<Array<Scalars['BigInt']>>;
+    lambda_not?: InputMaybe<Array<Scalars['BigInt']>>;
+    lambda_not_contains?: InputMaybe<Array<Scalars['BigInt']>>;
+    lambda_not_contains_nocase?: InputMaybe<Array<Scalars['BigInt']>>;
+    lastInterpolationTimePossible?: InputMaybe<Scalars['BigInt']>;
+    lastInterpolationTimePossible_gt?: InputMaybe<Scalars['BigInt']>;
+    lastInterpolationTimePossible_gte?: InputMaybe<Scalars['BigInt']>;
+    lastInterpolationTimePossible_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    lastInterpolationTimePossible_lt?: InputMaybe<Scalars['BigInt']>;
+    lastInterpolationTimePossible_lte?: InputMaybe<Scalars['BigInt']>;
+    lastInterpolationTimePossible_not?: InputMaybe<Scalars['BigInt']>;
+    lastInterpolationTimePossible_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    lastUpdateIntervalTime?: InputMaybe<Scalars['BigInt']>;
+    lastUpdateIntervalTime_gt?: InputMaybe<Scalars['BigInt']>;
+    lastUpdateIntervalTime_gte?: InputMaybe<Scalars['BigInt']>;
+    lastUpdateIntervalTime_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    lastUpdateIntervalTime_lt?: InputMaybe<Scalars['BigInt']>;
+    lastUpdateIntervalTime_lte?: InputMaybe<Scalars['BigInt']>;
+    lastUpdateIntervalTime_not?: InputMaybe<Scalars['BigInt']>;
+    lastUpdateIntervalTime_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    maxTradeSizeRatio?: InputMaybe<Scalars['BigInt']>;
+    maxTradeSizeRatio_gt?: InputMaybe<Scalars['BigInt']>;
+    maxTradeSizeRatio_gte?: InputMaybe<Scalars['BigInt']>;
+    maxTradeSizeRatio_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    maxTradeSizeRatio_lt?: InputMaybe<Scalars['BigInt']>;
+    maxTradeSizeRatio_lte?: InputMaybe<Scalars['BigInt']>;
+    maxTradeSizeRatio_not?: InputMaybe<Scalars['BigInt']>;
+    maxTradeSizeRatio_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    or?: InputMaybe<Array<InputMaybe<QuantAmmWeightedParams_Filter>>>;
+    oracleStalenessThreshold?: InputMaybe<Scalars['BigInt']>;
+    oracleStalenessThreshold_gt?: InputMaybe<Scalars['BigInt']>;
+    oracleStalenessThreshold_gte?: InputMaybe<Scalars['BigInt']>;
+    oracleStalenessThreshold_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    oracleStalenessThreshold_lt?: InputMaybe<Scalars['BigInt']>;
+    oracleStalenessThreshold_lte?: InputMaybe<Scalars['BigInt']>;
+    oracleStalenessThreshold_not?: InputMaybe<Scalars['BigInt']>;
+    oracleStalenessThreshold_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    poolRegistry?: InputMaybe<Scalars['BigInt']>;
+    poolRegistry_gt?: InputMaybe<Scalars['BigInt']>;
+    poolRegistry_gte?: InputMaybe<Scalars['BigInt']>;
+    poolRegistry_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    poolRegistry_lt?: InputMaybe<Scalars['BigInt']>;
+    poolRegistry_lte?: InputMaybe<Scalars['BigInt']>;
+    poolRegistry_not?: InputMaybe<Scalars['BigInt']>;
+    poolRegistry_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    updateInterval?: InputMaybe<Scalars['BigInt']>;
+    updateInterval_gt?: InputMaybe<Scalars['BigInt']>;
+    updateInterval_gte?: InputMaybe<Scalars['BigInt']>;
+    updateInterval_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    updateInterval_lt?: InputMaybe<Scalars['BigInt']>;
+    updateInterval_lte?: InputMaybe<Scalars['BigInt']>;
+    updateInterval_not?: InputMaybe<Scalars['BigInt']>;
+    updateInterval_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    weightBlockMultipliers?: InputMaybe<Array<Scalars['BigInt']>>;
+    weightBlockMultipliers_contains?: InputMaybe<Array<Scalars['BigInt']>>;
+    weightBlockMultipliers_contains_nocase?: InputMaybe<Array<Scalars['BigInt']>>;
+    weightBlockMultipliers_not?: InputMaybe<Array<Scalars['BigInt']>>;
+    weightBlockMultipliers_not_contains?: InputMaybe<Array<Scalars['BigInt']>>;
+    weightBlockMultipliers_not_contains_nocase?: InputMaybe<Array<Scalars['BigInt']>>;
+    weightsAtLastUpdateInterval?: InputMaybe<Array<Scalars['BigInt']>>;
+    weightsAtLastUpdateInterval_contains?: InputMaybe<Array<Scalars['BigInt']>>;
+    weightsAtLastUpdateInterval_contains_nocase?: InputMaybe<Array<Scalars['BigInt']>>;
+    weightsAtLastUpdateInterval_not?: InputMaybe<Array<Scalars['BigInt']>>;
+    weightsAtLastUpdateInterval_not_contains?: InputMaybe<Array<Scalars['BigInt']>>;
+    weightsAtLastUpdateInterval_not_contains_nocase?: InputMaybe<Array<Scalars['BigInt']>>;
+};
+
+export enum QuantAmmWeightedParams_OrderBy {
+    AbsoluteWeightGuardRail = 'absoluteWeightGuardRail',
+    EpsilonMax = 'epsilonMax',
+    Id = 'id',
+    Lambda = 'lambda',
+    LastInterpolationTimePossible = 'lastInterpolationTimePossible',
+    LastUpdateIntervalTime = 'lastUpdateIntervalTime',
+    MaxTradeSizeRatio = 'maxTradeSizeRatio',
+    OracleStalenessThreshold = 'oracleStalenessThreshold',
+    PoolRegistry = 'poolRegistry',
+    UpdateInterval = 'updateInterval',
+    WeightBlockMultipliers = 'weightBlockMultipliers',
+    WeightsAtLastUpdateInterval = 'weightsAtLastUpdateInterval',
 }
 
 export type Query = {
@@ -558,6 +734,8 @@ export type Query = {
     gyroEParams_collection: Array<GyroEParams>;
     pool?: Maybe<Pool>;
     pools: Array<Pool>;
+    quantAMMWeightedParams?: Maybe<QuantAmmWeightedParams>;
+    quantAMMWeightedParams_collection: Array<QuantAmmWeightedParams>;
     stableParams?: Maybe<StableParams>;
     stableParams_collection: Array<StableParams>;
     stableSurgeParams?: Maybe<StableSurgeParams>;
@@ -632,6 +810,22 @@ export type QueryPoolsArgs = {
     skip?: InputMaybe<Scalars['Int']>;
     subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<Pool_Filter>;
+};
+
+export type QueryQuantAmmWeightedParamsArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type QueryQuantAmmWeightedParams_CollectionArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<QuantAmmWeightedParams_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<QuantAmmWeightedParams_Filter>;
 };
 
 export type QueryStableParamsArgs = {
@@ -792,6 +986,8 @@ export type Subscription = {
     gyroEParams_collection: Array<GyroEParams>;
     pool?: Maybe<Pool>;
     pools: Array<Pool>;
+    quantAMMWeightedParams?: Maybe<QuantAmmWeightedParams>;
+    quantAMMWeightedParams_collection: Array<QuantAmmWeightedParams>;
     stableParams?: Maybe<StableParams>;
     stableParams_collection: Array<StableParams>;
     stableSurgeParams?: Maybe<StableSurgeParams>;
@@ -866,6 +1062,22 @@ export type SubscriptionPoolsArgs = {
     skip?: InputMaybe<Scalars['Int']>;
     subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<Pool_Filter>;
+};
+
+export type SubscriptionQuantAmmWeightedParamsArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type SubscriptionQuantAmmWeightedParams_CollectionArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<QuantAmmWeightedParams_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<QuantAmmWeightedParams_Filter>;
 };
 
 export type SubscriptionStableParamsArgs = {
