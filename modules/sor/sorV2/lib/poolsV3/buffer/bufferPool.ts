@@ -2,7 +2,7 @@ import { Address, Hex } from 'viem';
 import { MAX_UINT256, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { BufferState, Vault } from '@balancer-labs/balancer-maths';
 
-import { BasePoolMethodsV3 } from '../../poolsV2/basePool';
+import { BasePoolMethodsV3 } from '../basePoolMethodsV3';
 import { BasePoolToken } from '../../utils/basePoolToken';
 import { Erc4626PoolToken } from '../../utils/erc4626PoolToken';
 
