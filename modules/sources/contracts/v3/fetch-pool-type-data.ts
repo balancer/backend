@@ -10,7 +10,7 @@ export const fetchPoolTypeData = async (
         type: PrismaPoolType;
     }[],
     blockNumber?: bigint,
-): Promise<PoolTypeData[]> => {
+): Promise<{ [address: string]: PoolTypeData }> => {
     const calls = pools
         .flatMap((pool) => {
             switch (pool.type) {
@@ -30,15 +30,17 @@ export const fetchPoolTypeData = async (
                 return undefined;
             }
 
+            let typeData: any = undefined;
             switch (type) {
                 case PrismaPoolType.STABLE:
-                    return {
-                        id,
-                        typeData: parseStableContractCalls(result),
-                    };
+                    typeData = parseStableContractCalls(result);
             }
-        })
-        .filter((x): x is PoolTypeData => x !== undefined);
 
-    return params;
+            return [id, typeData];
+        })
+        .filter((x) => x !== undefined);
+
+    const data = Object.fromEntries(params);
+
+    return data as { [address: string]: PoolTypeData };
 };

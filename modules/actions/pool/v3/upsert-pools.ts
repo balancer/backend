@@ -1,16 +1,10 @@
 import { Chain, PrismaPool } from '@prisma/client';
 import { prisma } from '../../../../prisma/prisma-client';
-import { tokensTransformer } from '../../../sources/transformers/tokens-transformer';
-import { V3JoinedSubgraphPool } from '../../../sources/subgraphs';
 import { enrichPoolUpsertsUsd } from '../../../sources/enrichers/pool-upserts-usd';
 import { PoolsClient, type VaultClient } from '../../../sources/contracts';
-import { poolUpsertTransformerV3 } from '../../../sources/transformers/pool-upsert-transformer-v3';
-import { applyOnchainDataUpdateV3 } from '../../../sources/enrichers/apply-onchain-data';
-import { fetchErc4626AndUnderlyingTokenData } from '../../../sources/contracts/fetch-erc4626-token-data';
-import { getViemClient } from '../../../sources/viem-client';
 import { fetchHookData } from '../../../sources/contracts/v3/fetch-hook-data';
 import { HookData } from '../../../sources/transformers';
-import { PrismaPoolWithDynamic } from '../../../../prisma/prisma-types';
+import _ from 'lodash';
 
 /**
  * Gets and syncs all the pools state with the database
@@ -23,192 +17,97 @@ import { PrismaPoolWithDynamic } from '../../../../prisma/prisma-types';
  * @param blockNumber
  */
 export const upsertPools = async (
-    dbPools: PrismaPoolWithDynamic[],
-    subgraphPools: V3JoinedSubgraphPool[],
+    dbPools: (PrismaPool & { hook?: HookData })[],
     vaultClient: VaultClient,
     poolsClient: PoolsClient,
     chain: Chain,
     blockNumber: number,
 ) => {
-    const dbPoolsMap = dbPools.reduce((acc, pool) => {
-        acc.set(pool.id, pool);
-        return acc;
-    }, new Map<string, PrismaPoolWithDynamic>());
-
-    // Transform pools first
-    let pools = subgraphPools.map((fragment) =>
-        poolUpsertTransformerV3(fragment, chain, blockNumber, dbPoolsMap.get(fragment.id)),
-    );
-
-    const poolIds = pools.map((pool) => pool.pool.id);
-    const poolHooks = pools
-        .filter((pool) => pool.pool.hook)
-        .map((pool) => ({
-            address: pool.pool.address,
-            hook: pool.pool.hook as HookData,
-        }));
+    const poolIds = dbPools.map((pool) => pool.id);
 
     // Fetch all necessary data in parallel
-    const [onchainData, poolTypeData, allTokens, hookData] = await Promise.all([
+    const [onchainData, poolTypeData, hookData] = await Promise.all([
         vaultClient.fetchPoolData(poolIds, BigInt(blockNumber)),
-        poolsClient.fetchPoolTypeData(
-            pools.map((pool) => ({
-                id: pool.pool.id,
-                type: pool.pool.type,
-            })),
-            BigInt(blockNumber),
+        poolsClient.fetchPoolTypeData(dbPools, BigInt(blockNumber)),
+        fetchHookData(
+            vaultClient.viemClient,
+            dbPools.filter((pool) => pool.hook && pool.hook.type !== null),
         ),
-        tokensTransformer(subgraphPools, chain),
-        fetchHookData(vaultClient.viemClient, poolHooks),
     ]);
 
-    // Process token data and fetch prices in parallel
-    const [enrichedTokensWithErc4626Data, prices] = await Promise.all([
-        fetchErc4626AndUnderlyingTokenData(allTokens, getViemClient(chain)),
-        prisma.prismaTokenCurrentPrice
-            .findMany({
-                where: {
-                    chain: chain,
-                    tokenAddress: { in: allTokens.map((token) => token.address) },
-                },
-            })
-            .then((priceData) => Object.fromEntries(priceData.map((price) => [price.tokenAddress, price.price]))),
-    ]);
-
-    // Update ERC4626 token data
-    const erc4626Promises = enrichedTokensWithErc4626Data.map(async (token) => {
-        const tokenUpsert = prisma.prismaToken.upsert({
+    // USD Pricing
+    const prices = await prisma.prismaTokenCurrentPrice
+        .findMany({
             where: {
-                address_chain: {
-                    address: token.address,
-                    chain: chain,
+                chain: chain,
+                tokenAddress: {
+                    in: Object.values(onchainData)
+                        .flatMap((item) => item.poolToken)
+                        .map((token) => token.address),
                 },
             },
-            create: {
+        })
+        .then((priceData) => Object.fromEntries(priceData.map((price) => [price.tokenAddress, price.price])));
+
+    // Organize the data into upserts
+    const upserts = dbPools.map((pool) => {
+        const poolId = pool.id;
+        const onchainPool = {
+            ...onchainData[poolId],
+            poolToken: onchainData[poolId].poolToken.map((token) => ({
                 ...token,
                 chain,
-            },
-            update: {
-                ...token,
-            },
-        });
-
-        const typeUpsert = token.underlyingTokenAddress
-            ? prisma.prismaTokenType.upsert({
-                  where: {
-                      id_chain: {
-                          id: `${token.address}-erc4626`,
-                          chain,
+                poolId,
+            })),
+        };
+        const typeData = poolTypeData[poolId]
+            ? {
+                  pool: { id: pool.id, typeData: poolTypeData[poolId] },
+              }
+            : undefined;
+        const hookDynamicData = hookData[poolId]
+            ? {
+                  pool: {
+                      id: pool.id,
+                      hook: {
+                          dynamicData: hookData[poolId],
                       },
                   },
-                  create: {
-                      id: `${token.address}-erc4626`,
-                      chain,
-                      tokenAddress: token.address,
-                      type: 'ERC4626',
-                  },
-                  update: {
-                      id: `${token.address}-erc4626`,
-                      chain,
-                      tokenAddress: token.address,
-                      type: 'ERC4626',
-                  },
-              })
-            : Promise.resolve();
+              }
+            : undefined;
+        const usdData = enrichPoolUpsertsUsd(onchainPool, prices);
 
-        return Promise.all([tokenUpsert, typeUpsert]);
-    });
+        const upsert = _.mergeWith(onchainPool, typeData, hookDynamicData, usdData, mergeArraysById);
 
-    await Promise.all(erc4626Promises);
-
-    // Apply onchain data, type data, and USD enrichment in one pass
-    pools = pools.map((upsert) => {
-        // Apply onchain data
-        const withOnchainData = applyOnchainDataUpdateV3(
-            upsert,
-            onchainData[upsert.pool.id],
-            upsert.tokens,
-            chain,
-            upsert.pool.id,
-            blockNumber,
-        );
-
-        // Apply type and hook data
-        const typeData = poolTypeData.find((data) => data.id === upsert.pool.id)?.typeData || {};
-        const hookDynamicData = hookData[upsert.pool.address];
-        const withTypeData = {
-            ...upsert,
-            pool: {
-                ...upsert.pool,
-                typeData: {
-                    ...(upsert.pool.typeData ? (upsert.pool.typeData as any) : {}),
-                    ...typeData,
-                },
-                hook: {
-                    ...(upsert.pool.hook ? (upsert.pool.hook as HookData) : {}),
-                    ...(hookDynamicData ? { dynamicData: hookDynamicData } : {}),
-                },
-            },
-            poolToken: withOnchainData.poolToken,
-            poolDynamicData: withOnchainData.poolDynamicData,
-        };
-
-        // Apply USD enrichment
-        const withUsdData = enrichPoolUpsertsUsd(
-            {
-                poolDynamicData: withTypeData.poolDynamicData,
-                poolToken: withTypeData.poolToken,
-            },
-            prices,
-        );
-
-        return {
-            ...withTypeData,
-            poolDynamicData: withUsdData.poolDynamicData,
-            poolToken: withUsdData.poolToken,
-        };
+        return upsert;
     });
 
     // Upsert pools to the database in batches
-    for (const { pool, poolToken, poolDynamicData, poolExpandedTokens } of pools) {
+    for (const { pool, poolToken, poolDynamicData } of upserts) {
         try {
             await prisma.$transaction([
-                prisma.prismaPool.upsert({
-                    where: { id_chain: { id: pool.id, chain: pool.chain } },
-                    create: pool,
-                    update: pool,
-                }),
-                prisma.prismaPoolDynamicData.upsert({
-                    where: { poolId_chain: { poolId: pool.id, chain: pool.chain } },
-                    create: poolDynamicData,
-                    update: poolDynamicData,
-                }),
-                prisma.prismaPoolToken.deleteMany({
-                    where: { poolId: pool.id, address: { notIn: poolToken.map((t) => t.address) } },
-                }),
-                prisma.prismaPoolExpandedTokens.deleteMany({
-                    where: { poolId: pool.id, tokenAddress: { notIn: poolToken.map((t) => t.address) } },
-                }),
-                ...poolToken.map((token) =>
-                    prisma.prismaPoolToken.upsert({
-                        where: { id_chain: { id: token.id, chain } },
-                        create: token,
-                        update: token,
+                ...((pool && [
+                    prisma.prismaPool.update({
+                        where: { id_chain: { id: pool.id, chain } },
+                        data: pool,
                     }),
-                ),
-                ...poolExpandedTokens.map((token) =>
-                    prisma.prismaPoolExpandedTokens.upsert({
-                        where: {
-                            tokenAddress_poolId_chain: {
-                                tokenAddress: token.tokenAddress,
-                                poolId: pool.id,
-                                chain,
-                            },
-                        },
-                        create: token,
-                        update: token,
+                ]) ||
+                    []),
+                ...((poolDynamicData && [
+                    prisma.prismaPoolDynamicData.update({
+                        where: { poolId_chain: { poolId: poolDynamicData.id, chain } },
+                        data: poolDynamicData,
                     }),
-                ),
+                ]) ||
+                    []),
+                ...((poolToken &&
+                    poolToken.map((token) =>
+                        prisma.prismaPoolToken.update({
+                            where: { id_chain: { id: token.id, chain } },
+                            data: token,
+                        }),
+                    )) ||
+                    []),
             ]);
         } catch (e) {
             console.error('Error upserting pool', e);
@@ -216,4 +115,17 @@ export const upsertPools = async (
     }
 
     return poolIds;
+};
+
+const mergeArraysById = (objValue: any, srcValue: any) => {
+    if (_.isArray(objValue)) {
+        return _.unionBy(
+            objValue.map((obj) => {
+                const match = srcValue.find((src: any) => src.id === obj.id);
+                return match ? _.merge({}, obj, match) : obj;
+            }),
+            srcValue,
+            'id',
+        );
+    }
 };

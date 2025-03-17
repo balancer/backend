@@ -22,6 +22,7 @@ import { tokenService } from '../modules/token/token.service';
 import { VeBalVotingListService } from '../modules/vebal/vebal-voting-list.service';
 import { PrismaLastBlockSyncedCategory } from '@prisma/client';
 import { upsertLastSyncedBlock } from '../modules/actions/last-synced-block';
+import { prisma } from '../prisma/prisma-client';
 
 // TODO needed?
 const sftmxController = SftmxController();
@@ -47,8 +48,11 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
     } else if (job === 'sync-changed-pools-v2') {
         return PoolController().syncChangedPoolsV2(chain);
     } else if (job === 'reload-pools-v3') {
-        await upsertLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.POOLS_V3, 0);
-        return PoolController().syncPoolsV3(chain);
+        await upsertLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.ADD_POOLS_V3, 0);
+        await prisma.prismaPool.deleteMany({ where: { chain, protocolVersion: 3 } });
+        return PoolController().addPoolsV3(chain);
+    } else if (job === 'add-pools-v3') {
+        return PoolController().addPoolsV3(chain);
     } else if (job === 'sync-pools-v3') {
         return PoolController().syncPoolsV3(chain);
     } else if (job === 'update-liquidity-for-active-pools') {

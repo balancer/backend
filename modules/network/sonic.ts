@@ -140,6 +140,10 @@ export const sonicNetworkConfig: NetworkConfig = {
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(60, 'minutes') : every(20, 'minutes'),
         },
         {
+            name: 'add-pools-v3',
+            interval: every(30, 'seconds'),
+        },
+        {
             name: 'sync-pools-v3',
             interval: every(30, 'seconds'),
         },

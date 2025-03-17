@@ -1,4 +1,4 @@
-import { Chain } from '@prisma/client';
+import { Chain, PrismaToken } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
 import { ViemClient } from '../../sources/viem-client';
 import { fetchErc4626AndUnderlyingTokenData } from '../../sources/contracts/fetch-erc4626-token-data';
@@ -7,15 +7,21 @@ import { fetchErc4626AndUnderlyingTokenData } from '../../sources/contracts/fetc
  * Syncs erc4626 tokens and their underlying tokens
  * Only needed to update this info on already created tokens
  */
-export const syncErc4626Tokens = async (viemClient: ViemClient, chain: Chain) => {
-    const allTokens = await prisma.prismaToken.findMany({
-        where: {
-            chain,
-            address: { not: '0x0000000000000000000000000000000000000000' },
-        },
-    });
+export const syncErc4626Tokens = async (
+    viemClient: ViemClient,
+    chain: Chain,
+    tokens?: { address: string; decimals: number; name: string; symbol: string; chain: Chain }[],
+) => {
+    if (!tokens) {
+        tokens = await prisma.prismaToken.findMany({
+            where: {
+                chain,
+                address: { not: '0x0000000000000000000000000000000000000000' },
+            },
+        });
+    }
 
-    const enrichedTokensWithErc4626Data = await fetchErc4626AndUnderlyingTokenData(allTokens, viemClient);
+    const enrichedTokensWithErc4626Data = await fetchErc4626AndUnderlyingTokenData(tokens, viemClient);
 
     for (const token of enrichedTokensWithErc4626Data) {
         await prisma.prismaToken.upsert({

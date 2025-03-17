@@ -10,7 +10,7 @@ export interface PoolsClient {
             type: PrismaPoolType;
         }[],
         blockNumber?: bigint,
-    ) => Promise<PoolTypeData[]>;
+    ) => Promise<{ [address: string]: PoolTypeData }>;
 }
 
 export const getPoolsClient = (viemClient: ViemClient): PoolsClient => {

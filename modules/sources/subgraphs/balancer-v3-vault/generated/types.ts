@@ -3213,6 +3213,15 @@ export type PoolBalancesQuery = {
     }>;
 };
 
+export type ChangedPoolsQueryVariables = Exact<{
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<Pool_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    where?: InputMaybe<Pool_Filter>;
+}>;
+
+export type ChangedPoolsQuery = { __typename?: 'Query'; pools: Array<{ __typename?: 'Pool'; id: string }> };
+
 export type MetadataQueryVariables = Exact<{ [key: string]: never }>;
 
 export type MetadataQuery = {
@@ -3296,6 +3305,8 @@ export type PoolSnapshotsQuery = {
 export type VaultPoolFragment = {
     __typename?: 'Pool';
     id: string;
+    isPaused: boolean;
+    isInRecoveryMode: boolean;
     address: string;
     name: string;
     symbol: string;
@@ -3373,6 +3384,8 @@ export type PoolsQuery = {
     pools: Array<{
         __typename?: 'Pool';
         id: string;
+        isPaused: boolean;
+        isInRecoveryMode: boolean;
         address: string;
         name: string;
         symbol: string;
@@ -3615,6 +3628,8 @@ export const PoolSnapshotFragmentDoc = gql`
 export const VaultPoolFragmentDoc = gql`
     fragment VaultPool on Pool {
         id
+        isPaused
+        isInRecoveryMode
         address
         name
         symbol
@@ -3767,6 +3782,13 @@ export const PoolBalancesDocument = gql`
         }
     }
     ${PoolBalancesFragmentDoc}
+`;
+export const ChangedPoolsDocument = gql`
+    query ChangedPools($first: Int, $orderBy: Pool_orderBy, $orderDirection: OrderDirection, $where: Pool_filter) {
+        pools(first: $first, orderBy: $orderBy, orderDirection: $orderDirection, where: $where) {
+            id
+        }
+    }
 `;
 export const MetadataDocument = gql`
     query Metadata {
@@ -3925,6 +3947,20 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
                         ...wrappedRequestHeaders,
                     }),
                 'PoolBalances',
+                'query',
+            );
+        },
+        ChangedPools(
+            variables?: ChangedPoolsQueryVariables,
+            requestHeaders?: Dom.RequestInit['headers'],
+        ): Promise<ChangedPoolsQuery> {
+            return withWrapper(
+                (wrappedRequestHeaders) =>
+                    client.request<ChangedPoolsQuery>(ChangedPoolsDocument, variables, {
+                        ...requestHeaders,
+                        ...wrappedRequestHeaders,
+                    }),
+                'ChangedPools',
                 'query',
             );
         },

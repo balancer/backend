@@ -18,7 +18,9 @@ export const syncHookReviews = async (): Promise<void> => {
 
     // Get hook addresses from the database
     const poolsWithHooks = await prisma.prismaPool.findMany({
-        where: { hook: { not: {} } },
+        where: {
+            hook: { path: ['address'], string_starts_with: '0x' },
+        },
     });
 
     const operations = [];

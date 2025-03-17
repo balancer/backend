@@ -60,6 +60,31 @@ export const getPoolsSubgraphClient = (subgraphUrl: string, chain: Chain) => {
 
             return pools;
         },
+        async getChangedPools(fromBlock: number): Promise<string[]> {
+            const limit = 1000;
+            let hasMore = true;
+            let id = `0x`;
+            let pools: string[] = [];
+
+            while (hasMore) {
+                const response = await sdk.ChangedPools({
+                    where: { id_gt: id, _change_block: { number_gte: fromBlock } },
+                    orderBy: Pool_OrderBy.Id,
+                    orderDirection: OrderDirection.Asc,
+                    first: limit,
+                });
+
+                pools = [...pools, ...response.pools.map((p) => p.id)];
+
+                if (response.pools.length < limit) {
+                    hasMore = false;
+                } else {
+                    id = response.pools[response.pools.length - 1].id;
+                }
+            }
+
+            return pools;
+        },
     };
 };
 

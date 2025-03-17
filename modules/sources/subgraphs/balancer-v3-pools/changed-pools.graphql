@@ -1,0 +1,5 @@
+query ChangedPools($first: Int, $orderBy: Pool_orderBy, $orderDirection: OrderDirection, $where: Pool_filter) {
+    pools(first: $first, orderBy: $orderBy, orderDirection: $orderDirection, where: $where) {
+        id
+    }
+}
