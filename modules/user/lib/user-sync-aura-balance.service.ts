@@ -1,14 +1,14 @@
 import { UserStakedBalanceService, UserSyncUserBalanceInput } from '../user-types';
 import { prisma } from '../../../prisma/prisma-client';
-import _ from 'lodash';
+import _, { add } from 'lodash';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { formatFixed } from '@ethersproject/bignumber';
-import { Chain, Prisma, PrismaPoolStakingType } from '@prisma/client';
+import { Chain, PrismaPoolStakingType } from '@prisma/client';
 import ERC20Abi from '../../web3/abi/ERC20.json';
 import { AuraSubgraphService } from '../../sources/subgraphs/aura/aura.service';
 import { formatEther, hexToBigInt } from 'viem';
-import config from '../../../config';
 import { getViemClient } from '../../sources/viem-client';
+import config from '../../../config';
 
 export class UserSyncAuraBalanceService implements UserStakedBalanceService {
     public async initStakedBalances(stakingTypes: PrismaPoolStakingType[], chain: Chain): Promise<void> {
@@ -19,42 +19,81 @@ export class UserSyncAuraBalanceService implements UserStakedBalanceService {
         const auraSubgraphService = new AuraSubgraphService(config[chain].subgraphs.aura!);
         const viemClient = getViemClient(chain);
         const blockNumber = await viemClient.getBlockNumber();
-        const auraGauges = await auraSubgraphService.getAllPools([chain]);
         const accounts = await auraSubgraphService.getAllUsers();
 
-        const pools = await prisma.prismaPool.findMany({
-            select: { id: true, address: true, staking: true },
-            where: {
-                chain: chain,
-                staking: {
-                    some: { aura: { auraPoolAddress: { in: auraGauges.map((auraGauge) => auraGauge.address) } } },
-                },
-            },
+        // Get AURA pools - used to deal with staking ID DB constraint
+        const stakings = await prisma.prismaPoolStaking.findMany({
+            select: { id: true, poolId: true },
+            where: { type: 'AURA', chain },
         });
 
+        const dbBalances = await prisma.prismaUserStakedBalance.findMany({
+            where: { chain: chain, stakingId: { in: stakings.map((staking) => staking.id) } },
+        });
+
+        const dbBalancesMap = _.keyBy(dbBalances, (dbBalance) => `${dbBalance.stakingId}-${dbBalance.userAddress}`);
+
         const operations: any[] = [];
+        let i = 0;
         for (const account of accounts) {
             for (const poolAccount of account.poolAccounts) {
                 if (poolAccount.pool.chainId === config[chain].chain.id) {
-                    const pool = pools.find((pool) => pool.address === poolAccount.pool.lpToken.address);
-                    if (!pool) {
+                    let staking = stakings.find((s) => s.id === poolAccount.pool.address);
+
+                    // Add new staking
+                    if (!staking) {
+                        const pool = await prisma.prismaPool.findFirst({
+                            where: { address: poolAccount.pool.lpToken.address, chain },
+                        });
+                        if (!pool) {
+                            continue;
+                        }
+                        staking = await prisma.prismaPoolStaking.create({
+                            data: {
+                                id: poolAccount.pool.address,
+                                chain,
+                                type: 'AURA',
+                                address: poolAccount.pool.address,
+                                poolId: pool.id,
+                            },
+                        });
+                        stakings.push(staking);
+                    }
+                    const poolId = staking.poolId;
+
+                    const id = `${poolAccount.pool.address}-${account.id}`;
+                    const currentBalance = dbBalancesMap[id];
+                    const balance = formatEther(hexToBigInt(poolAccount.staked));
+
+                    // Remove 0 balance staking
+                    if (balance === '0') {
+                        if (currentBalance) {
+                            operations.push(
+                                prisma.prismaUserStakedBalance.delete({ where: { id_chain: { id, chain } } }),
+                            );
+                        }
+                        continue;
+                    }
+
+                    // Skip update if balance is the same
+                    if (currentBalance && currentBalance.balance === balance) {
                         continue;
                     }
 
                     const data = {
-                        id: `${poolAccount.pool.address}-${account.id}`,
-                        chain: chain,
-                        balance: formatEther(hexToBigInt(poolAccount.staked)),
-                        balanceNum: parseFloat(formatEther(hexToBigInt(poolAccount.staked))),
+                        id,
+                        chain,
+                        poolId,
+                        balance,
+                        balanceNum: parseFloat(balance),
                         userAddress: account.id,
-                        poolId: pool.id,
                         tokenAddress: poolAccount.pool.lpToken.address,
                         stakingId: poolAccount.pool.address,
                     };
 
                     operations.push(
                         prisma.prismaUserStakedBalance.upsert({
-                            where: { id_chain: { id: `${poolAccount.pool.address}-${account.id}`, chain: chain } },
+                            where: { id_chain: { id, chain } },
                             create: data,
                             update: data,
                         }),
@@ -63,6 +102,7 @@ export class UserSyncAuraBalanceService implements UserStakedBalanceService {
             }
         }
 
+        console.log(`[AuraBalanceSync] ${chain} AURA has ${operations.length} updates`);
         await prismaBulkExecuteOperations(
             [
                 prisma.prismaUser.createMany({
