@@ -9,6 +9,7 @@ import { AuraSubgraphService } from '../../sources/subgraphs/aura/aura.service';
 import { formatEther, hexToBigInt } from 'viem';
 import { getViemClient } from '../../sources/viem-client';
 import config from '../../../config';
+import { AccountSchemaFragment } from '../../sources/subgraphs/aura/generated/aura-subgraph-types';
 
 export class UserSyncAuraBalanceService implements UserStakedBalanceService {
     public async initStakedBalances(stakingTypes: PrismaPoolStakingType[], chain: Chain): Promise<void> {
@@ -16,10 +17,16 @@ export class UserSyncAuraBalanceService implements UserStakedBalanceService {
             return;
         }
 
-        const auraSubgraphService = new AuraSubgraphService(config[chain].subgraphs.aura!);
         const viemClient = getViemClient(chain);
         const blockNumber = await viemClient.getBlockNumber();
-        const accounts = await auraSubgraphService.getAllUsers();
+
+        let accounts: AccountSchemaFragment[] = [];
+        try {
+            const auraSubgraphService = new AuraSubgraphService(config[chain].subgraphs.aura!);
+            accounts = await auraSubgraphService.getAllUsers();
+        } catch (e) {
+            return;
+        }
 
         // Get AURA pools - used to deal with staking ID DB constraint
         const stakings = await prisma.prismaPoolStaking.findMany({
