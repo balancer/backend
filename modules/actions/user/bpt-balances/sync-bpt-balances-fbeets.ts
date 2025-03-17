@@ -20,7 +20,7 @@ export const syncBptBalancesFbeets = async (chain: Chain, subgraphUrl?: string) 
     try {
         syncedRange = await syncBptBalancesFromSubgraph(poolIds, subgraphClient, chain, 'BPT_BALANCES_FBEETS');
     } catch (e: any) {
-        console.error(`syncBptBalancesFbeets on ${chain} failed: ${e.message}`);
+        console.log(`syncBptBalancesFbeets on ${chain} failed: ${e.message}`);
     }
 
     return syncedRange;
