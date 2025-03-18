@@ -25,7 +25,9 @@ export const syncPools = async (
 ) => {
     const poolIds = dbPools.map((pool) => pool.id);
 
-    const poolsWithHooks = dbPools.filter((pool) => pool.hook && pool.hook.type !== null);
+    const poolsWithHooks = dbPools.filter(
+        (pool): pool is typeof pool & { hook: HookData } => !!pool.hook && pool.hook.type !== null,
+    );
 
     // Fetch all necessary data in parallel
     const [onchainData, poolTypeData, hookData] = await Promise.all([
@@ -82,7 +84,7 @@ export const syncPools = async (
               }
             : undefined;
 
-        const usdData = enrichPoolUpsertsUsd(onchainPool, prices);
+        const usdData = enrichPoolUpsertsUsd<typeof onchainPool>(onchainPool, prices);
 
         const upsert = _.mergeWith(onchainPool, typeData, hookDynamicData, usdData, mergeArraysById);
 

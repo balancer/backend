@@ -65,7 +65,7 @@ export const addPools = async (
         })
         .then((priceData) => Object.fromEntries(priceData.map((price) => [price.tokenAddress, price.price])));
 
-    const withUsd = inserts.map((item) => enrichPoolUpsertsUsd(item, prices));
+    const withUsd = inserts.map((item) => enrichPoolUpsertsUsd<typeof item>(item, prices));
 
     // Upsert pools to the database
     for (const { pool, tokens, poolToken, poolDynamicData, poolExpandedTokens } of withUsd) {
