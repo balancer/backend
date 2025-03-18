@@ -1,7 +1,8 @@
 import { Prisma, PrismaToken, PrismaTokenTypeOption, PrismaPoolEvent } from '@prisma/client';
+import { HookData } from '../modules/sources/transformers';
 
 export type PoolUpsertData = {
-    pool: Prisma.PrismaPoolCreateInput;
+    pool: Prisma.PrismaPoolCreateInput & { hook?: HookData };
     tokens: Prisma.PrismaTokenCreateInput[];
     poolDynamicData: Omit<Prisma.PrismaPoolDynamicDataCreateInput, 'pool'>;
     poolToken: Prisma.PrismaPoolTokenCreateManyInput[];
