@@ -3307,6 +3307,7 @@ export type VaultPoolFragment = {
     id: string;
     isPaused: boolean;
     isInRecoveryMode: boolean;
+    swapFee: string;
     address: string;
     name: string;
     symbol: string;
@@ -3386,6 +3387,7 @@ export type PoolsQuery = {
         id: string;
         isPaused: boolean;
         isInRecoveryMode: boolean;
+        swapFee: string;
         address: string;
         name: string;
         symbol: string;
@@ -3630,6 +3632,7 @@ export const VaultPoolFragmentDoc = gql`
         id
         isPaused
         isInRecoveryMode
+        swapFee
         address
         name
         symbol
