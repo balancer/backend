@@ -160,6 +160,9 @@ export function PoolController(tracer?: any) {
         async addPoolsV3(chain: Chain) {
             const {
                 subgraphs: { balancerV3, balancerPoolsV3 },
+                balancer: {
+                    v3: { vaultAddress },
+                },
                 hooks,
             } = config[chain];
 
@@ -167,6 +170,8 @@ export function PoolController(tracer?: any) {
             if (!balancerV3 || !balancerPoolsV3) {
                 throw new Error(`Chain not configured: ${chain}`);
             }
+
+            const viemClient = getViemClient(chain);
 
             const vaultSubgraphClient = getVaultSubgraphClient(balancerV3, chain);
             const poolsSubgraphClient = getPoolsSubgraphClient(balancerPoolsV3, chain);
@@ -200,7 +205,13 @@ export function PoolController(tracer?: any) {
                 return [];
             }
 
-            const inserts = await addPoolsV3(pools, chain, latestBlock);
+            const inserts = await addPoolsV3(
+                pools,
+                getVaultClient(viemClient, vaultAddress),
+                getPoolsClient(viemClient),
+                chain,
+                latestBlock,
+            );
             await syncBptBalancesFromSubgraph(newIds, vaultSubgraphClient, chain);
 
             // Sync token flags for the new tokens
@@ -229,7 +240,6 @@ export function PoolController(tracer?: any) {
                 balancer: {
                     v3: { vaultAddress, routerAddress },
                 },
-                hooks,
                 acceptableSGLag,
             } = config[chain];
 
