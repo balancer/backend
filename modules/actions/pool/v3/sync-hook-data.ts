@@ -23,7 +23,7 @@ export const syncHookData = async (pools: PrismaPool[], viemClient: ViemClient):
         pool.hook
             ? [
                   {
-                      address: pool.address,
+                      id: pool.address,
                       hook: pool.hook as HookData,
                   },
               ]

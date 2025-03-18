@@ -1,10 +1,11 @@
-import { Chain, PrismaPoolType } from '@prisma/client';
+import { Chain, Prisma, PrismaPoolType } from '@prisma/client';
 import { HookData } from '../../../../prisma/prisma-types';
 import { prisma } from '../../../../prisma/prisma-client';
 import { enrichPoolUpsertsUsd } from '../../../sources/enrichers/pool-upserts-usd';
-import { PoolsClient, type VaultClient } from '../../../sources/contracts';
-import { fetchHookData } from '../../../sources/contracts/v3/fetch-hook-data';
 import _ from 'lodash';
+import { fetchPoolSyncData } from '../../../sources/contracts/v3/fetch-pool-sync-data';
+import { ViemClient } from '../../../sources/viem-client';
+import { mergeArraysById } from '../../../helper/merge-arrays-by-id';
 
 /**
  * Gets and syncs all the pools state with the database
@@ -18,23 +19,16 @@ import _ from 'lodash';
  */
 export const syncPools = async (
     dbPools: { id: string; type: PrismaPoolType; hook?: HookData; typeData: any }[],
-    vaultClient: VaultClient,
-    poolsClient: PoolsClient,
     chain: Chain,
+    vault: string,
+    viemClient: ViemClient,
     blockNumber: number,
 ) => {
     const poolIds = dbPools.map((pool) => pool.id);
 
-    const poolsWithHooks = dbPools.filter(
-        (pool): pool is typeof pool & { hook: HookData } => !!pool.hook && pool.hook.type !== null,
-    );
+    const onchainData = await fetchPoolSyncData(viemClient, vault, dbPools, BigInt(blockNumber));
 
-    // Fetch all necessary data in parallel
-    const [onchainData, poolTypeData, hookData] = await Promise.all([
-        vaultClient.fetchPoolData(poolIds, BigInt(blockNumber)),
-        poolsClient.fetchPoolTypeData(dbPools, BigInt(blockNumber)),
-        fetchHookData(vaultClient.viemClient, poolsWithHooks),
-    ]);
+    const upserts = dbPools.map((pool) => _.mergeWith({ pool }, onchainData[pool.id], mergeArraysById));
 
     // USD Pricing
     const prices = await prisma.prismaTokenCurrentPrice
@@ -51,60 +45,22 @@ export const syncPools = async (
         .then((priceData) => Object.fromEntries(priceData.map((price) => [price.tokenAddress, price.price])));
 
     // Organize the data into upserts
-    const upserts = dbPools.map((pool) => {
-        const poolId = pool.id;
-        const onchainPool = {
-            ...onchainData[poolId],
-            poolToken: onchainData[poolId].poolToken.map((token) => ({
-                ...token,
-                chain,
-                poolId,
-            })),
-        };
-        const typeData = poolTypeData[poolId]
-            ? {
-                  pool: {
-                      id: pool.id,
-                      typeData: {
-                          ...(pool.typeData as any),
-                          ...poolTypeData[poolId],
-                      },
-                  },
-              }
-            : undefined;
-        const hookDynamicData = hookData[poolId]
-            ? {
-                  pool: {
-                      id: pool.id,
-                      hook: {
-                          ...(pool.hook as HookData),
-                          dynamicData: hookData[poolId],
-                      },
-                  },
-              }
-            : undefined;
-
-        const usdData = enrichPoolUpsertsUsd<typeof onchainPool>(onchainPool, prices);
-
-        const upsert = _.mergeWith(onchainPool, typeData, hookDynamicData, usdData, mergeArraysById);
-
-        return upsert;
-    });
+    const withUsd = upserts.map((item) => enrichPoolUpsertsUsd<typeof item>(item, prices));
 
     // Upsert pools to the database in batches
-    for (const { pool, poolToken, poolDynamicData } of upserts) {
+    for (const { pool, poolToken, poolDynamicData } of withUsd) {
         try {
             await prisma.$transaction([
                 ...((pool && [
                     prisma.prismaPool.update({
                         where: { id_chain: { id: pool.id, chain } },
-                        data: pool,
+                        data: pool as Prisma.PrismaPoolUpdateInput,
                     }),
                 ]) ||
                     []),
                 ...((poolDynamicData && [
                     prisma.prismaPoolDynamicData.update({
-                        where: { poolId_chain: { poolId: poolDynamicData.id, chain } },
+                        where: { poolId_chain: { poolId: pool.id, chain } },
                         data: poolDynamicData,
                     }),
                 ]) ||
@@ -124,17 +80,4 @@ export const syncPools = async (
     }
 
     return poolIds;
-};
-
-const mergeArraysById = (objValue: any, srcValue: any) => {
-    if (_.isArray(objValue)) {
-        return _.unionBy(
-            objValue.map((obj) => {
-                const match = srcValue.find((src: any) => src.id === obj.id);
-                return match ? _.merge({}, obj, match) : obj;
-            }),
-            srcValue,
-            'id',
-        );
-    }
 };

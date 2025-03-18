@@ -1,9 +1,10 @@
 import { ContractFunctionParameters } from 'viem';
 import { Chain } from '@prisma/client';
 import { getViemClient, ViemClient } from '../sources/viem-client';
-import { set } from 'lodash';
-
-export type ViemMulticallCall = { path: string } & ContractFunctionParameters;
+import _ from 'lodash';
+import type { IMulticaller, Multicaller3Call } from './types';
+export type { IMulticaller, Multicaller3Call as ViemMulticallCall };
+import { mergeArraysById } from '../helper/merge-arrays-by-id';
 
 /**
  * Wrapper for multicall that takes an array of calls and returns an object with the results mapped by the path
@@ -14,7 +15,7 @@ export type ViemMulticallCall = { path: string } & ContractFunctionParameters;
  */
 export async function multicallViem<T extends Record<string, any>>(
     client: ViemClient,
-    calls: ViemMulticallCall[],
+    calls: Multicaller3Call[],
     blockNumber?: bigint,
     batchSize?: number,
 ): Promise<T> {
@@ -28,17 +29,37 @@ export async function multicallViem<T extends Record<string, any>>(
     const returnObject = {};
     let i = 0;
     for (const call of calls) {
-        const resultValue = results[i].status === 'success' ? results[i].result : undefined;
-        set(returnObject, call.path, resultValue);
+        // Skip parsing if the call doesn't have a path, this result will be used as a helper data
+        if (!call.path) {
+            i++;
+            continue;
+        }
+
+        // Skip if the call failed, so data isn't overwritten with empty values
+        if (results[i].status === 'failure') {
+            i++;
+            continue;
+        }
+
+        const resultValue = results[i].result;
+
+        let parsedValue = resultValue;
+        if (call.parser) {
+            parsedValue = call.parser(resultValue, results, i);
+        }
+
+        // if value exists merge the result into it
+        const pathValue = _.get(returnObject, call.path);
+
+        if (parsedValue && pathValue) {
+            _.set(returnObject, call.path, _.mergeWith(pathValue, parsedValue, mergeArraysById));
+        } else {
+            _.set(returnObject, call.path, parsedValue);
+        }
+
         i++;
     }
     return returnObject as T;
-}
-
-export interface IMulticaller {
-    numCalls: number;
-    call(path: string, address: string, functionName: string, params?: any[], allowFailure?: boolean): IMulticaller;
-    execute<T>(): Promise<T>;
 }
 
 export class Multicaller3Viem implements IMulticaller {

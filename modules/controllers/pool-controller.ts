@@ -11,20 +11,20 @@ import { getViemClient } from '../sources/viem-client';
 import { getPoolsSubgraphClient, getV3JoinedSubgraphClient, getVaultSubgraphClient } from '../sources/subgraphs';
 import { prisma } from '../../prisma/prisma-client';
 import { updateLiquidity24hAgo, updateLiquidityValuesForPools } from '../actions/pool/update-liquidity';
-import { Chain, PrismaLastBlockSyncedCategory, PrismaPool } from '@prisma/client';
+import { Chain, PrismaLastBlockSyncedCategory } from '@prisma/client';
 import { getVaultClient } from '../sources/contracts/v3/vault-client';
 import { syncPools as syncPoolsV3 } from '../actions/pool/v3/sync-pools';
 import { syncTokenPairs } from '../actions/pool/v3/sync-tokenpairs';
 import { syncHookData } from '../actions/pool/v3/sync-hook-data';
 import { getLastSyncedBlock, upsertLastSyncedBlock } from '../actions/last-synced-block';
 import { getChangedPoolsV3 } from '../sources/logs';
-import { getPoolsClient } from '../sources/contracts';
 import { syncBptBalancesFromSubgraph } from '../actions/user/bpt-balances/helpers/sync-bpt-balances-from-subgraph';
-import { updateVolumeAndFees } from '../actions/pool/update-volume-and-fees';
 import { syncHookReviews } from '../actions/content/sync-hook-reviews';
 import { syncErc4626Tokens } from '../actions/token/sync-erc4626-tokens';
 import { syncRateProviderReviews } from '../actions/content/sync-rate-provider-reviews';
 import { PoolWithMappedJsonFields } from '../../prisma/prisma-types';
+import { updateVolumeAndFees } from '../actions/pool/update-volume-and-fees';
+import { getPoolsClient } from '../sources/contracts';
 
 export function PoolController(tracer?: any) {
     return {
@@ -206,13 +206,7 @@ export function PoolController(tracer?: any) {
                 return [];
             }
 
-            const inserts = await addPoolsV3(
-                pools,
-                getVaultClient(viemClient, vaultAddress),
-                getPoolsClient(viemClient),
-                chain,
-                latestBlock,
-            );
+            const inserts = await addPoolsV3(pools, viemClient, vaultAddress, chain, latestBlock);
             await syncBptBalancesFromSubgraph(newIds, vaultSubgraphClient, chain);
 
             // Sync token flags for the new tokens
@@ -284,15 +278,10 @@ export function PoolController(tracer?: any) {
 
             const dbPools = (await prisma.prismaPool.findMany({
                 where: { chain, protocolVersion: 3, id: { in: changedIds } },
+                select: { id: true, type: true, hook: true, typeData: true },
             })) as PoolWithMappedJsonFields[];
 
-            const ids = await syncPoolsV3(
-                dbPools,
-                getVaultClient(viemClient, vaultAddress),
-                getPoolsClient(viemClient),
-                chain,
-                latestBlock,
-            );
+            const ids = await syncPoolsV3(dbPools, chain, vaultAddress, viemClient, latestBlock);
             await syncTokenPairs(ids, viemClient, routerAddress, chain);
             await updateVolumeAndFees(chain, ids);
             await upsertLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.POOLS_V3, latestBlock);
