@@ -100,6 +100,7 @@ export const poolUpsertTransformerV3 = (
         ],
         poolDynamicData: {
             id: poolData.id,
+            swapFee: String(poolData.swapFee),
             totalShares: String(parseEther(poolData.totalShares)),
             totalSharesNum: Number(poolData.totalShares),
             isPaused: poolData.isPaused,
