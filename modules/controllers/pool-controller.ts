@@ -29,6 +29,7 @@ import { updateVolumeAndFees } from '../actions/pool/update-volume-and-fees';
 import { syncHookReviews } from '../actions/content/sync-hook-reviews';
 import { HookData } from '../sources/transformers';
 import { syncErc4626Tokens } from '../actions/token/sync-erc4626-tokens';
+import { syncRateProviderReviews } from '../actions/content/sync-rate-provider-reviews';
 
 export function PoolController(tracer?: any) {
     return {
@@ -220,6 +221,8 @@ export function PoolController(tracer?: any) {
                 chain,
                 inserts.flatMap(({ tokens }) => tokens),
             );
+
+            await syncRateProviderReviews();
 
             if (hooks) {
                 await syncHookReviews();
