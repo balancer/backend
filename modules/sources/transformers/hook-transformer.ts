@@ -1,30 +1,9 @@
 import { Chain } from '@prisma/client';
-import { GqlHook, GqlHookType, HookParams } from '../../../apps/api/gql/generated-schema';
+import { HookData } from '../../../prisma/prisma-types';
+import { GqlHook, HookParams } from '../../../apps/api/gql/generated-schema';
 import { V3JoinedSubgraphPool } from '../subgraphs';
 import { zeroAddress } from 'viem';
 import config from '../../../config';
-
-export type HookData = {
-    address: string;
-    name?: string;
-    type: GqlHookType;
-    enableHookAdjustedAmounts: boolean;
-    shouldCallAfterSwap: boolean;
-    shouldCallBeforeSwap: boolean;
-    shouldCallAfterInitialize: boolean;
-    shouldCallBeforeInitialize: boolean;
-    shouldCallAfterAddLiquidity: boolean;
-    shouldCallBeforeAddLiquidity: boolean;
-    shouldCallAfterRemoveLiquidity: boolean;
-    shouldCallBeforeRemoveLiquidity: boolean;
-    shouldCallComputeDynamicSwapFee: boolean;
-    dynamicData?: Record<string, string>;
-    reviewData?: {
-        summary: string;
-        reviewFile: string;
-        warnings: string[];
-    };
-};
 
 const typeToParamsType = {
     STABLE_SURGE: 'StableSurgeHookParams',

@@ -1,6 +1,6 @@
 import { prisma } from '../../../prisma/prisma-client';
 import { getHookReviews } from '../../sources/github/hook-reviews';
-import { HookData } from '../../sources/transformers';
+import { HookData } from '../../../prisma/prisma-types';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 
 export const syncHookReviews = async (): Promise<void> => {

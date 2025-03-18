@@ -3,8 +3,7 @@ import type { ViemMulticallCall } from '../../../web3/multicaller-viem';
 import { multicallViem } from '../../../web3/multicaller-viem';
 import { ViemClient } from '../../types';
 import * as hookCalls from '../hooks';
-import { GqlHookType } from '../../../../apps/api/gql/generated-schema';
-import { HookData } from '../../transformers';
+import { HookData } from '../../../../prisma/prisma-types';
 
 const typeToCallsMap = {
     FEE_TAKING: hookCalls.feeTakingHook,
@@ -16,7 +15,7 @@ const typeToCallsMap = {
 export const fetchHookData = async (
     client: ViemClient,
     pools: {
-        address: string;
+        id: string;
         hook: HookData;
     }[],
 ): Promise<{ [poolAddress: string]: Record<string, string> }> => {
@@ -29,7 +28,7 @@ export const fetchHookData = async (
     for (const pool of pools) {
         const typeCalls = typeToCallsMap[pool.hook.type as keyof typeof typeToCallsMap];
         if (typeCalls) {
-            calls = [...calls, ...typeCalls(pool.hook.address, pool.address)];
+            calls = [...calls, ...typeCalls(pool.hook.address, pool.id)];
         }
     }
 

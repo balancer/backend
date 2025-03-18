@@ -2,7 +2,7 @@ import { fetchHookData } from '../../../sources/contracts/v3/fetch-hook-data';
 import { prisma } from '../../../../prisma/prisma-client';
 import type { ViemClient } from '../../../sources/viem-client';
 import type { PrismaPool } from '@prisma/client';
-import { HookData } from '../../../sources/transformers';
+import { HookData } from '../../../../prisma/prisma-types';
 import { prismaBulkExecuteOperations } from '../../../../prisma/prisma-util';
 
 /**

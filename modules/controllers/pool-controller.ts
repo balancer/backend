@@ -22,9 +22,9 @@ import { getPoolsClient } from '../sources/contracts';
 import { syncBptBalancesFromSubgraph } from '../actions/user/bpt-balances/helpers/sync-bpt-balances-from-subgraph';
 import { updateVolumeAndFees } from '../actions/pool/update-volume-and-fees';
 import { syncHookReviews } from '../actions/content/sync-hook-reviews';
-import { HookData } from '../sources/transformers';
 import { syncErc4626Tokens } from '../actions/token/sync-erc4626-tokens';
 import { syncRateProviderReviews } from '../actions/content/sync-rate-provider-reviews';
+import { PoolWithMappedJsonFields } from '../../prisma/prisma-types';
 
 export function PoolController(tracer?: any) {
     return {
@@ -284,7 +284,7 @@ export function PoolController(tracer?: any) {
 
             const dbPools = (await prisma.prismaPool.findMany({
                 where: { chain, protocolVersion: 3, id: { in: changedIds } },
-            })) as (PrismaPool & { hook?: HookData })[];
+            })) as PoolWithMappedJsonFields[];
 
             const ids = await syncPoolsV3(
                 dbPools,

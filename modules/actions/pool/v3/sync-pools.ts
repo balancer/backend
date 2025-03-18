@@ -1,9 +1,9 @@
-import { Chain, PrismaPool } from '@prisma/client';
+import { Chain, PrismaPoolType } from '@prisma/client';
+import { HookData } from '../../../../prisma/prisma-types';
 import { prisma } from '../../../../prisma/prisma-client';
 import { enrichPoolUpsertsUsd } from '../../../sources/enrichers/pool-upserts-usd';
 import { PoolsClient, type VaultClient } from '../../../sources/contracts';
 import { fetchHookData } from '../../../sources/contracts/v3/fetch-hook-data';
-import { HookData } from '../../../sources/transformers';
 import _ from 'lodash';
 
 /**
@@ -17,7 +17,7 @@ import _ from 'lodash';
  * @param blockNumber
  */
 export const syncPools = async (
-    dbPools: (PrismaPool & { hook?: HookData })[],
+    dbPools: { id: string; type: PrismaPoolType; hook?: HookData; typeData: any }[],
     vaultClient: VaultClient,
     poolsClient: PoolsClient,
     chain: Chain,

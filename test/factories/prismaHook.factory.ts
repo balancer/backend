@@ -1,8 +1,7 @@
 import { Factory } from 'fishery';
 import { createRandomAddress } from '../utils';
-import { Chain } from '@prisma/client';
 
-import { HookData } from '../../modules/sources/transformers/hook-transformer';
+import { HookData } from '../../prisma/prisma-types';
 
 class PrismaHookFactory extends Factory<HookData> {}
 

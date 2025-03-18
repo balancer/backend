@@ -10,7 +10,7 @@ import {
     GqlSwapCallDataInput,
 } from '../../../apps/api/gql/generated-schema';
 import { Chain, Prisma, PrismaPoolType } from '@prisma/client';
-import { PrismaPoolAndHookWithDynamic, prismaPoolAndHookWithDynamic } from '../../../prisma/prisma-types';
+import { PrismaPoolAndHookWithDynamic, prismaPoolAndHookWithDynamic, HookData } from '../../../prisma/prisma-types';
 import { prisma } from '../../../prisma/prisma-client';
 import { GetSwapsV2Input as GetSwapPathsInput } from '../types';
 import { poolsToIgnore } from '../constants';
@@ -39,7 +39,6 @@ import { PathWithAmount } from './lib/path';
 import { calculatePriceImpact, getInputAmount, getOutputAmount } from './lib/utils/helpers';
 import { Cache } from 'memory-cache';
 import config from '../../../config';
-import { HookData } from '../../sources/transformers';
 
 class SorPathService {
     private cache = new Cache<

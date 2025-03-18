@@ -6,6 +6,7 @@ import {
     PrismaPoolTokenWithExpandedNesting,
     prismaPoolWithExpandedNesting,
     PrismaPoolWithExpandedNesting,
+    HookData,
 } from '../../../prisma/prisma-types';
 import {
     GqlBalancePoolAprItem,
@@ -53,7 +54,7 @@ import { SanityContentService } from '../../content/sanity-content.service';
 import { ElementData, FxData, GyroData, StableData } from '../subgraph-mapper';
 import { ZERO_ADDRESS } from '@balancer/sdk';
 import { tokenService } from '../../token/token.service';
-import { HookData, mapHookToGqlHook } from '../../sources/transformers';
+import { mapHookToGqlHook } from '../../sources/transformers';
 import { GraphQLError } from 'graphql';
 import { floatToExactString } from '../../common/numbers';
 
