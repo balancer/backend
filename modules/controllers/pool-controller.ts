@@ -329,7 +329,9 @@ export function PoolController(tracer?: any) {
 
             const viemClient = getViemClient(chain);
 
-            await syncHookData(poolsWithHooks, viemClient);
+            const ids = await syncHookData(poolsWithHooks, viemClient);
+
+            return ids;
         },
     };
 }

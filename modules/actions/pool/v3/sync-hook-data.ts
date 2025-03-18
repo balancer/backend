@@ -11,9 +11,9 @@ import { prismaBulkExecuteOperations } from '../../../../prisma/prisma-util';
  * @param hooks - known hooks addresses
  * @param viemClient
  */
-export const syncHookData = async (pools: PrismaPool[], viemClient: ViemClient): Promise<void> => {
+export const syncHookData = async (pools: PrismaPool[], viemClient: ViemClient): Promise<string[]> => {
     if (pools.length === 0) {
-        return;
+        return [];
     }
 
     const poolsMap = new Map<string, PrismaPool>();
@@ -54,5 +54,8 @@ export const syncHookData = async (pools: PrismaPool[], viemClient: ViemClient):
             }),
         );
     }
+
     await prismaBulkExecuteOperations(operations, false);
+
+    return Object.keys(data);
 };
