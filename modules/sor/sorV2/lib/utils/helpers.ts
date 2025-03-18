@@ -120,7 +120,7 @@ export function getHookState(pool: PrismaPoolAndHookWithDynamic): HookState | un
             };
         }
         default:
-            if (hookData.type) {
+            if (hookData.type && hookData.type !== 'MEV_TAX') {
                 console.warn(`pool ${pool.id} with hook type ${hookData.type} not implemented`);
             }
 
