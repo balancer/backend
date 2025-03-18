@@ -28,6 +28,9 @@ export class ClqdrPriceHandlerService implements TokenPriceHandler {
         const timestamp = timestampRoundedUpToNearestHour();
 
         const acceptedTokens = this.getAcceptedTokens(tokens);
+        if (acceptedTokens.length === 0) {
+            return [];
+        }
         const updatedTokens: PrismaTokenWithTypes[] = [];
         const tokenAndPrices: tokenAndPrice[] = [];
 
