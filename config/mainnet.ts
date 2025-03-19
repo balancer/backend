@@ -333,6 +333,12 @@ export default <NetworkData>{
             address: '0xd11c452fc99cf405034ee446803b6f6c1f6d5ed8',
         },
         defaultHandlers: {
+            cUSDO: {
+                tokenAddress: '0xad55aebc9b8c03fc43cd9f62260391c13c23e7c0',
+                sourceUrl: 'https://prod-gw.openeden.com/sys/apy',
+                path: 'apy',
+                scale: 100,
+            },
             slpETHApr: {
                 tokenAddress: '0x3976d71e7ddfbab9bd120ec281b7d35fa0f28528',
                 sourceUrl: 'https://api-data.loopfi.xyz/api/getData',
