@@ -8,17 +8,12 @@ import {
     syncOnChainDataForPools as syncOnChainDataForPoolsV2,
 } from '../actions/pool/v2';
 import { getViemClient } from '../sources/viem-client';
-import {
-    getPoolsSubgraphClient,
-    getV3JoinedSubgraphClient,
-    getVaultSubgraphClient,
-    V3JoinedSubgraphPool,
-} from '../sources/subgraphs';
+import { getPoolsSubgraphClient, getV3JoinedSubgraphClient, getVaultSubgraphClient } from '../sources/subgraphs';
 import { prisma } from '../../prisma/prisma-client';
 import { updateLiquidity24hAgo, updateLiquidityValuesForPools } from '../actions/pool/update-liquidity';
 import { Chain, PrismaLastBlockSyncedCategory, PrismaPool } from '@prisma/client';
 import { getVaultClient } from '../sources/contracts/v3/vault-client';
-import { upsertPools as upsertPoolsV3 } from '../actions/pool/v3/upsert-pools';
+import { syncPools as syncPoolsV3 } from '../actions/pool/v3/sync-pools';
 import { syncTokenPairs } from '../actions/pool/v3/sync-tokenpairs';
 import { syncHookData } from '../actions/pool/v3/sync-hook-data';
 import { getLastSyncedBlock, upsertLastSyncedBlock } from '../actions/last-synced-block';
@@ -158,7 +153,7 @@ export function PoolController(tracer?: any) {
                 pools.map(({ id }) => id),
             );
         },
-        async addPoolsV3(chain: Chain) {
+        async addPoolsV3(chain: Chain, checkForExistingPools = true) {
             const {
                 subgraphs: { balancerV3, balancerPoolsV3 },
                 balancer: {
@@ -193,7 +188,12 @@ export function PoolController(tracer?: any) {
                 })
             ).map(({ id }) => id);
 
-            let newIds = changedIds.filter((id) => !dbIds.includes(id));
+            let newIds: string[] = [];
+            if (checkForExistingPools) {
+                newIds = changedIds.filter((id) => !dbIds.includes(id));
+            } else {
+                newIds = changedIds;
+            }
 
             if (newIds.length === 0) {
                 return [];
@@ -258,7 +258,7 @@ export function PoolController(tracer?: any) {
             const latestBlock = await viemClient.getBlockNumber().then(Number);
             const sgLastSyncedBlock = await subgraphClient.lastSyncedBlock();
 
-            if (!fromBlock || fromBlock > latestBlock) {
+            if (fromBlock === undefined || fromBlock > latestBlock) {
                 return [];
             }
 
@@ -286,7 +286,7 @@ export function PoolController(tracer?: any) {
                 where: { chain, protocolVersion: 3, id: { in: changedIds } },
             })) as (PrismaPool & { hook?: HookData })[];
 
-            const ids = await upsertPoolsV3(
+            const ids = await syncPoolsV3(
                 dbPools,
                 getVaultClient(viemClient, vaultAddress),
                 getPoolsClient(viemClient),

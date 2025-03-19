@@ -49,8 +49,7 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         return PoolController().syncChangedPoolsV2(chain);
     } else if (job === 'reload-pools-v3') {
         await upsertLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.ADD_POOLS_V3, 0);
-        await prisma.prismaPool.deleteMany({ where: { chain, protocolVersion: 3 } });
-        return PoolController().addPoolsV3(chain);
+        return PoolController().addPoolsV3(chain, false);
     } else if (job === 'add-pools-v3') {
         return PoolController().addPoolsV3(chain);
     } else if (job === 'sync-pools-v3') {
