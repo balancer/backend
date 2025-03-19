@@ -16,7 +16,7 @@ import _ from 'lodash';
  * @param chain
  * @param blockNumber
  */
-export const upsertPools = async (
+export const syncPools = async (
     dbPools: (PrismaPool & { hook?: HookData })[],
     vaultClient: VaultClient,
     poolsClient: PoolsClient,

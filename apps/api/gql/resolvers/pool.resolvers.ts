@@ -204,8 +204,8 @@ const balancerResolvers: Resolvers = {
 
             for (const chain of chains) {
                 try {
-                    await upsertLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.POOLS_V3, 0);
-                    await PoolController().syncPoolsV3(chain);
+                    await upsertLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.ADD_POOLS_V3, 0);
+                    await PoolController().addPoolsV3(chain, false);
                     result.push({ type: 'v3', chain, success: true, error: undefined });
                 } catch (e) {
                     result.push({ type: 'v3', chain, success: false, error: `${e}` });
