@@ -324,7 +324,7 @@ export function PoolController(tracer?: any) {
 
             // Get hook addresses from the database
             const poolsWithHooks = await prisma.prismaPool.findMany({
-                where: { chain, hook: { not: {} } },
+                where: { chain, hook: { path: ['address'], string_starts_with: '0x' } },
             });
 
             const viemClient = getViemClient(chain);
