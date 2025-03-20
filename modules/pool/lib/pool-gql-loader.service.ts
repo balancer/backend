@@ -819,7 +819,7 @@ export class PoolGqlLoaderService {
             poolTokens: pool.tokens.map((token) => this.mapPoolToken(token)),
             vaultVersion: poolWithoutTypeData.protocolVersion,
             liquidityManagement: (pool.liquidityManagement as LiquidityManagement) || undefined,
-            hook: hook as GqlHook,
+            hook: mapHookToGqlHook(hook as HookData),
         };
 
         switch (pool.type) {
