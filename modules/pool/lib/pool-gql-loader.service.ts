@@ -954,7 +954,26 @@ export class PoolGqlLoaderService {
                 return {
                     __typename: 'GqlPoolGyro',
                     ...poolWithoutTypeData,
-                    ...(typeData as GyroData),
+                    ...({
+                        alpha: '',
+                        beta: '',
+                        sqrtAlpha: '',
+                        sqrtBeta: '',
+                        root3Alpha: '',
+                        c: '',
+                        s: '',
+                        lambda: '',
+                        tauAlphaX: '',
+                        tauAlphaY: '',
+                        tauBetaX: '',
+                        tauBetaY: '',
+                        u: '',
+                        v: '',
+                        w: '',
+                        z: '',
+                        dSq: '',
+                        ...(typeData as any),
+                    } as GyroData),
                     ...mappedData,
                 };
             case 'FX':

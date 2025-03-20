@@ -6,7 +6,7 @@ import { getPoolsSubgraphClient, getV3JoinedSubgraphClient, getVaultSubgraphClie
 import { getViemClient } from '../sources/viem-client';
 import { CowAmmController } from './cow-amm-controller';
 import { PoolController } from './pool-controller';
-import { upsertPools as upsertPoolsV3 } from '../actions/pool/v3/upsert-pools';
+import { upsertPools as upsertPoolsV3 } from '../actions/pool/v3/sync-pools';
 import exp from 'constants';
 import { StakingController } from './staking-controller';
 

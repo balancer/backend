@@ -36,8 +36,8 @@ export const fetchHookData = async (
     const results = await multicallViem(client, calls);
 
     // Parse all results bignumber values to percentages
-    for (const pool of Object.keys(results)) {
-        results[pool] = parseHookData(results[pool], pool);
+    for (const poolAddress of Object.keys(results)) {
+        results[poolAddress] = parseHookData(results[poolAddress], poolAddress);
     }
 
     return results;

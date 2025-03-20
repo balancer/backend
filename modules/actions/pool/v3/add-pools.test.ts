@@ -1,6 +1,6 @@
 import { getVaultClient } from '../../../sources/contracts';
 import { getPoolsClient } from '../../../sources/contracts';
-import { upsertPools } from './upsert-pools';
+import { addPools } from './add-pools';
 import { chainIdToChain } from '../../../network/chain-id-to-chain';
 import config from '../../../../config';
 import { getV3JoinedSubgraphClient } from '../../../sources/subgraphs/joined-client';
@@ -37,6 +37,6 @@ describe('upsert pools debug', () => {
         const poolsClient = getPoolsClient(viemClient);
         const latestBlock = await viemClient.getBlockNumber().then(Number);
 
-        await upsertPools(pools, vaultClient, poolsClient, chain, latestBlock);
+        await addPools(pools, vaultClient, poolsClient, chain, latestBlock);
     }, 5000000);
 });

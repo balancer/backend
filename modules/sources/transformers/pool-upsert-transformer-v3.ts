@@ -4,8 +4,8 @@ import { StableData } from '../../pool/subgraph-mapper';
 import { fx, gyro, element, stable } from '../../pool/pool-data';
 import { V3JoinedSubgraphPool } from '../subgraphs';
 import { parseEther } from 'viem';
-import { PoolUpsertData, PrismaPoolWithDynamic } from '../../../prisma/prisma-types';
-import { HookData, hookTransformer } from './hook-transformer';
+import { PoolUpsertData } from '../../../prisma/prisma-types';
+import { hookTransformer } from './hook-transformer';
 import _ from 'lodash';
 
 // Subgraph to DB format transformation
@@ -13,7 +13,6 @@ export const poolUpsertTransformerV3 = (
     poolData: V3JoinedSubgraphPool,
     chain: Chain,
     blockNumber: number,
-    dbPool?: PrismaPoolWithDynamic,
 ): PoolUpsertData => {
     let type: PrismaPoolType;
     let typeData: ReturnType<(typeof typeDataMapper)[keyof typeof typeDataMapper]> | {} = {};
@@ -63,14 +62,8 @@ export const poolUpsertTransformerV3 = (
             type = PrismaPoolType.UNKNOWN;
     }
 
-    const { dynamicData: dbDynamicData, ...poolDbData } = dbPool || {};
-    let dynamicData: any = dbDynamicData ? { ...dbDynamicData } : undefined;
-    delete dynamicData?.poolId;
-    delete dynamicData?.chain;
-
     return {
         pool: {
-            ...poolDbData,
             id: poolData.id.toLowerCase(),
             chain: chain,
             protocolVersion: 3,
@@ -87,10 +80,7 @@ export const poolUpsertTransformerV3 = (
             version: poolData.factory.version,
             createTime: Number(poolData.blockTimestamp),
             liquidityManagement: poolData.liquidityManagement,
-            hook: {
-                ...(dbPool?.hook as HookData), // keep existing data
-                ...hookTransformer(poolData, chain),
-            },
+            hook: hookTransformer(poolData, chain),
         },
         tokens: [
             ...poolData.tokens.map((token) => ({
@@ -109,25 +99,12 @@ export const poolUpsertTransformerV3 = (
             },
         ],
         poolDynamicData: {
-            ...dynamicData, // keep existing data
-            tokenPairsData: dynamicData?.tokenPairsData || {},
             id: poolData.id,
-            pool: {
-                connect: {
-                    id_chain: {
-                        id: poolData.id,
-                        chain: chain,
-                    },
-                },
-            },
+            swapFee: String(poolData.swapFee),
             totalShares: String(parseEther(poolData.totalShares)),
             totalSharesNum: Number(poolData.totalShares),
-            swapFee: dynamicData?.swapFee || '0', // enriched later
-            swapEnabled: dynamicData?.swapEnabled || true,
-            holdersCount: Number(poolData.holdersCount),
-            totalLiquidity: dynamicData?.totalLiquidity || 0,
-            isPaused: dynamicData?.isPaused || false,
-            isInRecoveryMode: dynamicData?.isInRecoveryMode || false,
+            isPaused: poolData.isPaused,
+            isInRecoveryMode: poolData.isInRecoveryMode,
             blockNumber,
         },
         poolToken: poolData.tokens.map((token, i) => ({
@@ -142,8 +119,6 @@ export const poolUpsertTransformerV3 = (
             scalingFactor: token.scalingFactor,
             balance: token.balance,
             weight: poolData.weightedParams ? poolData.weightedParams.weights[token.index] ?? null : null,
-            balanceUSD: 0, // enriched later
-            priceRate: '1.0', // enriched later
         })),
         poolExpandedTokens: allTokens.map((token) => ({
             poolId: poolData.id.toLowerCase(),

@@ -84,15 +84,15 @@ model PrismaPoolDynamicData {
 
     protocolYieldFee        String?
     protocolSwapFee         String              @default("0")
-    swapFee                 String
+    swapFee                 String              @default("0")
     aggregateSwapFee        String              @default("0")
     aggregateYieldFee       String              @default("0")
-    swapEnabled             Boolean
+    swapEnabled             Boolean             @default(true)
     isPaused                Boolean             @default(false)
     isInRecoveryMode        Boolean             @default(false)
     totalShares             String
     totalSharesNum          Float               @default(0)
-    totalLiquidity          Float
+    totalLiquidity          Float               @default(0)
     volume24h               Float               @default(0)
     fees24h                 Float               @default(0)
     surplus24h              Float               @default(0)
@@ -157,9 +157,9 @@ model PrismaPoolToken {
     scalingFactor               String?
 
     balance             String
-    balanceUSD          Float
+    balanceUSD          Float   @default(0)
     weight              String?
-    priceRate           String
+    priceRate           String  @default("1.0")
     latestFxPrice       Float?
 
     @@index([poolId, chain])

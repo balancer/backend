@@ -321,6 +321,9 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
             );
             break;
         // V3 Jobs
+        case 'add-pools-v3':
+            await runIfNotAlreadyRunning(name, chainId, () => PoolController().addPoolsV3(chain), res, next);
+            break;
         case 'sync-pools-v3':
             await runIfNotAlreadyRunning(name, chainId, () => PoolController().syncPoolsV3(chain), res, next);
             break;

@@ -90,7 +90,17 @@ export const upsertPools = async (
 
                 prisma.prismaPoolDynamicData.upsert({
                     where: { poolId_chain: { poolId: pool.id, chain: pool.chain } },
-                    create: poolDynamicData,
+                    create: {
+                        ...poolDynamicData,
+                        pool: {
+                            connect: {
+                                id_chain: {
+                                    id: pool.id,
+                                    chain: pool.chain,
+                                },
+                            },
+                        },
+                    },
                     update: poolDynamicData,
                 }),
 

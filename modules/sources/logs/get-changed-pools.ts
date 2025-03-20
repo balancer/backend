@@ -4,7 +4,13 @@ import VaultV3 from '../contracts/abis/VaultV3';
 const events = VaultV3.filter(
     (i) =>
         i.type === 'event' &&
-        ['SwapFeePercentageChanged', 'PoolPausedStateChanged', 'PoolRecoveryModeStateChanged'].includes(i.name),
+        [
+            'PoolBalanceChanged',
+            'Swap',
+            'SwapFeePercentageChanged',
+            'PoolPausedStateChanged',
+            'PoolRecoveryModeStateChanged',
+        ].includes(i.name),
 );
 
 /**

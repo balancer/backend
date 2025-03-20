@@ -121,6 +121,10 @@ export const sepoliaNetworkConfig: NetworkConfig = {
         },
         // V3 jobs
         {
+            name: 'add-pools-v3',
+            interval: every(30, 'seconds'),
+        },
+        {
             name: 'sync-pools-v3',
             interval: every(30, 'seconds'),
         },
