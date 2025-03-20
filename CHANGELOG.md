@@ -1,5 +1,11 @@
 # backend
 
+## 1.36.1
+
+### Patch Changes
+
+-   5aa767b: fix pool sync overwriting
+
 ## 1.36.0
 
 ### Minor Changes
