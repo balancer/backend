@@ -74,7 +74,7 @@ describe('sor debugging', () => {
             swapType: 'EXACT_IN',
             swapAmount: '0.01',
             useProtocolVersion,
-            poolIds: ['0x80fd5bc9d4fa6c22132f8bb2d9d30b01c3336fb3'], // gyroECLP
+            poolIds: ['0x9c781a9dcd12110f92b8eb1af21d441d58f5e8da'], // gyroECLP
         });
 
         console.log(swaps.returnAmount);

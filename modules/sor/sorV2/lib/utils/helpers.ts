@@ -15,8 +15,7 @@ import { HookState } from '@balancer-labs/balancer-maths';
 import { LiquidityManagement } from '../../../types';
 
 import { parseEther, parseUnits } from 'viem';
-import { PrismaPoolAndHookWithDynamic } from '../../../../../prisma/prisma-types';
-import { HookData } from '../../../../sources/transformers';
+import { PrismaPoolAndHookWithDynamic, HookData } from '../../../../../prisma/prisma-types';
 
 export function checkInputs(
     tokenIn: Token,

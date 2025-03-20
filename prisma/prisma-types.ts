@@ -1,8 +1,7 @@
-import { Prisma, PrismaToken, PrismaTokenTypeOption, PrismaPoolEvent } from '@prisma/client';
-import { HookData } from '../modules/sources/transformers';
+import { Prisma, PrismaToken, PrismaTokenTypeOption, PrismaPoolEvent, PrismaPool } from '@prisma/client';
 
 export type PoolUpsertData = {
-    pool: Prisma.PrismaPoolCreateInput & { hook?: HookData };
+    pool: PoolCreateWithMappedJsonFields;
     tokens: Prisma.PrismaTokenCreateInput[];
     poolDynamicData: Omit<Prisma.PrismaPoolDynamicDataCreateInput, 'pool'>;
     poolToken: Prisma.PrismaPoolTokenCreateManyInput[];
@@ -395,3 +394,54 @@ const prismaPoolWithDynamic = Prisma.validator<Prisma.PrismaPoolDefaultArgs>()({
 });
 
 export type PrismaPoolWithDynamic = Prisma.PrismaPoolGetPayload<typeof prismaPoolWithDynamic>;
+
+// Define which properties should be replaced and with what type
+type PoolJsonTypesMap = {
+    hook?: HookData;
+    typeData: Record<string, string>;
+    liquidityManagement: {
+        disableUnbalancedLiquidity?: boolean;
+        enableAddLiquidityCustom?: boolean;
+        enableDonation?: boolean;
+        enableRemoveLiquidityCustom?: boolean;
+    };
+};
+
+// Utility type that replaces JSON fields in any type
+type ReplaceJsonFields<T> = {
+    [K in keyof T]: K extends keyof PoolJsonTypesMap ? PoolJsonTypesMap[K] : T[K];
+};
+
+export type PoolWithMappedJsonFields = ReplaceJsonFields<PrismaPool>;
+export type PoolCreateWithMappedJsonFields = ReplaceJsonFields<Prisma.PrismaPoolCreateInput>;
+
+export type HookData = {
+    address: string;
+    name?: string;
+    type:
+        | 'FEE_TAKING'
+        | 'EXIT_FEE'
+        | 'STABLE_SURGE'
+        | 'MEV_TAX'
+        | 'DIRECTIONAL_FEE'
+        | 'LOTTERY'
+        | 'NFTLIQUIDITY_POSITION'
+        | 'VEBAL_DISCOUNT'
+        | 'UNKNOWN';
+    enableHookAdjustedAmounts: boolean;
+    shouldCallAfterSwap: boolean;
+    shouldCallBeforeSwap: boolean;
+    shouldCallAfterInitialize: boolean;
+    shouldCallBeforeInitialize: boolean;
+    shouldCallAfterAddLiquidity: boolean;
+    shouldCallBeforeAddLiquidity: boolean;
+    shouldCallAfterRemoveLiquidity: boolean;
+    shouldCallBeforeRemoveLiquidity: boolean;
+    shouldCallComputeDynamicSwapFee: boolean;
+    dynamicData?: Record<string, string>;
+    reviewData?: {
+        summary: string;
+        reviewFile: string;
+        warnings: string[];
+    };
+};

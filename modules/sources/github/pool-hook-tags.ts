@@ -1,6 +1,6 @@
 import { prisma } from '../../../prisma/prisma-client';
 import { chainIdToChain } from '../../network/chain-id-to-chain';
-import { HookData } from '../transformers';
+import { HookData } from '../../../prisma/prisma-types';
 
 const TAGS_URL = 'https://raw.githubusercontent.com/balancer/metadata/refs/heads/main/hooks/index.json';
 

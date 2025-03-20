@@ -58,7 +58,7 @@ export const upsertPools = async (
             };
         })
         .map((upsert) => {
-            const update = enrichPoolUpsertsUsd(
+            const update = enrichPoolUpsertsUsd<typeof upsert>(
                 {
                     poolDynamicData: upsert.poolDynamicData,
                     poolToken: upsert.poolToken,
