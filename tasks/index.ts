@@ -51,7 +51,7 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         return PoolController().syncChangedPoolsV2(chain);
     } else if (job === 'reload-pools-v3') {
         await upsertLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.ADD_POOLS_V3, 0);
-        return PoolController().addPoolsV3(chain);
+        return PoolController().addPoolsV3(chain, false);
     } else if (job === 'sor-sync') {
         console.log('Syncing V2 pools');
         await PoolController().addPoolsV2(chain);
@@ -60,9 +60,6 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         console.log('Syncing V3 pools');
         await upsertLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.ADD_POOLS_V3, 0);
         await PoolController().addPoolsV3(chain);
-
-        console.log('Syncing Cow pools');
-        await CowAmmController().syncPools(chain);
 
         console.log('Syncing pools metadata');
         await ContentController().syncCategories();
