@@ -1,5 +1,25 @@
 # backend
 
+## 1.36.0
+
+### Minor Changes
+
+-   643152a: aura stake syncing
+
+### Patch Changes
+
+-   aaa11a8: handle Clqdr handler
+-   e8950a4: cUSDO apr
+-   d3d0361: gyro params mapping
+-   1d08762: pool sync split
+-   778c6fa: include onchain data in adding new pools
+-   a2c524c: include swapFee from SG
+-   b69b76e: gyro v3 subgraph support
+-   67bc38e: use config rpc for ClqdrPriceHandler
+-   adea9a4: v3 pool reloads
+-   e678ef1: zkevm rpc range
+-   4c1d162: include reviews sync on add
+
 ## 1.35.4
 
 ### Patch Changes
