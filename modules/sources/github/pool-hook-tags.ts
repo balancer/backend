@@ -19,7 +19,7 @@ export const getPoolHookTags = async (
 
     // Get hook addresses from the database
     const poolsWithHooks = await prisma.prismaPool.findMany({
-        where: { hook: { not: {} } },
+        where: { hook: { path: ['address'], string_starts_with: '0x' } },
     });
 
     for (const hookMetadata of hooksMetadataList) {
