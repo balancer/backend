@@ -1,5 +1,11 @@
 # backend
 
+## 1.36.2
+
+### Patch Changes
+
+-   3b39cdf: parse hooks for aggregators
+
 ## 1.36.1
 
 ### Patch Changes
