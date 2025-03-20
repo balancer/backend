@@ -17,6 +17,7 @@ export const syncBptBalancesFromRpc = async (
     client: ViemClient,
     chain: Chain,
     syncCategory: 'BPT_BALANCES_V2' | 'BPT_BALANCES_V3' | 'BPT_BALANCES_COW_AMM',
+    syncStore = true, // Set false when syncing should be repeated, eg when passing subset of poolIds just for new pools
 ) => {
     // Must have poolIds to sync
     if (poolIds.length === 0) {
@@ -27,7 +28,11 @@ export const syncBptBalancesFromRpc = async (
     const endBlock = await client.getBlockNumber().then(Number);
 
     // Get the balances synced block from the DB
-    const startBlock = await getLastSyncedBlock(chain, syncCategory);
+    let startBlock = await getLastSyncedBlock(chain, syncCategory);
+    if (!syncStore) {
+        // try to get all events for these poolIds
+        startBlock = endBlock - config[chain].rpcMaxBlockRange + 5;
+    }
 
     // Don't use RPC when balances weren't synced at all
     if (startBlock === 0) {
@@ -108,7 +113,7 @@ export const syncBptBalancesFromRpc = async (
 
     console.log(`syncBptBalancesFromRpc ${syncCategory} on ${chain} got ${poolShares.length} poolShares`);
 
-    const operations = balancesToDb(poolShares, endBlock, syncCategory);
+    const operations = balancesToDb(poolShares, endBlock, syncStore ? syncCategory : undefined);
     try {
         await prisma.$transaction(operations);
     } catch (e: any) {

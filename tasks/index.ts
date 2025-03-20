@@ -61,7 +61,11 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
     } else if (job === 'sync-join-exits-v3') {
         return EventController().syncJoinExitsV3(chain);
     } else if (job === 'sync-join-exits-v2') {
-        return EventController().syncJoinExitsV2(chain);
+        // make a loop to hit the rate limit
+        while (true) {
+            await EventController().syncJoinExitsV2(chain);
+        }
+        // return EventController().syncJoinExitsV2(chain);
     } else if (job === 'sync-swaps-v2') {
         return EventController().syncSwapsUpdateVolumeAndFeesV2(chain);
     } else if (job === 'sync-snapshots-v2') {

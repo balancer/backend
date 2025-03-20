@@ -25,6 +25,7 @@ import { syncHookReviews } from '../actions/content/sync-hook-reviews';
 import { HookData } from '../sources/transformers';
 import { syncErc4626Tokens } from '../actions/token/sync-erc4626-tokens';
 import { syncRateProviderReviews } from '../actions/content/sync-rate-provider-reviews';
+import { handleSubgraphErrors } from './error-handling';
 
 export function PoolController(tracer?: any) {
     return {
@@ -32,7 +33,7 @@ export function PoolController(tracer?: any) {
             const subgraphUrl = config[chain].subgraphs.balancer;
             const subgraphService = getV2SubgraphClient(subgraphUrl, chain);
 
-            return addPoolsV2(subgraphService, chain);
+            return handleSubgraphErrors(() => addPoolsV2(subgraphService, chain));
         },
 
         async syncOnchainDataForAllPoolsV2(chain: Chain) {

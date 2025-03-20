@@ -10,6 +10,8 @@ import { syncBptBalancesFromSubgraph } from '../actions/user/bpt-balances/helper
 import { getLastSyncedBlock, upsertLastSyncedBlock } from '../actions/last-synced-block';
 import { updateLifetimeValues } from '../actions/pool/update-liftetime-values';
 import { syncTokenPairs } from '../actions/pool/v3/sync-tokenpairs';
+import { handleSubgraphErrors } from './error-handling';
+import { syncBptBalancesFromRpc } from '../actions/user/bpt-balances/helpers/sync-bpt-balances-from-rpc';
 
 export function CowAmmController(tracer?: any) {
     const getSubgraphClient = (chain: Chain) => {
@@ -104,7 +106,11 @@ export function CowAmmController(tracer?: any) {
             await updateSurplusAPRs(chain, ids);
             // Sync balances for the pools
             const newIds = ids.filter((id) => !existingIds.includes(id));
-            await syncBptBalancesFromSubgraph(newIds, subgraphClient, chain);
+            if (useSubgraph) {
+                await syncBptBalancesFromSubgraph(newIds, subgraphClient, chain);
+            } else {
+                await syncBptBalancesFromRpc(newIds, viemClient, chain, 'BPT_BALANCES_COW_AMM', false);
+            }
 
             await upsertLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.COW_AMM_POOLS, toBlock);
 
@@ -112,7 +118,7 @@ export function CowAmmController(tracer?: any) {
         },
         async syncSnapshots(chain: Chain) {
             const subgraphClient = getSubgraphClient(chain);
-            const ids = await syncSnapshots(subgraphClient, 'SNAPSHOTS_COW_AMM', chain);
+            const ids = await handleSubgraphErrors(() => syncSnapshots(subgraphClient, 'SNAPSHOTS_COW_AMM', chain));
             // update lifetime values based on snapshots
             await updateLifetimeValues(chain, undefined, 'COW_AMM');
             return ids;
@@ -127,12 +133,12 @@ export function CowAmmController(tracer?: any) {
         },
         async syncJoinExits(chain: Chain) {
             const subgraphClient = getSubgraphClient(chain);
-            const entries = await syncJoinExits(subgraphClient, chain);
+            const entries = await handleSubgraphErrors(() => syncJoinExits(subgraphClient, chain));
             return entries;
         },
         async syncSwaps(chain: Chain) {
             const subgraphClient = getSubgraphClient(chain);
-            const swaps = await syncSwaps(subgraphClient, chain);
+            const swaps = await handleSubgraphErrors(() => syncSwaps(subgraphClient, chain));
             const poolIds = swaps
                 .map((event) => event.poolId)
                 .filter((value, index, self) => self.indexOf(value) === index);
