@@ -301,7 +301,7 @@ function getAmountOutAndEffectivePriceFromResult(tokenPair: TokenPair, onchainRe
 function getBToAAmountFromResult(tokenPair: TokenPair, onchainResults: { [id: string]: OnchainData }) {
     const result = onchainResults[`${tokenPair.poolId}-${tokenPair.tokenA.address}-${tokenPair.tokenB.address}`];
 
-    if (result.bToAAmountOut) {
+    if (result?.bToAAmountOut) {
         tokenPair.bToAAmountOut = BigInt(result.bToAAmountOut.toString());
     }
 }
