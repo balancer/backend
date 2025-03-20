@@ -54,7 +54,7 @@ export const fetchPoolSyncData = async (
         calls = [...calls, ...poolCalls, ...typeCalls, ...hookCalls];
     }
 
-    const data = await multicallViem(client, calls, blockNumber);
+    const data = await multicallViem<{ [address: string]: PoolSyncDataV3 }>(client, calls, blockNumber);
 
-    return data as { [address: string]: PoolSyncDataV3 };
+    return data;
 };
