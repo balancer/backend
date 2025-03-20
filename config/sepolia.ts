@@ -68,6 +68,7 @@ export default <NetworkData>{
         ['0xea672a54f0aa38fc5f0a1a481467bebfe3c71046']: 'EXIT_FEE',
         ['0x1adc55adb4caae71abb4c33f606493f4114d2091']: 'STABLE_SURGE',
         ['0xc0cbcdd6b823a4f22aa6bbdde44c17e754266aef']: 'STABLE_SURGE',
+        ['0x30ce53fa38a1399f0ca158b5c38362c80e423ba9']: 'STABLE_SURGE',
         ['0xedb47231a12bdf64b8d951ded3351128f95b7e80']: 'VEBAL_DISCOUNT',
         ['0x4b8540ae9f341656dcb7959c2abd8830f3d95738']: 'VEBAL_DISCOUNT',
         ['0xd68372e85d8a14afa5fdb3d506bf765939aaf382']: 'DIRECTIONAL_FEE',
