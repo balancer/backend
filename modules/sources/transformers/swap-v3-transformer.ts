@@ -10,7 +10,7 @@ import { SwapEvent } from '../../../prisma/prisma-types';
  * @param chain
  * @returns
  */
-export async function swapV3Transformer(swaps: SwapFragment[], chain: Chain): Promise<SwapEvent[]> {
+export function swapV3Transformer(swaps: SwapFragment[], chain: Chain): SwapEvent[] {
     return swaps.map((swap) => ({
         id: swap.id, // tx + logIndex
         tx: swap.transactionHash,

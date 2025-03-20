@@ -12,6 +12,7 @@ import {
     PoolMutationController,
     StakingController,
     StakedSonicController,
+    TokenController,
 } from '../modules/controllers';
 import { chainIdToChain } from '../modules/network/chain-id-to-chain';
 
@@ -23,6 +24,7 @@ import { VeBalVotingListService } from '../modules/vebal/vebal-voting-list.servi
 import { PrismaLastBlockSyncedCategory } from '@prisma/client';
 import { upsertLastSyncedBlock } from '../modules/actions/last-synced-block';
 import { prisma } from '../prisma/prisma-client';
+import { syncLastSwaps } from '../modules/actions/pool/v3/sync-last-swaps';
 
 // TODO needed?
 const sftmxController = SftmxController();
@@ -49,7 +51,35 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         return PoolController().syncChangedPoolsV2(chain);
     } else if (job === 'reload-pools-v3') {
         await upsertLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.ADD_POOLS_V3, 0);
-        return PoolController().addPoolsV3(chain, false);
+        return PoolController().addPoolsV3(chain);
+    } else if (job === 'sor-sync') {
+        console.log('Syncing V2 pools');
+        await PoolController().addPoolsV2(chain);
+        await PoolController().syncOnchainDataForAllPoolsV2(chain);
+
+        console.log('Syncing V3 pools');
+        await upsertLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.ADD_POOLS_V3, 0);
+        await PoolController().addPoolsV3(chain);
+
+        console.log('Syncing Cow pools');
+        await CowAmmController().syncPools(chain);
+
+        console.log('Syncing pools metadata');
+        await ContentController().syncCategories();
+        await ContentController().syncRateProviderReviews();
+        await ContentController().syncHookReviews();
+
+        console.log('Syncing Erc4626');
+        await tokenService.syncTokenContentData(chain);
+        await ContentController().syncErc4626Data();
+        await TokenController().syncErc4626UnwrapRates(chain);
+
+        console.log('Syncing token prices');
+        await tokenService.updateTokenPrices([chain]);
+        await EventController().syncLastSwaps(chain);
+        await tokenService.updateTokenPrices([chain]);
+
+        return 'OK';
     } else if (job === 'add-pools-v3') {
         return PoolController().addPoolsV3(chain);
     } else if (job === 'sync-pools-v3') {
@@ -144,6 +174,7 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         setRequestScopedContextValue('chainId', chainId);
         return poolService.reloadAllPoolAprs(chain);
     } else if (job === 'update-prices') {
+        await tokenService.syncTokenContentData(chain);
         return tokenService.updateTokenPrices([chain]);
     } else if (job === 'sync-vebal') {
         return new VeBalVotingListService().syncVotingGauges();
