@@ -25,14 +25,13 @@ export const syncPools = async (
 ) => {
     const poolIds = dbPools.map((pool) => pool.id);
 
+    const poolsWithHooks = dbPools.filter((pool) => pool.hook && pool.hook.type !== null);
+
     // Fetch all necessary data in parallel
     const [onchainData, poolTypeData, hookData] = await Promise.all([
         vaultClient.fetchPoolData(poolIds, BigInt(blockNumber)),
         poolsClient.fetchPoolTypeData(dbPools, BigInt(blockNumber)),
-        fetchHookData(
-            vaultClient.viemClient,
-            dbPools.filter((pool) => pool.hook && pool.hook.type !== null),
-        ),
+        fetchHookData(vaultClient.viemClient, poolsWithHooks),
     ]);
 
     // USD Pricing
@@ -62,7 +61,13 @@ export const syncPools = async (
         };
         const typeData = poolTypeData[poolId]
             ? {
-                  pool: { id: pool.id, typeData: poolTypeData[poolId] },
+                  pool: {
+                      id: pool.id,
+                      typeData: {
+                          ...(pool.typeData as any),
+                          ...poolTypeData[poolId],
+                      },
+                  },
               }
             : undefined;
         const hookDynamicData = hookData[poolId]
@@ -70,11 +75,13 @@ export const syncPools = async (
                   pool: {
                       id: pool.id,
                       hook: {
+                          ...(pool.hook as HookData),
                           dynamicData: hookData[poolId],
                       },
                   },
               }
             : undefined;
+
         const usdData = enrichPoolUpsertsUsd(onchainPool, prices);
 
         const upsert = _.mergeWith(onchainPool, typeData, hookDynamicData, usdData, mergeArraysById);
