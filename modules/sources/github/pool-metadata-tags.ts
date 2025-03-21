@@ -18,6 +18,7 @@ export const getPoolMetadataTags = async (
     for (const tag of tagsList) {
         if (tag.pools) {
             tag.pools.forEach((poolId) => {
+                poolId = poolId.toLowerCase();
                 if (!existingTags[poolId]) {
                     existingTags[poolId] = new Set();
                 }
