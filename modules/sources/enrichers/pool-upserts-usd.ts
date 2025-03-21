@@ -1,10 +1,16 @@
 import _ from 'lodash';
-import { PoolDynamicUpsertData } from '../../../prisma/prisma-types';
+import { Prisma } from '@prisma/client';
 
-export const enrichPoolUpsertsUsd = <T extends PoolDynamicUpsertData>(
-    data: T,
+export const enrichPoolUpsertsUsd = <T>(
+    data: {
+        poolToken: {
+            id: string;
+            balance: string;
+        }[];
+        poolDynamicData: Prisma.PrismaPoolDynamicDataUpdateInput;
+    },
     prices: { [address: string]: number },
-): T => {
+) => {
     const poolToken = data.poolToken.map((token) => ({
         ...token,
         balanceUSD: parseFloat(token.balance) * prices[token.id.split('-')[1]] || 0,
@@ -19,5 +25,12 @@ export const enrichPoolUpsertsUsd = <T extends PoolDynamicUpsertData>(
         ...data,
         poolDynamicData,
         poolToken,
+    } as T & {
+        poolToken: {
+            balanceUSD: number;
+        }[];
+        poolDynamicData: {
+            totalLiquidity: number;
+        };
     };
 };

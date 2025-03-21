@@ -1,4 +1,5 @@
 import { addPools } from './add-pools';
+import { syncPools } from './sync-pools';
 import config from '../../../../config';
 import { getV3JoinedSubgraphClient } from '../../../sources/subgraphs/joined-client';
 import { getViemClient } from '../../../sources/viem-client';
@@ -6,20 +7,11 @@ import { getPoolsSubgraphClient, getVaultSubgraphClient } from '../../../sources
 import { prisma } from '../../../../prisma/prisma-client';
 import { PoolWithMappedJsonFields } from '../../../../prisma/prisma-types';
 
-describe('add pools debug', () => {
-    it('add boosted pool', async () => {
+describe('sync pools debug', () => {
+    it('sync pool', async () => {
         const chain = 'SEPOLIA';
 
         const ids = ['0x64bb1613459c6790cd6c94272dc9d09384d955c9', '0x7a7e80a5d622e1065f98dcd873f8c0c3d429aeba'];
-
-        await prisma.prismaPool.deleteMany({
-            where: {
-                id: {
-                    in: ids,
-                },
-                chain,
-            },
-        });
 
         const {
             subgraphs: { balancerV3, balancerPoolsV3 },
@@ -43,7 +35,14 @@ describe('add pools debug', () => {
         const viemClient = getViemClient(chain);
         const latestBlock = await viemClient.getBlockNumber().then(Number);
 
-        await addPools(pools, viemClient, vaultAddress, chain, latestBlock);
+        const inserts = await addPools(pools, viemClient, vaultAddress, chain, latestBlock);
+        await syncPools(
+            inserts.map(({ pool }) => pool),
+            chain,
+            vaultAddress,
+            viemClient,
+            latestBlock,
+        );
 
         const dbPools = (await prisma.prismaPool.findMany({
             where: {

@@ -93,13 +93,14 @@ export async function fetchErc4626AndUnderlyingTokenData(
         );
     }
 
-    const results = (await multicallViem(viemClient, calls)) as { [tokenAddress: string]: Erc4626Data };
+    const results = await multicallViem<{ [tokenAddress: string]: Erc4626Data }>(viemClient, calls);
 
     for (const token of tokens) {
         const result = results[token.address];
         let underlyingTokenAddress: string | undefined = undefined;
 
         if (
+            result &&
             result.asset !== undefined &&
             result.convertToAssets !== undefined &&
             result.convertToShares !== undefined &&

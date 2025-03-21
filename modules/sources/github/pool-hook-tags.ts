@@ -1,6 +1,6 @@
 import { prisma } from '../../../prisma/prisma-client';
 import { chainIdToChain } from '../../network/chain-id-to-chain';
-import { HookData } from '../transformers';
+import { HookData } from '../../../prisma/prisma-types';
 
 const TAGS_URL = 'https://raw.githubusercontent.com/balancer/metadata/refs/heads/main/hooks/index.json';
 
@@ -19,7 +19,7 @@ export const getPoolHookTags = async (
 
     // Get hook addresses from the database
     const poolsWithHooks = await prisma.prismaPool.findMany({
-        where: { hook: { not: {} } },
+        where: { hook: { path: ['address'], string_starts_with: '0x' } },
     });
 
     for (const hookMetadata of hooksMetadataList) {
