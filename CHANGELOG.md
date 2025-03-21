@@ -1,5 +1,19 @@
 # backend
 
+## 1.37.0
+
+### Minor Changes
+
+-   895e467: sor-sync task
+-   c396201: multicall with a parser
+
+### Patch Changes
+
+-   2d6d053: remove cow sync from sor-sync task
+-   a8802fc: sepolia stable surge hook config
+-   37c4d64: handle failing bToAAmountOut in tokenpair sync
+-   b2d324e: pools with hooks select query
+
 ## 1.36.2
 
 ### Patch Changes
