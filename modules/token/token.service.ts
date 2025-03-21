@@ -164,7 +164,9 @@ export class TokenService {
         const priceRateProviderDataResult: Record<string, GqlPriceRateProviderData | undefined> = {};
 
         for (const token of tokens) {
-            const providersForToken = priceRateProviders.filter((provider) => provider.tokenAddress === token.address);
+            const providersForToken = priceRateProviders.filter(
+                (provider) => provider.tokenAddress === token.address && provider.chain === token.chain,
+            );
 
             if (providersForToken.length === 1) {
                 priceRateProviderDataResult[token.address] = {
@@ -204,7 +206,9 @@ export class TokenService {
         const erc4626DataResult: Record<string, Erc4626ReviewData | undefined> = {};
 
         for (const token of tokens) {
-            const erc4626DataForToken = erc4626Data.filter((provider) => provider.erc4626Address === token.address);
+            const erc4626DataForToken = erc4626Data.filter(
+                (erc4626Data) => erc4626Data.erc4626Address === token.address && erc4626Data.chain === token.chain,
+            );
 
             if (erc4626DataForToken.length === 1) {
                 erc4626DataResult[token.address] = {
