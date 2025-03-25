@@ -319,6 +319,145 @@ export enum GyroEParams_OrderBy {
     Z = 'z',
 }
 
+export type LbpParams = {
+    __typename?: 'LBPParams';
+    /** End time of the LBP */
+    endTime: Scalars['BigInt'];
+    /** Unique identifier for the LBPParams */
+    id: Scalars['Bytes'];
+    /**  Project token swap in blocked */
+    isProjectTokenSwapInBlocked: Scalars['Boolean'];
+    /** Owner of the LBP */
+    owner: Scalars['Bytes'];
+    /** Project token for the LBP */
+    projectToken: Scalars['Bytes'];
+    /** Final weight of the project token */
+    projectTokenEndWeight: Scalars['BigInt'];
+    /** Initial weight of the project token */
+    projectTokenStartWeight: Scalars['BigInt'];
+    /** Reserve token for the LBP */
+    reserveToken: Scalars['Bytes'];
+    /** Final weight of the reserve token */
+    reserveTokenEndWeight: Scalars['BigInt'];
+    /** Initial weight of the reserve token */
+    reserveTokenStartWeight: Scalars['BigInt'];
+    /** Start time of the LBP */
+    startTime: Scalars['BigInt'];
+};
+
+export type LbpParams_Filter = {
+    /** Filter for the block changed event. */
+    _change_block?: InputMaybe<BlockChangedFilter>;
+    and?: InputMaybe<Array<InputMaybe<LbpParams_Filter>>>;
+    endTime?: InputMaybe<Scalars['BigInt']>;
+    endTime_gt?: InputMaybe<Scalars['BigInt']>;
+    endTime_gte?: InputMaybe<Scalars['BigInt']>;
+    endTime_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    endTime_lt?: InputMaybe<Scalars['BigInt']>;
+    endTime_lte?: InputMaybe<Scalars['BigInt']>;
+    endTime_not?: InputMaybe<Scalars['BigInt']>;
+    endTime_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    id?: InputMaybe<Scalars['Bytes']>;
+    id_contains?: InputMaybe<Scalars['Bytes']>;
+    id_gt?: InputMaybe<Scalars['Bytes']>;
+    id_gte?: InputMaybe<Scalars['Bytes']>;
+    id_in?: InputMaybe<Array<Scalars['Bytes']>>;
+    id_lt?: InputMaybe<Scalars['Bytes']>;
+    id_lte?: InputMaybe<Scalars['Bytes']>;
+    id_not?: InputMaybe<Scalars['Bytes']>;
+    id_not_contains?: InputMaybe<Scalars['Bytes']>;
+    id_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
+    isProjectTokenSwapInBlocked?: InputMaybe<Scalars['Boolean']>;
+    isProjectTokenSwapInBlocked_in?: InputMaybe<Array<Scalars['Boolean']>>;
+    isProjectTokenSwapInBlocked_not?: InputMaybe<Scalars['Boolean']>;
+    isProjectTokenSwapInBlocked_not_in?: InputMaybe<Array<Scalars['Boolean']>>;
+    or?: InputMaybe<Array<InputMaybe<LbpParams_Filter>>>;
+    owner?: InputMaybe<Scalars['Bytes']>;
+    owner_contains?: InputMaybe<Scalars['Bytes']>;
+    owner_gt?: InputMaybe<Scalars['Bytes']>;
+    owner_gte?: InputMaybe<Scalars['Bytes']>;
+    owner_in?: InputMaybe<Array<Scalars['Bytes']>>;
+    owner_lt?: InputMaybe<Scalars['Bytes']>;
+    owner_lte?: InputMaybe<Scalars['Bytes']>;
+    owner_not?: InputMaybe<Scalars['Bytes']>;
+    owner_not_contains?: InputMaybe<Scalars['Bytes']>;
+    owner_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
+    projectToken?: InputMaybe<Scalars['Bytes']>;
+    projectTokenEndWeight?: InputMaybe<Scalars['BigInt']>;
+    projectTokenEndWeight_gt?: InputMaybe<Scalars['BigInt']>;
+    projectTokenEndWeight_gte?: InputMaybe<Scalars['BigInt']>;
+    projectTokenEndWeight_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    projectTokenEndWeight_lt?: InputMaybe<Scalars['BigInt']>;
+    projectTokenEndWeight_lte?: InputMaybe<Scalars['BigInt']>;
+    projectTokenEndWeight_not?: InputMaybe<Scalars['BigInt']>;
+    projectTokenEndWeight_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    projectTokenStartWeight?: InputMaybe<Scalars['BigInt']>;
+    projectTokenStartWeight_gt?: InputMaybe<Scalars['BigInt']>;
+    projectTokenStartWeight_gte?: InputMaybe<Scalars['BigInt']>;
+    projectTokenStartWeight_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    projectTokenStartWeight_lt?: InputMaybe<Scalars['BigInt']>;
+    projectTokenStartWeight_lte?: InputMaybe<Scalars['BigInt']>;
+    projectTokenStartWeight_not?: InputMaybe<Scalars['BigInt']>;
+    projectTokenStartWeight_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    projectToken_contains?: InputMaybe<Scalars['Bytes']>;
+    projectToken_gt?: InputMaybe<Scalars['Bytes']>;
+    projectToken_gte?: InputMaybe<Scalars['Bytes']>;
+    projectToken_in?: InputMaybe<Array<Scalars['Bytes']>>;
+    projectToken_lt?: InputMaybe<Scalars['Bytes']>;
+    projectToken_lte?: InputMaybe<Scalars['Bytes']>;
+    projectToken_not?: InputMaybe<Scalars['Bytes']>;
+    projectToken_not_contains?: InputMaybe<Scalars['Bytes']>;
+    projectToken_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
+    reserveToken?: InputMaybe<Scalars['Bytes']>;
+    reserveTokenEndWeight?: InputMaybe<Scalars['BigInt']>;
+    reserveTokenEndWeight_gt?: InputMaybe<Scalars['BigInt']>;
+    reserveTokenEndWeight_gte?: InputMaybe<Scalars['BigInt']>;
+    reserveTokenEndWeight_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    reserveTokenEndWeight_lt?: InputMaybe<Scalars['BigInt']>;
+    reserveTokenEndWeight_lte?: InputMaybe<Scalars['BigInt']>;
+    reserveTokenEndWeight_not?: InputMaybe<Scalars['BigInt']>;
+    reserveTokenEndWeight_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    reserveTokenStartWeight?: InputMaybe<Scalars['BigInt']>;
+    reserveTokenStartWeight_gt?: InputMaybe<Scalars['BigInt']>;
+    reserveTokenStartWeight_gte?: InputMaybe<Scalars['BigInt']>;
+    reserveTokenStartWeight_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    reserveTokenStartWeight_lt?: InputMaybe<Scalars['BigInt']>;
+    reserveTokenStartWeight_lte?: InputMaybe<Scalars['BigInt']>;
+    reserveTokenStartWeight_not?: InputMaybe<Scalars['BigInt']>;
+    reserveTokenStartWeight_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    reserveToken_contains?: InputMaybe<Scalars['Bytes']>;
+    reserveToken_gt?: InputMaybe<Scalars['Bytes']>;
+    reserveToken_gte?: InputMaybe<Scalars['Bytes']>;
+    reserveToken_in?: InputMaybe<Array<Scalars['Bytes']>>;
+    reserveToken_lt?: InputMaybe<Scalars['Bytes']>;
+    reserveToken_lte?: InputMaybe<Scalars['Bytes']>;
+    reserveToken_not?: InputMaybe<Scalars['Bytes']>;
+    reserveToken_not_contains?: InputMaybe<Scalars['Bytes']>;
+    reserveToken_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
+    startTime?: InputMaybe<Scalars['BigInt']>;
+    startTime_gt?: InputMaybe<Scalars['BigInt']>;
+    startTime_gte?: InputMaybe<Scalars['BigInt']>;
+    startTime_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    startTime_lt?: InputMaybe<Scalars['BigInt']>;
+    startTime_lte?: InputMaybe<Scalars['BigInt']>;
+    startTime_not?: InputMaybe<Scalars['BigInt']>;
+    startTime_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+};
+
+export enum LbpParams_OrderBy {
+    EndTime = 'endTime',
+    Id = 'id',
+    IsProjectTokenSwapInBlocked = 'isProjectTokenSwapInBlocked',
+    Owner = 'owner',
+    ProjectToken = 'projectToken',
+    ProjectTokenEndWeight = 'projectTokenEndWeight',
+    ProjectTokenStartWeight = 'projectTokenStartWeight',
+    ReserveToken = 'reserveToken',
+    ReserveTokenEndWeight = 'reserveTokenEndWeight',
+    ReserveTokenStartWeight = 'reserveTokenStartWeight',
+    StartTime = 'startTime',
+}
+
 /** Defines the order direction, either ascending or descending */
 export enum OrderDirection {
     Asc = 'asc',
@@ -337,6 +476,8 @@ export type Pool = {
     gyroEParams?: Maybe<GyroEParams>;
     /** Unique identifier for the Pool */
     id: Scalars['Bytes'];
+    /** Parameters for LBP pools (null for other pool types) */
+    lbpParams?: Maybe<LbpParams>;
     /** Parameters for QuantAMMWeighted pools (null for other pool types) */
     quantAMMWeightedParams?: Maybe<QuantAmmWeightedParams>;
     /** Parameters for Stable pools (null for other pool types) */
@@ -350,6 +491,7 @@ export type Pool = {
 export enum PoolType {
     Gyro2 = 'Gyro2',
     GyroE = 'GyroE',
+    Lbp = 'LBP',
     QuantAmmWeighted = 'QuantAMMWeighted',
     Stable = 'Stable',
     StableSurge = 'StableSurge',
@@ -443,6 +585,27 @@ export type Pool_Filter = {
     id_not?: InputMaybe<Scalars['Bytes']>;
     id_not_contains?: InputMaybe<Scalars['Bytes']>;
     id_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
+    lbpParams?: InputMaybe<Scalars['String']>;
+    lbpParams_?: InputMaybe<LbpParams_Filter>;
+    lbpParams_contains?: InputMaybe<Scalars['String']>;
+    lbpParams_contains_nocase?: InputMaybe<Scalars['String']>;
+    lbpParams_ends_with?: InputMaybe<Scalars['String']>;
+    lbpParams_ends_with_nocase?: InputMaybe<Scalars['String']>;
+    lbpParams_gt?: InputMaybe<Scalars['String']>;
+    lbpParams_gte?: InputMaybe<Scalars['String']>;
+    lbpParams_in?: InputMaybe<Array<Scalars['String']>>;
+    lbpParams_lt?: InputMaybe<Scalars['String']>;
+    lbpParams_lte?: InputMaybe<Scalars['String']>;
+    lbpParams_not?: InputMaybe<Scalars['String']>;
+    lbpParams_not_contains?: InputMaybe<Scalars['String']>;
+    lbpParams_not_contains_nocase?: InputMaybe<Scalars['String']>;
+    lbpParams_not_ends_with?: InputMaybe<Scalars['String']>;
+    lbpParams_not_ends_with_nocase?: InputMaybe<Scalars['String']>;
+    lbpParams_not_in?: InputMaybe<Array<Scalars['String']>>;
+    lbpParams_not_starts_with?: InputMaybe<Scalars['String']>;
+    lbpParams_not_starts_with_nocase?: InputMaybe<Scalars['String']>;
+    lbpParams_starts_with?: InputMaybe<Scalars['String']>;
+    lbpParams_starts_with_nocase?: InputMaybe<Scalars['String']>;
     or?: InputMaybe<Array<InputMaybe<Pool_Filter>>>;
     quantAMMWeightedParams?: InputMaybe<Scalars['String']>;
     quantAMMWeightedParams_?: InputMaybe<QuantAmmWeightedParams_Filter>;
@@ -558,6 +721,18 @@ export enum Pool_OrderBy {
     GyroEParamsW = 'gyroEParams__w',
     GyroEParamsZ = 'gyroEParams__z',
     Id = 'id',
+    LbpParams = 'lbpParams',
+    LbpParamsEndTime = 'lbpParams__endTime',
+    LbpParamsId = 'lbpParams__id',
+    LbpParamsIsProjectTokenSwapInBlocked = 'lbpParams__isProjectTokenSwapInBlocked',
+    LbpParamsOwner = 'lbpParams__owner',
+    LbpParamsProjectToken = 'lbpParams__projectToken',
+    LbpParamsProjectTokenEndWeight = 'lbpParams__projectTokenEndWeight',
+    LbpParamsProjectTokenStartWeight = 'lbpParams__projectTokenStartWeight',
+    LbpParamsReserveToken = 'lbpParams__reserveToken',
+    LbpParamsReserveTokenEndWeight = 'lbpParams__reserveTokenEndWeight',
+    LbpParamsReserveTokenStartWeight = 'lbpParams__reserveTokenStartWeight',
+    LbpParamsStartTime = 'lbpParams__startTime',
     QuantAmmWeightedParams = 'quantAMMWeightedParams',
     QuantAmmWeightedParamsAbsoluteWeightGuardRail = 'quantAMMWeightedParams__absoluteWeightGuardRail',
     QuantAmmWeightedParamsEpsilonMax = 'quantAMMWeightedParams__epsilonMax',
@@ -580,10 +755,158 @@ export enum Pool_OrderBy {
     WeightedParamsId = 'weightedParams__id',
 }
 
+export type QuantAmmWeightedDetail = {
+    __typename?: 'QuantAMMWeightedDetail';
+    category: Scalars['String'];
+    id: Scalars['Bytes'];
+    name: Scalars['String'];
+    pool: QuantAmmWeightedParams;
+    type: Scalars['String'];
+    value: Scalars['String'];
+};
+
+export type QuantAmmWeightedDetail_Filter = {
+    /** Filter for the block changed event. */
+    _change_block?: InputMaybe<BlockChangedFilter>;
+    and?: InputMaybe<Array<InputMaybe<QuantAmmWeightedDetail_Filter>>>;
+    category?: InputMaybe<Scalars['String']>;
+    category_contains?: InputMaybe<Scalars['String']>;
+    category_contains_nocase?: InputMaybe<Scalars['String']>;
+    category_ends_with?: InputMaybe<Scalars['String']>;
+    category_ends_with_nocase?: InputMaybe<Scalars['String']>;
+    category_gt?: InputMaybe<Scalars['String']>;
+    category_gte?: InputMaybe<Scalars['String']>;
+    category_in?: InputMaybe<Array<Scalars['String']>>;
+    category_lt?: InputMaybe<Scalars['String']>;
+    category_lte?: InputMaybe<Scalars['String']>;
+    category_not?: InputMaybe<Scalars['String']>;
+    category_not_contains?: InputMaybe<Scalars['String']>;
+    category_not_contains_nocase?: InputMaybe<Scalars['String']>;
+    category_not_ends_with?: InputMaybe<Scalars['String']>;
+    category_not_ends_with_nocase?: InputMaybe<Scalars['String']>;
+    category_not_in?: InputMaybe<Array<Scalars['String']>>;
+    category_not_starts_with?: InputMaybe<Scalars['String']>;
+    category_not_starts_with_nocase?: InputMaybe<Scalars['String']>;
+    category_starts_with?: InputMaybe<Scalars['String']>;
+    category_starts_with_nocase?: InputMaybe<Scalars['String']>;
+    id?: InputMaybe<Scalars['Bytes']>;
+    id_contains?: InputMaybe<Scalars['Bytes']>;
+    id_gt?: InputMaybe<Scalars['Bytes']>;
+    id_gte?: InputMaybe<Scalars['Bytes']>;
+    id_in?: InputMaybe<Array<Scalars['Bytes']>>;
+    id_lt?: InputMaybe<Scalars['Bytes']>;
+    id_lte?: InputMaybe<Scalars['Bytes']>;
+    id_not?: InputMaybe<Scalars['Bytes']>;
+    id_not_contains?: InputMaybe<Scalars['Bytes']>;
+    id_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
+    name?: InputMaybe<Scalars['String']>;
+    name_contains?: InputMaybe<Scalars['String']>;
+    name_contains_nocase?: InputMaybe<Scalars['String']>;
+    name_ends_with?: InputMaybe<Scalars['String']>;
+    name_ends_with_nocase?: InputMaybe<Scalars['String']>;
+    name_gt?: InputMaybe<Scalars['String']>;
+    name_gte?: InputMaybe<Scalars['String']>;
+    name_in?: InputMaybe<Array<Scalars['String']>>;
+    name_lt?: InputMaybe<Scalars['String']>;
+    name_lte?: InputMaybe<Scalars['String']>;
+    name_not?: InputMaybe<Scalars['String']>;
+    name_not_contains?: InputMaybe<Scalars['String']>;
+    name_not_contains_nocase?: InputMaybe<Scalars['String']>;
+    name_not_ends_with?: InputMaybe<Scalars['String']>;
+    name_not_ends_with_nocase?: InputMaybe<Scalars['String']>;
+    name_not_in?: InputMaybe<Array<Scalars['String']>>;
+    name_not_starts_with?: InputMaybe<Scalars['String']>;
+    name_not_starts_with_nocase?: InputMaybe<Scalars['String']>;
+    name_starts_with?: InputMaybe<Scalars['String']>;
+    name_starts_with_nocase?: InputMaybe<Scalars['String']>;
+    or?: InputMaybe<Array<InputMaybe<QuantAmmWeightedDetail_Filter>>>;
+    pool?: InputMaybe<Scalars['String']>;
+    pool_?: InputMaybe<QuantAmmWeightedParams_Filter>;
+    pool_contains?: InputMaybe<Scalars['String']>;
+    pool_contains_nocase?: InputMaybe<Scalars['String']>;
+    pool_ends_with?: InputMaybe<Scalars['String']>;
+    pool_ends_with_nocase?: InputMaybe<Scalars['String']>;
+    pool_gt?: InputMaybe<Scalars['String']>;
+    pool_gte?: InputMaybe<Scalars['String']>;
+    pool_in?: InputMaybe<Array<Scalars['String']>>;
+    pool_lt?: InputMaybe<Scalars['String']>;
+    pool_lte?: InputMaybe<Scalars['String']>;
+    pool_not?: InputMaybe<Scalars['String']>;
+    pool_not_contains?: InputMaybe<Scalars['String']>;
+    pool_not_contains_nocase?: InputMaybe<Scalars['String']>;
+    pool_not_ends_with?: InputMaybe<Scalars['String']>;
+    pool_not_ends_with_nocase?: InputMaybe<Scalars['String']>;
+    pool_not_in?: InputMaybe<Array<Scalars['String']>>;
+    pool_not_starts_with?: InputMaybe<Scalars['String']>;
+    pool_not_starts_with_nocase?: InputMaybe<Scalars['String']>;
+    pool_starts_with?: InputMaybe<Scalars['String']>;
+    pool_starts_with_nocase?: InputMaybe<Scalars['String']>;
+    type?: InputMaybe<Scalars['String']>;
+    type_contains?: InputMaybe<Scalars['String']>;
+    type_contains_nocase?: InputMaybe<Scalars['String']>;
+    type_ends_with?: InputMaybe<Scalars['String']>;
+    type_ends_with_nocase?: InputMaybe<Scalars['String']>;
+    type_gt?: InputMaybe<Scalars['String']>;
+    type_gte?: InputMaybe<Scalars['String']>;
+    type_in?: InputMaybe<Array<Scalars['String']>>;
+    type_lt?: InputMaybe<Scalars['String']>;
+    type_lte?: InputMaybe<Scalars['String']>;
+    type_not?: InputMaybe<Scalars['String']>;
+    type_not_contains?: InputMaybe<Scalars['String']>;
+    type_not_contains_nocase?: InputMaybe<Scalars['String']>;
+    type_not_ends_with?: InputMaybe<Scalars['String']>;
+    type_not_ends_with_nocase?: InputMaybe<Scalars['String']>;
+    type_not_in?: InputMaybe<Array<Scalars['String']>>;
+    type_not_starts_with?: InputMaybe<Scalars['String']>;
+    type_not_starts_with_nocase?: InputMaybe<Scalars['String']>;
+    type_starts_with?: InputMaybe<Scalars['String']>;
+    type_starts_with_nocase?: InputMaybe<Scalars['String']>;
+    value?: InputMaybe<Scalars['String']>;
+    value_contains?: InputMaybe<Scalars['String']>;
+    value_contains_nocase?: InputMaybe<Scalars['String']>;
+    value_ends_with?: InputMaybe<Scalars['String']>;
+    value_ends_with_nocase?: InputMaybe<Scalars['String']>;
+    value_gt?: InputMaybe<Scalars['String']>;
+    value_gte?: InputMaybe<Scalars['String']>;
+    value_in?: InputMaybe<Array<Scalars['String']>>;
+    value_lt?: InputMaybe<Scalars['String']>;
+    value_lte?: InputMaybe<Scalars['String']>;
+    value_not?: InputMaybe<Scalars['String']>;
+    value_not_contains?: InputMaybe<Scalars['String']>;
+    value_not_contains_nocase?: InputMaybe<Scalars['String']>;
+    value_not_ends_with?: InputMaybe<Scalars['String']>;
+    value_not_ends_with_nocase?: InputMaybe<Scalars['String']>;
+    value_not_in?: InputMaybe<Array<Scalars['String']>>;
+    value_not_starts_with?: InputMaybe<Scalars['String']>;
+    value_not_starts_with_nocase?: InputMaybe<Scalars['String']>;
+    value_starts_with?: InputMaybe<Scalars['String']>;
+    value_starts_with_nocase?: InputMaybe<Scalars['String']>;
+};
+
+export enum QuantAmmWeightedDetail_OrderBy {
+    Category = 'category',
+    Id = 'id',
+    Name = 'name',
+    Pool = 'pool',
+    PoolAbsoluteWeightGuardRail = 'pool__absoluteWeightGuardRail',
+    PoolEpsilonMax = 'pool__epsilonMax',
+    PoolId = 'pool__id',
+    PoolLastInterpolationTimePossible = 'pool__lastInterpolationTimePossible',
+    PoolLastUpdateIntervalTime = 'pool__lastUpdateIntervalTime',
+    PoolMaxTradeSizeRatio = 'pool__maxTradeSizeRatio',
+    PoolOracleStalenessThreshold = 'pool__oracleStalenessThreshold',
+    PoolPoolRegistry = 'pool__poolRegistry',
+    PoolUpdateInterval = 'pool__updateInterval',
+    Type = 'type',
+    Value = 'value',
+}
+
 export type QuantAmmWeightedParams = {
     __typename?: 'QuantAMMWeightedParams';
     /** Absolute weight guard rail */
     absoluteWeightGuardRail: Scalars['BigInt'];
+    /** Pool details array */
+    details: Array<QuantAmmWeightedDetail>;
     /** Maximum epsilon value */
     epsilonMax: Scalars['BigInt'];
     /** Unique identifier for the QuantAMMWeightedParams */
@@ -608,6 +931,14 @@ export type QuantAmmWeightedParams = {
     weightsAtLastUpdateInterval: Array<Scalars['BigInt']>;
 };
 
+export type QuantAmmWeightedParamsDetailsArgs = {
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<QuantAmmWeightedDetail_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    where?: InputMaybe<QuantAmmWeightedDetail_Filter>;
+};
+
 export type QuantAmmWeightedParams_Filter = {
     /** Filter for the block changed event. */
     _change_block?: InputMaybe<BlockChangedFilter>;
@@ -620,6 +951,7 @@ export type QuantAmmWeightedParams_Filter = {
     absoluteWeightGuardRail_not?: InputMaybe<Scalars['BigInt']>;
     absoluteWeightGuardRail_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
     and?: InputMaybe<Array<InputMaybe<QuantAmmWeightedParams_Filter>>>;
+    details_?: InputMaybe<QuantAmmWeightedDetail_Filter>;
     epsilonMax?: InputMaybe<Scalars['BigInt']>;
     epsilonMax_gt?: InputMaybe<Scalars['BigInt']>;
     epsilonMax_gte?: InputMaybe<Scalars['BigInt']>;
@@ -709,6 +1041,7 @@ export type QuantAmmWeightedParams_Filter = {
 
 export enum QuantAmmWeightedParams_OrderBy {
     AbsoluteWeightGuardRail = 'absoluteWeightGuardRail',
+    Details = 'details',
     EpsilonMax = 'epsilonMax',
     Id = 'id',
     Lambda = 'lambda',
@@ -732,8 +1065,12 @@ export type Query = {
     gyro2Params_collection: Array<Gyro2Params>;
     gyroEParams?: Maybe<GyroEParams>;
     gyroEParams_collection: Array<GyroEParams>;
+    lbpparams?: Maybe<LbpParams>;
+    lbpparams_collection: Array<LbpParams>;
     pool?: Maybe<Pool>;
     pools: Array<Pool>;
+    quantAMMWeightedDetail?: Maybe<QuantAmmWeightedDetail>;
+    quantAMMWeightedDetails: Array<QuantAmmWeightedDetail>;
     quantAMMWeightedParams?: Maybe<QuantAmmWeightedParams>;
     quantAMMWeightedParams_collection: Array<QuantAmmWeightedParams>;
     stableParams?: Maybe<StableParams>;
@@ -796,6 +1133,22 @@ export type QueryGyroEParams_CollectionArgs = {
     where?: InputMaybe<GyroEParams_Filter>;
 };
 
+export type QueryLbpparamsArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type QueryLbpparams_CollectionArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<LbpParams_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<LbpParams_Filter>;
+};
+
 export type QueryPoolArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
@@ -810,6 +1163,22 @@ export type QueryPoolsArgs = {
     skip?: InputMaybe<Scalars['Int']>;
     subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<Pool_Filter>;
+};
+
+export type QueryQuantAmmWeightedDetailArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type QueryQuantAmmWeightedDetailsArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<QuantAmmWeightedDetail_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<QuantAmmWeightedDetail_Filter>;
 };
 
 export type QueryQuantAmmWeightedParamsArgs = {
@@ -984,8 +1353,12 @@ export type Subscription = {
     gyro2Params_collection: Array<Gyro2Params>;
     gyroEParams?: Maybe<GyroEParams>;
     gyroEParams_collection: Array<GyroEParams>;
+    lbpparams?: Maybe<LbpParams>;
+    lbpparams_collection: Array<LbpParams>;
     pool?: Maybe<Pool>;
     pools: Array<Pool>;
+    quantAMMWeightedDetail?: Maybe<QuantAmmWeightedDetail>;
+    quantAMMWeightedDetails: Array<QuantAmmWeightedDetail>;
     quantAMMWeightedParams?: Maybe<QuantAmmWeightedParams>;
     quantAMMWeightedParams_collection: Array<QuantAmmWeightedParams>;
     stableParams?: Maybe<StableParams>;
@@ -1048,6 +1421,22 @@ export type SubscriptionGyroEParams_CollectionArgs = {
     where?: InputMaybe<GyroEParams_Filter>;
 };
 
+export type SubscriptionLbpparamsArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type SubscriptionLbpparams_CollectionArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<LbpParams_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<LbpParams_Filter>;
+};
+
 export type SubscriptionPoolArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
@@ -1062,6 +1451,22 @@ export type SubscriptionPoolsArgs = {
     skip?: InputMaybe<Scalars['Int']>;
     subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<Pool_Filter>;
+};
+
+export type SubscriptionQuantAmmWeightedDetailArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type SubscriptionQuantAmmWeightedDetailsArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<QuantAmmWeightedDetail_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<QuantAmmWeightedDetail_Filter>;
 };
 
 export type SubscriptionQuantAmmWeightedParamsArgs = {
