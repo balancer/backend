@@ -9,11 +9,8 @@ import {
     GqlSorSwapType,
     GqlSwapCallDataInput,
 } from '../../../apps/api/gql/generated-schema';
-import { Chain, Prisma, PrismaPoolType } from '@prisma/client';
-import { PrismaPoolAndHookWithDynamic, prismaPoolAndHookWithDynamic, HookData } from '../../../prisma/prisma-types';
-import { prisma } from '../../../prisma/prisma-client';
+import { Chain } from '@prisma/client';
 import { GetSwapsV2Input as GetSwapPathsInput } from '../types';
-import { poolsToIgnore } from '../constants';
 import { chainToChainId as chainToIdMap } from '../../network/chain-id-to-chain';
 import * as Sentry from '@sentry/node';
 import { Address, formatUnits } from 'viem';
@@ -37,16 +34,10 @@ import {
 } from '@balancer/sdk';
 import { PathWithAmount } from './lib/path';
 import { calculatePriceImpact, getInputAmount, getOutputAmount } from './lib/utils/helpers';
-import { Cache } from 'memory-cache';
 import config from '../../../config';
+import { getBasePoolsFromDb } from '../utils/pool';
 
 class SorPathService {
-    private cache = new Cache<
-        string,
-        { pools: PrismaPoolAndHookWithDynamic[]; underlyingTokens: { address: string; decimals: number }[] }
-    >();
-    private readonly SOR_POOLS_CACHE_KEY = `sor:pools`;
-
     // The new SOR service
     public async getSorSwapPaths(input: GetSwapPathsInput, maxNonBoostedPathDepth = 4): Promise<GqlSorGetSwapPaths> {
         const paths = await this.getSwapPathsFromSor(input, maxNonBoostedPathDepth);
@@ -100,7 +91,7 @@ class SorPathService {
         maxNonBoostedPathDepth = 4,
     ): Promise<PathWithAmount[] | null> {
         try {
-            const { pools: poolsFromDb, underlyingTokens } = await this.getBasePoolsFromDb(
+            const { pools: poolsFromDb, underlyingTokens } = await getBasePoolsFromDb(
                 chain,
                 protocolVersion,
                 considerPoolsWithHooks,
@@ -413,186 +404,6 @@ class SorPathService {
             } as SingleSwap;
         }
         return swaps;
-    }
-
-    /**
-     * Fetch pools from Prisma and map to b-sdk BasePool.
-     * @returns
-     */
-    public async getBasePoolsFromDb(
-        chain: Chain,
-        protocolVersion: number,
-        considerPoolsWithHooks: boolean,
-        poolIds?: string[],
-    ): Promise<{ pools: PrismaPoolAndHookWithDynamic[]; underlyingTokens: { address: string; decimals: number }[] }> {
-        const type = {
-            in: [
-                'WEIGHTED',
-                'META_STABLE',
-                'PHANTOM_STABLE',
-                'COMPOSABLE_STABLE',
-                'STABLE',
-                'FX',
-                'GYRO',
-                'GYRO3',
-                'GYROE',
-            ] as PrismaPoolType[],
-        };
-
-        if (poolIds && poolIds.length > 0) {
-            const pools = await prisma.prismaPool.findMany({
-                where: {
-                    id: { in: poolIds },
-                    chain,
-                    protocolVersion,
-                    type,
-                },
-                include: {
-                    dynamicData: true,
-                    tokens: {
-                        include: {
-                            token: true,
-                        },
-                    },
-                },
-            });
-            const underlyingTokens = await this.getUnderlyingTokensFromDBPools(pools, chain);
-            return { pools, underlyingTokens };
-        }
-
-        const cached = this.cache.get(
-            `${this.SOR_POOLS_CACHE_KEY}:${chain}:${protocolVersion}:${considerPoolsWithHooks}`,
-        );
-
-        if (cached) {
-            return cached;
-        }
-
-        const poolIdsToExclude = config[chain].sor?.poolIdsToExclude ?? [];
-
-        const pools = await prisma.prismaPool.findMany({
-            where: {
-                chain,
-                protocolVersion,
-                dynamicData: {
-                    totalSharesNum: {
-                        gt: 0.000000000001,
-                    },
-                    swapEnabled: true,
-                    totalLiquidity: {
-                        gte: chain === 'SEPOLIA' ? 0 : 100,
-                    },
-                },
-                id: {
-                    notIn: [...poolIdsToExclude, ...poolsToIgnore],
-                },
-                type,
-            },
-            include: {
-                dynamicData: true,
-                tokens: {
-                    include: {
-                        token: true,
-                    },
-                },
-            },
-        });
-
-        const lbps = await prisma.prismaPool.findMany({
-            where: {
-                chain,
-                protocolVersion,
-                dynamicData: {
-                    totalSharesNum: {
-                        gt: 0.000000000001,
-                    },
-                    swapEnabled: true,
-                },
-                id: {
-                    notIn: [...poolIdsToExclude, ...poolsToIgnore],
-                },
-                type: {
-                    in: ['LIQUIDITY_BOOTSTRAPPING'],
-                },
-            },
-            include: prismaPoolAndHookWithDynamic.include,
-        });
-
-        let filteredPools = [
-            ...pools.filter((pool) => {
-                // always include pools with no hook
-                if (!pool.hook || Object.keys(pool.hook).length === 0) {
-                    return true;
-                }
-
-                // always include pools with MEV_TAX hooks
-                const hook = pool.hook as HookData;
-                if (hook.type === 'MEV_TAX') {
-                    return true;
-                }
-
-                // if considerPoolsWithHooks is false, filter out all pools with hooks
-                if (!considerPoolsWithHooks) {
-                    return false;
-                }
-
-                // if considerPoolsWithHooks is true, filter out pools with non supported hook types
-                const isSupportedHookType = hook.type !== undefined && hook.type !== 'UNKNOWN';
-                if (!isSupportedHookType) {
-                    console.log('Pool has unsupported hook type', pool.id, hook.type);
-                }
-                return isSupportedHookType;
-            }),
-            ...lbps,
-        ];
-
-        const underlyingTokens = await this.getUnderlyingTokensFromDBPools(filteredPools, chain);
-        const result = { pools: filteredPools, underlyingTokens };
-
-        // cache for 10s
-        this.cache.put(
-            `${this.SOR_POOLS_CACHE_KEY}:${chain}:${protocolVersion}:${considerPoolsWithHooks}`,
-            result,
-            10 * 1000,
-        );
-        return result;
-    }
-
-    private async getUnderlyingTokensFromDBPools(
-        pools: PrismaPoolAndHookWithDynamic[],
-        chain: Chain,
-    ): Promise<{ address: string; decimals: number }[]> {
-        const tokensWithUnderlying = pools.flatMap((pool) =>
-            pool.tokens.filter((token) => token.token.underlyingTokenAddress !== null),
-        );
-
-        const erc4626ThatCanBeUsedForSwaps = await prisma.prismaErc4626ReviewData.findMany({
-            where: {
-                chain,
-                erc4626Address: { in: tokensWithUnderlying.map((token) => token.address) },
-                canUseBufferForSwaps: true,
-            },
-        });
-
-        const underlyingTokenAddresses = erc4626ThatCanBeUsedForSwaps.map((data) => data.assetAddress);
-
-        const underlyingTokens = await prisma.prismaToken.findMany({
-            where: {
-                chain,
-                address: {
-                    in: underlyingTokenAddresses,
-                },
-            },
-        });
-
-        if (underlyingTokens.length !== underlyingTokenAddresses.length) {
-            underlyingTokenAddresses.forEach((address) => {
-                if (!underlyingTokens.find((token) => token.address === address)) {
-                    console.warn('Underlying token not found for pool', address);
-                }
-            });
-        }
-        return underlyingTokens;
     }
 
     private mapRoutes(paths: PathWithAmount[], pools: GqlPoolMinimal[]): GqlSorSwapRoute[] {
