@@ -1,15 +1,5 @@
-import {
-    BatchSwapStep,
-    BigintIsh,
-    DEFAULT_USERDATA,
-    PriceImpactAmount,
-    SingleSwap,
-    SwapKind,
-    Token,
-    TokenAmount,
-} from '@balancer/sdk';
+import { BigintIsh, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { PathWithAmount } from '../path';
-import { MathSol, abs } from './math';
 
 import { HookState } from '@balancer-labs/balancer-maths';
 import { LiquidityManagement } from '../../../types';
@@ -39,27 +29,6 @@ export function checkInputs(
     }
 
     return amount;
-}
-
-export function calculatePriceImpact(paths: PathWithAmount[], swapKind: SwapKind): PriceImpactAmount {
-    const pathsReverse = paths.map(
-        (path) =>
-            new PathWithAmount(
-                [...path.tokens].reverse(),
-                [...path.pools].reverse(),
-                [...path.isBuffer].reverse(),
-                swapKind === SwapKind.GivenIn ? path.outputAmount : path.inputAmount,
-            ),
-    );
-
-    const amountInitial =
-        swapKind === SwapKind.GivenIn ? getInputAmount(paths).amount : getInputAmount(pathsReverse).amount;
-
-    const amountFinal =
-        swapKind === SwapKind.GivenIn ? getOutputAmount(pathsReverse).amount : getOutputAmount(paths).amount;
-
-    const priceImpact = MathSol.divDownFixed(amountInitial - amountFinal, amountInitial * 2n);
-    return PriceImpactAmount.fromRawAmount(priceImpact);
 }
 
 export function getInputAmount(paths: PathWithAmount[]): TokenAmount {

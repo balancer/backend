@@ -7,34 +7,18 @@ import {
     GqlSorSwapRoute,
     GqlSorSwapRouteHop,
     GqlSorSwapType,
-    GqlSwapCallDataInput,
 } from '../../../apps/api/gql/generated-schema';
 import { Chain } from '@prisma/client';
 import { GetSwapsV2Input as GetSwapPathsInput } from '../types';
-import { chainToChainId as chainToIdMap } from '../../network/chain-id-to-chain';
 import * as Sentry from '@sentry/node';
 import { Address, formatUnits } from 'viem';
 import { sorGetPathsWithPools } from './lib/static';
 import { poolService } from '../../pool/pool.service';
 import { replaceZeroAddressWithEth } from '../../web3/addresses';
 import { getToken, swapPathsZeroResponse } from '../utils';
-import {
-    BatchSwapStep,
-    DEFAULT_USERDATA,
-    SingleSwap,
-    Slippage,
-    Swap,
-    SwapBuildOutputExactIn,
-    SwapBuildOutputExactOut,
-    TokenAmount,
-    SwapKind,
-    ExactInQueryOutput,
-    ExactOutQueryOutput,
-    VAULT,
-} from '@balancer/sdk';
+import { BatchSwapStep, DEFAULT_USERDATA, SingleSwap, TokenAmount, SwapKind } from '@balancer/sdk';
 import { PathWithAmount } from './lib/path';
-import { calculatePriceImpact, getInputAmount, getOutputAmount } from './lib/utils/helpers';
-import config from '../../../config';
+import { getInputAmount, getOutputAmount } from './lib/utils/helpers';
 import { getBasePoolsFromDb } from '../utils/pool';
 
 class SorPathService {
@@ -47,33 +31,7 @@ class SorPathService {
             return emptyResponse;
         }
 
-        try {
-            return this.mapToSorSwapPaths(
-                paths!,
-                input.swapType,
-                input.chain,
-                input.protocolVersion as 2 | 3,
-                input.queryBatchSwap,
-                input.callDataInput,
-            );
-        } catch (err: any) {
-            if (err.message === 'SOR queryBatchSwap failed') {
-                throw new Error('SOR queryBatchSwap failed');
-            } else {
-                console.log(`SOR queryBatchSwap failed`, err);
-                Sentry.captureException(err.message, {
-                    tags: {
-                        service: 'sorV2 query swap',
-                        tokenIn: input.tokenIn,
-                        tokenOut: input.tokenOut,
-                        swapAmount: formatUnits(input.swapAmount.amount, input.swapAmount.token.decimals),
-                        swapType: input.swapType,
-                        chain: input.chain,
-                    },
-                });
-                return emptyResponse;
-            }
-        }
+        return this.mapToSorSwapPaths(paths!, input.swapType, input.chain, input.protocolVersion as 2 | 3);
     }
 
     private async getSwapPathsFromSor(
@@ -152,113 +110,16 @@ class SorPathService {
         swapType: GqlSorSwapType,
         chain: Chain,
         protocolVersion: 2 | 3,
-        queryFirst = false,
-        callDataInput: (GqlSwapCallDataInput & { wethIsEth: boolean }) | undefined,
     ): Promise<GqlSorGetSwapPaths> {
         const swapKind = this.mapSwapTypeToSwapKind(swapType);
-
-        const sdkSwap = new Swap({
-            chainId: parseFloat(chainToIdMap[chain]),
-            paths: paths.map((path) => ({
-                protocolVersion,
-                vaultVersion: protocolVersion,
-                inputAmountRaw: path.inputAmount.amount,
-                outputAmountRaw: path.outputAmount.amount,
-                tokens: path.tokens.map((token) => ({
-                    address: token.address,
-                    decimals: token.decimals,
-                })),
-                pools: path.pools.map((pool) => pool.id),
-            })),
-            swapKind,
-        });
 
         let inputAmount = getInputAmount(paths);
         let outputAmount = getOutputAmount(paths);
 
-        let callData: GqlSorCallData | undefined = undefined;
-
-        // TODO: deprecated on-chain query and callData functionality will be supported for v2 for a while, but should be removed in the future
-        if (protocolVersion === 2) {
-            let queryOutput: ExactInQueryOutput | ExactOutQueryOutput | undefined = undefined;
-            let updatedAmount: TokenAmount | undefined = undefined;
-            if (queryFirst) {
-                try {
-                    queryOutput = await sdkSwap.query(config[chain].rpcUrl);
-                } catch (error) {
-                    throw new Error('SOR queryBatchSwap failed');
-                }
-                if (swapKind === SwapKind.GivenIn) {
-                    updatedAmount = (queryOutput as ExactInQueryOutput).expectedAmountOut;
-                } else {
-                    updatedAmount = (queryOutput as ExactOutQueryOutput).expectedAmountIn;
-                }
-            }
-            // only total inputAmount or outputAmount is updated
-            if (updatedAmount) {
-                inputAmount = swapKind === SwapKind.GivenIn ? inputAmount : updatedAmount;
-                outputAmount = swapKind === SwapKind.GivenIn ? updatedAmount : outputAmount;
-            }
-
-            if (callDataInput) {
-                // Slippage.fromPercentage cannot handle more than 6 decimal places because it converts numbers to strings via interpolation, resulting in a scientific notation string.
-                if (callDataInput.slippagePercentage.length > 6) {
-                    callDataInput.slippagePercentage = callDataInput.slippagePercentage.slice(0, 6);
-                }
-                if (swapKind === SwapKind.GivenIn) {
-                    const callDataExactIn = sdkSwap.buildCall({
-                        sender: callDataInput.sender as `0x${string}`,
-                        recipient: callDataInput.receiver as `0x${string}`,
-                        wethIsEth: callDataInput.wethIsEth,
-                        queryOutput: {
-                            swapKind,
-                            expectedAmountOut: outputAmount,
-                            amountIn: inputAmount,
-                            to: VAULT[parseInt(chainToIdMap[chain])],
-                        } as ExactInQueryOutput,
-                        slippage: Slippage.fromPercentage(callDataInput.slippagePercentage as `${number}`),
-                        deadline: callDataInput.deadline ? BigInt(callDataInput.deadline) : 999999999999999999n,
-                    }) as SwapBuildOutputExactIn;
-                    callData = {
-                        callData: callDataExactIn.callData,
-                        to: callDataExactIn.to,
-                        value: callDataExactIn.value.toString(),
-                        minAmountOutRaw: callDataExactIn.minAmountOut.amount.toString(),
-                    };
-                } else {
-                    const callDataExactOut = sdkSwap.buildCall({
-                        sender: callDataInput.sender as `0x${string}`,
-                        recipient: callDataInput.receiver as `0x${string}`,
-                        wethIsEth: callDataInput.wethIsEth,
-                        queryOutput: {
-                            swapKind,
-                            expectedAmountIn: inputAmount,
-                            amountOut: outputAmount,
-                            to: VAULT[parseInt(chainToIdMap[chain])],
-                        } as ExactOutQueryOutput,
-                        slippage: Slippage.fromPercentage(callDataInput.slippagePercentage as `${number}`),
-                        deadline: callDataInput.deadline ? BigInt(callDataInput.deadline) : 999999999999999999n,
-                    }) as SwapBuildOutputExactOut;
-                    callData = {
-                        callData: callDataExactOut.callData,
-                        to: callDataExactOut.to,
-                        value: callDataExactOut.value.toString(),
-                        maxAmountInRaw: callDataExactOut.maxAmountIn.amount.toString(),
-                    };
-                }
-            }
-        }
-
-        // TODO: replace price impact ABA with USD values approach (same as used in the FE)
-        let priceImpact: string | undefined;
-        let priceImpactError: string | undefined;
-        try {
-            priceImpact = calculatePriceImpact(paths, swapKind).decimal.toFixed(4);
-        } catch (error) {
-            priceImpact = undefined;
-            priceImpactError =
-                'Price impact could not be calculated for this path. The swap path is still valid and can be executed.';
-        }
+        const callData: GqlSorCallData | undefined = undefined;
+        const priceImpact = undefined;
+        const priceImpactError =
+            'Price impact could not be calculated for this path. The swap path is still valid and can be executed.';
 
         // get all affected pools
         let poolIds: string[] = [];
