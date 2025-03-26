@@ -2,11 +2,11 @@ import { Address, Hex } from 'viem';
 import { MAX_UINT256, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { BufferState, Vault } from '@balancer-labs/balancer-maths';
 
-import { BasePoolV3 } from '../../poolsV2/basePool';
+import { BasePoolMethodsV3 } from '../basePoolMethodsV3';
 import { BasePoolToken } from '../../utils/basePoolToken';
 import { Erc4626PoolToken } from '../../utils/erc4626PoolToken';
 
-export class BufferPool implements BasePoolV3 {
+export class BufferPool implements BasePoolMethodsV3 {
     public readonly chainId: number;
     public readonly id: Hex;
     public readonly address: string;

@@ -84,6 +84,7 @@ export const updateLiquidityValuesForPools = async (chain: Chain, poolIds?: stri
         const pool = pdt.pool;
         const balanceUSDs = pool.tokens.map((token) => ({
             id: token.id,
+            previousBalanceUSD: token.balanceUSD,
             balanceUSD:
                 token.address === pool.address
                     ? 0
@@ -106,12 +107,14 @@ export const updateLiquidityValuesForPools = async (chain: Chain, poolIds?: stri
                 );
                 continue;
             }
-            updates.push(
-                prisma.prismaPoolToken.update({
-                    where: { id_chain: { id: item.id, chain: pool.chain } },
-                    data: { balanceUSD: item.balanceUSD },
-                }),
-            );
+            if (item.balanceUSD !== item.previousBalanceUSD) {
+                updates.push(
+                    prisma.prismaPoolToken.update({
+                        where: { id_chain: { id: item.id, chain: pool.chain } },
+                        data: { balanceUSD: item.balanceUSD },
+                    }),
+                );
+            }
         }
         if (!isSupportedInt(totalLiquidity)) {
             Sentry.captureException(
@@ -127,12 +130,14 @@ export const updateLiquidityValuesForPools = async (chain: Chain, poolIds?: stri
             continue;
         }
 
-        updates.push(
-            prisma.prismaPoolDynamicData.update({
-                where: { id_chain: { id: pool.id, chain: pool.chain } },
-                data: { totalLiquidity },
-            }),
-        );
+        if (totalLiquidity !== pdt.totalLiquidity) {
+            updates.push(
+                prisma.prismaPoolDynamicData.update({
+                    where: { id_chain: { id: pool.id, chain: pool.chain } },
+                    data: { totalLiquidity },
+                }),
+            );
+        }
 
         if (updates.length > 100) {
             await Promise.all(updates);

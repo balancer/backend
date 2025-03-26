@@ -42,14 +42,25 @@ export class PoolAprUpdaterService {
         const grouped = _.groupBy(aprItems, 'poolId');
         let operations: any[] = [];
 
+        // Select / update aprs in Dynamic Data
+        const dynamicData = await prisma.prismaPoolDynamicData
+            .findMany({
+                where: { chain: chain },
+                select: { id: true, apr: true },
+            })
+            .then((data) => _.keyBy(data, 'id'));
+
         //store the total APR on the dynamic data so we can sort by it
         for (const poolId in grouped) {
-            operations.push(
-                prisma.prismaPoolDynamicData.update({
-                    where: { id_chain: { id: poolId, chain: chain } },
-                    data: { apr: _.sumBy(grouped[poolId], (item) => item.apr) },
-                }),
-            );
+            const apr = _.sumBy(grouped[poolId], (item) => item.apr);
+            if (dynamicData[poolId].apr !== apr) {
+                operations.push(
+                    prisma.prismaPoolDynamicData.update({
+                        where: { id_chain: { id: poolId, chain: chain } },
+                        data: { apr },
+                    }),
+                );
+            }
         }
 
         await prismaBulkExecuteOperations(operations);

@@ -6,6 +6,7 @@ import { PoolSnapshotService } from '../actions/snapshots/pool-snapshot-service'
 import { getVaultSubgraphClient } from '../sources/subgraphs';
 import { getV2SubgraphClient } from '../subgraphs/balancer-subgraph';
 import { updateLifetimeValues } from '../actions/pool/update-liftetime-values';
+import { roundToNextMidnight } from '../common/time';
 
 /**
  * Controller responsible for configuring and executing ETL actions.
@@ -95,9 +96,65 @@ export function SnapshotsController(tracer?: any) {
             const vaultSubgraphClient = getVaultSubgraphClient(balancerV3, chain);
             const entries = await syncSnapshots(vaultSubgraphClient, 'SNAPSHOTS_V3', chain, {
                 startFromLastSyncedBlock: false,
+                syncPoolsWithoutUpdates: true,
             });
             // update lifetime values based on snapshots
             await updateLifetimeValues(chain, 3);
+            return entries;
+        },
+        async forwardFillSnapshotsForPoolsWithoutUpdatesV3(chain: Chain) {
+            // To be run as a daily task, 1-2h after midnight, to make sure all pools have current day snapshots
+            const {
+                subgraphs: { balancerV3 },
+            } = config[chain];
+
+            // Guard against unconfigured chains
+            if (!balancerV3) {
+                throw new Error(`Chain not configured: ${chain}`);
+            }
+
+            const currentMidnight = roundToNextMidnight();
+
+            // Find pools without snapshots for the current midnight
+            const ids = await prisma.prismaPool
+                .findMany({
+                    where: {
+                        chain,
+                        protocolVersion: 3,
+                    },
+                    select: {
+                        id: true,
+                    },
+                })
+                .then((pools) => pools.map((pool) => pool.id));
+
+            const snapshotPoolIds = await prisma.prismaPoolSnapshot
+                .findMany({
+                    where: {
+                        chain,
+                        protocolVersion: 3,
+                        timestamp: currentMidnight,
+                    },
+                    select: {
+                        poolId: true,
+                    },
+                })
+                .then((snapshots) => snapshots.map((s) => s.poolId));
+
+            const poolIds = ids.filter((id) => !snapshotPoolIds.includes(id));
+
+            if (poolIds.length === 0) {
+                return [];
+            }
+
+            const vaultSubgraphClient = getVaultSubgraphClient(balancerV3, chain);
+            const entries = await syncSnapshots(vaultSubgraphClient, 'SNAPSHOTS_V3', chain, {
+                startFromLastSyncedBlock: true,
+                syncPoolsWithoutUpdates: true,
+                poolIds,
+            });
+
+            // update lifetime values based on snapshots
             return entries;
         },
         async fillMissingSnapshotsV2(chain: Chain) {

@@ -124,7 +124,7 @@ async function updateYieldCaptureForAllPools(chain: Chain) {
     const operations: any[] = [];
 
     for (const pool of pools) {
-        if (pool.dynamicData?.totalLiquidity && capturesYield(pool)) {
+        if (pool.dynamicData && pool.dynamicData.totalLiquidity && capturesYield(pool)) {
             const totalLiquidity = pool.dynamicData.totalLiquidity;
             const totalLiquidity24hAgo = pool.dynamicData.totalLiquidity24hAgo;
             let userYieldApr = 0;
@@ -165,12 +165,19 @@ async function updateYieldCaptureForAllPools(chain: Chain) {
             let protocolYieldCapture24h = yieldCapture24h - yieldForUser24h;
             let protocolYieldCapture48h = yieldCapture48h - yieldForUser48h;
 
-            operations.push(
-                prisma.prismaPoolDynamicData.update({
-                    where: { id_chain: { id: pool.id, chain: pool.chain } },
-                    data: { yieldCapture24h, yieldCapture48h, protocolYieldCapture24h, protocolYieldCapture48h },
-                }),
-            );
+            if (
+                pool.dynamicData.yieldCapture24h !== yieldCapture24h ||
+                pool.dynamicData.yieldCapture48h !== yieldCapture48h ||
+                pool.dynamicData.protocolYieldCapture24h !== protocolYieldCapture24h ||
+                pool.dynamicData.protocolYieldCapture48h !== protocolYieldCapture48h
+            ) {
+                operations.push(
+                    prisma.prismaPoolDynamicData.update({
+                        where: { id_chain: { id: pool.id, chain: pool.chain } },
+                        data: { yieldCapture24h, yieldCapture48h, protocolYieldCapture24h, protocolYieldCapture48h },
+                    }),
+                );
+            }
         }
     }
 

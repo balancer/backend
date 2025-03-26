@@ -1,51 +1,28 @@
 import { PrismaPoolAprType } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
 import { chainIdToChain } from '../../network/chain-id-to-chain';
-import moment from 'moment';
 
-const url = 'https://api.merkl.xyz/v3/campaigns?types=1&live=true';
+const url = 'https://api.merkl.xyz/v4/opportunities/?test=false&status=LIVE&campaigns=true&mainProtocolId=balancer';
 
-interface MerklCampaign {
+interface MerklOpportunity {
     chainId: number;
-    computeChainId: number;
+    identifier: string;
     apr: number;
-    startTimestamp: number;
-    endTimestamp: number;
-    type: 'balancerPool' | 'balancerV3';
-    typeInfo: {
-        tokenAddress: string;
-        poolId: string;
-    };
-    campaignParameters: {
-        symbolRewardToken: string;
-        whitelist: string[];
-    };
-}
-
-interface MerklCampaigns {
-    [chainId: number]: {
-        [typeAddress: string]: {
-            [campaignId: number]: MerklCampaign;
+    campaigns: {
+        params: {
+            whitelist: string[];
         };
-    };
+    }[];
 }
 
 const fetchMerklCampaigns = async () => {
-    const now = moment().unix();
     const response = await fetch(url);
-    const data = (await response.json()) as MerklCampaigns;
-    // Flatten the data
-    const campaigns = Object.values(data)
-        .map((chain) => {
-            return Object.values(chain).map((type: any) => {
-                return Object.values(type) as MerklCampaign[];
-            });
-        })
-        .flat(2)
-        .filter((campaign) => campaign.type === 'balancerPool' || campaign.type === 'balancerV3')
-        .filter((campaign) => campaign.campaignParameters.whitelist.length === 0)
-        .filter((campaign) => Object.keys(chainIdToChain).includes(String(campaign.computeChainId)))
-        .filter((campaign) => campaign.startTimestamp < now && campaign.endTimestamp > now);
+    const data = (await response.json()) as MerklOpportunity[];
+
+    // remove opportunities with whitelist
+    const campaigns = data.filter((opportunity) =>
+        opportunity.campaigns.every((campaign) => campaign.params.whitelist.length === 0),
+    );
 
     return campaigns;
 };
@@ -53,29 +30,35 @@ const fetchMerklCampaigns = async () => {
 export const syncMerklRewards = async () => {
     const campaigns = await fetchMerklCampaigns();
 
-    const data = campaigns
-        .map((campaign) => ({
-            id: `${campaign.typeInfo.poolId}-merkl`,
+    const affectedPools = await prisma.prismaPool.findMany({
+        where: {
+            address: { in: campaigns.map((campaign) => campaign.identifier.toLowerCase()) },
+        },
+        select: { id: true, address: true, chain: true },
+    });
+
+    const data = campaigns.map((campaign) => {
+        const poolId = affectedPools.find(
+            (pool) =>
+                pool.address === campaign.identifier.toLowerCase() && pool.chain === chainIdToChain[campaign.chainId],
+        )?.id;
+
+        if (!poolId) {
+            return null;
+        }
+
+        return {
+            id: `${poolId}-merkl`,
             type: PrismaPoolAprType.MERKL,
             title: `Merkl Rewards`,
-            chain: chainIdToChain[campaign.computeChainId],
-            poolId:
-                campaign.type === 'balancerPool'
-                    ? campaign.typeInfo.poolId.toLowerCase()
-                    : campaign.typeInfo.tokenAddress.toLowerCase(),
+            chain: chainIdToChain[campaign.chainId],
+            poolId: poolId,
             apr: campaign.apr / 100,
-        }))
-        .reduce((acc, item) => {
-            if (acc[item.id]) {
-                acc[item.id].apr += item.apr;
-            } else {
-                acc[item.id] = { ...item };
-            }
-            return acc;
-        }, {} as Record<string, any>);
+        };
+    });
 
     await prisma.$transaction([
         prisma.prismaPoolAprItem.deleteMany({ where: { type: PrismaPoolAprType.MERKL } }),
-        prisma.prismaPoolAprItem.createMany({ data: Object.values(data) }),
+        prisma.prismaPoolAprItem.createMany({ data: data.filter((item) => item !== null) }),
     ]);
 };
