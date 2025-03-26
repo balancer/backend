@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/node';
-import { Address } from 'viem';
+import { Address, formatUnits } from 'viem';
 
 import { GqlSorGetSwapPaths, QuerySorGetSwapPathsArgs } from '../../apps/api/gql/generated-schema';
 import { GetSwapPathsInput, GraphTraversalConfig } from './types';
@@ -15,6 +15,7 @@ import {
     validateTokens,
 } from './utils';
 import { PathWithAmount } from './lib/path';
+import { getInputAmount, getOutputAmount } from './lib/utils';
 
 export class SorService {
     async getSorSwapPaths(args: QuerySorGetSwapPathsArgs): Promise<GqlSorGetSwapPaths> {
@@ -30,56 +31,56 @@ export class SorService {
             return swapPathsZeroResponse(args.tokenIn, args.tokenOut, args.chain);
         }
 
-        // map query inputs to sor inputs
+        // map SOR Service inputs to SOR inputs
         const getSwapPathsInput = await mapToGetSwapPathsInput({ ...args, tokenIn, tokenOut });
 
         // get swap paths from sor for the requested protocol version mapped as sor service output type
-        const mappedPaths = args.useProtocolVersion
-            ? this.getSorSwapPathsForVersion({
+        const { paths, protocolVersion } = args.useProtocolVersion
+            ? await this.getSwapPathsWithRetry({
                   ...getSwapPathsInput,
                   protocolVersion: args.useProtocolVersion,
               })
-            : this.getBestSwapPathVersion(getSwapPathsInput);
+            : await this.getBestSwapPathFromBothVersions(getSwapPathsInput);
+
+        // return zero response if no paths are found
+        if (!paths) {
+            return swapPathsZeroResponse(
+                getSwapPathsInput.tokenIn,
+                getSwapPathsInput.tokenOut,
+                getSwapPathsInput.chain,
+            );
+        }
+
+        // map SOR output to SOR Service output
+        const mappedPaths = await mapToSorSwapPaths(paths, args.swapType, args.chain, protocolVersion);
 
         return mappedPaths;
     }
 
-    private async getSorSwapPathsForVersion(input: GetSwapPathsInput, maxDepth = 4): Promise<GqlSorGetSwapPaths> {
-        const paths = await this.getSwapPathsWithRetry(input, maxDepth);
-
-        if (!paths) {
-            return swapPathsZeroResponse(input.tokenIn, input.tokenOut, input.chain);
-        }
-
-        return mapToSorSwapPaths(paths, input.swapType, input.chain, input.protocolVersion as 2 | 3);
-    }
-
-    private async getBestSwapPathVersion(input: Omit<GetSwapPathsInput, 'protocolVersion'>) {
-        const swapBalancerV2 = await this.getSorSwapPathsForVersion({ ...input, protocolVersion: 2 });
-        const swapBalancerV3 = await this.getSorSwapPathsForVersion({ ...input, protocolVersion: 3 });
+    private async getBestSwapPathFromBothVersions(input: Omit<GetSwapPathsInput, 'protocolVersion'>): Promise<{
+        paths: PathWithAmount[] | null;
+        protocolVersion: number;
+    }> {
+        const pathsV2 = await this.getSwapPathsWithRetry({ ...input, protocolVersion: 2 });
+        const pathsV3 = await this.getSwapPathsWithRetry({ ...input, protocolVersion: 3 });
 
         if (input.swapType === 'EXACT_IN') {
-            return parseFloat(swapBalancerV2.returnAmount) > parseFloat(swapBalancerV3.returnAmount)
-                ? swapBalancerV2
-                : swapBalancerV3;
+            return parseFloat(pathsV2.returnAmount) > parseFloat(pathsV3.returnAmount) ? pathsV2 : pathsV3;
         } else {
             // return swap path with smallest non-zero amountsIn (if it exists)
-            if (parseFloat(swapBalancerV2.returnAmount) === 0) {
-                return swapBalancerV3;
-            } else if (parseFloat(swapBalancerV3.returnAmount) === 0) {
-                return swapBalancerV2;
+            if (parseFloat(pathsV2.returnAmount) === 0) {
+                return pathsV3;
+            } else if (parseFloat(pathsV3.returnAmount) === 0) {
+                return pathsV2;
             } else {
-                return parseFloat(swapBalancerV2.returnAmount) < parseFloat(swapBalancerV3.returnAmount)
-                    ? swapBalancerV2
-                    : swapBalancerV3;
+                return parseFloat(pathsV3.returnAmount) < parseFloat(pathsV3.returnAmount) ? pathsV2 : pathsV3;
             }
         }
     }
 
     private async getSwapPathsWithRetry(
         input: GetSwapPathsInput,
-        maxDepth: number = 4,
-    ): Promise<PathWithAmount[] | null> {
+    ): Promise<{ paths: PathWithAmount[] | null; protocolVersion: number; returnAmount: string }> {
         try {
             const { pools: poolsFromDb, underlyingTokens } = await getBasePoolsFromDb(
                 input.chain,
@@ -93,7 +94,7 @@ export class SorService {
             const swapKind = mapSwapKind(input.swapType);
 
             // retry with different max depth if no paths are found
-            let swapOptions = this.buildSwapOptions(maxDepth, input.graphTraversalConfig);
+            let swapOptions = this.buildSwapOptions(input.graphTraversalConfig);
             let paths = await SOR.getPathsWithPools(
                 tokenIn,
                 tokenOut,
@@ -106,7 +107,10 @@ export class SorService {
             );
 
             if (!paths) {
-                swapOptions = this.buildSwapOptions(maxDepth + 1, input.graphTraversalConfig);
+                swapOptions = this.buildSwapOptions({
+                    ...swapOptions.graphTraversalConfig,
+                    maxNonBoostedPathDepth: swapOptions.graphTraversalConfig.maxNonBoostedPathDepth! + 1,
+                });
                 paths = await SOR.getPathsWithPools(
                     tokenIn,
                     tokenOut,
@@ -119,20 +123,29 @@ export class SorService {
                 );
             }
 
-            return paths;
+            if (!paths) {
+                return { paths: null, protocolVersion: input.protocolVersion, returnAmount: '0' };
+            }
+
+            // add returnAmount to result using getInputAmount and getOutputAmount
+            const inputAmount = getInputAmount(paths);
+            const outputAmount = getOutputAmount(paths);
+            const returnAmountEvm = input.swapType === 'EXACT_IN' ? outputAmount : inputAmount;
+            const returnAmount = formatUnits(returnAmountEvm.amount, returnAmountEvm.token.decimals);
+
+            return { paths, protocolVersion: input.protocolVersion, returnAmount };
         } catch (err: any) {
             this.logSwapPathError(err, input);
-            return null;
+            return { paths: null, protocolVersion: input.protocolVersion, returnAmount: '0' };
         }
     }
 
-    private buildSwapOptions(
-        maxNonBoostedPathDepth: number,
-        graphTraversalConfig?: GraphTraversalConfig,
-    ): { graphTraversalConfig: GraphTraversalConfig } {
+    private buildSwapOptions(graphTraversalConfig?: GraphTraversalConfig): {
+        graphTraversalConfig: GraphTraversalConfig;
+    } {
         return {
             graphTraversalConfig: {
-                maxNonBoostedPathDepth,
+                maxNonBoostedPathDepth: graphTraversalConfig?.maxNonBoostedPathDepth ?? 4,
                 ...graphTraversalConfig,
             },
         };

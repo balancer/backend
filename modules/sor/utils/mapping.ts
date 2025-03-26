@@ -53,7 +53,7 @@ export async function mapToSorSwapPaths(
     paths: PathWithAmount[],
     swapType: GqlSorSwapType,
     chain: Chain,
-    protocolVersion: 2 | 3,
+    protocolVersion: number,
 ): Promise<GqlSorGetSwapPaths> {
     const swapKind = mapSwapKind(swapType);
 
