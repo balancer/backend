@@ -1,7 +1,11 @@
-import { TypePoolFragment } from '../../sources/subgraphs/balancer-v3-pools/generated/types';
+import { SepoliaTypePoolFragment } from '../../sources/subgraphs/balancer-v3-pools/generated/types';
 
-export const quant_amm_weighted = (pool: TypePoolFragment) => {
-    const params = pool.quantAMMWeightedParams!;
+export const quant_amm_weighted = (pool: SepoliaTypePoolFragment) => {
+    if (!pool.quantAMMWeightedParams) {
+        return {};
+    }
+
+    const params = pool.quantAMMWeightedParams;
 
     return {
         oracleStalenessThreshold: params.oracleStalenessThreshold || '',

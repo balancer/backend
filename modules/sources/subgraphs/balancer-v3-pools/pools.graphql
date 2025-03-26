@@ -46,26 +46,6 @@ fragment TypePool on Pool {
         z
         dSq
     }
-    quantAMMWeightedParams {
-        oracleStalenessThreshold
-        poolRegistry
-        lambda
-        epsilonMax
-        absoluteWeightGuardRail
-        maxTradeSizeRatio
-        updateInterval
-        weightsAtLastUpdateInterval
-        weightBlockMultipliers
-        lastUpdateIntervalTime
-        lastInterpolationTimePossible
-        details {
-            id
-            category
-            name
-            type
-            value
-        }
-    }
 }
 
 query Pools(

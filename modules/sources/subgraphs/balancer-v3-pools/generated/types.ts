@@ -1660,28 +1660,6 @@ export type TypePoolFragment = {
         z: string;
         dSq: string;
     } | null;
-    quantAMMWeightedParams?: {
-        __typename?: 'QuantAMMWeightedParams';
-        oracleStalenessThreshold: string;
-        poolRegistry: string;
-        lambda: Array<string>;
-        epsilonMax: string;
-        absoluteWeightGuardRail: string;
-        maxTradeSizeRatio: string;
-        updateInterval: string;
-        weightsAtLastUpdateInterval: Array<string>;
-        weightBlockMultipliers: Array<string>;
-        lastUpdateIntervalTime: string;
-        lastInterpolationTimePossible: string;
-        details: Array<{
-            __typename?: 'QuantAMMWeightedDetail';
-            id: string;
-            category: string;
-            name: string;
-            type: string;
-            value: string;
-        }>;
-    } | null;
 };
 
 export type PoolsQueryVariables = Exact<{
@@ -1720,28 +1698,6 @@ export type PoolsQuery = {
             w: string;
             z: string;
             dSq: string;
-        } | null;
-        quantAMMWeightedParams?: {
-            __typename?: 'QuantAMMWeightedParams';
-            oracleStalenessThreshold: string;
-            poolRegistry: string;
-            lambda: Array<string>;
-            epsilonMax: string;
-            absoluteWeightGuardRail: string;
-            maxTradeSizeRatio: string;
-            updateInterval: string;
-            weightsAtLastUpdateInterval: Array<string>;
-            weightBlockMultipliers: Array<string>;
-            lastUpdateIntervalTime: string;
-            lastInterpolationTimePossible: string;
-            details: Array<{
-                __typename?: 'QuantAMMWeightedDetail';
-                id: string;
-                category: string;
-                name: string;
-                type: string;
-                value: string;
-            }>;
         } | null;
     }>;
 };
@@ -1906,26 +1862,6 @@ export const TypePoolFragmentDoc = gql`
             w
             z
             dSq
-        }
-        quantAMMWeightedParams {
-            oracleStalenessThreshold
-            poolRegistry
-            lambda
-            epsilonMax
-            absoluteWeightGuardRail
-            maxTradeSizeRatio
-            updateInterval
-            weightsAtLastUpdateInterval
-            weightBlockMultipliers
-            lastUpdateIntervalTime
-            lastInterpolationTimePossible
-            details {
-                id
-                category
-                name
-                type
-                value
-            }
         }
     }
 `;
