@@ -194,6 +194,22 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
         case 'sync-snapshots-v3':
             await runIfNotAlreadyRunning(name, chainId, () => SnapshotsController().syncSnapshotsV3(chain), res, next);
             break;
+        case 'forward-fill-snapshots-v3':
+            await runIfNotAlreadyRunning(
+                name,
+                chainId,
+                () => {
+                    // Run just once per 24h
+                    const now = new Date();
+                    if (now.getUTCHours() !== 0) {
+                        return true;
+                    }
+                    return SnapshotsController().forwardFillSnapshotsForPoolsWithoutUpdatesV3(chain);
+                },
+                res,
+                next,
+            );
+            break;
         case 'update-lifetime-values-for-all-pools':
             await runIfNotAlreadyRunning(name, chainId, () => poolService.updateLifetimeValuesForAllPools(), res, next);
             break;
