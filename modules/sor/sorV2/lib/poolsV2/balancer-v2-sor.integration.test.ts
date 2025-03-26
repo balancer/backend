@@ -3,7 +3,7 @@
 import { ExactInQueryOutput, Swap, SwapKind, Token, Address } from '@balancer/sdk';
 
 import { PathWithAmount } from '../path';
-import { sorGetPathsWithPools } from '../static';
+import { SOR } from '../sor';
 import { getOutputAmount } from '../utils/helpers';
 import { chainToChainId as chainToIdMap } from '../../../../network/chain-id-to-chain';
 
@@ -90,12 +90,13 @@ describe('Balancer V2 SOR Integration Tests', () => {
             // get SOR paths
             const amountIn = BigInt(1e18);
 
-            paths = (await sorGetPathsWithPools(
+            paths = (await SOR.getPathsWithPools(
                 tIn,
                 tOut,
                 SwapKind.GivenIn,
                 amountIn,
                 [prismaWeightedPool],
+                [],
                 protocolVersion,
             )) as PathWithAmount[];
 
@@ -125,12 +126,13 @@ describe('Balancer V2 SOR Integration Tests', () => {
             // get SOR paths
             const amountIn = BigInt(10e18);
 
-            paths = (await sorGetPathsWithPools(
+            paths = (await SOR.getPathsWithPools(
                 tIn,
                 tOut,
                 SwapKind.GivenIn,
                 amountIn,
                 [prismaWeightedPool],
+                [],
                 protocolVersion,
             )) as PathWithAmount[];
 

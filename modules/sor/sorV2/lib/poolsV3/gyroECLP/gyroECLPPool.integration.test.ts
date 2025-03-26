@@ -6,7 +6,7 @@ import { createTestClient, Hex, http, parseUnits, TestClient } from 'viem';
 import { PrismaPoolAndHookWithDynamic } from '../../../../../../prisma/prisma-types';
 
 import { PathWithAmount } from '../../path';
-import { sorGetPathsWithPools } from '../../static';
+import { SOR } from '../../sor';
 import { getOutputAmount, getInputAmount } from '../../utils/helpers';
 import { chainToChainId as chainToIdMap } from '../../../../../network/chain-id-to-chain';
 
@@ -97,7 +97,7 @@ describe('SOR V3 - GyroECLP Integration Tests', () => {
             // get SOR paths
             const amountIn = parseUnits('0.1', tIn.decimals);
             const swapKind = SwapKind.GivenIn;
-            paths = (await sorGetPathsWithPools(
+            paths = (await SOR.getPathsWithPools(
                 tIn,
                 tOut,
                 swapKind,
@@ -137,7 +137,7 @@ describe('SOR V3 - GyroECLP Integration Tests', () => {
             // get SOR paths
             const amountOut = parseUnits('0.1', tOut.decimals);
             const swapKind = SwapKind.GivenOut;
-            paths = (await sorGetPathsWithPools(
+            paths = (await SOR.getPathsWithPools(
                 tIn,
                 tOut,
                 swapKind,

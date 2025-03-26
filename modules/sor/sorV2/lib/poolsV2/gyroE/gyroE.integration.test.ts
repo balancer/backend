@@ -7,7 +7,7 @@ import { gnosis, sonic } from 'viem/chains';
 import { PrismaPoolAndHookWithDynamic } from '../../../../../../prisma/prisma-types';
 
 import { PathWithAmount } from '../../path';
-import { sorGetPathsWithPools } from '../../static';
+import { SOR } from '../../sor';
 import { getOutputAmount, getInputAmount } from '../../utils/helpers';
 import { chainToChainId as chainToIdMap } from '../../../../../network/chain-id-to-chain';
 
@@ -42,7 +42,7 @@ describe('SOR - GyroE Integration Tests', () => {
         beforeAll(async () => {
             // start fork to run queries against
             chainId = parseFloat(chainToIdMap['SONIC']);
-            ({ rpcUrl } = await startFork(ANVIL_NETWORKS[ChainId[chainId]]));
+            ({ rpcUrl } = await startFork(ANVIL_NETWORKS.SONIC));
             client = createTestClient({
                 mode: 'anvil',
                 chain: sonic,
@@ -100,7 +100,7 @@ describe('SOR - GyroE Integration Tests', () => {
                 // get SOR paths
                 const amountIn = parseUnits('100', tIn.decimals);
                 const swapKind = SwapKind.GivenIn;
-                paths = (await sorGetPathsWithPools(
+                paths = (await SOR.getPathsWithPools(
                     tIn,
                     tOut,
                     swapKind,
@@ -142,7 +142,7 @@ describe('SOR - GyroE Integration Tests', () => {
                 // get SOR paths
                 const amountOut = parseUnits('1', tOut.decimals);
                 const swapKind = SwapKind.GivenOut;
-                paths = (await sorGetPathsWithPools(
+                paths = (await SOR.getPathsWithPools(
                     tIn,
                     tOut,
                     swapKind,
@@ -184,7 +184,7 @@ describe('SOR - GyroE Integration Tests', () => {
         beforeAll(async () => {
             // start fork to run queries against
             chainId = parseFloat(chainToIdMap['GNOSIS']);
-            ({ rpcUrl } = await startFork(ANVIL_NETWORKS[ChainId[chainId]], undefined, 39000387n));
+            ({ rpcUrl } = await startFork(ANVIL_NETWORKS.GNOSIS_CHAIN, undefined, 39000387n));
             client = createTestClient({
                 mode: 'anvil',
                 chain: gnosis,
@@ -240,7 +240,7 @@ describe('SOR - GyroE Integration Tests', () => {
                 // get SOR paths
                 const amountIn = parseUnits('100000', tIn.decimals);
                 const swapKind = SwapKind.GivenIn;
-                paths = (await sorGetPathsWithPools(
+                paths = (await SOR.getPathsWithPools(
                     tIn,
                     tOut,
                     swapKind,
@@ -282,7 +282,7 @@ describe('SOR - GyroE Integration Tests', () => {
                 // get SOR paths
                 const amountOut = parseUnits('190', tOut.decimals);
                 const swapKind = SwapKind.GivenOut;
-                paths = (await sorGetPathsWithPools(
+                paths = (await SOR.getPathsWithPools(
                     tIn,
                     tOut,
                     swapKind,

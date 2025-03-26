@@ -25,7 +25,7 @@ import { createTestClient, Hex, http, TestClient } from 'viem';
 import { mainnet } from 'viem/chains';
 
 import { PathWithAmount } from '../../path';
-import { sorGetPathsWithPools } from '../../static';
+import { SOR } from '../../sor';
 import { getOutputAmount } from '../../utils/helpers';
 import { chainToChainId } from '../../../../../network/chain-id-to-chain';
 import { ANVIL_NETWORKS, startFork } from '../../../../../../test/anvil/anvil-global-setup';
@@ -101,12 +101,13 @@ describe('Balancer SOR Integration Tests', () => {
                 USDC.token.decimals,
             );
             const amountIn = BigInt(100e18);
-            paths = (await sorGetPathsWithPools(
+            paths = (await SOR.getPathsWithPools(
                 tIn,
                 tOut,
                 SwapKind.GivenIn,
                 amountIn,
                 [prismaStablePool],
+                [],
                 protocolVersion,
             )) as PathWithAmount[];
 

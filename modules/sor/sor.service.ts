@@ -6,7 +6,7 @@ import { GqlSorGetSwapPaths, QuerySorGetSwapPathsArgs } from '../../apps/api/gql
 import { GetSwapsV2Input as GetSwapPathsInput, GraphTraversalConfig } from './types';
 import { getToken, getTokenAmountHuman, swapPathsZeroResponse } from './utils';
 import { mapSwapTypeToSwapKind, mapToSorSwapPaths } from './utils/mapping';
-import { sorGetPathsWithPools } from './sorV2/lib/static';
+import { SOR } from './sorV2/lib/sor';
 import { getBasePoolsFromDb } from './utils/pool';
 import { PathWithAmount } from './sorV2/lib/path';
 import { isValidSwapRequest, validateTokens } from './utils/validation';
@@ -111,7 +111,7 @@ export class SorService {
 
             // retry with different max depth if no paths are found
             let swapOptions = this.buildSwapOptions(maxDepth, input.graphTraversalConfig);
-            let paths = await sorGetPathsWithPools(
+            let paths = await SOR.getPathsWithPools(
                 tokenIn,
                 tokenOut,
                 swapKind,
@@ -124,7 +124,7 @@ export class SorService {
 
             if (!paths) {
                 swapOptions = this.buildSwapOptions(maxDepth + 1, input.graphTraversalConfig);
-                paths = await sorGetPathsWithPools(
+                paths = await SOR.getPathsWithPools(
                     tokenIn,
                     tokenOut,
                     swapKind,
