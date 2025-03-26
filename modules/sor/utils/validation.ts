@@ -1,6 +1,6 @@
 import { Chain } from '@prisma/client';
 import config from '../../../config';
-import { getToken } from '../utils';
+import { getToken } from './helpers';
 
 export function isValidSwapRequest(tokenIn: string, tokenOut: string, swapAmount: string, chain: Chain): boolean {
     if (parseFloat(swapAmount) <= 0) {

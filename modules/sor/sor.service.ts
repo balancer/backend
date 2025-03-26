@@ -4,7 +4,7 @@ import { Address } from 'viem';
 import config from '../../config';
 import { GqlSorGetSwapPaths, QuerySorGetSwapPathsArgs } from '../../apps/api/gql/generated-schema';
 import { GetSwapsV2Input as GetSwapPathsInput, GraphTraversalConfig } from './types';
-import { getToken, getTokenAmountHuman, swapPathsZeroResponse } from './utils';
+import { getToken, getTokenAmountHuman, swapPathsZeroResponse } from './utils/helpers';
 import { mapSwapTypeToSwapKind, mapToSorSwapPaths } from './utils/mapping';
 import { SOR } from './sorV2/lib/sor';
 import { getBasePoolsFromDb } from './utils/pool';

@@ -1,11 +1,11 @@
-import { tokenService } from '../token/token.service';
+import { tokenService } from '../../token/token.service';
 import { Chain } from '@prisma/client';
-import { chainToChainId as chainToIdMap } from '../network/chain-id-to-chain';
-import { GqlSorGetSwapPaths } from '../../apps/api/gql/generated-schema';
-import { replaceZeroAddressWithEth } from '../web3/addresses';
+import { chainToChainId as chainToIdMap } from '../../network/chain-id-to-chain';
+import { GqlSorGetSwapPaths } from '../../../apps/api/gql/generated-schema';
+import { replaceZeroAddressWithEth } from '../../web3/addresses';
 import { Address } from 'viem';
 import { Token, TokenAmount } from '@balancer/sdk';
-import config from '../../config';
+import config from '../../../config';
 
 export async function getTokenAmountHuman(tokenAddr: string, humanAmount: string, chain: Chain): Promise<TokenAmount> {
     const token = await getToken(tokenAddr, chain);
