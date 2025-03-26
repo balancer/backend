@@ -14,7 +14,7 @@ export const fillMissingTimestamps = (
         const sortedItems = _.sortBy(groupItems, 'timestamp');
 
         // Find the range of timestamps
-        const currentMidnight = roundToNextMidnight(Date.now() / 1000);
+        const currentMidnight = roundToNextMidnight();
         const timestamps = sortedItems.map((item) => item.timestamp);
         const minTimestamp = _.min(timestamps) ?? 0;
         // The maxTimestamp is always the last midnight, SG stops producing data when no events recieved
