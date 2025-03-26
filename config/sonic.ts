@@ -97,6 +97,7 @@ export default <NetworkData>{
                 '0x5954ce6671d97d24b782920ddcdbb4b1e63ab2de', // usdc market 23
                 '0x6c49b18333a1135e9a376560c07e6d1fd0350eaf', // Ws market 28
                 '0xda14a41dbda731f03a94cb722191639dd22b35b2', // frxUSD market 37
+                '0x0a94e18bdbccd048198806d7ff28a1b1d2590724', // scbtc market 32
             ],
         },
         avalon: {
