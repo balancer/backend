@@ -168,6 +168,10 @@ export const arbitrumNetworkConfig: NetworkConfig = {
             interval: every(10, 'minutes'),
         },
         {
+            name: 'forward-fill-snapshots-v3',
+            interval: every(1, 'hours'),
+        },
+        {
             name: 'sync-hook-data',
             interval: every(1, 'hours'),
         },

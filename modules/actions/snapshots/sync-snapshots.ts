@@ -5,6 +5,7 @@ import { PoolSnapshot_Filter } from '../../sources/subgraphs/balancer-v3-vault/g
 import { fillMissingTimestamps } from './lib/fill-missing-timestamps';
 import { computeDailyValues } from './lib/compute-daily-values';
 import { applyUSDValues } from './lib/apply-usd-values';
+import { getLastSyncedBlock } from '../last-synced-block';
 
 type SnapshotsSubgraphClient = {
     lastSyncedBlock: () => Promise<number>;
@@ -18,24 +19,21 @@ export async function syncSnapshots(
     options: {
         poolIds?: string[]; // Optional: Specific pool IDs to sync
         startFromLastSyncedBlock?: boolean; // Optional: Whether to sync based on the latest block
+        syncPoolsWithoutUpdates?: boolean; // Optional: Whether to sync based on the latest block
     } = {},
 ): Promise<string[]> {
-    const { poolIds = [], startFromLastSyncedBlock = true } = options;
+    const { poolIds = [], startFromLastSyncedBlock = true, syncPoolsWithoutUpdates = false } = options;
     const currentBlock = await subgraphClient.lastSyncedBlock();
+    const protocolVersion = category === 'COW_AMM_SNAPSHOTS' ? 1 : 3;
 
     let lastBlock = 0;
     if (startFromLastSyncedBlock) {
-        lastBlock = await prisma.prismaLastBlockSynced
-            .findFirst({
-                where: { chain, category },
-                select: { blockNumber: true },
-            })
-            .then((lastBlock) => lastBlock?.blockNumber || 0);
+        lastBlock = await getLastSyncedBlock(chain, category);
     }
 
     // Fetch pool IDs from DB
     const poolIdsInDb = await prisma.prismaPool
-        .findMany({ where: { chain, ...(poolIds.length > 0 ? { id: { in: poolIds } } : {}) } })
+        .findMany({ where: { protocolVersion, chain, ...(poolIds.length > 0 ? { id: { in: poolIds } } : {}) } })
         .then((pools) => pools.map((pool) => pool.id));
 
     if (poolIdsInDb.length === 0) {
@@ -51,15 +49,19 @@ export async function syncSnapshots(
         })
         .then((snapshots) => snapshots.filter((snapshot) => poolIdsInDb.includes(snapshot.poolId)));
 
-    if (!snapshots || snapshots.length === 0) {
+    if ((!snapshots || snapshots.length === 0) && !syncPoolsWithoutUpdates) {
         return [];
     }
 
     let mergedSnapshots: Prisma.PrismaPoolSnapshotUncheckedCreateInput[] = snapshots;
 
-    if (startFromLastSyncedBlock) {
+    if (startFromLastSyncedBlock || syncPoolsWithoutUpdates) {
         // Get pool IDs and fetch the 2 latest snapshots for each from the DB
-        const poolIds = [...new Set(snapshots.map((snapshot) => snapshot.poolId))];
+        let ids = [...new Set(snapshots.map((snapshot) => snapshot.poolId))];
+        if (syncPoolsWithoutUpdates) {
+            // This will forward fill the snapshots for pools without any updates
+            ids = poolIds;
+        }
         const dbSnapshots: Prisma.PrismaPoolSnapshotUncheckedCreateInput[] = await prisma.$queryRaw<
             (Prisma.PrismaPoolSnapshotUncheckedCreateInput & { row_num: number })[]
         >`
@@ -67,7 +69,7 @@ export async function syncSnapshots(
                 SELECT *,
                     ROW_NUMBER() OVER (PARTITION BY "poolId" ORDER BY "timestamp" DESC) AS row_num
                 FROM "PrismaPoolSnapshot"
-                WHERE "chain" = ${chain}::"Chain" AND "poolId" IN (${Prisma.join(poolIds)})
+                WHERE "chain" = ${chain}::"Chain" AND "poolId" IN (${Prisma.join(ids)})
             )
             SELECT *
             FROM latest_snapshots
@@ -107,7 +109,7 @@ export async function syncSnapshots(
     }
 
     // Update the last block synced
-    if (startFromLastSyncedBlock || poolIds.length === 0) {
+    if (!syncPoolsWithoutUpdates && (startFromLastSyncedBlock || poolIds.length === 0)) {
         await prisma.prismaLastBlockSynced.upsert({
             where: { category_chain: { chain, category } },
             create: { chain, category, blockNumber: currentBlock },
