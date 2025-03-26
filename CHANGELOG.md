@@ -1,5 +1,15 @@
 # backend
 
+## 1.37.1
+
+### Patch Changes
+
+-   213e17b: forward fill snapshots for v3
+-   59883c1: update to merkl v4 api
+-   cd94053: select/update for yield capture data
+-   f6f250c: SOR - Extract common v3 pool code to BasePoolV3
+-   4cd275e: select/update for dynamic data
+
 ## 1.37.0
 
 ### Minor Changes
