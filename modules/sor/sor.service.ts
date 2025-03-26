@@ -3,12 +3,18 @@ import { Address } from 'viem';
 
 import { GqlSorGetSwapPaths, QuerySorGetSwapPathsArgs } from '../../apps/api/gql/generated-schema';
 import { GetSwapPathsInput, GraphTraversalConfig } from './types';
-import { getToken, swapPathsZeroResponse } from './utils/helpers';
-import { mapSwapKind, mapToGetSwapPathsInput, mapToSorSwapPaths } from './utils/mapping';
 import { SOR } from './lib/sor';
-import { getBasePoolsFromDb } from './utils/pool';
+import {
+    getBasePoolsFromDb,
+    getToken,
+    isValidSwapRequest,
+    mapSwapKind,
+    mapToGetSwapPathsInput,
+    mapToSorSwapPaths,
+    swapPathsZeroResponse,
+    validateTokens,
+} from './utils';
 import { PathWithAmount } from './lib/path';
-import { isValidSwapRequest, validateTokens } from './utils/validation';
 
 export class SorService {
     async getSorSwapPaths(args: QuerySorGetSwapPathsArgs): Promise<GqlSorGetSwapPaths> {

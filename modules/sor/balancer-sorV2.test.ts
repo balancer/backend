@@ -2,7 +2,7 @@
 
 import { Chain } from '@prisma/client';
 import { PrismaPoolAndHookWithDynamic } from '../../prisma/prisma-types';
-import { getBasePoolsFromDb } from './utils/pool';
+import { getBasePoolsFromDb } from './utils/data';
 
 // This test is used for testing the SOR v2 (or "new" SOR).
 // The goal of this test is to enter the SOR from as far out
