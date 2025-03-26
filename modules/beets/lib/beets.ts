@@ -18,6 +18,7 @@ const NON_CIRCULATING_ADDRESSES_SONIC = [
     '0xc5E0250037195850E4D987CA25d6ABa68ef5fEe8', //treasury
     '0x9D14fB062Cb47Da81a09c8B20437719D553e91fb', //team multisig
     '0x8a81173FC726eEDd1ad6036dB6197027C77865C2', //beets minting target
+    '0x5f9a5CD0B77155AC1814EF6Cd9D82dA53d05E386', //beets migration contract
 ];
 
 export async function beetsGetCirculatingSupply() {
