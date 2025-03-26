@@ -6,6 +6,7 @@ import {
     GqlSorSwapRouteHop,
     GqlSorGetSwapPaths,
     GqlSorCallData,
+    QuerySorGetSwapPathsArgs,
 } from '../../../apps/api/gql/generated-schema';
 import { SwapKind, TokenAmount, BatchSwapStep, DEFAULT_USERDATA, SingleSwap } from '@balancer/sdk';
 import { formatUnits } from 'viem';
@@ -15,6 +16,38 @@ import { replaceZeroAddressWithEth } from '../../web3/addresses';
 import { GqlSorSwap } from '../../../apps/api/gql/generated-schema';
 import { poolService } from '../../pool/pool.service';
 import { getInputAmount, getOutputAmount } from '../lib/utils/helpers';
+import { GetSwapPathsInput } from '../types';
+import { getTokenAmountHuman } from './helpers';
+import config from '../../../config';
+
+export async function mapToGetSwapPathsInput(
+    args: QuerySorGetSwapPathsArgs,
+): Promise<Omit<GetSwapPathsInput, 'protocolVersion'>> {
+    const amountToken = args.swapType === 'EXACT_IN' ? args.tokenIn : args.tokenOut;
+    const amount = await getTokenAmountHuman(amountToken, args.swapAmount, args.chain);
+    const wethIsEth =
+        args.tokenIn === config[args.chain].eth.address || args.tokenOut === config[args.chain].eth.address;
+
+    return {
+        chain: args.chain,
+        swapAmount: amount,
+        swapType: args.swapType,
+        tokenIn: args.tokenIn,
+        tokenOut: args.tokenOut,
+        queryBatchSwap: args.queryBatchSwap ?? false,
+        callDataInput: args.callDataInput
+            ? {
+                  receiver: args.callDataInput.receiver,
+                  sender: args.callDataInput.sender,
+                  slippagePercentage: args.callDataInput.slippagePercentage,
+                  deadline: args.callDataInput.deadline,
+                  wethIsEth,
+              }
+            : undefined,
+        considerPoolsWithHooks: args.considerPoolsWithHooks ?? true,
+        poolIds: args.poolIds ?? undefined,
+    };
+}
 
 export async function mapToSorSwapPaths(
     paths: PathWithAmount[],
@@ -22,7 +55,7 @@ export async function mapToSorSwapPaths(
     chain: Chain,
     protocolVersion: 2 | 3,
 ): Promise<GqlSorGetSwapPaths> {
-    const swapKind = mapSwapTypeToSwapKind(swapType);
+    const swapKind = mapSwapKind(swapType);
 
     let inputAmount = getInputAmount(paths);
     let outputAmount = getOutputAmount(paths);
@@ -90,7 +123,7 @@ export async function mapToSorSwapPaths(
     };
 }
 
-export function mapSwapTypeToSwapKind(swapType: GqlSorSwapType): SwapKind {
+export function mapSwapKind(swapType: GqlSorSwapType): SwapKind {
     return swapType === 'EXACT_IN' ? SwapKind.GivenIn : SwapKind.GivenOut;
 }
 
