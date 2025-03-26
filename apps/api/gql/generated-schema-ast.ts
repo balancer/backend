@@ -511,6 +511,11 @@ export const schema = gql`
         protocolVersion: Int!
 
         """
+        QuantAmmWeightedParams
+        """
+        quantAmmWeightedParams: QuantAmmWeightedParams
+
+        """
         Data specific to gyro pools
         """
         root3Alpha: String
@@ -861,6 +866,11 @@ export const schema = gql`
         protocolVersion: Int!
 
         """
+        QuantAmmWeightedParams
+        """
+        quantAmmWeightedParams: QuantAmmWeightedParams
+
+        """
         Staking options of this pool which emit additional rewards
         """
         staking: GqlPoolStaking
@@ -978,6 +988,11 @@ export const schema = gql`
         poolCreator: Bytes
         poolTokens: [GqlPoolTokenDetail!]!
         protocolVersion: Int!
+
+        """
+        QuantAmmWeightedParams
+        """
+        quantAmmWeightedParams: QuantAmmWeightedParams
         staking: GqlPoolStaking
 
         """
@@ -1023,6 +1038,11 @@ export const schema = gql`
         Account empowered to set the pool creator fee percentage
         """
         poolCreator: Bytes
+
+        """
+        QuantAmmWeightedParams
+        """
+        quantAmmWeightedParams: QuantAmmWeightedParams
         swapFee: BigDecimal!
 
         """
@@ -1147,6 +1167,11 @@ export const schema = gql`
         poolTokens: [GqlPoolTokenDetail!]!
         principalToken: Bytes!
         protocolVersion: Int!
+
+        """
+        QuantAmmWeightedParams
+        """
+        quantAmmWeightedParams: QuantAmmWeightedParams
         staking: GqlPoolStaking
 
         """
@@ -1366,6 +1391,11 @@ export const schema = gql`
         poolCreator: Bytes
         poolTokens: [GqlPoolTokenDetail!]!
         protocolVersion: Int!
+
+        """
+        QuantAmmWeightedParams
+        """
+        quantAmmWeightedParams: QuantAmmWeightedParams
         staking: GqlPoolStaking
 
         """
@@ -1427,6 +1457,11 @@ export const schema = gql`
         poolCreator: Bytes
         poolTokens: [GqlPoolTokenDetail!]!
         protocolVersion: Int!
+
+        """
+        QuantAmmWeightedParams
+        """
+        quantAmmWeightedParams: QuantAmmWeightedParams
         root3Alpha: String!
         s: String!
         sqrtAlpha: String!
@@ -1534,6 +1569,11 @@ export const schema = gql`
         poolCreator: Bytes
         poolTokens: [GqlPoolTokenDetail!]!
         protocolVersion: Int!
+
+        """
+        QuantAmmWeightedParams
+        """
+        quantAmmWeightedParams: QuantAmmWeightedParams
         staking: GqlPoolStaking
 
         """
@@ -1590,6 +1630,11 @@ export const schema = gql`
         poolCreator: Bytes
         poolTokens: [GqlPoolTokenDetail!]!
         protocolVersion: Int!
+
+        """
+        QuantAmmWeightedParams
+        """
+        quantAmmWeightedParams: QuantAmmWeightedParams
         staking: GqlPoolStaking
 
         """
@@ -1872,6 +1917,11 @@ export const schema = gql`
         poolCreator: Bytes
         poolTokens: [GqlPoolTokenDetail!]!
         protocolVersion: Int!
+
+        """
+        QuantAmmWeightedParams
+        """
+        quantAmmWeightedParams: QuantAmmWeightedParams
         staking: GqlPoolStaking
 
         """
@@ -2406,6 +2456,7 @@ export const schema = gql`
         LIQUIDITY_BOOTSTRAPPING
         META_STABLE
         PHANTOM_STABLE
+        QUANT_AMM_WEIGHTED
         STABLE
         UNKNOWN
         WEIGHTED
@@ -2492,6 +2543,11 @@ export const schema = gql`
         poolCreator: Bytes
         poolTokens: [GqlPoolTokenDetail!]!
         protocolVersion: Int!
+
+        """
+        QuantAmmWeightedParams
+        """
+        quantAmmWeightedParams: QuantAmmWeightedParams
         staking: GqlPoolStaking
 
         """
@@ -3773,6 +3829,28 @@ export const schema = gql`
         name: String!
         symbol: String!
         type: GqlPoolType!
+    }
+
+    type QuantAMMWeightedDetail {
+        category: String!
+        name: String!
+        type: String!
+        value: String!
+    }
+
+    type QuantAmmWeightedParams {
+        absoluteWeightGuardRail: String!
+        details: [QuantAMMWeightedDetail!]!
+        epsilonMax: String!
+        lambda: [String!]!
+        lastInterpolationTimePossible: String!
+        lastUpdateIntervalTime: String!
+        maxTradeSizeRatio: String!
+        oracleStalenessThreshold: String!
+        poolRegistry: String!
+        updateInterval: String!
+        weightBlockMultipliers: [String!]!
+        weightsAtLastUpdateInterval: [String!]!
     }
 
     type Query {

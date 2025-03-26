@@ -64,6 +64,7 @@ enum PrismaPoolType {
     GYROE
     FX
     COW_AMM
+    QUANT_AMM_WEIGHTED
 }
 
 model PrismaPoolDynamicData {

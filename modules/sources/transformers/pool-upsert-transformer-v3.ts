@@ -1,7 +1,7 @@
 import { Chain, PrismaPool, PrismaPoolType } from '@prisma/client';
 import { PoolType } from '../subgraphs/balancer-v3-pools/generated/types';
 import { StableData } from '../../pool/subgraph-mapper';
-import { fx, gyro, element, stable } from '../../pool/pool-data';
+import { gyro, stable, quant_amm_weighted } from '../../pool/pool-data';
 import { V3JoinedSubgraphPool } from '../subgraphs';
 import { parseEther } from 'viem';
 import { PoolUpsertData } from '../../../prisma/prisma-types';
@@ -57,6 +57,10 @@ export const poolUpsertTransformerV3 = (
             typeData = {
                 ...poolData.gyroEParams,
             };
+            break;
+        case PoolType.QuantAmmWeighted:
+            type = PrismaPoolType.QUANT_AMM_WEIGHTED;
+            typeData = quant_amm_weighted(poolData);
             break;
         default:
             type = PrismaPoolType.UNKNOWN;
@@ -130,12 +134,9 @@ export const poolUpsertTransformerV3 = (
 };
 
 const typeDataMapper = {
-    ELEMENT: element,
-    FX: fx,
     GYRO: gyro,
     GYRO3: gyro,
     GYROE: gyro,
     STABLE: stable,
-    COMPOSABLE_STABLE: stable,
-    META_STABLE: stable,
+    QUANT_AMM_WEIGHTED: quant_amm_weighted,
 };

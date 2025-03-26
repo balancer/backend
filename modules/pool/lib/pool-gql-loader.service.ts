@@ -51,7 +51,7 @@ import { BeethovenChainIds } from '../../network/network-config';
 import { chainToChainId as chainToIdMap } from '../../network/chain-id-to-chain';
 import { GithubContentService } from '../../content/github-content.service';
 import { SanityContentService } from '../../content/sanity-content.service';
-import { ElementData, FxData, GyroData, StableData } from '../subgraph-mapper';
+import { ElementData, FxData, GyroData, StableData, QuantAmmWeightedData } from '../subgraph-mapper';
 import { ZERO_ADDRESS } from '@balancer/sdk';
 import { tokenService } from '../../token/token.service';
 import { mapHookToGqlHook } from '../../sources/transformers';
@@ -821,6 +821,7 @@ export class PoolGqlLoaderService {
             vaultVersion: poolWithoutTypeData.protocolVersion,
             liquidityManagement: (pool.liquidityManagement as LiquidityManagement) || undefined,
             hook: mapHookToGqlHook(hook as HookData),
+            quantAmmWeightedParams: (typeData as QuantAmmWeightedData) || undefined,
         };
 
         switch (pool.type) {
@@ -908,6 +909,7 @@ export class PoolGqlLoaderService {
             hasAnyAllowedBuffer: pool.allTokens.some(
                 (token) => token.token.types.some((type) => type.type === 'ERC4626') && token.token.isBufferAllowed,
             ),
+            quantAmmWeightedParams: (typeData as QuantAmmWeightedData) || undefined,
         };
 
         //TODO: may need to build out the types here still

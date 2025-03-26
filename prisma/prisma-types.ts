@@ -398,7 +398,7 @@ export type PrismaPoolWithDynamic = Prisma.PrismaPoolGetPayload<typeof prismaPoo
 // Define which properties should be replaced and with what type
 type PoolJsonTypesMap = {
     hook?: HookData;
-    typeData: Record<string, string>;
+    typeData: Record<string, any>;
     liquidityManagement: {
         disableUnbalancedLiquidity?: boolean;
         enableAddLiquidityCustom?: boolean;
