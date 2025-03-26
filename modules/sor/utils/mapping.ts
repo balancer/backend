@@ -9,12 +9,12 @@ import {
 } from '../../../apps/api/gql/generated-schema';
 import { SwapKind, TokenAmount, BatchSwapStep, DEFAULT_USERDATA, SingleSwap } from '@balancer/sdk';
 import { formatUnits } from 'viem';
-import { PathWithAmount } from '../sorV2/lib/path';
+import { PathWithAmount } from '../lib/path';
 import { Chain } from '@prisma/client';
 import { replaceZeroAddressWithEth } from '../../web3/addresses';
 import { GqlSorSwap } from '../../../apps/api/gql/generated-schema';
 import { poolService } from '../../pool/pool.service';
-import { getInputAmount, getOutputAmount } from '../sorV2/lib/utils/helpers';
+import { getInputAmount, getOutputAmount } from '../lib/utils/helpers';
 
 export async function mapToSorSwapPaths(
     paths: PathWithAmount[],

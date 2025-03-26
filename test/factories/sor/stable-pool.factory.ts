@@ -5,8 +5,8 @@ import { Token, TokenAmount } from '@balancer/sdk';
 import { Chain } from '@prisma/client';
 import { parseEther, parseUnits, Address } from 'viem';
 import { TokenPairData } from '../../../modules/sources/contracts/v3/fetch-tokenpair-data';
-import { StablePoolV3 } from '../../../modules/sor/sorV2/lib/poolsV3';
-import { PoolTokenWithRate } from '../../../modules/sor/sorV2/lib/utils/poolTokenWithRate';
+import { StablePoolV3 } from '../../../modules/sor/lib/poolsV3';
+import { PoolTokenWithRate } from '../../../modules/sor/lib/utils/poolTokenWithRate';
 import { LiquidityManagement } from '../../../modules/sor/types';
 import { HookState } from '@balancer-labs/balancer-maths';
 

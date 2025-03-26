@@ -3,7 +3,7 @@ import { PrismaPoolAndHookWithDynamic, HookData } from '../../../prisma/prisma-t
 import { prisma } from '../../../prisma/prisma-client';
 import { Cache } from 'memory-cache';
 import config from '../../../config';
-import { poolsToIgnore } from '../constants';
+import { poolsToIgnore } from './constants';
 
 const cache = new Cache<
     string,

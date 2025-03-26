@@ -2,9 +2,9 @@
 
 import { ExactInQueryOutput, Swap, SwapKind, Token, Address, Path, ExactOutQueryOutput } from '@balancer/sdk';
 
-import { PathWithAmount } from './sorV2/lib/path';
-import { SOR } from './sorV2/lib/sor';
-import { getOutputAmount, getInputAmount } from './sorV2/lib/utils/helpers';
+import { PathWithAmount } from './lib/path';
+import { SOR } from './lib/sor';
+import { getOutputAmount, getInputAmount } from './lib/utils/helpers';
 import { chainToChainId as chainToIdMap } from '../network/chain-id-to-chain';
 
 import { ANVIL_NETWORKS, startFork, stopAnvilForks } from '../../test/anvil/anvil-global-setup';

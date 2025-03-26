@@ -6,9 +6,9 @@ import { GqlSorGetSwapPaths, QuerySorGetSwapPathsArgs } from '../../apps/api/gql
 import { GetSwapsV2Input as GetSwapPathsInput, GraphTraversalConfig } from './types';
 import { getToken, getTokenAmountHuman, swapPathsZeroResponse } from './utils/helpers';
 import { mapSwapTypeToSwapKind, mapToSorSwapPaths } from './utils/mapping';
-import { SOR } from './sorV2/lib/sor';
+import { SOR } from './lib/sor';
 import { getBasePoolsFromDb } from './utils/pool';
-import { PathWithAmount } from './sorV2/lib/path';
+import { PathWithAmount } from './lib/path';
 import { isValidSwapRequest, validateTokens } from './utils/validation';
 
 export class SorService {
