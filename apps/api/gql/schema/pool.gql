@@ -493,10 +493,6 @@ type GqlPoolAggregator {
     """
     amp: BigInt
     """
-    QuantAmmWeightedParams
-    """
-    quantAmmWeightedParams: QuantAmmWeightedParams
-    """
     Liquidity management settings for v3 pools.
     """
     liquidityManagement: LiquidityManagement
@@ -504,28 +500,6 @@ type GqlPoolAggregator {
     Hook assigned to a pool
     """
     hook: GqlHook
-}
-
-type QuantAmmWeightedParams {
-    oracleStalenessThreshold: String!
-    poolRegistry: String!
-    lambda: [String!]!
-    epsilonMax: String!
-    absoluteWeightGuardRail: String!
-    maxTradeSizeRatio: String!
-    updateInterval: String!
-    weightsAtLastUpdateInterval: [String!]!
-    weightBlockMultipliers: [String!]!
-    lastUpdateIntervalTime: String!
-    lastInterpolationTimePossible: String!
-    details: [QuantAMMWeightedDetail!]!
-}
-
-type QuantAMMWeightedDetail {
-    category: String!
-    name: String!
-    type: String!
-    value: String!
 }
 
 """
@@ -656,10 +630,6 @@ interface GqlPoolBase {
     Hook assigned to a pool
     """
     hook: GqlHook
-    """
-    QuantAmmWeightedParams
-    """
-    quantAmmWeightedParams: QuantAmmWeightedParams
 }
 
 type GqlPoolDynamicData {
@@ -778,7 +748,7 @@ enum GqlPoolNestingType @deprecated(reason: "Removed without replacement") {
     HAS_ONLY_PHANTOM_BPT
 }
 
-type GqlPoolWeighted implements GqlPoolBase {
+type GqlPoolQuantAmmWeighted implements GqlPoolBase {
     id: ID!
     chain: GqlChain!
     vaultVersion: Int! @deprecated(reason: "use protocolVersion instead")
@@ -830,10 +800,116 @@ type GqlPoolWeighted implements GqlPoolBase {
 
     userBalance: GqlPoolUserBalance
 
+    weightsAtLastUpdateInterval: [String!]!
+    weightBlockMultipliers: [String!]!
+    lastUpdateIntervalTime: String!
+    lastInterpolationTimePossible: String!
+}
+
+type GqlPoolWeighted implements GqlPoolBase {
+    id: ID!
+    chain: GqlChain!
+    vaultVersion: Int! @deprecated(reason: "use protocolVersion instead")
+    protocolVersion: Int!
+    name: String!
+    symbol: String!
+    address: Bytes!
+    decimals: Int!
     """
-    QuantAmmWeightedParams
+    The wallet address of the owner of the pool. Pool owners can set certain properties like swapFees or AMP.
     """
-    quantAmmWeightedParams: QuantAmmWeightedParams
+    owner: Bytes @deprecated(reason: "Use swapFeeManager instead")
+    """
+    Account empowered to set static swap fees for a pool (when 0 on V2 swap fees are immutable, on V3 delegate to governance)
+    """
+    swapFeeManager: Bytes
+    """
+    Account empowered to pause/unpause the pool (or 0 to delegate to governance)
+    """
+    pauseManager: Bytes
+    """
+    Account empowered to set the pool creator fee percentage
+    """
+    poolCreator: Bytes
+    factory: Bytes
+    createTime: Int!
+    investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
+    withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
+    dynamicData: GqlPoolDynamicData!
+    displayTokens: [GqlPoolTokenDisplay!]! @deprecated(reason: "Use poolTokens instead")
+    allTokens: [GqlPoolTokenExpanded!]! @deprecated(reason: "Use poolTokens instead")
+    poolTokens: [GqlPoolTokenDetail!]!
+    categories: [GqlPoolFilterCategory]
+    tags: [String]
+    liquidityManagement: LiquidityManagement
+    hasErc4626: Boolean!
+    hasNestedErc4626: Boolean!
+    hasAnyAllowedBuffer: Boolean!
+    hook: GqlHook
+
+    """
+    All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
+    """
+    tokens: [GqlPoolTokenUnion!]! @deprecated(reason: "Use poolTokens instead")
+    nestingType: GqlPoolNestingType! @deprecated(reason: "Removed without replacement")
+    staking: GqlPoolStaking
+    type: GqlPoolType!
+    version: Int!
+
+    userBalance: GqlPoolUserBalance
+}
+
+type GqlPoolWeighted implements GqlPoolBase {
+    id: ID!
+    chain: GqlChain!
+    vaultVersion: Int! @deprecated(reason: "use protocolVersion instead")
+    protocolVersion: Int!
+    name: String!
+    symbol: String!
+    address: Bytes!
+    decimals: Int!
+    """
+    The wallet address of the owner of the pool. Pool owners can set certain properties like swapFees or AMP.
+    """
+    owner: Bytes @deprecated(reason: "Use swapFeeManager instead")
+    """
+    Account empowered to set static swap fees for a pool (when 0 on V2 swap fees are immutable, on V3 delegate to governance)
+    """
+    swapFeeManager: Bytes
+    """
+    Account empowered to pause/unpause the pool (or 0 to delegate to governance)
+    """
+    pauseManager: Bytes
+    """
+    Account empowered to set the pool creator fee percentage
+    """
+    poolCreator: Bytes
+    factory: Bytes
+    createTime: Int!
+    investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
+    withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
+    dynamicData: GqlPoolDynamicData!
+    displayTokens: [GqlPoolTokenDisplay!]! @deprecated(reason: "Use poolTokens instead")
+    allTokens: [GqlPoolTokenExpanded!]! @deprecated(reason: "Use poolTokens instead")
+    poolTokens: [GqlPoolTokenDetail!]!
+    categories: [GqlPoolFilterCategory]
+    tags: [String]
+    liquidityManagement: LiquidityManagement
+    hasErc4626: Boolean!
+    hasNestedErc4626: Boolean!
+    hasAnyAllowedBuffer: Boolean!
+    hook: GqlHook
+
+    """
+    All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
+    """
+    tokens: [GqlPoolTokenUnion!]! @deprecated(reason: "Use poolTokens instead")
+    nestingType: GqlPoolNestingType! @deprecated(reason: "Removed without replacement")
+    staking: GqlPoolStaking
+    type: GqlPoolType!
+    version: Int!
+
+    userBalance: GqlPoolUserBalance
 }
 
 type GqlPoolGyro implements GqlPoolBase {
@@ -905,11 +981,6 @@ type GqlPoolGyro implements GqlPoolBase {
     version: Int!
 
     userBalance: GqlPoolUserBalance
-
-    """
-    QuantAmmWeightedParams
-    """
-    quantAmmWeightedParams: QuantAmmWeightedParams
 }
 
 type GqlPoolFx implements GqlPoolBase {
@@ -968,11 +1039,6 @@ type GqlPoolFx implements GqlPoolBase {
     All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
     """
     tokens: [GqlPoolTokenUnion!]! @deprecated(reason: "Use poolTokens instead")
-
-    """
-    QuantAmmWeightedParams
-    """
-    quantAmmWeightedParams: QuantAmmWeightedParams
 }
 
 type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
@@ -1026,11 +1092,6 @@ type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
     version: Int!
 
     userBalance: GqlPoolUserBalance
-
-    """
-    QuantAmmWeightedParams
-    """
-    quantAmmWeightedParams: QuantAmmWeightedParams
 }
 
 type GqlPoolStable implements GqlPoolBase {
@@ -1082,11 +1143,6 @@ type GqlPoolStable implements GqlPoolBase {
     version: Int!
 
     userBalance: GqlPoolUserBalance
-
-    """
-    QuantAmmWeightedParams
-    """
-    quantAmmWeightedParams: QuantAmmWeightedParams
 }
 
 type GqlPoolMetaStable implements GqlPoolBase {
@@ -1137,11 +1193,6 @@ type GqlPoolMetaStable implements GqlPoolBase {
     version: Int!
 
     userBalance: GqlPoolUserBalance
-
-    """
-    QuantAmmWeightedParams
-    """
-    quantAmmWeightedParams: QuantAmmWeightedParams
 }
 
 type GqlPoolComposableStable implements GqlPoolBase {
@@ -1197,11 +1248,6 @@ type GqlPoolComposableStable implements GqlPoolBase {
     version: Int!
 
     userBalance: GqlPoolUserBalance
-
-    """
-    QuantAmmWeightedParams
-    """
-    quantAmmWeightedParams: QuantAmmWeightedParams
 }
 
 type GqlPoolElement implements GqlPoolBase {
@@ -1255,11 +1301,6 @@ type GqlPoolElement implements GqlPoolBase {
     version: Int!
 
     userBalance: GqlPoolUserBalance
-
-    """
-    QuantAmmWeightedParams
-    """
-    quantAmmWeightedParams: QuantAmmWeightedParams
 }
 
 type GqlPoolComposableStableNested @deprecated(reason: "use GqlPoolTokenDetail instead") {
@@ -1298,15 +1339,11 @@ type GqlPoolComposableStableNested @deprecated(reason: "use GqlPoolTokenDetail i
     version: Int!
     categories: [GqlPoolFilterCategory]
     tags: [String]
-
-    """
-    QuantAmmWeightedParams
-    """
-    quantAmmWeightedParams: QuantAmmWeightedParams
 }
 
 union GqlPoolUnion =
       GqlPoolWeighted
+    | GqlPoolQuantAmmWeighted
     | GqlPoolStable
     | GqlPoolMetaStable
     | GqlPoolComposableStable
@@ -1314,6 +1351,7 @@ union GqlPoolUnion =
     | GqlPoolLiquidityBootstrapping
     | GqlPoolGyro
     | GqlPoolFx
+
 union GqlPoolNestedUnion @deprecated(reason: "use GqlPoolTokenDetail instead") = GqlPoolComposableStableNested
 
 union GqlPoolTokenUnion = GqlPoolToken | GqlPoolTokenComposableStable

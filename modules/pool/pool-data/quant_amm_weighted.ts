@@ -7,18 +7,26 @@ export const quant_amm_weighted = (pool: SepoliaTypePoolFragment) => {
 
     const params = pool.quantAMMWeightedParams;
 
+    // Return just the fields that are dynamic and are updated in the RPC call
     return {
-        oracleStalenessThreshold: params.oracleStalenessThreshold || '',
-        poolRegistry: params.poolRegistry || '',
-        lambda: params.lambda || [],
-        epsilonMax: params.epsilonMax || '',
-        absoluteWeightGuardRail: params.absoluteWeightGuardRail || '',
-        maxTradeSizeRatio: params.maxTradeSizeRatio || '',
-        updateInterval: params.updateInterval || '',
         weightsAtLastUpdateInterval: params.weightsAtLastUpdateInterval || [],
         weightBlockMultipliers: params.weightBlockMultipliers || [],
         lastUpdateIntervalTime: params.lastUpdateIntervalTime || '',
         lastInterpolationTimePossible: params.lastInterpolationTimePossible || '',
-        details: params.details || [],
     };
+
+    // return {
+    //     oracleStalenessThreshold: params.oracleStalenessThreshold || '',
+    //     poolRegistry: params.poolRegistry || '',
+    //     lambda: params.lambda || [],
+    //     epsilonMax: params.epsilonMax || '',
+    //     absoluteWeightGuardRail: params.absoluteWeightGuardRail || '',
+    //     maxTradeSizeRatio: params.maxTradeSizeRatio || '',
+    //     updateInterval: params.updateInterval || '',
+    //     weightsAtLastUpdateInterval: params.weightsAtLastUpdateInterval || [],
+    //     weightBlockMultipliers: params.weightBlockMultipliers || [],
+    //     lastUpdateIntervalTime: params.lastUpdateIntervalTime || '',
+    //     lastInterpolationTimePossible: params.lastInterpolationTimePossible || '',
+    //     details: params.details || [],
+    // };
 };
