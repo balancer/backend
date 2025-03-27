@@ -29,7 +29,7 @@ export class WeightedPoolV3 extends BasePoolV3 implements BasePoolMethodsV3 {
 
     static fromPrismaPool(
         pool: PrismaPoolAndHookWithDynamic,
-        underlyingTokens: { address: string; decimals: number }[],
+        underlyingTokens: { address: string; decimals: number }[] = [],
     ): WeightedPoolV3 {
         const poolTokens: WeightedPoolToken[] = [];
 

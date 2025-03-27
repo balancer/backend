@@ -30,7 +30,7 @@ export class StablePoolV3 extends BasePoolV3 implements BasePoolMethodsV3 {
 
     static fromPrismaPool(
         pool: PrismaPoolAndHookWithDynamic,
-        underlyingTokens: { address: string; decimals: number }[],
+        underlyingTokens: { address: string; decimals: number }[] = [],
     ): StablePoolV3 {
         const poolTokens: StablePoolToken[] = [];
 

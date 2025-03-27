@@ -3,19 +3,15 @@
 import { ExactInQueryOutput, Swap, SwapKind, Token, Address, ExactOutQueryOutput, CHAINS } from '@balancer/sdk';
 import { createTestClient, Hex, http, parseUnits, TestClient } from 'viem';
 
-import { PrismaPoolAndHookWithDynamic } from '../../../../../../prisma/prisma-types';
+import { PrismaPoolAndHookWithDynamic } from '../../../../../prisma/prisma-types';
 
 import { PathWithAmount } from '../../path';
 import { SOR } from '../../sor';
 import { getOutputAmount, getInputAmount } from '../../utils/helpers';
-import { chainToChainId as chainToIdMap } from '../../../../../network/chain-id-to-chain';
+import { chainToChainId as chainToIdMap } from '../../../../network/chain-id-to-chain';
 
-import { ANVIL_NETWORKS, startFork, stopAnvilForks } from '../../../../../../test/anvil/anvil-global-setup';
-import {
-    prismaPoolDynamicDataFactory,
-    prismaPoolFactory,
-    prismaPoolTokenFactory,
-} from '../../../../../../test/factories';
+import { ANVIL_NETWORKS, startFork, stopAnvilForks } from '../../../../../test/anvil/anvil-global-setup';
+import { prismaPoolDynamicDataFactory, prismaPoolFactory, prismaPoolTokenFactory } from '../../../../../test/factories';
 
 const protocolVersion = 3;
 

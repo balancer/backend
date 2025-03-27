@@ -2,7 +2,7 @@
 
 import { parseEther, parseUnits } from 'viem';
 
-import { PrismaPoolAndHookWithDynamic } from '../../../../../../prisma/prisma-types';
+import { PrismaPoolAndHookWithDynamic } from '../../../../../prisma/prisma-types';
 import { WAD } from '../../utils/math';
 import { StablePoolV3 } from './stablePool';
 
@@ -15,8 +15,8 @@ import {
     prismaPoolFactory,
     prismaPoolTokenFactory,
     hookFactory,
-} from '../../../../../../test/factories';
-import { createRandomAddress } from '../../../../../../test/utils';
+} from '../../../../../test/factories';
+import { createRandomAddress } from '../../../../../test/utils';
 
 describe('SOR V3 Stable Pool Tests', () => {
     let amp: string;

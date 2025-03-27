@@ -2,10 +2,10 @@
 
 import { parseEther } from 'viem';
 
-import { PrismaPoolAndHookWithDynamic } from '../../../../../../prisma/prisma-types';
+import { PrismaPoolAndHookWithDynamic } from '../../../../../prisma/prisma-types';
 import { WAD } from '../../utils/math';
 import { WeightedPoolV3 } from './weightedPool';
-import { createRandomAddress } from '../../../../../../test/utils';
+import { createRandomAddress } from '../../../../../test/utils';
 
 // keep factories imports at the end - moving up will break the test
 import {
@@ -14,7 +14,7 @@ import {
     prismaPoolFactory,
     prismaPoolTokenFactory,
     hookFactory,
-} from '../../../../../../test/factories';
+} from '../../../../../test/factories';
 
 describe('SOR V3 Weighted Pool Tests', () => {
     let scalingFactors: bigint[];
