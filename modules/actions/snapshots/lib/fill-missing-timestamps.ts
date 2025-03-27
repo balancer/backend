@@ -1,5 +1,5 @@
 import { Prisma } from '@prisma/client';
-import { roundToNextMidnight, secondsPerDay } from '../../../common/time';
+import { roundToMidnight, secondsPerDay } from '../../../common/time';
 import _ from 'lodash';
 
 export const fillMissingTimestamps = (
@@ -14,11 +14,11 @@ export const fillMissingTimestamps = (
         const sortedItems = _.sortBy(groupItems, 'timestamp');
 
         // Find the range of timestamps
-        const currentMidnight = roundToNextMidnight();
+        const lastMidnight = roundToMidnight(); // There is no data for the current day in SG
         const timestamps = sortedItems.map((item) => item.timestamp);
         const minTimestamp = _.min(timestamps) ?? 0;
         // The maxTimestamp is always the last midnight, SG stops producing data when no events recieved
-        const maxTimestamp = currentMidnight;
+        const maxTimestamp = _.max([...timestamps, lastMidnight]) ?? 0;
 
         // Generate all timestamps within the range
         const allTimestamps: number[] = [];

@@ -55,4 +55,4 @@ export const computeDailyValues = (
 
 // Helper function to calculate the daily values
 const diff = (current: string[], previous: string[]) =>
-    current.map((value, i) => String(parseFloat(value) - parseFloat(previous[i] || '0')));
+    current.map((value, i) => String(Math.max(parseFloat(value) - parseFloat(previous[i] || '0'), 0)));

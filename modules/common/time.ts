@@ -151,7 +151,7 @@ export const roundToHour = (timestamp: number) => Math.floor(timestamp / 3600) *
 /**
  * Time helper to round timestamp down to the midnight
  */
-export const roundToMidnight = (timestamp: number) => Math.floor(timestamp / 86400) * 86400;
+export const roundToMidnight = (timestamp: number = now()) => Math.floor(timestamp / 86400) * 86400;
 
 /**
  * Time helper to round timestamp to the next midnight
