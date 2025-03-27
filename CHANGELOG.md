@@ -1,5 +1,11 @@
 # backend
 
+## 1.37.2
+
+### Patch Changes
+
+-   492b47a: fixing snapshots
+
 ## 1.37.1
 
 ### Patch Changes
