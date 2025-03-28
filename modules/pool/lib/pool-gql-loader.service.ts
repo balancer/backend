@@ -984,6 +984,13 @@ export class PoolGqlLoaderService {
                     ...mappedData,
                     ...(typeData as FxData),
                 };
+            case 'QUANT_AMM_WEIGHTED':
+                return {
+                    __typename: 'GqlPoolQuantAmmWeighted',
+                    ...poolWithoutTypeData,
+                    ...mappedData,
+                    ...(typeData as any),
+                };
         }
 
         return {
@@ -1143,13 +1150,21 @@ export class PoolGqlLoaderService {
 
         const sorted = this.getSortedGauges(pool);
 
+        if (sorted.length === 0) {
+            return null;
+        }
+
+        const auraPool = pool.staking.find(
+            (staking) => staking.type === 'AURA' && staking.aura && !staking.aura!.isShutdown,
+        );
+
         return {
             ...sorted[0],
             gauge: {
                 ...sorted[0].gauge!,
                 otherGauges: sorted.slice(1).map((item) => item.gauge!),
             },
-            aura: pool.staking.find((staking) => staking.type === 'AURA' && !staking.aura!.isShutdown)?.aura,
+            aura: auraPool?.aura,
             farm: null,
             reliquary: null,
         };

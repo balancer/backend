@@ -1,7 +1,7 @@
 import { Chain, Prisma, PrismaPoolType } from '@prisma/client';
 import { BalancerPoolFragment } from '../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
 import { zeroAddress as AddressZero } from 'viem';
-import { fx, gyro, element, stable } from './pool-data';
+import { fx, gyro, element, stable, quantAmmWeighted } from './pool-data';
 
 export const subgraphToPrismaCreate = (
     pool: BalancerPoolFragment,
@@ -94,7 +94,7 @@ const subgraphMapper = (
         totalLiquidity: Math.max(parseFloat(pool.totalLiquidity), 0),
     };
 
-    const typeData: ReturnType<typeof typeDataMapper[keyof typeof typeDataMapper]> | {} = Object.keys(
+    const typeData: ReturnType<(typeof typeDataMapper)[keyof typeof typeDataMapper]> | {} = Object.keys(
         typeDataMapper,
     ).includes(type)
         ? typeDataMapper[type as keyof typeof typeDataMapper](pool)
@@ -193,3 +193,4 @@ export type FxData = ReturnType<typeof fx>;
 export type GyroData = ReturnType<typeof gyro>;
 export type ElementData = ReturnType<typeof element>;
 export type StableData = ReturnType<typeof stable>;
+export type QuantAmmWeightedData = ReturnType<typeof quantAmmWeighted>;

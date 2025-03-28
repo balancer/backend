@@ -1,5 +1,5 @@
 import { ViemClient } from '../../types';
-import { stableContractCalls, PoolTypeData } from '../pool-type-dynamic-data';
+import { stableContractCalls, quantAmmWeightedCalls, PoolTypeData } from '../pool-type-dynamic-data';
 import { multicallViem, ViemMulticallCall } from '../../../web3/multicaller-viem';
 import { PrismaPoolType } from '@prisma/client';
 
@@ -7,6 +7,8 @@ export const poolTypeCalls = (pool: { id: string; type: PrismaPoolType }) => {
     switch (pool.type) {
         case PrismaPoolType.STABLE:
             return stableContractCalls(pool.id);
+        case PrismaPoolType.QUANT_AMM_WEIGHTED:
+            return quantAmmWeightedCalls(pool.id);
         default:
             return [];
     }
