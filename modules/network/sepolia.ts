@@ -168,5 +168,9 @@ export const sepoliaNetworkConfig: NetworkConfig = {
             name: 'sync-erc4626-unwrap-rate',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(60, 'minutes') : every(20, 'minutes'),
         },
+        {
+            name: 'quant-amm-sync-weights',
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(60, 'minutes') : every(10, 'minutes'),
+        },
     ],
 };
