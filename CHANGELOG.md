@@ -1,5 +1,12 @@
 # backend
 
+## 1.37.4
+
+### Patch Changes
+
+-   297f9b8: sonic subgraph with 3clp
+-   451faa6: quant amm pool data
+
 ## 1.37.3
 
 ### Patch Changes
