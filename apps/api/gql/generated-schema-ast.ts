@@ -1808,6 +1808,66 @@ export const schema = gql`
         desc
     }
 
+    type GqlPoolQuantAmmWeighted implements GqlPoolBase {
+        address: Bytes!
+        allTokens: [GqlPoolTokenExpanded!]! @deprecated(reason: "Use poolTokens instead")
+        categories: [GqlPoolFilterCategory]
+        chain: GqlChain!
+        createTime: Int!
+        decimals: Int!
+        displayTokens: [GqlPoolTokenDisplay!]! @deprecated(reason: "Use poolTokens instead")
+        dynamicData: GqlPoolDynamicData!
+        factory: Bytes
+        hasAnyAllowedBuffer: Boolean!
+        hasErc4626: Boolean!
+        hasNestedErc4626: Boolean!
+        hook: GqlHook
+        id: ID!
+        investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
+        lastInterpolationTimePossible: String!
+        lastUpdateIntervalTime: String!
+        liquidityManagement: LiquidityManagement
+        name: String!
+        nestingType: GqlPoolNestingType! @deprecated(reason: "Removed without replacement")
+
+        """
+        The wallet address of the owner of the pool. Pool owners can set certain properties like swapFees or AMP.
+        """
+        owner: Bytes @deprecated(reason: "Use swapFeeManager instead")
+
+        """
+        Account empowered to pause/unpause the pool (or 0 to delegate to governance)
+        """
+        pauseManager: Bytes
+
+        """
+        Account empowered to set the pool creator fee percentage
+        """
+        poolCreator: Bytes
+        poolTokens: [GqlPoolTokenDetail!]!
+        protocolVersion: Int!
+        staking: GqlPoolStaking
+
+        """
+        Account empowered to set static swap fees for a pool (when 0 on V2 swap fees are immutable, on V3 delegate to governance)
+        """
+        swapFeeManager: Bytes
+        symbol: String!
+        tags: [String]
+
+        """
+        All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
+        """
+        tokens: [GqlPoolTokenUnion!]! @deprecated(reason: "Use poolTokens instead")
+        type: GqlPoolType!
+        userBalance: GqlPoolUserBalance
+        vaultVersion: Int! @deprecated(reason: "use protocolVersion instead")
+        version: Int!
+        weightBlockMultipliers: [String!]!
+        weightsAtLastUpdateInterval: [String!]!
+        withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
+    }
+
     type GqlPoolSnapshot {
         amounts: [String!]!
         chain: GqlChain!
@@ -2406,6 +2466,7 @@ export const schema = gql`
         LIQUIDITY_BOOTSTRAPPING
         META_STABLE
         PHANTOM_STABLE
+        QUANT_AMM_WEIGHTED
         STABLE
         UNKNOWN
         WEIGHTED
@@ -2418,6 +2479,7 @@ export const schema = gql`
         | GqlPoolGyro
         | GqlPoolLiquidityBootstrapping
         | GqlPoolMetaStable
+        | GqlPoolQuantAmmWeighted
         | GqlPoolStable
         | GqlPoolWeighted
 
