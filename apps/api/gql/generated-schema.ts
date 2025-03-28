@@ -1281,8 +1281,6 @@ export interface GqlPoolQuantAmmWeighted extends GqlPoolBase {
     id: Scalars['ID'];
     /** @deprecated Removed without replacement */
     investConfig: GqlPoolInvestConfig;
-    lastInterpolationTimePossible: Scalars['String'];
-    lastUpdateIntervalTime: Scalars['String'];
     liquidityManagement?: Maybe<LiquidityManagement>;
     name: Scalars['String'];
     /** @deprecated Removed without replacement */
@@ -1313,8 +1311,6 @@ export interface GqlPoolQuantAmmWeighted extends GqlPoolBase {
     /** @deprecated use protocolVersion instead */
     vaultVersion: Scalars['Int'];
     version: Scalars['Int'];
-    weightBlockMultipliers: Array<Scalars['String']>;
-    weightsAtLastUpdateInterval: Array<Scalars['String']>;
     /** @deprecated Removed without replacement */
     withdrawConfig: GqlPoolWithdrawConfig;
 }
@@ -4475,8 +4471,6 @@ export type GqlPoolQuantAmmWeightedResolvers<
     hook?: Resolver<Maybe<ResolversTypes['GqlHook']>, ParentType, ContextType>;
     id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
     investConfig?: Resolver<ResolversTypes['GqlPoolInvestConfig'], ParentType, ContextType>;
-    lastInterpolationTimePossible?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    lastUpdateIntervalTime?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     liquidityManagement?: Resolver<Maybe<ResolversTypes['LiquidityManagement']>, ParentType, ContextType>;
     name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     nestingType?: Resolver<ResolversTypes['GqlPoolNestingType'], ParentType, ContextType>;
@@ -4494,8 +4488,6 @@ export type GqlPoolQuantAmmWeightedResolvers<
     userBalance?: Resolver<Maybe<ResolversTypes['GqlPoolUserBalance']>, ParentType, ContextType>;
     vaultVersion?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     version?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-    weightBlockMultipliers?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
-    weightsAtLastUpdateInterval?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
     withdrawConfig?: Resolver<ResolversTypes['GqlPoolWithdrawConfig'], ParentType, ContextType>;
     __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;

@@ -799,11 +799,6 @@ type GqlPoolQuantAmmWeighted implements GqlPoolBase {
     version: Int!
 
     userBalance: GqlPoolUserBalance
-
-    weightsAtLastUpdateInterval: [String!]!
-    weightBlockMultipliers: [String!]!
-    lastUpdateIntervalTime: String!
-    lastInterpolationTimePossible: String!
 }
 
 type GqlPoolWeighted implements GqlPoolBase {
