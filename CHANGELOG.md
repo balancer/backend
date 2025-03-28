@@ -1,5 +1,12 @@
 # backend
 
+## 1.37.3
+
+### Patch Changes
+
+-   a5bb1e0: add apr for vicuna boosted pools
+-   3142ce9: fix query casing
+
 ## 1.37.2
 
 ### Patch Changes

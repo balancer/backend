@@ -79,6 +79,23 @@ const casedQueryParams = (query: string): string => {
                             value,
                         },
                     };
+                } else if (node.value.kind === 'ListValue') {
+                    const values = node.value.values.map((value) => {
+                        if (value.kind === 'StringValue') {
+                            return {
+                                ...value,
+                                value: value.value.toLowerCase(),
+                            };
+                        }
+                        return value;
+                    });
+                    return {
+                        ...node,
+                        value: {
+                            ...node.value,
+                            values,
+                        },
+                    };
                 }
             } else if (UPPER_REGEX.test(node.name.value)) {
                 if (node.value.kind === 'StringValue') {
@@ -89,6 +106,23 @@ const casedQueryParams = (query: string): string => {
                         value: {
                             ...node.value,
                             value,
+                        },
+                    };
+                } else if (node.value.kind === 'ListValue') {
+                    const values = node.value.values.map((value) => {
+                        if (value.kind === 'StringValue') {
+                            return {
+                                ...value,
+                                value: value.value.toUpperCase(),
+                            };
+                        }
+                        return value;
+                    });
+                    return {
+                        ...node,
+                        value: {
+                            ...node.value,
+                            values,
                         },
                     };
                 }
