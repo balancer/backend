@@ -96,22 +96,6 @@ export const schema = gql`
         ZKEVM
     }
 
-    type GqlContentNewsItem {
-        discussionUrl: String
-        id: ID!
-        image: String
-        source: GqlContentNewsItemSource!
-        text: String!
-        timestamp: String!
-        url: String!
-    }
-
-    enum GqlContentNewsItemSource {
-        discord
-        medium
-        twitter
-    }
-
     type GqlFeaturePoolGroupItemExternalLink {
         buttonText: String!
         buttonUrl: String!
@@ -821,11 +805,6 @@ export const schema = gql`
         id: ID!
 
         """
-        Deprecated
-        """
-        investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
-
-        """
         Liquidity management settings for v3 pools.
         """
         liquidityManagement: LiquidityManagement
@@ -899,11 +878,6 @@ export const schema = gql`
         The version of the pool type.
         """
         version: Int!
-
-        """
-        Deprecated
-        """
-        withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
     }
 
     type GqlPoolBatchSwap {
@@ -957,7 +931,6 @@ export const schema = gql`
         hasNestedErc4626: Boolean!
         hook: GqlHook
         id: ID!
-        investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
         liquidityManagement: LiquidityManagement
         name: String!
         nestingType: GqlPoolNestingType! @deprecated(reason: "Removed without replacement")
@@ -995,7 +968,6 @@ export const schema = gql`
         userBalance: GqlPoolUserBalance
         vaultVersion: Int! @deprecated(reason: "use protocolVersion instead")
         version: Int!
-        withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
     }
 
     type GqlPoolComposableStableNested {
@@ -1126,7 +1098,6 @@ export const schema = gql`
         hasNestedErc4626: Boolean!
         hook: GqlHook
         id: ID!
-        investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
         liquidityManagement: LiquidityManagement
         name: String!
 
@@ -1161,7 +1132,6 @@ export const schema = gql`
         userBalance: GqlPoolUserBalance
         vaultVersion: Int! @deprecated(reason: "use protocolVersion instead")
         version: Int!
-        withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
     }
 
     """
@@ -1345,7 +1315,6 @@ export const schema = gql`
         hasNestedErc4626: Boolean!
         hook: GqlHook
         id: ID!
-        investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
         lambda: String!
         liquidityManagement: LiquidityManagement
         name: String!
@@ -1383,7 +1352,6 @@ export const schema = gql`
         userBalance: GqlPoolUserBalance
         vaultVersion: Int! @deprecated(reason: "use protocolVersion instead")
         version: Int!
-        withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
     }
 
     type GqlPoolGyro implements GqlPoolBase {
@@ -1405,7 +1373,6 @@ export const schema = gql`
         hasNestedErc4626: Boolean!
         hook: GqlHook
         id: ID!
-        investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
         lambda: String!
         liquidityManagement: LiquidityManagement
         name: String!
@@ -1455,20 +1422,7 @@ export const schema = gql`
         vaultVersion: Int! @deprecated(reason: "use protocolVersion instead")
         version: Int!
         w: String!
-        withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
         z: String!
-    }
-
-    type GqlPoolInvestConfig {
-        options: [GqlPoolInvestOption!]!
-        proportionalEnabled: Boolean!
-        singleAssetEnabled: Boolean!
-    }
-
-    type GqlPoolInvestOption {
-        poolTokenAddress: String!
-        poolTokenIndex: Int!
-        tokenOptions: [GqlPoolToken!]!
     }
 
     type GqlPoolJoinExit {
@@ -1513,7 +1467,6 @@ export const schema = gql`
         hasNestedErc4626: Boolean!
         hook: GqlHook
         id: ID!
-        investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
         liquidityManagement: LiquidityManagement
         name: String!
         nestingType: GqlPoolNestingType! @deprecated(reason: "Removed without replacement")
@@ -1551,7 +1504,6 @@ export const schema = gql`
         userBalance: GqlPoolUserBalance
         vaultVersion: Int! @deprecated(reason: "use protocolVersion instead")
         version: Int!
-        withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
     }
 
     type GqlPoolMetaStable implements GqlPoolBase {
@@ -1570,7 +1522,6 @@ export const schema = gql`
         hasNestedErc4626: Boolean!
         hook: GqlHook
         id: ID!
-        investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
         liquidityManagement: LiquidityManagement
         name: String!
 
@@ -1603,7 +1554,6 @@ export const schema = gql`
         userBalance: GqlPoolUserBalance
         vaultVersion: Int! @deprecated(reason: "use protocolVersion instead")
         version: Int!
-        withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
     }
 
     """
@@ -1823,7 +1773,6 @@ export const schema = gql`
         hasNestedErc4626: Boolean!
         hook: GqlHook
         id: ID!
-        investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
         liquidityManagement: LiquidityManagement
         name: String!
         nestingType: GqlPoolNestingType! @deprecated(reason: "Removed without replacement")
@@ -1861,7 +1810,6 @@ export const schema = gql`
         userBalance: GqlPoolUserBalance
         vaultVersion: Int! @deprecated(reason: "use protocolVersion instead")
         version: Int!
-        withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
     }
 
     type GqlPoolSnapshot {
@@ -1908,7 +1856,6 @@ export const schema = gql`
         hasNestedErc4626: Boolean!
         hook: GqlHook
         id: ID!
-        investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
         liquidityManagement: LiquidityManagement
         name: String!
 
@@ -1941,7 +1888,6 @@ export const schema = gql`
         userBalance: GqlPoolUserBalance
         vaultVersion: Int! @deprecated(reason: "use protocolVersion instead")
         version: Int!
-        withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
     }
 
     type GqlPoolStaking {
@@ -2529,7 +2475,6 @@ export const schema = gql`
         hasNestedErc4626: Boolean!
         hook: GqlHook
         id: ID!
-        investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
         liquidityManagement: LiquidityManagement
         name: String!
         nestingType: GqlPoolNestingType! @deprecated(reason: "Removed without replacement")
@@ -2567,19 +2512,6 @@ export const schema = gql`
         userBalance: GqlPoolUserBalance
         vaultVersion: Int! @deprecated(reason: "use protocolVersion instead")
         version: Int!
-        withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
-    }
-
-    type GqlPoolWithdrawConfig {
-        options: [GqlPoolWithdrawOption!]!
-        proportionalEnabled: Boolean!
-        singleAssetEnabled: Boolean!
-    }
-
-    type GqlPoolWithdrawOption {
-        poolTokenAddress: String!
-        poolTokenIndex: Int!
-        tokenOptions: [GqlPoolToken!]!
     }
 
     """
@@ -3854,7 +3786,6 @@ export const schema = gql`
         blocksGetBlocksPerDay: Float! @deprecated
         blocksGetBlocksPerSecond: Float! @deprecated
         blocksGetBlocksPerYear: Float! @deprecated
-        contentGetNewsItems(chain: GqlChain): [GqlContentNewsItem!]!
         latestSyncedBlocks: GqlLatestSyncedBlocks!
 
         """
@@ -3889,12 +3820,6 @@ export const schema = gql`
             typeIn: [GqlPoolEventType!]!
             userAddress: String
         ): [GqlPoolEvent!]!
-
-        """
-        Will de deprecated in favor of poolGetFeaturedPools
-        """
-        poolGetFeaturedPoolGroups(chains: [GqlChain!]): [GqlPoolFeaturedPoolGroup!]!
-            @deprecated(reason: "Use poolGetFeaturedPools instead")
 
         """
         Returns the list of featured pools for chains

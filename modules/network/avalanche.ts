@@ -5,7 +5,6 @@ import { SwapFeeAprService } from '../pool/lib/apr-data-sources/';
 import { GaugeAprService } from '../pool/lib/apr-data-sources/ve-bal-gauge-apr.service';
 import { UserSyncGaugeBalanceService } from '../user/lib/user-sync-gauge-balance.service';
 import { every } from '../../apps/scheduler/intervals';
-import { GithubContentService } from '../content/github-content.service';
 import { env } from '../../apps/env';
 import { YbTokensAprService } from '../pool/lib/apr-data-sources/yb-tokens-apr.service';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
@@ -16,7 +15,6 @@ const avalancheNetworkData: NetworkData = config.AVALANCHE;
 
 export const avalancheNetworkConfig: NetworkConfig = {
     data: avalancheNetworkData,
-    contentService: new GithubContentService(),
     provider: new ethers.providers.JsonRpcProvider({ url: avalancheNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
         new YbTokensAprService(avalancheNetworkData.ybAprConfig, avalancheNetworkData.chain.prismaId),
