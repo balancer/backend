@@ -12,7 +12,6 @@ import {
 } from '../pool/lib/apr-data-sources';
 import { UserSyncGaugeBalanceService } from '../user/lib/user-sync-gauge-balance.service';
 import { every } from '../../apps/scheduler/intervals';
-import { GithubContentService } from '../content/github-content.service';
 import { env } from '../../apps/env';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import config from '../../config';
@@ -24,7 +23,6 @@ export const data: NetworkData = config.MAINNET;
 
 export const mainnetNetworkConfig: NetworkConfig = {
     data,
-    contentService: new GithubContentService(),
     provider: new ethers.providers.JsonRpcProvider({ url: data.rpcUrl, timeout: 60000 }),
     poolAprServices: [
         new YbTokensAprService(data.ybAprConfig, data.chain.prismaId),

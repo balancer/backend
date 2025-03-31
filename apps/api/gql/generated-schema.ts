@@ -98,19 +98,6 @@ export type GqlChain =
     | 'SONIC'
     | 'ZKEVM';
 
-export interface GqlContentNewsItem {
-    __typename?: 'GqlContentNewsItem';
-    discussionUrl?: Maybe<Scalars['String']>;
-    id: Scalars['ID'];
-    image?: Maybe<Scalars['String']>;
-    source: GqlContentNewsItemSource;
-    text: Scalars['String'];
-    timestamp: Scalars['String'];
-    url: Scalars['String'];
-}
-
-export type GqlContentNewsItemSource = 'discord' | 'medium' | 'twitter';
-
 export interface GqlFeaturePoolGroupItemExternalLink {
     __typename?: 'GqlFeaturePoolGroupItemExternalLink';
     buttonText: Scalars['String'];
@@ -2605,7 +2592,6 @@ export interface Query {
     blocksGetBlocksPerSecond: Scalars['Float'];
     /** @deprecated Field no longer supported */
     blocksGetBlocksPerYear: Scalars['Float'];
-    contentGetNewsItems: Array<GqlContentNewsItem>;
     latestSyncedBlocks: GqlLatestSyncedBlocks;
     /** Getting swap, add and remove events with paging */
     poolEvents: Array<GqlPoolEvent>;
@@ -2621,11 +2607,6 @@ export interface Query {
     poolGetBatchSwaps: Array<GqlPoolBatchSwap>;
     /** Getting swap, add and remove events with range */
     poolGetEvents: Array<GqlPoolEvent>;
-    /**
-     * Will de deprecated in favor of poolGetFeaturedPools
-     * @deprecated Use poolGetFeaturedPools instead
-     */
-    poolGetFeaturedPoolGroups: Array<GqlPoolFeaturedPoolGroup>;
     /** Returns the list of featured pools for chains */
     poolGetFeaturedPools: Array<GqlPoolFeaturedPool>;
     /**
@@ -2726,10 +2707,6 @@ export interface QueryBeetsPoolGetReliquaryFarmSnapshotsArgs {
     range: GqlPoolSnapshotDataRange;
 }
 
-export interface QueryContentGetNewsItemsArgs {
-    chain?: InputMaybe<GqlChain>;
-}
-
 export interface QueryPoolEventsArgs {
     first?: InputMaybe<Scalars['Int']>;
     skip?: InputMaybe<Scalars['Int']>;
@@ -2756,10 +2733,6 @@ export interface QueryPoolGetEventsArgs {
     range: GqlPoolEventsDataRange;
     typeIn: Array<GqlPoolEventType>;
     userAddress?: InputMaybe<Scalars['String']>;
-}
-
-export interface QueryPoolGetFeaturedPoolGroupsArgs {
-    chains?: InputMaybe<Array<GqlChain>>;
 }
 
 export interface QueryPoolGetFeaturedPoolsArgs {
@@ -3062,8 +3035,6 @@ export type ResolversTypes = ResolversObject<{
     >;
     GqlBigNumber: ResolverTypeWrapper<Scalars['GqlBigNumber']>;
     GqlChain: GqlChain;
-    GqlContentNewsItem: ResolverTypeWrapper<GqlContentNewsItem>;
-    GqlContentNewsItemSource: GqlContentNewsItemSource;
     GqlFeaturePoolGroupItemExternalLink: ResolverTypeWrapper<GqlFeaturePoolGroupItemExternalLink>;
     GqlHistoricalTokenPrice: ResolverTypeWrapper<GqlHistoricalTokenPrice>;
     GqlHistoricalTokenPriceEntry: ResolverTypeWrapper<GqlHistoricalTokenPriceEntry>;
@@ -3275,7 +3246,6 @@ export type ResolversParentTypes = ResolversObject<{
     GqlBalancePoolAprItem: Omit<GqlBalancePoolAprItem, 'apr'> & { apr: ResolversParentTypes['GqlPoolAprValue'] };
     GqlBalancePoolAprSubItem: Omit<GqlBalancePoolAprSubItem, 'apr'> & { apr: ResolversParentTypes['GqlPoolAprValue'] };
     GqlBigNumber: Scalars['GqlBigNumber'];
-    GqlContentNewsItem: GqlContentNewsItem;
     GqlFeaturePoolGroupItemExternalLink: GqlFeaturePoolGroupItemExternalLink;
     GqlHistoricalTokenPrice: GqlHistoricalTokenPrice;
     GqlHistoricalTokenPriceEntry: GqlHistoricalTokenPriceEntry;
@@ -3518,20 +3488,6 @@ export type GqlBalancePoolAprSubItemResolvers<
 export interface GqlBigNumberScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['GqlBigNumber'], any> {
     name: 'GqlBigNumber';
 }
-
-export type GqlContentNewsItemResolvers<
-    ContextType = ResolverContext,
-    ParentType extends ResolversParentTypes['GqlContentNewsItem'] = ResolversParentTypes['GqlContentNewsItem'],
-> = ResolversObject<{
-    discussionUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-    id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-    image?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-    source?: Resolver<ResolversTypes['GqlContentNewsItemSource'], ParentType, ContextType>;
-    text?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    timestamp?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    url?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-}>;
 
 export type GqlFeaturePoolGroupItemExternalLinkResolvers<
     ContextType = ResolverContext,
@@ -5563,12 +5519,6 @@ export type QueryResolvers<
     blocksGetBlocksPerDay?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
     blocksGetBlocksPerSecond?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
     blocksGetBlocksPerYear?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
-    contentGetNewsItems?: Resolver<
-        Array<ResolversTypes['GqlContentNewsItem']>,
-        ParentType,
-        ContextType,
-        RequireFields<QueryContentGetNewsItemsArgs, never>
-    >;
     latestSyncedBlocks?: Resolver<ResolversTypes['GqlLatestSyncedBlocks'], ParentType, ContextType>;
     poolEvents?: Resolver<
         Array<ResolversTypes['GqlPoolEvent']>,
@@ -5593,12 +5543,6 @@ export type QueryResolvers<
         ParentType,
         ContextType,
         RequireFields<QueryPoolGetEventsArgs, 'chain' | 'poolId' | 'range' | 'typeIn'>
-    >;
-    poolGetFeaturedPoolGroups?: Resolver<
-        Array<ResolversTypes['GqlPoolFeaturedPoolGroup']>,
-        ParentType,
-        ContextType,
-        RequireFields<QueryPoolGetFeaturedPoolGroupsArgs, never>
     >;
     poolGetFeaturedPools?: Resolver<
         Array<ResolversTypes['GqlPoolFeaturedPool']>,
@@ -5844,7 +5788,6 @@ export type Resolvers<ContextType = ResolverContext> = ResolversObject<{
     GqlBalancePoolAprItem?: GqlBalancePoolAprItemResolvers<ContextType>;
     GqlBalancePoolAprSubItem?: GqlBalancePoolAprSubItemResolvers<ContextType>;
     GqlBigNumber?: GraphQLScalarType;
-    GqlContentNewsItem?: GqlContentNewsItemResolvers<ContextType>;
     GqlFeaturePoolGroupItemExternalLink?: GqlFeaturePoolGroupItemExternalLinkResolvers<ContextType>;
     GqlHistoricalTokenPrice?: GqlHistoricalTokenPriceResolvers<ContextType>;
     GqlHistoricalTokenPriceEntry?: GqlHistoricalTokenPriceEntryResolvers<ContextType>;

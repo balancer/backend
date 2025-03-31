@@ -96,22 +96,6 @@ export const schema = gql`
         ZKEVM
     }
 
-    type GqlContentNewsItem {
-        discussionUrl: String
-        id: ID!
-        image: String
-        source: GqlContentNewsItemSource!
-        text: String!
-        timestamp: String!
-        url: String!
-    }
-
-    enum GqlContentNewsItemSource {
-        discord
-        medium
-        twitter
-    }
-
     type GqlFeaturePoolGroupItemExternalLink {
         buttonText: String!
         buttonUrl: String!
@@ -3802,7 +3786,6 @@ export const schema = gql`
         blocksGetBlocksPerDay: Float! @deprecated
         blocksGetBlocksPerSecond: Float! @deprecated
         blocksGetBlocksPerYear: Float! @deprecated
-        contentGetNewsItems(chain: GqlChain): [GqlContentNewsItem!]!
         latestSyncedBlocks: GqlLatestSyncedBlocks!
 
         """
@@ -3837,12 +3820,6 @@ export const schema = gql`
             typeIn: [GqlPoolEventType!]!
             userAddress: String
         ): [GqlPoolEvent!]!
-
-        """
-        Will de deprecated in favor of poolGetFeaturedPools
-        """
-        poolGetFeaturedPoolGroups(chains: [GqlChain!]): [GqlPoolFeaturedPoolGroup!]!
-            @deprecated(reason: "Use poolGetFeaturedPools instead")
 
         """
         Returns the list of featured pools for chains

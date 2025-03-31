@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { prisma } from '../../prisma/prisma-client';
-import { ContentService, FeaturedPool, HomeScreenFeaturedPoolGroup, HomeScreenNewsItem } from './content-types';
 import { chainIdToChain, chainToChainId as chainToIdMap } from '../network/chain-id-to-chain';
 import { Chain, PrismaTokenTypeOption } from '@prisma/client';
+import { GqlChain } from '../../apps/api/gql/generated-schema';
 
 const POOLS_METADATA_URL = 'https://raw.githubusercontent.com/balancer/metadata/main/pools/featured.json';
 
@@ -33,7 +33,14 @@ interface WhitelistedToken {
     };
 }
 
-export class GithubContentService implements ContentService {
+export interface FeaturedPool {
+    poolId: string;
+    primary: boolean;
+    chain: GqlChain;
+    description: string;
+}
+
+export class GithubContentService {
     async syncTokenContentData(chains: Chain[]): Promise<void> {
         const {
             data: { tokens },
@@ -142,12 +149,6 @@ export class GithubContentService implements ContentService {
         await prisma.prismaTokenType.createMany({ skipDuplicates: true, data: [...bptTypes, ...phantomBptTypes] });
     }
 
-    async syncPoolContentData(chain: Chain): Promise<void> {}
-
-    async getFeaturedPoolGroups(chains: Chain[]): Promise<HomeScreenFeaturedPoolGroup[]> {
-        return [];
-    }
-
     async getFeaturedPools(chains: Chain[]): Promise<FeaturedPool[]> {
         const { data } = await axios.get<FeaturedPoolMetadata[]>(POOLS_METADATA_URL);
         const pools = data.filter((pool) => chains.includes(chainIdToChain[pool.chainId]));
@@ -157,9 +158,5 @@ export class GithubContentService implements ContentService {
             primary: Boolean(primary),
             description: description,
         })) as FeaturedPool[];
-    }
-
-    async getNewsItems(chain: Chain): Promise<HomeScreenNewsItem[]> {
-        return [];
     }
 }
