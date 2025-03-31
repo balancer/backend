@@ -89,17 +89,6 @@ const balancerResolvers: Resolvers = {
                 where,
             });
         },
-        poolGetFeaturedPoolGroups: async (parent, { chains }, context) => {
-            const currentChain = headerChain();
-            if (!chains && currentChain) {
-                chains = [currentChain];
-            } else if (!chains) {
-                throw new GraphQLError('Provide "chains" param', {
-                    extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
-                });
-            }
-            return poolService.getFeaturedPoolGroups(chains);
-        },
         poolGetFeaturedPools: async (parent, { chains }, context) => {
             return poolService.getFeaturedPools(chains);
         },

@@ -12,10 +12,7 @@ import {
     GqlBalancePoolAprItem,
     GqlBalancePoolAprSubItem,
     GqlPoolDynamicData,
-    GqlPoolFeaturedPoolGroup,
     GqlPoolFeaturedPool,
-    GqlPoolInvestConfig,
-    GqlPoolInvestOption,
     GqlPoolMinimal,
     GqlPoolNestingType,
     GqlPoolComposableStableNested,
@@ -26,8 +23,6 @@ import {
     GqlPoolTokenUnion,
     GqlPoolUnion,
     GqlPoolUserBalance,
-    GqlPoolWithdrawConfig,
-    GqlPoolWithdrawOption,
     QueryPoolGetPoolsArgs,
     GqlPoolTokenDetail,
     GqlNestedPool,
@@ -40,17 +35,12 @@ import {
     GqlHook,
     QueryAggregatorPoolsArgs,
 } from '../../../apps/api/gql/generated-schema';
-import { addressesMatch } from '../../web3/addresses';
 import _ from 'lodash';
 import { prisma } from '../../../prisma/prisma-client';
 import { Chain, Prisma, PrismaPoolAprType, PrismaUserStakedBalance, PrismaUserWalletBalance } from '@prisma/client';
-import { isWeightedPoolV2 } from './pool-utils';
-import { networkContext } from '../../network/network-context.service';
 import { fixedNumber } from '../../view-helpers/fixed-number';
-import { BeethovenChainIds } from '../../network/network-config';
 import { chainToChainId as chainToIdMap } from '../../network/chain-id-to-chain';
 import { GithubContentService } from '../../content/github-content.service';
-import { SanityContentService } from '../../content/sanity-content.service';
 import { ElementData, FxData, GyroData, StableData } from '../subgraph-mapper';
 import { ZERO_ADDRESS } from '@balancer/sdk';
 import { tokenService } from '../../token/token.service';
@@ -412,47 +402,6 @@ export class PoolGqlLoaderService {
 
     public async getPoolsCount(args: QueryPoolGetPoolsArgs): Promise<number> {
         return prisma.prismaPool.count({ where: this.mapQueryArgsToPoolQuery(args).where });
-    }
-
-    public async getFeaturedPoolGroups(chains: Chain[]): Promise<GqlPoolFeaturedPoolGroup[]> {
-        const featuredPoolGroups = [];
-        if (chains.some((chain) => BeethovenChainIds.includes(chainToIdMap[chain]))) {
-            const sanityContentService = new SanityContentService();
-            featuredPoolGroups.push(...(await sanityContentService.getFeaturedPoolGroups(chains)));
-        }
-        const poolIds = featuredPoolGroups
-            .map((group) =>
-                group.items
-                    .filter((item) => item._type === 'homeScreenFeaturedPoolGroupPoolId')
-                    .map((item) => (item._type === 'homeScreenFeaturedPoolGroupPoolId' ? item.poolId : '')),
-            )
-            .flat();
-
-        const pools = await this.getPools({ where: { idIn: poolIds } });
-
-        return featuredPoolGroups.map((group) => {
-            return {
-                ...group,
-                items: group.items
-                    //filter out any invalid pool ids
-                    .filter((item) => {
-                        if (item._type === 'homeScreenFeaturedPoolGroupPoolId') {
-                            return !!pools.find((pool) => pool.id === item.poolId);
-                        }
-
-                        return true;
-                    })
-                    .map((item) => {
-                        if (item._type === 'homeScreenFeaturedPoolGroupPoolId') {
-                            const pool = pools.find((pool) => pool.id === item.poolId);
-
-                            return { __typename: 'GqlPoolMinimal', ...pool! };
-                        } else {
-                            return { __typename: 'GqlFeaturePoolGroupItemExternalLink', ...item };
-                        }
-                    }),
-            };
-        });
     }
 
     public async getFeaturedPools(chains: Chain[]): Promise<GqlPoolFeaturedPool[]> {
@@ -888,8 +837,6 @@ export class PoolGqlLoaderService {
             owner: pool.swapFeeManager, // Keep for backwards compatibility
             staking: this.getStakingData(pool),
             dynamicData: this.getPoolDynamicData(pool),
-            investConfig: this.getPoolInvestConfig(pool), // TODO DEPRECATE
-            withdrawConfig: this.getPoolWithdrawConfig(pool), // TODO DEPRECATE
             nestingType: this.getPoolNestingType(pool),
             tokens: pool.tokens.map((token) => this.mapPoolTokenToGqlUnion(token)), // TODO DEPRECATE
             allTokens: this.mapAllTokens(pool),
@@ -1566,100 +1513,6 @@ export class PoolGqlLoaderService {
         }
 
         return aprItems;
-    }
-
-    private getPoolInvestConfig(pool: PrismaPoolWithExpandedNesting): GqlPoolInvestConfig {
-        const poolTokens = pool.tokens.filter((token) => token.address !== pool.address);
-        const supportsNativeAssetDeposit = pool.type !== 'COMPOSABLE_STABLE';
-        let options: GqlPoolInvestOption[] = [];
-
-        for (const poolToken of poolTokens) {
-            options = [...options, ...this.getActionOptionsForPoolToken(pool, poolToken, supportsNativeAssetDeposit)];
-        }
-
-        return {
-            //TODO could flag these as disabled in sanity
-            proportionalEnabled: pool.type !== 'COMPOSABLE_STABLE' && pool.type !== 'META_STABLE',
-            singleAssetEnabled: true,
-            options,
-        };
-    }
-
-    private getPoolWithdrawConfig(pool: PrismaPoolWithExpandedNesting): GqlPoolWithdrawConfig {
-        const poolTokens = pool.tokens.filter((token) => token.address !== pool.address);
-        let options: GqlPoolWithdrawOption[] = [];
-
-        for (const poolToken of poolTokens) {
-            options = [...options, ...this.getActionOptionsForPoolToken(pool, poolToken, false, true)];
-        }
-
-        return {
-            //TODO could flag these as disabled in sanity
-            proportionalEnabled: true,
-            singleAssetEnabled: true,
-            options,
-        };
-    }
-
-    private getActionOptionsForPoolToken(
-        pool: PrismaPoolWithExpandedNesting,
-        poolToken: PrismaPoolTokenWithExpandedNesting,
-        supportsNativeAsset: boolean,
-        isWithdraw?: boolean,
-    ): { poolTokenAddress: string; poolTokenIndex: number; tokenOptions: GqlPoolToken[] }[] {
-        const nestedPool = poolToken.nestedPool;
-        const options: GqlPoolInvestOption[] = [];
-
-        if (nestedPool && nestedPool.type === 'COMPOSABLE_STABLE') {
-            const nestedTokens = nestedPool.tokens.filter((token) => token.address !== nestedPool.address);
-
-            if (pool.type === 'COMPOSABLE_STABLE' || isWeightedPoolV2(pool)) {
-                //when nesting a composable stable inside a composable stable, all of the underlying tokens can be used when investing
-                //when withdrawing from a v2 weighted pool, we withdraw into all underlying assets.
-                // ie: USDC/DAI/USDT for nested bbaUSD
-                for (const nestedToken of nestedTokens) {
-                    options.push({
-                        poolTokenIndex: poolToken.index,
-                        poolTokenAddress: poolToken.address,
-                        tokenOptions: [this.mapPoolTokenToGql(nestedToken)],
-                    });
-                }
-            } else {
-                //if the parent pool does not have phantom bpt (ie: weighted), the user can only invest with 1 of the composable stable tokens
-                options.push({
-                    poolTokenIndex: poolToken.index,
-                    poolTokenAddress: poolToken.address,
-                    tokenOptions: nestedTokens.map((nestedToken) => {
-                        return this.mapPoolTokenToGql(nestedToken);
-                    }),
-                });
-            }
-        } else {
-            const isWrappedNativeAsset = addressesMatch(poolToken.address, networkContext.data.weth.address);
-
-            options.push({
-                poolTokenIndex: poolToken.index,
-                poolTokenAddress: poolToken.address,
-                tokenOptions:
-                    isWrappedNativeAsset && supportsNativeAsset
-                        ? [
-                              this.mapPoolTokenToGql(poolToken),
-                              this.mapPoolTokenToGql({
-                                  ...poolToken,
-                                  token: {
-                                      ...poolToken.token,
-                                      symbol: networkContext.data.eth.symbol,
-                                      address: networkContext.data.eth.address,
-                                      name: networkContext.data.eth.name,
-                                  },
-                                  id: `${pool.id}-${networkContext.data.eth.address}`,
-                              }),
-                          ]
-                        : [this.mapPoolTokenToGql(poolToken)],
-            });
-        }
-
-        return options;
     }
 
     private mapPoolTokenToGqlUnion(token: PrismaPoolTokenWithExpandedNesting): GqlPoolTokenUnion {
