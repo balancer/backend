@@ -13,6 +13,7 @@ import {
     StakingController,
     StakedSonicController,
     TokenController,
+    QuantAmmController,
 } from '../modules/controllers';
 import { chainIdToChain } from '../modules/network/chain-id-to-chain';
 
@@ -177,6 +178,8 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         return tokenService.updateTokenPrices([chain]);
     } else if (job === 'sync-vebal') {
         return new VeBalVotingListService().syncVotingGauges();
+    } else if (job === 'quant-amm-sync-weights') {
+        return QuantAmmController.syncWeights(chain);
     }
     // Maintenance
     else if (job === 'sync-fx-quote-tokens') {

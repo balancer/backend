@@ -1824,8 +1824,6 @@ export const schema = gql`
         hook: GqlHook
         id: ID!
         investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
-        lastInterpolationTimePossible: String!
-        lastUpdateIntervalTime: String!
         liquidityManagement: LiquidityManagement
         name: String!
         nestingType: GqlPoolNestingType! @deprecated(reason: "Removed without replacement")
@@ -1863,8 +1861,6 @@ export const schema = gql`
         userBalance: GqlPoolUserBalance
         vaultVersion: Int! @deprecated(reason: "use protocolVersion instead")
         version: Int!
-        weightBlockMultipliers: [String!]!
-        weightsAtLastUpdateInterval: [String!]!
         withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
     }
 
