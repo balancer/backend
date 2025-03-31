@@ -2,9 +2,9 @@
 
 import { ExactInQueryOutput, Swap, SwapKind, Token, Address, Path, ExactOutQueryOutput } from '@balancer/sdk';
 
-import { PathWithAmount } from './sorV2/lib/path';
-import { sorGetPathsWithPools } from './sorV2/lib/static';
-import { getOutputAmount, getInputAmount } from './sorV2/lib/utils/helpers';
+import { PathWithAmount } from './lib/path';
+import { SOR } from './lib/sor';
+import { getOutputAmount, getInputAmount } from './lib/utils/helpers';
 import { chainToChainId as chainToIdMap } from '../network/chain-id-to-chain';
 
 import { ANVIL_NETWORKS, startFork, stopAnvilForks } from '../../test/anvil/anvil-global-setup';
@@ -16,6 +16,7 @@ import {
 } from '../../test/factories';
 import { createTestClient, formatEther, Hex, http, parseEther, TestClient } from 'viem';
 import { sepolia } from 'viem/chains';
+import { HookData, PrismaPoolAndHookWithDynamic, PrismaPoolTokenWithDynamicData } from '../../prisma/prisma-types';
 
 /**
  * Test Data:
@@ -91,12 +92,13 @@ describe('Balancer SOR Integration Tests', () => {
             const tIn = new Token(parseFloat(chainToIdMap['SEPOLIA']), BAL.address as Address, BAL.token.decimals);
             const tOut = new Token(parseFloat(chainToIdMap['SEPOLIA']), WETH.address as Address, WETH.token.decimals);
             const amountIn = BigInt(0.1e18);
-            paths = (await sorGetPathsWithPools(
+            paths = (await SOR.getPathsWithPools(
                 tIn,
                 tOut,
                 SwapKind.GivenIn,
                 amountIn,
                 [prismaWeightedPool],
+                [],
                 protocolVersion,
             )) as PathWithAmount[];
 
@@ -162,12 +164,13 @@ describe('Balancer SOR Integration Tests', () => {
                 USDC.token.decimals,
             );
             const amountIn = BigInt(1000e6);
-            paths = (await sorGetPathsWithPools(
+            paths = (await SOR.getPathsWithPools(
                 tIn,
                 tOut,
                 SwapKind.GivenIn,
                 amountIn,
                 [prismaStablePool],
+                [],
                 protocolVersion,
             )) as PathWithAmount[];
 
@@ -268,12 +271,13 @@ describe('Balancer SOR Integration Tests', () => {
                     WETH.token.decimals,
                 );
                 const amountIn = BigInt(10e6);
-                paths = (await sorGetPathsWithPools(
+                paths = (await SOR.getPathsWithPools(
                     tIn,
                     tOut,
                     SwapKind.GivenIn,
                     amountIn,
                     [boostedPool, weightedPool],
+                    [],
                     protocolVersion,
                 )) as PathWithAmount[];
 
@@ -319,12 +323,13 @@ describe('Balancer SOR Integration Tests', () => {
                     stataEthUSDC.token.decimals,
                 );
                 const amountIn = parseEther('0.0001');
-                paths = (await sorGetPathsWithPools(
+                paths = (await SOR.getPathsWithPools(
                     tIn,
                     tOut,
                     SwapKind.GivenIn,
                     amountIn,
                     [boostedPool, weightedPool],
+                    [],
                     protocolVersion,
                 )) as PathWithAmount[];
 
@@ -393,12 +398,13 @@ describe('Balancer SOR Integration Tests', () => {
                 stataUSDT.token.decimals,
             );
             const amountIn = BigInt(10e6);
-            paths = (await sorGetPathsWithPools(
+            paths = (await SOR.getPathsWithPools(
                 tIn,
                 tOut,
                 SwapKind.GivenIn,
                 amountIn,
                 [prismaStablePool],
+                [],
                 protocolVersion,
             )) as PathWithAmount[];
 
@@ -439,18 +445,16 @@ describe('Balancer SOR Integration Tests', () => {
         // DirectionalFeeHook -
         // LotteryHook -
 
-        let WETH,
-            BAL,
-            stataUSDT,
-            stataUSDC,
-            aaveFaucetDai,
-            aaveFaucetUsdc: ReturnType<typeof prismaPoolTokenFactory.build>;
-        let prismaWeightedPool,
-            prismaStablePool,
-            prismaStablePoolWithExitFee,
-            prismaStablePoolWithDirectionalFee: ReturnType<typeof prismaPoolFactory.build>;
+        let WETH: PrismaPoolTokenWithDynamicData;
+        let BAL: PrismaPoolTokenWithDynamicData;
+        let aaveFaucetDai: PrismaPoolTokenWithDynamicData;
+        let aaveFaucetUsdc: PrismaPoolTokenWithDynamicData;
+        let prismaWeightedPool: PrismaPoolAndHookWithDynamic;
+        let prismaStablePoolWithExitFee: PrismaPoolAndHookWithDynamic;
+        let prismaStablePoolWithDirectionalFee: PrismaPoolAndHookWithDynamic;
 
-        let exitFeeHook, directionalFeeHook: ReturnType<typeof hookFactory.build>;
+        let exitFeeHook: HookData;
+        let directionalFeeHook: HookData;
 
         let weightedBpt: Token;
         let stableBpt: Token;
@@ -598,12 +602,13 @@ describe('Balancer SOR Integration Tests', () => {
 
             const amountIn = BigInt(1e18);
 
-            paths = (await sorGetPathsWithPools(
+            paths = (await SOR.getPathsWithPools(
                 weightedBpt,
                 wethToken,
                 SwapKind.GivenIn,
                 amountIn,
                 [prismaWeightedPool], // This pool has an exit fee hook
+                [],
                 protocolVersion,
             )) as PathWithAmount[];
 
@@ -619,12 +624,13 @@ describe('Balancer SOR Integration Tests', () => {
 
             const amountOut = BigInt(1e18);
 
-            paths = (await sorGetPathsWithPools(
+            paths = (await SOR.getPathsWithPools(
                 weightedBpt,
                 wethToken,
                 SwapKind.GivenOut,
                 amountOut,
                 [prismaWeightedPool], // This pool has an exit fee hook
+                [],
                 protocolVersion,
             )) as PathWithAmount[];
 
@@ -640,12 +646,13 @@ describe('Balancer SOR Integration Tests', () => {
 
             const amountIn = BigInt(1e18);
 
-            paths = (await sorGetPathsWithPools(
+            paths = (await SOR.getPathsWithPools(
                 wethToken,
                 weightedBpt,
                 SwapKind.GivenIn,
                 amountIn,
                 [prismaWeightedPool], // This pool has an exit fee hook
+                [],
                 protocolVersion,
             )) as PathWithAmount[];
 
@@ -661,12 +668,13 @@ describe('Balancer SOR Integration Tests', () => {
 
             const amountOut = BigInt(1e18);
 
-            paths = (await sorGetPathsWithPools(
+            paths = (await SOR.getPathsWithPools(
                 wethToken,
                 weightedBpt,
                 SwapKind.GivenOut,
                 amountOut,
                 [prismaWeightedPool], // This pool has an exit fee hook
+                [],
                 protocolVersion,
             )) as PathWithAmount[];
 
@@ -682,12 +690,13 @@ describe('Balancer SOR Integration Tests', () => {
 
             const amountIn = BigInt(1e18);
 
-            paths = (await sorGetPathsWithPools(
+            paths = (await SOR.getPathsWithPools(
                 stableBpt,
                 aaveFaucetUsdcToken,
                 SwapKind.GivenIn,
                 amountIn,
                 [prismaStablePoolWithExitFee], // This pool has an exit fee hook
+                [],
                 protocolVersion,
             )) as PathWithAmount[];
 
@@ -703,12 +712,13 @@ describe('Balancer SOR Integration Tests', () => {
 
             const amountOut = BigInt(1e18);
 
-            paths = (await sorGetPathsWithPools(
+            paths = (await SOR.getPathsWithPools(
                 stableBpt,
                 aaveFaucetUsdcToken,
                 SwapKind.GivenOut,
                 amountOut,
                 [prismaStablePoolWithExitFee], // This pool has an exit fee hook
+                [],
                 protocolVersion,
             )) as PathWithAmount[];
 
@@ -724,12 +734,13 @@ describe('Balancer SOR Integration Tests', () => {
 
             const amountIn = BigInt(1e18);
 
-            paths = (await sorGetPathsWithPools(
+            paths = (await SOR.getPathsWithPools(
                 aaveFaucetUsdcToken,
                 stableBpt,
                 SwapKind.GivenIn,
                 amountIn,
                 [prismaStablePoolWithExitFee], // This pool has an exit fee hook
+                [],
                 protocolVersion,
             )) as PathWithAmount[];
 
@@ -745,12 +756,13 @@ describe('Balancer SOR Integration Tests', () => {
 
             const amountOut = BigInt(1e18);
 
-            paths = (await sorGetPathsWithPools(
+            paths = (await SOR.getPathsWithPools(
                 aaveFaucetUsdcToken,
                 stableBpt,
                 SwapKind.GivenOut,
                 amountOut,
                 [prismaStablePoolWithExitFee], // This pool has an exit fee hook
+                [],
                 protocolVersion,
             )) as PathWithAmount[];
 
@@ -772,12 +784,13 @@ describe('Balancer SOR Integration Tests', () => {
             );
             const amountIn = BigInt(1e18);
 
-            paths = (await sorGetPathsWithPools(
+            paths = (await SOR.getPathsWithPools(
                 dai,
                 usdc,
                 SwapKind.GivenIn,
                 amountIn,
                 [prismaStablePoolWithDirectionalFee], //both pools have hooks.
+                [],
                 protocolVersion,
             )) as PathWithAmount[];
 
@@ -818,12 +831,13 @@ describe('Balancer SOR Integration Tests', () => {
             );
             const amountOut = BigInt(1e6);
 
-            paths = (await sorGetPathsWithPools(
+            paths = (await SOR.getPathsWithPools(
                 dai, //tokenIn
                 usdc, //tokenOut
                 SwapKind.GivenOut,
                 amountOut,
                 [prismaStablePoolWithDirectionalFee], //both pools have hooks.
+                [],
                 protocolVersion,
             )) as PathWithAmount[];
 
