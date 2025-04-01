@@ -19,6 +19,11 @@ export const schema = gql`
     """
     type Erc4626ReviewData {
         """
+        If it is an ERC4626 token, this defines whether we can use wrap/unwrap through the buffer in swap paths for this token.
+        """
+        canUseBufferForSwaps: Boolean
+
+        """
         The filename of the review of the ERC4626
         """
         reviewFile: String!
@@ -27,6 +32,16 @@ export const schema = gql`
         A summary of the ERC4626 review, usually just says safe or unsafe
         """
         summary: String!
+
+        """
+        If it is an ERC4626 token, this defines whether we allow underlying tokens to be used for add/remove operations.
+        """
+        useUnderlyingForAddRemove: Boolean
+
+        """
+        If it is an ERC4626 token, this defines whether we allow the wrapped tokens to be used for add/remove operations.
+        """
+        useWrappedForAddRemove: Boolean
 
         """
         Warnings associated with the ERC4626
@@ -3312,6 +3327,7 @@ export const schema = gql`
         The Twitter username of the token
         """
         twitterUsername: String
+        types: [GqlTokenType!]
 
         """
         The ERC4626 underlying token address, if applicable.
@@ -3445,6 +3461,11 @@ export const schema = gql`
         Only return tokens with these addresses
         """
         tokensIn: [String!]
+
+        """
+        Filter by token type
+        """
+        typeIn: [GqlTokenType!]
     }
 
     """
@@ -3483,6 +3504,7 @@ export const schema = gql`
 
     enum GqlTokenType {
         BPT
+        ERC4626
         PHANTOM_BPT
         WHITE_LISTED
     }

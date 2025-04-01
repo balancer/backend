@@ -3,11 +3,13 @@ import { prisma } from '../../prisma/prisma-client';
 import { TokenPriceService } from './lib/token-price.service';
 import {
     Chain,
+    Prisma,
     PrismaPriceRateProviderData,
     PrismaToken,
     PrismaTokenCurrentPrice,
     PrismaTokenDynamicData,
     PrismaTokenPrice,
+    PrismaTokenTypeOption,
 } from '@prisma/client';
 import { CoingeckoDataService } from './lib/coingecko-data.service';
 import { Cache, CacheClass } from 'memory-cache';
@@ -77,14 +79,17 @@ export class TokenService {
 
         if (token) {
             const rateProviderData = await this.getPriceRateProviderData([token]);
+            const erc4626Data = await this.getErc4626Data([token]);
             return {
                 ...token,
+                types: token.types.map((type) => type.type),
                 isBufferAllowed: token.isBufferAllowed,
                 chainId: config[chain].chain.id,
                 tradable: !token.types.find((type) => type.type === 'PHANTOM_BPT' || type.type === 'BPT'),
                 rateProviderData: rateProviderData[token.address],
                 coingeckoId: token.coingeckoTokenId,
                 isErc4626: token.types.some((type) => type.type === 'ERC4626'),
+                erc4626ReviewData: erc4626Data[token.address],
             };
         }
 
@@ -93,14 +98,25 @@ export class TokenService {
 
     public async getTokenDefinitions(args: QueryTokenGetTokensArgs): Promise<GqlToken[]> {
         const chains = args.chains!;
-        const tokens = await prisma.prismaToken.findMany({
-            where: {
-                types: { some: { type: 'WHITE_LISTED' } },
-                chain: { in: chains },
-                address: { in: args.where?.tokensIn || undefined },
-            },
-            include: { types: true, dynamicData: true },
-            orderBy: { priority: 'desc' },
+        const types = (args.where?.typeIn || []) as PrismaTokenTypeOption[];
+        const where: Prisma.PrismaTokenWhereInput = {
+            types: { some: { type: 'WHITE_LISTED' } },
+            chain: { in: chains },
+        };
+
+        if (args.where?.tokensIn) {
+            where.address = { in: args.where.tokensIn };
+        }
+
+        const tokens = (
+            await prisma.prismaToken.findMany({
+                where,
+                include: { types: true, dynamicData: true },
+                orderBy: { priority: 'desc' },
+            })
+        ).filter((token) => {
+            const tokenTypes = token.types.map((t) => t.type);
+            return types.every((type) => tokenTypes.includes(type));
         });
 
         for (const chain of chains) {
@@ -139,6 +155,7 @@ export class TokenService {
 
         return tokens.map((token) => ({
             ...token,
+            types: token.types.map((type) => type.type),
             chainId: config[token.chain].chain.id,
             tradable: !token.types.find((type) => type.type === 'PHANTOM_BPT' || type.type === 'BPT'),
             rateProviderData: rateProviderData[token.address],
@@ -146,7 +163,7 @@ export class TokenService {
             coingeckoId: token.coingeckoTokenId,
             isErc4626: token.types.some((type) => type.type === 'ERC4626'),
             underlyingTokenAddress: token.underlyingTokenAddress,
-            erc4626Data: erc4626Data[token.address],
+            erc4626ReviewData: erc4626Data[token.address],
         }));
     }
 
