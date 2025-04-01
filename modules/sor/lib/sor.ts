@@ -44,6 +44,7 @@ export class SOR {
                 case 'WEIGHTED':
                 /// LBPs can be handled like weighted pools
                 case 'LIQUIDITY_BOOTSTRAPPING':
+                case 'QUANT_AMM_WEIGHTED':
                     {
                         if (prismaPool.protocolVersion === 2) {
                             basePools.push(WeightedPool.fromPrismaPool(prismaPool));
