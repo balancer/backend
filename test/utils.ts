@@ -24,3 +24,27 @@ export function createRandomAddress() {
 export function sleep(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
+
+export function getDecimalsFromScalingFactor(scalingFactor: bigint): number {
+    // Since scaling factors are used to scale up to 18 decimals,
+    // if we take log10 of the scaling factor, we can determine
+    // how many decimal places were added to get to 18
+
+    // Convert scaling factor to number for math operations
+    const scalingFactorNumber = Number(scalingFactor);
+
+    // If scaling factor is 1, then the token already has 18 decimals
+    if (scalingFactorNumber === 1) {
+        return 18;
+    }
+
+    // Calculate log10 of scaling factor
+    const log10ScalingFactor = Math.log10(scalingFactorNumber);
+
+    // Since scaling factor = 10^(18 - tokenDecimals)
+    // Then tokenDecimals = 18 - log10(scalingFactor)
+    const decimals = 18 - log10ScalingFactor;
+
+    // Return rounded number since decimals should be an integer
+    return Math.round(decimals);
+}

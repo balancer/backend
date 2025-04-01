@@ -1,174 +1,95 @@
-// yarn vitest gyroECLPPool.integration.test.ts
+// bun run vitest gyroECLPPool.integration.test.ts
 
-import { ExactInQueryOutput, Swap, SwapKind, Token, Address, ExactOutQueryOutput, CHAINS } from '@balancer/sdk';
-import { createTestClient, Hex, http, parseUnits, TestClient } from 'viem';
-
-import { PrismaPoolAndHookWithDynamic } from '../../../../../prisma/prisma-types';
+import { isSameAddress, SwapKind, Token } from '@balancer/sdk';
+import { Address, formatEther, formatUnits } from 'viem';
 
 import { PathWithAmount } from '../../path';
 import { SOR } from '../../sor';
 import { getOutputAmount, getInputAmount } from '../../utils/helpers';
-import { chainToChainId as chainToIdMap } from '../../../../network/chain-id-to-chain';
 
-import { ANVIL_NETWORKS, startFork, stopAnvilForks } from '../../../../../test/anvil/anvil-global-setup';
-import { prismaPoolDynamicDataFactory, prismaPoolFactory, prismaPoolTokenFactory } from '../../../../../test/factories';
+import { GyroEPool, readTestData } from '../../../../../test/testData/readTestData';
+import { chainToChainId as chainToIdMap } from '../../../../network/chain-id-to-chain';
+import { prismaPoolFactory, prismaPoolTokenFactory } from '../../../../../test/factories';
+import { getDecimalsFromScalingFactor } from '../../../../../test/utils';
+import { PoolTokenWithRate } from '../../utils';
 
 const protocolVersion = 3;
+const gyroECLPData = readTestData('11155111-7748718-GyroECLP.json');
+const chainId = parseFloat(chainToIdMap['SEPOLIA']);
 
 describe('SOR V3 - GyroECLP Integration Tests', () => {
-    let rpcUrl: string;
-    let paths: PathWithAmount[];
-    let sdkSwap: Swap;
-    let snapshot: Hex;
-    let client: TestClient;
-    let chainId: number;
-    let prismaPool: PrismaPoolAndHookWithDynamic;
-    let tIn: Token;
-    let tOut: Token;
+    describe('Swaps', () => {
+        test.each(gyroECLPData.swaps)('$test $swapKind $amount', async (swap) => {
+            const { test, amountRaw, tokenIn, tokenOut, outputRaw, swapKind } = swap;
 
-    beforeAll(async () => {
-        // start fork to run queries against
-        chainId = parseFloat(chainToIdMap['SEPOLIA']);
-        ({ rpcUrl } = await startFork(ANVIL_NETWORKS.SEPOLIA));
-        client = createTestClient({
-            mode: 'anvil',
-            chain: CHAINS[chainId],
-            transport: http(rpcUrl),
-        });
-        // setup mock pool data
-        const USDC = prismaPoolTokenFactory.build({
-            address: '0x80d6d3946ed8a1da4e226aa21ccddc32bd127d1a',
-            balance: '1',
-            token: {
-                decimals: 6,
-            },
-        });
-        const DAI = prismaPoolTokenFactory.build({
-            address: '0xb77eb1a70a96fdaaeb31db1b42f2b8b5846b2613',
-            balance: '1',
-        });
-        prismaPool = prismaPoolFactory
-            .gyroE({
-                id: '0xd0bf6e2d49fd48a784896b9a41976260745cce8b',
-                alpha: '0.978502246630054917',
-                beta: '1.010200040008001600',
-                c: '0.707106781186547524',
-                s: '0.707106781186547524',
-                lambda: '1000.000000000000000000',
-                tauAlphaX: '-0.99579168032814905374385588903901421351',
-                tauAlphaY: '0.09164567305247642580897554123630647895',
-                tauBetaX: '0.98112818242891813219449962634412838733',
-                tauBetaY: '0.19335844859671257754549749878387404950',
-                u: '0.98845993137853359184850234854116310764',
-                v: '0.14250206082459450151567351654402283325',
-                w: '0.05085638777211807581060208804369063618',
-                z: '-0.00733174894961546076636569450193577293',
-                dSq: '0.99999999999999999886624093342106115200',
-            })
-            .build({
-                address: '0xd0bf6e2d49fd48a784896b9a41976260745cce8b',
-                protocolVersion,
-                tokens: [USDC, DAI],
-                dynamicData: prismaPoolDynamicDataFactory.build({
-                    totalShares: '0.001431966423464829',
-                    swapFee: '0.003',
-                }),
-            });
+            const poolState = gyroECLPData.pools.get(test) as GyroEPool;
 
-        tIn = new Token(chainId, USDC.address as Address, USDC.token.decimals);
-        tOut = new Token(chainId, DAI.address as Address, DAI.token.decimals);
+            const { tokenAmounts, prismaPool } = mapGyroPoolStateToPrismaPool(poolState);
 
-        snapshot = await client.snapshot();
-    });
-
-    beforeEach(async () => {
-        await client.revert({
-            id: snapshot,
-        });
-        snapshot = await client.snapshot();
-    });
-
-    describe('Swap Given In', () => {
-        beforeAll(async () => {
-            // get SOR paths
-            const amountIn = parseUnits('0.1', tIn.decimals);
-            const swapKind = SwapKind.GivenIn;
-            paths = (await SOR.getPathsWithPools(
-                tIn,
-                tOut,
+            const paths = (await SOR.getPathsWithPools(
+                tokenAmounts[poolState.tokens.findIndex((t) => isSameAddress(t as Address, tokenIn as Address))].token,
+                tokenAmounts[poolState.tokens.findIndex((t) => isSameAddress(t as Address, tokenOut as Address))].token,
                 swapKind,
-                amountIn,
+                amountRaw,
                 [prismaPool],
                 [],
                 protocolVersion,
             )) as PathWithAmount[];
 
-            // build SDK swap from SOR paths
-            sdkSwap = new Swap({
-                chainId,
-                paths: paths.map((path) => ({
-                    protocolVersion,
-                    inputAmountRaw: path.inputAmount.amount,
-                    outputAmountRaw: path.outputAmount.amount,
-                    tokens: path.tokens.map((token) => ({
-                        address: token.address,
-                        decimals: token.decimals,
-                    })),
-                    pools: path.pools.map((pool) => pool.id),
-                })),
-                swapKind,
-            });
+            const returnAmountSOR = swapKind === SwapKind.GivenIn ? getOutputAmount(paths) : getInputAmount(paths);
+            expect(outputRaw).toBe(returnAmountSOR.amount);
         });
-
-        test('SOR quote should match swap query', async () => {
-            const returnAmountSOR = getOutputAmount(paths);
-            const queryOutput = await sdkSwap.query(rpcUrl);
-            const returnAmountQuery = (queryOutput as ExactInQueryOutput).expectedAmountOut;
-            expect(returnAmountQuery.amount).toBe(returnAmountSOR.amount);
-        });
-    });
-
-    describe('Swap Given Out', () => {
-        beforeAll(async () => {
-            // get SOR paths
-            const amountOut = parseUnits('0.1', tOut.decimals);
-            const swapKind = SwapKind.GivenOut;
-            paths = (await SOR.getPathsWithPools(
-                tIn,
-                tOut,
-                swapKind,
-                amountOut,
-                [prismaPool],
-                [],
-                protocolVersion,
-            )) as PathWithAmount[];
-
-            // build SDK swap from SOR paths
-            sdkSwap = new Swap({
-                chainId,
-                paths: paths.map((path) => ({
-                    protocolVersion,
-                    inputAmountRaw: path.inputAmount.amount,
-                    outputAmountRaw: path.outputAmount.amount,
-                    tokens: path.tokens.map((token) => ({
-                        address: token.address,
-                        decimals: token.decimals,
-                    })),
-                    pools: path.pools.map((pool) => pool.id),
-                })),
-                swapKind,
-            });
-        });
-
-        test('SOR quote should match swap query', async () => {
-            const returnAmountSOR = getInputAmount(paths);
-            const queryOutput = await sdkSwap.query(rpcUrl);
-            const returnAmountQuery = (queryOutput as ExactOutQueryOutput).expectedAmountIn;
-            expect(returnAmountQuery.amount).toBe(returnAmountSOR.amount);
-        });
-    });
-
-    afterAll(async () => {
-        await stopAnvilForks();
     });
 });
+
+function mapGyroPoolStateToPrismaPool(poolState: GyroEPool) {
+    const decimals = poolState.scalingFactors.map((scalingFactor: bigint) =>
+        getDecimalsFromScalingFactor(scalingFactor),
+    );
+
+    const tokenAmounts = poolState.tokens.map((token, i) =>
+        PoolTokenWithRate.fromScale18AmountWithRate(
+            new Token(chainId, token as Address, decimals[i]),
+            poolState.balancesLiveScaled18[i],
+            poolState.tokenRates[i],
+            i,
+        ),
+    );
+
+    // map tokenIn and tokenOut to prisma tokens using prisma token factory
+    const tokens = poolState.tokens.map((token, i) =>
+        prismaPoolTokenFactory.build({
+            address: token as Address,
+            balance: formatUnits(tokenAmounts[i].amount, decimals[i]),
+            index: i,
+            priceRate: formatEther(poolState.tokenRates[i]),
+            token: { decimals: decimals[i] },
+        }),
+    );
+
+    // map pool state to prisma pool using prisma pool factory
+    const prismaPool = prismaPoolFactory
+        .gyroE({
+            id: poolState.poolAddress,
+            alpha: formatEther(poolState.paramsAlpha),
+            beta: formatEther(poolState.paramsBeta),
+            c: formatEther(poolState.paramsC),
+            s: formatEther(poolState.paramsS),
+            lambda: formatEther(poolState.paramsLambda),
+            tauAlphaX: formatUnits(poolState.tauAlphaX, 38),
+            tauAlphaY: formatUnits(poolState.tauAlphaY, 38),
+            tauBetaX: formatUnits(poolState.tauBetaX, 38),
+            tauBetaY: formatUnits(poolState.tauBetaY, 38),
+            u: formatUnits(poolState.u, 38),
+            v: formatUnits(poolState.v, 38),
+            w: formatUnits(poolState.w, 38),
+            z: formatUnits(poolState.z, 38),
+            dSq: formatUnits(poolState.dSq, 38),
+        })
+        .build({
+            address: poolState.poolAddress,
+            protocolVersion,
+            tokens,
+        });
+    return { tokenAmounts, prismaPool };
+}
