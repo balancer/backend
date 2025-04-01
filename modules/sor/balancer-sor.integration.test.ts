@@ -1,4 +1,4 @@
-// yarn vitest balancer-sor.integration.test.ts
+// bun vitest balancer-sor.integration.test.ts
 
 import { ExactInQueryOutput, Swap, SwapKind, Token, Address, Path, ExactOutQueryOutput } from '@balancer/sdk';
 
@@ -218,12 +218,14 @@ describe('Balancer SOR Integration Tests', () => {
                 token: { decimals: 6 },
                 balance: '17046.594346',
                 priceRate: '1.216261233431405026',
+                index: 0,
             });
             const stataEthUSDT = prismaPoolTokenFactory.build({
                 address: '0x978206fae13faf5a8d293fb614326b237684b750',
                 token: { decimals: 6 },
                 balance: '58206.030088',
                 priceRate: '1.371108722796244136',
+                index: 1,
             });
             boostedPool = prismaPoolFactory.stable('1000').build({
                 address: boostedPoolAddress,
@@ -240,11 +242,13 @@ describe('Balancer SOR Integration Tests', () => {
                 address: '0x59fa488dda749cdd41772bb068bb23ee955a6d7a',
                 token: { decimals: 18 },
                 balance: '536.112912071673838086',
+                index: 0,
             });
             WETH = prismaPoolTokenFactory.build({
                 address: '0x7b79995e5f793a07bc00c21412e50ecae098e7f9',
                 token: { decimals: 18 },
                 balance: '0.641025581212023582',
+                index: 1,
             });
             weightedPool = prismaPoolFactory.build({
                 address: weightedPoolAddress,
