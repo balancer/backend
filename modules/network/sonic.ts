@@ -9,7 +9,6 @@ import { YbTokensAprService } from '../pool/lib/apr-data-sources/yb-tokens-apr.s
 import { env } from '../../apps/env';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import config from '../../config';
-import { GithubContentService } from '../content/github-content.service';
 import { ReliquaryFarmAprService } from '../pool/lib/apr-data-sources/fantom/reliquary-farm-apr.service';
 import { UserSyncReliquaryFarmBalanceService } from '../user/lib/user-sync-reliquary-farm-balance.service';
 import { BeetswarsGaugeVotingAprService } from '../pool/lib/apr-data-sources/beetswars-gauge-voting-apr';
@@ -18,7 +17,6 @@ const sonicNetworkData: NetworkData = config.SONIC;
 
 export const sonicNetworkConfig: NetworkConfig = {
     data: sonicNetworkData,
-    contentService: new GithubContentService(),
     provider: new ethers.providers.JsonRpcProvider({ url: sonicNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
         new YbTokensAprService(sonicNetworkData.ybAprConfig, sonicNetworkData.chain.prismaId),

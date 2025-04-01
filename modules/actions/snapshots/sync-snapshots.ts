@@ -60,7 +60,10 @@ export async function syncSnapshots(
         let ids = [...new Set(snapshots.map((snapshot) => snapshot.poolId))];
         if (syncPoolsWithoutUpdates) {
             // This will forward fill the snapshots for pools without any updates
-            ids = poolIds;
+            ids = poolIdsInDb;
+        }
+        if (ids.length === 0) {
+            return [];
         }
         const dbSnapshots: Prisma.PrismaPoolSnapshotUncheckedCreateInput[] = await prisma.$queryRaw<
             (Prisma.PrismaPoolSnapshotUncheckedCreateInput & { row_num: number })[]

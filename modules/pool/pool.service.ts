@@ -119,10 +119,6 @@ export class PoolService {
         return this.poolSwapService.getJoinExits(args);
     }
 
-    public async getFeaturedPoolGroups(chains: Chain[]): Promise<GqlPoolFeaturedPoolGroup[]> {
-        return this.poolGqlLoaderService.getFeaturedPoolGroups(chains);
-    }
-
     public async getFeaturedPools(chains: Chain[]): Promise<GqlPoolFeaturedPool[]> {
         return this.poolGqlLoaderService.getFeaturedPools(chains);
     }

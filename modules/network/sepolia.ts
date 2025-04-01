@@ -5,7 +5,6 @@ import { SwapFeeAprService, DynamicSwapFeeFromEventsAprService } from '../pool/l
 import { GaugeAprService } from '../pool/lib/apr-data-sources/ve-bal-gauge-apr.service';
 import { UserSyncGaugeBalanceService } from '../user/lib/user-sync-gauge-balance.service';
 import { every } from '../../apps/scheduler/intervals';
-import { GithubContentService } from '../content/github-content.service';
 import { YbTokensAprService } from '../pool/lib/apr-data-sources/yb-tokens-apr.service';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import config from '../../config';
@@ -15,7 +14,6 @@ export const sepoliaNetworkData = config.SEPOLIA;
 
 export const sepoliaNetworkConfig: NetworkConfig = {
     data: sepoliaNetworkData,
-    contentService: new GithubContentService(),
     provider: new ethers.providers.JsonRpcProvider({ url: sepoliaNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
         new YbTokensAprService(sepoliaNetworkData.ybAprConfig, sepoliaNetworkData.chain.prismaId),
@@ -167,6 +165,10 @@ export const sepoliaNetworkConfig: NetworkConfig = {
         {
             name: 'sync-erc4626-unwrap-rate',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(60, 'minutes') : every(20, 'minutes'),
+        },
+        {
+            name: 'quant-amm-sync-weights',
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(60, 'minutes') : every(10, 'minutes'),
         },
     ],
 };

@@ -13,6 +13,7 @@ import {
     StakingController,
     StakedSonicController,
     TokenController,
+    QuantAmmController,
 } from '../modules/controllers';
 import { chainIdToChain } from '../modules/network/chain-id-to-chain';
 
@@ -52,14 +53,25 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
     } else if (job === 'reload-pools-v3') {
         await upsertLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.ADD_POOLS_V3, 0);
         return PoolController().addPoolsV3(chain, false);
-    } else if (job === 'sor-sync') {
+    } else if (job === 'sor-sync-v2') {
         console.log('Syncing V2 pools');
         await PoolController().addPoolsV2(chain);
         await PoolController().syncOnchainDataForAllPoolsV2(chain);
 
+        console.log('Syncing pools metadata');
+        await ContentController().syncCategories();
+        await ContentController().syncRateProviderReviews();
+
+        console.log('Syncing token prices');
+        await tokenService.updateTokenPrices([chain]);
+        await EventController().syncLastSwaps(chain);
+        await tokenService.updateTokenPrices([chain]);
+
+        return 'OK';
+    } else if (job === 'sor-sync-v3') {
         console.log('Syncing V3 pools');
         await upsertLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.ADD_POOLS_V3, 0);
-        await PoolController().addPoolsV3(chain);
+        await PoolController().addPoolsV3(chain, false);
 
         console.log('Syncing pools metadata');
         await ContentController().syncCategories();
@@ -177,6 +189,8 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         return tokenService.updateTokenPrices([chain]);
     } else if (job === 'sync-vebal') {
         return new VeBalVotingListService().syncVotingGauges();
+    } else if (job === 'quant-amm-sync-weights') {
+        return QuantAmmController.syncWeights(chain);
     }
     // Maintenance
     else if (job === 'sync-fx-quote-tokens') {

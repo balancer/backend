@@ -2,11 +2,7 @@
 import { Chain } from '@prisma/client';
 import { initRequestScopedContext, setRequestScopedContextValue } from '../context/request-scoped-context';
 import { chainIdToChain } from '../network/chain-id-to-chain';
-import { PoolController } from '../controllers/pool-controller';
-import { TokenController } from '../controllers/token-controller';
-import { ContentController } from '../controllers/content-controller';
 import { sorService } from './sor.service';
-import { tokenService } from '../token/token.service';
 
 describe('sor debugging', () => {
     it('sor v2', async () => {
@@ -18,12 +14,7 @@ describe('sor debugging', () => {
         setRequestScopedContextValue('chainId', chainId);
 
         // only do once before starting to debug
-        // await PoolController().addPoolsV2(chain);
-        // await PoolController().syncOnchainDataForAllPoolsV2(chain);
-        // await PoolController().syncChangedPoolsV2(chain);
-
-        // to update liquidity values, first update the token prices: yarn vitest token.service.test.ts
-        // await PoolController().updateLiquidityValuesForActivePools(chain);
+        // bun task sor-sync-v2 {chainId}
 
         const swaps = await sorService.getSorSwapPaths({
             chain,
@@ -58,14 +49,7 @@ describe('sor debugging', () => {
         initRequestScopedContext();
         setRequestScopedContextValue('chainId', chainId);
         // only do once before starting to debug
-        // await PoolController().reloadPoolsV3(chain);
-        // await PoolController().syncHookData(chain);
-        // await TokenController().syncErc4626Tokens(chain);
-        // await TokenController().syncErc4626UnwrapRates(chain);
-        // await ContentController().syncErc4626Data();
-
-        // to update liquidity values, first update the token prices: yarn vitest token.service.test.ts
-        // await PoolController().updateLiquidityValuesForActivePools(chain);
+        // bun task sor-sync-v3 {chainId}
 
         const swaps = await sorService.getSorSwapPaths({
             chain,

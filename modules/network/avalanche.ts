@@ -5,7 +5,6 @@ import { SwapFeeAprService } from '../pool/lib/apr-data-sources/';
 import { GaugeAprService } from '../pool/lib/apr-data-sources/ve-bal-gauge-apr.service';
 import { UserSyncGaugeBalanceService } from '../user/lib/user-sync-gauge-balance.service';
 import { every } from '../../apps/scheduler/intervals';
-import { GithubContentService } from '../content/github-content.service';
 import { env } from '../../apps/env';
 import { YbTokensAprService } from '../pool/lib/apr-data-sources/yb-tokens-apr.service';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
@@ -16,7 +15,6 @@ const avalancheNetworkData: NetworkData = config.AVALANCHE;
 
 export const avalancheNetworkConfig: NetworkConfig = {
     data: avalancheNetworkData,
-    contentService: new GithubContentService(),
     provider: new ethers.providers.JsonRpcProvider({ url: avalancheNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
         new YbTokensAprService(avalancheNetworkData.ybAprConfig, avalancheNetworkData.chain.prismaId),
@@ -127,6 +125,35 @@ export const avalancheNetworkConfig: NetworkConfig = {
         {
             name: 'sync-erc4626-unwrap-rate',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(60, 'minutes') : every(20, 'minutes'),
+        },
+        // V3
+        {
+            name: 'add-pools-v3',
+            interval: every(30, 'seconds'),
+        },
+        {
+            name: 'sync-pools-v3',
+            interval: every(30, 'seconds'),
+        },
+        {
+            name: 'sync-join-exits-v3',
+            interval: every(1, 'minutes'),
+        },
+        {
+            name: 'sync-swaps-v3',
+            interval: every(1, 'minutes'),
+        },
+        {
+            name: 'sync-snapshots-v3',
+            interval: every(10, 'minutes'),
+        },
+        {
+            name: 'forward-fill-snapshots-v3',
+            interval: every(1, 'hours'),
+        },
+        {
+            name: 'sync-hook-data',
+            interval: every(1, 'hours'),
         },
     ],
 };

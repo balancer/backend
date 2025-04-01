@@ -199,6 +199,7 @@ type GqlToken {
     The ERC4626 review data for the token
     """
     erc4626ReviewData: Erc4626ReviewData
+    types: [GqlTokenType!]
 }
 
 """
@@ -376,6 +377,7 @@ enum GqlTokenType {
     WHITE_LISTED
     BPT
     PHANTOM_BPT
+    ERC4626
 }
 """
 Provide filters for tokens
@@ -385,6 +387,10 @@ input GqlTokenFilter {
     Only return tokens with these addresses
     """
     tokensIn: [String!]
+    """
+    Filter by token type
+    """
+    typeIn: [GqlTokenType!]
 }
 
 """
@@ -403,4 +409,16 @@ type Erc4626ReviewData {
     Warnings associated with the ERC4626
     """
     warnings: [String!]!
+    """
+    If it is an ERC4626 token, this defines whether we can use wrap/unwrap through the buffer in swap paths for this token.
+    """
+    canUseBufferForSwaps: Boolean
+    """
+    If it is an ERC4626 token, this defines whether we allow underlying tokens to be used for add/remove operations.
+    """
+    useUnderlyingForAddRemove: Boolean
+    """
+    If it is an ERC4626 token, this defines whether we allow the wrapped tokens to be used for add/remove operations.
+    """
+    useWrappedForAddRemove: Boolean
 }

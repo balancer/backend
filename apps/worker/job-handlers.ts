@@ -26,6 +26,7 @@ import {
     StakingController,
     StakedSonicController,
     UserBalancesController,
+    QuantAmmController,
 } from '../../modules/controllers';
 import { updateVolumeAndFees } from '../../modules/actions/pool/update-volume-and-fees';
 import { TokenController } from '../../modules/controllers/token-controller';
@@ -431,6 +432,9 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
                 res,
                 next,
             );
+            break;
+        case 'quant-amm-sync-weights':
+            await runIfNotAlreadyRunning(name, chainId, () => QuantAmmController.syncWeights(chain), res, next);
             break;
         default:
             res.sendStatus(400);
