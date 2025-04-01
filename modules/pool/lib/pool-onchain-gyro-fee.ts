@@ -72,29 +72,18 @@ export const fetchOnChainGyroFees = async (pools: PoolInput[], gyroConfigAddress
 
     const results = (await multicaller.execute()) as OnchainGyroFees;
     const defaultFee = results.defaultFee ?? '0';
-    const eclpFee = results.eclpFee ?? defaultFee;
-    const twoClpFee = results.twoClpFee ?? defaultFee;
-    const threeClpFee = results.threeClpFee ?? defaultFee;
+    const typeFee = {
+        GYROE: results.eclpFee ?? defaultFee,
+        GYRO: results.twoClpFee ?? defaultFee,
+        GYRO3: results.threeClpFee ?? defaultFee,
+    };
 
-    let parsed: { [address: string]: string } = {};
-    if (results.pools) {
-        parsed = Object.fromEntries(
-            Object.entries(results.pools).map(([id, { poolFee }]) => [
-                id,
-                formatEther(
-                    poolFee
-                        ? poolFee
-                        : poolTypeLookup[id] == 'GYROE'
-                        ? eclpFee
-                        : poolTypeLookup[id] == 'GYRO'
-                        ? twoClpFee
-                        : poolTypeLookup[id] == 'GYRO3'
-                        ? threeClpFee
-                        : defaultFee,
-                ),
-            ]),
-        );
-    }
+    const parsed = Object.fromEntries(
+        pools.map(({ id, address, type }) => {
+            const fee = results.pools?.[id]?.poolFee ?? typeFee[type as keyof typeof typeFee] ?? defaultFee;
+            return [address, formatEther(fee)];
+        }),
+    );
 
     return parsed;
 };
