@@ -31,10 +31,16 @@ export interface Scalars {
 /** The review data for the ERC4626 token */
 export interface Erc4626ReviewData {
     __typename?: 'Erc4626ReviewData';
+    /** If it is an ERC4626 token, this defines whether we can use wrap/unwrap through the buffer in swap paths for this token. */
+    canUseBufferForSwaps?: Maybe<Scalars['Boolean']>;
     /** The filename of the review of the ERC4626 */
     reviewFile: Scalars['String'];
     /** A summary of the ERC4626 review, usually just says safe or unsafe */
     summary: Scalars['String'];
+    /** If it is an ERC4626 token, this defines whether we allow underlying tokens to be used for add/remove operations. */
+    useUnderlyingForAddRemove?: Maybe<Scalars['Boolean']>;
+    /** If it is an ERC4626 token, this defines whether we allow the wrapped tokens to be used for add/remove operations. */
+    useWrappedForAddRemove?: Maybe<Scalars['Boolean']>;
     /** Warnings associated with the ERC4626 */
     warnings: Array<Scalars['String']>;
 }
@@ -2204,6 +2210,7 @@ export interface GqlToken {
     tradable: Scalars['Boolean'];
     /** The Twitter username of the token */
     twitterUsername?: Maybe<Scalars['String']>;
+    types?: Maybe<Array<GqlTokenType>>;
     /** The ERC4626 underlying token address, if applicable. */
     underlyingTokenAddress?: Maybe<Scalars['String']>;
     /** The website URL of the token */
@@ -2283,6 +2290,8 @@ export interface GqlTokenDynamicData {
 export interface GqlTokenFilter {
     /** Only return tokens with these addresses */
     tokensIn?: InputMaybe<Array<Scalars['String']>>;
+    /** Filter by token type */
+    typeIn?: InputMaybe<Array<GqlTokenType>>;
 }
 
 /** Result of the poolReloadPools mutation */
@@ -2312,7 +2321,7 @@ export interface GqlTokenPriceChartDataItem {
     timestamp: Scalars['Int'];
 }
 
-export type GqlTokenType = 'BPT' | 'PHANTOM_BPT' | 'WHITE_LISTED';
+export type GqlTokenType = 'BPT' | 'ERC4626' | 'PHANTOM_BPT' | 'WHITE_LISTED';
 
 export interface GqlUserFbeetsBalance {
     __typename?: 'GqlUserFbeetsBalance';
@@ -3440,8 +3449,11 @@ export type Erc4626ReviewDataResolvers<
     ContextType = ResolverContext,
     ParentType extends ResolversParentTypes['Erc4626ReviewData'] = ResolversParentTypes['Erc4626ReviewData'],
 > = ResolversObject<{
+    canUseBufferForSwaps?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
     reviewFile?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     summary?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+    useUnderlyingForAddRemove?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+    useWrappedForAddRemove?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
     warnings?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
     __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
@@ -5121,6 +5133,7 @@ export type GqlTokenResolvers<
     telegramUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     tradable?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
     twitterUsername?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    types?: Resolver<Maybe<Array<ResolversTypes['GqlTokenType']>>, ParentType, ContextType>;
     underlyingTokenAddress?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     websiteUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
