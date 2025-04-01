@@ -496,6 +496,10 @@ type GqlPoolAggregator {
     Hook assigned to a pool
     """
     hook: GqlHook
+    """
+    QuantAmmWeighted specific fields
+    """
+    quantAmmWeightedParams: QuantAmmWeightedParams
 }
 
 """
@@ -707,6 +711,28 @@ enum GqlPoolNestingType @deprecated(reason: "Removed without replacement") {
     HAS_ONLY_PHANTOM_BPT
 }
 
+type QuantAmmWeightedParams {
+    oracleStalenessThreshold: String!
+    poolRegistry: String!
+    lambda: [String!]!
+    epsilonMax: String!
+    absoluteWeightGuardRail: String!
+    maxTradeSizeRatio: String!
+    updateInterval: String!
+    weightsAtLastUpdateInterval: [String!]!
+    weightBlockMultipliers: [String!]!
+    lastUpdateIntervalTime: String!
+    lastInterpolationTimePossible: String!
+    details: [QuantAMMWeightedDetail!]!
+}
+
+type QuantAMMWeightedDetail {
+    category: String!
+    name: String!
+    type: String!
+    value: String!
+}
+
 type GqlPoolQuantAmmWeighted implements GqlPoolBase {
     id: ID!
     chain: GqlChain!
@@ -756,6 +782,8 @@ type GqlPoolQuantAmmWeighted implements GqlPoolBase {
     version: Int!
 
     userBalance: GqlPoolUserBalance
+
+    quantAmmWeightedParams: QuantAmmWeightedParams
 }
 
 type GqlPoolWeighted implements GqlPoolBase {

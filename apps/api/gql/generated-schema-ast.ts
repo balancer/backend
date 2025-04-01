@@ -510,6 +510,11 @@ export const schema = gql`
         protocolVersion: Int!
 
         """
+        QuantAmm specific fields
+        """
+        quantAmmWeightedParams: QuantAmmWeightedParams
+
+        """
         Data specific to gyro pools
         """
         root3Alpha: String
@@ -1808,6 +1813,7 @@ export const schema = gql`
         poolCreator: Bytes
         poolTokens: [GqlPoolTokenDetail!]!
         protocolVersion: Int!
+        quantAmmWeightedParams: QuantAmmWeightedParams
         staking: GqlPoolStaking
 
         """
@@ -3785,6 +3791,28 @@ export const schema = gql`
         name: String!
         symbol: String!
         type: GqlPoolType!
+    }
+
+    type QuantAMMWeightedDetail {
+        category: String!
+        name: String!
+        type: String!
+        value: String!
+    }
+
+    type QuantAmmWeightedParams {
+        absoluteWeightGuardRail: String!
+        details: [QuantAMMWeightedDetail!]!
+        epsilonMax: String!
+        lambda: [String!]!
+        lastInterpolationTimePossible: String!
+        lastUpdateIntervalTime: String!
+        maxTradeSizeRatio: String!
+        oracleStalenessThreshold: String!
+        poolRegistry: String!
+        updateInterval: String!
+        weightBlockMultipliers: [String!]!
+        weightsAtLastUpdateInterval: [String!]!
     }
 
     type Query {
