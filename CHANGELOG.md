@@ -1,5 +1,17 @@
 # backend
 
+## 1.37.5
+
+### Patch Changes
+
+-   0fc2643: return erc4626 review data in token queries
+-   a4a3cee: handle snapshots for pools without updates
+-   915bfce: Refactor SOR service to improve maintainability
+-   5a8e426: Split sor sync task into v2 and v3
+-   118825b: remove deprecated investConfig, withdrawConfig and content service
+-   06a4b6e: sUSDX mainnet
+-   99b7fd6: avalanche v3 config
+
 ## 1.37.4
 
 ### Patch Changes
