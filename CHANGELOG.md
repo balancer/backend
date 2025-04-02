@@ -1,5 +1,12 @@
 # backend
 
+## 1.37.7
+
+### Patch Changes
+
+-   d8b64bb: SOR - Add support for QuantAmm pools
+-   936c947: fix emissions cap in gauges
+
 ## 1.37.6
 
 ### Patch Changes
