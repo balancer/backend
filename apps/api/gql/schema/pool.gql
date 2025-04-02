@@ -496,6 +496,10 @@ type GqlPoolAggregator {
     Hook assigned to a pool
     """
     hook: GqlHook
+    """
+    QuantAmmWeighted specific fields
+    """
+    quantAmmWeightedParams: QuantAmmWeightedParams
 }
 
 """
@@ -566,6 +570,14 @@ interface GqlPoolBase {
     The version of the pool type.
     """
     version: Int!
+    """
+    Deprecated
+    """
+    investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
+    """
+    Deprecated
+    """
+    withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
     """
     Only returns main tokens, also known as leave tokens. Wont return any nested BPTs. Used for displaying the tokens that the pool consists of.
     """
@@ -701,10 +713,61 @@ type GqlPoolDynamicData {
     fees24hAtlTimestamp: Int!
 }
 
+type GqlPoolInvestConfig @deprecated(reason: "Removed without replacement") {
+    proportionalEnabled: Boolean!
+    singleAssetEnabled: Boolean!
+    options: [GqlPoolInvestOption!]!
+}
+
+type GqlPoolInvestOption @deprecated(reason: "Removed without replacement") {
+    #we include the index because it is useful for constructing contract calls
+    poolTokenIndex: Int!
+    poolTokenAddress: String!
+
+    # we use an array here for invest options where there are more than one option, but only one can be selected
+    # - FTM/wFTM or ETH/wETH
+    # - weighted boosted with nested composable stable (bb-yv-USD) where you can only invest with DAI or USDC, not both at the same time
+    tokenOptions: [GqlPoolToken!]!
+}
+
+type GqlPoolWithdrawConfig @deprecated(reason: "Removed without replacement") {
+    proportionalEnabled: Boolean!
+    singleAssetEnabled: Boolean!
+    options: [GqlPoolWithdrawOption!]!
+}
+
+type GqlPoolWithdrawOption @deprecated(reason: "Removed without replacement") {
+    poolTokenIndex: Int!
+    poolTokenAddress: String!
+    tokenOptions: [GqlPoolToken!]!
+}
+
 enum GqlPoolNestingType @deprecated(reason: "Removed without replacement") {
     NO_NESTING
     HAS_SOME_PHANTOM_BPT
     HAS_ONLY_PHANTOM_BPT
+}
+
+type QuantAmmWeightedParams {
+    oracleStalenessThreshold: String!
+    poolRegistry: String!
+    lambda: [String!]!
+    epsilonMax: String!
+    absoluteWeightGuardRail: String!
+    maxTradeSizeRatio: String!
+    updateInterval: String!
+    weightsAtLastUpdateInterval: [String!]!
+    weightBlockMultipliers: [String!]!
+    lastUpdateIntervalTime: String!
+    lastInterpolationTimePossible: String!
+    details: [QuantAMMWeightedDetail!]!
+}
+
+type QuantAMMWeightedDetail {
+    category: String!
+    name: String!
+    type: String!
+    value: String!
 }
 
 type GqlPoolQuantAmmWeighted implements GqlPoolBase {
@@ -734,6 +797,8 @@ type GqlPoolQuantAmmWeighted implements GqlPoolBase {
     poolCreator: Bytes
     factory: Bytes
     createTime: Int!
+    investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
+    withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
     dynamicData: GqlPoolDynamicData!
     displayTokens: [GqlPoolTokenDisplay!]! @deprecated(reason: "Use poolTokens instead")
     allTokens: [GqlPoolTokenExpanded!]! @deprecated(reason: "Use poolTokens instead")
@@ -756,6 +821,8 @@ type GqlPoolQuantAmmWeighted implements GqlPoolBase {
     version: Int!
 
     userBalance: GqlPoolUserBalance
+
+    quantAmmWeightedParams: QuantAmmWeightedParams
 }
 
 type GqlPoolWeighted implements GqlPoolBase {
@@ -785,6 +852,8 @@ type GqlPoolWeighted implements GqlPoolBase {
     poolCreator: Bytes
     factory: Bytes
     createTime: Int!
+    investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
+    withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
     dynamicData: GqlPoolDynamicData!
     displayTokens: [GqlPoolTokenDisplay!]! @deprecated(reason: "Use poolTokens instead")
     allTokens: [GqlPoolTokenExpanded!]! @deprecated(reason: "Use poolTokens instead")
@@ -837,6 +906,8 @@ type GqlPoolGyro implements GqlPoolBase {
     poolCreator: Bytes
     factory: Bytes
     createTime: Int!
+    investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
+    withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
     dynamicData: GqlPoolDynamicData!
     displayTokens: [GqlPoolTokenDisplay!]! @deprecated(reason: "Use poolTokens instead")
     allTokens: [GqlPoolTokenExpanded!]! @deprecated(reason: "Use poolTokens instead")
@@ -914,6 +985,8 @@ type GqlPoolFx implements GqlPoolBase {
     poolCreator: Bytes
     factory: Bytes
     createTime: Int!
+    investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
+    withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
     displayTokens: [GqlPoolTokenDisplay!]! @deprecated(reason: "Use poolTokens instead")
     allTokens: [GqlPoolTokenExpanded!]! @deprecated(reason: "Use poolTokens instead")
     poolTokens: [GqlPoolTokenDetail!]!
@@ -961,6 +1034,8 @@ type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
     poolCreator: Bytes
     factory: Bytes
     createTime: Int!
+    investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
+    withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
     dynamicData: GqlPoolDynamicData!
     displayTokens: [GqlPoolTokenDisplay!]! @deprecated(reason: "Use poolTokens instead")
     allTokens: [GqlPoolTokenExpanded!]! @deprecated(reason: "Use poolTokens instead")
@@ -1012,6 +1087,8 @@ type GqlPoolStable implements GqlPoolBase {
     poolCreator: Bytes
     factory: Bytes
     createTime: Int!
+    investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
+    withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
     dynamicData: GqlPoolDynamicData!
     displayTokens: [GqlPoolTokenDisplay!]! @deprecated(reason: "Use poolTokens instead")
     allTokens: [GqlPoolTokenExpanded!]! @deprecated(reason: "Use poolTokens instead")
@@ -1061,6 +1138,8 @@ type GqlPoolMetaStable implements GqlPoolBase {
     poolCreator: Bytes
     factory: Bytes
     createTime: Int!
+    investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
+    withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
     dynamicData: GqlPoolDynamicData!
     displayTokens: [GqlPoolTokenDisplay!]! @deprecated(reason: "Use poolTokens instead")
     allTokens: [GqlPoolTokenExpanded!]! @deprecated(reason: "Use poolTokens instead")
@@ -1109,6 +1188,8 @@ type GqlPoolComposableStable implements GqlPoolBase {
     poolCreator: Bytes
     factory: Bytes
     createTime: Int!
+    investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
+    withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
     dynamicData: GqlPoolDynamicData!
     displayTokens: [GqlPoolTokenDisplay!]! @deprecated(reason: "Use poolTokens instead")
     allTokens: [GqlPoolTokenExpanded!]! @deprecated(reason: "Use poolTokens instead")
@@ -1162,6 +1243,8 @@ type GqlPoolElement implements GqlPoolBase {
     poolCreator: Bytes
     factory: Bytes
     createTime: Int!
+    investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
+    withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
     dynamicData: GqlPoolDynamicData!
     displayTokens: [GqlPoolTokenDisplay!]! @deprecated(reason: "Use poolTokens instead")
     allTokens: [GqlPoolTokenExpanded!]! @deprecated(reason: "Use poolTokens instead")

@@ -1,4 +1,4 @@
-import { Multicaller3Viem, IMulticaller } from '../../web3/multicaller-viem';
+import { Multicaller3Viem } from '../../web3/multicaller-viem';
 import { PrismaPoolType } from '@prisma/client';
 import abi from '../abi/GyroConfig.json';
 import { defaultAbiCoder } from '@ethersproject/abi';
@@ -32,6 +32,11 @@ export const fetchOnChainGyroFees = async (pools: PoolInput[], gyroConfigAddress
         return {};
     }
 
+    const gyroPools = pools.filter(({ type }) => type.includes('GYRO'));
+    if (gyroPools.length === 0) {
+        return {};
+    }
+
     const multicaller = new Multicaller3Viem(pools[0].chain, abi, batchSize);
 
     const feeKey = formatBytes32String('PROTOCOL_SWAP_FEE_PERC');
@@ -56,45 +61,25 @@ export const fetchOnChainGyroFees = async (pools: PoolInput[], gyroConfigAddress
     multicaller.call('twoClpFee', gyroConfigAddress, 'getUint', [twoClpKey]);
     multicaller.call('threeClpFee', gyroConfigAddress, 'getUint', [threeClpKey]);
 
-    let poolTypeLookup: { [id: string]: PrismaPoolType } = {};
-    pools.forEach(({ id, type, address }) => {
-        if (type.includes('GYRO')) {
-            const poolFeeKey = keccak256(
-                ['bytes'],
-                [defaultAbiCoder.encode(['bytes32', 'uint256'], [feeKey, address])],
-            );
-
-            multicaller.call(`pools.${id}.poolFee`, gyroConfigAddress, 'getUint', [poolFeeKey]);
-
-            poolTypeLookup[id] = type;
-        }
+    gyroPools.forEach(({ id, address }) => {
+        const poolFeeKey = keccak256(['bytes'], [defaultAbiCoder.encode(['bytes32', 'uint256'], [feeKey, address])]);
+        multicaller.call(`pools.${id}.poolFee`, gyroConfigAddress, 'getUint', [poolFeeKey]);
     });
 
     const results = (await multicaller.execute()) as OnchainGyroFees;
     const defaultFee = results.defaultFee ?? '0';
-    const eclpFee = results.eclpFee ?? defaultFee;
-    const twoClpFee = results.twoClpFee ?? defaultFee;
-    const threeClpFee = results.threeClpFee ?? defaultFee;
+    const typeFee = {
+        GYROE: results.eclpFee ?? defaultFee,
+        GYRO: results.twoClpFee ?? defaultFee,
+        GYRO3: results.threeClpFee ?? defaultFee,
+    };
 
-    let parsed: { [address: string]: string } = {};
-    if (results.pools) {
-        parsed = Object.fromEntries(
-            Object.entries(results.pools).map(([id, { poolFee }]) => [
-                id,
-                formatEther(
-                    poolFee
-                        ? poolFee
-                        : poolTypeLookup[id] == 'GYROE'
-                        ? eclpFee
-                        : poolTypeLookup[id] == 'GYRO'
-                        ? twoClpFee
-                        : poolTypeLookup[id] == 'GYRO3'
-                        ? threeClpFee
-                        : defaultFee,
-                ),
-            ]),
-        );
-    }
+    const parsed = Object.fromEntries(
+        gyroPools.map(({ id, type }) => {
+            const fee = results.pools?.[id]?.poolFee ?? typeFee[type as keyof typeof typeFee] ?? defaultFee;
+            return [id, formatEther(fee)];
+        }),
+    );
 
     return parsed;
 };

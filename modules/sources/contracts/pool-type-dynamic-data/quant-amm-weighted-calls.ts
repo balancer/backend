@@ -7,6 +7,10 @@ type QuantAMMWeightedPoolImmutableData = AbiParametersToPrimitiveTypes<
     ExtractAbiFunction<typeof quantAmmWeighted, 'getQuantAMMWeightedPoolImmutableData'>['outputs']
 >[0];
 
+type QuantAMMWeightedPoolDynamicData = AbiParametersToPrimitiveTypes<
+    ExtractAbiFunction<typeof quantAmmWeighted, 'getQuantAMMWeightedPoolDynamicData'>['outputs']
+>[0];
+
 type QuantAMMWeightedPoolNormalisedWeights = AbiParametersToPrimitiveTypes<
     ExtractAbiFunction<typeof quantAmmWeighted, 'getNormalizedWeights'>['outputs']
 >[0];
@@ -18,7 +22,7 @@ export const quantAmmWeightedCalls = (id: string): ViemMulticallCall[] => [
         functionName: 'getQuantAMMWeightedPoolImmutableData',
     },
     {
-        path: `${id}`,
+        path: `${id}.poolToken`,
         address: id as `0x${string}`,
         abi: quantAmmWeighted,
         functionName: 'getNormalizedWeights',
@@ -26,11 +30,33 @@ export const quantAmmWeightedCalls = (id: string): ViemMulticallCall[] => [
             const immutableData = results[index - 1].result as QuantAMMWeightedPoolImmutableData;
             const tokens = immutableData.tokens;
 
+            return tokens.map((token, index) => ({
+                id: `${id}-${token}`.toLowerCase(),
+                weight: formatEther(weights[index]),
+            }));
+        },
+    },
+    {
+        path: `${id}.pool.typeData`,
+        address: id as `0x${string}`,
+        abi: quantAmmWeighted,
+        functionName: 'getQuantAMMWeightedPoolDynamicData',
+        parser: (result: QuantAMMWeightedPoolDynamicData, results: any, index: number) => {
+            const [[weightsA, multipliersA], [weightsB, multipliersB]] = [
+                result.firstFourWeightsAndMultipliers,
+                result.secondFourWeightsAndMultipliers,
+            ].map((arr) => [arr.slice(0, 4), arr.slice(4)]);
+
+            const weightsAtLastUpdateInterval = [...weightsA, ...weightsB];
+            const weightBlockMultipliers = [...multipliersA, ...multipliersB].map(Number);
+            const lastUpdateIntervalTime = Number(result.lastUpdateTime);
+            const lastInterpolationTimePossible = Number(result.lastInteropTime);
+
             return {
-                poolToken: tokens.map((token, index) => ({
-                    id: `${id}-${token}`.toLowerCase(),
-                    weight: formatEther(weights[index]),
-                })),
+                weightsAtLastUpdateInterval: weightsAtLastUpdateInterval.map(Number),
+                weightBlockMultipliers,
+                lastUpdateIntervalTime,
+                lastInterpolationTimePossible,
             };
         },
     },
