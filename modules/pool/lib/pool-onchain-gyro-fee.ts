@@ -1,4 +1,4 @@
-import { Multicaller3Viem, IMulticaller } from '../../web3/multicaller-viem';
+import { Multicaller3Viem } from '../../web3/multicaller-viem';
 import { PrismaPoolType } from '@prisma/client';
 import abi from '../abi/GyroConfig.json';
 import { defaultAbiCoder } from '@ethersproject/abi';
@@ -79,9 +79,9 @@ export const fetchOnChainGyroFees = async (pools: PoolInput[], gyroConfigAddress
     };
 
     const parsed = Object.fromEntries(
-        pools.map(({ id, address, type }) => {
+        pools.map(({ id, type }) => {
             const fee = results.pools?.[id]?.poolFee ?? typeFee[type as keyof typeof typeFee] ?? defaultFee;
-            return [address, formatEther(fee)];
+            return [id, formatEther(fee)];
         }),
     );
 
