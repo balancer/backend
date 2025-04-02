@@ -1,4 +1,4 @@
-// yarn vitest sor-debug.test.ts
+// bun vitest sor-debug.test.ts
 import { Chain } from '@prisma/client';
 import { initRequestScopedContext, setRequestScopedContextValue } from '../context/request-scoped-context';
 import { chainIdToChain } from '../network/chain-id-to-chain';
@@ -53,12 +53,12 @@ describe('sor debugging', () => {
 
         const swaps = await sorService.getSorSwapPaths({
             chain,
-            tokenIn: '0xb19382073c7a0addbb56ac6af1808fa49e377b75', // BAL
-            tokenOut: '0xb77eb1a70a96fdaaeb31db1b42f2b8b5846b2613', // DAI
+            tokenIn: '0x29f2d40b0605204364af54ec677bd022da425d03', // wBTC
+            tokenOut: '0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8', // USDC
             swapType: 'EXACT_IN',
             swapAmount: '0.01',
             useProtocolVersion,
-            poolIds: ['0x9c781a9dcd12110f92b8eb1af21d441d58f5e8da'], // gyroECLP
+            poolIds: ['0x2e629cd9061e2b5214b6cfc8d001deb726275eb0'], // gyroECLP
         });
 
         console.log(swaps.returnAmount);

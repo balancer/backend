@@ -28,6 +28,7 @@ export async function getBasePoolsFromDb(
             'GYRO',
             'GYRO3',
             'GYROE',
+            'QUANT_AMM_WEIGHTED',
         ] as PrismaPoolType[],
     };
 
