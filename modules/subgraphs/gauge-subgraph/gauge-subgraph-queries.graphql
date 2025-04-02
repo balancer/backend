@@ -22,12 +22,6 @@ fragment Gauge on LiquidityGauge {
         rate
         periodFinish
     }
-    shares {
-        user {
-            id
-        }
-        balance
-    }
     streamer
     isPreferentialGauge
     isKilled

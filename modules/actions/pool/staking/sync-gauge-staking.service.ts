@@ -78,7 +78,6 @@ export const syncGaugeStakingForPools = async (
     const poolAddresses = dbPools.map((pool) => pool.address);
     const { liquidityGauges: subgraphGauges } = await gaugeSubgraphService.getAllGaugesForPoolAddresses(poolAddresses);
 
-    console.log(subgraphGauges.find((g) => g.id === '0x5a7f39435fd9c381e4932fa2047c9a5136a5e3e7'));
     /*
     TODO This can result in multiple preferential gauges for a pool 
     because its a manual two-step process to set them (set new preferential and unset old preferential)
@@ -315,10 +314,13 @@ const getOnchainRewardTokensData = async (
             const id = `${gaugeAddress}-${balAddress}-balgauge`.toLowerCase();
             const { rate, weight, workingSupply, totalSupply, relativeWeightCap } = balData[gaugeAddress];
 
-            let weightAfterCap;
-            if (relativeWeightCap && weight) {
-                weightAfterCap = Math.min(parseFloat(formatUnits(relativeWeightCap)), parseFloat(formatUnits(weight)));
-            }
+            const weightAfterCap = weight
+                ? Math.min(
+                      parseFloat(formatUnits(relativeWeightCap || '1000000000000000000')), // Old v1 gauges don't have relativeWeightCap
+                      parseFloat(formatUnits(weight)),
+                  )
+                : undefined;
+
             const rewardPerSecond = rate
                 ? formatUnits(rate) // L2 V2 case for BAL rewards
                 : weightAfterCap

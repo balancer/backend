@@ -89,6 +89,11 @@ const files = {
             },
         },
     },
+    ['modules/subgraphs/beets-bar-subgraph/generated/beets-bar-subgraph-types.ts']: {
+        schema: config.FANTOM.subgraphs.beetsBar,
+        documents: 'modules/subgraphs/beets-bar-subgraph/beets-bar-subgraph-queries.graphql',
+        ...defaults.types,
+    },
     ['modules/subgraphs/gauge-subgraph/generated/gauge-subgraph-types.ts']: {
         schema: config.MAINNET.subgraphs.gauge,
         documents: 'modules/subgraphs/gauge-subgraph/gauge-subgraph-queries.graphql',
