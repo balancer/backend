@@ -32,6 +32,11 @@ export const fetchOnChainGyroFees = async (pools: PoolInput[], gyroConfigAddress
         return {};
     }
 
+    const gyroPools = pools.filter(({ type }) => type.includes('GYRO'));
+    if (gyroPools.length === 0) {
+        return {};
+    }
+
     const multicaller = new Multicaller3Viem(pools[0].chain, abi, batchSize);
 
     const feeKey = formatBytes32String('PROTOCOL_SWAP_FEE_PERC');
@@ -56,18 +61,9 @@ export const fetchOnChainGyroFees = async (pools: PoolInput[], gyroConfigAddress
     multicaller.call('twoClpFee', gyroConfigAddress, 'getUint', [twoClpKey]);
     multicaller.call('threeClpFee', gyroConfigAddress, 'getUint', [threeClpKey]);
 
-    let poolTypeLookup: { [id: string]: PrismaPoolType } = {};
-    pools.forEach(({ id, type, address }) => {
-        if (type.includes('GYRO')) {
-            const poolFeeKey = keccak256(
-                ['bytes'],
-                [defaultAbiCoder.encode(['bytes32', 'uint256'], [feeKey, address])],
-            );
-
-            multicaller.call(`pools.${id}.poolFee`, gyroConfigAddress, 'getUint', [poolFeeKey]);
-
-            poolTypeLookup[id] = type;
-        }
+    gyroPools.forEach(({ id, address }) => {
+        const poolFeeKey = keccak256(['bytes'], [defaultAbiCoder.encode(['bytes32', 'uint256'], [feeKey, address])]);
+        multicaller.call(`pools.${id}.poolFee`, gyroConfigAddress, 'getUint', [poolFeeKey]);
     });
 
     const results = (await multicaller.execute()) as OnchainGyroFees;
@@ -79,7 +75,7 @@ export const fetchOnChainGyroFees = async (pools: PoolInput[], gyroConfigAddress
     };
 
     const parsed = Object.fromEntries(
-        pools.map(({ id, type }) => {
+        gyroPools.map(({ id, type }) => {
             const fee = results.pools?.[id]?.poolFee ?? typeFee[type as keyof typeof typeFee] ?? defaultFee;
             return [id, formatEther(fee)];
         }),
