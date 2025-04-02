@@ -2,13 +2,16 @@ import { BufferState, GyroECLPState, StableState, WeightedState } from '@balance
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
-type TestBase = {
-    chainId: number;
-    blockNumber: number;
-};
+import { PrismaPoolAndHookWithDynamic } from '../../prisma/prisma-types';
+import {
+    mapGyroPoolStateToPrismaPool,
+    mapStablePoolStateToPrismaPool,
+    mapWeightedPoolStateToPrismaPool,
+} from './mapping';
 
-type PoolBase = TestBase & {
+type PoolBase = {
     poolAddress: string;
+    chainId: string;
 };
 
 export type WeightedPool = PoolBase & WeightedState;
@@ -21,8 +24,6 @@ export type GyroEPool = PoolBase & GyroECLPState;
 
 export type SupportedPools = WeightedPool | StablePool | BufferPool | GyroEPool;
 
-export type PoolsMap = Map<string, SupportedPools>;
-
 type SwapPath = {
     swapKind: number;
     amountRaw: bigint;
@@ -33,7 +34,7 @@ type SwapPath = {
 };
 
 export type TestData = {
-    swapPathPools: SupportedPools[][];
+    swapPathPools: PrismaPoolAndHookWithDynamic[][];
     swapPaths: SwapPath[];
 };
 
@@ -61,8 +62,8 @@ export function readTestData(): TestData {
             try {
                 const jsonData = JSON.parse(fileContent);
 
-                // map pools to SupportedPools[]
-                const pools: SupportedPools[] = jsonData.pools.map((pool: any) => mapPool(pool));
+                // map pools to prisma pools
+                const pools: PrismaPoolAndHookWithDynamic[] = jsonData.pools.map((pool: any) => mapPool(pool));
                 testData.swapPathPools.push(pools);
 
                 // add swapPaths
@@ -87,9 +88,9 @@ type TransformBigintToString<T> = {
     [K in keyof T]: T[K] extends bigint ? string : T[K] extends bigint[] ? string[] : T[K];
 };
 
-function mapPool(pool: TransformBigintToString<SupportedPools>): SupportedPools {
+function mapPool(pool: TransformBigintToString<SupportedPools>): PrismaPoolAndHookWithDynamic {
     if (pool.poolType === 'WEIGHTED') {
-        return {
+        const weightedPool = {
             ...pool,
             scalingFactors: pool.scalingFactors.map((sf) => BigInt(sf)),
             swapFee: BigInt(pool.swapFee),
@@ -101,9 +102,10 @@ function mapPool(pool: TransformBigintToString<SupportedPools>): SupportedPools 
             supportsUnbalancedLiquidity:
                 pool.supportsUnbalancedLiquidity === undefined ? true : pool.supportsUnbalancedLiquidity,
         };
+        return mapWeightedPoolStateToPrismaPool(weightedPool, Number(pool.chainId), 3);
     }
     if (pool.poolType === 'STABLE') {
-        return {
+        const stablePool = {
             ...pool,
             scalingFactors: pool.scalingFactors.map((sf) => BigInt(sf)),
             swapFee: BigInt(pool.swapFee),
@@ -115,15 +117,17 @@ function mapPool(pool: TransformBigintToString<SupportedPools>): SupportedPools 
             supportsUnbalancedLiquidity:
                 pool.supportsUnbalancedLiquidity === undefined ? true : pool.supportsUnbalancedLiquidity,
         };
+        return mapStablePoolStateToPrismaPool(stablePool, Number(pool.chainId), 3);
     }
-    if (pool.poolType === 'Buffer') {
-        return {
-            ...pool,
-            rate: BigInt(pool.rate),
-        };
-    }
+    // TODO: check how to handle buffer pools
+    // if (pool.poolType === 'Buffer') {
+    //     return {
+    //         ...pool,
+    //         rate: BigInt(pool.rate),
+    //     };
+    // }
     if (pool.poolType === 'GYROE') {
-        return {
+        const gyroPool = {
             ...pool,
             scalingFactors: pool.scalingFactors.map((sf) => BigInt(sf)),
             swapFee: BigInt(pool.swapFee),
@@ -148,6 +152,7 @@ function mapPool(pool: TransformBigintToString<SupportedPools>): SupportedPools 
             z: BigInt(pool.z),
             dSq: BigInt(pool.dSq),
         };
+        return mapGyroPoolStateToPrismaPool(gyroPool, Number(pool.chainId), 3);
     }
     console.log(pool);
     throw new Error('mapPool: Unsupported Pool Type');

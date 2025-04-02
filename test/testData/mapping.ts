@@ -11,10 +11,7 @@ export function mapGyroPoolStateToPrismaPool(
     poolState: GyroEPool,
     chainId: number,
     protocolVersion: number,
-): {
-    poolTokens: Token[];
-    prismaPool: PrismaPoolAndHookWithDynamic;
-} {
+): PrismaPoolAndHookWithDynamic {
     const decimals = poolState.scalingFactors.map((scalingFactor: bigint) =>
         getDecimalsFromScalingFactor(scalingFactor),
     );
@@ -67,17 +64,14 @@ export function mapGyroPoolStateToPrismaPool(
             protocolVersion,
             tokens,
         });
-    return { poolTokens, prismaPool };
+    return prismaPool;
 }
 
 export function mapStablePoolStateToPrismaPool(
     poolState: StablePool,
     chainId: number,
     protocolVersion: number,
-): {
-    poolTokens: Token[];
-    prismaPool: PrismaPoolAndHookWithDynamic;
-} {
+): PrismaPoolAndHookWithDynamic {
     const decimals = poolState.scalingFactors.map((scalingFactor: bigint) =>
         getDecimalsFromScalingFactor(scalingFactor),
     );
@@ -117,17 +111,14 @@ export function mapStablePoolStateToPrismaPool(
             totalShares: formatEther(poolState.totalSupply),
         },
     });
-    return { poolTokens, prismaPool };
+    return prismaPool;
 }
 
 export function mapWeightedPoolStateToPrismaPool(
     poolState: WeightedPool,
     chainId: number,
     protocolVersion: number,
-): {
-    poolTokens: Token[];
-    prismaPool: PrismaPoolAndHookWithDynamic;
-} {
+): PrismaPoolAndHookWithDynamic {
     const decimals = poolState.scalingFactors.map((scalingFactor: bigint) =>
         getDecimalsFromScalingFactor(scalingFactor),
     );
@@ -162,5 +153,5 @@ export function mapWeightedPoolStateToPrismaPool(
             totalShares: formatEther(poolState.totalSupply),
         },
     });
-    return { poolTokens, prismaPool };
+    return prismaPool;
 }
