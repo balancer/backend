@@ -2344,11 +2344,6 @@ export type GaugeLiquidityGaugesQuery = {
             rate?: string | null;
             periodFinish?: string | null;
         }> | null;
-        shares?: Array<{
-            __typename?: 'GaugeShare';
-            balance: string;
-            user: { __typename?: 'User'; id: string };
-        }> | null;
         gauge?: { __typename?: 'Gauge'; addedTimestamp: number } | null;
     }>;
 };
@@ -2370,7 +2365,6 @@ export type GaugeFragment = {
         rate?: string | null;
         periodFinish?: string | null;
     }> | null;
-    shares?: Array<{ __typename?: 'GaugeShare'; balance: string; user: { __typename?: 'User'; id: string } }> | null;
     gauge?: { __typename?: 'Gauge'; addedTimestamp: number } | null;
 };
 
@@ -2534,12 +2528,6 @@ export const GaugeFragmentDoc = gql`
             symbol
             rate
             periodFinish
-        }
-        shares {
-            user {
-                id
-            }
-            balance
         }
         streamer
         isPreferentialGauge
