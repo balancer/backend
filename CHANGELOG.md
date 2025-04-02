@@ -1,5 +1,13 @@
 # backend
 
+## 1.37.6
+
+### Patch Changes
+
+-   d6e63fe: fix gyro protocol fees
+-   34bc964: readding withdrawConfig and investConfig
+-   5d62c69: readd quant fields syncing
+
 ## 1.37.5
 
 ### Patch Changes
