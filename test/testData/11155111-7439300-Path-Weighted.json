@@ -1,0 +1,49 @@
+{
+    "test": {
+        "chainId": "11155111",
+        "blockNumber": "7439300"
+    },
+    "swapPath": {
+        "swapKind": 0,
+        "amountRaw": "10000000",
+        "tokens": [
+            "0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8",
+            "0xff34b3d4aee8ddcd6f9afffb6fe49bd371b8a357"
+        ],
+        "pools": [
+            "0x86fde41ff01b35846eb2f27868fb2938addd44c4"
+        ],
+        "outputRaw": "8920009849766722311"
+    },
+    "pools": [
+        {
+            "chainId": "11155111",
+            "blockNumber": "7439300",
+            "poolType": "WEIGHTED",
+            "poolAddress": "0x86fde41ff01b35846eb2f27868fb2938addd44c4",
+            "tokens": [
+                "0x94a9D9AC8a22534E3FaCa9F4e7F2E2cf85d5E4C8",
+                "0xFF34B3d4Aee8ddCd6F9AFFFB6Fe49bD371b8a357"
+            ],
+            "scalingFactors": [
+                "1000000000000",
+                "1"
+            ],
+            "weights": [
+                "500000000000000000",
+                "500000000000000000"
+            ],
+            "swapFee": "10000000000000000",
+            "totalSupply": "6565147517543863649467",
+            "balancesLiveScaled18": [
+                "6916384366000000000000",
+                "6240659067374271172646"
+            ],
+            "tokenRates": [
+                "1000000000000000000",
+                "1000000000000000000"
+            ],
+            "aggregateSwapFee": "0"
+        }
+    ]
+}

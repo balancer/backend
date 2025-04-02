@@ -2,9 +2,12 @@ import { BufferState, GyroECLPState, StableState, WeightedState } from '@balance
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
-type PoolBase = {
+type TestBase = {
     chainId: number;
     blockNumber: number;
+};
+
+type PoolBase = TestBase & {
     poolAddress: string;
 };
 
@@ -12,59 +15,69 @@ export type WeightedPool = PoolBase & WeightedState;
 
 export type StablePool = PoolBase & StableState;
 
-type BufferPool = PoolBase & BufferState;
+export type BufferPool = PoolBase & BufferState;
 
 export type GyroEPool = PoolBase & GyroECLPState;
 
-type SupportedPools = WeightedPool | StablePool | BufferPool | GyroEPool;
+export type SupportedPools = WeightedPool | StablePool | BufferPool | GyroEPool;
 
-type PoolsMap = Map<string, SupportedPools>;
+export type PoolsMap = Map<string, SupportedPools>;
 
-type Swap = {
+type SwapPath = {
     swapKind: number;
     amountRaw: bigint;
     outputRaw: bigint;
-    tokenIn: string;
-    tokenOut: string;
+    tokens: string[];
+    pools: PoolBase[];
     test: string;
 };
 
 export type TestData = {
-    swaps: Swap[];
-    pools: PoolsMap;
+    swapPathPools: SupportedPools[][];
+    swapPaths: SwapPath[];
 };
 
 // Reads all json test files and parses to relevant swap/pool bigint format
-export function readTestData(fileName: string): TestData {
-    const pools: PoolsMap = new Map<string, SupportedPools>();
-    const swaps: Swap[] = [];
+export function readTestData(): TestData {
     const testData: TestData = {
-        swaps,
-        pools,
+        swapPathPools: [],
+        swapPaths: [],
     };
 
     // Resolve the directory path relative to the current file's directory
-    const absoluteDirectoryPath = path.resolve(__dirname, fileName);
+    const absoluteDirectoryPath = path.resolve(__dirname);
 
-    // Read the file conten
-    const fileContent = fs.readFileSync(absoluteDirectoryPath, 'utf-8');
+    // Read all files in the directory
+    const files = fs.readdirSync(absoluteDirectoryPath);
 
-    // Parse the JSON content
-    try {
-        const jsonData = JSON.parse(fileContent);
-        if (jsonData.swaps)
-            swaps.push(
-                ...jsonData.swaps.map((swap: Swap) => ({
-                    ...swap,
-                    swapKind: Number(swap.swapKind),
-                    amountRaw: BigInt(swap.amountRaw),
-                    outputRaw: BigInt(swap.outputRaw),
-                    test: fileName,
-                })),
-            );
-        pools.set(fileName, mapPool(jsonData.pool));
-    } catch (error) {
-        console.error(`Error parsing JSON file ${fileName}:`, error);
+    // Iterate over each file
+    for (const file of files) {
+        // Check if the file ends with .json
+        if (file.endsWith('.json')) {
+            // Read the file content
+            const fileContent = fs.readFileSync(path.join(absoluteDirectoryPath, file), 'utf-8');
+
+            // Parse the JSON content
+            try {
+                const jsonData = JSON.parse(fileContent);
+
+                // map pools to SupportedPools[]
+                const pools: SupportedPools[] = jsonData.pools.map((pool: any) => mapPool(pool));
+                testData.swapPathPools.push(pools);
+
+                // add swapPaths
+                testData.swapPaths.push({
+                    ...jsonData.swapPath,
+                    pools: jsonData.swapPath.pools.map((pool: any) => pool.poolAddress),
+                    swapKind: Number(jsonData.swapPath.swapKind),
+                    amountRaw: BigInt(jsonData.swapPath.amountRaw),
+                    outputRaw: BigInt(jsonData.swapPath.outputRaw),
+                    test: file,
+                });
+            } catch (error) {
+                console.error(`Error parsing JSON file ${file}:`, error);
+            }
+        }
     }
 
     return testData;
@@ -138,11 +151,4 @@ function mapPool(pool: TransformBigintToString<SupportedPools>): SupportedPools 
     }
     console.log(pool);
     throw new Error('mapPool: Unsupported Pool Type');
-}
-
-function mapRemoveKind(kind: string): number {
-    if (kind === 'Proportional') return 0;
-    else if (kind === 'SingleTokenExactIn') return 1;
-    else if (kind === 'SingleTokenExactOut') return 2;
-    else throw new Error(`Unsupported RemoveKind: ${kind}`);
 }

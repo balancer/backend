@@ -1,0 +1,77 @@
+{
+    "test": {
+        "chainId": "11155111",
+        "blockNumber": "7303517"
+    },
+    "swapPath": {
+        "swapKind": 0,
+        "amountRaw": "1000000",
+        "tokens": [
+            "0x8a88124522dbbf1e56352ba3de1d9f78c143751e",
+            "0x59fa488dda749cdd41772bb068bb23ee955a6d7a",
+            "0x7b79995e5f793a07bc00c21412e50ecae098e7f9"
+        ],
+        "pools": [
+            "0x59fa488dda749cdd41772bb068bb23ee955a6d7a",
+            "0x693cc6a39bbf35464f53d6a5dbf7d6c2fa93741c"
+        ],
+        "outputRaw": "1412528322217864"
+    },
+    "pools": [
+        {
+            "chainId": "11155111",
+            "blockNumber": "7303517",
+            "poolType": "STABLE",
+            "poolAddress": "0x59fa488dda749cdd41772bb068bb23ee955a6d7a",
+            "tokens": [
+                "0x8A88124522dbBF1E56352ba3DE1d9F78C143751e",
+                "0x978206fAe13faF5a8d293FB614326B237684B750"
+            ],
+            "scalingFactors": [
+                "1000000000000",
+                "1000000000000"
+            ],
+            "swapFee": "1000000000000000",
+            "totalSupply": "98722363453387463962451",
+            "balancesLiveScaled18": [
+                "20733111865070775095047",
+                "79806795572997437673409"
+            ],
+            "tokenRates": [
+                "1216261233431405026",
+                "1371108722796244136"
+            ],
+            "amp": "1000000",
+            "aggregateSwapFee": "0"
+        },
+        {
+            "chainId": "11155111",
+            "blockNumber": "7303517",
+            "poolType": "WEIGHTED",
+            "poolAddress": "0x693cc6a39bbf35464f53d6a5dbf7d6c2fa93741c",
+            "tokens": [
+                "0x59fa488dda749cDD41772bb068BB23Ee955A6d7a",
+                "0x7b79995e5f793A07Bc00c21412e50Ecae098E7f9"
+            ],
+            "scalingFactors": [
+                "1",
+                "1"
+            ],
+            "weights": [
+                "500000000000000000",
+                "500000000000000000"
+            ],
+            "swapFee": "10000000000000000",
+            "totalSupply": "18481916220523369438",
+            "balancesLiveScaled18": [
+                "536112912071673838086",
+                "641025581212023582"
+            ],
+            "tokenRates": [
+                "1000000000000000000",
+                "1000000000000000000"
+            ],
+            "aggregateSwapFee": "0"
+        }
+    ]
+}
