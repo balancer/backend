@@ -11,8 +11,8 @@ import { PrismaPoolAndHookWithDynamic } from '../../prisma/prisma-types';
 import { areBigIntsWithinPercent, getTokensFromPrismaPools } from '../../test/utils';
 import { formatUnits, parseUnits } from 'viem';
 
-// This test will run against all files added to test/testData
-// In order to add new scenarios, please generate testData on balancer-maths and add it to test/testData
+// This test will run against all files added to test/testData/read
+// In order to add new scenarios, please add them to test/testData/config.json
 
 // Note: these tests are only available for Balancer V3
 const protocolVersion = 3;
