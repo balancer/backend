@@ -1,10 +1,10 @@
 import { Address, formatEther, formatUnits } from 'viem';
 import { Token } from '@balancer/sdk';
 
-import { BasePoolToken, PoolTokenWithRate } from '../../modules/sor/lib/utils';
-import { PrismaPoolAndHookWithDynamic } from '../../prisma/prisma-types';
-import { prismaPoolFactory, prismaPoolTokenFactory } from '../factories';
-import { getDecimalsFromScalingFactor } from '../utils';
+import { BasePoolToken, PoolTokenWithRate } from '../../../modules/sor/lib/utils';
+import { PrismaPoolAndHookWithDynamic } from '../../../prisma/prisma-types';
+import { prismaPoolFactory, prismaPoolTokenFactory } from '../../factories';
+import { getDecimalsFromScalingFactor } from '../../utils';
 import { BufferPool, GyroEPool, StablePool, WeightedPool } from './readTestData';
 
 export function mapGyroPoolStateToPrismaPool(

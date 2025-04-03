@@ -2,7 +2,7 @@ import { BufferState, GyroECLPState, StableState, WeightedState } from '@balance
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
-import { PrismaPoolAndHookWithDynamic } from '../../prisma/prisma-types';
+import { PrismaPoolAndHookWithDynamic } from '../../../prisma/prisma-types';
 import {
     mapGyroPoolStateToPrismaPool,
     mapStablePoolStateToPrismaPool,

@@ -6,7 +6,7 @@ import { PathWithAmount } from './lib/path';
 import { SOR } from './lib/sor';
 import { getOutputAmount, getInputAmount } from './lib/utils/helpers';
 
-import { readTestData } from '../../test/testData/readTestData';
+import { readTestData } from '../../test/testData/read/readTestData';
 import { PrismaPoolAndHookWithDynamic } from '../../prisma/prisma-types';
 import { areBigIntsWithinPercent, getTokensFromPrismaPools } from '../../test/utils';
 import { formatUnits, parseUnits } from 'viem';
