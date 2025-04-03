@@ -8,7 +8,8 @@ import { getOutputAmount, getInputAmount } from './lib/utils/helpers';
 
 import { readTestData } from '../../test/testData/readTestData';
 import { PrismaPoolAndHookWithDynamic } from '../../prisma/prisma-types';
-import { getTokensFromPrismaPools } from '../../test/utils';
+import { areBigIntsWithinPercent, getTokensFromPrismaPools } from '../../test/utils';
+import { formatUnits, parseUnits } from 'viem';
 
 // This test will run against all files added to test/testData
 // In order to add new scenarios, please generate testData on balancer-maths and add it to test/testData
@@ -24,8 +25,8 @@ describe('SOR V3 Swap Paths Integration Tests', () => {
 
         const index = testData.swapPaths.indexOf(swapPath);
         const prismaPools: PrismaPoolAndHookWithDynamic[] = testData.swapPathPools[index];
-
-        const { tokenIn, tokenOut } = getTokensFromPrismaPools(prismaPools, tokens);
+        const underlyingTokens = testData.underlyingTokens[index];
+        const { tokenIn, tokenOut } = getTokensFromPrismaPools(prismaPools, tokens, underlyingTokens);
 
         const paths = (await SOR.getPathsWithPools(
             tokenIn,
@@ -33,11 +34,18 @@ describe('SOR V3 Swap Paths Integration Tests', () => {
             swapKind,
             amountRaw,
             prismaPools,
-            [],
+            underlyingTokens,
             protocolVersion,
         )) as PathWithAmount[];
 
         const returnAmountSOR = swapKind === SwapKind.GivenIn ? getOutputAmount(paths) : getInputAmount(paths);
-        expect(outputRaw).toBe(returnAmountSOR.amount);
+
+        const isSwapPathWithBufferPools = underlyingTokens.length > 0;
+        if (isSwapPathWithBufferPools) {
+            const isWithinPercent = areBigIntsWithinPercent(outputRaw, returnAmountSOR.amount, 0.0001);
+            expect(isWithinPercent).toBe(true);
+        } else {
+            expect(outputRaw).toBe(returnAmountSOR.amount);
+        }
     });
 });

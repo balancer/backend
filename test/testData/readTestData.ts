@@ -8,6 +8,7 @@ import {
     mapStablePoolStateToPrismaPool,
     mapWeightedPoolStateToPrismaPool,
 } from './mapping';
+import { Address, isSameAddress } from '@balancer/sdk';
 
 type PoolBase = {
     poolAddress: string;
@@ -36,6 +37,7 @@ type SwapPath = {
 export type TestData = {
     swapPathPools: PrismaPoolAndHookWithDynamic[][];
     swapPaths: SwapPath[];
+    underlyingTokens: { address: string; decimals: number }[][];
 };
 
 // Reads all json test files and parses to relevant swap/pool bigint format
@@ -43,6 +45,7 @@ export function readTestData(): TestData {
     const testData: TestData = {
         swapPathPools: [],
         swapPaths: [],
+        underlyingTokens: [],
     };
 
     // Resolve the directory path relative to the current file's directory
@@ -62,8 +65,12 @@ export function readTestData(): TestData {
             try {
                 const jsonData = JSON.parse(fileContent);
 
+                // add underlying tokens
+                const underlyingTokens = jsonData.underlyingTokens as { address: string; decimals: number }[];
+                testData.underlyingTokens.push(underlyingTokens);
+
                 // map pools to prisma pools
-                const pools: PrismaPoolAndHookWithDynamic[] = jsonData.pools.map((pool: any) => mapPool(pool));
+                const pools: PrismaPoolAndHookWithDynamic[] = mapPools(jsonData.pools, underlyingTokens);
                 testData.swapPathPools.push(pools);
 
                 // add swapPaths
@@ -88,72 +95,80 @@ type TransformBigintToString<T> = {
     [K in keyof T]: T[K] extends bigint ? string : T[K] extends bigint[] ? string[] : T[K];
 };
 
-function mapPool(pool: TransformBigintToString<SupportedPools>): PrismaPoolAndHookWithDynamic {
-    if (pool.poolType === 'WEIGHTED') {
-        const weightedPool = {
+function mapPools(
+    pools: TransformBigintToString<SupportedPools>[],
+    underlyingTokens: { address: string; decimals: number }[],
+): PrismaPoolAndHookWithDynamic[] {
+    const bufferPools: (BufferPool & { underlyingTokenDecimals: number })[] = pools
+        .filter((pool) => pool.poolType === 'Buffer')
+        .map((pool) => ({
             ...pool,
-            scalingFactors: pool.scalingFactors.map((sf) => BigInt(sf)),
-            swapFee: BigInt(pool.swapFee),
-            balancesLiveScaled18: pool.balancesLiveScaled18.map((b) => BigInt(b)),
-            tokenRates: pool.tokenRates.map((r) => BigInt(r)),
-            totalSupply: BigInt(pool.totalSupply),
-            weights: (pool as TransformBigintToString<WeightedPool>).weights.map((w) => BigInt(w)),
-            aggregateSwapFee: BigInt(pool.aggregateSwapFee ?? '0'),
-            supportsUnbalancedLiquidity:
-                pool.supportsUnbalancedLiquidity === undefined ? true : pool.supportsUnbalancedLiquidity,
-        };
-        return mapWeightedPoolStateToPrismaPool(weightedPool, Number(pool.chainId), 3);
+            rate: BigInt(pool.rate),
+            underlyingTokenDecimals:
+                underlyingTokens.find((token) => isSameAddress(token.address as Address, pool.tokens[1] as Address))
+                    ?.decimals || 0,
+        }));
+
+    const nonBufferPools = pools.filter((pool) => pool.poolType !== 'Buffer');
+
+    const prismaPools: PrismaPoolAndHookWithDynamic[] = [];
+    for (const pool of nonBufferPools) {
+        if (pool.poolType === 'WEIGHTED') {
+            const weightedPool = {
+                ...pool,
+                scalingFactors: pool.scalingFactors.map((sf) => BigInt(sf)),
+                swapFee: BigInt(pool.swapFee),
+                balancesLiveScaled18: pool.balancesLiveScaled18.map((b) => BigInt(b)),
+                tokenRates: pool.tokenRates.map((r) => BigInt(r)),
+                totalSupply: BigInt(pool.totalSupply),
+                weights: (pool as TransformBigintToString<WeightedPool>).weights.map((w) => BigInt(w)),
+                aggregateSwapFee: BigInt(pool.aggregateSwapFee ?? '0'),
+                supportsUnbalancedLiquidity:
+                    pool.supportsUnbalancedLiquidity === undefined ? true : pool.supportsUnbalancedLiquidity,
+            };
+            prismaPools.push(mapWeightedPoolStateToPrismaPool(weightedPool, Number(pool.chainId), 3, bufferPools));
+        } else if (pool.poolType === 'STABLE') {
+            const stablePool = {
+                ...pool,
+                scalingFactors: pool.scalingFactors.map((sf) => BigInt(sf)),
+                swapFee: BigInt(pool.swapFee),
+                balancesLiveScaled18: pool.balancesLiveScaled18.map((b) => BigInt(b)),
+                tokenRates: pool.tokenRates.map((r) => BigInt(r)),
+                totalSupply: BigInt(pool.totalSupply),
+                amp: BigInt((pool as TransformBigintToString<StablePool>).amp),
+                aggregateSwapFee: BigInt(pool.aggregateSwapFee ?? '0'),
+                supportsUnbalancedLiquidity:
+                    pool.supportsUnbalancedLiquidity === undefined ? true : pool.supportsUnbalancedLiquidity,
+            };
+            prismaPools.push(mapStablePoolStateToPrismaPool(stablePool, Number(pool.chainId), 3, bufferPools));
+        } else if (pool.poolType === 'GYROE') {
+            const gyroPool = {
+                ...pool,
+                scalingFactors: pool.scalingFactors.map((sf) => BigInt(sf)),
+                swapFee: BigInt(pool.swapFee),
+                balancesLiveScaled18: pool.balancesLiveScaled18.map((b) => BigInt(b)),
+                tokenRates: pool.tokenRates.map((r) => BigInt(r)),
+                totalSupply: BigInt(pool.totalSupply),
+                aggregateSwapFee: BigInt(pool.aggregateSwapFee ?? '0'),
+                supportsUnbalancedLiquidity:
+                    pool.supportsUnbalancedLiquidity === undefined ? true : pool.supportsUnbalancedLiquidity,
+                paramsAlpha: BigInt(pool.paramsAlpha),
+                paramsBeta: BigInt(pool.paramsBeta),
+                paramsC: BigInt(pool.paramsC),
+                paramsS: BigInt(pool.paramsS),
+                paramsLambda: BigInt(pool.paramsLambda),
+                tauAlphaX: BigInt(pool.tauAlphaX),
+                tauAlphaY: BigInt(pool.tauAlphaY),
+                tauBetaX: BigInt(pool.tauBetaX),
+                tauBetaY: BigInt(pool.tauBetaY),
+                u: BigInt(pool.u),
+                v: BigInt(pool.v),
+                w: BigInt(pool.w),
+                z: BigInt(pool.z),
+                dSq: BigInt(pool.dSq),
+            };
+            prismaPools.push(mapGyroPoolStateToPrismaPool(gyroPool, Number(pool.chainId), 3));
+        }
     }
-    if (pool.poolType === 'STABLE') {
-        const stablePool = {
-            ...pool,
-            scalingFactors: pool.scalingFactors.map((sf) => BigInt(sf)),
-            swapFee: BigInt(pool.swapFee),
-            balancesLiveScaled18: pool.balancesLiveScaled18.map((b) => BigInt(b)),
-            tokenRates: pool.tokenRates.map((r) => BigInt(r)),
-            totalSupply: BigInt(pool.totalSupply),
-            amp: BigInt((pool as TransformBigintToString<StablePool>).amp),
-            aggregateSwapFee: BigInt(pool.aggregateSwapFee ?? '0'),
-            supportsUnbalancedLiquidity:
-                pool.supportsUnbalancedLiquidity === undefined ? true : pool.supportsUnbalancedLiquidity,
-        };
-        return mapStablePoolStateToPrismaPool(stablePool, Number(pool.chainId), 3);
-    }
-    // TODO: check how to handle buffer pools
-    // if (pool.poolType === 'Buffer') {
-    //     return {
-    //         ...pool,
-    //         rate: BigInt(pool.rate),
-    //     };
-    // }
-    if (pool.poolType === 'GYROE') {
-        const gyroPool = {
-            ...pool,
-            scalingFactors: pool.scalingFactors.map((sf) => BigInt(sf)),
-            swapFee: BigInt(pool.swapFee),
-            balancesLiveScaled18: pool.balancesLiveScaled18.map((b) => BigInt(b)),
-            tokenRates: pool.tokenRates.map((r) => BigInt(r)),
-            totalSupply: BigInt(pool.totalSupply),
-            aggregateSwapFee: BigInt(pool.aggregateSwapFee ?? '0'),
-            supportsUnbalancedLiquidity:
-                pool.supportsUnbalancedLiquidity === undefined ? true : pool.supportsUnbalancedLiquidity,
-            paramsAlpha: BigInt(pool.paramsAlpha),
-            paramsBeta: BigInt(pool.paramsBeta),
-            paramsC: BigInt(pool.paramsC),
-            paramsS: BigInt(pool.paramsS),
-            paramsLambda: BigInt(pool.paramsLambda),
-            tauAlphaX: BigInt(pool.tauAlphaX),
-            tauAlphaY: BigInt(pool.tauAlphaY),
-            tauBetaX: BigInt(pool.tauBetaX),
-            tauBetaY: BigInt(pool.tauBetaY),
-            u: BigInt(pool.u),
-            v: BigInt(pool.v),
-            w: BigInt(pool.w),
-            z: BigInt(pool.z),
-            dSq: BigInt(pool.dSq),
-        };
-        return mapGyroPoolStateToPrismaPool(gyroPool, Number(pool.chainId), 3);
-    }
-    console.log(pool);
-    throw new Error('mapPool: Unsupported Pool Type');
+    return prismaPools;
 }

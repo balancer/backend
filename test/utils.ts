@@ -58,28 +58,34 @@ export function getDecimalsFromScalingFactor(scalingFactor: bigint): number {
 export function getTokensFromPrismaPools(
     supportedPools: PrismaPoolAndHookWithDynamic[],
     tokens: string[],
+    underlyingTokens: { address: string; decimals: number }[],
 ): {
     tokenIn: Token;
     tokenOut: Token;
 } {
-    const prismaTokens = supportedPools.flatMap((p) => p.tokens.map((t) => t.token));
-
-    const prismaTokenIn = prismaTokens.find((p) =>
-        isSameAddress(p.address as Address, tokens[0] as Address),
-    ) as PrismaToken;
-    const prismaTokenOut = prismaTokens.find((p) =>
-        isSameAddress(p.address as Address, tokens[tokens.length - 1] as Address),
-    ) as PrismaToken;
-
-    const tokenIn = new Token(
-        parseFloat(chainToIdMap[prismaTokenIn.chain]),
-        prismaTokenIn.address as Address,
-        prismaTokenIn.decimals,
+    const chainId = Number(chainToIdMap[supportedPools[0].chain]);
+    const prismaTokens = supportedPools.flatMap((p) =>
+        p.tokens.map((t) => ({ address: t.token.address as Address, decimals: t.token.decimals })),
     );
-    const tokenOut = new Token(
-        parseFloat(chainToIdMap[prismaTokenOut.chain]),
-        prismaTokenOut.address as Address,
-        prismaTokenOut.decimals,
-    );
+    if (underlyingTokens.length > 0) {
+        prismaTokens.push(...(underlyingTokens as { address: Address; decimals: number }[]));
+    }
+
+    const prismaTokenIn = prismaTokens.find((p) => isSameAddress(p.address, tokens[0] as Address))!;
+    const prismaTokenOut = prismaTokens.find((p) => isSameAddress(p.address, tokens[tokens.length - 1] as Address))!;
+
+    const tokenIn = new Token(chainId, prismaTokenIn.address, prismaTokenIn.decimals);
+    const tokenOut = new Token(chainId, prismaTokenOut.address, prismaTokenOut.decimals);
     return { tokenIn, tokenOut };
+}
+
+export function areBigIntsWithinPercent(value1: bigint, value2: bigint, percent: number): boolean {
+    if (percent < 0) {
+        throw new Error('Percent must be non-negative');
+    }
+    const difference = value1 > value2 ? value1 - value2 : value2 - value1;
+    console.log('Buffer Difference: ', difference);
+    const percentFactor = BigInt(Math.floor(percent * 1e8));
+    const tolerance = (value2 * percentFactor) / BigInt(1e10);
+    return difference <= tolerance;
 }

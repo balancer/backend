@@ -5,7 +5,7 @@ import { BasePoolToken, PoolTokenWithRate } from '../../modules/sor/lib/utils';
 import { PrismaPoolAndHookWithDynamic } from '../../prisma/prisma-types';
 import { prismaPoolFactory, prismaPoolTokenFactory } from '../factories';
 import { getDecimalsFromScalingFactor } from '../utils';
-import { GyroEPool, StablePool, WeightedPool } from './readTestData';
+import { BufferPool, GyroEPool, StablePool, WeightedPool } from './readTestData';
 
 export function mapGyroPoolStateToPrismaPool(
     poolState: GyroEPool,
@@ -71,6 +71,7 @@ export function mapStablePoolStateToPrismaPool(
     poolState: StablePool,
     chainId: number,
     protocolVersion: number,
+    bufferPools: (BufferPool & { underlyingTokenDecimals: number })[],
 ): PrismaPoolAndHookWithDynamic {
     const decimals = poolState.scalingFactors.map((scalingFactor: bigint) =>
         getDecimalsFromScalingFactor(scalingFactor),
@@ -90,15 +91,23 @@ export function mapStablePoolStateToPrismaPool(
     );
 
     // map tokenIn and tokenOut to prisma tokens using prisma token factory
-    const tokens = poolState.tokens.map((token: string, i: number) =>
-        prismaPoolTokenFactory.build({
-            address: token as Address,
+    const tokens = poolState.tokens.map((_token: string, i: number) => {
+        const bufferPool = bufferPools.find((bufferPool) => bufferPool.poolAddress === _token);
+        const token = bufferPool
+            ? {
+                  decimals: decimals[i],
+                  unwrapRate: formatUnits(bufferPool.rate, 18 - decimals[i] + bufferPool.underlyingTokenDecimals),
+                  underlyingTokenAddress: bufferPool.tokens[1],
+              }
+            : { decimals: decimals[i] };
+        return prismaPoolTokenFactory.build({
+            address: _token as Address,
             balance: formatUnits(tokenAmounts[i].amount, decimals[i]),
             index: i,
             priceRate: formatEther(poolState.tokenRates[i]),
-            token: { decimals: decimals[i] },
-        }),
-    );
+            token,
+        });
+    });
 
     // map pool state to prisma pool using prisma pool factory
     const prismaPool = prismaPoolFactory.stable(formatUnits(poolState.amp, 3)).build({
@@ -118,6 +127,7 @@ export function mapWeightedPoolStateToPrismaPool(
     poolState: WeightedPool,
     chainId: number,
     protocolVersion: number,
+    bufferPools: (BufferPool & { underlyingTokenDecimals: number })[],
 ): PrismaPoolAndHookWithDynamic {
     const decimals = poolState.scalingFactors.map((scalingFactor: bigint) =>
         getDecimalsFromScalingFactor(scalingFactor),
@@ -132,15 +142,24 @@ export function mapWeightedPoolStateToPrismaPool(
     );
 
     // map tokenIn and tokenOut to prisma tokens using prisma token factory
-    const tokens = poolState.tokens.map((token: string, i: number) =>
-        prismaPoolTokenFactory.build({
-            address: token as Address,
+    const tokens = poolState.tokens.map((_token: string, i: number) => {
+        const bufferPool = bufferPools.find((bufferPool) => bufferPool.poolAddress === _token);
+        const token = bufferPool
+            ? {
+                  decimals: decimals[i],
+                  unwrapRate: formatUnits(bufferPool.rate, 18 - decimals[i] + bufferPool.underlyingTokenDecimals),
+                  underlyingTokenAddress: bufferPool.tokens[1],
+              }
+            : { decimals: decimals[i] };
+
+        return prismaPoolTokenFactory.build({
+            address: _token as Address,
             balance: formatUnits(tokenAmounts[i].amount, decimals[i]),
             index: i,
-            token: { decimals: decimals[i] },
+            token,
             weight: formatUnits(poolState.weights[i], 18),
-        }),
-    );
+        });
+    });
 
     // map pool state to prisma pool using prisma pool factory
     const prismaPool = prismaPoolFactory.build({
