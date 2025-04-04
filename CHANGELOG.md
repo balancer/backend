@@ -1,5 +1,11 @@
 # backend
 
+## 1.37.8
+
+### Patch Changes
+
+-   ab723d6: fix cow snapshot syncing
+
 ## 1.37.7
 
 ### Patch Changes
