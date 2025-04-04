@@ -15,7 +15,9 @@
         "test": "vitest",
         "vitest": "vitest",
         "task": "bun run tasks/index.ts",
-        "mutation": "sh scripts/run_mutation.sh"
+        "mutation": "sh scripts/run_mutation.sh",
+        "generate-sor-test-data": "bun run test/testData/index.ts false",
+        "generate-sor-test-data:overwrite": "bun run test/testData/index.ts true"
     },
     "dependencies": {
         "@apollo/server": "^4.11.3",
@@ -68,6 +70,7 @@
         "@graphql-codegen/typescript-operations": "^2.5.13",
         "@graphql-codegen/typescript-resolvers": "2.4.1",
         "@graphql-tools/schema": "^8.5.1",
+        "@types/bun": "^1.2.8",
         "@types/lodash": "^4.17.15",
         "@types/memory-cache": "^0.2.6",
         "@types/node": "^18.19.74",
