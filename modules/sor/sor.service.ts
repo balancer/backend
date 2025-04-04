@@ -17,6 +17,8 @@ import {
 import { PathWithAmount } from './lib/path';
 import { getInputAmount, getOutputAmount } from './lib/utils';
 
+const DEFAULT_MAX_DEPTH = 4;
+
 export class SorService {
     async getSorSwapPaths(args: QuerySorGetSwapPathsArgs): Promise<GqlSorGetSwapPaths> {
         console.log('getSorSwaps args', JSON.stringify(args));
@@ -94,7 +96,7 @@ export class SorService {
             const swapKind = mapSwapKind(input.swapType);
 
             // retry with different max depth if no paths are found
-            let swapOptions = this.buildSwapOptions(input.graphTraversalConfig);
+            let swapOptions = this.buildSwapOptions(DEFAULT_MAX_DEPTH);
             let paths = await SOR.getPathsWithPools(
                 tokenIn,
                 tokenOut,
@@ -107,10 +109,7 @@ export class SorService {
             );
 
             if (!paths) {
-                swapOptions = this.buildSwapOptions({
-                    ...swapOptions.graphTraversalConfig,
-                    maxNonBoostedPathDepth: swapOptions.graphTraversalConfig.maxNonBoostedPathDepth! + 1,
-                });
+                swapOptions = this.buildSwapOptions(DEFAULT_MAX_DEPTH + 1);
                 paths = await SOR.getPathsWithPools(
                     tokenIn,
                     tokenOut,
@@ -140,13 +139,12 @@ export class SorService {
         }
     }
 
-    private buildSwapOptions(graphTraversalConfig?: GraphTraversalConfig): {
+    private buildSwapOptions(maxNonBoostedPathDepth: number): {
         graphTraversalConfig: GraphTraversalConfig;
     } {
         return {
             graphTraversalConfig: {
-                maxNonBoostedPathDepth: graphTraversalConfig?.maxNonBoostedPathDepth ?? 4,
-                ...graphTraversalConfig,
+                maxNonBoostedPathDepth,
             },
         };
     }
