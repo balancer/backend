@@ -9,7 +9,6 @@ import { getOutputAmount, getInputAmount } from './lib/utils/helpers';
 import { readTestData } from '../../test/testData/read/readTestData';
 import { PrismaPoolAndHookWithDynamic } from '../../prisma/prisma-types';
 import { areBigIntsWithinPercent, getTokensFromPrismaPools } from '../../test/utils';
-import { formatUnits, parseUnits } from 'viem';
 
 // This test will run against all files added to test/testData/read
 // In order to add new scenarios, please add them to test/testData/config.json
@@ -18,7 +17,7 @@ import { formatUnits, parseUnits } from 'viem';
 const protocolVersion = 3;
 
 describe('SOR V3 Swap Paths Integration Tests', () => {
-    // read all test files in test/testData
+    // read all test files in test/testData/read
     const testData = readTestData();
     test.each(testData.swapPaths)('$test $swapKind $amount', async (swapPath) => {
         const { amountRaw, tokens, outputRaw, swapKind } = swapPath;

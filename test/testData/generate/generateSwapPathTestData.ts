@@ -8,7 +8,7 @@ export async function generateSwapPathTestData(input: SwapPathTestInput, overwri
     if (!overwrite) {
         const file = Bun.file(path);
         if (await file.exists()) {
-            console.log('File alr   eady exists and overwrite set to false.', path);
+            console.log('File already exists and overwrite set to false.', path);
             return;
         }
     }
