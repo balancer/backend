@@ -24,7 +24,7 @@ export async function syncSnapshots(
 ): Promise<string[]> {
     const { poolIds = [], startFromLastSyncedBlock = true, syncPoolsWithoutUpdates = false } = options;
     const currentBlock = await subgraphClient.lastSyncedBlock();
-    const protocolVersion = category === 'COW_AMM_SNAPSHOTS' ? 1 : 3;
+    const protocolVersion = category === 'SNAPSHOTS_COW_AMM' ? 1 : 3;
 
     let lastBlock = 0;
     if (startFromLastSyncedBlock) {

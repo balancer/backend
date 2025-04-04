@@ -122,6 +122,7 @@ export function CowAmmController(tracer?: any) {
             const subgraphClient = getSubgraphClient(chain);
             const ids = await syncSnapshots(subgraphClient, 'SNAPSHOTS_COW_AMM', chain, {
                 startFromLastSyncedBlock: false,
+                syncPoolsWithoutUpdates: true,
             });
             return ids;
         },
