@@ -1,5 +1,11 @@
 # backend
 
+## 1.37.9
+
+### Patch Changes
+
+-   b25cd25: ezETH on base
+
 ## 1.37.8
 
 ### Patch Changes
