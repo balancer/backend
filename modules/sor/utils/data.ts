@@ -33,21 +33,29 @@ export async function getBasePoolsFromDb(
     };
 
     if (poolIds?.length) {
-        return getPoolsByIds(chain, protocolVersion, type, poolIds);
+        const pools = await getPoolsByIds(chain, protocolVersion, type, poolIds);
+        const underlyingTokens = await getUnderlyingTokensFromDBPools(pools, chain);
+        return { pools, underlyingTokens };
     }
 
     const cacheKey = `${SOR_POOLS_CACHE_KEY}:${chain}:${protocolVersion}:${considerPoolsWithHooks}`;
     const cached = cache.get(cacheKey);
     if (cached) return cached;
 
-    const result = await getFilteredPools(chain, protocolVersion, considerPoolsWithHooks, type);
+    const pools = await getFilteredPools(chain, protocolVersion, considerPoolsWithHooks, type);
+    const underlyingTokens = await getUnderlyingTokensFromDBPools(pools, chain);
 
     // cache for 10s
-    cache.put(cacheKey, result, 10 * 1000);
-    return result;
+    cache.put(cacheKey, { pools, underlyingTokens }, 10 * 1000);
+    return { pools, underlyingTokens };
 }
 
-async function getPoolsByIds(chain: Chain, protocolVersion: number, type: { in: PrismaPoolType[] }, poolIds: string[]) {
+async function getPoolsByIds(
+    chain: Chain,
+    protocolVersion: number,
+    type: { in: PrismaPoolType[] },
+    poolIds: string[],
+): Promise<PrismaPoolAndHookWithDynamic[]> {
     const pools = await prisma.prismaPool.findMany({
         where: { id: { in: poolIds }, chain, protocolVersion, type },
         include: {
@@ -55,8 +63,8 @@ async function getPoolsByIds(chain: Chain, protocolVersion: number, type: { in: 
             tokens: { include: { token: true } },
         },
     });
-    const underlyingTokens = await getUnderlyingTokensFromDBPools(pools, chain);
-    return { pools, underlyingTokens };
+
+    return pools;
 }
 
 async function getFilteredPools(
@@ -64,7 +72,7 @@ async function getFilteredPools(
     protocolVersion: number,
     considerPoolsWithHooks: boolean,
     type: { in: PrismaPoolType[] },
-) {
+): Promise<PrismaPoolAndHookWithDynamic[]> {
     const poolIdsToExclude = config[chain].sor?.poolIdsToExclude ?? [];
 
     const [pools, lbps] = await Promise.all([
@@ -74,11 +82,13 @@ async function getFilteredPools(
 
     const filteredPools = [...filterPoolsByHooks(pools, considerPoolsWithHooks), ...lbps];
 
-    const underlyingTokens = await getUnderlyingTokensFromDBPools(filteredPools, chain);
-    return { pools: filteredPools, underlyingTokens };
+    return filteredPools;
 }
 
-function filterPoolsByHooks(pools: PrismaPoolAndHookWithDynamic[], considerPoolsWithHooks: boolean) {
+function filterPoolsByHooks(
+    pools: PrismaPoolAndHookWithDynamic[],
+    considerPoolsWithHooks: boolean,
+): PrismaPoolAndHookWithDynamic[] {
     return pools.filter((pool) => {
         if (!pool.hook || Object.keys(pool.hook).length === 0) return true;
 
@@ -99,7 +109,7 @@ async function getPrimaryPools(
     protocolVersion: number,
     type: { in: PrismaPoolType[] },
     poolIdsToExclude: string[],
-) {
+): Promise<PrismaPoolAndHookWithDynamic[]> {
     return prisma.prismaPool.findMany({
         where: {
             chain,
@@ -119,7 +129,11 @@ async function getPrimaryPools(
     });
 }
 
-async function getLiquidityBootstrappingPools(chain: Chain, protocolVersion: number, poolIdsToExclude: string[]) {
+async function getLiquidityBootstrappingPools(
+    chain: Chain,
+    protocolVersion: number,
+    poolIdsToExclude: string[],
+): Promise<PrismaPoolAndHookWithDynamic[]> {
     return prisma.prismaPool.findMany({
         where: {
             chain,

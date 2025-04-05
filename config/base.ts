@@ -81,6 +81,12 @@ export default <NetworkData>{
             tokens: {},
         },
         defaultHandlers: {
+            ezETH: {
+                tokenAddress: '0x2416092f143378750bb29b79ed961ab195cceea5',
+                sourceUrl: 'https://app.renzoprotocol.com/api/apr',
+                path: 'apr',
+                isIbYield: true,
+            },
             sUSDz: {
                 tokenAddress: '0xe31ee12bdfdd0573d634124611e85338e2cbf0cf',
                 sourceUrl: 'https://rwa-api.anzen.finance/metrics/susdz_stats',

@@ -79,9 +79,19 @@ export class YbTokensAprService implements PoolAprService {
 
             const tokenAprs = pool.tokens.map((token) => {
                 const tokenApr = aprs.get(token.address);
+                // AAVE + LST case, we need to apply the underlying token APR on top of the AAVE market APR
+                const underlying = this.underlyingMap[token.address] || token.token.underlyingTokenAddress;
+                const underlyingApr = aprs.get(underlying || '');
+
+                let apr = tokenApr?.apr || 0;
+                if (underlyingApr) {
+                    apr = (1 + apr) * (1 + underlyingApr.apr) - 1;
+                }
+
                 return {
                     ...token,
-                    ...tokenApr,
+                    apr,
+                    group: tokenApr?.group,
                     share: (parseFloat(token.balance) * tokenPrices[token.address]) / totalLiquidity,
                 };
             });
@@ -92,21 +102,6 @@ export class YbTokensAprService implements PoolAprService {
                 }
 
                 let userApr = token.apr * token.share;
-
-                // AAVE + LST case, we need to apply the underlying token APR on top of the AAVE market APR
-                const underlying = this.underlyingMap[token.address];
-                if (underlying) {
-                    const underlyingApr = aprs.get(underlying);
-                    if (underlyingApr) {
-                        userApr = ((1 + token.apr) * (1 + underlyingApr.apr) - 1) * token.share;
-                    }
-                } else if (token.token.underlyingTokenAddress) {
-                    // When underlying has yield
-                    const underlyingApr = aprs.get(token.token.underlyingTokenAddress);
-                    if (underlyingApr) {
-                        userApr = ((1 + token.apr) * (1 + underlyingApr.apr) - 1) * token.share;
-                    }
-                }
 
                 let fee = 0;
                 if (collectsYieldFee(pool) && tokenCollectsYieldFee(token) && pool.dynamicData) {
