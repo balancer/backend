@@ -541,6 +541,13 @@ export default <NetworkData>{
                 scale: 1,
                 isIbYield: true,
             },
+            slpUSD: {
+                tokenAddress: '0xbfb53910c935e837c74e6c4ef584557352d20fde',
+                sourceUrl: 'https://api-data.loopfi.xyz/api/getData',
+                path: 'lpUSDLoop.slpUSDApr',
+                scale: 1,
+                isIbYield: true,
+            },
         },
     },
     datastudio: {
