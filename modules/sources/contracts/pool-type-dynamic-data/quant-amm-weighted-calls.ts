@@ -15,6 +15,21 @@ type QuantAMMWeightedPoolNormalisedWeights = AbiParametersToPrimitiveTypes<
     ExtractAbiFunction<typeof quantAmmWeighted, 'getNormalizedWeights'>['outputs']
 >[0];
 
+export type QuantAMMWeightedCallsOutput = {
+    poolToken: {
+        id: string;
+        weight: string;
+    }[];
+    pool: {
+        typeData: {
+            weightsAtLastUpdateInterval: string[];
+            weightBlockMultipliers: string[];
+            lastUpdateIntervalTime: number;
+            lastInterpolationTimePossible: number;
+        };
+    };
+};
+
 export const quantAmmWeightedCalls = (id: string): ViemMulticallCall[] => [
     {
         address: id as `0x${string}`,

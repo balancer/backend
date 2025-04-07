@@ -1,0 +1,22 @@
+// Note on performance: Decomposing the array into individual columns would be faster
+// for querying and aggregations since database optimizers work better with scalar values.
+// Consider using separate columns if query performance is critical and the number
+// of weights is fixed.
+
+model quantWeights {
+    id Int @id @default(autoincrement())
+    pool String
+    chain Chain
+    timestamp Int
+    weight1 Float
+    weight2 Float
+    weight3 Float?
+    weight4 Float?
+    weight5 Float?
+    weight6 Float?
+    weight7 Float?
+    weight8 Float?
+
+    @@index([pool, chain, timestamp])
+    @@map("quant_weights")
+}

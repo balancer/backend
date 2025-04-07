@@ -62,8 +62,8 @@ export class PoolService {
         return networkContext.services.balancerSubgraphService;
     }
 
-    public async getGqlPool(id: string, chain: GqlChain, userAddress?: string): Promise<GqlPoolUnion> {
-        return this.poolGqlLoaderService.getPool(id, chain, userAddress);
+    public async getGqlPool(fields: any, id: string, chain: GqlChain, userAddress?: string): Promise<GqlPoolUnion> {
+        return this.poolGqlLoaderService.getPool(fields, id, chain, userAddress);
     }
 
     public async getGqlPools(args: QueryPoolGetPoolsArgs): Promise<GqlPoolMinimal[]> {
