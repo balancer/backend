@@ -1,5 +1,11 @@
 # backend
 
+## 1.37.10
+
+### Patch Changes
+
+-   ad73f99: slpUSD APR
+
 ## 1.37.9
 
 ### Patch Changes
