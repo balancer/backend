@@ -1866,6 +1866,7 @@ export const schema = gql`
         userBalance: GqlPoolUserBalance
         vaultVersion: Int! @deprecated(reason: "use protocolVersion instead")
         version: Int!
+        weightSnapshots: [QuantAmmWeightSnapshot!]
         withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
     }
 
@@ -3850,6 +3851,18 @@ export const schema = gql`
         name: String!
         type: String!
         value: String!
+    }
+
+    type QuantAmmWeightSnapshot {
+        timestamp: String!
+        weight1: Float!
+        weight2: Float!
+        weight3: Float
+        weight4: Float
+        weight5: Float
+        weight6: Float
+        weight7: Float
+        weight8: Float
     }
 
     type QuantAmmWeightedParams {

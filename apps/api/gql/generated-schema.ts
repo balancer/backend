@@ -1307,6 +1307,7 @@ export interface GqlPoolQuantAmmWeighted extends GqlPoolBase {
     /** @deprecated use protocolVersion instead */
     vaultVersion: Scalars['Int'];
     version: Scalars['Int'];
+    weightSnapshots?: Maybe<Array<QuantAmmWeightSnapshot>>;
     /** @deprecated Removed without replacement */
     withdrawConfig: GqlPoolWithdrawConfig;
 }
@@ -2672,6 +2673,19 @@ export interface QuantAmmWeightedDetail {
     value: Scalars['String'];
 }
 
+export interface QuantAmmWeightSnapshot {
+    __typename?: 'QuantAmmWeightSnapshot';
+    timestamp: Scalars['String'];
+    weight1: Scalars['Float'];
+    weight2: Scalars['Float'];
+    weight3?: Maybe<Scalars['Float']>;
+    weight4?: Maybe<Scalars['Float']>;
+    weight5?: Maybe<Scalars['Float']>;
+    weight6?: Maybe<Scalars['Float']>;
+    weight7?: Maybe<Scalars['Float']>;
+    weight8?: Maybe<Scalars['Float']>;
+}
+
 export interface QuantAmmWeightedParams {
     __typename?: 'QuantAmmWeightedParams';
     absoluteWeightGuardRail: Scalars['String'];
@@ -3338,6 +3352,7 @@ export type ResolversTypes = ResolversObject<{
     Mutation: ResolverTypeWrapper<{}>;
     PoolForBatchSwap: ResolverTypeWrapper<PoolForBatchSwap>;
     QuantAMMWeightedDetail: ResolverTypeWrapper<QuantAmmWeightedDetail>;
+    QuantAmmWeightSnapshot: ResolverTypeWrapper<QuantAmmWeightSnapshot>;
     QuantAmmWeightedParams: ResolverTypeWrapper<QuantAmmWeightedParams>;
     Query: ResolverTypeWrapper<{}>;
     StableSurgeHookParams: ResolverTypeWrapper<StableSurgeHookParams>;
@@ -3529,6 +3544,7 @@ export type ResolversParentTypes = ResolversObject<{
     Mutation: {};
     PoolForBatchSwap: PoolForBatchSwap;
     QuantAMMWeightedDetail: QuantAmmWeightedDetail;
+    QuantAmmWeightSnapshot: QuantAmmWeightSnapshot;
     QuantAmmWeightedParams: QuantAmmWeightedParams;
     Query: {};
     StableSurgeHookParams: StableSurgeHookParams;
@@ -4489,6 +4505,7 @@ export type GqlPoolQuantAmmWeightedResolvers<
     userBalance?: Resolver<Maybe<ResolversTypes['GqlPoolUserBalance']>, ParentType, ContextType>;
     vaultVersion?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     version?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+    weightSnapshots?: Resolver<Maybe<Array<ResolversTypes['QuantAmmWeightSnapshot']>>, ParentType, ContextType>;
     withdrawConfig?: Resolver<ResolversTypes['GqlPoolWithdrawConfig'], ParentType, ContextType>;
     __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
@@ -5697,6 +5714,22 @@ export type QuantAmmWeightedDetailResolvers<
     __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
+export type QuantAmmWeightSnapshotResolvers<
+    ContextType = ResolverContext,
+    ParentType extends ResolversParentTypes['QuantAmmWeightSnapshot'] = ResolversParentTypes['QuantAmmWeightSnapshot'],
+> = ResolversObject<{
+    timestamp?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+    weight1?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+    weight2?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+    weight3?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+    weight4?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+    weight5?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+    weight6?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+    weight7?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+    weight8?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+    __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export type QuantAmmWeightedParamsResolvers<
     ContextType = ResolverContext,
     ParentType extends ResolversParentTypes['QuantAmmWeightedParams'] = ResolversParentTypes['QuantAmmWeightedParams'],
@@ -6121,6 +6154,7 @@ export type Resolvers<ContextType = ResolverContext> = ResolversObject<{
     Mutation?: MutationResolvers<ContextType>;
     PoolForBatchSwap?: PoolForBatchSwapResolvers<ContextType>;
     QuantAMMWeightedDetail?: QuantAmmWeightedDetailResolvers<ContextType>;
+    QuantAmmWeightSnapshot?: QuantAmmWeightSnapshotResolvers<ContextType>;
     QuantAmmWeightedParams?: QuantAmmWeightedParamsResolvers<ContextType>;
     Query?: QueryResolvers<ContextType>;
     StableSurgeHookParams?: StableSurgeHookParamsResolvers<ContextType>;
