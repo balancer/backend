@@ -67,6 +67,8 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         await EventController().syncLastSwaps(chain);
         await tokenService.updateTokenPrices([chain]);
 
+        await PoolController().updateLiquidityValuesForActivePools(chain);
+
         return 'OK';
     } else if (job === 'sor-sync-v3') {
         console.log('Syncing V3 pools');
@@ -75,8 +77,6 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
 
         console.log('Syncing pools metadata');
         await ContentController().syncCategories();
-        await ContentController().syncRateProviderReviews();
-        await ContentController().syncHookReviews();
 
         console.log('Syncing Erc4626');
         await tokenService.syncTokenContentData(chain);
@@ -87,6 +87,8 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         await tokenService.updateTokenPrices([chain]);
         await EventController().syncLastSwaps(chain);
         await tokenService.updateTokenPrices([chain]);
+
+        await PoolController().updateLiquidityValuesForActivePools(chain);
 
         return 'OK';
     } else if (job === 'add-pools-v3') {
