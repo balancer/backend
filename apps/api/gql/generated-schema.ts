@@ -2675,15 +2675,8 @@ export interface QuantAmmWeightedDetail {
 
 export interface QuantAmmWeightSnapshot {
     __typename?: 'QuantAmmWeightSnapshot';
-    timestamp: Scalars['String'];
-    weight1: Scalars['Float'];
-    weight2: Scalars['Float'];
-    weight3?: Maybe<Scalars['Float']>;
-    weight4?: Maybe<Scalars['Float']>;
-    weight5?: Maybe<Scalars['Float']>;
-    weight6?: Maybe<Scalars['Float']>;
-    weight7?: Maybe<Scalars['Float']>;
-    weight8?: Maybe<Scalars['Float']>;
+    timestamp: Scalars['Int'];
+    weights?: Maybe<Array<Scalars['Float']>>;
 }
 
 export interface QuantAmmWeightedParams {
@@ -5718,15 +5711,8 @@ export type QuantAmmWeightSnapshotResolvers<
     ContextType = ResolverContext,
     ParentType extends ResolversParentTypes['QuantAmmWeightSnapshot'] = ResolversParentTypes['QuantAmmWeightSnapshot'],
 > = ResolversObject<{
-    timestamp?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    weight1?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
-    weight2?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
-    weight3?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
-    weight4?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
-    weight5?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
-    weight6?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
-    weight7?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
-    weight8?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+    timestamp?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+    weights?: Resolver<Maybe<Array<ResolversTypes['Float']>>, ParentType, ContextType>;
     __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 

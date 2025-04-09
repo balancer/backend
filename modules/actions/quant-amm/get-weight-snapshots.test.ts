@@ -80,8 +80,8 @@ describe('getWeightSnapshots', () => {
         const bucket = result[12];
         expect(bucket).toBeDefined();
         if (bucket) {
-            expect(bucket.weight1).toBeCloseTo(0.5);
-            expect(bucket.weight5).toBeNull();
+            expect(bucket.weights[0]).toBeCloseTo(0.5);
+            expect(bucket.weights[4]).toBeUndefined();
         }
     });
 
@@ -129,10 +129,10 @@ describe('getWeightSnapshots', () => {
         expect(bucket).toBeDefined();
         if (bucket) {
             // Should use exact values from snapshot
-            expect(bucket.weight1).toBeCloseTo(0.2);
-            expect(bucket.weight2).toBeCloseTo(0.3);
-            expect(bucket.weight3).toBeCloseTo(0.4);
-            expect(bucket.weight4).toBeNull();
+            expect(bucket.weights[0]).toBeCloseTo(0.2);
+            expect(bucket.weights[1]).toBeCloseTo(0.3);
+            expect(bucket.weights[2]).toBeCloseTo(0.4);
+            expect(bucket.weights[4]).toBeUndefined();
         }
     });
 });

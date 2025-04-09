@@ -3854,15 +3854,8 @@ export const schema = gql`
     }
 
     type QuantAmmWeightSnapshot {
-        timestamp: String!
-        weight1: Float!
-        weight2: Float!
-        weight3: Float
-        weight4: Float
-        weight5: Float
-        weight6: Float
-        weight7: Float
-        weight8: Float
+        timestamp: Int!
+        weights: [Float!]
     }
 
     type QuantAmmWeightedParams {
