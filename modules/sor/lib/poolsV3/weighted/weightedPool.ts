@@ -132,7 +132,7 @@ export class WeightedPoolV3 extends BasePoolV3 implements BasePoolMethodsV3 {
             poolAddress: this.address,
             swapFee: this.swapFee,
             balancesLiveScaled18: this.tokens.map((t) => t.scale18),
-            tokenRates: this.tokens.map((_) => WAD),
+            tokenRates: this.tokens.map((t) => ('rate' in t ? t.rate : WAD)),
             totalSupply: this.totalShares,
             weights: this.tokens.map((t) => t.weight),
             tokens: this.tokens.map((t) => t.token.address),
