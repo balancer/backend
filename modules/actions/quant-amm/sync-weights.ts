@@ -48,12 +48,6 @@ export const syncWeights = async (client: ViemClient, chain: Chain): Promise<voi
 
     await prisma.$transaction(operations);
 
-    // Optionally skip the snapshot creation if no weights have changed
-    if (operations.length === 0) {
-        console.log('No weights changed, skipping snapshot creation');
-        return;
-    }
-
     // Store weights snapshots
     const snapshots = Object.keys(onchainData).flatMap((id) => {
         const head = { pool: id, chain, timestamp };
