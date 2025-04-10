@@ -28,12 +28,6 @@ export interface Scalars {
     JSON: any;
 }
 
-export interface CreateLbpInput {
-    metadata: LbpMetadataInput;
-    poolContract: LbPoolInput;
-    saleToken: LbpSaleTokenInput;
-}
-
 /** The review data for the ERC4626 token */
 export interface Erc4626ReviewData {
     __typename?: 'Erc4626ReviewData';
@@ -2553,27 +2547,6 @@ export interface HookConfig {
 
 export type HookParams = ExitFeeHookParams | FeeTakingHookParams | MevTaxHookParams | StableSurgeHookParams;
 
-export interface LbpMetadataInput {
-    description: Scalars['String'];
-    discord: Scalars['String'];
-    farcaster: Scalars['String'];
-    name: Scalars['String'];
-    telegram: Scalars['String'];
-    website: Scalars['String'];
-    x: Scalars['String'];
-}
-
-export interface LbpSaleTokenInput {
-    address: Scalars['String'];
-    chain: Scalars['String'];
-    logo: Scalars['String'];
-}
-
-export interface LbPoolInput {
-    address: Scalars['String'];
-    chain: GqlChain;
-}
-
 /** Liquidity management settings for v3 pools. */
 export interface LiquidityManagement {
     __typename?: 'LiquidityManagement';
@@ -2599,7 +2572,6 @@ export interface Mutation {
     __typename?: 'Mutation';
     beetsPoolLoadReliquarySnapshotsForAllFarms: Scalars['String'];
     beetsSyncFbeetsRatio: Scalars['String'];
-    createLBP: Scalars['Boolean'];
     poolLoadOnChainDataForAllPools: Array<GqlPoolMutationResult>;
     poolLoadSnapshotsForPools: Scalars['String'];
     poolReloadAllPoolAprs: Scalars['String'];
@@ -2632,10 +2604,6 @@ export interface Mutation {
 
 export interface MutationBeetsPoolLoadReliquarySnapshotsForAllFarmsArgs {
     chain: GqlChain;
-}
-
-export interface MutationCreateLbpArgs {
-    input: CreateLbpInput;
 }
 
 export interface MutationPoolLoadOnChainDataForAllPoolsArgs {
@@ -3182,7 +3150,6 @@ export type ResolversTypes = ResolversObject<{
     BigInt: ResolverTypeWrapper<Scalars['BigInt']>;
     Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
     Bytes: ResolverTypeWrapper<Scalars['Bytes']>;
-    CreateLBPInput: CreateLbpInput;
     Date: ResolverTypeWrapper<Scalars['Date']>;
     Erc4626ReviewData: ResolverTypeWrapper<Erc4626ReviewData>;
     ExitFeeHookParams: ResolverTypeWrapper<ExitFeeHookParams>;
@@ -3385,9 +3352,6 @@ export type ResolversTypes = ResolversObject<{
     ID: ResolverTypeWrapper<Scalars['ID']>;
     Int: ResolverTypeWrapper<Scalars['Int']>;
     JSON: ResolverTypeWrapper<Scalars['JSON']>;
-    LBPMetadataInput: LbpMetadataInput;
-    LBPSaleTokenInput: LbpSaleTokenInput;
-    LBPoolInput: LbPoolInput;
     LiquidityManagement: ResolverTypeWrapper<LiquidityManagement>;
     MevTaxHookParams: ResolverTypeWrapper<MevTaxHookParams>;
     Mutation: ResolverTypeWrapper<{}>;
@@ -3409,7 +3373,6 @@ export type ResolversParentTypes = ResolversObject<{
     BigInt: Scalars['BigInt'];
     Boolean: Scalars['Boolean'];
     Bytes: Scalars['Bytes'];
-    CreateLBPInput: CreateLbpInput;
     Date: Scalars['Date'];
     Erc4626ReviewData: Erc4626ReviewData;
     ExitFeeHookParams: ExitFeeHookParams;
@@ -3581,9 +3544,6 @@ export type ResolversParentTypes = ResolversObject<{
     ID: Scalars['ID'];
     Int: Scalars['Int'];
     JSON: Scalars['JSON'];
-    LBPMetadataInput: LbpMetadataInput;
-    LBPSaleTokenInput: LbpSaleTokenInput;
-    LBPoolInput: LbPoolInput;
     LiquidityManagement: LiquidityManagement;
     MevTaxHookParams: MevTaxHookParams;
     Mutation: {};
@@ -5643,12 +5603,6 @@ export type MutationResolvers<
         RequireFields<MutationBeetsPoolLoadReliquarySnapshotsForAllFarmsArgs, 'chain'>
     >;
     beetsSyncFbeetsRatio?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    createLBP?: Resolver<
-        ResolversTypes['Boolean'],
-        ParentType,
-        ContextType,
-        RequireFields<MutationCreateLbpArgs, 'input'>
-    >;
     poolLoadOnChainDataForAllPools?: Resolver<
         Array<ResolversTypes['GqlPoolMutationResult']>,
         ParentType,

@@ -12,12 +12,6 @@ export const schema = gql`
 
     scalar Bytes
 
-    input CreateLBPInput {
-        metadata: LBPMetadataInput!
-        poolContract: LBPoolInput!
-        saleToken: LBPSaleTokenInput!
-    }
-
     scalar Date
 
     """
@@ -3789,27 +3783,6 @@ export const schema = gql`
 
     scalar JSON
 
-    input LBPMetadataInput {
-        description: String!
-        discord: String!
-        farcaster: String!
-        name: String!
-        telegram: String!
-        website: String!
-        x: String!
-    }
-
-    input LBPSaleTokenInput {
-        address: String!
-        chain: String!
-        logo: String!
-    }
-
-    input LBPoolInput {
-        address: String!
-        chain: GqlChain!
-    }
-
     """
     Liquidity management settings for v3 pools.
     """
@@ -3847,7 +3820,6 @@ export const schema = gql`
     type Mutation {
         beetsPoolLoadReliquarySnapshotsForAllFarms(chain: GqlChain!): String!
         beetsSyncFbeetsRatio: String!
-        createLBP(input: CreateLBPInput!): Boolean!
         poolLoadOnChainDataForAllPools(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
         poolLoadSnapshotsForPools(poolIds: [String!]!, reload: Boolean): String!
         poolReloadAllPoolAprs(chain: GqlChain!): String!
