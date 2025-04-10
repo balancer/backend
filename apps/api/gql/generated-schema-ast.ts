@@ -1515,20 +1515,18 @@ export const schema = gql`
         chain: GqlChain!
         createTime: Int!
         decimals: Int!
-        description: String
-        discord: String
         displayTokens: [GqlPoolTokenDisplay!]! @deprecated(reason: "Use poolTokens instead")
         dynamicData: GqlPoolDynamicData!
-        endTime: Int
-        endWeights: [Int!]
+        endTime: Int!
         factory: Bytes
-        farcaster: String
         hasAnyAllowedBuffer: Boolean!
         hasErc4626: Boolean!
         hasNestedErc4626: Boolean!
         hook: GqlHook
         id: ID!
         investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
+        isProjectTokenSwapInBlocked: Boolean!
+        lbpOwner: String!
         liquidityManagement: LiquidityManagement
         name: String!
         nestingType: GqlPoolNestingType! @deprecated(reason: "Removed without replacement")
@@ -1548,10 +1546,17 @@ export const schema = gql`
         """
         poolCreator: Bytes
         poolTokens: [GqlPoolTokenDetail!]!
+        projectToken: String!
+        projectTokenEndWeight: Float!
+        projectTokenIndex: Int!
+        projectTokenStartWeight: Float!
         protocolVersion: Int!
+        reserveToken: String!
+        reserveTokenEndWeight: Float!
+        reserveTokenIndex: Int!
+        reserveTokenStartWeight: Float!
         staking: GqlPoolStaking
-        startTime: Int
-        startWeights: [Int!]
+        startTime: Int!
 
         """
         Account empowered to set static swap fees for a pool (when 0 on V2 swap fees are immutable, on V3 delegate to governance)
@@ -1559,7 +1564,6 @@ export const schema = gql`
         swapFeeManager: Bytes
         symbol: String!
         tags: [String]
-        telegram: String
 
         """
         All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
@@ -1569,9 +1573,7 @@ export const schema = gql`
         userBalance: GqlPoolUserBalance
         vaultVersion: Int! @deprecated(reason: "use protocolVersion instead")
         version: Int!
-        website: String
         withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
-        x: String
     }
 
     type GqlPoolMetaStable implements GqlPoolBase {
