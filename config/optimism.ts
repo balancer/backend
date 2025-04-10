@@ -19,6 +19,10 @@ export default <NetworkData>{
         gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/Qmdtj1ix1nUCRtSoiyF7a3oKMSvrKT8KTEFJdep53EHtRy`,
         aura: 'https://data.aura.finance/graphql',
     },
+    hooks: {
+        ['0xf39ca6ede9bf7820a952b52f3c94af526bab9015']: 'STABLE_SURGE',
+        ['0x3630d26e51c03026f4f063d69d65f8e234eeaf5b']: 'MEV_TAX',
+    },
     eth: {
         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
         addressFormatted: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
@@ -68,9 +72,6 @@ export default <NetworkData>{
             defaultSwapFeePercentage: '0.5',
             defaultYieldFeePercentage: '0.1',
         },
-    },
-    hooks: {
-        ['0xf39ca6ede9bf7820a952b52f3c94af526bab9015']: 'STABLE_SURGE',
     },
     multicall: '0x2dc0e2aa608532da689e89e237df582b783e552c',
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',
