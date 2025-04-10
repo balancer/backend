@@ -102,6 +102,7 @@ export default <NetworkData>{
                 '0xe6605932e4a686534d19005bb9db0fba1f101272', // scusdc 46
                 '0x08c320a84a59c6f533e0dca655cf497594bca1f9', // weth 35
                 '0x24c74b30d1a4261608e84bf5a618693032681dac', // sceth 47
+                '0x11ba70c0ebab7946ac84f0e6d79162b0cbb2693f', // usdc 36
             ],
         },
         avalon: {
