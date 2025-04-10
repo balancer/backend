@@ -14,6 +14,8 @@ export default <NetworkData>{
     subgraphs: {
         startDate: '2022-01-01',
         balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmWUgkiUM5c3BW1Z51DUkZfnyQfyfesE8p3BRnEtA9vyPL`,
+        balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmXrc8uoiZzPdd5AqEAkHvc9SgMdcQAxrYa74N8buJLKyQ`,
+        balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmW18r2hKjPxfiSwdVN9q9J3XPcPtbmP9BUYixRRF3Y4tp`,
         gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/Qmdtj1ix1nUCRtSoiyF7a3oKMSvrKT8KTEFJdep53EHtRy`,
         aura: 'https://data.aura.finance/graphql',
     },
@@ -60,11 +62,15 @@ export default <NetworkData>{
             balancerQueriesAddress: '0xe39b5e3b6d74016b2f6a9673d7d7493b6df549d5',
         },
         v3: {
-            vaultAddress: '0xba12222222228d8ba445958a75a0704d566bf2c8',
-            routerAddress: '0xba12222222228d8ba445958a75a0704d566bf2c8',
+            vaultAddress: '0xba1333333333a1ba1108e8412f11850a5c319ba9',
+            protocolFeeController: '0xcacc7e1efeea8bb3af6d5720d12c1876aa6ee76b',
+            routerAddress: '0xe2fa4e1d17725e72dcdafe943ecf45df4b9e285b',
             defaultSwapFeePercentage: '0.5',
-            defaultYieldFeePercentage: '0.5',
+            defaultYieldFeePercentage: '0.1',
         },
+    },
+    hooks: {
+        ['0xf39ca6ede9bf7820a952b52f3c94af526bab9015']: 'STABLE_SURGE',
     },
     multicall: '0x2dc0e2aa608532da689e89e237df582b783e552c',
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',
