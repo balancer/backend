@@ -38,6 +38,7 @@ import {
     LiquidityManagement,
     GqlHook,
     QueryAggregatorPoolsArgs,
+    QuantAmmWeightSnapshot,
 } from '../../../apps/api/gql/generated-schema';
 import _ from 'lodash';
 import { prisma } from '../../../prisma/prisma-client';
@@ -46,6 +47,7 @@ import { fixedNumber } from '../../view-helpers/fixed-number';
 import { chainToChainId as chainToIdMap } from '../../network/chain-id-to-chain';
 import { GithubContentService } from '../../content/github-content.service';
 import { ElementData, FxData, GyroData, StableData, QuantAmmWeightedData } from '../subgraph-mapper';
+import { LBPoolData } from '../pool-data';
 import { ZERO_ADDRESS } from '@balancer/sdk';
 import { tokenService } from '../../token/token.service';
 import { mapHookToGqlHook } from '../../sources/transformers';
@@ -54,12 +56,13 @@ import { floatToExactString } from '../../common/numbers';
 import { isWeightedPoolV2 } from './pool-utils';
 import { addressesMatch } from '../../web3/addresses';
 import { networkContext } from '../../network/network-context.service';
+import { getWeightSnapshots } from '../../actions/quant-amm/get-weight-snapshots';
 
 const isToken = (text: string) => text.match(/^0x[0-9a-fA-F]{40}$/);
 const isPoolId = (text: string) => isToken(text) || text.match(/^0x[0-9a-fA-F]{64}$/);
 
 export class PoolGqlLoaderService {
-    public async getPool(id: string, chain: Chain, userAddress?: string): Promise<GqlPoolUnion> {
+    public async getPool(fields: any, id: string, chain: Chain, userAddress?: string): Promise<GqlPoolUnion> {
         let pool = undefined;
         pool = await prisma.prismaPool.findUnique({
             where: { id_chain: { id, chain: chain } },
@@ -76,10 +79,16 @@ export class PoolGqlLoaderService {
             throw new GraphQLError('Pool exists, but has an unknown type', { extensions: { code: 'NOT_FOUND' } });
         }
 
+        const includeQuantWeightSnapshots = Object.keys(fields).includes('weightSnapshots');
+        let quantWeightSnapshots: QuantAmmWeightSnapshot[] | undefined = undefined;
+        if (pool.type === 'QUANT_AMM_WEIGHTED' && includeQuantWeightSnapshots) {
+            quantWeightSnapshots = await getWeightSnapshots(prisma, pool.id, pool.chain, 7);
+        }
         const mappedPool = this.mapPoolToGqlPool(
             pool,
             pool.userWalletBalances,
             userAddress ? pool.staking.map((staking) => staking.userStakedBalances).flat() : [],
+            quantWeightSnapshots,
         );
 
         // load rate provider data into PoolTokenDetail model
@@ -418,7 +427,7 @@ export class PoolGqlLoaderService {
         const featuredPools: GqlPoolFeaturedPool[] = [];
 
         for (const contentPool of featuredPoolsFromService) {
-            const pool = await this.getPool(contentPool.poolId.toLowerCase(), contentPool.chain);
+            const pool = await this.getPool({}, contentPool.poolId.toLowerCase(), contentPool.chain);
             featuredPools.push({
                 poolId: contentPool.poolId,
                 primary: contentPool.primary,
@@ -842,6 +851,7 @@ export class PoolGqlLoaderService {
         pool: PrismaPoolWithExpandedNesting,
         userWalletbalances: PrismaUserWalletBalance[] = [],
         userStakedBalances: PrismaUserStakedBalance[] = [],
+        quantWeightSnapshots?: QuantAmmWeightSnapshot[],
     ): GqlPoolUnion {
         const { typeData, ...poolWithoutTypeData } = pool;
 
@@ -909,6 +919,7 @@ export class PoolGqlLoaderService {
                 return {
                     __typename: 'GqlPoolLiquidityBootstrapping',
                     ...poolWithoutTypeData,
+                    ...(typeData as LBPoolData),
                     ...mappedData,
                 };
             case 'GYRO':
@@ -952,6 +963,7 @@ export class PoolGqlLoaderService {
                     ...poolWithoutTypeData,
                     ...mappedData,
                     quantAmmWeightedParams: typeData as QuantAmmWeightedData,
+                    weightSnapshots: quantWeightSnapshots,
                 };
         }
 

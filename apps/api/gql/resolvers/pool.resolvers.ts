@@ -14,10 +14,12 @@ import { chainIdToChain } from '../../../../modules/network/chain-id-to-chain';
 import { GraphQLError } from 'graphql';
 import { upsertLastSyncedBlock } from '../../../../modules/actions/last-synced-block';
 import { PrismaLastBlockSyncedCategory } from '@prisma/client';
+import graphqlFields from 'graphql-fields';
 
 const balancerResolvers: Resolvers = {
     Query: {
-        poolGetPool: async (parent, { id, chain, userAddress }, context) => {
+        poolGetPool: async (parent, { id, chain, userAddress }, context, info) => {
+            const fields = graphqlFields(info);
             const currentChain = headerChain();
             if (!chain && currentChain) {
                 chain = currentChain;
@@ -26,7 +28,7 @@ const balancerResolvers: Resolvers = {
                     extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
                 });
             }
-            return poolService.getGqlPool(id, chain, userAddress ? userAddress : undefined);
+            return poolService.getGqlPool(fields, id, chain, userAddress ? userAddress : undefined);
         },
         poolGetPools: async (parent, args, context) => {
             return poolService.getGqlPools(args);

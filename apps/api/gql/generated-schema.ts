@@ -1066,6 +1066,7 @@ export interface GqlPoolLiquidityBootstrapping extends GqlPoolBase {
     /** @deprecated Use poolTokens instead */
     displayTokens: Array<GqlPoolTokenDisplay>;
     dynamicData: GqlPoolDynamicData;
+    endTime: Scalars['Int'];
     factory?: Maybe<Scalars['Bytes']>;
     hasAnyAllowedBuffer: Scalars['Boolean'];
     hasErc4626: Scalars['Boolean'];
@@ -1074,6 +1075,8 @@ export interface GqlPoolLiquidityBootstrapping extends GqlPoolBase {
     id: Scalars['ID'];
     /** @deprecated Removed without replacement */
     investConfig: GqlPoolInvestConfig;
+    isProjectTokenSwapInBlocked: Scalars['Boolean'];
+    lbpOwner: Scalars['String'];
     liquidityManagement?: Maybe<LiquidityManagement>;
     name: Scalars['String'];
     /** @deprecated Removed without replacement */
@@ -1088,8 +1091,17 @@ export interface GqlPoolLiquidityBootstrapping extends GqlPoolBase {
     /** Account empowered to set the pool creator fee percentage */
     poolCreator?: Maybe<Scalars['Bytes']>;
     poolTokens: Array<GqlPoolTokenDetail>;
+    projectToken: Scalars['String'];
+    projectTokenEndWeight: Scalars['Float'];
+    projectTokenIndex: Scalars['Int'];
+    projectTokenStartWeight: Scalars['Float'];
     protocolVersion: Scalars['Int'];
+    reserveToken: Scalars['String'];
+    reserveTokenEndWeight: Scalars['Float'];
+    reserveTokenIndex: Scalars['Int'];
+    reserveTokenStartWeight: Scalars['Float'];
     staking?: Maybe<GqlPoolStaking>;
+    startTime: Scalars['Int'];
     /** Account empowered to set static swap fees for a pool (when 0 on V2 swap fees are immutable, on V3 delegate to governance) */
     swapFeeManager?: Maybe<Scalars['Bytes']>;
     symbol: Scalars['String'];
@@ -1307,6 +1319,7 @@ export interface GqlPoolQuantAmmWeighted extends GqlPoolBase {
     /** @deprecated use protocolVersion instead */
     vaultVersion: Scalars['Int'];
     version: Scalars['Int'];
+    weightSnapshots?: Maybe<Array<QuantAmmWeightSnapshot>>;
     /** @deprecated Removed without replacement */
     withdrawConfig: GqlPoolWithdrawConfig;
 }
@@ -2672,6 +2685,12 @@ export interface QuantAmmWeightedDetail {
     value: Scalars['String'];
 }
 
+export interface QuantAmmWeightSnapshot {
+    __typename?: 'QuantAmmWeightSnapshot';
+    timestamp: Scalars['Int'];
+    weights?: Maybe<Array<Scalars['Float']>>;
+}
+
 export interface QuantAmmWeightedParams {
     __typename?: 'QuantAmmWeightedParams';
     absoluteWeightGuardRail: Scalars['String'];
@@ -3338,6 +3357,7 @@ export type ResolversTypes = ResolversObject<{
     Mutation: ResolverTypeWrapper<{}>;
     PoolForBatchSwap: ResolverTypeWrapper<PoolForBatchSwap>;
     QuantAMMWeightedDetail: ResolverTypeWrapper<QuantAmmWeightedDetail>;
+    QuantAmmWeightSnapshot: ResolverTypeWrapper<QuantAmmWeightSnapshot>;
     QuantAmmWeightedParams: ResolverTypeWrapper<QuantAmmWeightedParams>;
     Query: ResolverTypeWrapper<{}>;
     StableSurgeHookParams: ResolverTypeWrapper<StableSurgeHookParams>;
@@ -3529,6 +3549,7 @@ export type ResolversParentTypes = ResolversObject<{
     Mutation: {};
     PoolForBatchSwap: PoolForBatchSwap;
     QuantAMMWeightedDetail: QuantAmmWeightedDetail;
+    QuantAmmWeightSnapshot: QuantAmmWeightSnapshot;
     QuantAmmWeightedParams: QuantAmmWeightedParams;
     Query: {};
     StableSurgeHookParams: StableSurgeHookParams;
@@ -4329,6 +4350,7 @@ export type GqlPoolLiquidityBootstrappingResolvers<
     decimals?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     displayTokens?: Resolver<Array<ResolversTypes['GqlPoolTokenDisplay']>, ParentType, ContextType>;
     dynamicData?: Resolver<ResolversTypes['GqlPoolDynamicData'], ParentType, ContextType>;
+    endTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     factory?: Resolver<Maybe<ResolversTypes['Bytes']>, ParentType, ContextType>;
     hasAnyAllowedBuffer?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
     hasErc4626?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
@@ -4336,6 +4358,8 @@ export type GqlPoolLiquidityBootstrappingResolvers<
     hook?: Resolver<Maybe<ResolversTypes['GqlHook']>, ParentType, ContextType>;
     id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
     investConfig?: Resolver<ResolversTypes['GqlPoolInvestConfig'], ParentType, ContextType>;
+    isProjectTokenSwapInBlocked?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+    lbpOwner?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     liquidityManagement?: Resolver<Maybe<ResolversTypes['LiquidityManagement']>, ParentType, ContextType>;
     name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     nestingType?: Resolver<ResolversTypes['GqlPoolNestingType'], ParentType, ContextType>;
@@ -4343,8 +4367,17 @@ export type GqlPoolLiquidityBootstrappingResolvers<
     pauseManager?: Resolver<Maybe<ResolversTypes['Bytes']>, ParentType, ContextType>;
     poolCreator?: Resolver<Maybe<ResolversTypes['Bytes']>, ParentType, ContextType>;
     poolTokens?: Resolver<Array<ResolversTypes['GqlPoolTokenDetail']>, ParentType, ContextType>;
+    projectToken?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+    projectTokenEndWeight?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+    projectTokenIndex?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+    projectTokenStartWeight?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
     protocolVersion?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+    reserveToken?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+    reserveTokenEndWeight?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+    reserveTokenIndex?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+    reserveTokenStartWeight?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
     staking?: Resolver<Maybe<ResolversTypes['GqlPoolStaking']>, ParentType, ContextType>;
+    startTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     swapFeeManager?: Resolver<Maybe<ResolversTypes['Bytes']>, ParentType, ContextType>;
     symbol?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     tags?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>;
@@ -4489,6 +4522,7 @@ export type GqlPoolQuantAmmWeightedResolvers<
     userBalance?: Resolver<Maybe<ResolversTypes['GqlPoolUserBalance']>, ParentType, ContextType>;
     vaultVersion?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     version?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+    weightSnapshots?: Resolver<Maybe<Array<ResolversTypes['QuantAmmWeightSnapshot']>>, ParentType, ContextType>;
     withdrawConfig?: Resolver<ResolversTypes['GqlPoolWithdrawConfig'], ParentType, ContextType>;
     __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
@@ -5697,6 +5731,15 @@ export type QuantAmmWeightedDetailResolvers<
     __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
+export type QuantAmmWeightSnapshotResolvers<
+    ContextType = ResolverContext,
+    ParentType extends ResolversParentTypes['QuantAmmWeightSnapshot'] = ResolversParentTypes['QuantAmmWeightSnapshot'],
+> = ResolversObject<{
+    timestamp?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+    weights?: Resolver<Maybe<Array<ResolversTypes['Float']>>, ParentType, ContextType>;
+    __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export type QuantAmmWeightedParamsResolvers<
     ContextType = ResolverContext,
     ParentType extends ResolversParentTypes['QuantAmmWeightedParams'] = ResolversParentTypes['QuantAmmWeightedParams'],
@@ -6121,6 +6164,7 @@ export type Resolvers<ContextType = ResolverContext> = ResolversObject<{
     Mutation?: MutationResolvers<ContextType>;
     PoolForBatchSwap?: PoolForBatchSwapResolvers<ContextType>;
     QuantAMMWeightedDetail?: QuantAmmWeightedDetailResolvers<ContextType>;
+    QuantAmmWeightSnapshot?: QuantAmmWeightSnapshotResolvers<ContextType>;
     QuantAmmWeightedParams?: QuantAmmWeightedParamsResolvers<ContextType>;
     Query?: QueryResolvers<ContextType>;
     StableSurgeHookParams?: StableSurgeHookParamsResolvers<ContextType>;

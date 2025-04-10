@@ -9,7 +9,7 @@ const poolAbi = [
 
 const abi = parseAbi(poolAbi);
 
-export async function fetchErc20Headers(addresses: `0x${string}`[], client: ViemClient) {
+export async function fetchErc20Headers(addresses: readonly `0x${string}`[], client: ViemClient) {
     const contracts = addresses
         .map((address) => [
             {

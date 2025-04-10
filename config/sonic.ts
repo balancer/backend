@@ -14,7 +14,7 @@ export default <NetworkData>{
         startDate: '2024-12-12',
         balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmPXaLKDvMMZdjD1ZuMpMSkRjKf8ALLVRtjUpTwWdKSvpQ`,
         balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmSrSrGEGWz5ZjvgaAZpWYBxpX996vCBcBsbin1mraGiCj`,
-        balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmQ3hxJC8cHrqDf7XeFfL13WGvw64DrUgguExS2LGM8wJH`,
+        balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmTiTuPRuzQmij2H6N3MTBoBpmUKu4PgDHGXRTfEziKPLN`,
         gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmSRNzwTmLu55ZxxyxYULS5T1Kar7upz1jzL5FsMzLpB2e`,
         reliquary: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmUM8aU6H3gFx6JL65GQV5baPPjczU9hUb6VRiDQ1jEp3B`,
         sts: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmYmPEGqVZPyJKRah4NVbCYtxkHrXq3QzqBrnVQYBt15MU`,
@@ -98,6 +98,11 @@ export default <NetworkData>{
                 '0x6c49b18333a1135e9a376560c07e6d1fd0350eaf', // Ws market 28
                 '0xda14a41dbda731f03a94cb722191639dd22b35b2', // frxUSD market 37
                 '0x0a94e18bdbccd048198806d7ff28a1b1d2590724', // scbtc market 32
+                '0x42ce2234fd5a26bf161477a996961c4d01f466a3', // usdc 33
+                '0xe6605932e4a686534d19005bb9db0fba1f101272', // scusdc 46
+                '0x08c320a84a59c6f533e0dca655cf497594bca1f9', // weth 35
+                '0x24c74b30d1a4261608e84bf5a618693032681dac', // sceth 47
+                '0x11ba70c0ebab7946ac84f0e6d79162b0cbb2693f', // usdc 36
             ],
         },
         avalon: {
