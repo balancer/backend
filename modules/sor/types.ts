@@ -12,7 +12,6 @@ export interface GetSwapPathsInput {
     protocolVersion: number;
     considerPoolsWithHooks: boolean;
     poolIds?: string[];
-    graphTraversalConfig?: GraphTraversalConfig;
     callDataInput?: (GqlSwapCallDataInput & { wethIsEth: boolean }) | undefined;
 }
 
