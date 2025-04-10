@@ -1054,6 +1054,19 @@ type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
     hasAnyAllowedBuffer: Boolean!
     hook: GqlHook
 
+    startTime: Int!
+    endTime: Int!
+    lbpOwner: String!
+    isProjectTokenSwapInBlocked: Boolean!
+    reserveToken: String!
+    reserveTokenStartWeight: Float!
+    reserveTokenEndWeight: Float!
+    reserveTokenIndex: Int!
+    projectToken: String!
+    projectTokenStartWeight: Float!
+    projectTokenEndWeight: Float!
+    projectTokenIndex: Int!
+
     """
     All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
     """

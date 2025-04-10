@@ -1560,6 +1560,19 @@ export type SepoliaTypePoolFragment = {
             value: string;
         }>;
     } | null;
+    lbpParams?: {
+        __typename?: 'LBPParams';
+        startTime: string;
+        endTime: string;
+        owner: string;
+        isProjectTokenSwapInBlocked: boolean;
+        reserveToken: string;
+        reserveTokenStartWeight: string;
+        reserveTokenEndWeight: string;
+        projectToken: string;
+        projectTokenStartWeight: string;
+        projectTokenEndWeight: string;
+    } | null;
 };
 
 export type SepoliaPoolsQueryVariables = Exact<{
@@ -1620,6 +1633,19 @@ export type SepoliaPoolsQuery = {
                 type: string;
                 value: string;
             }>;
+        } | null;
+        lbpParams?: {
+            __typename?: 'LBPParams';
+            startTime: string;
+            endTime: string;
+            owner: string;
+            isProjectTokenSwapInBlocked: boolean;
+            reserveToken: string;
+            reserveTokenStartWeight: string;
+            reserveTokenEndWeight: string;
+            projectToken: string;
+            projectTokenStartWeight: string;
+            projectTokenEndWeight: string;
         } | null;
     }>;
 };
@@ -1732,6 +1758,18 @@ export const SepoliaTypePoolFragmentDoc = gql`
                 type
                 value
             }
+        }
+        lbpParams {
+            startTime
+            endTime
+            owner
+            isProjectTokenSwapInBlocked
+            reserveToken
+            reserveTokenStartWeight
+            reserveTokenEndWeight
+            projectToken
+            projectTokenStartWeight
+            projectTokenEndWeight
         }
     }
 `;
