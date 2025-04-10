@@ -1,5 +1,22 @@
 # backend
 
+## 1.38.0
+
+### Minor Changes
+
+-   4216f0a: quant weight snapshots
+
+### Patch Changes
+
+-   7dd3eb7: add OP deployment. Edit avax deployment. Add new stable v2 and surge v2 to all networks
+-   276492b: removing LBPool mutation
+-   ff7aa07: SOR - Make input validation more robust
+-   3b07b74: add aave sonic subgraph
+-   81624a1: SOR - Remove graphTraversalConfig from inputs
+-   da762f2: LBP metadata
+-   a7f6c6c: store all quant weight snapshots
+-   e2fa6cc: sor sync job tweeks
+
 ## 1.37.10
 
 ### Patch Changes
