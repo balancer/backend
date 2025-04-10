@@ -3,7 +3,8 @@ import config from '../../../config';
 import { getToken } from './helpers';
 
 export function isValidSwapRequest(tokenIn: string, tokenOut: string, swapAmount: string, chain: Chain): boolean {
-    if (parseFloat(swapAmount) <= 0) {
+    const swapAmountNumber = Number(swapAmount);
+    if (Number.isNaN(swapAmountNumber) || swapAmountNumber <= 0) {
         return false;
     }
 
