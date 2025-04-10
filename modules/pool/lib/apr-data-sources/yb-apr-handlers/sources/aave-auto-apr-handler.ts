@@ -28,6 +28,9 @@ const config = {
     POLYGON: {
         subgraphURL: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/Co2URyXjnxaw8WqxKyVHdirq9Ahhm5vcTs4dMedAq211`,
     },
+    SONIC: {
+        subgraphURL: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/FQcacc4ZJaQVS9euWb76nvpSq2GxavBnUM6DU6tmspbi`,
+    },
 };
 
 const query = `query getReserves($underlyingTokens: [Bytes!]) {
