@@ -43,7 +43,7 @@ describe('sor debugging', () => {
 
     it('sor v3', async () => {
         const useProtocolVersion = 3;
-        const chain = Chain.SEPOLIA;
+        const chain = Chain.SONIC;
 
         const chainId = Object.keys(chainIdToChain).find((key) => chainIdToChain[key] === chain) as string;
         initRequestScopedContext();
@@ -53,12 +53,12 @@ describe('sor debugging', () => {
 
         const swaps = await sorService.getSorSwapPaths({
             chain,
-            tokenIn: '0x29f2d40b0605204364af54ec677bd022da425d03', // wBTC
-            tokenOut: '0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8', // USDC
+            tokenIn: '0x039e2fB66102314Ce7b64Ce5Ce3E5183bc94aD38', // wS
+            tokenOut: '0x29219dd400f2Bf60E5a23d13Be72B486D4038894', // USDC.e
             swapType: 'EXACT_IN',
-            swapAmount: '0.01',
+            swapAmount: '0.001',
             useProtocolVersion,
-            poolIds: ['0x2e629cd9061e2b5214b6cfc8d001deb726275eb0'], // gyroECLP
+            poolIds: ['0x0af8ea4de2ecfb962cdbb66033a46afe99836994'],
         });
 
         console.log(swaps.returnAmount);

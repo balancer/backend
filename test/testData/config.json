@@ -140,6 +140,35 @@
                     }
                 ]
             }
+        },
+        {
+            "testName": "Path-Boosted-GyroECLP",
+            "chainId": "146",
+            "blockNumber": "19424406",
+            "swapPathInput": {
+                "swapKind": 0,
+                "amountRaw": "1000000000000000",
+                "tokens": [
+                    "0x039e2fB66102314Ce7b64Ce5Ce3E5183bc94aD38",
+                    "0x6c49b18333a1135e9a376560c07e6d1fd0350eaf",
+                    "0x6646248971427b80ce531bdd793e2eb859347e55",
+                    "0x29219dd400f2Bf60E5a23d13Be72B486D4038894"
+                ],
+                "pools": [
+                    {
+                        "poolAddress": "0x6c49b18333a1135e9a376560c07e6d1fd0350eaf",
+                        "poolType": "Buffer"
+                    },
+                    {
+                        "poolAddress": "0x0af8ea4de2ecfb962cdbb66033a46afe99836994",
+                        "poolType": "GYROE"
+                    },
+                    {
+                        "poolAddress": "0x6646248971427b80ce531bdd793e2eb859347e55",
+                        "poolType": "Buffer"
+                    }
+                ]
+            }
         }
     ]
 }
