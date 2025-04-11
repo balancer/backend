@@ -1,5 +1,11 @@
 # backend
 
+## 1.38.1
+
+### Patch Changes
+
+-   33ddfd9: use DB pricing for v2 snapshots
+
 ## 1.38.0
 
 ### Minor Changes
