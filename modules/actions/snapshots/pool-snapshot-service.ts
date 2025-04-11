@@ -327,6 +327,10 @@ export class PoolSnapshotService {
                 totalLiquidity = snapshot.amounts.reduce((acc, amount, index) => {
                     const addressIndex = poolTokens.findIndex((token) => token.index === index);
                     const { address } = poolTokens[addressIndex];
+                    // Skip BPTs
+                    if (snapshot.pool.id.includes(address)) {
+                        return acc;
+                    }
                     if (!prices[address]) {
                         throw 'Price not found';
                     }
