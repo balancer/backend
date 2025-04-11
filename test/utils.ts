@@ -78,14 +78,3 @@ export function getTokensFromPrismaPools(
     const tokenOut = new Token(chainId, prismaTokenOut.address, prismaTokenOut.decimals);
     return { tokenIn, tokenOut };
 }
-
-export function areBigIntsWithinPercent(value1: bigint, value2: bigint, percent: number): boolean {
-    if (percent < 0) {
-        throw new Error('Percent must be non-negative');
-    }
-    const difference = value1 > value2 ? value1 - value2 : value2 - value1;
-    console.log('Buffer Difference: ', difference);
-    const percentFactor = BigInt(Math.floor(percent * 1e8));
-    const tolerance = (value2 * percentFactor) / BigInt(1e10);
-    return difference <= tolerance;
-}

@@ -131,7 +131,11 @@ export function mapRoutes(paths: PathWithAmount[], pools: GqlPoolMinimal[]): Gql
     const isBatchSwap = paths.length > 1 || paths[0].pools.length > 1;
 
     if (!isBatchSwap) {
-        if (pools.length === 0) return [];
+        if (pools.length === 0) {
+            const bufferPool = paths[0].pools.find((p) => p.poolType === 'Buffer');
+            if (!bufferPool) return [];
+            return [mapSingleSwap(paths[0], { id: bufferPool.id, address: bufferPool.address } as GqlPoolMinimal)];
+        }
         const pool = pools.find((p) => p.id === paths[0].pools[0].id);
         if (!pool) throw new Error('Pool not found while mapping route');
         return [mapSingleSwap(paths[0], pool)];

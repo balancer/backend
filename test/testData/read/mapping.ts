@@ -1,5 +1,5 @@
 import { Address, formatEther, formatUnits } from 'viem';
-import { Token } from '@balancer/sdk';
+import { isSameAddress, Token } from '@balancer/sdk';
 
 import { BasePoolToken, PoolTokenWithRate } from '../../../modules/sor/lib/utils';
 import { PrismaPoolAndHookWithDynamic } from '../../../prisma/prisma-types';
@@ -92,7 +92,9 @@ export function mapStablePoolStateToPrismaPool(
 
     // map tokenIn and tokenOut to prisma tokens using prisma token factory
     const tokens = poolState.tokens.map((_token: string, i: number) => {
-        const bufferPool = bufferPools.find((bufferPool) => bufferPool.poolAddress === _token);
+        const bufferPool = bufferPools.find((bufferPool) =>
+            isSameAddress(_token as Address, bufferPool.poolAddress as Address),
+        );
         const token = bufferPool
             ? {
                   decimals: decimals[i],
@@ -138,12 +140,19 @@ export function mapWeightedPoolStateToPrismaPool(
     );
 
     const tokenAmounts = poolTokens.map((token: Token, i: number) =>
-        BasePoolToken.fromScale18Amount(token, poolState.balancesLiveScaled18[i]),
+        PoolTokenWithRate.fromScale18AmountWithRate(
+            token,
+            poolState.balancesLiveScaled18[i],
+            poolState.tokenRates[i],
+            i,
+        ),
     );
 
     // map tokenIn and tokenOut to prisma tokens using prisma token factory
     const tokens = poolState.tokens.map((_token: string, i: number) => {
-        const bufferPool = bufferPools.find((bufferPool) => bufferPool.poolAddress === _token);
+        const bufferPool = bufferPools.find((bufferPool) =>
+            isSameAddress(_token as Address, bufferPool.poolAddress as Address),
+        );
         const token = bufferPool
             ? {
                   decimals: decimals[i],
