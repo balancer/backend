@@ -1,5 +1,12 @@
 # backend
 
+## 1.38.2
+
+### Patch Changes
+
+-   5b9ede9: fix stable pool snapshots
+-   e8d9f3b: sAVAX APR
+
 ## 1.38.1
 
 ### Patch Changes
