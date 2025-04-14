@@ -184,6 +184,7 @@ export function mapWeightedPoolStateToPrismaPool(
             index: i,
             token,
             weight: formatUnits(poolState.weights[i], 18),
+            priceRate: formatEther(poolState.tokenRates[i]),
         });
     });
 

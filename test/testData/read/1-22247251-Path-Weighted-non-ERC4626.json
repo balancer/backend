@@ -1,0 +1,68 @@
+{
+    "test": {
+        "chainId": "1",
+        "blockNumber": "22247251"
+    },
+    "swapPath": {
+        "swapKind": 0,
+        "amountRaw": "100000000",
+        "tokens": [
+            "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+            "0xd4fa2d31b7968e448877f69a96de69f5de8cd23e",
+            "0x68749665ff8d2d112fa859aa293f07a622782f38"
+        ],
+        "pools": [
+            "0xd4fa2d31b7968e448877f69a96de69f5de8cd23e",
+            "0x2232b91ceb6d291b7d82935cefc2f7744d8f1a09"
+        ],
+        "outputRaw": "27113"
+    },
+    "pools": [
+        {
+            "chainId": "1",
+            "blockNumber": "22247251",
+            "poolType": "Buffer",
+            "poolAddress": "0xd4fa2d31b7968e448877f69a96de69f5de8cd23e",
+            "tokens": [
+                "0xd4fa2d31b7968e448877f69a96de69f5de8cd23e",
+                "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+            ],
+            "rate": "1125929784681585540"
+        },
+        {
+            "chainId": "1",
+            "blockNumber": "22247251",
+            "poolType": "WEIGHTED",
+            "poolAddress": "0x2232b91ceb6d291b7d82935cefc2f7744d8f1a09",
+            "tokens": [
+                "0x68749665FF8D2d112Fa859AA293F07A622782F38",
+                "0xD4fa2D31b7968E448877f69A96DE69f5de8cD23E"
+            ],
+            "scalingFactors": [
+                "1000000000000",
+                "1000000000000"
+            ],
+            "weights": [
+                "800000000000000000",
+                "200000000000000000"
+            ],
+            "swapFee": "9000000000000000",
+            "totalSupply": "1075243232429463940234",
+            "balancesLiveScaled18": [
+                "1514222554050000000000",
+                "368727403425771513548"
+            ],
+            "tokenRates": [
+                "3226590000000000000000",
+                "1125929784681585540"
+            ],
+            "aggregateSwapFee": "500000000000000000"
+        }
+    ],
+    "underlyingTokens": [
+        {
+            "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+            "decimals": 6
+        }
+    ]
+}

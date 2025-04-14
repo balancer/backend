@@ -1,4 +1,4 @@
-import { BigintIsh, Token, TokenAmount } from '@balancer/sdk';
+import { BigintIsh, Token } from '@balancer/sdk';
 import { BasePoolToken } from '../../utils/basePoolToken';
 
 export class WeightedBasePoolToken extends BasePoolToken {
