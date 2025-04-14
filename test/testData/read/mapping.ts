@@ -226,7 +226,7 @@ export function mapLiquidityBootstrappingPoolStateToPrismaPool(
             isProjectTokenSwapInBlocked: poolState.isProjectTokenSwapInBlocked,
             balancesLiveScaled18: poolState.balancesLiveScaled18,
             weights: poolState.weights,
-            swapFee: poolState.swapFee,
+            swapFee: formatEther(poolState.swapFee),
             totalSupply: poolState.totalSupply,
             isPoolInRecoveryMode: poolState.isPoolInRecoveryMode,
             isSwapEnabled: poolState.isSwapEnabled,
