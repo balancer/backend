@@ -167,7 +167,7 @@ function mapPools(
                 z: BigInt(pool.z),
                 dSq: BigInt(pool.dSq),
             };
-            prismaPools.push(mapGyroPoolStateToPrismaPool(gyroPool, Number(pool.chainId), 3));
+            prismaPools.push(mapGyroPoolStateToPrismaPool(gyroPool, Number(pool.chainId), 3, bufferPools));
         }
     }
     return prismaPools;
