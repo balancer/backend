@@ -86,6 +86,11 @@ export default <NetworkData>{
                     vaultId: 'silov2-sonic-usdce-ws',
                     isIbYield: true,
                 },
+                'beefy-besonic': {
+                    address: '0x871a101dcf22fe4fe37be7b654098c801cba1c88',
+                    vaultId: 'beefy-besonic',
+                    isIbYield: true,
+                },
             },
         },
         silo: {
