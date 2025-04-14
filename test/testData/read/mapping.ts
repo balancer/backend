@@ -5,7 +5,15 @@ import { BasePoolToken, PoolTokenWithRate } from '../../../modules/sor/lib/utils
 import { PrismaPoolAndHookWithDynamic } from '../../../prisma/prisma-types';
 import { prismaPoolFactory, prismaPoolTokenFactory } from '../../factories';
 import { getDecimalsFromScalingFactor } from '../../utils';
-import { BufferPool, GyroEPool, StablePool, WeightedPool } from './readTestData';
+import {
+    BufferPool,
+    GyroEPool,
+    StablePool,
+    WeightedPool,
+    LiquidityBootstrappingPool,
+    LiquidityBootstrappingImmutable,
+    LiquidityBootstrappingMutable,
+} from './readTestData';
 
 export function mapGyroPoolStateToPrismaPool(
     poolState: GyroEPool,
@@ -172,5 +180,68 @@ export function mapWeightedPoolStateToPrismaPool(
             totalShares: formatEther(poolState.totalSupply),
         },
     });
+    return prismaPool;
+}
+
+export function mapLiquidityBootstrappingPoolStateToPrismaPool(
+    poolState: LiquidityBootstrappingPool,
+    chainId: number,
+    protocolVersion: number,
+): PrismaPoolAndHookWithDynamic {
+    const decimals = poolState.scalingFactors.map((scalingFactor: bigint) =>
+        getDecimalsFromScalingFactor(scalingFactor),
+    );
+
+    const poolTokens = poolState.tokens.map(
+        (token: string, i: number) => new Token(chainId, token as Address, decimals[i]),
+    );
+
+    const tokenAmounts = poolTokens.map((token: Token, i: number) =>
+        PoolTokenWithRate.fromScale18AmountWithRate(
+            token,
+            poolState.balancesLiveScaled18[i],
+            poolState.tokenRates[i],
+            i,
+        ),
+    );
+
+    // map tokenIn and tokenOut to prisma tokens using prisma token factory
+    const tokens = poolState.tokens.map((token, i) =>
+        prismaPoolTokenFactory.build({
+            address: token as Address,
+            balance: formatUnits(tokenAmounts[i].amount, decimals[i]),
+            index: i,
+            priceRate: formatEther(poolState.tokenRates[i]),
+            token: { decimals: decimals[i] },
+            weight: formatUnits(poolState.weights[i], 18),
+        }),
+    );
+
+    // map pool state to prisma pool using prisma pool factory
+    const prismaPool = prismaPoolFactory
+        .lbp({
+            projectTokenIndex: poolState.projectTokenIndex,
+            reserveTokenIndex: poolState.reserveTokenIndex,
+            tokens: poolState.tokens,
+            isProjectTokenSwapInBlocked: poolState.isProjectTokenSwapInBlocked,
+            balancesLiveScaled18: poolState.balancesLiveScaled18,
+            weights: poolState.weights,
+            swapFee: poolState.swapFee,
+            totalSupply: poolState.totalSupply,
+            isPoolInRecoveryMode: poolState.isPoolInRecoveryMode,
+            isSwapEnabled: poolState.isSwapEnabled,
+            poolAddress: '',
+            chainId: '',
+            poolType: 'LIQUIDITY_BOOTSTRAPPING',
+            scalingFactors: [],
+            tokenRates: [],
+            aggregateSwapFee: 0n,
+            supportsUnbalancedLiquidity: false,
+        })
+        .build({
+            address: poolState.poolAddress,
+            protocolVersion,
+            tokens: tokens,
+        });
     return prismaPool;
 }

@@ -6,13 +6,27 @@ import { Chain, PrismaPoolType } from '@prisma/client';
 import { prismaPoolDynamicDataFactory } from './prismaPoolDynamicData.factory';
 import { LiquidityManagement } from '../../modules/sor/types';
 import { GyroEParams } from '../../modules/sources/subgraphs/balancer-v3-pools/generated/types';
-
+import { LiquidityBootstrappingPool } from '../testData/read/readTestData';
 class PrismaPoolFactory extends Factory<PrismaPoolAndHookWithDynamic> {
     stable(amp?: string) {
         return this.params({ type: PrismaPoolType.STABLE, typeData: { amp: amp ?? '10' } });
     }
     gyroE(gyroEParams: GyroEParams) {
         return this.params({ id: gyroEParams.id, type: PrismaPoolType.GYROE, typeData: { ...gyroEParams } });
+    }
+    lbp(lbpParams: LiquidityBootstrappingPool) {
+        return this.params({
+            type: PrismaPoolType.LIQUIDITY_BOOTSTRAPPING,
+            typeData: {
+                projectTokenIndex: lbpParams.projectTokenIndex,
+                reserveTokenIndex: lbpParams.reserveTokenIndex,
+                isProjectTokenSwapInBlocked: lbpParams.isProjectTokenSwapInBlocked,
+                isSwapEnabled: lbpParams.isSwapEnabled,
+            },
+            dynamicData: {
+                swapFee: lbpParams.swapFee.toString(),
+            },
+        });
     }
 }
 

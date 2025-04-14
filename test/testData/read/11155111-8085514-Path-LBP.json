@@ -1,0 +1,40 @@
+{
+    "test": {
+        "chainId": "11155111",
+        "blockNumber": "8085514"
+    },
+    "swapPath": {
+        "swapKind": 0,
+        "amountRaw": "1230000000000000",
+        "tokens": ["0xb19382073c7A0aDdbb56Ac6AF1808Fa49e377B75", "0xB77EB1A70A96fDAAeB31DB1b42F2b8b5846b2613"],
+        "pools": ["0x8E4Bd90c02b612594C96a31fADD7E4957bd5daBb"],
+        "outputRaw": "1132006902411746"
+    },
+    "pools": [
+        {
+            "chainId": "11155111",
+            "blockNumber": "8085514",
+            "poolType": "LIQUIDITY_BOOTSTRAPPING",
+            "poolAddress": "0x8E4Bd90c02b612594C96a31fADD7E4957bd5daBb",
+            "tokens": ["0xb19382073c7A0aDdbb56Ac6AF1808Fa49e377B75", "0xB77EB1A70A96fDAAeB31DB1b42F2b8b5846b2613"],
+            "scalingFactors": ["1", "1"],
+            "startWeights": ["500000000000000000", "500000000000000000"],
+            "endWeights": ["100000000000000000", "900000000000000000"],
+            "startTime": "1744204169",
+            "endTime": "1744546169",
+            "projectTokenIndex": 0,
+            "reserveTokenIndex": 1,
+            "isProjectTokenSwapInBlocked": false,
+            "balancesLiveScaled18": ["1000000000000000000", "1000000000000000000"],
+            "weights": ["480300584795321638", "519699415204678362"],
+            "swapFee": "3000000000000000",
+            "totalSupply": "999999999999979998",
+            "tokenRates": ["1000000000000000000", "1000000000000000000"],
+            "isPoolInitialized": true,
+            "isPoolPaused": false,
+            "isPoolInRecoveryMode": false,
+            "isSwapEnabled": true
+        }
+    ],
+    "underlyingTokens": []
+}
