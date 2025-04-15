@@ -16,6 +16,7 @@ import { BasePool } from './poolsV2/basePool';
 import { SorSwapOptions } from './types';
 import { PathWithAmount } from './path';
 import { Gyro2CLPPool, GyroECLPPool, StablePoolV3, WeightedPoolV3 } from './poolsV3';
+import { LiquidityBootstrappingPoolV3 } from './poolsV3/liquidityBootstrapping/liquidityBootstrapping';
 
 export class SOR {
     static async getPathsWithPools(
@@ -42,8 +43,6 @@ export class SOR {
             }
             switch (prismaPool.type) {
                 case 'WEIGHTED':
-                /// LBPs can be handled like weighted pools
-                case 'LIQUIDITY_BOOTSTRAPPING':
                 case 'QUANT_AMM_WEIGHTED':
                     {
                         if (prismaPool.protocolVersion === 2) {
@@ -53,6 +52,14 @@ export class SOR {
                         }
                     }
                     break;
+                case 'LIQUIDITY_BOOTSTRAPPING': {
+                    if (prismaPool.protocolVersion === 2) {
+                        // TODO: relevant?
+                    } else {
+                        basePools.push(LiquidityBootstrappingPoolV3.fromPrismaPool(prismaPool, underlyingTokens));
+                    }
+                    break;
+                }
                 case 'COMPOSABLE_STABLE':
                 case 'PHANTOM_STABLE':
                     basePools.push(ComposableStablePool.fromPrismaPool(prismaPool));
