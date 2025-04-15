@@ -1,3 +1,4 @@
+import { formatEther, parseEther } from 'viem';
 import config from '../../../config';
 import { chainIdToChain } from '../../../modules/network/chain-id-to-chain';
 import { fetchHookData } from '../../../modules/sources/contracts/v3/fetch-hook-data';
@@ -39,9 +40,21 @@ export async function getHooks(pools: PoolBase[], chainId: number, blockNumber: 
 
     // append hook data to pool
     const poolsWithHookData = poolsWithHookType.map((pool) => {
+        if (!pool.hook) {
+            return pool;
+        }
+
+        // scale hook data values to fixed point 18 decimals
+        const dynamicData = Object.fromEntries(
+            Object.entries(hookData[pool.poolAddress]).map(([key, value]) => [key, String(parseEther(value))]),
+        );
+
         return {
             ...pool,
-            hook: pool.hook ? { ...pool.hook, dynamicData: hookData[pool.poolAddress] } : undefined,
+            hook: {
+                ...pool.hook,
+                dynamicData,
+            },
         };
     });
 

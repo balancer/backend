@@ -36,10 +36,6 @@ export const fetchHookData = async (
 
     for (const pool of pools) {
         calls = [...calls, ...hookDataCalls(pool)];
-        calls = calls.map((call) => ({
-            ...call,
-            parser: (result: bigint) => result.toString(), // update parser to keep proper scaling
-        }));
     }
 
     const results = await multicallViem<Record<string, { pool: { hook: { dynamicData: Record<string, string> } } }>>(
