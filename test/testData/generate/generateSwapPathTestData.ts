@@ -2,7 +2,7 @@ import type { SwapPathTestInput, SwapPathTestOutput } from '../types';
 import { getSwapPath } from './getSwapPath';
 import { getPool } from './getPool';
 import { getUnderlyingTokens } from './getUnderlyingTokens';
-import { getHooks } from './getHook';
+import { getHooks } from './getHooks';
 
 export async function generateSwapPathTestData(input: SwapPathTestInput, overwrite = false) {
     const path = `./test/testData/read/${input.chainId}-${input.blockNumber}-${input.testName}.json`;
