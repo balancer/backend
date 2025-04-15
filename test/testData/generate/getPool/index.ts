@@ -1,9 +1,11 @@
 import type { Address } from 'viem';
+import { createPublicClient, http } from 'viem';
 import { WeightedPool } from './weightedPool';
 import { StablePool } from './stablePool';
 import type { PoolBase, TestBase } from '../../types';
 import { BufferPool } from './buffer';
 import { GyroECLPPool } from './gyroECLP';
+import { CHAINS, VAULT_V3, vaultExtensionAbi_V3 } from '@balancer/sdk';
 
 export async function getPool(
     rpcUrl: string,
@@ -24,6 +26,8 @@ export async function getPool(
     console.log('Fetching pool data...');
     const immutable = await poolData[poolType].fetchImmutableData(poolAddress, blockNumber);
     const mutable = await poolData[poolType].fetchMutableData(poolAddress, blockNumber);
+    const hooksContract = await fetchHookAddress(poolType, rpcUrl, chainId, poolAddress, blockNumber);
+
     console.log('Done');
 
     return {
@@ -31,7 +35,33 @@ export async function getPool(
         blockNumber,
         poolType,
         poolAddress,
+        hook: hooksContract ? { address: hooksContract.toLowerCase() } : undefined,
         ...immutable,
         ...mutable,
     };
+}
+
+async function fetchHookAddress(
+    poolType: string,
+    rpcUrl: string,
+    chainId: number,
+    poolAddress: Address,
+    blockNumber: bigint,
+): Promise<Address | undefined> {
+    let hooksContract: Address | undefined;
+
+    if (poolType !== 'Buffer') {
+        const publicClient = createPublicClient({
+            transport: http(rpcUrl),
+            chain: CHAINS[chainId],
+        });
+        ({ hooksContract } = await publicClient.readContract({
+            address: VAULT_V3[chainId],
+            abi: vaultExtensionAbi_V3,
+            functionName: 'getHooksConfig',
+            args: [poolAddress],
+            blockNumber,
+        }));
+    }
+    return hooksContract;
 }

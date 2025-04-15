@@ -52,6 +52,12 @@ export function mapGyroPoolStateToPrismaPool(
         });
     });
 
+    // transform hook dynamicData values to bigInt and then apply formatEther to them
+    const _hookDynamicData = poolState.hook?.dynamicData;
+    const hookDynamicData = _hookDynamicData
+        ? Object.fromEntries(Object.entries(_hookDynamicData).map(([key, value]) => [key, formatEther(BigInt(value))]))
+        : undefined;
+
     // map pool state to prisma pool using prisma pool factory
     const prismaPool = prismaPoolFactory
         .gyroE({
@@ -79,6 +85,10 @@ export function mapGyroPoolStateToPrismaPool(
                 swapFee: formatEther(poolState.swapFee),
                 aggregateSwapFee: formatEther(poolState.aggregateSwapFee),
                 totalShares: formatEther(poolState.totalSupply),
+            },
+            hook: {
+                ...poolState.hook,
+                dynamicData: hookDynamicData,
             },
         });
     return prismaPool;
@@ -128,6 +138,12 @@ export function mapStablePoolStateToPrismaPool(
         });
     });
 
+    // transform hook dynamicData values to bigInt and then apply formatEther to them
+    const _hookDynamicData = poolState.hook?.dynamicData;
+    const hookDynamicData = _hookDynamicData
+        ? Object.fromEntries(Object.entries(_hookDynamicData).map(([key, value]) => [key, formatEther(BigInt(value))]))
+        : undefined;
+
     // map pool state to prisma pool using prisma pool factory
     const prismaPool = prismaPoolFactory.stable(formatUnits(poolState.amp, 3)).build({
         address: poolState.poolAddress,
@@ -137,6 +153,10 @@ export function mapStablePoolStateToPrismaPool(
             swapFee: formatEther(poolState.swapFee),
             aggregateSwapFee: formatEther(poolState.aggregateSwapFee),
             totalShares: formatEther(poolState.totalSupply),
+        },
+        hook: {
+            ...poolState.hook,
+            dynamicData: hookDynamicData,
         },
     });
     return prismaPool;
@@ -188,6 +208,12 @@ export function mapWeightedPoolStateToPrismaPool(
         });
     });
 
+    // transform hook dynamicData values to bigInt and then apply formatEther to them
+    const _hookDynamicData = poolState.hook?.dynamicData;
+    const hookDynamicData = _hookDynamicData
+        ? Object.fromEntries(Object.entries(_hookDynamicData).map(([key, value]) => [key, formatEther(BigInt(value))]))
+        : undefined;
+
     // map pool state to prisma pool using prisma pool factory
     const prismaPool = prismaPoolFactory.build({
         address: poolState.poolAddress,
@@ -197,6 +223,10 @@ export function mapWeightedPoolStateToPrismaPool(
             swapFee: formatEther(poolState.swapFee),
             aggregateSwapFee: formatEther(poolState.aggregateSwapFee),
             totalShares: formatEther(poolState.totalSupply),
+        },
+        hook: {
+            ...poolState.hook,
+            dynamicData: hookDynamicData,
         },
     });
     return prismaPool;
