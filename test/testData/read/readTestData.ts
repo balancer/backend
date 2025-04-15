@@ -23,8 +23,8 @@ type PoolBase = {
     chainId: string;
 };
 
-type LiquidityBootstrappingState = BasePoolState & {
-    poolType: 'LIQUIDITY_BOOTSTRAPPING';
+export type LiquidityBootstrappingState = BasePoolState & {
+    poolType: 'LIQUIDITY_BOOTSTRAPPING' | 'WEIGHTED';
 } & LiquidityBootstrappingImmutable &
     LiquidityBootstrappingMutable;
 
@@ -34,10 +34,7 @@ export type LiquidityBootstrappingImmutable = {
     isProjectTokenSwapInBlocked: boolean;
 };
 
-export type LiquidityBootstrappingMutable = {
-    isPoolInRecoveryMode: boolean;
-    isSwapEnabled: boolean;
-} & WeightedImmutable;
+export type LiquidityBootstrappingMutable = {} & WeightedImmutable;
 
 export type WeightedPool = PoolBase & WeightedState;
 
