@@ -1511,6 +1511,7 @@ export const schema = gql`
         decimals: Int!
         displayTokens: [GqlPoolTokenDisplay!]! @deprecated(reason: "Use poolTokens instead")
         dynamicData: GqlPoolDynamicData!
+        endTime: Int!
         factory: Bytes
         hasAnyAllowedBuffer: Boolean!
         hasErc4626: Boolean!
@@ -1518,6 +1519,8 @@ export const schema = gql`
         hook: GqlHook
         id: ID!
         investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
+        isProjectTokenSwapInBlocked: Boolean!
+        lbpOwner: String!
         liquidityManagement: LiquidityManagement
         name: String!
         nestingType: GqlPoolNestingType! @deprecated(reason: "Removed without replacement")
@@ -1537,8 +1540,17 @@ export const schema = gql`
         """
         poolCreator: Bytes
         poolTokens: [GqlPoolTokenDetail!]!
+        projectToken: String!
+        projectTokenEndWeight: Float!
+        projectTokenIndex: Int!
+        projectTokenStartWeight: Float!
         protocolVersion: Int!
+        reserveToken: String!
+        reserveTokenEndWeight: Float!
+        reserveTokenIndex: Int!
+        reserveTokenStartWeight: Float!
         staking: GqlPoolStaking
+        startTime: Int!
 
         """
         Account empowered to set static swap fees for a pool (when 0 on V2 swap fees are immutable, on V3 delegate to governance)
@@ -1866,6 +1878,7 @@ export const schema = gql`
         userBalance: GqlPoolUserBalance
         vaultVersion: Int! @deprecated(reason: "use protocolVersion instead")
         version: Int!
+        weightSnapshots: [QuantAmmWeightSnapshot!]
         withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
     }
 
@@ -3850,6 +3863,11 @@ export const schema = gql`
         name: String!
         type: String!
         value: String!
+    }
+
+    type QuantAmmWeightSnapshot {
+        timestamp: Int!
+        weights: [Float!]
     }
 
     type QuantAmmWeightedParams {

@@ -93,8 +93,8 @@ export class PathWithAmount extends PathLocal {
                 this.inputAmount = amounts[0];
                 this.outputAmount = this.swapAmount;
             }
-        } catch {
-            throw new Error('Invalid path, swap amount exceeds maximum for pool');
+        } catch (error) {
+            throw new Error('Invalid swap path with error: ' + error);
         }
     }
 

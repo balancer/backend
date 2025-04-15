@@ -26,6 +26,7 @@ import { PrismaLastBlockSyncedCategory } from '@prisma/client';
 import { upsertLastSyncedBlock } from '../modules/actions/last-synced-block';
 import { prisma } from '../prisma/prisma-client';
 import { syncLastSwaps } from '../modules/actions/pool/v3/sync-last-swaps';
+import { LBPController } from '../modules/controllers/lbp-controller';
 
 // TODO needed?
 const sftmxController = SftmxController();
@@ -191,8 +192,10 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         return tokenService.updateTokenPrices([chain]);
     } else if (job === 'sync-vebal') {
         return new VeBalVotingListService().syncVotingGauges();
-    } else if (job === 'quant-amm-sync-weights') {
-        return QuantAmmController.syncWeights(chain);
+    } else if (job === 'sync-weights') {
+        await QuantAmmController.syncWeights(chain);
+        await LBPController.syncWeights(chain);
+        return 'OK';
     }
     // Maintenance
     else if (job === 'sync-fx-quote-tokens') {

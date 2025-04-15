@@ -56,7 +56,7 @@ type SwapPath = {
     amountRaw: bigint;
     outputRaw: bigint;
     tokens: string[];
-    pools: PoolBase[];
+    pools: string[];
     test: string;
 };
 
@@ -102,7 +102,7 @@ export function readTestData(): TestData {
                 // add swapPaths
                 testData.swapPaths.push({
                     ...jsonData.swapPath,
-                    pools: jsonData.swapPath.pools.map((pool: any) => pool.poolAddress),
+                    pools: jsonData.swapPath.pools,
                     swapKind: Number(jsonData.swapPath.swapKind),
                     amountRaw: BigInt(jsonData.swapPath.amountRaw),
                     outputRaw: BigInt(jsonData.swapPath.outputRaw),
@@ -193,7 +193,7 @@ function mapPools(
                 z: BigInt(pool.z),
                 dSq: BigInt(pool.dSq),
             };
-            prismaPools.push(mapGyroPoolStateToPrismaPool(gyroPool, Number(pool.chainId), 3));
+            prismaPools.push(mapGyroPoolStateToPrismaPool(gyroPool, Number(pool.chainId), 3, bufferPools));
         } else if (pool.poolType === 'LIQUIDITY_BOOTSTRAPPING') {
             // the return obect here need to be a PrismaPoolAndHookWithDynamic
             const lbpPool = {

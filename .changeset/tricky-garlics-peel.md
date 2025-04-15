@@ -2,4 +2,4 @@
 'backend': patch
 ---
 
-sor sync job tweeks
+LBP weight syncing

@@ -13,10 +13,14 @@ export default <NetworkData>{
     subgraphs: {
         startDate: '2023-06-06',
         balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmNudbtVu2eACfxNpFz37MVwKxxHPh1Lg5MzFKwQZG2xsU`,
-        balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmVfkyJiBeiG8eFbmMjNGbyqebEjidwPZqvr7evfG6fuPN`,
-        balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmRCbJPKp1rjpThv4wihG8v4nvmTh9RiFFPNYbbnD125vs`,
+        balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmQmzD7faCa6CgfLQuZiPBucRcAU7G2dVBULkVUDEYyQ43`,
+        balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmXAC6G27iAqtZocQBgXa8NDbXs2x2LmtcsAiPx5jM94GL`,
         gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmQYUD5riMQmA8yzJQjSFonEZxkA9PLEoaxpQVjQdnBPHM`,
         aura: 'https://data.aura.finance/graphql',
+    },
+    hooks: {
+        ['0x86705ee19c0509ff68f1118c55ee2ebde383d122']: 'STABLE_SURGE',
+        ['0x6ead84af26e997d27998fc9f8614e8a19bb93938']: 'MEV_TAX',
     },
     eth: {
         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -58,9 +62,9 @@ export default <NetworkData>{
             balancerQueriesAddress: '0xe39b5e3b6d74016b2f6a9673d7d7493b6df549d5',
         },
         v3: {
-            vaultAddress: '0xba1333333333cbcdb5d83c2e5d1d898e07ed00dc',
-            protocolFeeController: '0x8de13a85136982f7a0f9e6836e98803de138fb88',
-            routerAddress: '0x4bdcc2fb18aeb9e2d281b0278d946445070eada7',
+            vaultAddress: '0xba1333333333a1ba1108e8412f11850a5c319ba9',
+            protocolFeeController: '0xa731c23d7c95436baaae9d52782f966e1ed07cc8',
+            routerAddress: '0xf39ca6ede9bf7820a952b52f3c94af526bab9015',
             defaultSwapFeePercentage: '0.5',
             defaultYieldFeePercentage: '0.1',
         },
@@ -120,12 +124,12 @@ export default <NetworkData>{
             },
         },
         defaultHandlers: {
-            // sAVAX: {
-            //     tokenAddress: '0x2b2c81e08f1af8835a78bb2a90ae924ace0ea4be',
-            //     sourceUrl: 'https://api.benqi.fi/liquidstaking/apr',
-            //     path: 'apr',
-            //     scale: 1,
-            // },
+            sAVAX: {
+                tokenAddress: '0x2b2c81e08f1af8835a78bb2a90ae924ace0ea4be',
+                sourceUrl: 'https://api.benqi.fi/liquidstaking/apr',
+                path: 'apr',
+                scale: 1,
+            },
             yyAVAX: {
                 tokenAddress: '0xf7d9281e8e363584973f946201b82ba72c965d27',
                 sourceUrl: 'https://staging-api.yieldyak.com/yyavax',

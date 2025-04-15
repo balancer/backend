@@ -97,7 +97,7 @@
             }
         },
         {
-            "testName": "Path-Boosted",
+            "testName": "Path-Boosted-Stable",
             "chainId": "11155111",
             "blockNumber": "7748718",
             "swapPathInput": {
@@ -137,6 +137,75 @@
                     {
                         "poolAddress": "0x8E4Bd90c02b612594C96a31fADD7E4957bd5daBb",
                         "poolType": "LIQUIDITY_BOOTSTRAPPING"
+                    }
+                ]
+            }
+        },
+        {
+            "testName": "Path-Boosted-Weigthed",
+            "chainId": "1",
+            "blockNumber": "22233282",
+            "swapPathInput": {
+                "swapKind": 0,
+                "amountRaw": "42348",
+                "tokens": ["0x2260fac5e5542a773aa44fbcfedf7c193bc2c599", "0x775f661b0bd1739349b9a2a3ef60be277c5d2d29"],
+                "pools": [
+                    {
+                        "poolAddress": "0x8523bcadcda4bd329435940dcc49a7c4c0a14d94",
+                        "poolType": "WEIGHTED"
+                    }
+                ]
+            }
+        },
+        {
+            "testName": "Path-Boosted-GyroECLP",
+            "chainId": "146",
+            "blockNumber": "19424406",
+            "swapPathInput": {
+                "swapKind": 0,
+                "amountRaw": "1000000000000000",
+                "tokens": [
+                    "0x039e2fB66102314Ce7b64Ce5Ce3E5183bc94aD38",
+                    "0x6c49b18333a1135e9a376560c07e6d1fd0350eaf",
+                    "0x6646248971427b80ce531bdd793e2eb859347e55",
+                    "0x29219dd400f2Bf60E5a23d13Be72B486D4038894"
+                ],
+                "pools": [
+                    {
+                        "poolAddress": "0x6c49b18333a1135e9a376560c07e6d1fd0350eaf",
+                        "poolType": "Buffer"
+                    },
+                    {
+                        "poolAddress": "0x0af8ea4de2ecfb962cdbb66033a46afe99836994",
+                        "poolType": "GYROE"
+                    },
+                    {
+                        "poolAddress": "0x6646248971427b80ce531bdd793e2eb859347e55",
+                        "poolType": "Buffer"
+                    }
+                ]
+            }
+        },
+        {
+            "testName": "Path-Weighted-non-ERC4626",
+            "chainId": "1",
+            "blockNumber": "22247251",
+            "swapPathInput": {
+                "swapKind": 0,
+                "amountRaw": "100000000",
+                "tokens": [
+                    "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+                    "0xd4fa2d31b7968e448877f69a96de69f5de8cd23e",
+                    "0x68749665ff8d2d112fa859aa293f07a622782f38"
+                ],
+                "pools": [
+                    {
+                        "poolAddress": "0xd4fa2d31b7968e448877f69a96de69f5de8cd23e",
+                        "poolType": "Buffer"
+                    },
+                    {
+                        "poolAddress": "0x2232b91ceb6d291b7d82935cefc2f7744d8f1a09",
+                        "poolType": "WEIGHTED"
                     }
                 ]
             }

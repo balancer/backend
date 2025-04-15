@@ -14,13 +14,14 @@ export default <NetworkData>{
         startDate: '2021-08-23',
         balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmXXSKeLh14DnJgR1ncHhAHciqacfRshcHKXasAGy7LP4Y`,
         balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmX3JrRdSYhRWB8MszquB285J5bTzGEA79gekFJB9b3yA9`,
-        balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmeuDT8nKJtHd76rL2fm4GgUFWpqvFqithASLsXBEyu4EP`,
+        balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmQKMaW1cuEUBQ1rnmbLwZqDpubnFmszMyomSzeWMEdfWY`,
         gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmPyH9BbVshMZRp5T7WBPnx1J5GVi46GX2NmheRQUkqF39`,
         aura: 'https://data.aura.finance/graphql',
         cowAmm: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/Qmb9jmxb2EVWHk7NryKCAbsq2WAZaCV4CmnZne59EbADeh`,
     },
     hooks: {
         ['0xe4f1878ec9710846e2b529c1b5037f8ba94583b1']: 'STABLE_SURGE',
+        ['0x90bd26fbb9db17d75b56e4ca3a4c438fa7c93694']: 'STABLE_SURGE',
         ['0xa1d0791a41318c775707c56eae247af81a05322c']: 'MEV_TAX',
     },
     eth: {

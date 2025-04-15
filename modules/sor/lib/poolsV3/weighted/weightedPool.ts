@@ -1,6 +1,6 @@
 import { Address, Hex, parseEther, parseUnits } from 'viem';
 import { PoolType, Token, TokenAmount, WAD } from '@balancer/sdk';
-import { Vault, WeightedState, HookState } from '@balancer-labs/balancer-maths';
+import { WeightedState, HookState } from '@balancer-labs/balancer-maths';
 import { Chain } from '@prisma/client';
 
 import { PrismaPoolAndHookWithDynamic } from '../../../../../prisma/prisma-types';
@@ -8,7 +8,7 @@ import { TokenPairData } from '../../../../sources/contracts/v3/fetch-tokenpair-
 import { chainToChainId as chainToIdMap } from '../../../../network/chain-id-to-chain';
 
 import { BasePoolMethodsV3 } from '../basePoolMethodsV3';
-import { WeightedBasePoolToken } from '../../poolsV2/weighted/weightedBasePoolToken';
+import { WeightedPoolTokenWithRate } from './weightedPoolTokenWithRate';
 import { WeightedErc4626PoolToken } from './weightedErc4626PoolToken';
 
 import { getHookState } from '../../utils/helpers';
@@ -16,7 +16,7 @@ import { getHookState } from '../../utils/helpers';
 import { LiquidityManagement } from '../../../../sor/types';
 import { BasePoolV3 } from '../basePoolV3';
 
-type WeightedPoolToken = WeightedBasePoolToken | WeightedErc4626PoolToken;
+type WeightedPoolToken = WeightedPoolTokenWithRate | WeightedErc4626PoolToken;
 
 export class WeightedPoolV3 extends BasePoolV3 implements BasePoolMethodsV3 {
     public readonly poolType: PoolType = PoolType.Weighted;
@@ -70,18 +70,17 @@ export class WeightedPoolV3 extends BasePoolV3 implements BasePoolMethodsV3 {
                         ),
                     );
                 } else {
-                    poolTokens.push(
-                        new WeightedBasePoolToken(
-                            token,
-                            tokenAmount.amount,
-                            poolToken.index,
-                            parseEther(poolToken.weight),
-                        ),
-                    );
+                    throw new Error('SOR - ERC4626 underlying token not found');
                 }
             } else {
                 poolTokens.push(
-                    new WeightedBasePoolToken(token, tokenAmount.amount, poolToken.index, parseEther(poolToken.weight)),
+                    new WeightedPoolTokenWithRate(
+                        token,
+                        tokenAmount.amount,
+                        poolToken.index,
+                        parseEther(poolToken.priceRate),
+                        parseEther(poolToken.weight),
+                    ),
                 );
             }
         }
@@ -121,7 +120,7 @@ export class WeightedPoolV3 extends BasePoolV3 implements BasePoolMethodsV3 {
 
         // add BPT to tokenMap, so we can handle add/remove liquidity operations
         const bpt = new Token(tokens[0].token.chainId, this.id, 18, 'BPT', 'BPT');
-        this.tokenMap.set(bpt.address, new WeightedBasePoolToken(bpt, totalShares, -1, 0n));
+        this.tokenMap.set(bpt.address, new WeightedPoolTokenWithRate(bpt, totalShares, -1, WAD, 0n));
 
         this.poolState = this.getPoolState(hookState?.hookType);
     }
@@ -132,7 +131,7 @@ export class WeightedPoolV3 extends BasePoolV3 implements BasePoolMethodsV3 {
             poolAddress: this.address,
             swapFee: this.swapFee,
             balancesLiveScaled18: this.tokens.map((t) => t.scale18),
-            tokenRates: this.tokens.map((_) => WAD),
+            tokenRates: this.tokens.map((t) => ('rate' in t ? t.rate : WAD)),
             totalSupply: this.totalShares,
             weights: this.tokens.map((t) => t.weight),
             tokens: this.tokens.map((t) => t.token.address),

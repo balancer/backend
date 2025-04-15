@@ -770,6 +770,11 @@ type QuantAMMWeightedDetail {
     value: String!
 }
 
+type QuantAmmWeightSnapshot {
+    timestamp: Int!
+    weights: [Float!]
+}
+
 type GqlPoolQuantAmmWeighted implements GqlPoolBase {
     id: ID!
     chain: GqlChain!
@@ -823,6 +828,7 @@ type GqlPoolQuantAmmWeighted implements GqlPoolBase {
     userBalance: GqlPoolUserBalance
 
     quantAmmWeightedParams: QuantAmmWeightedParams
+    weightSnapshots: [QuantAmmWeightSnapshot!]
 }
 
 type GqlPoolWeighted implements GqlPoolBase {
@@ -1047,6 +1053,19 @@ type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
     hasNestedErc4626: Boolean!
     hasAnyAllowedBuffer: Boolean!
     hook: GqlHook
+
+    startTime: Int!
+    endTime: Int!
+    lbpOwner: String!
+    isProjectTokenSwapInBlocked: Boolean!
+    reserveToken: String!
+    reserveTokenStartWeight: Float!
+    reserveTokenEndWeight: Float!
+    reserveTokenIndex: Int!
+    projectToken: String!
+    projectTokenStartWeight: Float!
+    projectTokenEndWeight: Float!
+    projectTokenIndex: Int!
 
     """
     All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.

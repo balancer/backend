@@ -125,6 +125,18 @@ fragment SepoliaTypePool on Pool {
             value
         }
     }
+    lbpParams {
+        startTime
+        endTime
+        owner
+        isProjectTokenSwapInBlocked
+        reserveToken
+        reserveTokenStartWeight
+        reserveTokenEndWeight
+        projectToken
+        projectTokenStartWeight
+        projectTokenEndWeight
+    }
 }
 
 query SepoliaPools(

@@ -13,6 +13,7 @@ import { prismaPoolWithExpandedNesting } from '../../../prisma/prisma-types';
 import { TokenHistoricalPrices } from '../../token/lib/coingecko-data.service';
 import { V2SubgraphClient } from '../../subgraphs/balancer-subgraph';
 import { blockNumbers } from '../../block-numbers';
+import { roundToMidnight } from '../../common/time';
 
 export class PoolSnapshotService {
     constructor(
@@ -85,23 +86,25 @@ export class PoolSnapshotService {
             const startTotalSwapVolume = `${latestSyncedSnapshot?.totalSwapVolume || '0'}`;
             const startTotalSwapFee = `${latestSyncedSnapshot?.totalSwapFee || '0'}`;
 
-            const poolOperations = snapshots.map((snapshot, index) => {
-                const prevTotalSwapVolume = index === 0 ? startTotalSwapVolume : snapshots[index - 1].swapVolume;
-                const prevTotalSwapFee = index === 0 ? startTotalSwapFee : snapshots[index - 1].swapFees;
+            const poolOperations = await Promise.all(
+                snapshots.map(async (snapshot, index) => {
+                    const prevTotalSwapVolume = index === 0 ? startTotalSwapVolume : snapshots[index - 1].swapVolume;
+                    const prevTotalSwapFee = index === 0 ? startTotalSwapFee : snapshots[index - 1].swapFees;
 
-                const data = this.getPrismaPoolSnapshotFromSubgraphData(
-                    snapshot,
-                    prevTotalSwapVolume,
-                    prevTotalSwapFee,
-                    pool.tokens,
-                );
+                    const data = await this.getPrismaPoolSnapshotFromSubgraphData(
+                        snapshot,
+                        prevTotalSwapVolume,
+                        prevTotalSwapFee,
+                        pool.tokens,
+                    );
 
-                return prisma.prismaPoolSnapshot.upsert({
-                    where: { id_chain: { id: snapshot.id, chain: this.chain } },
-                    create: data,
-                    update: data,
-                });
-            });
+                    return prisma.prismaPoolSnapshot.upsert({
+                        where: { id_chain: { id: snapshot.id, chain: this.chain } },
+                        create: data,
+                        update: data,
+                    });
+                }),
+            );
             operations.push(...poolOperations);
         }
 
@@ -142,17 +145,19 @@ export class PoolSnapshotService {
             await prisma.$transaction([
                 ...((reload && [prisma.prismaPoolSnapshot.deleteMany({ where: { poolId, chain: this.chain } })]) || []),
                 prisma.prismaPoolSnapshot.createMany({
-                    data: snapshots.map((snapshot, index) => {
-                        let prevTotalSwapVolume = index === 0 ? '0' : snapshots[index - 1].swapVolume;
-                        let prevTotalSwapFee = index === 0 ? '0' : snapshots[index - 1].swapFees;
+                    data: await Promise.all(
+                        snapshots.map((snapshot, index) => {
+                            let prevTotalSwapVolume = index === 0 ? '0' : snapshots[index - 1].swapVolume;
+                            let prevTotalSwapFee = index === 0 ? '0' : snapshots[index - 1].swapFees;
 
-                        return this.getPrismaPoolSnapshotFromSubgraphData(
-                            snapshot,
-                            prevTotalSwapVolume,
-                            prevTotalSwapFee,
-                            tokens,
-                        );
-                    }),
+                            return this.getPrismaPoolSnapshotFromSubgraphData(
+                                snapshot,
+                                prevTotalSwapVolume,
+                                prevTotalSwapFee,
+                                tokens,
+                            );
+                        }),
+                    ),
                     skipDuplicates: true,
                 }),
             ]);
@@ -291,20 +296,41 @@ export class PoolSnapshotService {
         }
     }
 
-    private getPrismaPoolSnapshotFromSubgraphData(
+    private async getPrismaPoolSnapshotFromSubgraphData(
         snapshot: BalancerPoolSnapshotFragment,
         prevTotalSwapVolume: string,
         prevTotalSwapFee: string,
         poolTokens?: { address: string; index: number }[],
-    ): PrismaPoolSnapshot {
+    ): Promise<PrismaPoolSnapshot> {
         let totalLiquidity = parseFloat(snapshot.liquidity);
 
-        if (totalLiquidity === 0 && poolTokens && this.prices) {
-            const prices = this.prices;
+        // this.prices - are current prices only not historical prices - can be used to calculate liquidity, but only if it's a current day data
+        let prices = this.prices;
+        if (snapshot.timestamp < roundToMidnight()) {
+            prices = await prisma.prismaTokenPrice
+                .findMany({
+                    where: {
+                        chain: this.chain,
+                        timestamp: snapshot.timestamp,
+                    },
+                })
+                .then((prices) => {
+                    return prices.reduce((acc, price) => {
+                        acc[price.tokenAddress] = price.price;
+                        return acc;
+                    }, {} as { [address: string]: number });
+                });
+        }
+
+        if (poolTokens && prices) {
             try {
                 totalLiquidity = snapshot.amounts.reduce((acc, amount, index) => {
                     const addressIndex = poolTokens.findIndex((token) => token.index === index);
                     const { address } = poolTokens[addressIndex];
+                    // Skip BPTs
+                    if (snapshot.pool.id.includes(address)) {
+                        return acc;
+                    }
                     if (!prices[address]) {
                         throw 'Price not found';
                     }
