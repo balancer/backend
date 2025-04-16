@@ -1910,6 +1910,10 @@ enum GqlPoolAprItemType {
     """
     MERKL
     """
+    APR calculated for QUANT-AMM pools based on performance measurements over a month
+    """
+    QUANT_AMM_UPLIFT
+    """
     Cow AMM specific APR
     """
     SURPLUS @deprecated(reason: "Use SURPLUS_24H instead")

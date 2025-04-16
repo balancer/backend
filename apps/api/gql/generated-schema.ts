@@ -417,6 +417,8 @@ export type GqlPoolAprItemType =
     | 'MERKL'
     /** Represents if the APR items comes from a nested pool. */
     | 'NESTED'
+    /** APR calculated for QUANT-AMM pools based on performance measurements over a month */
+    | 'QUANT_AMM_UPLIFT'
     /** Staking reward APR in a pool from a reward token. */
     | 'STAKING'
     /** APR boost that can be earned, i.e. via veBAL or maBEETS. */
