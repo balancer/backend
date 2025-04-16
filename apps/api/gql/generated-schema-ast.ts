@@ -679,6 +679,11 @@ export const schema = gql`
         NESTED
 
         """
+        APR calculated for QUANT-AMM pools based on performance measurements over a month
+        """
+        QUANT_AMM_UPLIFT
+
+        """
         Staking reward APR in a pool from a reward token.
         """
         STAKING

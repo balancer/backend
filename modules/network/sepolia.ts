@@ -9,6 +9,7 @@ import { YbTokensAprService } from '../pool/lib/apr-data-sources/yb-tokens-apr.s
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import config from '../../config';
 import { env } from '../../apps/env';
+import { QuantAmmAprService } from '../pool/lib/apr-data-sources/quant-amm-apr-handler';
 
 export const sepoliaNetworkData = config.SEPOLIA;
 
@@ -21,6 +22,7 @@ export const sepoliaNetworkConfig: NetworkConfig = {
         new SwapFeeAprService(),
         new DynamicSwapFeeFromEventsAprService(),
         new GaugeAprService(),
+        new QuantAmmAprService(),
     ],
     userStakedBalanceServices: [new UserSyncGaugeBalanceService()],
     services: {
