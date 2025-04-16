@@ -13,7 +13,7 @@ export default <NetworkData>{
     subgraphs: {
         startDate: '2023-05-17',
         balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmVNcphdNjTCaJ4ammPtFzRyD4gmyNBomKcVFZ98RADpS1`,
-        gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmPVc4XuaG1XciJ1epthSS3iUiUf6o15nj8USaqf5SxSrB`,
+        gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmbarCL8ofjqRJVAuSvKpd99m9xetBEGixoEQHJx31WEdB`,
         aura: 'https://data.aura.finance/graphql',
     },
     eth: {
