@@ -90,7 +90,7 @@ export class QuantAmmAprService implements PoolAprService {
             const apr = totalYearlyReturn / pool.dynamicData.totalLiquidity;
 
             await prisma.prismaPoolAprItem.upsert({
-                where: { id_chain: { id: pool.id, chain: chain } },
+                where: { id_chain: { id: `${pool.id}-quant-amm-apr`, chain: chain } },
                 update: { apr: totalYearlyReturn / pool.dynamicData?.totalLiquidity },
                 create: {
                     id: `${pool.id}-quant-amm-apr`,
