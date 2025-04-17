@@ -151,6 +151,18 @@ export default <NetworkData>{
                 path: 'services.{serviceName == "avax"}.apy',
                 isIbYield: true,
             },
+            sdeUSD: {
+                tokenAddress: '0x68088c91446c7bea49ea7dbd3b96ce62b272dc96',
+                sourceUrl: 'https://api-deusd-prod-public.elixir.xyz/public/deusd_apy',
+                path: 'deusd_apy',
+                isIbYield: true,
+            },
+            savUSD: {
+                tokenAddress: '0x06d47f3fb376649c3a9dafe069b3d6e35572219e',
+                sourceUrl: 'https://app.avantprotocol.com/api/savusdApy',
+                path: 'savusdApy',
+                isIbYield: true,
+            },
         },
     },
     datastudio: {
