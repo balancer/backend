@@ -71,20 +71,6 @@ export class ProtocolService {
 
         const pools = await prisma.prismaPool.findMany({
             where: {
-                type: {
-                    in: [
-                        'WEIGHTED',
-                        'STABLE',
-                        'COMPOSABLE_STABLE',
-                        'META_STABLE',
-                        'LIQUIDITY_BOOTSTRAPPING',
-                        'GYRO',
-                        'GYRO3',
-                        'GYROE',
-                        'COW_AMM',
-                        'FX',
-                    ],
-                },
                 NOT: { categories: { has: 'BLACK_LISTED' } },
                 dynamicData: {
                     totalSharesNum: {
@@ -102,7 +88,6 @@ export class ProtocolService {
             select: { poolId: true, valueUSD: true, blockTimestamp: true, payload: true },
             where: { blockTimestamp: { gte: oneDayAgo }, chain, type: 'SWAP' },
         });
-        const filteredSwaps = swaps.filter((swap) => pools.find((pool) => pool.id === swap.poolId));
 
         const holdersQueryResponse = await prisma.prismaPoolDynamicData.aggregate({
             _sum: { holdersCount: true },
@@ -110,8 +95,8 @@ export class ProtocolService {
         });
 
         const totalLiquidity = _.sumBy(pools, (pool) => (!pool.dynamicData ? 0 : pool.dynamicData.totalLiquidity));
-        const swapVolume24h = _.sumBy(filteredSwaps, (swap) => swap.valueUSD);
-        const swapFee24h = _.sumBy(filteredSwaps, (swap) => parseFloat((swap as SwapEvent).payload.fee.valueUSD));
+        const swapVolume24h = _.sumBy(swaps, (swap) => swap.valueUSD);
+        const swapFee24h = _.sumBy(swaps, (swap) => parseFloat((swap as SwapEvent).payload.fee.valueUSD));
 
         const yieldCapture24h = _.sumBy(pools, (pool) => (!pool.dynamicData ? 0 : pool.dynamicData.yieldCapture24h));
         const surplus24 = _.sumBy(pools, (pool) => (!pool.dynamicData ? 0 : pool.dynamicData.surplus24h));
