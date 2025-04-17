@@ -325,7 +325,7 @@ export type LbpParams = {
     endTime: Scalars['BigInt'];
     /** Unique identifier for the LBPParams */
     id: Scalars['Bytes'];
-    /**  Project token swap in blocked */
+    /** Project token swap in blocked */
     isProjectTokenSwapInBlocked: Scalars['Boolean'];
     /** Owner of the LBP */
     owner: Scalars['Bytes'];
@@ -480,6 +480,8 @@ export type Pool = {
     lbpParams?: Maybe<LbpParams>;
     /** Parameters for QuantAMMWeighted pools (null for other pool types) */
     quantAMMWeightedParams?: Maybe<QuantAmmWeightedParams>;
+    /** Parameters for ReClamm pools (null for other pool types) */
+    reClammParams?: Maybe<ReClammParams>;
     /** Parameters for Stable pools (null for other pool types) */
     stableParams?: Maybe<StableParams>;
     /** Parameters for StableSurge pools (null for other pool types) */
@@ -493,6 +495,7 @@ export enum PoolType {
     GyroE = 'GyroE',
     Lbp = 'LBP',
     QuantAmmWeighted = 'QuantAMMWeighted',
+    ReClamm = 'ReClamm',
     Stable = 'Stable',
     StableSurge = 'StableSurge',
     Weighted = 'Weighted',
@@ -628,6 +631,27 @@ export type Pool_Filter = {
     quantAMMWeightedParams_not_starts_with_nocase?: InputMaybe<Scalars['String']>;
     quantAMMWeightedParams_starts_with?: InputMaybe<Scalars['String']>;
     quantAMMWeightedParams_starts_with_nocase?: InputMaybe<Scalars['String']>;
+    reClammParams?: InputMaybe<Scalars['String']>;
+    reClammParams_?: InputMaybe<ReClammParams_Filter>;
+    reClammParams_contains?: InputMaybe<Scalars['String']>;
+    reClammParams_contains_nocase?: InputMaybe<Scalars['String']>;
+    reClammParams_ends_with?: InputMaybe<Scalars['String']>;
+    reClammParams_ends_with_nocase?: InputMaybe<Scalars['String']>;
+    reClammParams_gt?: InputMaybe<Scalars['String']>;
+    reClammParams_gte?: InputMaybe<Scalars['String']>;
+    reClammParams_in?: InputMaybe<Array<Scalars['String']>>;
+    reClammParams_lt?: InputMaybe<Scalars['String']>;
+    reClammParams_lte?: InputMaybe<Scalars['String']>;
+    reClammParams_not?: InputMaybe<Scalars['String']>;
+    reClammParams_not_contains?: InputMaybe<Scalars['String']>;
+    reClammParams_not_contains_nocase?: InputMaybe<Scalars['String']>;
+    reClammParams_not_ends_with?: InputMaybe<Scalars['String']>;
+    reClammParams_not_ends_with_nocase?: InputMaybe<Scalars['String']>;
+    reClammParams_not_in?: InputMaybe<Array<Scalars['String']>>;
+    reClammParams_not_starts_with?: InputMaybe<Scalars['String']>;
+    reClammParams_not_starts_with_nocase?: InputMaybe<Scalars['String']>;
+    reClammParams_starts_with?: InputMaybe<Scalars['String']>;
+    reClammParams_starts_with_nocase?: InputMaybe<Scalars['String']>;
     stableParams?: InputMaybe<Scalars['String']>;
     stableParams_?: InputMaybe<StableParams_Filter>;
     stableParams_contains?: InputMaybe<Scalars['String']>;
@@ -743,6 +767,16 @@ export enum Pool_OrderBy {
     QuantAmmWeightedParamsOracleStalenessThreshold = 'quantAMMWeightedParams__oracleStalenessThreshold',
     QuantAmmWeightedParamsPoolRegistry = 'quantAMMWeightedParams__poolRegistry',
     QuantAmmWeightedParamsUpdateInterval = 'quantAMMWeightedParams__updateInterval',
+    ReClammParams = 'reClammParams',
+    ReClammParamsCenterednessMargin = 'reClammParams__centerednessMargin',
+    ReClammParamsCurrentFourthRootPriceRatio = 'reClammParams__currentFourthRootPriceRatio',
+    ReClammParamsEndFourthRootPriceRatio = 'reClammParams__endFourthRootPriceRatio',
+    ReClammParamsId = 'reClammParams__id',
+    ReClammParamsLastTimestamp = 'reClammParams__lastTimestamp',
+    ReClammParamsPriceRatioUpdateEndTime = 'reClammParams__priceRatioUpdateEndTime',
+    ReClammParamsPriceRatioUpdateStartTime = 'reClammParams__priceRatioUpdateStartTime',
+    ReClammParamsPriceShiftDailyRateInSeconds = 'reClammParams__priceShiftDailyRateInSeconds',
+    ReClammParamsStartFourthRootPriceRatio = 'reClammParams__startFourthRootPriceRatio',
     StableParams = 'stableParams',
     StableParamsAmp = 'stableParams__amp',
     StableParamsId = 'stableParams__id',
@@ -1073,6 +1107,8 @@ export type Query = {
     quantAMMWeightedDetails: Array<QuantAmmWeightedDetail>;
     quantAMMWeightedParams?: Maybe<QuantAmmWeightedParams>;
     quantAMMWeightedParams_collection: Array<QuantAmmWeightedParams>;
+    reClammParams?: Maybe<ReClammParams>;
+    reClammParams_collection: Array<ReClammParams>;
     stableParams?: Maybe<StableParams>;
     stableParams_collection: Array<StableParams>;
     stableSurgeParams?: Maybe<StableSurgeParams>;
@@ -1197,6 +1233,22 @@ export type QueryQuantAmmWeightedParams_CollectionArgs = {
     where?: InputMaybe<QuantAmmWeightedParams_Filter>;
 };
 
+export type QueryReClammParamsArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type QueryReClammParams_CollectionArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<ReClammParams_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<ReClammParams_Filter>;
+};
+
 export type QueryStableParamsArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
@@ -1244,6 +1296,130 @@ export type QueryWeightedParams_CollectionArgs = {
     subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<WeightedParams_Filter>;
 };
+
+export type ReClammParams = {
+    __typename?: 'ReClammParams';
+    /** The centeredness margin of the pool */
+    centerednessMargin: Scalars['BigInt'];
+    /** The current fourth root price ratio, an interpolation of the price ratio state */
+    currentFourthRootPriceRatio: Scalars['BigInt'];
+    /** The fourth root price ratio at the end of an update */
+    endFourthRootPriceRatio: Scalars['BigInt'];
+    /** Unique identifier for the ReClammParams */
+    id: Scalars['Bytes'];
+    /** The timestamp of the last user interaction */
+    lastTimestamp: Scalars['BigInt'];
+    /** The last virtual balances of the pool */
+    lastVirtualBalances: Array<Scalars['BigInt']>;
+    /** The timestamp when the update ends */
+    priceRatioUpdateEndTime: Scalars['BigInt'];
+    /** The timestamp when the update begins */
+    priceRatioUpdateStartTime: Scalars['BigInt'];
+    /** Represents how fast the pool can move the virtual balances per day */
+    priceShiftDailyRateInSeconds: Scalars['BigInt'];
+    /** The fourth root price ratio at the start of an update */
+    startFourthRootPriceRatio: Scalars['BigInt'];
+};
+
+export type ReClammParams_Filter = {
+    /** Filter for the block changed event. */
+    _change_block?: InputMaybe<BlockChangedFilter>;
+    and?: InputMaybe<Array<InputMaybe<ReClammParams_Filter>>>;
+    centerednessMargin?: InputMaybe<Scalars['BigInt']>;
+    centerednessMargin_gt?: InputMaybe<Scalars['BigInt']>;
+    centerednessMargin_gte?: InputMaybe<Scalars['BigInt']>;
+    centerednessMargin_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    centerednessMargin_lt?: InputMaybe<Scalars['BigInt']>;
+    centerednessMargin_lte?: InputMaybe<Scalars['BigInt']>;
+    centerednessMargin_not?: InputMaybe<Scalars['BigInt']>;
+    centerednessMargin_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    currentFourthRootPriceRatio?: InputMaybe<Scalars['BigInt']>;
+    currentFourthRootPriceRatio_gt?: InputMaybe<Scalars['BigInt']>;
+    currentFourthRootPriceRatio_gte?: InputMaybe<Scalars['BigInt']>;
+    currentFourthRootPriceRatio_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    currentFourthRootPriceRatio_lt?: InputMaybe<Scalars['BigInt']>;
+    currentFourthRootPriceRatio_lte?: InputMaybe<Scalars['BigInt']>;
+    currentFourthRootPriceRatio_not?: InputMaybe<Scalars['BigInt']>;
+    currentFourthRootPriceRatio_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    endFourthRootPriceRatio?: InputMaybe<Scalars['BigInt']>;
+    endFourthRootPriceRatio_gt?: InputMaybe<Scalars['BigInt']>;
+    endFourthRootPriceRatio_gte?: InputMaybe<Scalars['BigInt']>;
+    endFourthRootPriceRatio_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    endFourthRootPriceRatio_lt?: InputMaybe<Scalars['BigInt']>;
+    endFourthRootPriceRatio_lte?: InputMaybe<Scalars['BigInt']>;
+    endFourthRootPriceRatio_not?: InputMaybe<Scalars['BigInt']>;
+    endFourthRootPriceRatio_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    id?: InputMaybe<Scalars['Bytes']>;
+    id_contains?: InputMaybe<Scalars['Bytes']>;
+    id_gt?: InputMaybe<Scalars['Bytes']>;
+    id_gte?: InputMaybe<Scalars['Bytes']>;
+    id_in?: InputMaybe<Array<Scalars['Bytes']>>;
+    id_lt?: InputMaybe<Scalars['Bytes']>;
+    id_lte?: InputMaybe<Scalars['Bytes']>;
+    id_not?: InputMaybe<Scalars['Bytes']>;
+    id_not_contains?: InputMaybe<Scalars['Bytes']>;
+    id_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
+    lastTimestamp?: InputMaybe<Scalars['BigInt']>;
+    lastTimestamp_gt?: InputMaybe<Scalars['BigInt']>;
+    lastTimestamp_gte?: InputMaybe<Scalars['BigInt']>;
+    lastTimestamp_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    lastTimestamp_lt?: InputMaybe<Scalars['BigInt']>;
+    lastTimestamp_lte?: InputMaybe<Scalars['BigInt']>;
+    lastTimestamp_not?: InputMaybe<Scalars['BigInt']>;
+    lastTimestamp_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    lastVirtualBalances?: InputMaybe<Array<Scalars['BigInt']>>;
+    lastVirtualBalances_contains?: InputMaybe<Array<Scalars['BigInt']>>;
+    lastVirtualBalances_contains_nocase?: InputMaybe<Array<Scalars['BigInt']>>;
+    lastVirtualBalances_not?: InputMaybe<Array<Scalars['BigInt']>>;
+    lastVirtualBalances_not_contains?: InputMaybe<Array<Scalars['BigInt']>>;
+    lastVirtualBalances_not_contains_nocase?: InputMaybe<Array<Scalars['BigInt']>>;
+    or?: InputMaybe<Array<InputMaybe<ReClammParams_Filter>>>;
+    priceRatioUpdateEndTime?: InputMaybe<Scalars['BigInt']>;
+    priceRatioUpdateEndTime_gt?: InputMaybe<Scalars['BigInt']>;
+    priceRatioUpdateEndTime_gte?: InputMaybe<Scalars['BigInt']>;
+    priceRatioUpdateEndTime_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    priceRatioUpdateEndTime_lt?: InputMaybe<Scalars['BigInt']>;
+    priceRatioUpdateEndTime_lte?: InputMaybe<Scalars['BigInt']>;
+    priceRatioUpdateEndTime_not?: InputMaybe<Scalars['BigInt']>;
+    priceRatioUpdateEndTime_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    priceRatioUpdateStartTime?: InputMaybe<Scalars['BigInt']>;
+    priceRatioUpdateStartTime_gt?: InputMaybe<Scalars['BigInt']>;
+    priceRatioUpdateStartTime_gte?: InputMaybe<Scalars['BigInt']>;
+    priceRatioUpdateStartTime_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    priceRatioUpdateStartTime_lt?: InputMaybe<Scalars['BigInt']>;
+    priceRatioUpdateStartTime_lte?: InputMaybe<Scalars['BigInt']>;
+    priceRatioUpdateStartTime_not?: InputMaybe<Scalars['BigInt']>;
+    priceRatioUpdateStartTime_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    priceShiftDailyRateInSeconds?: InputMaybe<Scalars['BigInt']>;
+    priceShiftDailyRateInSeconds_gt?: InputMaybe<Scalars['BigInt']>;
+    priceShiftDailyRateInSeconds_gte?: InputMaybe<Scalars['BigInt']>;
+    priceShiftDailyRateInSeconds_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    priceShiftDailyRateInSeconds_lt?: InputMaybe<Scalars['BigInt']>;
+    priceShiftDailyRateInSeconds_lte?: InputMaybe<Scalars['BigInt']>;
+    priceShiftDailyRateInSeconds_not?: InputMaybe<Scalars['BigInt']>;
+    priceShiftDailyRateInSeconds_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    startFourthRootPriceRatio?: InputMaybe<Scalars['BigInt']>;
+    startFourthRootPriceRatio_gt?: InputMaybe<Scalars['BigInt']>;
+    startFourthRootPriceRatio_gte?: InputMaybe<Scalars['BigInt']>;
+    startFourthRootPriceRatio_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    startFourthRootPriceRatio_lt?: InputMaybe<Scalars['BigInt']>;
+    startFourthRootPriceRatio_lte?: InputMaybe<Scalars['BigInt']>;
+    startFourthRootPriceRatio_not?: InputMaybe<Scalars['BigInt']>;
+    startFourthRootPriceRatio_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+};
+
+export enum ReClammParams_OrderBy {
+    CenterednessMargin = 'centerednessMargin',
+    CurrentFourthRootPriceRatio = 'currentFourthRootPriceRatio',
+    EndFourthRootPriceRatio = 'endFourthRootPriceRatio',
+    Id = 'id',
+    LastTimestamp = 'lastTimestamp',
+    LastVirtualBalances = 'lastVirtualBalances',
+    PriceRatioUpdateEndTime = 'priceRatioUpdateEndTime',
+    PriceRatioUpdateStartTime = 'priceRatioUpdateStartTime',
+    PriceShiftDailyRateInSeconds = 'priceShiftDailyRateInSeconds',
+    StartFourthRootPriceRatio = 'startFourthRootPriceRatio',
+}
 
 export type StableParams = {
     __typename?: 'StableParams';
@@ -1342,6 +1518,214 @@ export enum StableSurgeParams_OrderBy {
     MaxSurgeFeePercentage = 'maxSurgeFeePercentage',
     SurgeThresholdPercentage = 'surgeThresholdPercentage',
 }
+
+export type Subscription = {
+    __typename?: 'Subscription';
+    /** Access to subgraph metadata */
+    _meta?: Maybe<_Meta_>;
+    factories: Array<Factory>;
+    factory?: Maybe<Factory>;
+    gyro2Params?: Maybe<Gyro2Params>;
+    gyro2Params_collection: Array<Gyro2Params>;
+    gyroEParams?: Maybe<GyroEParams>;
+    gyroEParams_collection: Array<GyroEParams>;
+    lbpparams?: Maybe<LbpParams>;
+    lbpparams_collection: Array<LbpParams>;
+    pool?: Maybe<Pool>;
+    pools: Array<Pool>;
+    quantAMMWeightedDetail?: Maybe<QuantAmmWeightedDetail>;
+    quantAMMWeightedDetails: Array<QuantAmmWeightedDetail>;
+    quantAMMWeightedParams?: Maybe<QuantAmmWeightedParams>;
+    quantAMMWeightedParams_collection: Array<QuantAmmWeightedParams>;
+    reClammParams?: Maybe<ReClammParams>;
+    reClammParams_collection: Array<ReClammParams>;
+    stableParams?: Maybe<StableParams>;
+    stableParams_collection: Array<StableParams>;
+    stableSurgeParams?: Maybe<StableSurgeParams>;
+    stableSurgeParams_collection: Array<StableSurgeParams>;
+    weightedParams?: Maybe<WeightedParams>;
+    weightedParams_collection: Array<WeightedParams>;
+};
+
+export type Subscription_MetaArgs = {
+    block?: InputMaybe<Block_Height>;
+};
+
+export type SubscriptionFactoriesArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<Factory_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<Factory_Filter>;
+};
+
+export type SubscriptionFactoryArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type SubscriptionGyro2ParamsArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type SubscriptionGyro2Params_CollectionArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<Gyro2Params_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<Gyro2Params_Filter>;
+};
+
+export type SubscriptionGyroEParamsArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type SubscriptionGyroEParams_CollectionArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<GyroEParams_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<GyroEParams_Filter>;
+};
+
+export type SubscriptionLbpparamsArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type SubscriptionLbpparams_CollectionArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<LbpParams_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<LbpParams_Filter>;
+};
+
+export type SubscriptionPoolArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type SubscriptionPoolsArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<Pool_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<Pool_Filter>;
+};
+
+export type SubscriptionQuantAmmWeightedDetailArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type SubscriptionQuantAmmWeightedDetailsArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<QuantAmmWeightedDetail_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<QuantAmmWeightedDetail_Filter>;
+};
+
+export type SubscriptionQuantAmmWeightedParamsArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type SubscriptionQuantAmmWeightedParams_CollectionArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<QuantAmmWeightedParams_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<QuantAmmWeightedParams_Filter>;
+};
+
+export type SubscriptionReClammParamsArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type SubscriptionReClammParams_CollectionArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<ReClammParams_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<ReClammParams_Filter>;
+};
+
+export type SubscriptionStableParamsArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type SubscriptionStableParams_CollectionArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<StableParams_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<StableParams_Filter>;
+};
+
+export type SubscriptionStableSurgeParamsArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type SubscriptionStableSurgeParams_CollectionArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<StableSurgeParams_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<StableSurgeParams_Filter>;
+};
+
+export type SubscriptionWeightedParamsArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type SubscriptionWeightedParams_CollectionArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<WeightedParams_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<WeightedParams_Filter>;
+};
 
 export type WeightedParams = {
     __typename?: 'WeightedParams';
@@ -1470,74 +1854,6 @@ export type TypePoolFragment = {
         z: string;
         dSq: string;
     } | null;
-};
-
-export type PoolsQueryVariables = Exact<{
-    skip?: InputMaybe<Scalars['Int']>;
-    first?: InputMaybe<Scalars['Int']>;
-    orderBy?: InputMaybe<Pool_OrderBy>;
-    orderDirection?: InputMaybe<OrderDirection>;
-    where?: InputMaybe<Pool_Filter>;
-    block?: InputMaybe<Block_Height>;
-}>;
-
-export type PoolsQuery = {
-    __typename?: 'Query';
-    pools: Array<{
-        __typename?: 'Pool';
-        id: string;
-        address: string;
-        factory: { __typename?: 'Factory'; id: string; type: PoolType; version: number };
-        stableParams?: { __typename?: 'StableParams'; amp: string } | null;
-        stableSurgeParams?: { __typename?: 'StableSurgeParams'; amp: string } | null;
-        weightedParams?: { __typename?: 'WeightedParams'; weights: Array<string> } | null;
-        gyro2Params?: { __typename?: 'Gyro2Params'; sqrtAlpha: string; sqrtBeta: string } | null;
-        gyroEParams?: {
-            __typename?: 'GyroEParams';
-            alpha: string;
-            beta: string;
-            c: string;
-            s: string;
-            lambda: string;
-            tauAlphaX: string;
-            tauAlphaY: string;
-            tauBetaX: string;
-            tauBetaY: string;
-            u: string;
-            v: string;
-            w: string;
-            z: string;
-            dSq: string;
-        } | null;
-    }>;
-};
-
-export type SepoliaTypePoolFragment = {
-    __typename?: 'Pool';
-    id: string;
-    address: string;
-    factory: { __typename?: 'Factory'; id: string; type: PoolType; version: number };
-    stableParams?: { __typename?: 'StableParams'; amp: string } | null;
-    stableSurgeParams?: { __typename?: 'StableSurgeParams'; amp: string } | null;
-    weightedParams?: { __typename?: 'WeightedParams'; weights: Array<string> } | null;
-    gyro2Params?: { __typename?: 'Gyro2Params'; sqrtAlpha: string; sqrtBeta: string } | null;
-    gyroEParams?: {
-        __typename?: 'GyroEParams';
-        alpha: string;
-        beta: string;
-        c: string;
-        s: string;
-        lambda: string;
-        tauAlphaX: string;
-        tauAlphaY: string;
-        tauBetaX: string;
-        tauBetaY: string;
-        u: string;
-        v: string;
-        w: string;
-        z: string;
-        dSq: string;
-    } | null;
     quantAMMWeightedParams?: {
         __typename?: 'QuantAMMWeightedParams';
         oracleStalenessThreshold: string;
@@ -1573,9 +1889,21 @@ export type SepoliaTypePoolFragment = {
         projectTokenStartWeight: string;
         projectTokenEndWeight: string;
     } | null;
+    reClammParams?: {
+        __typename?: 'ReClammParams';
+        lastTimestamp: string;
+        lastVirtualBalances: Array<string>;
+        priceShiftDailyRateInSeconds: string;
+        centerednessMargin: string;
+        currentFourthRootPriceRatio: string;
+        startFourthRootPriceRatio: string;
+        endFourthRootPriceRatio: string;
+        priceRatioUpdateStartTime: string;
+        priceRatioUpdateEndTime: string;
+    } | null;
 };
 
-export type SepoliaPoolsQueryVariables = Exact<{
+export type PoolsQueryVariables = Exact<{
     skip?: InputMaybe<Scalars['Int']>;
     first?: InputMaybe<Scalars['Int']>;
     orderBy?: InputMaybe<Pool_OrderBy>;
@@ -1584,7 +1912,7 @@ export type SepoliaPoolsQueryVariables = Exact<{
     block?: InputMaybe<Block_Height>;
 }>;
 
-export type SepoliaPoolsQuery = {
+export type PoolsQuery = {
     __typename?: 'Query';
     pools: Array<{
         __typename?: 'Pool';
@@ -1647,6 +1975,18 @@ export type SepoliaPoolsQuery = {
             projectTokenStartWeight: string;
             projectTokenEndWeight: string;
         } | null;
+        reClammParams?: {
+            __typename?: 'ReClammParams';
+            lastTimestamp: string;
+            lastVirtualBalances: Array<string>;
+            priceShiftDailyRateInSeconds: string;
+            centerednessMargin: string;
+            currentFourthRootPriceRatio: string;
+            startFourthRootPriceRatio: string;
+            endFourthRootPriceRatio: string;
+            priceRatioUpdateStartTime: string;
+            priceRatioUpdateEndTime: string;
+        } | null;
     }>;
 };
 
@@ -1663,46 +2003,6 @@ export const FactoryFragmentDoc = gql`
 `;
 export const TypePoolFragmentDoc = gql`
     fragment TypePool on Pool {
-        id
-        address
-        factory {
-            id
-            type
-            version
-        }
-        stableParams {
-            amp
-        }
-        stableSurgeParams {
-            amp
-        }
-        weightedParams {
-            weights
-        }
-        gyro2Params {
-            sqrtAlpha
-            sqrtBeta
-        }
-        gyroEParams {
-            alpha
-            beta
-            c
-            s
-            lambda
-            tauAlphaX
-            tauAlphaY
-            tauBetaX
-            tauBetaY
-            u
-            v
-            w
-            z
-            dSq
-        }
-    }
-`;
-export const SepoliaTypePoolFragmentDoc = gql`
-    fragment SepoliaTypePool on Pool {
         id
         address
         factory {
@@ -1771,6 +2071,17 @@ export const SepoliaTypePoolFragmentDoc = gql`
             projectTokenStartWeight
             projectTokenEndWeight
         }
+        reClammParams {
+            lastTimestamp
+            lastVirtualBalances
+            priceShiftDailyRateInSeconds
+            centerednessMargin
+            currentFourthRootPriceRatio
+            startFourthRootPriceRatio
+            endFourthRootPriceRatio
+            priceRatioUpdateStartTime
+            priceRatioUpdateEndTime
+        }
     }
 `;
 export const ChangedPoolsDocument = gql`
@@ -1812,28 +2123,6 @@ export const PoolsDocument = gql`
         }
     }
     ${TypePoolFragmentDoc}
-`;
-export const SepoliaPoolsDocument = gql`
-    query SepoliaPools(
-        $skip: Int
-        $first: Int
-        $orderBy: Pool_orderBy
-        $orderDirection: OrderDirection
-        $where: Pool_filter
-        $block: Block_height
-    ) {
-        pools(
-            skip: $skip
-            first: $first
-            orderBy: $orderBy
-            orderDirection: $orderDirection
-            where: $where
-            block: $block
-        ) {
-            ...SepoliaTypePool
-        }
-    }
-    ${SepoliaTypePoolFragmentDoc}
 `;
 
 export type SdkFunctionWrapper = <T>(
@@ -1882,20 +2171,6 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
                         ...wrappedRequestHeaders,
                     }),
                 'Pools',
-                'query',
-            );
-        },
-        SepoliaPools(
-            variables?: SepoliaPoolsQueryVariables,
-            requestHeaders?: Dom.RequestInit['headers'],
-        ): Promise<SepoliaPoolsQuery> {
-            return withWrapper(
-                (wrappedRequestHeaders) =>
-                    client.request<SepoliaPoolsQuery>(SepoliaPoolsDocument, variables, {
-                        ...requestHeaders,
-                        ...wrappedRequestHeaders,
-                    }),
-                'SepoliaPools',
                 'query',
             );
         },

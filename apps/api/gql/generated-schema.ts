@@ -296,10 +296,14 @@ export interface GqlPoolAggregator {
     beta?: Maybe<Scalars['String']>;
     /** Data specific to gyro pools */
     c?: Maybe<Scalars['String']>;
+    /** ReClamm: The centeredness margin of the pool */
+    centerednessMargin?: Maybe<Scalars['BigDecimal']>;
     /** The chain on which the pool is deployed */
     chain: GqlChain;
     /** The timestamp the pool was created. */
     createTime: Scalars['Int'];
+    /** ReClamm: The current fourth root price ratio, an interpolation of the price ratio state */
+    currentFourthRootPriceRatio?: Maybe<Scalars['BigDecimal']>;
     /** Data specific to gyro pools */
     dSq?: Maybe<Scalars['String']>;
     /** The decimals of the BPT, usually 18 */
@@ -308,6 +312,8 @@ export interface GqlPoolAggregator {
     delta?: Maybe<Scalars['String']>;
     /** Dynamic data such as token balances, swap fees or volume */
     dynamicData: GqlPoolDynamicData;
+    /** ReClamm: The fourth root price ratio at the end of an update */
+    endFourthRootPriceRatio?: Maybe<Scalars['BigDecimal']>;
     /** Data specific to fx pools */
     epsilon?: Maybe<Scalars['String']>;
     /** The factory contract address from which the pool was created. */
@@ -318,6 +324,10 @@ export interface GqlPoolAggregator {
     id: Scalars['ID'];
     /** Data specific to gyro/fx pools */
     lambda?: Maybe<Scalars['String']>;
+    /** The timestamp of the last user interaction */
+    lastTimestamp?: Maybe<Scalars['Int']>;
+    /** ReClamm: The last virtual balances of the pool */
+    lastVirtualBalances?: Maybe<Array<Scalars['BigDecimal']>>;
     /** Liquidity management settings for v3 pools. */
     liquidityManagement?: Maybe<LiquidityManagement>;
     /** The name of the pool as per contract */
@@ -333,6 +343,12 @@ export interface GqlPoolAggregator {
     poolCreator?: Maybe<Scalars['Bytes']>;
     /** Returns all pool tokens, including BPTs and nested pools if there are any. Only one nested level deep. */
     poolTokens: Array<GqlPoolTokenDetail>;
+    /** ReClamm: The timestamp when the update ends */
+    priceRatioUpdateEndTime?: Maybe<Scalars['Int']>;
+    /** ReClamm: The timestamp when the update begins */
+    priceRatioUpdateStartTime?: Maybe<Scalars['Int']>;
+    /** ReClamm: Represents how fast the pool can move the virtual balances per day */
+    priceShiftRatePerSecond?: Maybe<Scalars['BigDecimal']>;
     /** The protocol version on which the pool is deployed, 1, 2 or 3 */
     protocolVersion: Scalars['Int'];
     /** QuantAmmWeighted specific fields */
@@ -345,6 +361,8 @@ export interface GqlPoolAggregator {
     sqrtAlpha?: Maybe<Scalars['String']>;
     /** Data specific to gyro pools */
     sqrtBeta?: Maybe<Scalars['String']>;
+    /** ReClamm: The fourth root price ratio at the start of an update */
+    startFourthRootPriceRatio?: Maybe<Scalars['BigDecimal']>;
     /** Account empowered to set static swap fees for a pool (when 0 on V2 swap fees are immutable, on V3 delegate to governance) */
     swapFeeManager?: Maybe<Scalars['Bytes']>;
     /** The token symbol of the pool as per contract */
@@ -417,6 +435,8 @@ export type GqlPoolAprItemType =
     | 'MERKL'
     /** Represents if the APR items comes from a nested pool. */
     | 'NESTED'
+    /** APR calculated for QUANT-AMM pools based on performance measurements over a month */
+    | 'QUANT_AMM_UPLIFT'
     /** Staking reward APR in a pool from a reward token. */
     | 'STAKING'
     /** APR boost that can be earned, i.e. via veBAL or maBEETS. */
@@ -1324,6 +1344,78 @@ export interface GqlPoolQuantAmmWeighted extends GqlPoolBase {
     withdrawConfig: GqlPoolWithdrawConfig;
 }
 
+export interface GqlPoolReClamm extends GqlPoolBase {
+    __typename?: 'GqlPoolReClamm';
+    address: Scalars['Bytes'];
+    /** @deprecated Use poolTokens instead */
+    allTokens: Array<GqlPoolTokenExpanded>;
+    categories?: Maybe<Array<Maybe<GqlPoolFilterCategory>>>;
+    /** The centeredness margin of the pool */
+    centerednessMargin: Scalars['BigDecimal'];
+    chain: GqlChain;
+    createTime: Scalars['Int'];
+    /** The current fourth root price ratio, an interpolation of the price ratio state */
+    currentFourthRootPriceRatio: Scalars['BigDecimal'];
+    decimals: Scalars['Int'];
+    /** @deprecated Use poolTokens instead */
+    displayTokens: Array<GqlPoolTokenDisplay>;
+    dynamicData: GqlPoolDynamicData;
+    /** The fourth root price ratio at the end of an update */
+    endFourthRootPriceRatio: Scalars['BigDecimal'];
+    factory?: Maybe<Scalars['Bytes']>;
+    hasAnyAllowedBuffer: Scalars['Boolean'];
+    hasErc4626: Scalars['Boolean'];
+    hasNestedErc4626: Scalars['Boolean'];
+    hook?: Maybe<GqlHook>;
+    id: Scalars['ID'];
+    /** @deprecated Removed without replacement */
+    investConfig: GqlPoolInvestConfig;
+    /** The timestamp of the last user interaction */
+    lastTimestamp: Scalars['Int'];
+    /** The last virtual balances of the pool */
+    lastVirtualBalances: Array<Scalars['BigDecimal']>;
+    liquidityManagement?: Maybe<LiquidityManagement>;
+    name: Scalars['String'];
+    /** @deprecated Removed without replacement */
+    nestingType: GqlPoolNestingType;
+    /**
+     * The wallet address of the owner of the pool. Pool owners can set certain properties like swapFees or AMP.
+     * @deprecated Use swapFeeManager instead
+     */
+    owner?: Maybe<Scalars['Bytes']>;
+    /** Account empowered to pause/unpause the pool (or 0 to delegate to governance) */
+    pauseManager?: Maybe<Scalars['Bytes']>;
+    /** Account empowered to set the pool creator fee percentage */
+    poolCreator?: Maybe<Scalars['Bytes']>;
+    poolTokens: Array<GqlPoolTokenDetail>;
+    /** The timestamp when the update ends */
+    priceRatioUpdateEndTime: Scalars['Int'];
+    /** The timestamp when the update begins */
+    priceRatioUpdateStartTime: Scalars['Int'];
+    /** Represents how fast the pool can move the virtual balances per day */
+    priceShiftRatePerSecond: Scalars['BigDecimal'];
+    protocolVersion: Scalars['Int'];
+    staking?: Maybe<GqlPoolStaking>;
+    /** The fourth root price ratio at the start of an update */
+    startFourthRootPriceRatio: Scalars['BigDecimal'];
+    /** Account empowered to set static swap fees for a pool (when 0 on V2 swap fees are immutable, on V3 delegate to governance) */
+    swapFeeManager?: Maybe<Scalars['Bytes']>;
+    symbol: Scalars['String'];
+    tags?: Maybe<Array<Maybe<Scalars['String']>>>;
+    /**
+     * All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
+     * @deprecated Use poolTokens instead
+     */
+    tokens: Array<GqlPoolTokenUnion>;
+    type: GqlPoolType;
+    userBalance?: Maybe<GqlPoolUserBalance>;
+    /** @deprecated use protocolVersion instead */
+    vaultVersion: Scalars['Int'];
+    version: Scalars['Int'];
+    /** @deprecated Removed without replacement */
+    withdrawConfig: GqlPoolWithdrawConfig;
+}
+
 export interface GqlPoolSnapshot {
     __typename?: 'GqlPoolSnapshot';
     amounts: Array<Scalars['String']>;
@@ -1756,6 +1848,7 @@ export type GqlPoolType =
     | 'META_STABLE'
     | 'PHANTOM_STABLE'
     | 'QUANT_AMM_WEIGHTED'
+    | 'RECLAMM'
     | 'STABLE'
     | 'UNKNOWN'
     | 'WEIGHTED';
@@ -1768,6 +1861,7 @@ export type GqlPoolUnion =
     | GqlPoolLiquidityBootstrapping
     | GqlPoolMetaStable
     | GqlPoolQuantAmmWeighted
+    | GqlPoolReClamm
     | GqlPoolStable
     | GqlPoolWeighted;
 
@@ -1904,6 +1998,7 @@ export interface GqlProtocolMetricsAggregated {
     chains: Array<GqlProtocolMetricsChain>;
     numLiquidityProviders: Scalars['BigInt'];
     poolCount: Scalars['BigInt'];
+    surplus24h: Scalars['BigDecimal'];
     swapFee24h: Scalars['BigDecimal'];
     swapVolume24h: Scalars['BigDecimal'];
     totalLiquidity: Scalars['BigDecimal'];
@@ -1919,6 +2014,7 @@ export interface GqlProtocolMetricsChain {
     chainId: Scalars['String'];
     numLiquidityProviders: Scalars['BigInt'];
     poolCount: Scalars['BigInt'];
+    surplus24h: Scalars['BigDecimal'];
     swapFee24h: Scalars['BigDecimal'];
     swapVolume24h: Scalars['BigDecimal'];
     totalLiquidity: Scalars['BigDecimal'];
@@ -3195,6 +3291,7 @@ export type ResolversTypes = ResolversObject<{
         | ResolversTypes['GqlPoolLiquidityBootstrapping']
         | ResolversTypes['GqlPoolMetaStable']
         | ResolversTypes['GqlPoolQuantAmmWeighted']
+        | ResolversTypes['GqlPoolReClamm']
         | ResolversTypes['GqlPoolStable']
         | ResolversTypes['GqlPoolWeighted'];
     GqlPoolBatchSwap: ResolverTypeWrapper<GqlPoolBatchSwap>;
@@ -3250,6 +3347,9 @@ export type ResolversTypes = ResolversObject<{
     GqlPoolQuantAmmWeighted: ResolverTypeWrapper<
         Omit<GqlPoolQuantAmmWeighted, 'tokens'> & { tokens: Array<ResolversTypes['GqlPoolTokenUnion']> }
     >;
+    GqlPoolReClamm: ResolverTypeWrapper<
+        Omit<GqlPoolReClamm, 'tokens'> & { tokens: Array<ResolversTypes['GqlPoolTokenUnion']> }
+    >;
     GqlPoolSnapshot: ResolverTypeWrapper<GqlPoolSnapshot>;
     GqlPoolSnapshotDataRange: GqlPoolSnapshotDataRange;
     GqlPoolStable: ResolverTypeWrapper<GqlPoolStable>;
@@ -3287,6 +3387,7 @@ export type ResolversTypes = ResolversObject<{
         | ResolversTypes['GqlPoolLiquidityBootstrapping']
         | ResolversTypes['GqlPoolMetaStable']
         | ResolversTypes['GqlPoolQuantAmmWeighted']
+        | ResolversTypes['GqlPoolReClamm']
         | ResolversTypes['GqlPoolStable']
         | ResolversTypes['GqlPoolWeighted'];
     GqlPoolUserBalance: ResolverTypeWrapper<GqlPoolUserBalance>;
@@ -3409,6 +3510,7 @@ export type ResolversParentTypes = ResolversObject<{
         | ResolversParentTypes['GqlPoolLiquidityBootstrapping']
         | ResolversParentTypes['GqlPoolMetaStable']
         | ResolversParentTypes['GqlPoolQuantAmmWeighted']
+        | ResolversParentTypes['GqlPoolReClamm']
         | ResolversParentTypes['GqlPoolStable']
         | ResolversParentTypes['GqlPoolWeighted'];
     GqlPoolBatchSwap: GqlPoolBatchSwap;
@@ -3453,6 +3555,7 @@ export type ResolversParentTypes = ResolversObject<{
     GqlPoolQuantAmmWeighted: Omit<GqlPoolQuantAmmWeighted, 'tokens'> & {
         tokens: Array<ResolversParentTypes['GqlPoolTokenUnion']>;
     };
+    GqlPoolReClamm: Omit<GqlPoolReClamm, 'tokens'> & { tokens: Array<ResolversParentTypes['GqlPoolTokenUnion']> };
     GqlPoolSnapshot: GqlPoolSnapshot;
     GqlPoolStable: GqlPoolStable;
     GqlPoolStaking: GqlPoolStaking;
@@ -3486,6 +3589,7 @@ export type ResolversParentTypes = ResolversObject<{
         | ResolversParentTypes['GqlPoolLiquidityBootstrapping']
         | ResolversParentTypes['GqlPoolMetaStable']
         | ResolversParentTypes['GqlPoolQuantAmmWeighted']
+        | ResolversParentTypes['GqlPoolReClamm']
         | ResolversParentTypes['GqlPoolStable']
         | ResolversParentTypes['GqlPoolWeighted'];
     GqlPoolUserBalance: GqlPoolUserBalance;
@@ -3781,29 +3885,38 @@ export type GqlPoolAggregatorResolvers<
     amp?: Resolver<Maybe<ResolversTypes['BigInt']>, ParentType, ContextType>;
     beta?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     c?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    centerednessMargin?: Resolver<Maybe<ResolversTypes['BigDecimal']>, ParentType, ContextType>;
     chain?: Resolver<ResolversTypes['GqlChain'], ParentType, ContextType>;
     createTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+    currentFourthRootPriceRatio?: Resolver<Maybe<ResolversTypes['BigDecimal']>, ParentType, ContextType>;
     dSq?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     decimals?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     delta?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     dynamicData?: Resolver<ResolversTypes['GqlPoolDynamicData'], ParentType, ContextType>;
+    endFourthRootPriceRatio?: Resolver<Maybe<ResolversTypes['BigDecimal']>, ParentType, ContextType>;
     epsilon?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     factory?: Resolver<Maybe<ResolversTypes['Bytes']>, ParentType, ContextType>;
     hook?: Resolver<Maybe<ResolversTypes['GqlHook']>, ParentType, ContextType>;
     id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
     lambda?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    lastTimestamp?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+    lastVirtualBalances?: Resolver<Maybe<Array<ResolversTypes['BigDecimal']>>, ParentType, ContextType>;
     liquidityManagement?: Resolver<Maybe<ResolversTypes['LiquidityManagement']>, ParentType, ContextType>;
     name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     owner?: Resolver<Maybe<ResolversTypes['Bytes']>, ParentType, ContextType>;
     pauseManager?: Resolver<Maybe<ResolversTypes['Bytes']>, ParentType, ContextType>;
     poolCreator?: Resolver<Maybe<ResolversTypes['Bytes']>, ParentType, ContextType>;
     poolTokens?: Resolver<Array<ResolversTypes['GqlPoolTokenDetail']>, ParentType, ContextType>;
+    priceRatioUpdateEndTime?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+    priceRatioUpdateStartTime?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+    priceShiftRatePerSecond?: Resolver<Maybe<ResolversTypes['BigDecimal']>, ParentType, ContextType>;
     protocolVersion?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     quantAmmWeightedParams?: Resolver<Maybe<ResolversTypes['QuantAmmWeightedParams']>, ParentType, ContextType>;
     root3Alpha?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     s?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     sqrtAlpha?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     sqrtBeta?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    startFourthRootPriceRatio?: Resolver<Maybe<ResolversTypes['BigDecimal']>, ParentType, ContextType>;
     swapFeeManager?: Resolver<Maybe<ResolversTypes['Bytes']>, ParentType, ContextType>;
     symbol?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     tauAlphaX?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -3881,6 +3994,7 @@ export type GqlPoolBaseResolvers<
         | 'GqlPoolLiquidityBootstrapping'
         | 'GqlPoolMetaStable'
         | 'GqlPoolQuantAmmWeighted'
+        | 'GqlPoolReClamm'
         | 'GqlPoolStable'
         | 'GqlPoolWeighted',
         ParentType,
@@ -4527,6 +4641,55 @@ export type GqlPoolQuantAmmWeightedResolvers<
     __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
+export type GqlPoolReClammResolvers<
+    ContextType = ResolverContext,
+    ParentType extends ResolversParentTypes['GqlPoolReClamm'] = ResolversParentTypes['GqlPoolReClamm'],
+> = ResolversObject<{
+    address?: Resolver<ResolversTypes['Bytes'], ParentType, ContextType>;
+    allTokens?: Resolver<Array<ResolversTypes['GqlPoolTokenExpanded']>, ParentType, ContextType>;
+    categories?: Resolver<Maybe<Array<Maybe<ResolversTypes['GqlPoolFilterCategory']>>>, ParentType, ContextType>;
+    centerednessMargin?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
+    chain?: Resolver<ResolversTypes['GqlChain'], ParentType, ContextType>;
+    createTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+    currentFourthRootPriceRatio?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
+    decimals?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+    displayTokens?: Resolver<Array<ResolversTypes['GqlPoolTokenDisplay']>, ParentType, ContextType>;
+    dynamicData?: Resolver<ResolversTypes['GqlPoolDynamicData'], ParentType, ContextType>;
+    endFourthRootPriceRatio?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
+    factory?: Resolver<Maybe<ResolversTypes['Bytes']>, ParentType, ContextType>;
+    hasAnyAllowedBuffer?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+    hasErc4626?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+    hasNestedErc4626?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+    hook?: Resolver<Maybe<ResolversTypes['GqlHook']>, ParentType, ContextType>;
+    id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+    investConfig?: Resolver<ResolversTypes['GqlPoolInvestConfig'], ParentType, ContextType>;
+    lastTimestamp?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+    lastVirtualBalances?: Resolver<Array<ResolversTypes['BigDecimal']>, ParentType, ContextType>;
+    liquidityManagement?: Resolver<Maybe<ResolversTypes['LiquidityManagement']>, ParentType, ContextType>;
+    name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+    nestingType?: Resolver<ResolversTypes['GqlPoolNestingType'], ParentType, ContextType>;
+    owner?: Resolver<Maybe<ResolversTypes['Bytes']>, ParentType, ContextType>;
+    pauseManager?: Resolver<Maybe<ResolversTypes['Bytes']>, ParentType, ContextType>;
+    poolCreator?: Resolver<Maybe<ResolversTypes['Bytes']>, ParentType, ContextType>;
+    poolTokens?: Resolver<Array<ResolversTypes['GqlPoolTokenDetail']>, ParentType, ContextType>;
+    priceRatioUpdateEndTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+    priceRatioUpdateStartTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+    priceShiftRatePerSecond?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
+    protocolVersion?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+    staking?: Resolver<Maybe<ResolversTypes['GqlPoolStaking']>, ParentType, ContextType>;
+    startFourthRootPriceRatio?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
+    swapFeeManager?: Resolver<Maybe<ResolversTypes['Bytes']>, ParentType, ContextType>;
+    symbol?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+    tags?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>;
+    tokens?: Resolver<Array<ResolversTypes['GqlPoolTokenUnion']>, ParentType, ContextType>;
+    type?: Resolver<ResolversTypes['GqlPoolType'], ParentType, ContextType>;
+    userBalance?: Resolver<Maybe<ResolversTypes['GqlPoolUserBalance']>, ParentType, ContextType>;
+    vaultVersion?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+    version?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+    withdrawConfig?: Resolver<ResolversTypes['GqlPoolWithdrawConfig'], ParentType, ContextType>;
+    __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export type GqlPoolSnapshotResolvers<
     ContextType = ResolverContext,
     ParentType extends ResolversParentTypes['GqlPoolSnapshot'] = ResolversParentTypes['GqlPoolSnapshot'],
@@ -4921,6 +5084,7 @@ export type GqlPoolUnionResolvers<
         | 'GqlPoolLiquidityBootstrapping'
         | 'GqlPoolMetaStable'
         | 'GqlPoolQuantAmmWeighted'
+        | 'GqlPoolReClamm'
         | 'GqlPoolStable'
         | 'GqlPoolWeighted',
         ParentType,
@@ -5053,6 +5217,7 @@ export type GqlProtocolMetricsAggregatedResolvers<
     chains?: Resolver<Array<ResolversTypes['GqlProtocolMetricsChain']>, ParentType, ContextType>;
     numLiquidityProviders?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
     poolCount?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
+    surplus24h?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
     swapFee24h?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
     swapVolume24h?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
     totalLiquidity?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
@@ -5069,6 +5234,7 @@ export type GqlProtocolMetricsChainResolvers<
     chainId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     numLiquidityProviders?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
     poolCount?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
+    surplus24h?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
     swapFee24h?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
     swapVolume24h?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
     totalLiquidity?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
@@ -6089,6 +6255,7 @@ export type Resolvers<ContextType = ResolverContext> = ResolversObject<{
     GqlPoolMutationResult?: GqlPoolMutationResultResolvers<ContextType>;
     GqlPoolNestedUnion?: GqlPoolNestedUnionResolvers<ContextType>;
     GqlPoolQuantAmmWeighted?: GqlPoolQuantAmmWeightedResolvers<ContextType>;
+    GqlPoolReClamm?: GqlPoolReClammResolvers<ContextType>;
     GqlPoolSnapshot?: GqlPoolSnapshotResolvers<ContextType>;
     GqlPoolStable?: GqlPoolStableResolvers<ContextType>;
     GqlPoolStaking?: GqlPoolStakingResolvers<ContextType>;

@@ -1,5 +1,16 @@
 # backend
 
+## 1.38.3
+
+### Patch Changes
+
+-   d6d6b00: SOR - Fix weighted pool tokens with rate
+-   dd5d2ec: add surplus to protocol metrics and change calc for fees
+-   bb946f3: SOR - Fix non-erc4626 token rates
+-   132b6f4: add quant-amm apr
+-   e0fed17: add sdeUSD and savUSD APRs on avax
+-   3f85da3: LBP weight syncing
+
 ## 1.38.2
 
 ### Patch Changes

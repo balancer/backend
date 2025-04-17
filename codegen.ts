@@ -26,12 +26,12 @@ const files = {
         ...defaults.types,
     },
     ['modules/sources/subgraphs/balancer-v3-vault/generated/types.ts']: {
-        schema: config.SEPOLIA.subgraphs.balancerV3,
+        schema: config.MAINNET.subgraphs.balancerV3,
         documents: 'modules/sources/subgraphs/balancer-v3-vault/*.graphql',
         ...defaults.types,
     },
     ['modules/sources/subgraphs/balancer-v3-pools/generated/types.ts']: {
-        schema: config.SEPOLIA.subgraphs.balancerPoolsV3,
+        schema: config.MAINNET.subgraphs.balancerPoolsV3,
         documents: 'modules/sources/subgraphs/balancer-v3-pools/*.graphql',
         ...defaults.types,
     },

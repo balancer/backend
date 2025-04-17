@@ -65,6 +65,7 @@ enum PrismaPoolType {
     FX
     COW_AMM
     QUANT_AMM_WEIGHTED
+    RECLAMM
 }
 
 model PrismaPoolDynamicData {
@@ -257,6 +258,7 @@ enum PrismaPoolAprType {
     LOCKING
     AURA
     MERKL
+    QUANT_AMM_UPLIFT
     SURPLUS
     SURPLUS_24H
     SURPLUS_7D
