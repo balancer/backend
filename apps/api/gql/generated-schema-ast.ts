@@ -2684,6 +2684,7 @@ export const schema = gql`
         chains: [GqlProtocolMetricsChain!]!
         numLiquidityProviders: BigInt!
         poolCount: BigInt!
+        surplus24h: BigDecimal!
         swapFee24h: BigDecimal!
         swapVolume24h: BigDecimal!
         totalLiquidity: BigDecimal!
@@ -2696,6 +2697,7 @@ export const schema = gql`
         chainId: String!
         numLiquidityProviders: BigInt!
         poolCount: BigInt!
+        surplus24h: BigDecimal!
         swapFee24h: BigDecimal!
         swapVolume24h: BigDecimal!
         totalLiquidity: BigDecimal!
