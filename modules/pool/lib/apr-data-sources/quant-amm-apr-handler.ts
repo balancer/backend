@@ -50,7 +50,7 @@ export class QuantAmmAprService implements PoolAprService {
         for (const pool of poolsExpanded) {
             const poolPrices = pricesByToken[pool.address.toLowerCase()];
 
-            if (poolPrices.length === 0 || !pool.dynamicData?.totalLiquidity) {
+            if (!poolPrices || poolPrices.length === 0 || !pool.dynamicData?.totalLiquidity) {
                 continue;
             }
 
