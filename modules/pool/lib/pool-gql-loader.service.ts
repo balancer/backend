@@ -46,7 +46,7 @@ import { Chain, Prisma, PrismaPoolAprType, PrismaUserStakedBalance, PrismaUserWa
 import { fixedNumber } from '../../view-helpers/fixed-number';
 import { chainToChainId as chainToIdMap } from '../../network/chain-id-to-chain';
 import { GithubContentService } from '../../content/github-content.service';
-import { ElementData, FxData, GyroData, StableData, QuantAmmWeightedData } from '../subgraph-mapper';
+import { ElementData, FxData, GyroData, StableData, QuantAmmWeightedData, ReclammData } from '../subgraph-mapper';
 import { LBPoolData } from '../pool-data';
 import { ZERO_ADDRESS } from '@balancer/sdk';
 import { tokenService } from '../../token/token.service';
@@ -839,6 +839,12 @@ export class PoolGqlLoaderService {
                     ...mappedData,
                     quantAmmWeightedParams: typeData as QuantAmmWeightedData,
                 };
+            case 'RECLAMM':
+                return {
+                    ...poolWithoutTypeData,
+                    ...(typeData as ReclammData),
+                    ...mappedData,
+                };
         }
 
         return {
@@ -964,6 +970,13 @@ export class PoolGqlLoaderService {
                     ...mappedData,
                     quantAmmWeightedParams: typeData as QuantAmmWeightedData,
                     weightSnapshots: quantWeightSnapshots,
+                };
+            case 'RECLAMM':
+                return {
+                    __typename: 'GqlPoolReClamm',
+                    ...poolWithoutTypeData,
+                    ...(typeData as ReclammData),
+                    ...mappedData,
                 };
         }
 

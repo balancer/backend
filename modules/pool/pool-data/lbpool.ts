@@ -1,10 +1,10 @@
 import { VaultPoolFragment } from '../../sources/subgraphs/balancer-v3-vault/generated/types';
-import { SepoliaTypePoolFragment } from '../../sources/subgraphs/balancer-v3-pools/generated/types';
+import { TypePoolFragment } from '../../sources/subgraphs/balancer-v3-pools/generated/types';
 import { formatEther } from 'viem';
 
 export type LBPoolData = ReturnType<typeof lbPool>;
 
-export const lbPool = (pool: SepoliaTypePoolFragment & VaultPoolFragment) => {
+export const lbPool = (pool: TypePoolFragment & VaultPoolFragment) => {
     const params = pool.lbpParams!;
     const tokens = pool.tokens;
 
