@@ -1,6 +1,6 @@
-import { SepoliaTypePoolFragment } from '../../sources/subgraphs/balancer-v3-pools/generated/types';
+import { TypePoolFragment } from '../../sources/subgraphs/balancer-v3-pools/generated/types';
 
-export const quantAmmWeighted = (pool: SepoliaTypePoolFragment) => {
+export const quantAmmWeighted = (pool: TypePoolFragment) => {
     const params = pool.quantAMMWeightedParams!;
 
     return {
