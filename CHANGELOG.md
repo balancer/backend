@@ -1,5 +1,15 @@
 # backend
 
+## 1.39.0
+
+### Minor Changes
+
+-   33e8fe3: add reclamm
+
+### Patch Changes
+
+-   7ecf9be: SOR - Fix underlying token not found
+
 ## 1.38.3
 
 ### Patch Changes
