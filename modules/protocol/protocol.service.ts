@@ -7,6 +7,7 @@ import { networkContext } from '../network/network-context.service';
 import { GqlProtocolMetricsAggregated, GqlProtocolMetricsChain } from '../../apps/api/gql/generated-schema';
 import axios from 'axios';
 import config from '../../config';
+import { SwapEvent } from '../../prisma/prisma-types';
 
 interface LatestSyncedBlocks {
     userWalletSyncBlock: string;
@@ -38,6 +39,7 @@ export class ProtocolService {
         const swapVolume24h = _.sumBy(chainMetrics, (metrics) => parseFloat(metrics.swapVolume24h));
         const swapFee24h = _.sumBy(chainMetrics, (metrics) => parseFloat(metrics.swapFee24h));
         const yieldCapture24h = _.sumBy(chainMetrics, (metrics) => parseFloat(metrics.yieldCapture24h));
+        const surplus24h = _.sumBy(chainMetrics, (metrics) => parseFloat(metrics.surplus24h));
         const numLiquidityProviders = _.sumBy(chainMetrics, (metrics) => parseInt(metrics.numLiquidityProviders));
 
         return {
@@ -48,6 +50,7 @@ export class ProtocolService {
             swapVolume24h: `${swapVolume24h}`,
             swapFee24h: `${swapFee24h}`,
             yieldCapture24h: `${yieldCapture24h}`,
+            surplus24h: `${surplus24h}`,
             numLiquidityProviders: `${numLiquidityProviders}`,
             chains: chainMetrics,
         };
@@ -96,7 +99,7 @@ export class ProtocolService {
         const poolCount = pools.length;
 
         const swaps = await prisma.prismaPoolEvent.findMany({
-            select: { poolId: true, valueUSD: true, blockTimestamp: true },
+            select: { poolId: true, valueUSD: true, blockTimestamp: true, payload: true },
             where: { blockTimestamp: { gte: oneDayAgo }, chain, type: 'SWAP' },
         });
         const filteredSwaps = swaps.filter((swap) => pools.find((pool) => pool.id === swap.poolId));
@@ -108,13 +111,10 @@ export class ProtocolService {
 
         const totalLiquidity = _.sumBy(pools, (pool) => (!pool.dynamicData ? 0 : pool.dynamicData.totalLiquidity));
         const swapVolume24h = _.sumBy(filteredSwaps, (swap) => swap.valueUSD);
-        const swapFee24h = _.sumBy(filteredSwaps, (swap) => {
-            const pool = pools.find((pool) => pool.id === swap.poolId);
-
-            return parseFloat(pool?.dynamicData?.swapFee || '0') * swap.valueUSD;
-        });
+        const swapFee24h = _.sumBy(filteredSwaps, (swap) => parseFloat((swap as SwapEvent).payload.fee.valueUSD));
 
         const yieldCapture24h = _.sumBy(pools, (pool) => (!pool.dynamicData ? 0 : pool.dynamicData.yieldCapture24h));
+        const surplus24 = _.sumBy(pools, (pool) => (!pool.dynamicData ? 0 : pool.dynamicData.surplus24h));
 
         const protocolSwapFees24h = _.sumBy(pools, (pool) =>
             !pool.dynamicData ? 0 : pool.dynamicData.protocolFees24h,
@@ -136,6 +136,7 @@ export class ProtocolService {
             swapVolume24h: `${swapVolume24h}`,
             swapFee24h: `${swapFee24h}`,
             yieldCapture24h: `${yieldCapture24h}`,
+            surplus24h: `${surplus24}`,
             protocolSwapFee24h: `${protocolSwapFees24h}`,
             protocolYieldCapture24h: `${protocolYieldCapture24h}`,
             numLiquidityProviders: `${holdersQueryResponse._sum.holdersCount || '0'}`,
