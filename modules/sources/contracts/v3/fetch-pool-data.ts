@@ -93,7 +93,7 @@ export const poolDataCalls = (pool: string, vault: string, blockNumber: bigint) 
                 index: i,
                 address: token.toLowerCase(),
                 balance: formatUnits(poolTokenInfo[2][i], decimals[i]),
-                exemptFromProtocolYieldFee: poolTokenInfo[1][i].paysYieldFees,
+                exemptFromProtocolYieldFee: !poolTokenInfo[1][i].paysYieldFees,
                 priceRateProvider: poolTokenInfo[1][i].rateProvider.toLowerCase(),
                 priceRate: formatEther(poolTokenRates ? poolTokenRates[1][i] : 1000000000000000000n),
                 scalingFactor: String(poolTokenRates ? poolTokenRates[0][i] : 1000000000000000000n),
