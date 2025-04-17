@@ -53,12 +53,12 @@ describe('sor debugging', () => {
 
         const swaps = await sorService.getSorSwapPaths({
             chain,
-            tokenIn: '0x039e2fB66102314Ce7b64Ce5Ce3E5183bc94aD38', // wS
-            tokenOut: '0x29219dd400f2Bf60E5a23d13Be72B486D4038894', // USDC.e
+            tokenIn: '0xfa85fe5a8f5560e9039c04f2b0a90de1415abd70', // wanS
+            tokenOut: '0x871a101dcf22fe4fe37be7b654098c801cba1c88', // beS
             swapType: 'EXACT_IN',
-            swapAmount: '0.001',
+            swapAmount: '10',
             useProtocolVersion,
-            poolIds: ['0x0af8ea4de2ecfb962cdbb66033a46afe99836994'],
+            // poolIds: ['0x5cd1ab566d0f03c6aab84b96f6076a276390c0bd'],
         });
 
         console.log(swaps.returnAmount);
