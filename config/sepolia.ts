@@ -12,11 +12,11 @@ export default <NetworkData>{
     },
     subgraphs: {
         startDate: '2023-05-03',
-        cowAmm: 'https://api.studio.thegraph.com/query/75376/balancer-cow-amm-sepolia/version/latest',
-        balancer: 'https://api.studio.thegraph.com/query/24660/balancer-sepolia-v2/version/latest',
-        balancerV3: 'https://api.studio.thegraph.com/query/75376/balancer-v3-sepolia/version/latest',
-        balancerPoolsV3: 'https://api.studio.thegraph.com/query/75376/balancer-pools-v3-sepolia/version/latest',
-        gauge: `https://api.studio.thegraph.com/query/24660/balancer-gauges-sepolia/version/latest`,
+        cowAmm: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmeqeR1YL7xfB2Z7DaykE5Xh1YGGS1AGuoF4qUxSa58K2D`,
+        balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmPa1RR8QNnrdR7paNAAf99TcfugmE25kBApBy3Deonz6S`,
+        balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmRVsoQT4BtfgZ5x6QW1DbhhBwdM8daGe2T6XxuCZq352H`,
+        balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmcsSJRbBoLYHbKnoFKf4VhzuJMbsGCsohsF1DUop4py5h`,
+        gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmWZ2zNHK93m4f8SHvhjy2T5x3NxjfZe7z1rGQSwhXH75Q`,
     },
     eth: {
         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',

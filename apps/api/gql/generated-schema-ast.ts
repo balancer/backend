@@ -679,6 +679,11 @@ export const schema = gql`
         NESTED
 
         """
+        APR calculated for QUANT-AMM pools based on performance measurements over a month
+        """
+        QUANT_AMM_UPLIFT
+
+        """
         Staking reward APR in a pool from a reward token.
         """
         STAKING
@@ -2679,6 +2684,7 @@ export const schema = gql`
         chains: [GqlProtocolMetricsChain!]!
         numLiquidityProviders: BigInt!
         poolCount: BigInt!
+        surplus24h: BigDecimal!
         swapFee24h: BigDecimal!
         swapVolume24h: BigDecimal!
         totalLiquidity: BigDecimal!
@@ -2691,6 +2697,7 @@ export const schema = gql`
         chainId: String!
         numLiquidityProviders: BigInt!
         poolCount: BigInt!
+        surplus24h: BigDecimal!
         swapFee24h: BigDecimal!
         swapVolume24h: BigDecimal!
         totalLiquidity: BigDecimal!

@@ -32,6 +32,7 @@ import { updateVolumeAndFees } from '../../modules/actions/pool/update-volume-an
 import { TokenController } from '../../modules/controllers/token-controller';
 import { SubgraphMonitorController } from '../../modules/controllers/subgraph-monitor-controller';
 import config from '../../config';
+import { LBPController } from '../../modules/controllers/lbp-controller';
 
 const runningJobs: Set<string> = new Set();
 
@@ -433,8 +434,14 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
                 next,
             );
             break;
-        case 'quant-amm-sync-weights':
-            await runIfNotAlreadyRunning(name, chainId, () => QuantAmmController.syncWeights(chain), res, next);
+        case 'sync-weights':
+            await runIfNotAlreadyRunning(
+                name,
+                chainId,
+                () => Promise.all([QuantAmmController.syncWeights(chain), LBPController.syncWeights(chain)]),
+                res,
+                next,
+            );
             break;
         default:
             res.sendStatus(400);

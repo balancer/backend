@@ -14,8 +14,8 @@ import { Prisma } from '@prisma/client';
 import { tokensTransformer } from '../sources/transformers';
 
 test('debug aprs', async () => {
-    const chain = 'MAINNET';
-    const chainId = '1';
+    const chain = 'SEPOLIA';
+    const chainId = '11155111';
 
     initRequestScopedContext();
     setRequestScopedContextValue('chainId', chainId);
@@ -23,7 +23,7 @@ test('debug aprs', async () => {
     //only do once before starting to debug
     // await PoolController().reloadPoolsV3(chain);
     // await PoolController().syncOnchainDataForAllPoolsV2(chain);
-    await PoolController().updateLiquidityValuesForActivePools(chain);
+    // await PoolController().updateLiquidityValuesForActivePools(chain);
     // await poolService.reloadStakingForAllPools(['GAUGE'], chain);
     // await userService.initStakedBalances(['GAUGE'], chain);
     // // await CowAmmController().reloadPools('MAINNET');
@@ -47,7 +47,7 @@ test('debug aprs', async () => {
         console.log(e);
     }
     const aprs = await prisma.prismaPoolAprItem.findMany({
-        where: { chain: chain, poolId: '0x64b84023cfe8397df83c67eaccc2c03ecda4aee5' },
+        where: { chain: chain, poolId: '0xe95ffe489b6b7ea91eb46c48329113b8aefb73c5' },
     });
     console.log(aprs);
 
