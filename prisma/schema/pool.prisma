@@ -65,6 +65,7 @@ enum PrismaPoolType {
     FX
     COW_AMM
     QUANT_AMM_WEIGHTED
+    RECLAMM
 }
 
 model PrismaPoolDynamicData {

@@ -1854,74 +1854,6 @@ export type TypePoolFragment = {
         z: string;
         dSq: string;
     } | null;
-};
-
-export type PoolsQueryVariables = Exact<{
-    skip?: InputMaybe<Scalars['Int']>;
-    first?: InputMaybe<Scalars['Int']>;
-    orderBy?: InputMaybe<Pool_OrderBy>;
-    orderDirection?: InputMaybe<OrderDirection>;
-    where?: InputMaybe<Pool_Filter>;
-    block?: InputMaybe<Block_Height>;
-}>;
-
-export type PoolsQuery = {
-    __typename?: 'Query';
-    pools: Array<{
-        __typename?: 'Pool';
-        id: string;
-        address: string;
-        factory: { __typename?: 'Factory'; id: string; type: PoolType; version: number };
-        stableParams?: { __typename?: 'StableParams'; amp: string } | null;
-        stableSurgeParams?: { __typename?: 'StableSurgeParams'; amp: string } | null;
-        weightedParams?: { __typename?: 'WeightedParams'; weights: Array<string> } | null;
-        gyro2Params?: { __typename?: 'Gyro2Params'; sqrtAlpha: string; sqrtBeta: string } | null;
-        gyroEParams?: {
-            __typename?: 'GyroEParams';
-            alpha: string;
-            beta: string;
-            c: string;
-            s: string;
-            lambda: string;
-            tauAlphaX: string;
-            tauAlphaY: string;
-            tauBetaX: string;
-            tauBetaY: string;
-            u: string;
-            v: string;
-            w: string;
-            z: string;
-            dSq: string;
-        } | null;
-    }>;
-};
-
-export type SepoliaTypePoolFragment = {
-    __typename?: 'Pool';
-    id: string;
-    address: string;
-    factory: { __typename?: 'Factory'; id: string; type: PoolType; version: number };
-    stableParams?: { __typename?: 'StableParams'; amp: string } | null;
-    stableSurgeParams?: { __typename?: 'StableSurgeParams'; amp: string } | null;
-    weightedParams?: { __typename?: 'WeightedParams'; weights: Array<string> } | null;
-    gyro2Params?: { __typename?: 'Gyro2Params'; sqrtAlpha: string; sqrtBeta: string } | null;
-    gyroEParams?: {
-        __typename?: 'GyroEParams';
-        alpha: string;
-        beta: string;
-        c: string;
-        s: string;
-        lambda: string;
-        tauAlphaX: string;
-        tauAlphaY: string;
-        tauBetaX: string;
-        tauBetaY: string;
-        u: string;
-        v: string;
-        w: string;
-        z: string;
-        dSq: string;
-    } | null;
     quantAMMWeightedParams?: {
         __typename?: 'QuantAMMWeightedParams';
         oracleStalenessThreshold: string;
@@ -1957,9 +1889,21 @@ export type SepoliaTypePoolFragment = {
         projectTokenStartWeight: string;
         projectTokenEndWeight: string;
     } | null;
+    reClammParams?: {
+        __typename?: 'ReClammParams';
+        lastTimestamp: string;
+        lastVirtualBalances: Array<string>;
+        priceShiftDailyRateInSeconds: string;
+        centerednessMargin: string;
+        currentFourthRootPriceRatio: string;
+        startFourthRootPriceRatio: string;
+        endFourthRootPriceRatio: string;
+        priceRatioUpdateStartTime: string;
+        priceRatioUpdateEndTime: string;
+    } | null;
 };
 
-export type SepoliaPoolsQueryVariables = Exact<{
+export type PoolsQueryVariables = Exact<{
     skip?: InputMaybe<Scalars['Int']>;
     first?: InputMaybe<Scalars['Int']>;
     orderBy?: InputMaybe<Pool_OrderBy>;
@@ -1968,7 +1912,7 @@ export type SepoliaPoolsQueryVariables = Exact<{
     block?: InputMaybe<Block_Height>;
 }>;
 
-export type SepoliaPoolsQuery = {
+export type PoolsQuery = {
     __typename?: 'Query';
     pools: Array<{
         __typename?: 'Pool';
@@ -2031,6 +1975,18 @@ export type SepoliaPoolsQuery = {
             projectTokenStartWeight: string;
             projectTokenEndWeight: string;
         } | null;
+        reClammParams?: {
+            __typename?: 'ReClammParams';
+            lastTimestamp: string;
+            lastVirtualBalances: Array<string>;
+            priceShiftDailyRateInSeconds: string;
+            centerednessMargin: string;
+            currentFourthRootPriceRatio: string;
+            startFourthRootPriceRatio: string;
+            endFourthRootPriceRatio: string;
+            priceRatioUpdateStartTime: string;
+            priceRatioUpdateEndTime: string;
+        } | null;
     }>;
 };
 
@@ -2047,46 +2003,6 @@ export const FactoryFragmentDoc = gql`
 `;
 export const TypePoolFragmentDoc = gql`
     fragment TypePool on Pool {
-        id
-        address
-        factory {
-            id
-            type
-            version
-        }
-        stableParams {
-            amp
-        }
-        stableSurgeParams {
-            amp
-        }
-        weightedParams {
-            weights
-        }
-        gyro2Params {
-            sqrtAlpha
-            sqrtBeta
-        }
-        gyroEParams {
-            alpha
-            beta
-            c
-            s
-            lambda
-            tauAlphaX
-            tauAlphaY
-            tauBetaX
-            tauBetaY
-            u
-            v
-            w
-            z
-            dSq
-        }
-    }
-`;
-export const SepoliaTypePoolFragmentDoc = gql`
-    fragment SepoliaTypePool on Pool {
         id
         address
         factory {
@@ -2155,6 +2071,17 @@ export const SepoliaTypePoolFragmentDoc = gql`
             projectTokenStartWeight
             projectTokenEndWeight
         }
+        reClammParams {
+            lastTimestamp
+            lastVirtualBalances
+            priceShiftDailyRateInSeconds
+            centerednessMargin
+            currentFourthRootPriceRatio
+            startFourthRootPriceRatio
+            endFourthRootPriceRatio
+            priceRatioUpdateStartTime
+            priceRatioUpdateEndTime
+        }
     }
 `;
 export const ChangedPoolsDocument = gql`
@@ -2196,28 +2123,6 @@ export const PoolsDocument = gql`
         }
     }
     ${TypePoolFragmentDoc}
-`;
-export const SepoliaPoolsDocument = gql`
-    query SepoliaPools(
-        $skip: Int
-        $first: Int
-        $orderBy: Pool_orderBy
-        $orderDirection: OrderDirection
-        $where: Pool_filter
-        $block: Block_height
-    ) {
-        pools(
-            skip: $skip
-            first: $first
-            orderBy: $orderBy
-            orderDirection: $orderDirection
-            where: $where
-            block: $block
-        ) {
-            ...SepoliaTypePool
-        }
-    }
-    ${SepoliaTypePoolFragmentDoc}
 `;
 
 export type SdkFunctionWrapper = <T>(
@@ -2266,20 +2171,6 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
                         ...wrappedRequestHeaders,
                     }),
                 'Pools',
-                'query',
-            );
-        },
-        SepoliaPools(
-            variables?: SepoliaPoolsQueryVariables,
-            requestHeaders?: Dom.RequestInit['headers'],
-        ): Promise<SepoliaPoolsQuery> {
-            return withWrapper(
-                (wrappedRequestHeaders) =>
-                    client.request<SepoliaPoolsQuery>(SepoliaPoolsDocument, variables, {
-                        ...requestHeaders,
-                        ...wrappedRequestHeaders,
-                    }),
-                'SepoliaPools',
                 'query',
             );
         },

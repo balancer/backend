@@ -13,66 +13,6 @@ fragment TypePool on Pool {
     address
     factory {
         id
-        # address
-        type
-        version
-    }
-    stableParams {
-        amp
-    }
-    stableSurgeParams {
-        amp
-    }
-    weightedParams {
-        weights
-    }
-    gyro2Params {
-        sqrtAlpha
-        sqrtBeta
-    }
-    gyroEParams {
-        alpha
-        beta
-        c
-        s
-        lambda
-        tauAlphaX
-        tauAlphaY
-        tauBetaX
-        tauBetaY
-        u
-        v
-        w
-        z
-        dSq
-    }
-}
-
-query Pools(
-    $skip: Int
-    $first: Int
-    $orderBy: Pool_orderBy
-    $orderDirection: OrderDirection
-    $where: Pool_filter
-    $block: Block_height
-) {
-    pools(
-        skip: $skip
-        first: $first
-        orderBy: $orderBy
-        orderDirection: $orderDirection
-        where: $where
-        block: $block
-    ) {
-        ...TypePool
-    }
-}
-
-fragment SepoliaTypePool on Pool {
-    id
-    address
-    factory {
-        id
         type
         version
     }
@@ -137,9 +77,20 @@ fragment SepoliaTypePool on Pool {
         projectTokenStartWeight
         projectTokenEndWeight
     }
+    reClammParams {
+        lastTimestamp
+        lastVirtualBalances
+        priceShiftDailyRateInSeconds
+        centerednessMargin
+        currentFourthRootPriceRatio
+        startFourthRootPriceRatio
+        endFourthRootPriceRatio
+        priceRatioUpdateStartTime
+        priceRatioUpdateEndTime
+    }
 }
 
-query SepoliaPools(
+query Pools(
     $skip: Int
     $first: Int
     $orderBy: Pool_orderBy
@@ -155,6 +106,6 @@ query SepoliaPools(
         where: $where
         block: $block
     ) {
-        ...SepoliaTypePool
+        ...TypePool
     }
 }
