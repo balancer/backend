@@ -108,8 +108,6 @@ export class LiquidityBootstrappingPool {
             functionName: 'getLBPoolDynamicData',
         } as const;
 
-        console.log('HELLO');
-
         const tokenRatesCall = {
             address: this.vault,
             abi: vaultExtensionAbi_V3,
