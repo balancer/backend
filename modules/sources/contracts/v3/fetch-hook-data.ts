@@ -26,6 +26,7 @@ export const fetchHookData = async (
         id: string;
         hook: HookData;
     }[],
+    blockNumber?: bigint,
 ): Promise<{ [poolAddress: string]: Record<string, string> }> => {
     if (pools.length === 0) {
         return {};
@@ -40,6 +41,7 @@ export const fetchHookData = async (
     const results = await multicallViem<Record<string, { pool: { hook: { dynamicData: Record<string, string> } } }>>(
         client,
         calls,
+        blockNumber,
     );
 
     return Object.fromEntries(
