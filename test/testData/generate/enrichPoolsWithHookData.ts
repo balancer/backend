@@ -1,4 +1,4 @@
-import { formatEther, parseEther } from 'viem';
+import { parseEther } from 'viem';
 import config from '../../../config';
 import { chainIdToChain } from '../../../modules/network/chain-id-to-chain';
 import { fetchHookData } from '../../../modules/sources/contracts/v3/fetch-hook-data';
@@ -6,7 +6,7 @@ import { getViemClient } from '../../../modules/sources/viem-client';
 import { HookData } from '../../../prisma/prisma-types';
 import { PoolBase } from '../types';
 
-export async function getHooks(pools: PoolBase[], chainId: number, blockNumber: bigint) {
+export async function enrichPoolsWithHookData(pools: PoolBase[], chainId: number, blockNumber: bigint) {
     const chain = chainIdToChain[chainId];
     const viemClient = getViemClient(chain);
     const hookTypes = config[chain].hooks;

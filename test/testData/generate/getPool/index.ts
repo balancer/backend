@@ -1,11 +1,11 @@
 import type { Address } from 'viem';
-import { createPublicClient, http } from 'viem';
+import { createPublicClient, http, zeroAddress } from 'viem';
 import { WeightedPool } from './weightedPool';
 import { StablePool } from './stablePool';
 import type { PoolBase, TestBase } from '../../types';
 import { BufferPool } from './buffer';
 import { GyroECLPPool } from './gyroECLP';
-import { CHAINS, VAULT_V3, vaultExtensionAbi_V3 } from '@balancer/sdk';
+import { CHAINS, isSameAddress, VAULT_V3, vaultExtensionAbi_V3 } from '@balancer/sdk';
 
 export async function getPool(
     rpcUrl: string,
@@ -63,5 +63,10 @@ async function fetchHookAddress(
             blockNumber,
         }));
     }
+
+    if (!hooksContract || isSameAddress(hooksContract, zeroAddress)) {
+        return undefined;
+    }
+
     return hooksContract;
 }
