@@ -70,7 +70,6 @@ export class WeightedPoolV3 extends BasePoolV3 implements BasePoolMethodsV3 {
                         ),
                     );
                 } else {
-                    console.error('SOR - ERC4626 underlying token not found', poolToken.token.underlyingTokenAddress);
                     poolTokens.push(
                         new WeightedPoolTokenWithRate(
                             token,
