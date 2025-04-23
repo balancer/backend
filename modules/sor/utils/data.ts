@@ -1,4 +1,4 @@
-import { Chain, PrismaPoolType } from '@prisma/client';
+import { Chain, PrismaPoolType, PrismaToken } from '@prisma/client';
 import { PrismaPoolAndHookWithDynamic, HookData } from '../../../prisma/prisma-types';
 import { prisma } from '../../../prisma/prisma-client';
 import { Cache } from 'memory-cache';
@@ -166,6 +166,7 @@ export async function getUnderlyingTokensFromDBPools(
     });
 
     const underlyingTokenAddresses = erc4626ThatCanBeUsedForSwaps.map((data) => data.assetAddress);
+
     const underlyingTokens = await prisma.prismaToken.findMany({
         where: { chain, address: { in: underlyingTokenAddresses } },
     });
@@ -174,11 +175,11 @@ export async function getUnderlyingTokensFromDBPools(
     return underlyingTokens;
 }
 
-function logMissingTokens(underlyingTokens: any[], underlyingTokenAddresses: string[]) {
+function logMissingTokens(underlyingTokens: PrismaToken[], underlyingTokenAddresses: string[]) {
     if (underlyingTokens.length !== underlyingTokenAddresses.length) {
         underlyingTokenAddresses.forEach((address) => {
             if (!underlyingTokens.find((token) => token.address === address)) {
-                console.warn('Underlying token not found for pool', address);
+                console.error(`Underlying prisma token not found for ${address}`);
             }
         });
     }
