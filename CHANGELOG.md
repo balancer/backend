@@ -1,5 +1,12 @@
 # backend
 
+## 1.39.1
+
+### Patch Changes
+
+-   831af6e: filter tokens for quant apr
+-   4272d59: fix error reporting for underlying not found
+
 ## 1.39.0
 
 ### Minor Changes
