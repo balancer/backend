@@ -54,17 +54,23 @@ export class QuantAmmAprService implements PoolAprService {
                 continue;
             }
 
+            const poolTokenAddresses = pool.tokens.map((token) => token.address.toLowerCase());
+
             const oldestEntry = poolPrices[0];
             const newestEntry = poolPrices[poolPrices.length - 1];
 
             const startTokenPrices = pricesByTimestamp[oldestEntry.timestamp].filter(
-                (price) => price.tokenAddress !== pool.address.toLowerCase(),
+                (price) =>
+                    price.tokenAddress !== pool.address.toLowerCase() &&
+                    poolTokenAddresses.includes(price.tokenAddress),
             );
             const startLpPrice = pricesByTimestamp[oldestEntry.timestamp].filter(
                 (price) => price.tokenAddress === pool.address.toLowerCase(),
             )[0];
             const endTokenPrices = pricesByTimestamp[newestEntry.timestamp].filter(
-                (price) => price.tokenAddress !== pool.address.toLowerCase(),
+                (price) =>
+                    price.tokenAddress !== pool.address.toLowerCase() &&
+                    poolTokenAddresses.includes(price.tokenAddress),
             );
             const endLpPrice = pricesByTimestamp[newestEntry.timestamp].filter(
                 (price) => price.tokenAddress === pool.address.toLowerCase(),
