@@ -14,6 +14,7 @@ export type TestBase = {
 export type PoolBase = {
     poolType: string;
     poolAddress: Address;
+    hook?: { address: string };
 };
 
 type SwapPathTestConfig = TestBase & {

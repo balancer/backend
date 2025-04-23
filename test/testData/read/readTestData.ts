@@ -2,7 +2,7 @@ import { BufferState, GyroECLPState, StableState, WeightedState } from '@balance
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
-import { PrismaPoolAndHookWithDynamic } from '../../../prisma/prisma-types';
+import { HookData, PrismaPoolAndHookWithDynamic } from '../../../prisma/prisma-types';
 import {
     mapGyroPoolStateToPrismaPool,
     mapStablePoolStateToPrismaPool,
@@ -13,6 +13,7 @@ import { Address, isSameAddress } from '@balancer/sdk';
 type PoolBase = {
     poolAddress: string;
     chainId: string;
+    hook?: HookData;
 };
 
 export type WeightedPool = PoolBase & WeightedState;
