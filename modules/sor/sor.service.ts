@@ -1,7 +1,9 @@
+import { Chain } from '@prisma/client';
 import * as Sentry from '@sentry/node';
 import { Address, formatUnits } from 'viem';
 
 import { GqlSorGetSwapPaths, QuerySorGetSwapPathsArgs } from '../../apps/api/gql/generated-schema';
+import config from '../../config';
 import { GetSwapPathsInput, GraphTraversalConfig } from './types';
 import { SOR } from './lib/sor';
 import {
@@ -96,7 +98,7 @@ export class SorService {
             const swapKind = mapSwapKind(input.swapType);
 
             // retry with different max depth if no paths are found
-            let swapOptions = this.buildSwapOptions(DEFAULT_MAX_DEPTH);
+            let swapOptions = this.buildSwapOptions(DEFAULT_MAX_DEPTH, input.chain);
             let paths = await SOR.getPathsWithPools(
                 tokenIn,
                 tokenOut,
@@ -109,7 +111,7 @@ export class SorService {
             );
 
             if (!paths) {
-                swapOptions = this.buildSwapOptions(DEFAULT_MAX_DEPTH + 1);
+                swapOptions = this.buildSwapOptions(DEFAULT_MAX_DEPTH + 1, input.chain);
                 paths = await SOR.getPathsWithPools(
                     tokenIn,
                     tokenOut,
@@ -139,13 +141,18 @@ export class SorService {
         }
     }
 
-    private buildSwapOptions(maxNonBoostedPathDepth: number): {
+    private buildSwapOptions(
+        maxNonBoostedPathDepth: number,
+        chain: Chain,
+    ): {
         graphTraversalConfig: GraphTraversalConfig;
+        rpcUrl: string;
     } {
         return {
             graphTraversalConfig: {
                 maxNonBoostedPathDepth,
             },
+            rpcUrl: config[chain].rpcUrl,
         };
     }
 

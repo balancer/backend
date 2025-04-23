@@ -9,6 +9,7 @@ interface FundManagement {
 
 export interface SorSwapOptions {
     block?: bigint;
+    rpcUrl?: string;
     slippage?: bigint;
     funds?: FundManagement;
     deadline?: bigint;

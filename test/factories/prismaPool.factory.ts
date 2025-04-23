@@ -4,8 +4,8 @@ import { prismaPoolTokenFactory } from './prismaToken.factory';
 import { createRandomAddress } from '../utils';
 import { Chain, PrismaPoolType } from '@prisma/client';
 import { prismaPoolDynamicDataFactory } from './prismaPoolDynamicData.factory';
-import { LiquidityManagement } from '../../modules/sor/types';
-import { GyroEParams } from '../../modules/sources/subgraphs/balancer-v3-pools/generated/types';
+import { GyroEParams, ReClammParams } from '../../modules/sources/subgraphs/balancer-v3-pools/generated/types';
+import { ReclammData } from '../../modules/pool/subgraph-mapper';
 
 class PrismaPoolFactory extends Factory<PrismaPoolAndHookWithDynamic> {
     stable(amp?: string) {
@@ -13,6 +13,9 @@ class PrismaPoolFactory extends Factory<PrismaPoolAndHookWithDynamic> {
     }
     gyroE(gyroEParams: GyroEParams) {
         return this.params({ id: gyroEParams.id, type: PrismaPoolType.GYROE, typeData: { ...gyroEParams } });
+    }
+    reClamm(reClammData: ReclammData) {
+        return this.params({ type: PrismaPoolType.RECLAMM, typeData: { ...reClammData } });
     }
 }
 

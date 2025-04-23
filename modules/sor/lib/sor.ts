@@ -1,3 +1,6 @@
+import { createPublicClient, http } from 'viem';
+import { CHAINS, SwapKind, Token } from '@balancer/sdk';
+
 import { Router } from './router';
 import { PrismaPoolAndHookWithDynamic } from '../../../prisma/prisma-types';
 import { checkInputs, isLiquidityManagement } from './utils/helpers';
@@ -11,11 +14,10 @@ import {
     StablePool,
     WeightedPool,
 } from './poolsV2';
-import { SwapKind, Token } from '@balancer/sdk';
 import { BasePool } from './poolsV2/basePool';
 import { SorSwapOptions } from './types';
 import { PathWithAmount } from './path';
-import { Gyro2CLPPool, GyroECLPPool, StablePoolV3, WeightedPoolV3 } from './poolsV3';
+import { Gyro2CLPPool, GyroECLPPool, ReClammPool, StablePoolV3, WeightedPoolV3 } from './poolsV3';
 
 export class SOR {
     static async getPathsWithPools(
@@ -29,6 +31,13 @@ export class SOR {
         swapOptions?: Omit<SorSwapOptions, 'graphTraversalConfig.poolIdsToInclude'>,
     ): Promise<PathWithAmount[] | null> {
         const checkedSwapAmount = checkInputs(tokenIn, tokenOut, swapKind, swapAmountEvm);
+
+        // get current block timestamp for ReClamm math
+        const currentTimestamp = await getCurrentBlockTimestamp(
+            tokenIn.chainId,
+            swapOptions?.rpcUrl,
+            swapOptions?.block,
+        );
 
         const basePools: BasePool[] = [];
 
@@ -97,6 +106,9 @@ export class SOR {
                         basePools.push(GyroEPool.fromPrismaPool(prismaPool));
                     }
                     break;
+                case 'RECLAMM':
+                    basePools.push(ReClammPool.fromPrismaPool(prismaPool, underlyingTokens, currentTimestamp));
+                    break;
                 default:
                     console.log('Unsupported pool type');
                     break;
@@ -121,4 +133,14 @@ export class SOR {
 
         return bestPaths;
     }
+}
+
+async function getCurrentBlockTimestamp(chainId: number, rpcUrl?: string, blockNumber?: bigint): Promise<bigint> {
+    const publicClient = createPublicClient({
+        chain: CHAINS[chainId],
+        transport: http(rpcUrl),
+    });
+
+    const block = await publicClient.getBlock(blockNumber ? { blockNumber } : undefined);
+    return block.timestamp;
 }
