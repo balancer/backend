@@ -1,7 +1,4 @@
 export interface YbAprConfig {
-    morpho?: {
-        tokens: { [wrapper: string]: string };
-    };
     aave?: AaveAprConfig;
     avalon?: AvalonAprConfig;
     bloom?: BloomAprConfig;
