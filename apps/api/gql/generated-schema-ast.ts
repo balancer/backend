@@ -3900,12 +3900,22 @@ export const schema = gql`
         Pool ID
         """
         id: ID!
+
+        """
+        Returns all pool tokens, including BPTs and nested pools if there are any. Only one nested level deep.
+        """
+        poolTokens: [GqlPoolTokenDetail!]!
         protocolVersion: Int!
 
         """
         The symbol of the pool.
         """
         symbol: String!
+
+        """
+        List of tags assigned by the team based on external factors
+        """
+        tags: [String]
 
         """
         The tokens inside the pool.
