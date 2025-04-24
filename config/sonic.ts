@@ -174,6 +174,18 @@ export default <NetworkData>{
                 path: 'aavev3-usdc.totalApy',
                 scale: 1,
             },
+            wstkscUSD: {
+                tokenAddress: '0x9fb76f7ce5fceaa2c42887ff441d46095e494206',
+                sourceUrl: 'https://usd-locks-api.rings.money/wrapper/apy',
+                path: 'apy',
+                scale: 1,
+            },
+            wstkscETH: {
+                tokenAddress: '0x24c74b30d1a4261608e84bf5a618693032681dac',
+                sourceUrl: 'https://eth-locks-api.rings.money/wrapper/apy',
+                path: 'apy',
+                scale: 1,
+            },
         },
     },
     datastudio: {
