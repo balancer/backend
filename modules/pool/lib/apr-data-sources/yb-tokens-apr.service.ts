@@ -28,7 +28,6 @@ export class YbTokensAprService implements PoolAprService {
 
         this.underlyingMap = {
             ...aaveTokens,
-            ...(aprConfig.morpho?.tokens || {}),
         };
     }
 
