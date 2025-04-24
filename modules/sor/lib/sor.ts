@@ -1,5 +1,4 @@
-import { createPublicClient, http } from 'viem';
-import { CHAINS, SwapKind, Token } from '@balancer/sdk';
+import { SwapKind, Token } from '@balancer/sdk';
 
 import { Router } from './router';
 import { PrismaPoolAndHookWithDynamic } from '../../../prisma/prisma-types';
@@ -33,11 +32,7 @@ export class SOR {
         const checkedSwapAmount = checkInputs(tokenIn, tokenOut, swapKind, swapAmountEvm);
 
         // get current block timestamp for ReClamm math
-        const currentTimestamp = await getCurrentBlockTimestamp(
-            tokenIn.chainId,
-            swapOptions?.rpcUrl,
-            swapOptions?.block,
-        );
+        const currentTimestamp = swapOptions?.currentTimestamp ?? BigInt(Date.now()) / 1000n;
 
         const basePools: BasePool[] = [];
 
@@ -133,14 +128,4 @@ export class SOR {
 
         return bestPaths;
     }
-}
-
-async function getCurrentBlockTimestamp(chainId: number, rpcUrl?: string, blockNumber?: bigint): Promise<bigint> {
-    const publicClient = createPublicClient({
-        chain: CHAINS[chainId],
-        transport: http(rpcUrl),
-    });
-
-    const block = await publicClient.getBlock(blockNumber ? { blockNumber } : undefined);
-    return block.timestamp;
 }

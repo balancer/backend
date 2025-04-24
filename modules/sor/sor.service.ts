@@ -98,7 +98,7 @@ export class SorService {
             const swapKind = mapSwapKind(input.swapType);
 
             // retry with different max depth if no paths are found
-            let swapOptions = this.buildSwapOptions(DEFAULT_MAX_DEPTH, input.chain);
+            let swapOptions = this.buildSwapOptions(DEFAULT_MAX_DEPTH);
             let paths = await SOR.getPathsWithPools(
                 tokenIn,
                 tokenOut,
@@ -111,7 +111,7 @@ export class SorService {
             );
 
             if (!paths) {
-                swapOptions = this.buildSwapOptions(DEFAULT_MAX_DEPTH + 1, input.chain);
+                swapOptions = this.buildSwapOptions(DEFAULT_MAX_DEPTH + 1);
                 paths = await SOR.getPathsWithPools(
                     tokenIn,
                     tokenOut,
@@ -141,18 +141,15 @@ export class SorService {
         }
     }
 
-    private buildSwapOptions(
-        maxNonBoostedPathDepth: number,
-        chain: Chain,
-    ): {
+    private buildSwapOptions(maxNonBoostedPathDepth: number): {
+        currentTimestamp: bigint;
         graphTraversalConfig: GraphTraversalConfig;
-        rpcUrl: string;
     } {
         return {
+            currentTimestamp: BigInt(Date.now() / 1000),
             graphTraversalConfig: {
                 maxNonBoostedPathDepth,
             },
-            rpcUrl: config[chain].rpcUrl,
         };
     }
 

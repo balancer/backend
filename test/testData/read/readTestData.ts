@@ -36,7 +36,7 @@ type SwapPath = {
     tokens: string[];
     pools: string[];
     test: string;
-    blockNumber: bigint;
+    currentTimestamp: bigint;
 };
 
 export type TestData = {
@@ -78,6 +78,10 @@ export function readTestData(): TestData {
                 const pools: PrismaPoolAndHookWithDynamic[] = mapPools(jsonData.pools, underlyingTokens);
                 testData.swapPathPools.push(pools);
 
+                const currentTimestamp = (jsonData.pools as { poolType: string; currentTimestamp?: bigint }[]).find(
+                    (pool) => pool.poolType === 'RECLAMM',
+                )?.currentTimestamp;
+
                 // add swapPaths
                 testData.swapPaths.push({
                     ...jsonData.swapPath,
@@ -86,7 +90,7 @@ export function readTestData(): TestData {
                     amountRaw: BigInt(jsonData.swapPath.amountRaw),
                     outputRaw: BigInt(jsonData.swapPath.outputRaw),
                     test: file,
-                    blockNumber: BigInt(jsonData.test.blockNumber),
+                    currentTimestamp,
                 });
             } catch (error) {
                 console.error(`Error parsing JSON file ${file}:`, error);
