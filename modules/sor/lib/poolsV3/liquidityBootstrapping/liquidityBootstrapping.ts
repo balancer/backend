@@ -204,6 +204,7 @@ export class LiquidityBootstrappingPoolV3 extends BasePoolV3 implements BasePool
         // handle add & remove liquidity paths
 
         // call into BasePoolV3 to do the swap
+        // this includes potential for adding and removing liquidity paths
         return super.swapGivenOut(tokenIn, tokenOut, swapAmount);
     }
 
