@@ -78,6 +78,9 @@ export default <NetworkData>{
             oracle: '0x65d946e533748a998b1f0e430803e39a6388f7a1',
             token: '0x5875eee11cf8398102fdad704c9e96607675467a',
         },
+        morpho: {
+            tokens: {},
+        },
         defaultHandlers: {
             ezETH: {
                 tokenAddress: '0x2416092f143378750bb29b79ed961ab195cceea5',

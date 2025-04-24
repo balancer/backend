@@ -116,6 +116,9 @@ export default <NetworkData>{
         },
     },
     ybAprConfig: {
+        morpho: {
+            tokens: {},
+        },
         aave: {
             v2: {
                 subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/8wR23o1zkS4gpLqLNU4kG3JHYVucqGyopL5utGxP2q1N`,
