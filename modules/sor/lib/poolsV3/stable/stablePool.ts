@@ -34,10 +34,10 @@ export class StablePoolV3 extends BasePoolV3 implements BasePoolMethodsV3 {
     ): StablePoolV3 {
         const poolTokens: StablePoolToken[] = [];
 
-        if (!pool.dynamicData) throw new Error('Stable pool has no dynamic data');
+        if (!pool.dynamicData) throw new Error(`${pool.type} pool has no dynamic data`);
 
         for (const poolToken of pool.tokens) {
-            if (!poolToken.priceRate) throw new Error('Stable pool token does not have a price rate');
+            if (!poolToken.priceRate) throw new Error(`${pool.type} pool token does not have a price rate`);
             const token = new Token(
                 parseFloat(chainToIdMap[pool.chain]),
                 poolToken.address as Address,

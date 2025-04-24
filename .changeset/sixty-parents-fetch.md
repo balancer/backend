@@ -2,4 +2,4 @@
 'backend': patch
 ---
 
-SOR - Add suport for ReClamm
+SOR - Add support for ReClamm

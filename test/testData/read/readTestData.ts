@@ -86,7 +86,7 @@ export function readTestData(): TestData {
                     amountRaw: BigInt(jsonData.swapPath.amountRaw),
                     outputRaw: BigInt(jsonData.swapPath.outputRaw),
                     test: file,
-                    blockNumber: jsonData.test.blockNumber,
+                    blockNumber: BigInt(jsonData.test.blockNumber),
                 });
             } catch (error) {
                 console.error(`Error parsing JSON file ${file}:`, error);
