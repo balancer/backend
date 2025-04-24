@@ -142,11 +142,9 @@ export class SorService {
     }
 
     private buildSwapOptions(maxNonBoostedPathDepth: number): {
-        currentTimestamp: bigint;
         graphTraversalConfig: GraphTraversalConfig;
     } {
         return {
-            currentTimestamp: BigInt(Date.now() / 1000),
             graphTraversalConfig: {
                 maxNonBoostedPathDepth,
             },
