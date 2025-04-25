@@ -10,7 +10,8 @@ const query = gql`
                     network
                 }
                 state {
-                    netApy
+                    apy
+                    fee
                     netApyWithoutRewards
                 }
             }
@@ -18,14 +19,26 @@ const query = gql`
     }
 `;
 
+/*
+Morpho APIs results are as follows:
+- apy: Vault APY excluding rewards, before deducting the performance fee. Also NOT including the net APY of the underlying asset.
+- netApy: Vault APY including rewards and underlying yield, after deducting the performance fee.
+- netApyWithoutRewards: Vault APY excluding rewards, after deducting the performance fee. Also NOT including the net APY of the underlying asset.
+- fee: Vault performance fee.
+
+We only want to get the APY for rewards as we account for underlying yield separately inside the YB APR service. 
+We therefore deduct the fee from the apy and subgtract the netApyWithoutRewards from it as both these numbers do NOT include APY from the underlying asset.
+*/
+
 type Vault = {
     address: string;
     chain: {
         network: string;
     };
     state: {
-        netApy: number;
+        apy: number;
         netApyWithoutRewards: number;
+        fee: number;
     };
 };
 
@@ -51,9 +64,7 @@ export const morphoApiClient = {
             items.map((vault: Vault) => [
                 vault.address.toLowerCase(),
                 {
-                    netApy: vault.state.netApy,
-                    netApyWithoutRewards: vault.state.netApyWithoutRewards,
-                    rewardApy: vault.state.netApy - vault.state.netApyWithoutRewards,
+                    rewardApy: vault.state.apy * (1 - vault.state.fee) - vault.state.netApyWithoutRewards,
                     chain: mapMorphoNetworkToChain[vault.chain.network as keyof typeof mapMorphoNetworkToChain],
                 },
             ]),
