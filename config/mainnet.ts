@@ -116,6 +116,7 @@ export default <NetworkData>{
         },
     },
     ybAprConfig: {
+        usdl: true,
         morpho: {
             tokens: {},
         },
