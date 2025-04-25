@@ -1,4 +1,5 @@
 import request, { gql } from 'graphql-request';
+import { applyOnchainDataUpdateCowAmm } from '../../../sources/enrichers/apply-onchain-data';
 
 const url = 'https://blue-api.morpho.org/graphql';
 const query = gql`
@@ -6,13 +7,19 @@ const query = gql`
         vaults(first: 1000, where: { netApy_gte: 0.00001 }) {
             items {
                 address
+                asset {
+                    address
+                    yield {
+                        apr
+                    }
+                }
                 chain {
                     network
                 }
                 state {
-                    apy
                     fee
-                    netApyWithoutRewards
+                    dailyApy
+                    dailyNetApy
                 }
             }
         }
@@ -21,13 +28,12 @@ const query = gql`
 
 /*
 Morpho APIs results are as follows:
-- apy: Vault APY excluding rewards, before deducting the performance fee. Also NOT including the net APY of the underlying asset.
-- netApy: Vault APY including rewards and underlying yield, after deducting the performance fee.
-- netApyWithoutRewards: Vault APY excluding rewards, after deducting the performance fee. Also NOT including the net APY of the underlying asset.
-- fee: Vault performance fee.
+- dailyApy: Vault APY excluding rewards, before deducting the performance fee. Also NOT including the net APY of the underlying asset.
+- dailyNetApy: Vault APY including rewards and underlying yield, after deducting the performance fee.
+
 
 We only want to get the APY for rewards as we account for underlying yield separately inside the YB APR service. 
-We therefore deduct the fee from the apy and subgtract the netApyWithoutRewards from it as both these numbers do NOT include APY from the underlying asset.
+We therefore deduct the fee from the apy and subtract the asset yield apr from it.
 */
 
 type Vault = {
@@ -35,10 +41,16 @@ type Vault = {
     chain: {
         network: string;
     };
+    asset: {
+        address: string;
+        yield?: {
+            apr: number;
+        };
+    };
     state: {
-        apy: number;
-        netApyWithoutRewards: number;
         fee: number;
+        dailyApy: number;
+        dailyNetApy: number;
     };
 };
 
@@ -64,7 +76,13 @@ export const morphoApiClient = {
             items.map((vault: Vault) => [
                 vault.address.toLowerCase(),
                 {
-                    rewardApy: vault.state.apy * (1 - vault.state.fee) - vault.state.netApyWithoutRewards,
+                    dailyApy: vault.state.dailyApy,
+                    dailyNetApy: vault.state.dailyNetApy,
+                    fee: vault.state.fee,
+                    rewardApy:
+                        vault.state.dailyNetApy -
+                        vault.state.dailyApy * (1 - vault.state.fee) -
+                        (vault.asset.yield?.apr || 0),
                     chain: mapMorphoNetworkToChain[vault.chain.network as keyof typeof mapMorphoNetworkToChain],
                 },
             ]),
