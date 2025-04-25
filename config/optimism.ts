@@ -14,7 +14,7 @@ export default <NetworkData>{
     subgraphs: {
         startDate: '2022-01-01',
         balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmWUgkiUM5c3BW1Z51DUkZfnyQfyfesE8p3BRnEtA9vyPL`,
-        balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmXrc8uoiZzPdd5AqEAkHvc9SgMdcQAxrYa74N8buJLKyQ`,
+        balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmQ9dWgFk8sri6C7D16kSxxaU3z1qvZ8H64hYxHvqfEwNh`,
         balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmULj3ABUCkvgppni7iaJ2RRgJJ1gnBw6zNkFo46KbJU36`,
         gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/Qmdtj1ix1nUCRtSoiyF7a3oKMSvrKT8KTEFJdep53EHtRy`,
         aura: 'https://data.aura.finance/graphql',
