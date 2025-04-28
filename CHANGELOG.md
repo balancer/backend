@@ -1,5 +1,15 @@
 # backend
 
+## 1.39.2
+
+### Patch Changes
+
+-   81c74e2: add weights syncing on mainnet
+-   89c7150: use new morpho query and combine reward apr
+-   510f37a: add euler APRs for sonic and avax
+-   5cc93c9: add tags and pooltokens to vebal query
+-   80690df: new vault subgraphs, pools subgraphs for reclamm and quant
+
 ## 1.39.1
 
 ### Patch Changes
