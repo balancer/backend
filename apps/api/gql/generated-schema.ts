@@ -2617,9 +2617,13 @@ export interface GqlVotingPool {
     gauge: GqlVotingGauge;
     /** Pool ID */
     id: Scalars['ID'];
+    /** Returns all pool tokens, including BPTs and nested pools if there are any. Only one nested level deep. */
+    poolTokens: Array<GqlPoolTokenDetail>;
     protocolVersion: Scalars['Int'];
     /** The symbol of the pool. */
     symbol: Scalars['String'];
+    /** List of tags assigned by the team based on external factors */
+    tags?: Maybe<Array<Maybe<Scalars['String']>>>;
     /** The tokens inside the pool. */
     tokens: Array<GqlVotingGaugeToken>;
     /** The type of the pool. */
@@ -5698,8 +5702,10 @@ export type GqlVotingPoolResolvers<
     chain?: Resolver<ResolversTypes['GqlChain'], ParentType, ContextType>;
     gauge?: Resolver<ResolversTypes['GqlVotingGauge'], ParentType, ContextType>;
     id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+    poolTokens?: Resolver<Array<ResolversTypes['GqlPoolTokenDetail']>, ParentType, ContextType>;
     protocolVersion?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     symbol?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+    tags?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>;
     tokens?: Resolver<Array<ResolversTypes['GqlVotingGaugeToken']>, ParentType, ContextType>;
     type?: Resolver<ResolversTypes['GqlPoolType'], ParentType, ContextType>;
     __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;

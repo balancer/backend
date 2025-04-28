@@ -13,7 +13,7 @@ export default <NetworkData>{
     subgraphs: {
         startDate: '2023-06-06',
         balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmNudbtVu2eACfxNpFz37MVwKxxHPh1Lg5MzFKwQZG2xsU`,
-        balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmQmzD7faCa6CgfLQuZiPBucRcAU7G2dVBULkVUDEYyQ43`,
+        balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmS51gX4dWTYEzgt6gKGyHTXm9KUxJwQvo3bRaxp3bfwwC`,
         balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmbYgBXpBSWxFBeWvoUcEekRLKg2UNQYFP14D8zZLVY5DL`,
         gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmQYUD5riMQmA8yzJQjSFonEZxkA9PLEoaxpQVjQdnBPHM`,
         aura: 'https://data.aura.finance/graphql',
@@ -122,6 +122,11 @@ export default <NetworkData>{
                     },
                 },
             },
+        },
+        euler: {
+            vaultsJsonUrl:
+                'https://raw.githubusercontent.com/euler-xyz/euler-labels/refs/heads/master/43114/vaults.json',
+            lensContractAddress: '0xc820c24905c210aefe21dae40723ec28d62c1544',
         },
         defaultHandlers: {
             sAVAX: {

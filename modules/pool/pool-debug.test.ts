@@ -14,8 +14,8 @@ import { Prisma } from '@prisma/client';
 import { tokensTransformer } from '../sources/transformers';
 
 test('debug aprs', async () => {
-    const chain = 'SEPOLIA';
-    const chainId = '11155111';
+    const chain = 'MAINNET';
+    const chainId = '1';
 
     initRequestScopedContext();
     setRequestScopedContextValue('chainId', chainId);
@@ -47,7 +47,7 @@ test('debug aprs', async () => {
         console.log(e);
     }
     const aprs = await prisma.prismaPoolAprItem.findMany({
-        where: { chain: chain, poolId: '0xe95ffe489b6b7ea91eb46c48329113b8aefb73c5' },
+        where: { chain: chain, poolId: '0x10a04efba5b880e169920fd4348527c64fb29d4d' },
     });
     console.log(aprs);
 

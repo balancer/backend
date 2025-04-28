@@ -13,7 +13,7 @@ export default <NetworkData>{
     subgraphs: {
         startDate: '2024-12-12',
         balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmPXaLKDvMMZdjD1ZuMpMSkRjKf8ALLVRtjUpTwWdKSvpQ`,
-        balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmSrSrGEGWz5ZjvgaAZpWYBxpX996vCBcBsbin1mraGiCj`,
+        balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/Qmdz8fMYxntF2Rjmp8HzjE2Pv6hkBJw5n5XR4LBPE4HRke`,
         balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmbavWsVRUSFvTTCd2W6jcTyUdXEkTBU86kggJtU2GKgcV`,
         gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmSRNzwTmLu55ZxxyxYULS5T1Kar7upz1jzL5FsMzLpB2e`,
         reliquary: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmUM8aU6H3gFx6JL65GQV5baPPjczU9hUb6VRiDQ1jEp3B`,
@@ -77,6 +77,10 @@ export default <NetworkData>{
     ybAprConfig: {
         sts: {
             token: '0xe5da20f15420ad15de0fa650600afc998bbe3955',
+        },
+        euler: {
+            vaultsJsonUrl: 'https://raw.githubusercontent.com/euler-xyz/euler-labels/refs/heads/master/146/vaults.json',
+            lensContractAddress: '0xc3a705ea6e339a53a7d301d3c5d7e6f499a9366a',
         },
         beefy: {
             sourceUrl: 'https://api.beefy.finance/apy/',
@@ -144,35 +148,19 @@ export default <NetworkData>{
                 path: 'apy',
                 isIbYield: true,
             },
-            vicunaStS: {
-                tokenAddress: '0xdb1e39fac2eeeedb49198735b12a8e598a84510c',
-                sourceUrl: 'https://vicuna.orthae.xyz/apy/breakdown',
-                path: 'aavev3-sts.totalApy',
+            wstkscUSD: {
+                tokenAddress: '0x9fb76f7ce5fceaa2c42887ff441d46095e494206',
+                sourceUrl: 'https://usd-locks-api.rings.money/wrapper/apy',
+                path: 'apy',
                 scale: 1,
+                isIbYield: true,
             },
-            vicunaWS: {
-                tokenAddress: '0x6c2dadffab1714485ad87d1926f4c26e29a957b6',
-                sourceUrl: 'https://vicuna.orthae.xyz/apy/breakdown',
-                path: 'aavev3-ws.totalApy',
+            wstkscETH: {
+                tokenAddress: '0xe8a41c62bb4d5863c6eadc96792cfe90a1f37c47',
+                sourceUrl: 'https://eth-locks-api.rings.money/wrapper/apy',
+                path: 'apy',
                 scale: 1,
-            },
-            vicunaScUSD: {
-                tokenAddress: '0x711a93a8bd6803af0a6122f2de18c1a6ab7cb29c',
-                sourceUrl: 'https://vicuna.orthae.xyz/apy/breakdown',
-                path: 'aavev3-scusd.totalApy',
-                scale: 1,
-            },
-            vicunaUSDT: {
-                tokenAddress: '0xd7c9f62622db85545731f0e4e5d4556ac8a19832',
-                sourceUrl: 'https://vicuna.orthae.xyz/apy/breakdown',
-                path: 'aavev3-usdt.totalApy',
-                scale: 1,
-            },
-            vicunaUSDC: {
-                tokenAddress: '0xef23fdcbd9b36ed99a6c51caa83af549c36601cf',
-                sourceUrl: 'https://vicuna.orthae.xyz/apy/breakdown',
-                path: 'aavev3-usdc.totalApy',
-                scale: 1,
+                isIbYield: true,
             },
         },
     },

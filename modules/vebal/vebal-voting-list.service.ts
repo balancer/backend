@@ -6,7 +6,9 @@ import { oldVeBalAddress, specialVotingGaugeAddresses } from './special-pools/sp
 import { getVeVotingGauges, veGauges, vePools } from './special-pools/ve-pools';
 import { hardCodedPools } from './special-pools/hardcoded-pools';
 import { GqlVotingPool } from '../../apps/api/gql/generated-schema';
-import { Chain } from '@prisma/client';
+import { $Enums, Chain } from '@prisma/client';
+import { JsonValue } from '@prisma/client/runtime/library';
+import { mapPoolToken } from '../pool/lib/pool-gql-mapper-helper';
 
 export class VeBalVotingListService {
     constructor(private votingGauges = new VotingGaugesRepository()) {}
@@ -44,6 +46,7 @@ export class VeBalVotingListService {
                 address: pool.address,
                 type: pool.type,
                 protocolVersion: pool.protocolVersion,
+                tags: pool.categories,
                 tokens: pool.tokens.map((token) => ({
                     address: token.address,
                     weight: token.weight,
@@ -51,6 +54,7 @@ export class VeBalVotingListService {
                     logoURI: token.token.logoURI || '',
                     underlyingTokenAddress: token.token.underlyingTokenAddress,
                 })),
+                poolTokens: pool.tokens.map((token) => mapPoolToken(token)),
                 gauge: {
                     address: votingGauge.id,
                     relativeWeightCap: votingGauge.relativeWeightCap,
@@ -71,8 +75,24 @@ export class VeBalVotingListService {
             },
             include: {
                 tokens: {
+                    orderBy: { index: 'asc' },
                     include: {
-                        token: true,
+                        token: {
+                            include: { types: true },
+                        },
+                        nestedPool: {
+                            include: {
+                                dynamicData: true,
+                                tokens: {
+                                    orderBy: { index: 'asc' },
+                                    include: {
+                                        token: {
+                                            include: { types: true },
+                                        },
+                                    },
+                                },
+                            },
+                        },
                     },
                 },
             },

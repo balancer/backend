@@ -25,8 +25,8 @@ export default <NetworkData>{
         startDate: '2019-04-20',
         cowAmm: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmQ3c9CTJBZdgy3uTLB929ARZucMUCf6piZBDxSgBKnf6m`,
         balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmQ5TT2yYBZgoUxsat3bKmNe5Fr9LW9YAtDs8aeuc1BRhj`,
-        balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmcZiurwdwrNwtTn9daBFkEbiZMwHW3tKMWxTSX7F6oNmd`,
-        balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmV2pHsryT5uWX7BCc2cYLfDKgPq8JTnnqR7tWfpxmhnMz`,
+        balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmXnYPWnuy1FRawu9LUA2pnp27FfXVhzgG1bEZjxfasm2w`,
+        balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmSEDdoTaedGiRwnP4Xv76WN7btuKtiMfDzvMZskQaKwMU`,
         gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmNrMRgSeUUkQsvhE6ExBEPETZ6P2jiJL3SzXftNQcAEcW`,
         aura: 'https://data.aura.finance/graphql',
     },
@@ -118,16 +118,7 @@ export default <NetworkData>{
     ybAprConfig: {
         usdl: true,
         morpho: {
-            tokens: {
-                // Morpho Steakhouse USDC
-                '0xbeef01735c132ada46aa9aa4c54623caa92a64cb': '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
-                // Morpho Coinshift USDL - used to calculate the APR in the YB Tokens APR service
-                '0xbeefc01767ed5086f35decb6c00e6c12bc7476c1': '0x7751e2f4b8ae93ef6b79d86419d42fe3295a4559',
-                // Morpho Steakhouse USDC
-                '0x7204b7dbf9412567835633b6f00c3edc3a8d6330': '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
-                // Morpho Coinshift USDL - used to calculate the APR in the YB Tokens APR service
-                '0xbeefc011e94f43b8b7b455ebab290c7ab4e216f1': '0x7751e2f4b8ae93ef6b79d86419d42fe3295a4559',
-            },
+            tokens: {},
         },
         aave: {
             v2: {
@@ -270,15 +261,6 @@ export default <NetworkData>{
                 tokenAddress: '0xf073bac22dab7faf4a3dd6c6189a70d54110525c',
             },
         ],
-        euler: {
-            subgraphUrl: 'https://api.thegraph.com/subgraphs/name/euler-xyz/euler-mainnet',
-            tokens: {
-                eUSDC: { address: '0xeb91861f8a4e1c12333f42dce8fb0ecdc28da716' },
-                eDAI: { address: '0xe025e3ca2be02316033184551d4d3aa22024d9dc' },
-                eUSDT: { address: '0x4d19f33948b99800b6113ff3e83bec9b537c85d2' },
-                eFRAX: { address: '0x5484451a88a35cd0878a1be177435ca8a0e4054e' },
-            },
-        },
         gearbox: {
             sourceUrl: 'https://charts-server.fly.dev/api/pools',
             tokens: {
