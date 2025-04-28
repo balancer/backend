@@ -239,5 +239,9 @@ export const mainnetNetworkConfig: NetworkConfig = {
             name: 'post-subgraph-lag-metrics',
             interval: every(2, 'minutes'),
         },
+        {
+            name: 'sync-weights',
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(60, 'minutes') : every(10, 'minutes'),
+        },
     ],
 };
