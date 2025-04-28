@@ -107,13 +107,8 @@ export interface SftmxAprConfig {
 }
 
 export interface EulerAprConfig {
-    subgraphUrl: string;
-    tokens: {
-        [tokenName: string]: {
-            address: string;
-            isIbYield?: boolean;
-        };
-    };
+    vaultsJsonUrl: string;
+    lensContractAddress: string;
 }
 
 export interface GearBoxAprConfig {

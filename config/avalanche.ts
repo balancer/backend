@@ -123,6 +123,11 @@ export default <NetworkData>{
                 },
             },
         },
+        euler: {
+            vaultsJsonUrl:
+                'https://raw.githubusercontent.com/euler-xyz/euler-labels/refs/heads/master/43114/vaults.json',
+            lensContractAddress: '0xc820c24905c210aefe21dae40723ec28d62c1544',
+        },
         defaultHandlers: {
             sAVAX: {
                 tokenAddress: '0x2b2c81e08f1af8835a78bb2a90ae924ace0ea4be',

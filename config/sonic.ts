@@ -78,6 +78,10 @@ export default <NetworkData>{
         sts: {
             token: '0xe5da20f15420ad15de0fa650600afc998bbe3955',
         },
+        euler: {
+            vaultsJsonUrl: 'https://raw.githubusercontent.com/euler-xyz/euler-labels/refs/heads/master/146/vaults.json',
+            lensContractAddress: '0xc3a705ea6e339a53a7d301d3c5d7e6f499a9366a',
+        },
         beefy: {
             sourceUrl: 'https://api.beefy.finance/apy/',
             tokens: {
