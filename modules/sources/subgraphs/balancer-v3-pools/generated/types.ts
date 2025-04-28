@@ -1893,7 +1893,6 @@ export type TypePoolFragment = {
         __typename?: 'ReClammParams';
         lastTimestamp: string;
         lastVirtualBalances: Array<string>;
-        priceShiftDailyRateInSeconds: string;
         centerednessMargin: string;
         currentFourthRootPriceRatio: string;
         startFourthRootPriceRatio: string;
@@ -1979,7 +1978,6 @@ export type PoolsQuery = {
             __typename?: 'ReClammParams';
             lastTimestamp: string;
             lastVirtualBalances: Array<string>;
-            priceShiftDailyRateInSeconds: string;
             centerednessMargin: string;
             currentFourthRootPriceRatio: string;
             startFourthRootPriceRatio: string;
@@ -2074,7 +2072,6 @@ export const TypePoolFragmentDoc = gql`
         reClammParams {
             lastTimestamp
             lastVirtualBalances
-            priceShiftDailyRateInSeconds
             centerednessMargin
             currentFourthRootPriceRatio
             startFourthRootPriceRatio

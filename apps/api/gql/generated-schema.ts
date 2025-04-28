@@ -306,6 +306,8 @@ export interface GqlPoolAggregator {
     currentFourthRootPriceRatio?: Maybe<Scalars['BigDecimal']>;
     /** Data specific to gyro pools */
     dSq?: Maybe<Scalars['String']>;
+    /** ReClamm: Represents how fast the pool can move the virtual balances per day */
+    dailyPriceShiftBase?: Maybe<Scalars['BigDecimal']>;
     /** The decimals of the BPT, usually 18 */
     decimals: Scalars['Int'];
     /** Data specific to fx pools */
@@ -347,8 +349,6 @@ export interface GqlPoolAggregator {
     priceRatioUpdateEndTime?: Maybe<Scalars['Int']>;
     /** ReClamm: The timestamp when the update begins */
     priceRatioUpdateStartTime?: Maybe<Scalars['Int']>;
-    /** ReClamm: Represents how fast the pool can move the virtual balances per day */
-    priceShiftRatePerSecond?: Maybe<Scalars['BigDecimal']>;
     /** The protocol version on which the pool is deployed, 1, 2 or 3 */
     protocolVersion: Scalars['Int'];
     /** QuantAmmWeighted specific fields */
@@ -3894,6 +3894,7 @@ export type GqlPoolAggregatorResolvers<
     createTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     currentFourthRootPriceRatio?: Resolver<Maybe<ResolversTypes['BigDecimal']>, ParentType, ContextType>;
     dSq?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    dailyPriceShiftBase?: Resolver<Maybe<ResolversTypes['BigDecimal']>, ParentType, ContextType>;
     decimals?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     delta?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     dynamicData?: Resolver<ResolversTypes['GqlPoolDynamicData'], ParentType, ContextType>;
@@ -3913,7 +3914,6 @@ export type GqlPoolAggregatorResolvers<
     poolTokens?: Resolver<Array<ResolversTypes['GqlPoolTokenDetail']>, ParentType, ContextType>;
     priceRatioUpdateEndTime?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
     priceRatioUpdateStartTime?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-    priceShiftRatePerSecond?: Resolver<Maybe<ResolversTypes['BigDecimal']>, ParentType, ContextType>;
     protocolVersion?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     quantAmmWeightedParams?: Resolver<Maybe<ResolversTypes['QuantAmmWeightedParams']>, ParentType, ContextType>;
     root3Alpha?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;

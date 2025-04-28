@@ -445,6 +445,11 @@ export const schema = gql`
         dSq: String
 
         """
+        ReClamm: Represents how fast the pool can move the virtual balances per day
+        """
+        dailyPriceShiftBase: BigDecimal
+
+        """
         The decimals of the BPT, usually 18
         """
         decimals: Int!
@@ -538,11 +543,6 @@ export const schema = gql`
         ReClamm: The timestamp when the update begins
         """
         priceRatioUpdateStartTime: Int
-
-        """
-        ReClamm: Represents how fast the pool can move the virtual balances per day
-        """
-        priceShiftRatePerSecond: BigDecimal
 
         """
         The protocol version on which the pool is deployed, 1, 2 or 3
