@@ -1505,7 +1505,7 @@ export class PoolGqlLoaderService {
             );
         }
 
-        return aprItems;
+        return filteredItems;
     }
 
     private getPoolInvestConfig(pool: PrismaPoolWithExpandedNesting): GqlPoolInvestConfig {
