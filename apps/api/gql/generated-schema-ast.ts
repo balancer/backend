@@ -194,9 +194,11 @@ export const schema = gql`
         DIRECTIONAL_FEE
         EXIT_FEE
         FEE_TAKING
+        LBP
         LOTTERY
         MEV_TAX
         NFTLIQUIDITY_POSITION
+        RECLAMM
         STABLE_SURGE
         UNKNOWN
         VEBAL_DISCOUNT

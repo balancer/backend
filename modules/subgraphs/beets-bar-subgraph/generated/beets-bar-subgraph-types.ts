@@ -280,52 +280,6 @@ export type QueryUsersArgs = {
     where?: InputMaybe<User_Filter>;
 };
 
-export type Subscription = {
-    __typename?: 'Subscription';
-    /** Access to subgraph metadata */
-    _meta?: Maybe<_Meta_>;
-    bar?: Maybe<Bar>;
-    bars: Array<Bar>;
-    user?: Maybe<User>;
-    users: Array<User>;
-};
-
-export type Subscription_MetaArgs = {
-    block?: InputMaybe<Block_Height>;
-};
-
-export type SubscriptionBarArgs = {
-    block?: InputMaybe<Block_Height>;
-    id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
-};
-
-export type SubscriptionBarsArgs = {
-    block?: InputMaybe<Block_Height>;
-    first?: InputMaybe<Scalars['Int']>;
-    orderBy?: InputMaybe<Bar_OrderBy>;
-    orderDirection?: InputMaybe<OrderDirection>;
-    skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
-    where?: InputMaybe<Bar_Filter>;
-};
-
-export type SubscriptionUserArgs = {
-    block?: InputMaybe<Block_Height>;
-    id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
-};
-
-export type SubscriptionUsersArgs = {
-    block?: InputMaybe<Block_Height>;
-    first?: InputMaybe<Scalars['Int']>;
-    orderBy?: InputMaybe<User_OrderBy>;
-    orderDirection?: InputMaybe<OrderDirection>;
-    skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
-    where?: InputMaybe<User_Filter>;
-};
-
 export type User = {
     __typename?: 'User';
     address: Scalars['Bytes'];
