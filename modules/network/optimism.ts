@@ -125,5 +125,33 @@ export const optimismNetworkConfig: NetworkConfig = {
             name: 'sync-erc4626-unwrap-rate',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(60, 'minutes') : every(20, 'minutes'),
         },
+        {
+            name: 'add-pools-v3',
+            interval: every(30, 'seconds'),
+        },
+        {
+            name: 'sync-pools-v3',
+            interval: every(30, 'seconds'),
+        },
+        {
+            name: 'sync-join-exits-v3',
+            interval: every(1, 'minutes'),
+        },
+        {
+            name: 'sync-swaps-v3',
+            interval: every(1, 'minutes'),
+        },
+        {
+            name: 'sync-snapshots-v3',
+            interval: every(10, 'minutes'),
+        },
+        {
+            name: 'forward-fill-snapshots-v3',
+            interval: every(1, 'hours'),
+        },
+        {
+            name: 'sync-hook-data',
+            interval: every(1, 'hours'),
+        },
     ],
 };
