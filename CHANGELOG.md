@@ -1,5 +1,12 @@
 # backend
 
+## 1.39.3
+
+### Patch Changes
+
+-   a991765: merkl forwarded apr
+-   bcc9b8f: handle if pool is hook
+
 ## 1.39.2
 
 ### Patch Changes
