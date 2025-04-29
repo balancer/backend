@@ -1494,6 +1494,17 @@ export class PoolGqlLoaderService {
             }
         }
 
+        let filteredItems = aprItems;
+        if (pool.type === 'QUANT_AMM_WEIGHTED') {
+            filteredItems = aprItems.filter(
+                (item) =>
+                    item.type == 'QUANT_AMM_UPLIFT' ||
+                    item.type == 'STAKING' ||
+                    item.type == 'STAKING_BOOST' ||
+                    item.type == 'MERKL',
+            );
+        }
+
         return aprItems;
     }
 
