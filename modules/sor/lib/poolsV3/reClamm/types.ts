@@ -1,7 +1,7 @@
 export type ReClammParams = {
     lastTimestamp: bigint;
     lastVirtualBalances: bigint[];
-    priceShiftRatePerSecond: bigint;
+    dailyPriceShiftBase: bigint;
     centerednessMargin: bigint;
     startFourthRootPriceRatio: bigint;
     endFourthRootPriceRatio: bigint;

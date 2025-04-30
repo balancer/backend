@@ -191,7 +191,7 @@ function mapPools(
                     pool.supportsUnbalancedLiquidity === undefined ? true : pool.supportsUnbalancedLiquidity,
                 lastTimestamp: BigInt(pool.lastTimestamp),
                 lastVirtualBalances: pool.lastVirtualBalances.map((b) => BigInt(b)),
-                priceShiftDailyRateInSeconds: BigInt(pool.priceShiftDailyRateInSeconds),
+                dailyPriceShiftBase: BigInt(pool.dailyPriceShiftBase),
                 centerednessMargin: BigInt(pool.centerednessMargin),
                 startFourthRootPriceRatio: BigInt(pool.startFourthRootPriceRatio),
                 endFourthRootPriceRatio: BigInt(pool.endFourthRootPriceRatio),

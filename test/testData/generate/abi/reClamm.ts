@@ -3,12 +3,24 @@ export const reclammAbi = [
         inputs: [
             {
                 components: [
-                    { internalType: 'string', name: 'name', type: 'string' },
-                    { internalType: 'string', name: 'symbol', type: 'string' },
-                    { internalType: 'string', name: 'version', type: 'string' },
+                    {
+                        internalType: 'string',
+                        name: 'name',
+                        type: 'string',
+                    },
+                    {
+                        internalType: 'string',
+                        name: 'symbol',
+                        type: 'string',
+                    },
+                    {
+                        internalType: 'string',
+                        name: 'version',
+                        type: 'string',
+                    },
                     {
                         internalType: 'uint256',
-                        name: 'priceShiftDailyRate',
+                        name: 'dailyPriceShiftExponent',
                         type: 'uint256',
                     },
                     {
@@ -36,41 +48,94 @@ export const reclammAbi = [
                 name: 'params',
                 type: 'tuple',
             },
-            { internalType: 'contract IVault', name: 'vault', type: 'address' },
+            {
+                internalType: 'contract IVault',
+                name: 'vault',
+                type: 'address',
+            },
         ],
         stateMutability: 'nonpayable',
         type: 'constructor',
     },
-    { inputs: [], name: 'AmountOutGreaterThanBalance', type: 'error' },
-    { inputs: [], name: 'BalanceRatioExceedsTolerance', type: 'error' },
-    { inputs: [], name: 'BaseOutOfBounds', type: 'error' },
-    { inputs: [], name: 'ECDSAInvalidSignature', type: 'error' },
     {
-        inputs: [{ internalType: 'uint256', name: 'length', type: 'uint256' }],
+        inputs: [],
+        name: 'AmountOutGreaterThanBalance',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'BalanceRatioExceedsTolerance',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'BaseOutOfBounds',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'DailyPriceShiftExponentTooHigh',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'ECDSAInvalidSignature',
+        type: 'error',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'uint256',
+                name: 'length',
+                type: 'uint256',
+            },
+        ],
         name: 'ECDSAInvalidSignatureLength',
         type: 'error',
     },
     {
-        inputs: [{ internalType: 'bytes32', name: 's', type: 'bytes32' }],
+        inputs: [
+            {
+                internalType: 'bytes32',
+                name: 's',
+                type: 'bytes32',
+            },
+        ],
         name: 'ECDSAInvalidSignatureS',
         type: 'error',
     },
     {
         inputs: [
-            { internalType: 'uint256', name: 'deadline', type: 'uint256' },
+            {
+                internalType: 'uint256',
+                name: 'deadline',
+                type: 'uint256',
+            },
         ],
         name: 'ERC2612ExpiredSignature',
         type: 'error',
     },
     {
         inputs: [
-            { internalType: 'address', name: 'signer', type: 'address' },
-            { internalType: 'address', name: 'owner', type: 'address' },
+            {
+                internalType: 'address',
+                name: 'signer',
+                type: 'address',
+            },
+            {
+                internalType: 'address',
+                name: 'owner',
+                type: 'address',
+            },
         ],
         name: 'ERC2612InvalidSigner',
         type: 'error',
     },
-    { inputs: [], name: 'ExponentOutOfBounds', type: 'error' },
+    {
+        inputs: [],
+        name: 'ExponentOutOfBounds',
+        type: 'error',
+    },
     {
         inputs: [
             {
@@ -85,66 +150,184 @@ export const reclammAbi = [
     {
         inputs: [
             {
+                internalType: 'address',
+                name: 'account',
+                type: 'address',
+            },
+            {
                 internalType: 'uint256',
-                name: 'resolvedStartTime',
+                name: 'currentNonce',
                 type: 'uint256',
             },
-            { internalType: 'uint256', name: 'endTime', type: 'uint256' },
-        ],
-        name: 'GradualUpdateTimeTravel',
-        type: 'error',
-    },
-    {
-        inputs: [
-            { internalType: 'address', name: 'account', type: 'address' },
-            { internalType: 'uint256', name: 'currentNonce', type: 'uint256' },
         ],
         name: 'InvalidAccountNonce',
         type: 'error',
     },
-    { inputs: [], name: 'InvalidCenterednessMargin', type: 'error' },
-    { inputs: [], name: 'InvalidExponent', type: 'error' },
-    { inputs: [], name: 'InvalidInitialPrice', type: 'error' },
-    { inputs: [], name: 'InvalidShortString', type: 'error' },
-    { inputs: [], name: 'InvalidStartTime', type: 'error' },
-    { inputs: [], name: 'NegativeAmountOut', type: 'error' },
-    { inputs: [], name: 'NotImplemented', type: 'error' },
-    { inputs: [], name: 'PoolCenterednessTooLow', type: 'error' },
-    { inputs: [], name: 'PoolNotInitialized', type: 'error' },
-    { inputs: [], name: 'PoolOutsideTargetRange', type: 'error' },
-    { inputs: [], name: 'PriceRatioUpdateDurationTooShort', type: 'error' },
-    { inputs: [], name: 'PriceShiftDailyRateTooHigh', type: 'error' },
-    { inputs: [], name: 'ProductOutOfBounds', type: 'error' },
-    { inputs: [], name: 'ReClammPoolBptRateUnsupported', type: 'error' },
+    {
+        inputs: [],
+        name: 'InvalidCenterednessMargin',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'InvalidExponent',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'InvalidInitialPrice',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'InvalidShortString',
+        type: 'error',
+    },
     {
         inputs: [
-            { internalType: 'uint8', name: 'bits', type: 'uint8' },
-            { internalType: 'uint256', name: 'value', type: 'uint256' },
+            {
+                internalType: 'uint256',
+                name: 'resolvedStartTime',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'endTime',
+                type: 'uint256',
+            },
+        ],
+        name: 'InvalidStartTime',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'InvalidStartTime',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'InvalidToken',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'NegativeAmountOut',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'NotImplemented',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'PoolCenterednessTooLow',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'PoolNotInitialized',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'PoolOutsideTargetRange',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'PriceRatioUpdateDurationTooShort',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'ProductOutOfBounds',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'ReClammPoolBptRateUnsupported',
+        type: 'error',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'uint8',
+                name: 'bits',
+                type: 'uint8',
+            },
+            {
+                internalType: 'uint256',
+                name: 'value',
+                type: 'uint256',
+            },
         ],
         name: 'SafeCastOverflowedUintDowncast',
         type: 'error',
     },
     {
-        inputs: [{ internalType: 'uint256', name: 'value', type: 'uint256' }],
+        inputs: [
+            {
+                internalType: 'uint256',
+                name: 'value',
+                type: 'uint256',
+            },
+        ],
         name: 'SafeCastOverflowedUintToInt',
         type: 'error',
     },
     {
-        inputs: [{ internalType: 'address', name: 'sender', type: 'address' }],
+        inputs: [
+            {
+                internalType: 'address',
+                name: 'sender',
+                type: 'address',
+            },
+        ],
         name: 'SenderIsNotVault',
         type: 'error',
     },
-    { inputs: [], name: 'SenderNotAllowed', type: 'error' },
     {
-        inputs: [{ internalType: 'string', name: 'str', type: 'string' }],
+        inputs: [],
+        name: 'SenderNotAllowed',
+        type: 'error',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'string',
+                name: 'str',
+                type: 'string',
+            },
+        ],
         name: 'StringTooLong',
         type: 'error',
     },
-    { inputs: [], name: 'TokenBalanceTooLow', type: 'error' },
-    { inputs: [], name: 'VaultIsNotLocked', type: 'error' },
-    { inputs: [], name: 'VaultNotSet', type: 'error' },
-    { inputs: [], name: 'WrongInitializationPrices', type: 'error' },
-    { inputs: [], name: 'ZeroDivision', type: 'error' },
+    {
+        inputs: [],
+        name: 'TokenBalanceTooLow',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'VaultIsNotLocked',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'VaultNotSet',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'WrongInitializationPrices',
+        type: 'error',
+    },
+    {
+        inputs: [],
+        name: 'ZeroDivision',
+        type: 'error',
+    },
     {
         anonymous: false,
         inputs: [
@@ -181,6 +364,25 @@ export const reclammAbi = [
             },
         ],
         name: 'CenterednessMarginUpdated',
+        type: 'event',
+    },
+    {
+        anonymous: false,
+        inputs: [
+            {
+                indexed: false,
+                internalType: 'uint256',
+                name: 'dailyPriceShiftExponent',
+                type: 'uint256',
+            },
+            {
+                indexed: false,
+                internalType: 'uint256',
+                name: 'dailyPriceShiftBase',
+                type: 'uint256',
+            },
+        ],
+        name: 'DailyPriceShiftExponentUpdated',
         type: 'event',
     },
     {
@@ -237,25 +439,6 @@ export const reclammAbi = [
         anonymous: false,
         inputs: [
             {
-                indexed: false,
-                internalType: 'uint256',
-                name: 'priceShiftDailyRate',
-                type: 'uint256',
-            },
-            {
-                indexed: false,
-                internalType: 'uint256',
-                name: 'priceShiftDailyRateInSeconds',
-                type: 'uint256',
-            },
-        ],
-        name: 'PriceShiftDailyRateUpdated',
-        type: 'event',
-    },
-    {
-        anonymous: false,
-        inputs: [
-            {
                 indexed: true,
                 internalType: 'address',
                 name: 'from',
@@ -299,66 +482,148 @@ export const reclammAbi = [
     {
         inputs: [],
         name: 'DOMAIN_SEPARATOR',
-        outputs: [{ internalType: 'bytes32', name: '', type: 'bytes32' }],
+        outputs: [
+            {
+                internalType: 'bytes32',
+                name: '',
+                type: 'bytes32',
+            },
+        ],
         stateMutability: 'view',
         type: 'function',
     },
     {
         inputs: [],
         name: 'PERMIT_TYPEHASH',
-        outputs: [{ internalType: 'bytes32', name: '', type: 'bytes32' }],
+        outputs: [
+            {
+                internalType: 'bytes32',
+                name: '',
+                type: 'bytes32',
+            },
+        ],
         stateMutability: 'view',
         type: 'function',
     },
     {
         inputs: [
-            { internalType: 'address', name: 'owner', type: 'address' },
-            { internalType: 'address', name: 'spender', type: 'address' },
+            {
+                internalType: 'address',
+                name: 'owner',
+                type: 'address',
+            },
+            {
+                internalType: 'address',
+                name: 'spender',
+                type: 'address',
+            },
         ],
         name: 'allowance',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
+        ],
         stateMutability: 'view',
         type: 'function',
     },
     {
         inputs: [
-            { internalType: 'address', name: 'spender', type: 'address' },
-            { internalType: 'uint256', name: 'amount', type: 'uint256' },
+            {
+                internalType: 'address',
+                name: 'spender',
+                type: 'address',
+            },
+            {
+                internalType: 'uint256',
+                name: 'amount',
+                type: 'uint256',
+            },
         ],
         name: 'approve',
-        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
+        outputs: [
+            {
+                internalType: 'bool',
+                name: '',
+                type: 'bool',
+            },
+        ],
         stateMutability: 'nonpayable',
         type: 'function',
     },
     {
-        inputs: [{ internalType: 'address', name: 'account', type: 'address' }],
+        inputs: [
+            {
+                internalType: 'address',
+                name: 'account',
+                type: 'address',
+            },
+        ],
         name: 'balanceOf',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
+        ],
         stateMutability: 'view',
         type: 'function',
     },
     {
         inputs: [
-            { internalType: 'uint256[]', name: '', type: 'uint256[]' },
-            { internalType: 'uint256', name: '', type: 'uint256' },
-            { internalType: 'uint256', name: '', type: 'uint256' },
+            {
+                internalType: 'uint256[]',
+                name: '',
+                type: 'uint256[]',
+            },
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
         ],
         name: 'computeBalance',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
+        ],
         stateMutability: 'pure',
         type: 'function',
     },
     {
         inputs: [],
         name: 'computeCurrentFourthRootPriceRatio',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
+        ],
         stateMutability: 'view',
         type: 'function',
     },
     {
         inputs: [],
         name: 'computeCurrentPoolCenteredness',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
+        ],
         stateMutability: 'view',
         type: 'function',
     },
@@ -366,8 +631,16 @@ export const reclammAbi = [
         inputs: [],
         name: 'computeCurrentPriceRange',
         outputs: [
-            { internalType: 'uint256', name: 'minPrice', type: 'uint256' },
-            { internalType: 'uint256', name: 'maxPrice', type: 'uint256' },
+            {
+                internalType: 'uint256',
+                name: 'minPrice',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'maxPrice',
+                type: 'uint256',
+            },
         ],
         stateMutability: 'view',
         type: 'function',
@@ -386,7 +659,11 @@ export const reclammAbi = [
                 name: 'currentVirtualBalanceB',
                 type: 'uint256',
             },
-            { internalType: 'bool', name: 'changed', type: 'bool' },
+            {
+                internalType: 'bool',
+                name: 'changed',
+                type: 'bool',
+            },
         ],
         stateMutability: 'view',
         type: 'function',
@@ -395,7 +672,35 @@ export const reclammAbi = [
         inputs: [],
         name: 'computeInitialBalanceRatio',
         outputs: [
-            { internalType: 'uint256', name: 'balanceRatio', type: 'uint256' },
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'contract IERC20',
+                name: 'referenceToken',
+                type: 'address',
+            },
+            {
+                internalType: 'uint256',
+                name: 'referenceAmountIn',
+                type: 'uint256',
+            },
+        ],
+        name: 'computeInitialBalances',
+        outputs: [
+            {
+                internalType: 'uint256[]',
+                name: 'initialBalances',
+                type: 'uint256[]',
+            },
         ],
         stateMutability: 'view',
         type: 'function',
@@ -407,17 +712,33 @@ export const reclammAbi = [
                 name: 'balancesScaled18',
                 type: 'uint256[]',
             },
-            { internalType: 'enum Rounding', name: 'rounding', type: 'uint8' },
+            {
+                internalType: 'enum Rounding',
+                name: 'rounding',
+                type: 'uint8',
+            },
         ],
         name: 'computeInvariant',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
+        ],
         stateMutability: 'view',
         type: 'function',
     },
     {
         inputs: [],
         name: 'decimals',
-        outputs: [{ internalType: 'uint8', name: '', type: 'uint8' }],
+        outputs: [
+            {
+                internalType: 'uint8',
+                name: '',
+                type: 'uint8',
+            },
+        ],
         stateMutability: 'pure',
         type: 'function',
     },
@@ -425,16 +746,36 @@ export const reclammAbi = [
         inputs: [],
         name: 'eip712Domain',
         outputs: [
-            { internalType: 'bytes1', name: 'fields', type: 'bytes1' },
-            { internalType: 'string', name: 'name', type: 'string' },
-            { internalType: 'string', name: 'version', type: 'string' },
-            { internalType: 'uint256', name: 'chainId', type: 'uint256' },
+            {
+                internalType: 'bytes1',
+                name: 'fields',
+                type: 'bytes1',
+            },
+            {
+                internalType: 'string',
+                name: 'name',
+                type: 'string',
+            },
+            {
+                internalType: 'string',
+                name: 'version',
+                type: 'string',
+            },
+            {
+                internalType: 'uint256',
+                name: 'chainId',
+                type: 'uint256',
+            },
             {
                 internalType: 'address',
                 name: 'verifyingContract',
                 type: 'address',
             },
-            { internalType: 'bytes32', name: 'salt', type: 'bytes32' },
+            {
+                internalType: 'bytes32',
+                name: 'salt',
+                type: 'bytes32',
+            },
             {
                 internalType: 'uint256[]',
                 name: 'extensions',
@@ -446,9 +787,21 @@ export const reclammAbi = [
     },
     {
         inputs: [
-            { internalType: 'address', name: 'owner', type: 'address' },
-            { internalType: 'address', name: 'spender', type: 'address' },
-            { internalType: 'uint256', name: 'amount', type: 'uint256' },
+            {
+                internalType: 'address',
+                name: 'owner',
+                type: 'address',
+            },
+            {
+                internalType: 'address',
+                name: 'spender',
+                type: 'address',
+            },
+            {
+                internalType: 'uint256',
+                name: 'amount',
+                type: 'uint256',
+            },
         ],
         name: 'emitApproval',
         outputs: [],
@@ -457,9 +810,21 @@ export const reclammAbi = [
     },
     {
         inputs: [
-            { internalType: 'address', name: 'from', type: 'address' },
-            { internalType: 'address', name: 'to', type: 'address' },
-            { internalType: 'uint256', name: 'amount', type: 'uint256' },
+            {
+                internalType: 'address',
+                name: 'from',
+                type: 'address',
+            },
+            {
+                internalType: 'address',
+                name: 'to',
+                type: 'address',
+            },
+            {
+                internalType: 'uint256',
+                name: 'amount',
+                type: 'uint256',
+            },
         ],
         name: 'emitTransfer',
         outputs: [],
@@ -467,9 +832,21 @@ export const reclammAbi = [
         type: 'function',
     },
     {
-        inputs: [{ internalType: 'bytes4', name: 'selector', type: 'bytes4' }],
+        inputs: [
+            {
+                internalType: 'bytes4',
+                name: 'selector',
+                type: 'bytes4',
+            },
+        ],
         name: 'getActionId',
-        outputs: [{ internalType: 'bytes32', name: '', type: 'bytes32' }],
+        outputs: [
+            {
+                internalType: 'bytes32',
+                name: '',
+                type: 'bytes32',
+            },
+        ],
         stateMutability: 'view',
         type: 'function',
     },
@@ -494,7 +871,13 @@ export const reclammAbi = [
     {
         inputs: [],
         name: 'getCenterednessMargin',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
+        ],
         stateMutability: 'view',
         type: 'function',
     },
@@ -506,6 +889,32 @@ export const reclammAbi = [
                 internalType: 'uint256[]',
                 name: 'balancesLiveScaled18',
                 type: 'uint256[]',
+            },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'getDailyPriceShiftBase',
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'getDailyPriceShiftExponent',
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
             },
         ],
         stateMutability: 'view',
@@ -579,7 +988,13 @@ export const reclammAbi = [
     {
         inputs: [],
         name: 'getLastTimestamp',
-        outputs: [{ internalType: 'uint32', name: '', type: 'uint32' }],
+        outputs: [
+            {
+                internalType: 'uint32',
+                name: '',
+                type: 'uint32',
+            },
+        ],
         stateMutability: 'view',
         type: 'function',
     },
@@ -604,28 +1019,52 @@ export const reclammAbi = [
     {
         inputs: [],
         name: 'getMaximumInvariantRatio',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
+        ],
         stateMutability: 'pure',
         type: 'function',
     },
     {
         inputs: [],
         name: 'getMaximumSwapFeePercentage',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
+        ],
         stateMutability: 'pure',
         type: 'function',
     },
     {
         inputs: [],
         name: 'getMinimumInvariantRatio',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
+        ],
         stateMutability: 'pure',
         type: 'function',
     },
     {
         inputs: [],
         name: 'getMinimumSwapFeePercentage',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
+        ],
         stateMutability: 'pure',
         type: 'function',
     },
@@ -666,15 +1105,14 @@ export const reclammAbi = [
     },
     {
         inputs: [],
-        name: 'getPriceShiftDailyRateInSeconds',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [],
         name: 'getRate',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
+        ],
         stateMutability: 'pure',
         type: 'function',
     },
@@ -716,7 +1154,7 @@ export const reclammAbi = [
                     },
                     {
                         internalType: 'uint256',
-                        name: 'priceShiftDailyRateInSeconds',
+                        name: 'dailyPriceShiftBase',
                         type: 'uint256',
                     },
                     {
@@ -806,7 +1244,7 @@ export const reclammAbi = [
                     },
                     {
                         internalType: 'uint256',
-                        name: 'initialPriceShiftDailyRate',
+                        name: 'initialDailyPriceShiftExponent',
                         type: 'uint256',
                     },
                     {
@@ -836,7 +1274,7 @@ export const reclammAbi = [
                     },
                     {
                         internalType: 'uint256',
-                        name: 'maxPriceShiftDailyRate',
+                        name: 'maxDailyPriceShiftExponent',
                         type: 'uint256',
                     },
                     {
@@ -861,7 +1299,13 @@ export const reclammAbi = [
     {
         inputs: [],
         name: 'getStaticSwapFeePercentage',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
+        ],
         stateMutability: 'view',
         type: 'function',
     },
@@ -927,7 +1371,11 @@ export const reclammAbi = [
         inputs: [],
         name: 'getVault',
         outputs: [
-            { internalType: 'contract IVault', name: '', type: 'address' },
+            {
+                internalType: 'contract IVault',
+                name: '',
+                type: 'address',
+            },
         ],
         stateMutability: 'view',
         type: 'function',
@@ -942,81 +1390,209 @@ export const reclammAbi = [
     {
         inputs: [],
         name: 'isPoolWithinTargetRange',
-        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
+        outputs: [
+            {
+                internalType: 'bool',
+                name: '',
+                type: 'bool',
+            },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'isPoolWithinTargetRangeUsingCurrentVirtualBalances',
+        outputs: [
+            {
+                internalType: 'bool',
+                name: 'isWithinTargetRange',
+                type: 'bool',
+            },
+            {
+                internalType: 'bool',
+                name: 'virtualBalancesChanged',
+                type: 'bool',
+            },
+        ],
         stateMutability: 'view',
         type: 'function',
     },
     {
         inputs: [],
         name: 'name',
-        outputs: [{ internalType: 'string', name: '', type: 'string' }],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [{ internalType: 'address', name: 'owner', type: 'address' }],
-        name: 'nonces',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        outputs: [
+            {
+                internalType: 'string',
+                name: '',
+                type: 'string',
+            },
+        ],
         stateMutability: 'view',
         type: 'function',
     },
     {
         inputs: [
-            { internalType: 'address', name: '', type: 'address' },
-            { internalType: 'address', name: '', type: 'address' },
-            { internalType: 'enum AddLiquidityKind', name: '', type: 'uint8' },
-            { internalType: 'uint256[]', name: '', type: 'uint256[]' },
+            {
+                internalType: 'address',
+                name: 'owner',
+                type: 'address',
+            },
+        ],
+        name: 'nonces',
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'address',
+                name: '',
+                type: 'address',
+            },
+            {
+                internalType: 'address',
+                name: '',
+                type: 'address',
+            },
+            {
+                internalType: 'enum AddLiquidityKind',
+                name: '',
+                type: 'uint8',
+            },
+            {
+                internalType: 'uint256[]',
+                name: '',
+                type: 'uint256[]',
+            },
             {
                 internalType: 'uint256[]',
                 name: 'amountsInRaw',
                 type: 'uint256[]',
             },
-            { internalType: 'uint256', name: '', type: 'uint256' },
-            { internalType: 'uint256[]', name: '', type: 'uint256[]' },
-            { internalType: 'bytes', name: '', type: 'bytes' },
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256[]',
+                name: '',
+                type: 'uint256[]',
+            },
+            {
+                internalType: 'bytes',
+                name: '',
+                type: 'bytes',
+            },
         ],
         name: 'onAfterAddLiquidity',
         outputs: [
-            { internalType: 'bool', name: '', type: 'bool' },
-            { internalType: 'uint256[]', name: '', type: 'uint256[]' },
+            {
+                internalType: 'bool',
+                name: '',
+                type: 'bool',
+            },
+            {
+                internalType: 'uint256[]',
+                name: '',
+                type: 'uint256[]',
+            },
         ],
         stateMutability: 'nonpayable',
         type: 'function',
     },
     {
         inputs: [
-            { internalType: 'uint256[]', name: '', type: 'uint256[]' },
-            { internalType: 'uint256', name: '', type: 'uint256' },
-            { internalType: 'bytes', name: '', type: 'bytes' },
+            {
+                internalType: 'uint256[]',
+                name: '',
+                type: 'uint256[]',
+            },
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
+            {
+                internalType: 'bytes',
+                name: '',
+                type: 'bytes',
+            },
         ],
         name: 'onAfterInitialize',
-        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
+        outputs: [
+            {
+                internalType: 'bool',
+                name: '',
+                type: 'bool',
+            },
+        ],
         stateMutability: 'nonpayable',
         type: 'function',
     },
     {
         inputs: [
-            { internalType: 'address', name: '', type: 'address' },
-            { internalType: 'address', name: '', type: 'address' },
+            {
+                internalType: 'address',
+                name: '',
+                type: 'address',
+            },
+            {
+                internalType: 'address',
+                name: '',
+                type: 'address',
+            },
             {
                 internalType: 'enum RemoveLiquidityKind',
                 name: '',
                 type: 'uint8',
             },
-            { internalType: 'uint256', name: '', type: 'uint256' },
-            { internalType: 'uint256[]', name: '', type: 'uint256[]' },
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256[]',
+                name: '',
+                type: 'uint256[]',
+            },
             {
                 internalType: 'uint256[]',
                 name: 'amountsOutRaw',
                 type: 'uint256[]',
             },
-            { internalType: 'uint256[]', name: '', type: 'uint256[]' },
-            { internalType: 'bytes', name: '', type: 'bytes' },
+            {
+                internalType: 'uint256[]',
+                name: '',
+                type: 'uint256[]',
+            },
+            {
+                internalType: 'bytes',
+                name: '',
+                type: 'bytes',
+            },
         ],
         name: 'onAfterRemoveLiquidity',
         outputs: [
-            { internalType: 'bool', name: '', type: 'bool' },
-            { internalType: 'uint256[]', name: '', type: 'uint256[]' },
+            {
+                internalType: 'bool',
+                name: '',
+                type: 'bool',
+            },
+            {
+                internalType: 'uint256[]',
+                name: '',
+                type: 'uint256[]',
+            },
         ],
         stateMutability: 'nonpayable',
         type: 'function',
@@ -1075,8 +1651,16 @@ export const reclammAbi = [
                         name: 'router',
                         type: 'address',
                     },
-                    { internalType: 'address', name: 'pool', type: 'address' },
-                    { internalType: 'bytes', name: 'userData', type: 'bytes' },
+                    {
+                        internalType: 'address',
+                        name: 'pool',
+                        type: 'address',
+                    },
+                    {
+                        internalType: 'bytes',
+                        name: 'userData',
+                        type: 'bytes',
+                    },
                 ],
                 internalType: 'struct AfterSwapParams',
                 name: '',
@@ -1085,18 +1669,42 @@ export const reclammAbi = [
         ],
         name: 'onAfterSwap',
         outputs: [
-            { internalType: 'bool', name: '', type: 'bool' },
-            { internalType: 'uint256', name: '', type: 'uint256' },
+            {
+                internalType: 'bool',
+                name: '',
+                type: 'bool',
+            },
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
         ],
         stateMutability: 'nonpayable',
         type: 'function',
     },
     {
         inputs: [
-            { internalType: 'address', name: '', type: 'address' },
-            { internalType: 'address', name: 'pool', type: 'address' },
-            { internalType: 'enum AddLiquidityKind', name: '', type: 'uint8' },
-            { internalType: 'uint256[]', name: '', type: 'uint256[]' },
+            {
+                internalType: 'address',
+                name: '',
+                type: 'address',
+            },
+            {
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
+            {
+                internalType: 'enum AddLiquidityKind',
+                name: '',
+                type: 'uint8',
+            },
+            {
+                internalType: 'uint256[]',
+                name: '',
+                type: 'uint256[]',
+            },
             {
                 internalType: 'uint256',
                 name: 'minBptAmountOut',
@@ -1107,10 +1715,20 @@ export const reclammAbi = [
                 name: 'balancesScaled18',
                 type: 'uint256[]',
             },
-            { internalType: 'bytes', name: '', type: 'bytes' },
+            {
+                internalType: 'bytes',
+                name: '',
+                type: 'bytes',
+            },
         ],
         name: 'onBeforeAddLiquidity',
-        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
+        outputs: [
+            {
+                internalType: 'bool',
+                name: '',
+                type: 'bool',
+            },
+        ],
         stateMutability: 'nonpayable',
         type: 'function',
     },
@@ -1121,17 +1739,35 @@ export const reclammAbi = [
                 name: 'balancesScaled18',
                 type: 'uint256[]',
             },
-            { internalType: 'bytes', name: '', type: 'bytes' },
+            {
+                internalType: 'bytes',
+                name: '',
+                type: 'bytes',
+            },
         ],
         name: 'onBeforeInitialize',
-        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
+        outputs: [
+            {
+                internalType: 'bool',
+                name: '',
+                type: 'bool',
+            },
+        ],
         stateMutability: 'nonpayable',
         type: 'function',
     },
     {
         inputs: [
-            { internalType: 'address', name: '', type: 'address' },
-            { internalType: 'address', name: 'pool', type: 'address' },
+            {
+                internalType: 'address',
+                name: '',
+                type: 'address',
+            },
+            {
+                internalType: 'address',
+                name: 'pool',
+                type: 'address',
+            },
             {
                 internalType: 'enum RemoveLiquidityKind',
                 name: '',
@@ -1142,16 +1778,30 @@ export const reclammAbi = [
                 name: 'maxBptAmountIn',
                 type: 'uint256',
             },
-            { internalType: 'uint256[]', name: '', type: 'uint256[]' },
+            {
+                internalType: 'uint256[]',
+                name: '',
+                type: 'uint256[]',
+            },
             {
                 internalType: 'uint256[]',
                 name: 'balancesScaled18',
                 type: 'uint256[]',
             },
-            { internalType: 'bytes', name: '', type: 'bytes' },
+            {
+                internalType: 'bytes',
+                name: '',
+                type: 'bytes',
+            },
         ],
         name: 'onBeforeRemoveLiquidity',
-        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
+        outputs: [
+            {
+                internalType: 'bool',
+                name: '',
+                type: 'bool',
+            },
+        ],
         stateMutability: 'nonpayable',
         type: 'function',
     },
@@ -1189,16 +1839,30 @@ export const reclammAbi = [
                         name: 'router',
                         type: 'address',
                     },
-                    { internalType: 'bytes', name: 'userData', type: 'bytes' },
+                    {
+                        internalType: 'bytes',
+                        name: 'userData',
+                        type: 'bytes',
+                    },
                 ],
                 internalType: 'struct PoolSwapParams',
                 name: '',
                 type: 'tuple',
             },
-            { internalType: 'address', name: '', type: 'address' },
+            {
+                internalType: 'address',
+                name: '',
+                type: 'address',
+            },
         ],
         name: 'onBeforeSwap',
-        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
+        outputs: [
+            {
+                internalType: 'bool',
+                name: '',
+                type: 'bool',
+            },
+        ],
         stateMutability: 'nonpayable',
         type: 'function',
     },
@@ -1236,27 +1900,55 @@ export const reclammAbi = [
                         name: 'router',
                         type: 'address',
                     },
-                    { internalType: 'bytes', name: 'userData', type: 'bytes' },
+                    {
+                        internalType: 'bytes',
+                        name: 'userData',
+                        type: 'bytes',
+                    },
                 ],
                 internalType: 'struct PoolSwapParams',
                 name: '',
                 type: 'tuple',
             },
-            { internalType: 'address', name: '', type: 'address' },
-            { internalType: 'uint256', name: '', type: 'uint256' },
+            {
+                internalType: 'address',
+                name: '',
+                type: 'address',
+            },
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
         ],
         name: 'onComputeDynamicSwapFeePercentage',
         outputs: [
-            { internalType: 'bool', name: '', type: 'bool' },
-            { internalType: 'uint256', name: '', type: 'uint256' },
+            {
+                internalType: 'bool',
+                name: '',
+                type: 'bool',
+            },
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
         ],
         stateMutability: 'view',
         type: 'function',
     },
     {
         inputs: [
-            { internalType: 'address', name: '', type: 'address' },
-            { internalType: 'address', name: '', type: 'address' },
+            {
+                internalType: 'address',
+                name: '',
+                type: 'address',
+            },
+            {
+                internalType: 'address',
+                name: '',
+                type: 'address',
+            },
             {
                 components: [
                     {
@@ -1313,7 +2005,13 @@ export const reclammAbi = [
             },
         ],
         name: 'onRegister',
-        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
+        outputs: [
+            {
+                internalType: 'bool',
+                name: '',
+                type: 'bool',
+            },
+        ],
         stateMutability: 'view',
         type: 'function',
     },
@@ -1351,7 +2049,11 @@ export const reclammAbi = [
                         name: 'router',
                         type: 'address',
                     },
-                    { internalType: 'bytes', name: 'userData', type: 'bytes' },
+                    {
+                        internalType: 'bytes',
+                        name: 'userData',
+                        type: 'bytes',
+                    },
                 ],
                 internalType: 'struct PoolSwapParams',
                 name: 'request',
@@ -1371,13 +2073,41 @@ export const reclammAbi = [
     },
     {
         inputs: [
-            { internalType: 'address', name: 'owner', type: 'address' },
-            { internalType: 'address', name: 'spender', type: 'address' },
-            { internalType: 'uint256', name: 'amount', type: 'uint256' },
-            { internalType: 'uint256', name: 'deadline', type: 'uint256' },
-            { internalType: 'uint8', name: 'v', type: 'uint8' },
-            { internalType: 'bytes32', name: 'r', type: 'bytes32' },
-            { internalType: 'bytes32', name: 's', type: 'bytes32' },
+            {
+                internalType: 'address',
+                name: 'owner',
+                type: 'address',
+            },
+            {
+                internalType: 'address',
+                name: 'spender',
+                type: 'address',
+            },
+            {
+                internalType: 'uint256',
+                name: 'amount',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint256',
+                name: 'deadline',
+                type: 'uint256',
+            },
+            {
+                internalType: 'uint8',
+                name: 'v',
+                type: 'uint8',
+            },
+            {
+                internalType: 'bytes32',
+                name: 'r',
+                type: 'bytes32',
+            },
+            {
+                internalType: 'bytes32',
+                name: 's',
+                type: 'bytes32',
+            },
         ],
         name: 'permit',
         outputs: [],
@@ -1394,6 +2124,25 @@ export const reclammAbi = [
         ],
         name: 'setCenterednessMargin',
         outputs: [],
+        stateMutability: 'nonpayable',
+        type: 'function',
+    },
+    {
+        inputs: [
+            {
+                internalType: 'uint256',
+                name: 'newDailyPriceShiftExponent',
+                type: 'uint256',
+            },
+        ],
+        name: 'setDailyPriceShiftExponent',
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
+        ],
         stateMutability: 'nonpayable',
         type: 'function',
     },
@@ -1429,64 +2178,111 @@ export const reclammAbi = [
     {
         inputs: [
             {
-                internalType: 'uint256',
-                name: 'newPriceShiftDailyRate',
-                type: 'uint256',
+                internalType: 'bytes4',
+                name: 'interfaceId',
+                type: 'bytes4',
             },
         ],
-        name: 'setPriceShiftDailyRate',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-    },
-    {
-        inputs: [
-            { internalType: 'bytes4', name: 'interfaceId', type: 'bytes4' },
-        ],
         name: 'supportsInterface',
-        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
+        outputs: [
+            {
+                internalType: 'bool',
+                name: '',
+                type: 'bool',
+            },
+        ],
         stateMutability: 'view',
         type: 'function',
     },
     {
         inputs: [],
         name: 'symbol',
-        outputs: [{ internalType: 'string', name: '', type: 'string' }],
+        outputs: [
+            {
+                internalType: 'string',
+                name: '',
+                type: 'string',
+            },
+        ],
         stateMutability: 'view',
         type: 'function',
     },
     {
         inputs: [],
         name: 'totalSupply',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
+        ],
         stateMutability: 'view',
         type: 'function',
     },
     {
         inputs: [
-            { internalType: 'address', name: 'to', type: 'address' },
-            { internalType: 'uint256', name: 'amount', type: 'uint256' },
+            {
+                internalType: 'address',
+                name: 'to',
+                type: 'address',
+            },
+            {
+                internalType: 'uint256',
+                name: 'amount',
+                type: 'uint256',
+            },
         ],
         name: 'transfer',
-        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
+        outputs: [
+            {
+                internalType: 'bool',
+                name: '',
+                type: 'bool',
+            },
+        ],
         stateMutability: 'nonpayable',
         type: 'function',
     },
     {
         inputs: [
-            { internalType: 'address', name: 'from', type: 'address' },
-            { internalType: 'address', name: 'to', type: 'address' },
-            { internalType: 'uint256', name: 'amount', type: 'uint256' },
+            {
+                internalType: 'address',
+                name: 'from',
+                type: 'address',
+            },
+            {
+                internalType: 'address',
+                name: 'to',
+                type: 'address',
+            },
+            {
+                internalType: 'uint256',
+                name: 'amount',
+                type: 'uint256',
+            },
         ],
         name: 'transferFrom',
-        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
+        outputs: [
+            {
+                internalType: 'bool',
+                name: '',
+                type: 'bool',
+            },
+        ],
         stateMutability: 'nonpayable',
         type: 'function',
     },
     {
         inputs: [],
         name: 'version',
-        outputs: [{ internalType: 'string', name: '', type: 'string' }],
+        outputs: [
+            {
+                internalType: 'string',
+                name: '',
+                type: 'string',
+            },
+        ],
         stateMutability: 'view',
         type: 'function',
     },

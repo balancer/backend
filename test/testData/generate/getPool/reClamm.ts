@@ -12,7 +12,7 @@ type ReClammMutable = {
     // ReClamm
     lastTimestamp: bigint;
     lastVirtualBalances: bigint[];
-    priceShiftDailyRateInSeconds: bigint;
+    dailyPriceShiftBase: bigint;
     centerednessMargin: bigint;
     startFourthRootPriceRatio: bigint;
     endFourthRootPriceRatio: bigint;
@@ -101,7 +101,7 @@ export class ReClammPool {
             tokenRates: multicallResult[1].tokenRates.map((b) => b.toString()),
             lastTimestamp: multicallResult[1].lastTimestamp.toString(),
             lastVirtualBalances: multicallResult[1].lastVirtualBalances.map((b) => b.toString()),
-            priceShiftDailyRateInSeconds: multicallResult[1].priceShiftDailyRateInSeconds.toString(),
+            dailyPriceShiftBase: multicallResult[1].dailyPriceShiftBase.toString(),
             centerednessMargin: multicallResult[1].centerednessMargin.toString(),
             startFourthRootPriceRatio: multicallResult[1].startFourthRootPriceRatio.toString(),
             endFourthRootPriceRatio: multicallResult[1].endFourthRootPriceRatio.toString(),

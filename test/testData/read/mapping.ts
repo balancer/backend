@@ -305,7 +305,7 @@ export function mapReClammPoolStateToPrismaPool(
             lastVirtualBalances: poolState.lastVirtualBalances.map((b) => formatEther(b)),
             priceRatioUpdateEndTime: Number(poolState.priceRatioUpdateEndTime),
             priceRatioUpdateStartTime: Number(poolState.priceRatioUpdateStartTime),
-            priceShiftRatePerSecond: formatEther(poolState.priceShiftDailyRateInSeconds),
+            dailyPriceShiftBase: formatEther(poolState.dailyPriceShiftBase),
             startFourthRootPriceRatio: formatEther(poolState.startFourthRootPriceRatio),
         })
         .build({
