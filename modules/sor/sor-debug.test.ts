@@ -58,7 +58,7 @@ describe('sor debugging', () => {
             swapType: 'EXACT_IN',
             swapAmount: '1',
             useProtocolVersion,
-            poolIds: ['0x5d54ddf620f312cc150527e24c2d5d6fed91e5b7'],
+            poolIds: ['0x035d7213cbc08483aa78ced076dbdc8ac5a509c1'],
         });
 
         console.log(swaps.returnAmount);
