@@ -531,6 +531,12 @@ export default <NetworkData>{
                 scale: 1,
                 isIbYield: true,
             },
+            wUSDN: {
+                tokenAddress: '0x99999999999999cc837c997b882957dafdcb1af9',
+                sourceUrl: 'https://usdn.api.smardex.io/v1/wusdn/apr',
+                scale: 1,
+                isIbYield: true,
+            },
         },
     },
     datastudio: {
