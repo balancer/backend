@@ -12,7 +12,7 @@ export type ReclammCallsOutput = {
         typeData: {
             lastTimestamp: number;
             lastVirtualBalances: string[];
-            priceShiftRatePerSecond: string;
+            dailyPriceShiftBase: string;
             centerednessMargin: string;
             currentFourthRootPriceRatio: string;
             startFourthRootPriceRatio: string;
@@ -33,7 +33,7 @@ export const reclammCalls = (id: string): ViemMulticallCall[] => [
             return {
                 lastTimestamp: Number(result.lastTimestamp),
                 lastVirtualBalances: result.lastVirtualBalances.map((balance) => formatEther(balance)),
-                priceShiftRatePerSecond: formatEther(result.priceShiftDailyRateInSeconds),
+                dailyPriceShiftBase: formatEther(result.dailyPriceShiftBase),
                 centerednessMargin: formatEther(result.centerednessMargin),
                 currentFourthRootPriceRatio: formatEther(result.currentFourthRootPriceRatio),
                 startFourthRootPriceRatio: formatEther(result.startFourthRootPriceRatio),

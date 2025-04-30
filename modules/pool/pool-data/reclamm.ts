@@ -9,7 +9,7 @@ export const reclamm = (pool: TypePoolFragment & VaultPoolFragment) => {
     return {
         lastTimestamp: Number(params.lastTimestamp) || 0,
         lastVirtualBalances: params.lastVirtualBalances || [],
-        priceShiftRatePerSecond: params.priceShiftDailyRateInSeconds || '',
+        dailyPriceShiftBase: params.dailyPriceShiftBase || '',
         centerednessMargin: params.centerednessMargin || '',
         currentFourthRootPriceRatio: params.currentFourthRootPriceRatio || '',
         startFourthRootPriceRatio: params.startFourthRootPriceRatio || '',

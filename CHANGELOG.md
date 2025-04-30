@@ -1,5 +1,12 @@
 # backend
 
+## 1.39.4
+
+### Patch Changes
+
+-   02255aa: enable aave apr on avax
+-   12f59f5: wusdn apr
+
 ## 1.39.3
 
 ### Patch Changes

@@ -10,9 +10,10 @@ import { prisma } from '../../prisma/prisma-client';
 import { CowAmmController } from '../controllers/cow-amm-controller';
 import { ContentController } from '../controllers/content-controller';
 import { PoolController } from '../controllers';
-import { Prisma } from '@prisma/client';
+import { Prisma, PrismaLastBlockSyncedCategory } from '@prisma/client';
 import { tokensTransformer } from '../sources/transformers';
 import { chainToChainId } from '../network/chain-id-to-chain';
+import { upsertLastSyncedBlock } from '../actions/last-synced-block';
 
 test('debug aprs', async () => {
     const chain = 'MAINNET';
@@ -22,7 +23,8 @@ test('debug aprs', async () => {
     setRequestScopedContextValue('chainId', chainId);
 
     //only do once before starting to debug
-    // await PoolController().reloadPoolsV3(chain);
+    // await upsertLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.ADD_POOLS_V3, 0);
+    // await PoolController().addPoolsV3(chain, false);
     // await PoolController().syncOnchainDataForAllPoolsV2(chain);
     // await PoolController().updateLiquidityValuesForActivePools(chain);
     // await poolService.reloadStakingForAllPools(['GAUGE'], chain);
@@ -48,7 +50,7 @@ test('debug aprs', async () => {
         console.log(e);
     }
     const aprs = await prisma.prismaPoolAprItem.findMany({
-        where: { chain: chain, poolId: '0x10a04efba5b880e169920fd4348527c64fb29d4d' },
+        where: { chain: chain, poolId: '0xd4ed17bbf48af09b87fd7d8c60970f5da79d4852' },
     });
     console.log(aprs);
 

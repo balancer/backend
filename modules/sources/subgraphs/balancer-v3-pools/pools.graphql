@@ -80,7 +80,7 @@ fragment TypePool on Pool {
     reClammParams {
         lastTimestamp
         lastVirtualBalances
-        priceShiftDailyRateInSeconds
+        dailyPriceShiftBase
         centerednessMargin
         currentFourthRootPriceRatio
         startFourthRootPriceRatio
