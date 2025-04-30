@@ -1388,7 +1388,7 @@ type GqlPoolReClamm implements GqlPoolBase {
     """
     Represents how fast the pool can move the virtual balances per day
     """
-    priceShiftRatePerSecond: BigDecimal!
+    dailyPriceShiftBase: BigDecimal!
     """
     The centeredness margin of the pool
     """

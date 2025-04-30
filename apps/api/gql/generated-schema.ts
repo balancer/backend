@@ -1356,6 +1356,8 @@ export interface GqlPoolReClamm extends GqlPoolBase {
     createTime: Scalars['Int'];
     /** The current fourth root price ratio, an interpolation of the price ratio state */
     currentFourthRootPriceRatio: Scalars['BigDecimal'];
+    /** Represents how fast the pool can move the virtual balances per day */
+    dailyPriceShiftBase: Scalars['BigDecimal'];
     decimals: Scalars['Int'];
     /** @deprecated Use poolTokens instead */
     displayTokens: Array<GqlPoolTokenDisplay>;
@@ -1392,8 +1394,6 @@ export interface GqlPoolReClamm extends GqlPoolBase {
     priceRatioUpdateEndTime: Scalars['Int'];
     /** The timestamp when the update begins */
     priceRatioUpdateStartTime: Scalars['Int'];
-    /** Represents how fast the pool can move the virtual balances per day */
-    priceShiftRatePerSecond: Scalars['BigDecimal'];
     protocolVersion: Scalars['Int'];
     staking?: Maybe<GqlPoolStaking>;
     /** The fourth root price ratio at the start of an update */
@@ -4656,6 +4656,7 @@ export type GqlPoolReClammResolvers<
     chain?: Resolver<ResolversTypes['GqlChain'], ParentType, ContextType>;
     createTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     currentFourthRootPriceRatio?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
+    dailyPriceShiftBase?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
     decimals?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     displayTokens?: Resolver<Array<ResolversTypes['GqlPoolTokenDisplay']>, ParentType, ContextType>;
     dynamicData?: Resolver<ResolversTypes['GqlPoolDynamicData'], ParentType, ContextType>;
@@ -4678,7 +4679,6 @@ export type GqlPoolReClammResolvers<
     poolTokens?: Resolver<Array<ResolversTypes['GqlPoolTokenDetail']>, ParentType, ContextType>;
     priceRatioUpdateEndTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     priceRatioUpdateStartTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-    priceShiftRatePerSecond?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
     protocolVersion?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     staking?: Resolver<Maybe<ResolversTypes['GqlPoolStaking']>, ParentType, ContextType>;
     startFourthRootPriceRatio?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;

@@ -1948,6 +1948,11 @@ export const schema = gql`
         The current fourth root price ratio, an interpolation of the price ratio state
         """
         currentFourthRootPriceRatio: BigDecimal!
+
+        """
+        Represents how fast the pool can move the virtual balances per day
+        """
+        dailyPriceShiftBase: BigDecimal!
         decimals: Int!
         displayTokens: [GqlPoolTokenDisplay!]! @deprecated(reason: "Use poolTokens instead")
         dynamicData: GqlPoolDynamicData!
@@ -2002,11 +2007,6 @@ export const schema = gql`
         The timestamp when the update begins
         """
         priceRatioUpdateStartTime: Int!
-
-        """
-        Represents how fast the pool can move the virtual balances per day
-        """
-        priceShiftRatePerSecond: BigDecimal!
         protocolVersion: Int!
         staking: GqlPoolStaking
 
