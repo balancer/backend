@@ -1,7 +1,9 @@
+import { Chain } from '@prisma/client';
 import * as Sentry from '@sentry/node';
 import { Address, formatUnits } from 'viem';
 
 import { GqlSorGetSwapPaths, QuerySorGetSwapPathsArgs } from '../../apps/api/gql/generated-schema';
+import config from '../../config';
 import { GetSwapPathsInput, GraphTraversalConfig } from './types';
 import { SOR } from './lib/sor';
 import {

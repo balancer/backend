@@ -1,11 +1,10 @@
 import { Address, Hex, parseEther, parseUnits } from 'viem';
-import { PoolType, Token } from '@balancer/sdk';
-import { StableState, HookState } from '@balancer-labs/balancer-maths';
+import { Token } from '@balancer/sdk';
+import { HookState, ReClammState } from '@balancer-labs/balancer-maths';
 import { Chain } from '@prisma/client';
 
 import { PrismaPoolAndHookWithDynamic } from '../../../../../prisma/prisma-types';
 import { chainToChainId as chainToIdMap } from '../../../../network/chain-id-to-chain';
-import { StableData } from '../../../../pool/subgraph-mapper';
 import { TokenPairData } from '../../../../sources/contracts/v3/fetch-tokenpair-data';
 
 import { WAD } from '../../utils/math';
@@ -15,24 +14,27 @@ import { Erc4626PoolToken } from '../../utils/erc4626PoolToken';
 
 import { getHookState } from '../../utils/helpers';
 
-import { LiquidityManagement } from '../../../../sor/types';
+import { LiquidityManagement } from '../../../types';
 import { BasePoolV3 } from '../basePoolV3';
+import { ReclammData } from '../../../../pool/subgraph-mapper';
+import { ReClammParams } from './types';
 
-type StablePoolToken = PoolTokenWithRate | Erc4626PoolToken;
+type ReClammPoolToken = PoolTokenWithRate | Erc4626PoolToken;
 
-export class StablePoolV3 extends BasePoolV3 implements BasePoolMethodsV3 {
-    public readonly poolType: PoolType = PoolType.Stable;
-    public readonly amp: bigint;
+export class ReClammPool extends BasePoolV3 implements BasePoolMethodsV3 {
+    public readonly poolType = 'RECLAMM';
+    public readonly reClammParams: ReClammParams;
 
-    public tokens: StablePoolToken[];
+    public tokens: ReClammPoolToken[];
 
-    private readonly tokenMap: Map<string, StablePoolToken>;
+    private readonly tokenMap: Map<string, ReClammPoolToken>;
 
     static fromPrismaPool(
         pool: PrismaPoolAndHookWithDynamic,
         underlyingTokens: { address: string; decimals: number }[] = [],
-    ): StablePoolV3 {
-        const poolTokens: StablePoolToken[] = [];
+        currentTimestamp: bigint,
+    ): ReClammPool {
+        const poolTokens: ReClammPoolToken[] = [];
 
         if (!pool.dynamicData) throw new Error(`${pool.type} pool has no dynamic data`);
 
@@ -74,16 +76,29 @@ export class StablePoolV3 extends BasePoolV3 implements BasePoolMethodsV3 {
         }
 
         const totalShares = parseEther(pool.dynamicData.totalShares);
-        const amp = parseUnits((pool.typeData as StableData).amp, 3);
+
+        const reClammData = pool.typeData as ReclammData;
+
+        const reClammParams: ReClammParams = {
+            lastTimestamp: BigInt(reClammData.lastTimestamp),
+            currentTimestamp,
+            lastVirtualBalances: reClammData.lastVirtualBalances.map((balance) => parseEther(balance)),
+            dailyPriceShiftBase: parseEther(reClammData.dailyPriceShiftBase),
+            centerednessMargin: parseEther(reClammData.centerednessMargin),
+            startFourthRootPriceRatio: parseEther(reClammData.startFourthRootPriceRatio),
+            endFourthRootPriceRatio: parseEther(reClammData.endFourthRootPriceRatio),
+            priceRatioUpdateStartTime: BigInt(reClammData.priceRatioUpdateStartTime),
+            priceRatioUpdateEndTime: BigInt(reClammData.priceRatioUpdateEndTime),
+        };
 
         //transform
         const hookState = getHookState(pool);
 
-        return new StablePoolV3(
+        return new ReClammPool(
             pool.id as Hex,
             pool.address,
             pool.chain,
-            amp,
+            reClammParams,
             parseEther(pool.dynamicData.swapFee),
             parseEther(pool.dynamicData.aggregateSwapFee),
             poolTokens,
@@ -98,17 +113,17 @@ export class StablePoolV3 extends BasePoolV3 implements BasePoolMethodsV3 {
         id: Hex,
         address: string,
         chain: Chain,
-        amp: bigint,
+        reClammParams: ReClammParams,
         swapFee: bigint,
         aggregateSwapFee: bigint,
-        tokens: StablePoolToken[],
+        tokens: ReClammPoolToken[],
         totalShares: bigint,
         tokenPairs: TokenPairData[],
         liquidityManagement: LiquidityManagement,
         hookState: HookState | undefined = undefined,
     ) {
         super(id, address, chain, swapFee, aggregateSwapFee, totalShares, tokenPairs, liquidityManagement, hookState);
-        this.amp = amp;
+        this.reClammParams = reClammParams;
 
         this.tokens = tokens.sort((a, b) => a.index - b.index);
         this.tokenMap = new Map(this.tokens.map((token) => [token.token.address, token]));
@@ -120,19 +135,27 @@ export class StablePoolV3 extends BasePoolV3 implements BasePoolMethodsV3 {
         this.poolState = this.getPoolState(hookState?.hookType);
     }
 
-    public getPoolState(hookName?: string): StableState {
-        const poolState: StableState = {
-            poolType: 'STABLE',
+    public getPoolState(hookName?: string): ReClammState {
+        const poolState: ReClammState = {
+            poolType: this.poolType,
             poolAddress: this.address,
             swapFee: this.swapFee,
             balancesLiveScaled18: this.tokens.map((t) => t.scale18),
             tokenRates: this.tokens.map((t) => t.rate),
             totalSupply: this.totalShares,
-            amp: this.amp,
             tokens: this.tokens.map((t) => t.token.address),
             scalingFactors: this.tokens.map((t) => t.scalar),
             aggregateSwapFee: this.aggregateSwapFee,
             supportsUnbalancedLiquidity: !this.liquidityManagement.disableUnbalancedLiquidity,
+            lastTimestamp: this.reClammParams.lastTimestamp,
+            currentTimestamp: this.reClammParams.currentTimestamp,
+            lastVirtualBalances: this.reClammParams.lastVirtualBalances,
+            dailyPriceShiftBase: this.reClammParams.dailyPriceShiftBase,
+            centerednessMargin: this.reClammParams.centerednessMargin,
+            startFourthRootPriceRatio: this.reClammParams.startFourthRootPriceRatio,
+            endFourthRootPriceRatio: this.reClammParams.endFourthRootPriceRatio,
+            priceRatioUpdateStartTime: this.reClammParams.priceRatioUpdateStartTime,
+            priceRatioUpdateEndTime: this.reClammParams.priceRatioUpdateEndTime,
         };
 
         poolState.hookType = hookName;
@@ -140,7 +163,7 @@ export class StablePoolV3 extends BasePoolV3 implements BasePoolMethodsV3 {
         return poolState;
     }
 
-    public getPoolTokens(tokenIn: Token, tokenOut: Token): { tIn: StablePoolToken; tOut: StablePoolToken } {
+    public getPoolTokens(tokenIn: Token, tokenOut: Token): { tIn: ReClammPoolToken; tOut: ReClammPoolToken } {
         const tIn = this.tokenMap.get(tokenIn.wrapped);
         const tOut = this.tokenMap.get(tokenOut.wrapped);
 

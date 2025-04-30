@@ -34,7 +34,7 @@ export class WeightedPoolV3 extends BasePoolV3 implements BasePoolMethodsV3 {
         const poolTokens: WeightedPoolToken[] = [];
 
         if (!pool.dynamicData) {
-            throw new Error('No dynamic data for pool');
+            throw new Error(`${pool.type} pool has no dynamic data`);
         }
 
         for (const poolToken of pool.tokens) {

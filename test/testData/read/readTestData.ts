@@ -1,10 +1,11 @@
-import { BufferState, GyroECLPState, StableState, WeightedState } from '@balancer-labs/balancer-maths';
+import { BufferState, GyroECLPState, ReClammState, StableState, WeightedState } from '@balancer-labs/balancer-maths';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
 import { HookData, PrismaPoolAndHookWithDynamic } from '../../../prisma/prisma-types';
 import {
     mapGyroPoolStateToPrismaPool,
+    mapReClammPoolStateToPrismaPool,
     mapStablePoolStateToPrismaPool,
     mapWeightedPoolStateToPrismaPool,
 } from './mapping';
@@ -24,7 +25,9 @@ export type BufferPool = PoolBase & BufferState;
 
 export type GyroEPool = PoolBase & GyroECLPState;
 
-export type SupportedPools = WeightedPool | StablePool | BufferPool | GyroEPool;
+export type ReClammPool = PoolBase & ReClammState;
+
+export type SupportedPools = WeightedPool | StablePool | BufferPool | GyroEPool | ReClammPool;
 
 type SwapPath = {
     swapKind: number;
@@ -33,6 +36,7 @@ type SwapPath = {
     tokens: string[];
     pools: string[];
     test: string;
+    currentTimestamp: bigint;
 };
 
 export type TestData = {
@@ -74,6 +78,10 @@ export function readTestData(): TestData {
                 const pools: PrismaPoolAndHookWithDynamic[] = mapPools(jsonData.pools, underlyingTokens);
                 testData.swapPathPools.push(pools);
 
+                const currentTimestamp = (jsonData.pools as { poolType: string; currentTimestamp?: bigint }[]).find(
+                    (pool) => pool.poolType === 'RECLAMM',
+                )?.currentTimestamp;
+
                 // add swapPaths
                 testData.swapPaths.push({
                     ...jsonData.swapPath,
@@ -82,6 +90,7 @@ export function readTestData(): TestData {
                     amountRaw: BigInt(jsonData.swapPath.amountRaw),
                     outputRaw: BigInt(jsonData.swapPath.outputRaw),
                     test: file,
+                    currentTimestamp,
                 });
             } catch (error) {
                 console.error(`Error parsing JSON file ${file}:`, error);
@@ -169,6 +178,28 @@ function mapPools(
                 dSq: BigInt(pool.dSq),
             };
             prismaPools.push(mapGyroPoolStateToPrismaPool(gyroPool, Number(pool.chainId), 3, bufferPools));
+        } else if (pool.poolType === 'RECLAMM') {
+            const reClammPool = {
+                ...pool,
+                scalingFactors: pool.scalingFactors.map((sf) => BigInt(sf)),
+                swapFee: BigInt(pool.swapFee),
+                balancesLiveScaled18: pool.balancesLiveScaled18.map((b) => BigInt(b)),
+                tokenRates: pool.tokenRates.map((r) => BigInt(r)),
+                totalSupply: BigInt(pool.totalSupply),
+                aggregateSwapFee: BigInt(pool.aggregateSwapFee ?? '0'),
+                supportsUnbalancedLiquidity:
+                    pool.supportsUnbalancedLiquidity === undefined ? true : pool.supportsUnbalancedLiquidity,
+                lastTimestamp: BigInt(pool.lastTimestamp),
+                lastVirtualBalances: pool.lastVirtualBalances.map((b) => BigInt(b)),
+                dailyPriceShiftBase: BigInt(pool.dailyPriceShiftBase),
+                centerednessMargin: BigInt(pool.centerednessMargin),
+                startFourthRootPriceRatio: BigInt(pool.startFourthRootPriceRatio),
+                endFourthRootPriceRatio: BigInt(pool.endFourthRootPriceRatio),
+                priceRatioUpdateStartTime: BigInt(pool.priceRatioUpdateStartTime),
+                priceRatioUpdateEndTime: BigInt(pool.priceRatioUpdateEndTime),
+                currentTimestamp: BigInt(pool.currentTimestamp),
+            };
+            prismaPools.push(mapReClammPoolStateToPrismaPool(reClammPool, Number(pool.chainId), 3, bufferPools));
         }
     }
     return prismaPools;
