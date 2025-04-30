@@ -187,9 +187,11 @@ export type GqlHookType =
     | 'DIRECTIONAL_FEE'
     | 'EXIT_FEE'
     | 'FEE_TAKING'
+    | 'LBP'
     | 'LOTTERY'
     | 'MEV_TAX'
     | 'NFTLIQUIDITY_POSITION'
+    | 'RECLAMM'
     | 'STABLE_SURGE'
     | 'UNKNOWN'
     | 'VEBAL_DISCOUNT';
@@ -306,6 +308,8 @@ export interface GqlPoolAggregator {
     currentFourthRootPriceRatio?: Maybe<Scalars['BigDecimal']>;
     /** Data specific to gyro pools */
     dSq?: Maybe<Scalars['String']>;
+    /** ReClamm: Represents how fast the pool can move the virtual balances per day */
+    dailyPriceShiftBase?: Maybe<Scalars['BigDecimal']>;
     /** The decimals of the BPT, usually 18 */
     decimals: Scalars['Int'];
     /** Data specific to fx pools */
@@ -347,8 +351,6 @@ export interface GqlPoolAggregator {
     priceRatioUpdateEndTime?: Maybe<Scalars['Int']>;
     /** ReClamm: The timestamp when the update begins */
     priceRatioUpdateStartTime?: Maybe<Scalars['Int']>;
-    /** ReClamm: Represents how fast the pool can move the virtual balances per day */
-    priceShiftRatePerSecond?: Maybe<Scalars['BigDecimal']>;
     /** The protocol version on which the pool is deployed, 1, 2 or 3 */
     protocolVersion: Scalars['Int'];
     /** QuantAmmWeighted specific fields */
@@ -1356,6 +1358,8 @@ export interface GqlPoolReClamm extends GqlPoolBase {
     createTime: Scalars['Int'];
     /** The current fourth root price ratio, an interpolation of the price ratio state */
     currentFourthRootPriceRatio: Scalars['BigDecimal'];
+    /** Represents how fast the pool can move the virtual balances per day */
+    dailyPriceShiftBase: Scalars['BigDecimal'];
     decimals: Scalars['Int'];
     /** @deprecated Use poolTokens instead */
     displayTokens: Array<GqlPoolTokenDisplay>;
@@ -1392,8 +1396,6 @@ export interface GqlPoolReClamm extends GqlPoolBase {
     priceRatioUpdateEndTime: Scalars['Int'];
     /** The timestamp when the update begins */
     priceRatioUpdateStartTime: Scalars['Int'];
-    /** Represents how fast the pool can move the virtual balances per day */
-    priceShiftRatePerSecond: Scalars['BigDecimal'];
     protocolVersion: Scalars['Int'];
     staking?: Maybe<GqlPoolStaking>;
     /** The fourth root price ratio at the start of an update */
@@ -2617,9 +2619,13 @@ export interface GqlVotingPool {
     gauge: GqlVotingGauge;
     /** Pool ID */
     id: Scalars['ID'];
+    /** Returns all pool tokens, including BPTs and nested pools if there are any. Only one nested level deep. */
+    poolTokens: Array<GqlPoolTokenDetail>;
     protocolVersion: Scalars['Int'];
     /** The symbol of the pool. */
     symbol: Scalars['String'];
+    /** List of tags assigned by the team based on external factors */
+    tags?: Maybe<Array<Maybe<Scalars['String']>>>;
     /** The tokens inside the pool. */
     tokens: Array<GqlVotingGaugeToken>;
     /** The type of the pool. */
@@ -3890,6 +3896,7 @@ export type GqlPoolAggregatorResolvers<
     createTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     currentFourthRootPriceRatio?: Resolver<Maybe<ResolversTypes['BigDecimal']>, ParentType, ContextType>;
     dSq?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    dailyPriceShiftBase?: Resolver<Maybe<ResolversTypes['BigDecimal']>, ParentType, ContextType>;
     decimals?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     delta?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     dynamicData?: Resolver<ResolversTypes['GqlPoolDynamicData'], ParentType, ContextType>;
@@ -3909,7 +3916,6 @@ export type GqlPoolAggregatorResolvers<
     poolTokens?: Resolver<Array<ResolversTypes['GqlPoolTokenDetail']>, ParentType, ContextType>;
     priceRatioUpdateEndTime?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
     priceRatioUpdateStartTime?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-    priceShiftRatePerSecond?: Resolver<Maybe<ResolversTypes['BigDecimal']>, ParentType, ContextType>;
     protocolVersion?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     quantAmmWeightedParams?: Resolver<Maybe<ResolversTypes['QuantAmmWeightedParams']>, ParentType, ContextType>;
     root3Alpha?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -4652,6 +4658,7 @@ export type GqlPoolReClammResolvers<
     chain?: Resolver<ResolversTypes['GqlChain'], ParentType, ContextType>;
     createTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     currentFourthRootPriceRatio?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
+    dailyPriceShiftBase?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
     decimals?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     displayTokens?: Resolver<Array<ResolversTypes['GqlPoolTokenDisplay']>, ParentType, ContextType>;
     dynamicData?: Resolver<ResolversTypes['GqlPoolDynamicData'], ParentType, ContextType>;
@@ -4674,7 +4681,6 @@ export type GqlPoolReClammResolvers<
     poolTokens?: Resolver<Array<ResolversTypes['GqlPoolTokenDetail']>, ParentType, ContextType>;
     priceRatioUpdateEndTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     priceRatioUpdateStartTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-    priceShiftRatePerSecond?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
     protocolVersion?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     staking?: Resolver<Maybe<ResolversTypes['GqlPoolStaking']>, ParentType, ContextType>;
     startFourthRootPriceRatio?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
@@ -5698,8 +5704,10 @@ export type GqlVotingPoolResolvers<
     chain?: Resolver<ResolversTypes['GqlChain'], ParentType, ContextType>;
     gauge?: Resolver<ResolversTypes['GqlVotingGauge'], ParentType, ContextType>;
     id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+    poolTokens?: Resolver<Array<ResolversTypes['GqlPoolTokenDetail']>, ParentType, ContextType>;
     protocolVersion?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     symbol?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+    tags?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>;
     tokens?: Resolver<Array<ResolversTypes['GqlVotingGaugeToken']>, ParentType, ContextType>;
     type?: Resolver<ResolversTypes['GqlPoolType'], ParentType, ContextType>;
     __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;

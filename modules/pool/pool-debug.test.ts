@@ -10,18 +10,21 @@ import { prisma } from '../../prisma/prisma-client';
 import { CowAmmController } from '../controllers/cow-amm-controller';
 import { ContentController } from '../controllers/content-controller';
 import { PoolController } from '../controllers';
-import { Prisma } from '@prisma/client';
+import { Prisma, PrismaLastBlockSyncedCategory } from '@prisma/client';
 import { tokensTransformer } from '../sources/transformers';
+import { chainToChainId } from '../network/chain-id-to-chain';
+import { upsertLastSyncedBlock } from '../actions/last-synced-block';
 
 test('debug aprs', async () => {
-    const chain = 'SEPOLIA';
-    const chainId = '11155111';
+    const chain = 'MAINNET';
+    const chainId = '1';
 
     initRequestScopedContext();
     setRequestScopedContextValue('chainId', chainId);
 
     //only do once before starting to debug
-    // await PoolController().reloadPoolsV3(chain);
+    // await upsertLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.ADD_POOLS_V3, 0);
+    // await PoolController().addPoolsV3(chain, false);
     // await PoolController().syncOnchainDataForAllPoolsV2(chain);
     // await PoolController().updateLiquidityValuesForActivePools(chain);
     // await poolService.reloadStakingForAllPools(['GAUGE'], chain);
@@ -47,7 +50,7 @@ test('debug aprs', async () => {
         console.log(e);
     }
     const aprs = await prisma.prismaPoolAprItem.findMany({
-        where: { chain: chain, poolId: '0xe95ffe489b6b7ea91eb46c48329113b8aefb73c5' },
+        where: { chain: chain, poolId: '0xd4ed17bbf48af09b87fd7d8c60970f5da79d4852' },
     });
     console.log(aprs);
 
@@ -55,37 +58,39 @@ test('debug aprs', async () => {
     // expect(aprs[0].apr).toBeGreaterThan(0);
 }, 100000000);
 
-// describe('pool debugging', () => {
-//     it('query pools', async () => {
-//         initRequestScopedContext();
-//         setRequestScopedContextValue('chainId', '11155111');
-//         //only do once before starting to debug
-//         // await poolService.syncAllPoolsFromSubgraph();
-//         // await poolService.syncChangedPools();
-//         // await tokenService.updateTokenPrices(['MAINNET']);
-//         // await PoolController().reloadPoolsV3('SEPOLIA');
+test('pool debugging', async () => {
+    const chain = 'MAINNET';
+    const chainId = chainToChainId[chain];
+    initRequestScopedContext();
+    setRequestScopedContextValue('chainId', chainId);
+    //only do once before starting to debug
+    // await poolService.syncAllPoolsFromSubgraph();
+    // await poolService.syncChangedPools();
+    // await tokenService.updateTokenPrices(['MAINNET']);
+    // await PoolController().reloadPoolsV3('SEPOLIA');
 
-//         // const allAggPools = await poolService.getAggregatorPools({
-//         //     where: { chainIn: ['SEPOLIA'], protocolVersionIn: [3] },
-//         // });
+    // const allAggPools = await poolService.getAggregatorPools({
+    //     where: { chainIn: ['SEPOLIA'], protocolVersionIn: [3] },
+    // });
 
-//         // console.log(allAggPools.length);
+    // console.log(allAggPools.length);
 
-//         const allPools = await poolService.getGqlPools({
-//             where: { chainIn: ['SEPOLIA'], protocolVersionIn: [3] },
-//         });
+    const allPools = await poolService.getGqlPools({
+        where: { chainIn: ['BASE'], idIn: ['0x7dc81fb7e93cdde7754bff7f55428226bd9cef7b'] },
+    });
 
-//         console.log(allPools.length);
-//         for (const pool of allPools) {
-//             console.log(pool.id);
-//             console.log(pool.hasErc4626);
-//             console.log(pool.hasNestedErc4626);
-//         }
+    console.log(allPools.length);
+    for (const pool of allPools) {
+        console.log(pool.id);
+        console.log(pool.hasErc4626);
+        console.log(pool.hasNestedErc4626);
+        console.log(pool.hook?.type);
+    }
 
-//         // const poolAfterNewSync = await poolService.getGqlPool('0x8fc07bcf9b88ace84c7523248dc4a85f638c9536', 'SEPOLIA');
+    // const poolAfterNewSync = await poolService.getGqlPool('0x8fc07bcf9b88ace84c7523248dc4a85f638c9536', 'SEPOLIA');
 
-//         // expect(poolAfterNewSync.dynamicData.isPaused).toBe(true);
-//     }, 5000000);
+    // expect(poolAfterNewSync.dynamicData.isPaused).toBe(true);
+}, 5000000);
 
 //     it('sync pools', async () => {
 //         initRequestScopedContext();

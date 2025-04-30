@@ -70,12 +70,18 @@ type GqlVotingPool {
     """
     type: GqlPoolType!
     protocolVersion: Int!
-
     """
     The tokens inside the pool.
     """
     tokens: [GqlVotingGaugeToken!]!
-
+    """
+    Returns all pool tokens, including BPTs and nested pools if there are any. Only one nested level deep.
+    """
+    poolTokens: [GqlPoolTokenDetail!]!
+    """
+    List of tags assigned by the team based on external factors
+    """
+    tags: [String]
     """
     The gauge that is connected to the pool and that will receive the rewards.
     """

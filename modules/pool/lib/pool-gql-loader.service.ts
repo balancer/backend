@@ -57,6 +57,7 @@ import { isWeightedPoolV2 } from './pool-utils';
 import { addressesMatch } from '../../web3/addresses';
 import { networkContext } from '../../network/network-context.service';
 import { getWeightSnapshots } from '../../actions/quant-amm/get-weight-snapshots';
+import { mapPoolToken } from './pool-gql-mapper-helper';
 
 const isToken = (text: string) => text.match(/^0x[0-9a-fA-F]{40}$/);
 const isPoolId = (text: string) => isToken(text) || text.match(/^0x[0-9a-fA-F]{64}$/);
@@ -401,7 +402,7 @@ export class PoolGqlLoaderService {
             dynamicData: this.getPoolDynamicData(pool),
             allTokens: this.mapAllTokens(pool),
             displayTokens: this.mapDisplayTokens(pool),
-            poolTokens: pool.tokens.map((token) => this.mapPoolToken(token)),
+            poolTokens: pool.tokens.map((token) => mapPoolToken(token)),
             staking: this.getStakingData(pool),
             userBalance: this.getUserBalance(pool, userWalletbalances, userStakedBalances),
             categories: pool.categories as GqlPoolFilterCategory[],
@@ -782,7 +783,7 @@ export class PoolGqlLoaderService {
         const mappedData = {
             decimals: 18,
             dynamicData: this.getPoolDynamicData(pool),
-            poolTokens: pool.tokens.map((token) => this.mapPoolToken(token)),
+            poolTokens: pool.tokens.map((token) => mapPoolToken(token)),
             vaultVersion: poolWithoutTypeData.protocolVersion,
             liquidityManagement: (pool.liquidityManagement as LiquidityManagement) || undefined,
             hook: mapHookToGqlHook(hook as HookData),
@@ -872,7 +873,7 @@ export class PoolGqlLoaderService {
             tokens: pool.tokens.map((token) => this.mapPoolTokenToGqlUnion(token)), // TODO DEPRECATE
             allTokens: this.mapAllTokens(pool),
             displayTokens: this.mapDisplayTokens(pool),
-            poolTokens: pool.tokens.map((token) => this.mapPoolToken(token)),
+            poolTokens: pool.tokens.map((token) => mapPoolToken(token)),
             userBalance: this.getUserBalance(pool, userWalletbalances, userStakedBalances),
             vaultVersion: poolWithoutTypeData.protocolVersion,
             categories: pool.categories as GqlPoolFilterCategory[],
@@ -1036,65 +1037,6 @@ export class PoolGqlLoaderService {
                     ...poolToken.token,
                 };
             });
-    }
-
-    private mapPoolToken(poolToken: PrismaPoolTokenWithExpandedNesting, nestedPercentage = 1): GqlPoolTokenDetail {
-        const { nestedPool } = poolToken;
-
-        const hasNestedPool = nestedPool !== null && nestedPool.id !== poolToken.poolId;
-
-        return {
-            id: `${poolToken.poolId}-${poolToken.token.address}`,
-            ...poolToken.token,
-            index: poolToken.index,
-            balance: floatToExactString(parseFloat(poolToken.balance || '0') * nestedPercentage),
-            balanceUSD: floatToExactString((poolToken.balanceUSD || 0) * nestedPercentage),
-            priceRate: poolToken.priceRate || '1.0',
-            priceRateProvider: poolToken.priceRateProvider,
-            weight: poolToken.weight,
-            hasNestedPool: hasNestedPool,
-            nestedPool: hasNestedPool ? this.mapNestedPool(nestedPool, poolToken.balance || '0') : undefined,
-            isAllowed: poolToken.token.types.some(
-                (type) => type.type === 'WHITE_LISTED' || type.type === 'PHANTOM_BPT' || type.type === 'BPT',
-            ),
-            isErc4626: poolToken.token.types.some((type) => type.type === 'ERC4626'),
-            isExemptFromProtocolYieldFee: poolToken.exemptFromProtocolYieldFee,
-            scalingFactor: poolToken.scalingFactor,
-            tradable: !poolToken.token.types.find((type) => type.type === 'PHANTOM_BPT' || type.type === 'BPT'),
-            chain: poolToken.chain,
-            chainId: Number(chainToIdMap[poolToken.chain]),
-        };
-    }
-
-    private mapNestedPool(nestedPool: PrismaNestedPoolWithSingleLayerNesting, tokenBalance: string): GqlNestedPool {
-        const totalShares = parseFloat(nestedPool.dynamicData?.totalShares || '0');
-        const percentOfSupplyNested = totalShares > 0 ? parseFloat(tokenBalance) / totalShares : 0;
-        const totalLiquidity = nestedPool.dynamicData?.totalLiquidity || 0;
-
-        const hook = (nestedPool.hook as HookData)?.address ? (nestedPool.hook as HookData) : null;
-
-        return {
-            ...nestedPool,
-            owner: nestedPool.swapFeeManager, // Keep for backwards compatibility
-            liquidityManagement: (nestedPool.liquidityManagement as LiquidityManagement) || undefined,
-            totalLiquidity: `${totalLiquidity}`,
-            totalShares: `${totalShares}`,
-            nestedShares: `${totalShares * percentOfSupplyNested}`,
-            nestedLiquidity: `${totalLiquidity * percentOfSupplyNested}`,
-            nestedPercentage: `${percentOfSupplyNested}`,
-            tokens: nestedPool.tokens.map((token) =>
-                this.mapPoolToken(
-                    {
-                        ...token,
-                        nestedPool: null,
-                    },
-                    percentOfSupplyNested,
-                ),
-            ),
-            swapFee: nestedPool.dynamicData?.swapFee || '0',
-            bptPriceRate: (nestedPool.typeData as StableData).bptPriceRate || '1.0',
-            hook: hook as GqlHook,
-        };
     }
 
     private getStakingData(pool: PrismaPoolMinimal): GqlPoolStaking | null {
@@ -1552,7 +1494,18 @@ export class PoolGqlLoaderService {
             }
         }
 
-        return aprItems;
+        let filteredItems = aprItems;
+        if (pool.type === 'QUANT_AMM_WEIGHTED') {
+            filteredItems = aprItems.filter(
+                (item) =>
+                    item.type === 'QUANT_AMM_UPLIFT' ||
+                    item.type === 'STAKING' ||
+                    item.type === 'STAKING_BOOST' ||
+                    item.type === 'MERKL',
+            );
+        }
+
+        return filteredItems;
     }
 
     private getPoolInvestConfig(pool: PrismaPoolWithExpandedNesting): GqlPoolInvestConfig {

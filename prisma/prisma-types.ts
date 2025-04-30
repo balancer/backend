@@ -427,6 +427,8 @@ export type HookData = {
         | 'LOTTERY'
         | 'NFTLIQUIDITY_POSITION'
         | 'VEBAL_DISCOUNT'
+        | 'RECLAMM'
+        | 'LBP'
         | 'UNKNOWN';
     enableHookAdjustedAmounts: boolean;
     shouldCallAfterSwap: boolean;
