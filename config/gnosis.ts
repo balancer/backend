@@ -13,8 +13,8 @@ export default <NetworkData>{
     subgraphs: {
         startDate: '2021-08-23',
         balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmXXSKeLh14DnJgR1ncHhAHciqacfRshcHKXasAGy7LP4Y`,
-        balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmeGDQcYMBJiZVYa6MkveWoVkBVT8KTdKeJWnhb8WpMj1p`,
-        balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmbTSYthG7jeK8A6CYTStnv879t96wKVarhZTmSR1eMYMw`,
+        balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmcQUxfK2rEVSbRBBEd4PimcuVBA8LJttF1pgvTYS5k9bh`,
+        balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmWdADRxdsmoDrHgKcePC71h6LYGJny7wjWm8FzEQ9WwWy`,
         gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmPyH9BbVshMZRp5T7WBPnx1J5GVi46GX2NmheRQUkqF39`,
         aura: 'https://data.aura.finance/graphql',
         cowAmm: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/Qmb9jmxb2EVWHk7NryKCAbsq2WAZaCV4CmnZne59EbADeh`,

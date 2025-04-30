@@ -770,12 +770,13 @@ export enum Pool_OrderBy {
     ReClammParams = 'reClammParams',
     ReClammParamsCenterednessMargin = 'reClammParams__centerednessMargin',
     ReClammParamsCurrentFourthRootPriceRatio = 'reClammParams__currentFourthRootPriceRatio',
+    ReClammParamsDailyPriceShiftBase = 'reClammParams__dailyPriceShiftBase',
+    ReClammParamsDailyPriceShiftExponent = 'reClammParams__dailyPriceShiftExponent',
     ReClammParamsEndFourthRootPriceRatio = 'reClammParams__endFourthRootPriceRatio',
     ReClammParamsId = 'reClammParams__id',
     ReClammParamsLastTimestamp = 'reClammParams__lastTimestamp',
     ReClammParamsPriceRatioUpdateEndTime = 'reClammParams__priceRatioUpdateEndTime',
     ReClammParamsPriceRatioUpdateStartTime = 'reClammParams__priceRatioUpdateStartTime',
-    ReClammParamsPriceShiftDailyRateInSeconds = 'reClammParams__priceShiftDailyRateInSeconds',
     ReClammParamsStartFourthRootPriceRatio = 'reClammParams__startFourthRootPriceRatio',
     StableParams = 'stableParams',
     StableParamsAmp = 'stableParams__amp',
@@ -1303,6 +1304,10 @@ export type ReClammParams = {
     centerednessMargin: Scalars['BigInt'];
     /** The current fourth root price ratio, an interpolation of the price ratio state */
     currentFourthRootPriceRatio: Scalars['BigInt'];
+    /** Internal time constant used to update virtual balances (1 - tau) */
+    dailyPriceShiftBase: Scalars['BigInt'];
+    /** Represents how fast the pool can move the virtual balances per day */
+    dailyPriceShiftExponent: Scalars['BigInt'];
     /** The fourth root price ratio at the end of an update */
     endFourthRootPriceRatio: Scalars['BigInt'];
     /** Unique identifier for the ReClammParams */
@@ -1315,8 +1320,6 @@ export type ReClammParams = {
     priceRatioUpdateEndTime: Scalars['BigInt'];
     /** The timestamp when the update begins */
     priceRatioUpdateStartTime: Scalars['BigInt'];
-    /** Represents how fast the pool can move the virtual balances per day */
-    priceShiftDailyRateInSeconds: Scalars['BigInt'];
     /** The fourth root price ratio at the start of an update */
     startFourthRootPriceRatio: Scalars['BigInt'];
 };
@@ -1341,6 +1344,22 @@ export type ReClammParams_Filter = {
     currentFourthRootPriceRatio_lte?: InputMaybe<Scalars['BigInt']>;
     currentFourthRootPriceRatio_not?: InputMaybe<Scalars['BigInt']>;
     currentFourthRootPriceRatio_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    dailyPriceShiftBase?: InputMaybe<Scalars['BigInt']>;
+    dailyPriceShiftBase_gt?: InputMaybe<Scalars['BigInt']>;
+    dailyPriceShiftBase_gte?: InputMaybe<Scalars['BigInt']>;
+    dailyPriceShiftBase_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    dailyPriceShiftBase_lt?: InputMaybe<Scalars['BigInt']>;
+    dailyPriceShiftBase_lte?: InputMaybe<Scalars['BigInt']>;
+    dailyPriceShiftBase_not?: InputMaybe<Scalars['BigInt']>;
+    dailyPriceShiftBase_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    dailyPriceShiftExponent?: InputMaybe<Scalars['BigInt']>;
+    dailyPriceShiftExponent_gt?: InputMaybe<Scalars['BigInt']>;
+    dailyPriceShiftExponent_gte?: InputMaybe<Scalars['BigInt']>;
+    dailyPriceShiftExponent_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    dailyPriceShiftExponent_lt?: InputMaybe<Scalars['BigInt']>;
+    dailyPriceShiftExponent_lte?: InputMaybe<Scalars['BigInt']>;
+    dailyPriceShiftExponent_not?: InputMaybe<Scalars['BigInt']>;
+    dailyPriceShiftExponent_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
     endFourthRootPriceRatio?: InputMaybe<Scalars['BigInt']>;
     endFourthRootPriceRatio_gt?: InputMaybe<Scalars['BigInt']>;
     endFourthRootPriceRatio_gte?: InputMaybe<Scalars['BigInt']>;
@@ -1390,14 +1409,6 @@ export type ReClammParams_Filter = {
     priceRatioUpdateStartTime_lte?: InputMaybe<Scalars['BigInt']>;
     priceRatioUpdateStartTime_not?: InputMaybe<Scalars['BigInt']>;
     priceRatioUpdateStartTime_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
-    priceShiftDailyRateInSeconds?: InputMaybe<Scalars['BigInt']>;
-    priceShiftDailyRateInSeconds_gt?: InputMaybe<Scalars['BigInt']>;
-    priceShiftDailyRateInSeconds_gte?: InputMaybe<Scalars['BigInt']>;
-    priceShiftDailyRateInSeconds_in?: InputMaybe<Array<Scalars['BigInt']>>;
-    priceShiftDailyRateInSeconds_lt?: InputMaybe<Scalars['BigInt']>;
-    priceShiftDailyRateInSeconds_lte?: InputMaybe<Scalars['BigInt']>;
-    priceShiftDailyRateInSeconds_not?: InputMaybe<Scalars['BigInt']>;
-    priceShiftDailyRateInSeconds_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
     startFourthRootPriceRatio?: InputMaybe<Scalars['BigInt']>;
     startFourthRootPriceRatio_gt?: InputMaybe<Scalars['BigInt']>;
     startFourthRootPriceRatio_gte?: InputMaybe<Scalars['BigInt']>;
@@ -1411,13 +1422,14 @@ export type ReClammParams_Filter = {
 export enum ReClammParams_OrderBy {
     CenterednessMargin = 'centerednessMargin',
     CurrentFourthRootPriceRatio = 'currentFourthRootPriceRatio',
+    DailyPriceShiftBase = 'dailyPriceShiftBase',
+    DailyPriceShiftExponent = 'dailyPriceShiftExponent',
     EndFourthRootPriceRatio = 'endFourthRootPriceRatio',
     Id = 'id',
     LastTimestamp = 'lastTimestamp',
     LastVirtualBalances = 'lastVirtualBalances',
     PriceRatioUpdateEndTime = 'priceRatioUpdateEndTime',
     PriceRatioUpdateStartTime = 'priceRatioUpdateStartTime',
-    PriceShiftDailyRateInSeconds = 'priceShiftDailyRateInSeconds',
     StartFourthRootPriceRatio = 'startFourthRootPriceRatio',
 }
 
@@ -1518,214 +1530,6 @@ export enum StableSurgeParams_OrderBy {
     MaxSurgeFeePercentage = 'maxSurgeFeePercentage',
     SurgeThresholdPercentage = 'surgeThresholdPercentage',
 }
-
-export type Subscription = {
-    __typename?: 'Subscription';
-    /** Access to subgraph metadata */
-    _meta?: Maybe<_Meta_>;
-    factories: Array<Factory>;
-    factory?: Maybe<Factory>;
-    gyro2Params?: Maybe<Gyro2Params>;
-    gyro2Params_collection: Array<Gyro2Params>;
-    gyroEParams?: Maybe<GyroEParams>;
-    gyroEParams_collection: Array<GyroEParams>;
-    lbpparams?: Maybe<LbpParams>;
-    lbpparams_collection: Array<LbpParams>;
-    pool?: Maybe<Pool>;
-    pools: Array<Pool>;
-    quantAMMWeightedDetail?: Maybe<QuantAmmWeightedDetail>;
-    quantAMMWeightedDetails: Array<QuantAmmWeightedDetail>;
-    quantAMMWeightedParams?: Maybe<QuantAmmWeightedParams>;
-    quantAMMWeightedParams_collection: Array<QuantAmmWeightedParams>;
-    reClammParams?: Maybe<ReClammParams>;
-    reClammParams_collection: Array<ReClammParams>;
-    stableParams?: Maybe<StableParams>;
-    stableParams_collection: Array<StableParams>;
-    stableSurgeParams?: Maybe<StableSurgeParams>;
-    stableSurgeParams_collection: Array<StableSurgeParams>;
-    weightedParams?: Maybe<WeightedParams>;
-    weightedParams_collection: Array<WeightedParams>;
-};
-
-export type Subscription_MetaArgs = {
-    block?: InputMaybe<Block_Height>;
-};
-
-export type SubscriptionFactoriesArgs = {
-    block?: InputMaybe<Block_Height>;
-    first?: InputMaybe<Scalars['Int']>;
-    orderBy?: InputMaybe<Factory_OrderBy>;
-    orderDirection?: InputMaybe<OrderDirection>;
-    skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
-    where?: InputMaybe<Factory_Filter>;
-};
-
-export type SubscriptionFactoryArgs = {
-    block?: InputMaybe<Block_Height>;
-    id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
-};
-
-export type SubscriptionGyro2ParamsArgs = {
-    block?: InputMaybe<Block_Height>;
-    id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
-};
-
-export type SubscriptionGyro2Params_CollectionArgs = {
-    block?: InputMaybe<Block_Height>;
-    first?: InputMaybe<Scalars['Int']>;
-    orderBy?: InputMaybe<Gyro2Params_OrderBy>;
-    orderDirection?: InputMaybe<OrderDirection>;
-    skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
-    where?: InputMaybe<Gyro2Params_Filter>;
-};
-
-export type SubscriptionGyroEParamsArgs = {
-    block?: InputMaybe<Block_Height>;
-    id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
-};
-
-export type SubscriptionGyroEParams_CollectionArgs = {
-    block?: InputMaybe<Block_Height>;
-    first?: InputMaybe<Scalars['Int']>;
-    orderBy?: InputMaybe<GyroEParams_OrderBy>;
-    orderDirection?: InputMaybe<OrderDirection>;
-    skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
-    where?: InputMaybe<GyroEParams_Filter>;
-};
-
-export type SubscriptionLbpparamsArgs = {
-    block?: InputMaybe<Block_Height>;
-    id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
-};
-
-export type SubscriptionLbpparams_CollectionArgs = {
-    block?: InputMaybe<Block_Height>;
-    first?: InputMaybe<Scalars['Int']>;
-    orderBy?: InputMaybe<LbpParams_OrderBy>;
-    orderDirection?: InputMaybe<OrderDirection>;
-    skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
-    where?: InputMaybe<LbpParams_Filter>;
-};
-
-export type SubscriptionPoolArgs = {
-    block?: InputMaybe<Block_Height>;
-    id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
-};
-
-export type SubscriptionPoolsArgs = {
-    block?: InputMaybe<Block_Height>;
-    first?: InputMaybe<Scalars['Int']>;
-    orderBy?: InputMaybe<Pool_OrderBy>;
-    orderDirection?: InputMaybe<OrderDirection>;
-    skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
-    where?: InputMaybe<Pool_Filter>;
-};
-
-export type SubscriptionQuantAmmWeightedDetailArgs = {
-    block?: InputMaybe<Block_Height>;
-    id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
-};
-
-export type SubscriptionQuantAmmWeightedDetailsArgs = {
-    block?: InputMaybe<Block_Height>;
-    first?: InputMaybe<Scalars['Int']>;
-    orderBy?: InputMaybe<QuantAmmWeightedDetail_OrderBy>;
-    orderDirection?: InputMaybe<OrderDirection>;
-    skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
-    where?: InputMaybe<QuantAmmWeightedDetail_Filter>;
-};
-
-export type SubscriptionQuantAmmWeightedParamsArgs = {
-    block?: InputMaybe<Block_Height>;
-    id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
-};
-
-export type SubscriptionQuantAmmWeightedParams_CollectionArgs = {
-    block?: InputMaybe<Block_Height>;
-    first?: InputMaybe<Scalars['Int']>;
-    orderBy?: InputMaybe<QuantAmmWeightedParams_OrderBy>;
-    orderDirection?: InputMaybe<OrderDirection>;
-    skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
-    where?: InputMaybe<QuantAmmWeightedParams_Filter>;
-};
-
-export type SubscriptionReClammParamsArgs = {
-    block?: InputMaybe<Block_Height>;
-    id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
-};
-
-export type SubscriptionReClammParams_CollectionArgs = {
-    block?: InputMaybe<Block_Height>;
-    first?: InputMaybe<Scalars['Int']>;
-    orderBy?: InputMaybe<ReClammParams_OrderBy>;
-    orderDirection?: InputMaybe<OrderDirection>;
-    skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
-    where?: InputMaybe<ReClammParams_Filter>;
-};
-
-export type SubscriptionStableParamsArgs = {
-    block?: InputMaybe<Block_Height>;
-    id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
-};
-
-export type SubscriptionStableParams_CollectionArgs = {
-    block?: InputMaybe<Block_Height>;
-    first?: InputMaybe<Scalars['Int']>;
-    orderBy?: InputMaybe<StableParams_OrderBy>;
-    orderDirection?: InputMaybe<OrderDirection>;
-    skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
-    where?: InputMaybe<StableParams_Filter>;
-};
-
-export type SubscriptionStableSurgeParamsArgs = {
-    block?: InputMaybe<Block_Height>;
-    id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
-};
-
-export type SubscriptionStableSurgeParams_CollectionArgs = {
-    block?: InputMaybe<Block_Height>;
-    first?: InputMaybe<Scalars['Int']>;
-    orderBy?: InputMaybe<StableSurgeParams_OrderBy>;
-    orderDirection?: InputMaybe<OrderDirection>;
-    skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
-    where?: InputMaybe<StableSurgeParams_Filter>;
-};
-
-export type SubscriptionWeightedParamsArgs = {
-    block?: InputMaybe<Block_Height>;
-    id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
-};
-
-export type SubscriptionWeightedParams_CollectionArgs = {
-    block?: InputMaybe<Block_Height>;
-    first?: InputMaybe<Scalars['Int']>;
-    orderBy?: InputMaybe<WeightedParams_OrderBy>;
-    orderDirection?: InputMaybe<OrderDirection>;
-    skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
-    where?: InputMaybe<WeightedParams_Filter>;
-};
 
 export type WeightedParams = {
     __typename?: 'WeightedParams';
