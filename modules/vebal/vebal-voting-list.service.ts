@@ -6,9 +6,8 @@ import { oldVeBalAddress, specialVotingGaugeAddresses } from './special-pools/sp
 import { getVeVotingGauges, veGauges, vePools } from './special-pools/ve-pools';
 import { hardCodedPools } from './special-pools/hardcoded-pools';
 import { GqlVotingPool } from '../../apps/api/gql/generated-schema';
-import { $Enums, Chain } from '@prisma/client';
-import { JsonValue } from '@prisma/client/runtime/library';
-import { mapPoolToken } from '../pool/lib/pool-gql-mapper-helper';
+import { Chain } from '@prisma/client';
+import { enrichWithErc4626Data, mapPoolToken } from '../pool/lib/pool-gql-mapper-helper';
 
 export class VeBalVotingListService {
     constructor(private votingGauges = new VotingGaugesRepository()) {}
@@ -35,7 +34,7 @@ export class VeBalVotingListService {
         const allGauges = [...validGauges, ...(await getVeVotingGauges())];
 
         // For each voting gauge returns a pool with its gauge info inside
-        return allGauges.map((votingGauge) => {
+        const gauges = allGauges.map((votingGauge) => {
             const pool = poolsById[votingGauge.stakingGauge!.staking.poolId];
             // Only L2 networks have childGaugeAddress
             const childGaugeAddress = pool.chain === Chain.MAINNET ? null : votingGauge.stakingGauge?.staking.address;
@@ -66,6 +65,11 @@ export class VeBalVotingListService {
             };
             return votingPool;
         });
+
+        for (const gauge of gauges) {
+            await enrichWithErc4626Data(gauge.poolTokens, gauge.chain);
+        }
+        return gauges;
     }
 
     public async getPoolsForVotingList(poolIds: string[]) {
