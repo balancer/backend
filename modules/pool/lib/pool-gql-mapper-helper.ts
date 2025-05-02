@@ -1,3 +1,4 @@
+import { Chain } from '@prisma/client';
 import {
     GqlPoolTokenDetail,
     GqlNestedPool,
@@ -12,6 +13,8 @@ import {
 import { floatToExactString } from '../../common/numbers';
 import { chainToChainId } from '../../network/chain-id-to-chain';
 import { StableData } from '../subgraph-mapper';
+import { prisma } from '../../../prisma/prisma-client';
+import { tokenService } from '../../token/token.service';
 
 export function mapPoolToken(poolToken: PrismaPoolTokenWithExpandedNesting, nestedPercentage = 1): GqlPoolTokenDetail {
     const { nestedPool } = poolToken;
@@ -70,4 +73,82 @@ function mapNestedPool(nestedPool: PrismaNestedPoolWithSingleLayerNesting, token
         bptPriceRate: (nestedPool.typeData as StableData).bptPriceRate || '1.0',
         hook: hook as GqlHook,
     };
+}
+
+export async function enrichWithErc4626Data(poolTokens: GqlPoolTokenDetail[], chain: Chain) {
+    for (const token of poolTokens) {
+        if (token.isErc4626) {
+            const prismaToken = await prisma.prismaToken.findUnique({
+                where: { address_chain: { address: token.address, chain: chain } },
+            });
+            if (prismaToken?.underlyingTokenAddress) {
+                const underlyingTokenDefinition = await tokenService.getTokenDefinition(
+                    prismaToken.underlyingTokenAddress,
+                    chain,
+                );
+                token.underlyingToken = underlyingTokenDefinition;
+            }
+
+            const erc4626ReviewData = await prisma.prismaErc4626ReviewData.findUnique({
+                where: {
+                    chain_erc4626Address: {
+                        chain: chain,
+                        erc4626Address: token.address,
+                    },
+                },
+            });
+            if (erc4626ReviewData) {
+                token.erc4626ReviewData = {
+                    ...erc4626ReviewData,
+                    warnings: erc4626ReviewData.warnings?.split(',') || [],
+                };
+                token.useUnderlyingForAddRemove = erc4626ReviewData.useUnderlyingForAddRemove;
+                token.useWrappedForAddRemove = erc4626ReviewData.useUnderlyingForAddRemove;
+                token.canUseBufferForSwaps = erc4626ReviewData.canUseBufferForSwaps;
+            } else {
+                token.useUnderlyingForAddRemove = false;
+                token.useWrappedForAddRemove = true;
+                token.canUseBufferForSwaps = false;
+            }
+        }
+
+        if (token.hasNestedPool) {
+            for (const nestedToken of token.nestedPool!.tokens) {
+                if (nestedToken.isErc4626) {
+                    const prismaToken = await prisma.prismaToken.findUnique({
+                        where: { address_chain: { address: nestedToken.address, chain: chain } },
+                    });
+                    if (prismaToken?.underlyingTokenAddress) {
+                        const tokenDefinition = await tokenService.getTokenDefinition(
+                            prismaToken.underlyingTokenAddress,
+                            chain,
+                        );
+                        nestedToken.underlyingToken = tokenDefinition;
+                    }
+
+                    const erc4626ReviewData = await prisma.prismaErc4626ReviewData.findUnique({
+                        where: {
+                            chain_erc4626Address: {
+                                chain: chain,
+                                erc4626Address: nestedToken.address,
+                            },
+                        },
+                    });
+                    if (erc4626ReviewData) {
+                        nestedToken.erc4626ReviewData = {
+                            ...erc4626ReviewData,
+                            warnings: erc4626ReviewData.warnings?.split(',') || [],
+                        };
+                        nestedToken.useUnderlyingForAddRemove = erc4626ReviewData.useUnderlyingForAddRemove;
+                        nestedToken.useWrappedForAddRemove = erc4626ReviewData.useUnderlyingForAddRemove;
+                        nestedToken.canUseBufferForSwaps = erc4626ReviewData.canUseBufferForSwaps;
+                    } else {
+                        nestedToken.useUnderlyingForAddRemove = false;
+                        nestedToken.useWrappedForAddRemove = true;
+                        nestedToken.canUseBufferForSwaps = false;
+                    }
+                }
+            }
+        }
+    }
 }

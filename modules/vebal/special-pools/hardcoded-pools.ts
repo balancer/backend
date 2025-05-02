@@ -1,4 +1,3 @@
-import { Chain } from '@prisma/client';
 import { GqlVotingPool } from '../../../apps/api/gql/generated-schema';
 
 /* Balancer wstETH/rETH/L and USDC/WETH/L from Cron Finance
@@ -8,7 +7,7 @@ const cron1VotingGaugeAddress = '0xb5bd58c733948e3d65d86ba9604e06e5da276fd1';
 const cron2VotingGaugeAddress = '0xc4e72abe8a32fd7d7ba787e1ec860ecb8c0b333c';
 
 const cronPool1: GqlVotingPool = {
-    chain: Chain.MAINNET,
+    chain: 'MAINNET',
     symbol: 'wstETH/rETH/L',
     id: '0x6910c4e32d425a834fb61e983c8083a84b0ebd01000200000000000000000532',
     address: '0x6910c4e32d425a834fb61e983c8083a84b0ebd01',
@@ -80,7 +79,7 @@ const cronPool1: GqlVotingPool = {
 };
 
 const cronPool2: GqlVotingPool = {
-    chain: Chain.MAINNET,
+    chain: 'MAINNET',
     symbol: 'USDC/WETH/L',
     id: '0x0018c32d85d8aebea2efbe0b0f4a4eb9e4f1c8c900020000000000000000050c',
     address: '0x0018c32d85d8aebea2efbe0b0f4a4eb9e4f1c8c9',
