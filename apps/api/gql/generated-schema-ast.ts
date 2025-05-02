@@ -191,6 +191,7 @@ export const schema = gql`
     }
 
     enum GqlHookType {
+        AKRON
         DIRECTIONAL_FEE
         EXIT_FEE
         FEE_TAKING

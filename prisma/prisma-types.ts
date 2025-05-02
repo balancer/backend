@@ -419,6 +419,7 @@ export type HookData = {
     address: string;
     name?: string;
     type:
+        | 'AKRON'
         | 'FEE_TAKING'
         | 'EXIT_FEE'
         | 'STABLE_SURGE'

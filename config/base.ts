@@ -25,6 +25,7 @@ export default <NetworkData>{
         ['0x97b05bafb3c592089d382ba7cfa7abb9d85f599e']: 'UNKNOWN',
         ['0xa64cde229697d500ecaceb0611d603ad21fe4ce5']: 'UNKNOWN',
         ['0x7a2535f5fb47b8e44c02ef5d9990588313fe8f05']: 'MEV_TAX',
+        ['0xa45570815dbe7bf7010c41f1f74479be322d02bd']: 'AKRON',
     },
     gyro: {
         config: '0x8a5eb9a5b726583a213c7e4de2403d2dfd42c8a6',
