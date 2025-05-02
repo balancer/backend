@@ -23,6 +23,7 @@ export default <NetworkData>{
         ['0x0fa0f9990d7969a7ae6f9961d663e4a201ed6417']: 'STABLE_SURGE',
         ['0x7c1b7a97bfacd39975de53e989a16c7bc4c78275']: 'STABLE_SURGE',
         ['0x5b42ec6d40f7b7965be5308c70e2603c0281c1e9']: 'MEV_TAX',
+        ['0xd221affabdd3c1281ea14c5781dec6b0fca8937e']: 'AKRON',
     },
     eth: {
         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',

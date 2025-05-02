@@ -105,6 +105,7 @@ type GqlHookReviewData {
 }
 
 enum GqlHookType {
+    AKRON
     FEE_TAKING
     EXIT_FEE
     STABLE_SURGE

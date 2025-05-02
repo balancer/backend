@@ -59,15 +59,14 @@ test('debug aprs', async () => {
 }, 100000000);
 
 test('pool debugging', async () => {
-    const chain = 'MAINNET';
+    const chain = 'BASE';
     const chainId = chainToChainId[chain];
     initRequestScopedContext();
     setRequestScopedContextValue('chainId', chainId);
     //only do once before starting to debug
-    // await poolService.syncAllPoolsFromSubgraph();
-    // await poolService.syncChangedPools();
-    // await tokenService.updateTokenPrices(['MAINNET']);
-    // await PoolController().reloadPoolsV3('SEPOLIA');
+
+    await upsertLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.ADD_POOLS_V3, 0);
+    await PoolController().addPoolsV3(chain, false);
 
     // const allAggPools = await poolService.getAggregatorPools({
     //     where: { chainIn: ['SEPOLIA'], protocolVersionIn: [3] },
@@ -76,7 +75,7 @@ test('pool debugging', async () => {
     // console.log(allAggPools.length);
 
     const allPools = await poolService.getGqlPools({
-        where: { chainIn: ['BASE'], idIn: ['0x7dc81fb7e93cdde7754bff7f55428226bd9cef7b'] },
+        where: { chainIn: ['BASE'], idIn: ['0x4fbb7870dbe7a7ef4866a33c0eed73d395730dc0'] },
     });
 
     console.log(allPools.length);
