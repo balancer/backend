@@ -1,5 +1,5 @@
 import { PoolAprService } from '../../pool-types';
-import { PrismaPoolWithTokens } from '../../../../prisma/prisma-types';
+import { PoolForAPRs } from '../../../../prisma/prisma-types';
 import { prisma } from '../../../../prisma/prisma-client';
 import { prismaBulkExecuteOperations } from '../../../../prisma/prisma-util';
 import { Chain, PrismaPoolType } from '@prisma/client';
@@ -43,7 +43,7 @@ export class SwapFeeFromEventsAprService implements PoolAprService {
         return 'SwapFeeAprService';
     }
 
-    public async updateAprForPools(pools: PrismaPoolWithTokens[]): Promise<void> {
+    public async updateAprForPools(pools: PoolForAPRs[]): Promise<void> {
         const chain = pools[0].chain;
 
         const typeMap = pools.reduce((acc, pool) => {

@@ -1,5 +1,5 @@
 import { PoolAprService } from '../../pool-types';
-import { PrismaPoolWithTokens } from '../../../../prisma/prisma-types';
+import { PoolForAPRs } from '../../../../prisma/prisma-types';
 import { prisma } from '../../../../prisma/prisma-client';
 import { PrismaPoolAprType } from '@prisma/client';
 import { morphoApiClient } from './morpho-api-client';
@@ -11,7 +11,7 @@ export class MorphoRewardsAprService implements PoolAprService {
         return 'MorphoRewardsAprService';
     }
 
-    public async updateAprForPools(pools: PrismaPoolWithTokens[]): Promise<void> {
+    public async updateAprForPools(pools: PoolForAPRs[]): Promise<void> {
         const aprItems = await this.getAprItems(pools);
 
         await prisma.$transaction(
@@ -27,7 +27,7 @@ export class MorphoRewardsAprService implements PoolAprService {
         );
     }
 
-    private async getAprItems(pools: PrismaPoolWithTokens[]) {
+    private async getAprItems(pools: PoolForAPRs[]) {
         // Get Morpho aprs
         const morphoApr = await morphoApiClient.morphoApr();
 

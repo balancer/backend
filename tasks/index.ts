@@ -188,11 +188,22 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         initRequestScopedContext();
         setRequestScopedContextValue('chainId', chainId);
         return poolService.reloadAllPoolAprs(chain);
-    } else if (job === 'update-total-apr') {
+    } else if (job === 'update-pool-aprs') {
         const id = process.argv[4];
         const chain = chainIdToChain[chainId];
         const service = new PoolAprUpdaterService();
-        return service.updateTotalApr(id, chain);
+        const pools = await prisma.prismaPool.findMany({
+            where: { id: id, chain: chain },
+            include: {
+                dynamicData: true,
+                tokens: {
+                    include: {
+                        token: true,
+                    },
+                },
+            },
+        });
+        return service.updateAprsForPools(pools);
     } else if (job === 'update-prices') {
         await tokenService.syncTokenContentData(chain);
         return tokenService.updateTokenPrices([chain]);

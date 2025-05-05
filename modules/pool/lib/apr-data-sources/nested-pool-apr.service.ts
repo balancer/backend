@@ -1,5 +1,5 @@
 import { PoolAprService } from '../../pool-types';
-import { PrismaPoolWithTokens, prismaPoolWithExpandedNesting } from '../../../../prisma/prisma-types';
+import { PoolForAPRs } from '../../../../prisma/prisma-types';
 import { prisma } from '../../../../prisma/prisma-client';
 import { collectsYieldFee } from '../pool-utils';
 
@@ -8,7 +8,7 @@ export class BoostedPoolAprService implements PoolAprService {
         return 'BoostedPoolAprService';
     }
 
-    public async updateAprForPools(pools: PrismaPoolWithTokens[]): Promise<void> {
+    public async updateAprForPools(pools: PoolForAPRs[]): Promise<void> {
         const chain = pools[0].chain;
 
         // need to do multiple queries otherwise the nesting is too deep for many pools. Error: stack depth limit exceeded
