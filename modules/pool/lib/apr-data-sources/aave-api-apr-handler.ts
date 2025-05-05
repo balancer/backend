@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { prisma } from '../../../../prisma/prisma-client';
-import { PrismaPoolWithTokens } from '../../../../prisma/prisma-types';
+import { PoolForAPRs } from '../../../../prisma/prisma-types';
 import { PoolAprService } from '../../pool-types';
 import { Chain } from '@prisma/client';
 import { chainToChainId } from '../../../network/chain-id-to-chain';
@@ -40,7 +40,7 @@ export class AaveApiAprService implements PoolAprService {
         return 'AaveApiAprServices';
     }
 
-    public async updateAprForPools(pools: PrismaPoolWithTokens[]): Promise<void> {
+    public async updateAprForPools(pools: PoolForAPRs[]): Promise<void> {
         const aprItems = await this.getAprItemsForSupplyIncentives(pools);
         await prisma.$transaction(
             aprItems.map((item) =>
@@ -55,7 +55,7 @@ export class AaveApiAprService implements PoolAprService {
         );
     }
 
-    private async getAprItemsForSupplyIncentives(pools: PrismaPoolWithTokens[]): Promise<
+    private async getAprItemsForSupplyIncentives(pools: PoolForAPRs[]): Promise<
         {
             id: string;
             chain: Chain;
@@ -93,7 +93,7 @@ export class AaveApiAprService implements PoolAprService {
         return aprItems;
     }
 
-    private async fetchAprForChain(chainId: string, pools: PrismaPoolWithTokens[]) {
+    private async fetchAprForChain(chainId: string, pools: PoolForAPRs[]) {
         const aprItems: {
             id: string;
             chain: Chain;

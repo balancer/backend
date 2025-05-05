@@ -1,9 +1,7 @@
 import _ from 'lodash';
 import { prisma } from '../../../../prisma/prisma-client';
-import { PrismaPoolWithTokens } from '../../../../prisma/prisma-types';
+import { PoolForAPRs } from '../../../../prisma/prisma-types';
 import { PoolAprService } from '../../pool-types';
-import { Chain } from '@prisma/client';
-import { chainToChainId } from '../../../network/chain-id-to-chain';
 import moment from 'moment';
 
 export class QuantAmmAprService implements PoolAprService {
@@ -11,7 +9,7 @@ export class QuantAmmAprService implements PoolAprService {
         return 'QuantAmmAprServices';
     }
 
-    public async updateAprForPools(pools: PrismaPoolWithTokens[]): Promise<void> {
+    public async updateAprForPools(pools: PoolForAPRs[]): Promise<void> {
         const quantAmmPools = pools.filter((pool) => pool.type === 'QUANT_AMM_WEIGHTED');
 
         if (quantAmmPools.length === 0) {

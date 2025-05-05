@@ -1,5 +1,5 @@
 import { PoolAprService } from '../../pool-types';
-import { PrismaPoolWithTokens } from '../../../../prisma/prisma-types';
+import { PoolForAPRs } from '../../../../prisma/prisma-types';
 import axios from 'axios';
 import { prisma } from '../../../../prisma/prisma-client';
 import { networkContext } from '../../../network/network-context.service';
@@ -12,7 +12,7 @@ export class BeetswarsGaugeVotingAprService implements PoolAprService {
         return 'BeetswarsGaugeVotingAprService';
     }
 
-    public async updateAprForPools(pools: PrismaPoolWithTokens[]): Promise<void> {
+    public async updateAprForPools(pools: PoolForAPRs[]): Promise<void> {
         for (const pool of pools) {
             if (pool.id !== this.FRESH_BEETS_POOL_ID) {
                 continue;

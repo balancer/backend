@@ -1,8 +1,8 @@
 import { Chain, PrismaPoolStakingType } from '@prisma/client';
-import { PrismaPoolWithTokens } from '../../prisma/prisma-types';
+import { PoolForAPRs } from '../../prisma/prisma-types';
 
 export interface PoolAprService {
-    updateAprForPools(pools: PrismaPoolWithTokens[]): Promise<void>;
+    updateAprForPools(pools: PoolForAPRs[]): Promise<void>;
     getAprServiceName(): string;
 }
 

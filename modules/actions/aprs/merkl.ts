@@ -1,6 +1,6 @@
 import { $Enums, PrismaPoolAprType } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
-import { poolWithTokens, PrismaPoolWithTokens } from '../../../prisma/prisma-types';
+import { poolsIncludeForAprs, PoolForAPRs } from '../../../prisma/prisma-types';
 import { chainIdToChain } from '../../network/chain-id-to-chain';
 import { AllNetworkConfigs } from '../../network/network-config';
 
@@ -91,7 +91,7 @@ export const syncMerklRewards = async () => {
                 in: allAffectedPoolIds,
             },
         },
-        ...poolWithTokens,
+        ...poolsIncludeForAprs,
     });
 
     const aprsFromOpportunities = mapOpportunitiesToAprs(opportunities, affectedPools);
@@ -118,7 +118,7 @@ export const syncMerklRewards = async () => {
 
 function mapForwardedOpportunitiesToAprs(
     opportunities: MerklOpportunity[],
-    affectedPools: PrismaPoolWithTokens[],
+    affectedPools: PoolForAPRs[],
 ): {
     id: string;
     type: PrismaPoolAprType;
@@ -180,7 +180,7 @@ function mapForwardedOpportunitiesToAprs(
 
 function mapOpportunitiesToAprs(
     opportunities: MerklOpportunity[],
-    affectedPools: PrismaPoolWithTokens[],
+    affectedPools: PoolForAPRs[],
 ): {
     id: string;
     type: PrismaPoolAprType;
