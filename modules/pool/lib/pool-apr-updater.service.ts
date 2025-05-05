@@ -20,7 +20,6 @@ export class PoolAprUpdaterService {
         });
 
         await this.updateAprsForPools(pools);
-        await this.updateTotalApr(pools);
     }
 
     async reloadAllPoolAprs(chain: Chain) {
@@ -44,6 +43,8 @@ export class PoolAprUpdaterService {
         if (failedAprServices.length > 0) {
             throw new Error(`The following APR services failed: ${failedAprServices}`);
         }
+
+        await this.updateTotalApr(pools);
     }
 
     private async updateTotalApr(pools: PoolForAPRs[]) {
@@ -62,14 +63,16 @@ export class PoolAprUpdaterService {
                     ],
                 },
             },
-            select: { apr: true, id: true, title: true },
         });
 
         const grouped = _.groupBy(items, 'poolId');
         let operations: any[] = [];
 
         // Select / update aprs in Dynamic Data
-        const dynamicData = _.keyBy(pools.map((pool) => pool.dynamicData));
+        const dynamicData = _.keyBy(
+            pools.map((pool) => pool.dynamicData),
+            'poolId',
+        );
 
         //store the total APR on the dynamic data so we can sort by it
         for (const poolId in grouped) {
