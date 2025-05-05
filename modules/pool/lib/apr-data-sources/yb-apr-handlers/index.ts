@@ -9,6 +9,7 @@ const sourceToHandler = {
     avalon: sources.AvalonAprHandler,
     beefy: sources.BeefyAprHandler,
     euler: sources.EulerAprHandler,
+    fluid: sources.FluidAprHandler,
     // gearbox: sources.GearboxAprHandler, // Removed, endpoint is down
     // idle: sources.IdleAprHandler, // Removed, endpoint is down
     maker: sources.MakerAprHandler,

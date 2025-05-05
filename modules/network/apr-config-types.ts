@@ -21,6 +21,9 @@ export interface YbAprConfig {
         url: string;
         token: string;
     };
+    fluid?: {
+        url: string;
+    };
     maple?: {
         url: string;
         token: string;
