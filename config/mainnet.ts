@@ -315,6 +315,9 @@ export default <NetworkData>{
         teth: {
             address: '0xd11c452fc99cf405034ee446803b6f6c1f6d5ed8',
         },
+        fluid: {
+            url: 'https://api.fluid.instad.app/v2/lending/1/tokens',
+        },
         defaultHandlers: {
             cUSDO: {
                 tokenAddress: '0xad55aebc9b8c03fc43cd9f62260391c13c23e7c0',
