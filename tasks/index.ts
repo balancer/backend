@@ -15,6 +15,7 @@ import {
     TokenController,
     QuantAmmController,
 } from '../modules/controllers';
+import { PoolAprUpdaterService } from '../modules/pool/lib/pool-apr-updater.service';
 import { chainIdToChain } from '../modules/network/chain-id-to-chain';
 
 import { backsyncSwaps } from './subgraph-syncing/backsync-swaps';
@@ -187,6 +188,11 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         initRequestScopedContext();
         setRequestScopedContextValue('chainId', chainId);
         return poolService.reloadAllPoolAprs(chain);
+    } else if (job === 'update-total-apr') {
+        const id = process.argv[4];
+        const chain = chainIdToChain[chainId];
+        const service = new PoolAprUpdaterService();
+        return service.updateTotalApr(id, chain);
     } else if (job === 'update-prices') {
         await tokenService.syncTokenContentData(chain);
         return tokenService.updateTokenPrices([chain]);

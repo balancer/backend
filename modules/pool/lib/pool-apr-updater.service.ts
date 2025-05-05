@@ -33,7 +33,15 @@ export class PoolAprUpdaterService {
             where: {
                 chain: chain,
                 type: {
-                    notIn: ['SURPLUS_30D', 'SURPLUS_7D', 'SWAP_FEE_30D', 'SWAP_FEE_7D', 'DYNAMIC_SWAP_FEE_24H'],
+                    notIn: [
+                        'SURPLUS',
+                        'SURPLUS_30D',
+                        'SURPLUS_7D',
+                        'SWAP_FEE_30D',
+                        'SWAP_FEE_7D',
+                        'SWAP_FEE',
+                        'DYNAMIC_SWAP_FEE_24H',
+                    ],
                 },
             },
             select: { poolId: true, apr: true },
@@ -67,6 +75,43 @@ export class PoolAprUpdaterService {
         if (failedAprServices.length > 0) {
             throw new Error(`The following APR services failed: ${failedAprServices}`);
         }
+    }
+
+    // Debugging function to update the total APR of a pool
+    // This is not used in production, but can be used to fix the total APR of a pool
+    async updateTotalApr(id: string, chain: Chain) {
+        const items = await prisma.prismaPoolAprItem.findMany({
+            where: {
+                poolId: id,
+                chain: chain,
+                type: {
+                    notIn: [
+                        'SURPLUS',
+                        'SURPLUS_30D',
+                        'SURPLUS_7D',
+                        'SWAP_FEE_30D',
+                        'SWAP_FEE_7D',
+                        'DYNAMIC_SWAP_FEE_24H',
+                    ],
+                },
+            },
+            select: { apr: true, id: true, title: true },
+        });
+
+        console.log(
+            `Updating total APR for pool ${id} on chain ${chain}`,
+            items.map((item) => item.title),
+            items.map((item) => item.id),
+            items.map((item) => item.apr),
+            items.map((item) => item.apr).reduce((a, b) => a + b, 0),
+        );
+
+        const apr = _.sumBy(items, (item) => item.apr);
+
+        await prisma.prismaPoolDynamicData.update({
+            where: { id_chain: { id, chain } },
+            data: { apr },
+        });
     }
 
     public async reloadAllPoolAprs(chain: Chain) {

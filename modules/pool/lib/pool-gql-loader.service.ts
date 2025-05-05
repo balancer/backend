@@ -1124,7 +1124,7 @@ export class PoolGqlLoaderService {
         const aprItemsWithNoGroup = aprItems.filter((item) => !item.group);
 
         const hasAprRange = !!aprItems.find((item) => item.range);
-        let aprTotal = `0`;
+        let aprTotal = `${pool.dynamicData?.apr || 0}`;
         let swapAprTotal = `0`;
         let nativeRewardAprTotal = `0`;
         let thirdPartyAprTotal = `0`;
@@ -1199,7 +1199,6 @@ export class PoolGqlLoaderService {
         } else {
             const nativeRewardAprItems = aprItems.filter((item) => item.type === 'NATIVE_REWARD');
             const thirdPartyRewardAprItems = aprItems.filter((item) => item.type === 'THIRD_PARTY_REWARD');
-            aprTotal = `${_.sumBy(aprItems, 'apr')}`;
             swapAprTotal = `${_.sumBy(swapAprItems, 'apr')}`;
             nativeRewardAprTotal = `${_.sumBy(nativeRewardAprItems, 'apr')}`;
             thirdPartyAprTotal = `${_.sumBy(thirdPartyRewardAprItems, 'apr')}`;
