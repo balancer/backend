@@ -28,15 +28,12 @@ import {
     GqlPoolWithdrawConfig,
     GqlPoolWithdrawOption,
     QueryPoolGetPoolsArgs,
-    GqlPoolTokenDetail,
-    GqlNestedPool,
     GqlPoolAprItem,
     GqlPoolAprItemType,
     GqlUserStakedBalance,
     GqlPoolFilterCategory,
     GqlPoolAggregator,
     LiquidityManagement,
-    GqlHook,
     QueryAggregatorPoolsArgs,
     QuantAmmWeightSnapshot,
 } from '../../../apps/api/gql/generated-schema';
@@ -44,20 +41,17 @@ import _ from 'lodash';
 import { prisma } from '../../../prisma/prisma-client';
 import { Chain, Prisma, PrismaPoolAprType, PrismaUserStakedBalance, PrismaUserWalletBalance } from '@prisma/client';
 import { fixedNumber } from '../../view-helpers/fixed-number';
-import { chainToChainId as chainToIdMap } from '../../network/chain-id-to-chain';
 import { GithubContentService } from '../../content/github-content.service';
 import { ElementData, FxData, GyroData, StableData, QuantAmmWeightedData, ReclammData } from '../subgraph-mapper';
 import { LBPoolData } from '../pool-data';
 import { ZERO_ADDRESS } from '@balancer/sdk';
-import { tokenService } from '../../token/token.service';
 import { mapHookToGqlHook } from '../../sources/transformers';
 import { GraphQLError } from 'graphql';
-import { floatToExactString } from '../../common/numbers';
 import { isWeightedPoolV2 } from './pool-utils';
 import { addressesMatch } from '../../web3/addresses';
 import { networkContext } from '../../network/network-context.service';
 import { getWeightSnapshots } from '../../actions/quant-amm/get-weight-snapshots';
-import { mapPoolToken } from './pool-gql-mapper-helper';
+import { mapPoolToken, enrichWithErc4626Data } from './pool-gql-mapper-helper';
 
 const isToken = (text: string) => text.match(/^0x[0-9a-fA-F]{40}$/);
 const isPoolId = (text: string) => isToken(text) || text.match(/^0x[0-9a-fA-F]{64}$/);
@@ -96,87 +90,9 @@ export class PoolGqlLoaderService {
         await this.enrichWithRateproviderData(mappedPool);
 
         // load underlying token info into PoolTokenDetail
-        await this.enrichWithErc4626Data(mappedPool);
+        await enrichWithErc4626Data(mappedPool.poolTokens, mappedPool.chain);
 
         return mappedPool;
-    }
-
-    private async enrichWithErc4626Data(mappedPool: GqlPoolUnion | GqlPoolAggregator | GqlPoolMinimal) {
-        for (const token of mappedPool.poolTokens) {
-            if (token.isErc4626) {
-                const prismaToken = await prisma.prismaToken.findUnique({
-                    where: { address_chain: { address: token.address, chain: mappedPool.chain } },
-                });
-                if (prismaToken?.underlyingTokenAddress) {
-                    const underlyingTokenDefinition = await tokenService.getTokenDefinition(
-                        prismaToken.underlyingTokenAddress,
-                        mappedPool.chain,
-                    );
-                    token.underlyingToken = underlyingTokenDefinition;
-                }
-
-                const erc4626ReviewData = await prisma.prismaErc4626ReviewData.findUnique({
-                    where: {
-                        chain_erc4626Address: {
-                            chain: mappedPool.chain,
-                            erc4626Address: token.address,
-                        },
-                    },
-                });
-                if (erc4626ReviewData) {
-                    token.erc4626ReviewData = {
-                        ...erc4626ReviewData,
-                        warnings: erc4626ReviewData.warnings?.split(',') || [],
-                    };
-                    token.useUnderlyingForAddRemove = erc4626ReviewData.useUnderlyingForAddRemove;
-                    token.useWrappedForAddRemove = erc4626ReviewData.useUnderlyingForAddRemove;
-                    token.canUseBufferForSwaps = erc4626ReviewData.canUseBufferForSwaps;
-                } else {
-                    token.useUnderlyingForAddRemove = false;
-                    token.useWrappedForAddRemove = true;
-                    token.canUseBufferForSwaps = false;
-                }
-            }
-
-            if (token.hasNestedPool) {
-                for (const nestedToken of token.nestedPool!.tokens) {
-                    if (nestedToken.isErc4626) {
-                        const prismaToken = await prisma.prismaToken.findUnique({
-                            where: { address_chain: { address: nestedToken.address, chain: mappedPool.chain } },
-                        });
-                        if (prismaToken?.underlyingTokenAddress) {
-                            const tokenDefinition = await tokenService.getTokenDefinition(
-                                prismaToken.underlyingTokenAddress,
-                                mappedPool.chain,
-                            );
-                            nestedToken.underlyingToken = tokenDefinition;
-                        }
-
-                        const erc4626ReviewData = await prisma.prismaErc4626ReviewData.findUnique({
-                            where: {
-                                chain_erc4626Address: {
-                                    chain: mappedPool.chain,
-                                    erc4626Address: nestedToken.address,
-                                },
-                            },
-                        });
-                        if (erc4626ReviewData) {
-                            nestedToken.erc4626ReviewData = {
-                                ...erc4626ReviewData,
-                                warnings: erc4626ReviewData.warnings?.split(',') || [],
-                            };
-                            nestedToken.useUnderlyingForAddRemove = erc4626ReviewData.useUnderlyingForAddRemove;
-                            nestedToken.useWrappedForAddRemove = erc4626ReviewData.useUnderlyingForAddRemove;
-                            nestedToken.canUseBufferForSwaps = erc4626ReviewData.canUseBufferForSwaps;
-                        } else {
-                            nestedToken.useUnderlyingForAddRemove = false;
-                            nestedToken.useWrappedForAddRemove = true;
-                            nestedToken.canUseBufferForSwaps = false;
-                        }
-                    }
-                }
-            }
-        }
     }
 
     private async enrichWithRateproviderData(mappedPool: GqlPoolMinimal | GqlPoolAggregator | GqlPoolUnion) {
@@ -259,7 +175,7 @@ export class PoolGqlLoaderService {
             await this.enrichWithRateproviderData(mappedPool);
 
             // load underlying token info into PoolTokenDetail
-            await this.enrichWithErc4626Data(mappedPool);
+            await enrichWithErc4626Data(mappedPool.poolTokens, mappedPool.chain);
         }
 
         return gqlPools;
@@ -308,7 +224,7 @@ export class PoolGqlLoaderService {
             await this.enrichWithRateproviderData(mappedPool);
 
             // load underlying token info into PoolTokenDetail
-            await this.enrichWithErc4626Data(mappedPool);
+            await enrichWithErc4626Data(mappedPool.poolTokens, mappedPool.chain);
 
             filteredPools.push(mappedPool);
         }
@@ -349,7 +265,7 @@ export class PoolGqlLoaderService {
                 await this.enrichWithRateproviderData(mappedPool);
 
                 // load underlying token info into PoolTokenDetail
-                await this.enrichWithErc4626Data(mappedPool);
+                await enrichWithErc4626Data(mappedPool.poolTokens, mappedPool.chain);
             }
 
             if (args.orderBy === 'userbalanceUsd') {
@@ -381,7 +297,7 @@ export class PoolGqlLoaderService {
             await this.enrichWithRateproviderData(mappedPool);
 
             // load underlying token info into PoolTokenDetail
-            await this.enrichWithErc4626Data(mappedPool);
+            await enrichWithErc4626Data(mappedPool.poolTokens, mappedPool.chain);
         }
 
         return gqlPools;
@@ -1208,7 +1124,7 @@ export class PoolGqlLoaderService {
         const aprItemsWithNoGroup = aprItems.filter((item) => !item.group);
 
         const hasAprRange = !!aprItems.find((item) => item.range);
-        let aprTotal = `0`;
+        let aprTotal = `${pool.dynamicData?.apr || 0}`;
         let swapAprTotal = `0`;
         let nativeRewardAprTotal = `0`;
         let thirdPartyAprTotal = `0`;
@@ -1283,7 +1199,6 @@ export class PoolGqlLoaderService {
         } else {
             const nativeRewardAprItems = aprItems.filter((item) => item.type === 'NATIVE_REWARD');
             const thirdPartyRewardAprItems = aprItems.filter((item) => item.type === 'THIRD_PARTY_REWARD');
-            aprTotal = `${_.sumBy(aprItems, 'apr')}`;
             swapAprTotal = `${_.sumBy(swapAprItems, 'apr')}`;
             nativeRewardAprTotal = `${_.sumBy(nativeRewardAprItems, 'apr')}`;
             thirdPartyAprTotal = `${_.sumBy(thirdPartyRewardAprItems, 'apr')}`;
@@ -1494,18 +1409,7 @@ export class PoolGqlLoaderService {
             }
         }
 
-        let filteredItems = aprItems;
-        if (pool.type === 'QUANT_AMM_WEIGHTED') {
-            filteredItems = aprItems.filter(
-                (item) =>
-                    item.type === 'QUANT_AMM_UPLIFT' ||
-                    item.type === 'STAKING' ||
-                    item.type === 'STAKING_BOOST' ||
-                    item.type === 'MERKL',
-            );
-        }
-
-        return filteredItems;
+        return aprItems;
     }
 
     private getPoolInvestConfig(pool: PrismaPoolWithExpandedNesting): GqlPoolInvestConfig {

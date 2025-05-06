@@ -6,6 +6,7 @@ import { zeroAddress } from 'viem';
 import config from '../../../config';
 
 const typeToParamsType = {
+    AKRON: undefined,
     STABLE_SURGE: 'StableSurgeHookParams',
     FEE_TAKING: 'FeeTakingHookParams',
     EXIT_FEE: 'ExitFeeHookParams',

@@ -1,6 +1,6 @@
 import { PrismaPoolAprItem, PrismaTokenCurrentPrice } from '@prisma/client';
 import { prisma } from '../../../../../prisma/prisma-client';
-import { PrismaPoolWithExpandedNesting, PrismaPoolWithTokens } from '../../../../../prisma/prisma-types';
+import { PoolForAPRs } from '../../../../../prisma/prisma-types';
 import { prismaBulkExecuteOperations } from '../../../../../prisma/prisma-util';
 import { secondsPerYear } from '../../../../common/time';
 import { FarmFragment } from '../../../../subgraphs/masterchef-subgraph/generated/masterchef-subgraph-types';
@@ -19,7 +19,7 @@ export class MasterchefFarmAprService implements PoolAprService {
         return 'MasterchefFarmAprService';
     }
 
-    public async updateAprForPools(pools: PrismaPoolWithTokens[]): Promise<void> {
+    public async updateAprForPools(pools: PoolForAPRs[]): Promise<void> {
         const chain = pools[0].chain;
         const masterchefService = new MasterchefSubgraphService(networkContext.data.subgraphs.masterchef!);
         const farms = await masterchefService.getAllFarms({});

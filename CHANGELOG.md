@@ -1,5 +1,20 @@
 # backend
 
+## 1.40.0
+
+### Minor Changes
+
+-   af5056e: SOR - Add support for ReClamm
+-   291ebb0: refactor wrapped token APRs calculation
+
+### Patch Changes
+
+-   2c87585: add akron hook
+-   b6bd71b: fluid APRs
+-   c2b738a: fix hardcoded cron pools for vebal voting list
+-   845f210: fix to apr updater service
+-   57e06f9: fix: total APR for cow pools
+
 ## 1.39.4
 
 ### Patch Changes

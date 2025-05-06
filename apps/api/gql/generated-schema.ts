@@ -184,6 +184,7 @@ export interface GqlHookReviewData {
 }
 
 export type GqlHookType =
+    | 'AKRON'
     | 'DIRECTIONAL_FEE'
     | 'EXIT_FEE'
     | 'FEE_TAKING'

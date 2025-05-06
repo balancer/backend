@@ -1,3 +1,5 @@
+import { SwapKind, Token } from '@balancer/sdk';
+
 import { Router } from './router';
 import { PrismaPoolAndHookWithDynamic } from '../../../prisma/prisma-types';
 import { checkInputs, isLiquidityManagement } from './utils/helpers';
@@ -11,11 +13,10 @@ import {
     StablePool,
     WeightedPool,
 } from './poolsV2';
-import { SwapKind, Token } from '@balancer/sdk';
 import { BasePool } from './poolsV2/basePool';
 import { SorSwapOptions } from './types';
 import { PathWithAmount } from './path';
-import { Gyro2CLPPool, GyroECLPPool, StablePoolV3, WeightedPoolV3 } from './poolsV3';
+import { Gyro2CLPPool, GyroECLPPool, ReClammPool, StablePoolV3, WeightedPoolV3 } from './poolsV3';
 
 export class SOR {
     static async getPathsWithPools(
@@ -29,6 +30,9 @@ export class SOR {
         swapOptions?: Omit<SorSwapOptions, 'graphTraversalConfig.poolIdsToInclude'>,
     ): Promise<PathWithAmount[] | null> {
         const checkedSwapAmount = checkInputs(tokenIn, tokenOut, swapKind, swapAmountEvm);
+
+        // get current block timestamp for ReClamm math
+        const currentTimestamp = swapOptions?.currentTimestamp ?? BigInt(Date.now()) / 1000n;
 
         const basePools: BasePool[] = [];
 
@@ -96,6 +100,9 @@ export class SOR {
                     } else {
                         basePools.push(GyroEPool.fromPrismaPool(prismaPool));
                     }
+                    break;
+                case 'RECLAMM':
+                    basePools.push(ReClammPool.fromPrismaPool(prismaPool, underlyingTokens, currentTimestamp));
                     break;
                 default:
                     console.log('Unsupported pool type');

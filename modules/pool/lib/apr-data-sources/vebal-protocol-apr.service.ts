@@ -1,5 +1,5 @@
 import { PoolAprService } from '../../pool-types';
-import { PrismaPoolWithTokens } from '../../../../prisma/prisma-types';
+import { PoolForAPRs } from '../../../../prisma/prisma-types';
 import { prisma } from '../../../../prisma/prisma-client';
 import { multicallViem } from '../../../web3/multicaller-viem';
 import { mainnet } from 'viem/chains';
@@ -119,7 +119,7 @@ export class VeBalProtocolAprService implements PoolAprService {
         return apr;
     }
 
-    async updateAprForPools(pools: PrismaPoolWithTokens[]): Promise<void> {
+    async updateAprForPools(pools: PoolForAPRs[]): Promise<void> {
         const apr = await this.getApr();
 
         await prisma.prismaPoolAprItem.upsert({

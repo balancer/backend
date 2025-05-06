@@ -1,5 +1,4 @@
 import request, { gql } from 'graphql-request';
-import { applyOnchainDataUpdateCowAmm } from '../../../sources/enrichers/apply-onchain-data';
 
 const url = 'https://blue-api.morpho.org/graphql';
 const query = gql`

@@ -1,5 +1,5 @@
 import { PoolAprService } from '../../pool-types';
-import { PrismaPoolWithTokens } from '../../../../prisma/prisma-types';
+import { PoolForAPRs } from '../../../../prisma/prisma-types';
 import { Chain } from '@prisma/client';
 import { prisma } from '../../../../prisma/prisma-client';
 
@@ -123,7 +123,7 @@ export class VeBalVotingAprService implements PoolAprService {
         return avg.reduce((acc, val) => acc + val, 0) / avg.length;
     }
 
-    async updateAprForPools(pools: PrismaPoolWithTokens[]): Promise<void> {
+    async updateAprForPools(pools: PoolForAPRs[]): Promise<void> {
         const apr = await this.getApr();
 
         await prisma.prismaPoolAprItem.upsert({

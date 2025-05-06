@@ -21,7 +21,7 @@ describe('SOR V3 Swap Paths Integration Tests', () => {
     // read all test files in test/testData/read
     const testData = readTestData();
     test.each(testData.swapPaths)('$test $swapKind $amount', async (swapPath) => {
-        const { amountRaw, pools, tokens, outputRaw, swapKind } = swapPath;
+        const { amountRaw, pools, tokens, outputRaw, swapKind, currentTimestamp } = swapPath;
 
         const index = testData.swapPaths.indexOf(swapPath);
         const prismaPools: PrismaPoolAndHookWithDynamic[] = testData.swapPathPools[index];
@@ -36,6 +36,9 @@ describe('SOR V3 Swap Paths Integration Tests', () => {
             prismaPools,
             underlyingTokens,
             protocolVersion,
+            {
+                currentTimestamp,
+            },
         )) as PathWithAmount[];
 
         // make sure path found is the same as the onde described in the test

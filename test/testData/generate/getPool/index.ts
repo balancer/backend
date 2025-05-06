@@ -1,11 +1,13 @@
 import type { Address } from 'viem';
 import { createPublicClient, http, zeroAddress } from 'viem';
+import { CHAINS, isSameAddress, VAULT_V3, vaultExtensionAbi_V3 } from '@balancer/sdk';
+
+import type { PoolBase, TestBase } from '../../types';
 import { WeightedPool } from './weightedPool';
 import { StablePool } from './stablePool';
-import type { PoolBase, TestBase } from '../../types';
 import { BufferPool } from './buffer';
 import { GyroECLPPool } from './gyroECLP';
-import { CHAINS, isSameAddress, VAULT_V3, vaultExtensionAbi_V3 } from '@balancer/sdk';
+import { ReClammPool } from './reClamm';
 
 export async function getPool(
     rpcUrl: string,
@@ -15,11 +17,12 @@ export async function getPool(
     poolAddress: Address,
 ): Promise<PoolBase & TestBase> {
     // Find onchain data fetching via pool type
-    const poolData: Record<string, WeightedPool | StablePool | BufferPool | GyroECLPPool> = {
+    const poolData: Record<string, WeightedPool | StablePool | BufferPool | GyroECLPPool | ReClammPool> = {
         WEIGHTED: new WeightedPool(rpcUrl, chainId),
         STABLE: new StablePool(rpcUrl, chainId),
         Buffer: new BufferPool(rpcUrl, chainId),
         GYROE: new GyroECLPPool(rpcUrl, chainId),
+        RECLAMM: new ReClammPool(rpcUrl, chainId),
     };
     if (!poolData[poolType]) throw new Error(`getPool: Unsupported pool type: ${poolType}`);
 
@@ -64,7 +67,7 @@ async function fetchHookAddress(
         }));
     }
 
-    if (!hooksContract || isSameAddress(hooksContract, zeroAddress)) {
+    if (!hooksContract || isSameAddress(hooksContract, zeroAddress) || isSameAddress(hooksContract, poolAddress)) {
         return undefined;
     }
 

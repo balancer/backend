@@ -33,10 +33,10 @@ export class Gyro2CLPPool extends BasePoolV3 implements BasePoolMethodsV3 {
     ): Gyro2CLPPool {
         const poolTokens: GyroPoolToken[] = [];
 
-        if (!pool.dynamicData) throw new Error('Gyro2CLP pool has no dynamic data');
+        if (!pool.dynamicData) throw new Error(`${pool.type} pool has no dynamic data`);
 
         for (const poolToken of pool.tokens) {
-            if (!poolToken.priceRate) throw new Error('Gyro2CLP pool token does not have a price rate');
+            if (!poolToken.priceRate) throw new Error(`${pool.type} pool token does not have a price rate`);
             const token = new Token(
                 parseFloat(chainToIdMap[pool.chain]),
                 poolToken.address as Address,
