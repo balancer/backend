@@ -1,5 +1,11 @@
 # backend
 
+## 1.40.1
+
+### Patch Changes
+
+-   2a5f580: handle obsolete hook state
+
 ## 1.40.0
 
 ### Minor Changes

@@ -55,6 +55,10 @@ export function getHookState(pool: PrismaPoolAndHookWithDynamic): HookState | un
     const hookData = pool.hook as HookData;
 
     switch (hookData.type) {
+        case 'MEV_TAX':
+        case 'RECLAMM':
+        case 'AKRON':
+            return undefined;
         case 'EXIT_FEE': {
             // api for this hook is an Object with removeLiquidityFeePercentage key & fee as string
             const dynamicData = hookData.dynamicData as { removeLiquidityFeePercentage: string };
@@ -88,7 +92,7 @@ export function getHookState(pool: PrismaPoolAndHookWithDynamic): HookState | un
             };
         }
         default:
-            if (hookData.type && hookData.type !== 'MEV_TAX') {
+            if (hookData.type) {
                 console.warn(`pool ${pool.id} with hook type ${hookData.type} not implemented`);
             }
 
