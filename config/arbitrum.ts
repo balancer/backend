@@ -197,6 +197,12 @@ export default <NetworkData>{
                 path: 'apy',
                 isIbYield: true,
             },
+            yUSD2: {
+                tokenAddress: '0x4772d2e014f9fc3a820c444e3313968e9a5c8121',
+                sourceUrl: 'https://api.yield.fi/t/7Dapy',
+                path: '7d-apy[0].weighted_apy_7d_avg',
+                isIbYield: true,
+            },
             usdm: {
                 tokenAddress: '0x57f5e098cad7a3d1eed53991d4d66c45c9af7812',
                 sourceUrl: 'https://apy.prod.mountainprotocol.com',
