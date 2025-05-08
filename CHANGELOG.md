@@ -1,5 +1,11 @@
 # backend
 
+## 1.40.3
+
+### Patch Changes
+
+-   e09e9cf: new yUSD token APRs
+
 ## 1.40.2
 
 ### Patch Changes
