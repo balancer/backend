@@ -1,5 +1,11 @@
 # backend
 
+## 1.40.2
+
+### Patch Changes
+
+-   064e670: quant pools apr filter
+
 ## 1.40.1
 
 ### Patch Changes
