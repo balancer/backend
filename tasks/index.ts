@@ -215,7 +215,11 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         return 'OK';
     }
     // Maintenance
-    else if (job === 'sync-fx-quote-tokens') {
+    else if (job === 'sync-onchain-data-v2') {
+        const poolId = process.argv[4];
+        await PoolController().syncOnchainDataForPoolsV2(chain, [poolId]);
+        return 'OK';
+    } else if (job === 'sync-fx-quote-tokens') {
         return FXPoolsController().syncQuoteTokens(chain);
     }
     return Promise.reject(new Error(`Unknown job: ${job}`));
