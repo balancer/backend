@@ -2,8 +2,6 @@ import { Address, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { PathGraphEdgeData, PathGraphTraversalConfig } from './pathGraphTypes';
 import { BasePool } from '../poolsV2/basePool';
 import { PathLocal } from '../path';
-import { BufferPool } from '../poolsV3/buffer/bufferPool';
-import { Erc4626PoolToken } from '../utils/erc4626PoolToken';
 
 const DEFAULT_MAX_PATHS_PER_TOKEN_PAIR = 2;
 

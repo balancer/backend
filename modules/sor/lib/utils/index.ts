@@ -1,4 +1,3 @@
-export * from './erc4626PoolToken';
 export * from './poolTokenWithRate';
 export * from './basePoolToken';
 export * from './helpers';
