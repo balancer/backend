@@ -39,8 +39,6 @@ export class PathGraph {
         this.edges = new Map();
         this.maxPathsPerTokenPair = maxPathsPerTokenPair;
 
-        this.insertBufferPools(pools); // Add buffer pools to the pool list
-
         this.buildPoolAddressMap(pools);
 
         this.addAllTokensAsGraphNodes({ pools, enableAddRemoveLiquidityPaths });
@@ -168,23 +166,6 @@ export class PathGraph {
         }
 
         return filtered;
-    }
-
-    /**
-     * Create buffer pools from ERC4626 tokens and add them to the pool list
-     * @param pools
-     */
-    private insertBufferPools(pools: BasePool[]) {
-        const bufferPools = new Set<BufferPool>();
-        for (const pool of pools) {
-            for (const token of pool.tokens) {
-                if ('underlyingTokenAddress' in token) {
-                    const erc4626Token = token as Erc4626PoolToken;
-                    bufferPools.add(BufferPool.fromErc4626Token(erc4626Token));
-                }
-            }
-        }
-        pools.push(...bufferPools);
     }
 
     private buildPoolAddressMap(pools: BasePool[]) {

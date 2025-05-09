@@ -17,6 +17,8 @@ import { BasePool } from './poolsV2/basePool';
 import { SorSwapOptions } from './types';
 import { PathWithAmount } from './path';
 import { Gyro2CLPPool, GyroECLPPool, ReClammPool, StablePoolV3, WeightedPoolV3 } from './poolsV3';
+import { BufferPool } from './poolsV3/buffer/bufferPool';
+import { BufferPoolData } from '../utils/data';
 
 export class SOR {
     static async getPathsWithPools(
@@ -25,7 +27,7 @@ export class SOR {
         swapKind: SwapKind,
         swapAmountEvm: bigint,
         prismaPools: PrismaPoolAndHookWithDynamic[],
-        underlyingTokens: { address: string; decimals: number }[],
+        bufferPools: BufferPoolData[],
         protocolVersion: number,
         swapOptions?: Omit<SorSwapOptions, 'graphTraversalConfig.poolIdsToInclude'>,
     ): Promise<PathWithAmount[] | null> {
@@ -35,6 +37,8 @@ export class SOR {
         const currentTimestamp = swapOptions?.currentTimestamp ?? BigInt(Date.now()) / 1000n;
 
         const basePools: BasePool[] = [];
+
+        const underlyingTokens: { address: string; decimals: number }[] = []; // TODO: remove this
 
         for (const prismaPool of prismaPools) {
             // typeguard
@@ -108,6 +112,10 @@ export class SOR {
                     console.log('Unsupported pool type');
                     break;
             }
+        }
+
+        for (const bufferPool of bufferPools) {
+            basePools.push(BufferPool.fromBufferPoolData(bufferPool));
         }
 
         const router = new Router();
