@@ -144,6 +144,7 @@ model PrismaPoolToken {
     id                          String
     poolId                      String
     pool                        PrismaPool          @relation(fields:[poolId, chain], references: [id, chain], onDelete: Cascade)
+    poolView                    Pools               @relation(name: "PoolViewFK", fields:[poolId, chain], references: [id, chain], onDelete: Cascade, map: "prismapooltoken_poolview_fkey")
     chain                       Chain
 
     address                     String

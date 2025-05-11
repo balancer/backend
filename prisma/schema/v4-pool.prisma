@@ -1,0 +1,12 @@
+view Pools {
+    id                  String
+    chain               Chain
+    address             String
+    protocolVersion     Int                 @default(2)
+    totalLiquidity      Float               @default(0)
+    totalShares         String
+    tokens              PrismaPoolToken[]   @relation(name: "PoolViewFK")
+
+    @@unique([id, chain])
+    @@map("pools")
+}

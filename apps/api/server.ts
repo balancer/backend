@@ -11,7 +11,9 @@ import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHt
 import { ApolloServerPluginUsageReporting } from '@apollo/server/plugin/usageReporting';
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 import { schema } from './gql/generated-schema-ast';
+import { schema as v4schema } from './gql/v4/generated-schema-ast';
 import { resolvers } from './gql/resolvers';
+import { v4Resolvers } from './gql/v4/resolvers';
 import { ResolverContext, resolverContext } from './gql/resolver-context';
 import { apolloSentryPlugin } from './apollo/sentry-plugin';
 
@@ -50,8 +52,11 @@ const configureApolloServer = async (httpServer: http.Server, app: express.Expre
     }
 
     const server = new ApolloServer<ResolverContext>({
-        resolvers,
-        typeDefs: schema,
+        resolvers: {
+            ...resolvers,
+            ...v4Resolvers,
+        },
+        typeDefs: [schema, v4schema],
         introspection: true,
         cache: 'bounded',
         plugins,

@@ -1,0 +1,57 @@
+scalar BigInt
+
+type Query {
+    pool(id: String!, chain: Chain!): Pool
+    pools(first: Int, skip: Int, orderBy: PoolOrderBy, orderDirection: OrderDirection, where: PoolFilter): [Pool!]!
+}
+
+enum Chain {
+    ARBITRUM
+    AVALANCHE
+    BASE
+    FANTOM
+    GNOSIS
+    MAINNET
+    OPTIMISM
+    POLYGON
+    ZKEVM
+    SEPOLIA
+    FRAXTAL
+    MODE
+    SONIC
+}
+
+enum OrderDirection {
+    asc
+    desc
+}
+
+enum PoolOrderBy {
+    totalLiquidity
+    totalShares
+}
+
+input PoolFilter {
+    id: String!
+    id_in: [String!]
+    id_not_in: [String!]
+    chain: Chain!
+    chain_in: [Chain!]
+    chain_not_in: [Chain!]
+    protocolVersion: Int!
+    protocolVersion_in: [Int!]
+    protocolVersion_not_in: [Int!]
+    totalLiquidity_lt: Float
+    totalLiquidity_lte: Float
+    totalLiquidity_gt: Float
+    totalLiquidity_gte: Float
+}
+
+type Pool {
+    id: ID!
+    chain: Chain!
+    address: String!
+    protocolVersion: Int!
+    totalLiquidity: Float!
+    totalShares: BigInt!
+}
