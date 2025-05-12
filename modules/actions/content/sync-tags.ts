@@ -34,60 +34,82 @@ export const syncTags = async (): Promise<void> => {
     });
 
     // Convert the transformed object to an array of PoolTags
-    const tagsData = Object.entries(allTags).map(([id, tags]) => ({
-        id,
-        tags,
-    }));
+    const externalCategoriesMap = Object.entries(allTags).reduce((acc, [id, tags]) => {
+        acc[id] = new Set(
+            [...tags].map((tag) => tag.toUpperCase()).map((tag) => (tag === 'BLACKLISTED' ? 'BLACK_LISTED' : tag)),
+        );
+        return acc;
+    }, {} as Record<string, Set<string>>);
 
-    // Check if the pool exists in the DB
-    const existingPools = await prisma.prismaPool.findMany({
+    // Get DB data
+    const dbPools = await prisma.prismaPool.findMany({
         select: {
             chain: true,
             id: true,
             categories: true,
         },
     });
-
-    const existingPoolIds = existingPools.map(({ id }) => id);
-
-    const idToChain = existingPools.reduce((acc, { id, chain }) => {
+    const dbCategoriesMap = dbPools.reduce((acc, { id, categories }) => {
+        acc[id] = new Set(categories);
+        return acc;
+    }, {} as Record<string, Set<string>>);
+    const dbPoolIds = Object.keys(dbCategoriesMap);
+    const idToChain = dbPools.reduce((acc, { id, chain }) => {
         acc[id] = chain;
         return acc;
     }, {} as Record<string, Chain>);
 
-    // Skip items that are missing in the DB
-    const filteredMetadata = tagsData.filter(({ id }) => existingPoolIds.includes(id));
+    const poolsToUpdate = new Set<string>();
+    const poolsToRemove = new Set<string>();
 
-    const data = filteredMetadata.map(({ id, tags }) => ({
-        where: {
-            id_chain: {
-                id,
-                chain: idToChain[id],
-            },
-        },
-        data: {
-            categories: [...tags]
-                .map((tag) => tag.toUpperCase())
-                .map((tag) => (tag === 'BLACKLISTED' ? 'BLACK_LISTED' : tag)),
-        },
-    }));
+    Object.entries(externalCategoriesMap).forEach(([id, tags]) => {
+        const dbCategories = dbCategoriesMap[id];
+        if (!dbCategories) {
+            // Pool does not exist in the DB
+            return;
+        }
+        if (_.xor([...dbCategories], [...tags]).length === 0) {
+            // External tags are the same as the DB, no need to update
+            return;
+        }
+        // Tags are different
+        poolsToUpdate.add(id);
+    });
 
-    // Insert new categories
-    await prisma.$transaction([
-        // Update existing categories
-        ...data.map(({ where, data }) => prisma.prismaPool.update({ where, data })),
-        // Remove categories from pools that are not in the metadata
-        prisma.prismaPool.updateMany({
-            where: {
-                NOT: {
-                    id: {
-                        in: filteredMetadata.map(({ id }) => id),
-                    },
-                },
-            },
-            data: {
-                categories: [],
-            },
-        }),
-    ]);
+    // Remove categories from pools that are not in the metadata
+    dbPoolIds.forEach((id) => {
+        const dbCategories = dbCategoriesMap[id];
+        const tags = externalCategoriesMap[id];
+        if (dbCategories.size > 0 && (!tags || tags.size === 0)) {
+            // Pool shouldn't have categories
+            poolsToRemove.add(id);
+            return;
+        }
+    });
+
+    const queries: any[] = [];
+
+    if (poolsToUpdate.size > 0) {
+        poolsToUpdate.forEach((id) => {
+            const categories = externalCategoriesMap[id];
+            queries.push(
+                prisma.prismaPool.update({
+                    where: { id_chain: { id, chain: idToChain[id] } },
+                    data: { categories: [...categories] },
+                }),
+            );
+        });
+    }
+    if (poolsToRemove.size > 0) {
+        poolsToRemove.forEach((id) => {
+            queries.push(
+                prisma.prismaPool.update({
+                    where: { id_chain: { id, chain: idToChain[id] } },
+                    data: { categories: [] },
+                }),
+            );
+        });
+    }
+
+    await prisma.$transaction(queries);
 };
