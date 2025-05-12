@@ -1,7 +1,6 @@
 import { Chain } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
 import { getPoolMetadataTags as getPoolMetadataTags } from '../../sources/github/pool-metadata-tags';
-import { syncIncentivizedCategory } from '../pool/sync-incentivized-category';
 import { getErc4626Tags } from '../../sources/github/pool-erc4626-tags';
 import { getPoolHookTags } from '../../sources/github/pool-hook-tags';
 import _ from 'lodash';
@@ -11,6 +10,28 @@ export const syncTags = async (): Promise<void> => {
     let allTags = await getPoolMetadataTags({});
     allTags = await getErc4626Tags(allTags);
     allTags = await getPoolHookTags(allTags);
+
+    // Add incentivized category to pools with rewards
+    const poolsWithReward = await prisma.prismaPoolAprItem.findMany({
+        select: { poolId: true },
+        where: {
+            type: {
+                in: ['NATIVE_REWARD', 'THIRD_PARTY_REWARD', 'MERKL', 'VOTING', 'LOCKING'],
+            },
+            apr: {
+                gt: 0,
+            },
+        },
+    });
+
+    // Add incentivized category to tags array
+    poolsWithReward.forEach(({ poolId }) => {
+        if (allTags[poolId]) {
+            allTags[poolId].add('INCENTIVIZED');
+        } else {
+            allTags[poolId] = new Set(['INCENTIVIZED']);
+        }
+    });
 
     // Convert the transformed object to an array of PoolTags
     const tagsData = Object.entries(allTags).map(([id, tags]) => ({
@@ -23,6 +44,7 @@ export const syncTags = async (): Promise<void> => {
         select: {
             chain: true,
             id: true,
+            categories: true,
         },
     });
 
@@ -68,7 +90,4 @@ export const syncTags = async (): Promise<void> => {
             },
         }),
     ]);
-
-    // Sync incentivized category
-    await syncIncentivizedCategory();
 };
