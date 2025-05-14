@@ -558,7 +558,10 @@ export class PoolGqlLoaderService {
                             some: {
                                 token: {
                                     symbol: textSearch,
-                                    address: filterArgs.allTokens?.some?.token?.address,
+                                    OR: [
+                                        { address: filterArgs.allTokens?.some?.token?.address },
+                                        { address: textSearch },
+                                    ],
                                 },
                             },
                         },
