@@ -3,8 +3,7 @@ import { prisma } from '../../../../prisma/prisma-client';
 import { PoolForAPRs } from '../../../../prisma/prisma-types';
 import { PoolAprService } from '../../pool-types';
 import moment from 'moment';
-import { Prisma, PrismaTokenPrice, PrismaTokenTypeOption, PrismaPoolEvent, PrismaPool } from '@prisma/client';
-import { en } from '@faker-js/faker';
+import { PrismaTokenPrice } from '@prisma/client';
 
 export class QuantAmmAprService implements PoolAprService {
     public getAprServiceName(): string {
