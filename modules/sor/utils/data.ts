@@ -20,6 +20,7 @@ export async function getBasePoolsFromDb(
     const type = {
         in: [
             'WEIGHTED',
+            'LIQUIDITY_BOOTSTRAPPING',
             'META_STABLE',
             'PHANTOM_STABLE',
             'COMPOSABLE_STABLE',
@@ -58,7 +59,7 @@ async function getPoolsByIds(
     poolIds: string[],
 ): Promise<PrismaPoolAndHookWithDynamic[]> {
     const pools = await prisma.prismaPool.findMany({
-        where: { id: { in: poolIds }, chain, protocolVersion, type },
+        where: { id: { in: poolIds }, chain, protocolVersion, type: { in: [...type.in, 'LIQUIDITY_BOOTSTRAPPING'] } },
         include: {
             dynamicData: true,
             tokens: { include: { token: true } },
