@@ -37,13 +37,14 @@ export class QuantAmmAprService implements PoolAprService {
 
         const midnightOneMonthAgo = moment().utc().startOf('day').subtract(30, 'days').unix();
 
-        const midnightMay13th = moment('2023-05-13T00:00:00Z').unix();
+        // launch date of Quant AMM
+        const midnightMay11th = moment('2023-05-11T00:00:00Z').unix();
 
         const prices = await prisma.prismaTokenPrice.findMany({
             where: {
                 tokenAddress: { in: uniqueTokensToPrice },
                 chain: chain,
-                timestamp: { gte: Math.max(midnightOneMonthAgo, midnightMay13th) },
+                timestamp: { gte: Math.max(midnightOneMonthAgo, midnightMay11th) },
             },
             orderBy: { timestamp: 'asc' },
         });
