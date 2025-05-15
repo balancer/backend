@@ -3,6 +3,7 @@ import { prisma } from '../../../../prisma/prisma-client';
 import { PoolForAPRs } from '../../../../prisma/prisma-types';
 import { PoolAprService } from '../../pool-types';
 import moment from 'moment';
+import { PrismaTokenPrice } from '@prisma/client';
 
 export class QuantAmmAprService implements PoolAprService {
     public getAprServiceName(): string {
@@ -37,9 +38,23 @@ export class QuantAmmAprService implements PoolAprService {
 
         const midnightOneMonthAgo = moment().utc().startOf('day').subtract(30, 'days').unix();
 
+        // launch date of Quant AMM
+        const midnightMay14th = moment('2023-05-14T00:00:00Z').unix();
+
         const prices = await prisma.prismaTokenPrice.findMany({
-            where: { tokenAddress: { in: uniqueTokensToPrice }, chain: chain, timestamp: { gte: midnightOneMonthAgo } },
+            where: {
+                tokenAddress: { in: uniqueTokensToPrice },
+                chain: chain,
+                timestamp: { gte: Math.max(midnightOneMonthAgo, midnightMay14th) },
+            },
             orderBy: { timestamp: 'asc' },
+        });
+
+        const currentPrices = await prisma.prismaTokenCurrentPrice.findMany({
+            where: {
+                tokenAddress: { in: uniqueTokensToPrice },
+                chain: chain,
+            },
         });
 
         const pricesByToken = _.groupBy(prices, 'tokenAddress');
@@ -54,27 +69,40 @@ export class QuantAmmAprService implements PoolAprService {
 
             const poolTokenAddresses = pool.tokens.map((token) => token.address.toLowerCase());
 
-            const oldestEntry = poolPrices[0];
-            const newestEntry = poolPrices[poolPrices.length - 1];
+            // find oldest timestamp that has all prices
+            let startTokenPrices: PrismaTokenPrice[] = [];
+            let oldestIndexForAllPrices = 0;
+            for (oldestIndexForAllPrices = 0; oldestIndexForAllPrices < poolPrices.length; oldestIndexForAllPrices++) {
+                const poolPrice = poolPrices[oldestIndexForAllPrices];
+                const foundPrices = pricesByTimestamp[poolPrice.timestamp].filter(
+                    (price) =>
+                        price.tokenAddress !== pool.address.toLowerCase() &&
+                        poolTokenAddresses.includes(price.tokenAddress),
+                );
+                if (foundPrices.length === poolTokenAddresses.length) {
+                    startTokenPrices = foundPrices;
+                    break;
+                }
+            }
 
-            const startTokenPrices = pricesByTimestamp[oldestEntry.timestamp].filter(
+            if (startTokenPrices.length === 0) {
+                console.error(`Quant AMM APR: No start prices found for pool ${pool.id} on chain ${chain}.`);
+                continue;
+            }
+
+            const oldestEntryPoolPrice = poolPrices[oldestIndexForAllPrices];
+
+            const startLpPrice = oldestEntryPoolPrice;
+
+            const endTokenPrices = currentPrices.filter(
                 (price) =>
                     price.tokenAddress !== pool.address.toLowerCase() &&
                     poolTokenAddresses.includes(price.tokenAddress),
             );
-            const startLpPrice = pricesByTimestamp[oldestEntry.timestamp].filter(
-                (price) => price.tokenAddress === pool.address.toLowerCase(),
-            )[0];
-            const endTokenPrices = pricesByTimestamp[newestEntry.timestamp].filter(
-                (price) =>
-                    price.tokenAddress !== pool.address.toLowerCase() &&
-                    poolTokenAddresses.includes(price.tokenAddress),
-            );
-            const endLpPrice = pricesByTimestamp[newestEntry.timestamp].filter(
-                (price) => price.tokenAddress === pool.address.toLowerCase(),
-            )[0];
 
-            const weight = 1 / pool.tokens.length;
+            if (endTokenPrices.length === 0) {
+                console.error(`Quant AMM APR: No end prices found for pool ${pool.id} on chain ${chain}.`);
+            }
 
             if (startTokenPrices.length !== endTokenPrices.length) {
                 console.error(
@@ -82,6 +110,14 @@ export class QuantAmmAprService implements PoolAprService {
                 );
                 continue;
             }
+
+            const endLpPrice = currentPrices.filter((price) => price.tokenAddress === pool.address.toLowerCase())[0];
+
+            if (!endLpPrice) {
+                console.error(`Quant AMM APR: No end LP price found for pool ${pool.id} on chain ${chain}.`);
+            }
+
+            const weight = 1 / pool.tokens.length;
 
             const priceRatios = endTokenPrices.map((end, i) => end.price / startTokenPrices[i].price);
 
@@ -95,12 +131,12 @@ export class QuantAmmAprService implements PoolAprService {
 
             await prisma.prismaPoolAprItem.upsert({
                 where: { id_chain: { id: `${pool.id}-quant-amm-apr`, chain: chain } },
-                update: { apr: totalYearlyReturn / pool.dynamicData?.totalLiquidity },
+                update: { apr: relativeReturn },
                 create: {
                     id: `${pool.id}-quant-amm-apr`,
                     chain: chain,
                     poolId: pool.id,
-                    apr: apr,
+                    apr: relativeReturn,
                     title: 'Quant AMM APR',
                     type: 'QUANT_AMM_UPLIFT',
                     group: null,

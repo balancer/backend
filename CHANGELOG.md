@@ -1,5 +1,15 @@
 # backend
 
+## 1.40.4
+
+### Patch Changes
+
+-   edda5b7: allow text search to filter for token addr
+-   f0fc480: maintenance task for V2 onchain syncing
+-   488d7fa: category syncing db load optimisation
+-   8e61261: simplify category syncing
+-   d8588e2: swaps pricing handler can use all prices
+
 ## 1.40.3
 
 ### Patch Changes
