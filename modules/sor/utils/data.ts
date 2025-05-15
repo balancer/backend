@@ -34,7 +34,8 @@ export async function getBasePoolsFromDb(
     };
 
     if (poolIds?.length) {
-        const pools = await getPoolsByIds(chain, protocolVersion, type, poolIds);
+        const typeWithLBP = { in: [...type.in, 'LIQUIDITY_BOOTSTRAPPING'] as PrismaPoolType[] };
+        const pools = await getPoolsByIds(chain, protocolVersion, typeWithLBP, poolIds);
         const underlyingTokens = await getUnderlyingTokensFromDBPools(pools, chain);
         return { pools, underlyingTokens };
     }
@@ -58,7 +59,7 @@ async function getPoolsByIds(
     poolIds: string[],
 ): Promise<PrismaPoolAndHookWithDynamic[]> {
     const pools = await prisma.prismaPool.findMany({
-        where: { id: { in: poolIds }, chain, protocolVersion, type: { in: [...type.in, 'LIQUIDITY_BOOTSTRAPPING'] } },
+        where: { id: { in: poolIds }, chain, protocolVersion, type },
         include: {
             dynamicData: true,
             tokens: { include: { token: true } },
