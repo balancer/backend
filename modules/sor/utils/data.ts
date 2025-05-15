@@ -20,7 +20,6 @@ export async function getBasePoolsFromDb(
     const type = {
         in: [
             'WEIGHTED',
-            'LIQUIDITY_BOOTSTRAPPING',
             'META_STABLE',
             'PHANTOM_STABLE',
             'COMPOSABLE_STABLE',
