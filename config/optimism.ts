@@ -208,6 +208,12 @@ export default <NetworkData>{
                 path: 'sfrxethApr',
                 isIbYield: true,
             },
+            sfrxETHOft: {
+                tokenAddress: '0x3ec3849c33291a9ef4c5db86de593eb4a37fde45',
+                sourceUrl: 'https://api.frax.finance/v2/frxeth/summary/latest',
+                path: 'sfrxethApr',
+                isIbYield: true,
+            },
             sFRAX: {
                 tokenAddress: '0x2dd1b4d4548accea497050619965f91f78b3b532',
                 sourceUrl: 'https://api.frax.finance/v2/frax/sfrax/summary/history?range=1d',

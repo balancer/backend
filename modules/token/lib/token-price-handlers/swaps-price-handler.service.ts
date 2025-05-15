@@ -51,8 +51,16 @@ export class SwapsPriceHandlerService implements TokenPriceHandler {
                 select: { payload: true },
             });
 
+            const otherTokenAddresses = [
+                ...swaps
+                    .filter((swap) => !tokenAddresses.includes((swap.payload as SwapPayload).tokenIn.address))
+                    .map((swap) => (swap.payload as SwapPayload).tokenIn.address),
+                ...swaps
+                    .filter((swap) => !tokenAddresses.includes((swap.payload as SwapPayload).tokenOut.address))
+                    .map((swap) => (swap.payload as SwapPayload).tokenOut.address),
+            ];
             const tokenPrices = await prisma.prismaTokenCurrentPrice.findMany({
-                where: { chain: chain, tokenAddress: { in: tokenAddresses } },
+                where: { chain: chain, tokenAddress: { in: otherTokenAddresses } },
             });
 
             for (const token of acceptedTokensForChain) {
