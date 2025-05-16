@@ -7,7 +7,7 @@ import { sorService } from './sor.service';
 describe('sor debugging', () => {
     it('sor v2', async () => {
         const useProtocolVersion = 2;
-        const chain = Chain.SONIC;
+        const chain = Chain.GNOSIS;
 
         const chainId = Object.keys(chainIdToChain).find((key) => chainIdToChain[key] === chain) as string;
         initRequestScopedContext();
@@ -18,17 +18,17 @@ describe('sor debugging', () => {
 
         const swaps = await sorService.getSorSwapPaths({
             chain,
-            tokenIn: '0xd3dce716f3ef535c5ff8d041c1a41c3bd89b97ae', // scUSD
-            tokenOut: '0x3bce5cb273f0f148010bbea2470e7b5df84c7812', // sETH
-            swapType: 'EXACT_OUT',
-            swapAmount: '1',
+            tokenIn: '0xaf204776c7245bf4147c2612bf6e5972ee483701', // sDAI
+            tokenOut: '0xe0ed85f76d9c552478929fab44693e03f0899f23', // s-KPK
+            swapType: 'EXACT_IN',
+            swapAmount: '10',
             useProtocolVersion,
             // callDataInput: {
             //     receiver: '0xb5e6b895734409Df411a052195eb4EE7e40d8696',
             //     sender: '0xb5e6b895734409Df411a052195eb4EE7e40d8696',
             //     slippagePercentage: '0.1',
             // },
-            poolIds: ['0xe7734b495a552ab6f4c78406e672cca7175181e10002000000000000000000c5'],
+            poolIds: ['0x40d2cbc586dd8df50001cdba3f65cd4bbc32d596000200000000000000000154'],
         });
 
         console.log(swaps.returnAmount);

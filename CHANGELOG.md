@@ -1,5 +1,11 @@
 # backend
 
+## 1.40.5
+
+### Patch Changes
+
+-   70da6c8: SOR - Fix LBP swap
+
 ## 1.40.4
 
 ### Patch Changes

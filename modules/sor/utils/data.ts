@@ -34,7 +34,8 @@ export async function getBasePoolsFromDb(
     };
 
     if (poolIds?.length) {
-        const pools = await getPoolsByIds(chain, protocolVersion, type, poolIds);
+        const typeWithLBP = { in: [...type.in, 'LIQUIDITY_BOOTSTRAPPING'] as PrismaPoolType[] };
+        const pools = await getPoolsByIds(chain, protocolVersion, typeWithLBP, poolIds);
         const underlyingTokens = await getUnderlyingTokensFromDBPools(pools, chain);
         return { pools, underlyingTokens };
     }
