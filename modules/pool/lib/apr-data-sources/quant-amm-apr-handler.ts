@@ -39,7 +39,7 @@ export class QuantAmmAprService implements PoolAprService {
         const midnightOneMonthAgo = moment().utc().startOf('day').subtract(30, 'days').unix();
 
         // launch date of Quant AMM
-        const midnightMay14th = moment('2023-05-14T00:00:00Z').unix();
+        const midnightMay14th = moment('2025-05-14T00:00:00Z').unix();
 
         const prices = await prisma.prismaTokenPrice.findMany({
             where: {
@@ -139,7 +139,7 @@ export class QuantAmmAprService implements PoolAprService {
                 console.log(`End timestamp: ${sortedEndTokenPrices[0].timestamp}`);
                 console.log(`Start LP price: ${startLpPrice.price}`);
                 console.log(`End LP price: ${endLpPrice.price}`);
-                console.log(`Start token prices: ${startTokenPrices.map((price) => price.price)}`);
+                console.log(`Start token prices: ${sortedStartTokenPrices.map((price) => price.price)}`);
                 console.log(`End token prices: ${sortedEndTokenPrices.map((price) => price.price)}`);
                 console.log(`Price ratios: ${priceRatios}`);
                 console.log(`End weighted value: ${endWeightedValue}`);
