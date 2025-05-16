@@ -1,4 +1,3 @@
-import moment from 'moment';
 import {
     SftmxController,
     SnapshotsController,
@@ -9,7 +8,6 @@ import {
     FXPoolsController,
     PoolController,
     EventController,
-    PoolMutationController,
     StakingController,
     StakedSonicController,
     TokenController,
@@ -23,11 +21,12 @@ import { poolService } from '../modules/pool/pool.service';
 import { initRequestScopedContext, setRequestScopedContextValue } from '../modules/context/request-scoped-context';
 import { tokenService } from '../modules/token/token.service';
 import { VeBalVotingListService } from '../modules/vebal/vebal-voting-list.service';
-import { PrismaLastBlockSyncedCategory } from '@prisma/client';
+import { Chain, PrismaLastBlockSyncedCategory } from '@prisma/client';
 import { upsertLastSyncedBlock } from '../modules/actions/last-synced-block';
 import { prisma } from '../prisma/prisma-client';
-import { syncLastSwaps } from '../modules/actions/pool/v3/sync-last-swaps';
 import { LBPController } from '../modules/controllers/lbp-controller';
+import { request, gql } from 'graphql-request';
+import _ from 'lodash';
 
 // TODO needed?
 const sftmxController = SftmxController();
@@ -65,9 +64,8 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         await ContentController().syncRateProviderReviews();
 
         console.log('Syncing token prices');
-        await tokenService.updateTokenPrices([chain]);
         await EventController().syncLastSwaps(chain);
-        await tokenService.updateTokenPrices([chain]);
+        await syncCurrentPricesFromApi(chain);
 
         await PoolController().updateLiquidityValuesForActivePools(chain);
 
@@ -86,9 +84,8 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         await TokenController().syncErc4626UnwrapRates(chain);
 
         console.log('Syncing token prices');
-        await tokenService.updateTokenPrices([chain]);
         await EventController().syncLastSwaps(chain);
-        await tokenService.updateTokenPrices([chain]);
+        await syncCurrentPricesFromApi(chain);
 
         await PoolController().updateLiquidityValuesForActivePools(chain);
 
@@ -221,6 +218,120 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         return 'OK';
     } else if (job === 'sync-fx-quote-tokens') {
         return FXPoolsController().syncQuoteTokens(chain);
+    } else if (job === 'sync-current-prices') {
+        await syncCurrentPricesFromApi(chain);
+
+        return 'OK';
+    } else if (job === 'sync-historical-prices') {
+        console.log('Syncing all pools and tokens first');
+        // await PoolController().addPoolsV2(chain);
+        // await upsertLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.ADD_POOLS_V3, 0);
+        // await PoolController().addPoolsV3(chain, false);
+        // await upsertLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.COW_AMM_POOLS, 0);
+        // await CowAmmController().syncPools(chain);
+
+        // get all current prices first to
+        const endpoint = 'https://api-v3.balancer.fi/graphql';
+        const currentPricesQuery = gql`
+            {
+                tokenGetCurrentPrices(chains: [${chain}]) {
+                    address
+                }
+            }
+        `;
+
+        const currentPricesResp = (await request(endpoint, currentPricesQuery, {}, {})) as {
+            tokenGetCurrentPrices: {
+                address: string;
+            }[];
+        };
+
+        const addressChunks = _.chunk(
+            currentPricesResp.tokenGetCurrentPrices.map((price) => price.address),
+            50,
+        );
+
+        const allHistoricalPrices = [];
+
+        let tokensLoaded = 0;
+        for (const chunk of addressChunks) {
+            const tokensList = `"${chunk.join('","')}"`;
+
+            const historicalPricesQuery = gql`
+                {
+                    tokenGetHistoricalPrices(
+                        chain: MAINNET
+                        range: SEVEN_DAY
+                        addresses: [${tokensList}]
+                    ) {
+                        address
+                        chain
+                        prices {
+                            price
+                            timestamp
+                            updatedBy
+                        }
+                    }
+                }
+            `;
+
+            const historicalPricesResp = (await request(endpoint, historicalPricesQuery, {}, {})) as {
+                tokenGetHistoricalPrices: {
+                    address: string;
+                    chain: string;
+                    prices: {
+                        price: number;
+                        timestamp: string;
+                        updatedBy: string;
+                    }[];
+                }[];
+            };
+
+            tokensLoaded += historicalPricesResp.tokenGetHistoricalPrices.length;
+            console.log(`Tokens loaded: ${tokensLoaded}/${currentPricesResp.tokenGetCurrentPrices.length}`);
+            allHistoricalPrices.push(...historicalPricesResp.tokenGetHistoricalPrices);
+        }
+
+        let failed = 0;
+        for (const token of allHistoricalPrices) {
+            try {
+                for (const price of token.prices) {
+                    await prisma.prismaTokenPrice.upsert({
+                        where: {
+                            tokenAddress_timestamp_chain: {
+                                tokenAddress: token.address,
+                                timestamp: parseFloat(price.timestamp),
+                                chain: token.chain as Chain,
+                            },
+                        },
+                        update: {
+                            price: price.price,
+                            close: price.price,
+                            updatedBy: price.updatedBy,
+                        },
+                        create: {
+                            tokenAddress: token.address,
+                            chain: token.chain as Chain,
+                            timestamp: parseFloat(price.timestamp),
+                            price: price.price,
+                            high: price.price,
+                            low: price.price,
+                            open: price.price,
+                            close: price.price,
+                            updatedBy: price.updatedBy,
+                        },
+                    });
+                }
+            } catch (e) {
+                console.error('Error inserting historical price for token: ', token.address);
+                failed++;
+            }
+        }
+        console.log('Total prices to insert: ', allHistoricalPrices.length);
+        console.log('Failed to insert prices: ', failed);
+        console.log('Successful inserted prices: ', allHistoricalPrices.length - failed);
+
+        return 'OK';
     }
     return Promise.reject(new Error(`Unknown job: ${job}`));
 }
@@ -229,3 +340,70 @@ run()
     .then((r) => console.log(r))
     .then(() => process.exit(0))
     .catch((e) => console.error(e));
+
+async function syncCurrentPricesFromApi(chain: Chain) {
+    const endpoint = 'https://api-v3.balancer.fi/graphql';
+
+    const query = gql`
+            {
+                tokenGetCurrentPrices(chains: [${chain}]) {
+                    address
+                    price
+                    chain
+                    updatedAt
+                    updatedBy
+                }
+            }
+        `;
+
+    const resp = (await request(endpoint, query, {}, {})) as {
+        tokenGetCurrentPrices: {
+            address: string;
+            price: number;
+            chain: string;
+            updatedAt: number;
+            updatedBy: string;
+        }[];
+    };
+
+    console.log('Deleting old current prices');
+    await prisma.prismaTokenCurrentPrice.deleteMany({
+        where: {
+            chain: chain,
+        },
+    });
+
+    console.log('Inserting new current prices: ', resp.tokenGetCurrentPrices.length);
+    let failed = 0;
+
+    for (const token of resp.tokenGetCurrentPrices) {
+        try {
+            await prisma.prismaTokenCurrentPrice.upsert({
+                where: {
+                    tokenAddress_chain: {
+                        tokenAddress: token.address,
+                        chain: token.chain as Chain,
+                    },
+                },
+                update: {
+                    price: token.price,
+                    timestamp: token.updatedAt,
+                    updatedBy: token.updatedBy,
+                },
+                create: {
+                    tokenAddress: token.address,
+                    chain: token.chain as Chain,
+                    price: token.price,
+                    timestamp: token.updatedAt,
+                    updatedBy: token.updatedBy,
+                },
+            });
+        } catch (e) {
+            console.error('Error inserting current price for token: ', token.address);
+            failed++;
+        }
+    }
+    console.log('Total prices to insert: ', resp.tokenGetCurrentPrices.length);
+    console.log('Failed to insert prices: ', failed);
+    console.log('Successful inserted prices: ', resp.tokenGetCurrentPrices.length - failed);
+}
