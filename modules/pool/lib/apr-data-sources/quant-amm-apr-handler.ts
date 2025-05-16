@@ -119,7 +119,10 @@ export class QuantAmmAprService implements PoolAprService {
 
             const weight = 1 / pool.tokens.length;
 
-            const priceRatios = endTokenPrices.map((end, i) => end.price / startTokenPrices[i].price);
+            const sortedStartTokenPrices = _.sortBy(startTokenPrices, (price) => price.tokenAddress);
+            const sortedEndTokenPrices = _.sortBy(endTokenPrices, (price) => price.tokenAddress);
+
+            const priceRatios = sortedEndTokenPrices.map((end, i) => end.price / sortedStartTokenPrices[i].price);
 
             const endWeightedValue =
                 startLpPrice.price * priceRatios.reduce((acc, ratio) => acc * Math.pow(ratio, weight), 1);
@@ -128,6 +131,20 @@ export class QuantAmmAprService implements PoolAprService {
 
             const totalYearlyReturn = relativeReturn * 12;
             const apr = totalYearlyReturn / pool.dynamicData.totalLiquidity;
+
+            if (pool.address.toLowerCase() === '0x6b61d8680c4f9e560c8306807908553f95c749c5') {
+                // nice console log for debug
+                console.log(`Quant AMM APR for pool ${pool.id} on chain ${chain}`);
+                console.log(`Start timestamp: ${sortedStartTokenPrices[0].timestamp}`);
+                console.log(`End timestamp: ${sortedEndTokenPrices[0].timestamp}`);
+                console.log(`Start LP price: ${startLpPrice.price}`);
+                console.log(`End LP price: ${endLpPrice.price}`);
+                console.log(`Start token prices: ${startTokenPrices.map((price) => price.price)}`);
+                console.log(`End token prices: ${sortedEndTokenPrices.map((price) => price.price)}`);
+                console.log(`Price ratios: ${priceRatios}`);
+                console.log(`End weighted value: ${endWeightedValue}`);
+                console.log(`Relative return: ${relativeReturn}`);
+            }
 
             await prisma.prismaPoolAprItem.upsert({
                 where: { id_chain: { id: `${pool.id}-quant-amm-apr`, chain: chain } },
