@@ -1,9 +1,7 @@
-import { Chain } from '@prisma/client';
 import * as Sentry from '@sentry/node';
 import { Address, formatUnits } from 'viem';
 
 import { GqlSorGetSwapPaths, QuerySorGetSwapPathsArgs } from '../../apps/api/gql/generated-schema';
-import config from '../../config';
 import { GetSwapPathsInput, GraphTraversalConfig } from './types';
 import { SOR } from './lib/sor';
 import {
@@ -86,7 +84,7 @@ export class SorService {
         input: GetSwapPathsInput,
     ): Promise<{ paths: PathWithAmount[] | null; protocolVersion: number; returnAmount: string }> {
         try {
-            const { pools: poolsFromDb, underlyingTokens } = await getBasePoolsFromDb(
+            const { pools: poolsFromDb, bufferPools } = await getBasePoolsFromDb(
                 input.chain,
                 input.protocolVersion,
                 input.considerPoolsWithHooks,
@@ -105,7 +103,7 @@ export class SorService {
                 swapKind,
                 input.swapAmount.amount,
                 poolsFromDb,
-                underlyingTokens,
+                bufferPools,
                 input.protocolVersion,
                 swapOptions,
             );
@@ -118,7 +116,7 @@ export class SorService {
                     swapKind,
                     input.swapAmount.amount,
                     poolsFromDb,
-                    underlyingTokens,
+                    bufferPools,
                     input.protocolVersion,
                     swapOptions,
                 );

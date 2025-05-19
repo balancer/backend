@@ -4,12 +4,12 @@ import { BufferState, Vault } from '@balancer-labs/balancer-maths';
 
 import { BasePoolMethodsV3 } from '../basePoolMethodsV3';
 import { BasePoolToken } from '../../utils/basePoolToken';
-import { Erc4626PoolToken } from '../../utils/erc4626PoolToken';
+import { BufferPoolData } from '../../../utils/data';
 
 export class BufferPool implements BasePoolMethodsV3 {
     public readonly chainId: number;
     public readonly id: Hex;
-    public readonly address: string;
+    public readonly address: Address;
     public readonly poolType = 'Buffer';
     public readonly swapFee = 0n;
     public readonly rate: bigint;
@@ -21,38 +21,39 @@ export class BufferPool implements BasePoolMethodsV3 {
     private poolState: BufferState;
 
     /**
-     * Instantiates a buffer pool from an ERC-4626 Token
+     * Instantiates a buffer pool from buffer pool data built from erc4626 tokens
      *
      * For context: buffer pool within the SOR is an abstraction that works like
      * a pool where users can trade yield bearing tokens with their underlying token.
-     * @param erc4626Token
+     * @param bufferPoolData
      * @returns Buffer pool
      */
-
-    static fromErc4626Token(erc4626Token: Erc4626PoolToken): BufferPool {
-        const mainToken = new BasePoolToken(erc4626Token.token, MAX_UINT256, 0);
-        const underlyingToken = new BasePoolToken(
-            new Token(
-                erc4626Token.token.chainId,
-                erc4626Token.underlyingTokenAddress as Address,
-                erc4626Token.token.decimals,
-            ),
-            MAX_UINT256,
-            1,
-        );
+    static fromBufferPoolData(bufferPoolData: BufferPoolData): BufferPool {
         return new BufferPool(
-            erc4626Token.token.address,
-            erc4626Token.token.address,
-            erc4626Token.token.chainId,
-            erc4626Token.unwrapRate,
-            mainToken,
-            underlyingToken,
+            bufferPoolData.address,
+            bufferPoolData.address,
+            bufferPoolData.chainId,
+            bufferPoolData.unwrapRate,
+            new BasePoolToken(
+                new Token(bufferPoolData.chainId, bufferPoolData.mainToken.address, bufferPoolData.mainToken.decimals),
+                MAX_UINT256,
+                0,
+            ),
+            new BasePoolToken(
+                new Token(
+                    bufferPoolData.chainId,
+                    bufferPoolData.underlyingToken.address,
+                    bufferPoolData.underlyingToken.decimals,
+                ),
+                MAX_UINT256,
+                1,
+            ),
         );
     }
 
     constructor(
         id: Hex,
-        address: string,
+        address: Address,
         chainId: number,
         rate: bigint,
         mainToken: BasePoolToken,

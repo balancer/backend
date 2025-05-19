@@ -1,7 +1,6 @@
 import type { SwapPathTestInput, SwapPathTestOutput } from '../types';
 import { getSwapPath } from './getSwapPath';
 import { getPool } from './getPool';
-import { getUnderlyingTokens } from './getUnderlyingTokens';
 import { enrichPoolsWithHookData } from './enrichPoolsWithHookData';
 
 export async function generateSwapPathTestData(input: SwapPathTestInput, overwrite = false) {
@@ -30,12 +29,9 @@ async function fetchTestData(input: SwapPathTestInput): Promise<SwapPathTestOutp
 
     const poolsWithHooks = await enrichPoolsWithHookData(pools, chainId, blockNumber);
 
-    const underlyingTokens = await getUnderlyingTokens(pools, rpcUrl, chainId);
-
     return {
         test: { chainId, blockNumber },
         swapPath,
         pools: poolsWithHooks,
-        underlyingTokens,
     };
 }

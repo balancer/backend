@@ -27,6 +27,10 @@
                 "0xd4fa2d31b7968e448877f69a96de69f5de8cd23e",
                 "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
             ],
+            "decimals": [
+                6,
+                6
+            ],
             "rate": "1125929784681585540"
         },
         {
@@ -57,12 +61,6 @@
                 "1125929784681585540"
             ],
             "aggregateSwapFee": "500000000000000000"
-        }
-    ],
-    "underlyingTokens": [
-        {
-            "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
-            "decimals": 6
         }
     ]
 }

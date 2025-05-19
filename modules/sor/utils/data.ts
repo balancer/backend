@@ -1,14 +1,24 @@
-import { Chain, PrismaPoolType, PrismaToken } from '@prisma/client';
-import { PrismaPoolAndHookWithDynamic, HookData } from '../../../prisma/prisma-types';
-import { prisma } from '../../../prisma/prisma-client';
 import { Cache } from 'memory-cache';
+import { Address, parseUnits } from 'viem';
+import { isSameAddress } from '@balancer/sdk';
+import { Chain, PrismaPoolType, PrismaToken } from '@prisma/client';
+
 import config from '../../../config';
+import { prisma } from '../../../prisma/prisma-client';
+import { PrismaPoolAndHookWithDynamic, HookData } from '../../../prisma/prisma-types';
+import { chainToChainId } from '../../network/chain-id-to-chain';
 import { poolsToIgnore } from './constants';
 
-const cache = new Cache<
-    string,
-    { pools: PrismaPoolAndHookWithDynamic[]; underlyingTokens: { address: string; decimals: number }[] }
->();
+export type BufferPoolData = {
+    address: Address;
+    chainId: number;
+    mainToken: { address: Address; decimals: number };
+    underlyingToken: { address: Address; decimals: number };
+    poolType: string;
+    unwrapRate: bigint;
+};
+
+const cache = new Cache<string, { pools: PrismaPoolAndHookWithDynamic[]; bufferPools: BufferPoolData[] }>();
 const SOR_POOLS_CACHE_KEY = `sor:pools`;
 
 export async function getBasePoolsFromDb(
@@ -16,7 +26,7 @@ export async function getBasePoolsFromDb(
     protocolVersion: number,
     considerPoolsWithHooks: boolean,
     poolIds?: string[],
-): Promise<{ pools: PrismaPoolAndHookWithDynamic[]; underlyingTokens: { address: string; decimals: number }[] }> {
+): Promise<{ pools: PrismaPoolAndHookWithDynamic[]; bufferPools: BufferPoolData[] }> {
     const type = {
         in: [
             'WEIGHTED',
@@ -37,7 +47,8 @@ export async function getBasePoolsFromDb(
         const typeWithLBP = { in: [...type.in, 'LIQUIDITY_BOOTSTRAPPING'] as PrismaPoolType[] };
         const pools = await getPoolsByIds(chain, protocolVersion, typeWithLBP, poolIds);
         const underlyingTokens = await getUnderlyingTokensFromDBPools(pools, chain);
-        return { pools, underlyingTokens };
+        const bufferPools = getBufferPoolsFromDBPools(pools, underlyingTokens, chain);
+        return { pools, bufferPools };
     }
 
     const cacheKey = `${SOR_POOLS_CACHE_KEY}:${chain}:${protocolVersion}:${considerPoolsWithHooks}`;
@@ -46,10 +57,11 @@ export async function getBasePoolsFromDb(
 
     const pools = await getFilteredPools(chain, protocolVersion, considerPoolsWithHooks, type);
     const underlyingTokens = await getUnderlyingTokensFromDBPools(pools, chain);
+    const bufferPools = getBufferPoolsFromDBPools(pools, underlyingTokens, chain);
 
     // cache for 10s
-    cache.put(cacheKey, { pools, underlyingTokens }, 10 * 1000);
-    return { pools, underlyingTokens };
+    cache.put(cacheKey, { pools, bufferPools }, 10 * 1000);
+    return { pools, bufferPools };
 }
 
 async function getPoolsByIds(
@@ -154,7 +166,7 @@ async function getLiquidityBootstrappingPools(
 export async function getUnderlyingTokensFromDBPools(
     pools: PrismaPoolAndHookWithDynamic[],
     chain: Chain,
-): Promise<{ address: string; decimals: number }[]> {
+): Promise<{ address: string; decimals: number; unwrapRate: string }[]> {
     const tokensWithUnderlying = pools.flatMap((pool) =>
         pool.tokens.filter((token) => token.token.underlyingTokenAddress !== null),
     );
@@ -175,6 +187,42 @@ export async function getUnderlyingTokensFromDBPools(
 
     logMissingTokens(underlyingTokens, underlyingTokenAddresses);
     return underlyingTokens;
+}
+
+export function getBufferPoolsFromDBPools(
+    pools: PrismaPoolAndHookWithDynamic[],
+    underlyingTokens: { address: string; decimals: number }[],
+    chain: Chain,
+): BufferPoolData[] {
+    // instead of an actual buffer pool, I'd like to return an object that can be used to build a buffer pool
+    const bufferPools: BufferPoolData[] = [];
+    for (const pool of pools) {
+        for (const poolToken of pool.tokens) {
+            if (poolToken.token.underlyingTokenAddress) {
+                const underlyingToken = underlyingTokens.find((t) =>
+                    isSameAddress(t.address as Address, poolToken.token.underlyingTokenAddress as Address),
+                );
+                if (underlyingToken) {
+                    const unwrapRateDecimals = 18 - poolToken.token.decimals + underlyingToken.decimals;
+                    bufferPools.push({
+                        address: poolToken.address.toLowerCase() as Address,
+                        chainId: Number(chainToChainId[chain]),
+                        mainToken: {
+                            address: poolToken.address.toLowerCase() as Address,
+                            decimals: poolToken.token.decimals,
+                        },
+                        underlyingToken: {
+                            address: underlyingToken.address.toLowerCase() as Address,
+                            decimals: underlyingToken.decimals,
+                        },
+                        poolType: 'Buffer',
+                        unwrapRate: parseUnits(poolToken.token.unwrapRate, unwrapRateDecimals),
+                    });
+                }
+            }
+        }
+    }
+    return bufferPools;
 }
 
 function logMissingTokens(underlyingTokens: PrismaToken[], underlyingTokenAddresses: string[]) {

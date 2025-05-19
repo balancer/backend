@@ -29,6 +29,10 @@
                 "0x8A88124522dbBF1E56352ba3DE1d9F78C143751e",
                 "0x94a9D9AC8a22534E3FaCa9F4e7F2E2cf85d5E4C8"
             ],
+            "decimals": [
+                6,
+                6
+            ],
             "rate": "1273497688678036460"
         },
         {
@@ -66,17 +70,11 @@
                 "0x978206fAe13faF5a8d293FB614326B237684B750",
                 "0xaA8E23Fb1079EA71e0a56F48a2aA51851D8433D0"
             ],
+            "decimals": [
+                6,
+                6
+            ],
             "rate": "1516109706528345850"
-        }
-    ],
-    "underlyingTokens": [
-        {
-            "address": "0x94a9D9AC8a22534E3FaCa9F4e7F2E2cf85d5E4C8",
-            "decimals": 6
-        },
-        {
-            "address": "0xaA8E23Fb1079EA71e0a56F48a2aA51851D8433D0",
-            "decimals": 6
         }
     ]
 }
