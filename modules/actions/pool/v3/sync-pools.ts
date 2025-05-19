@@ -61,7 +61,11 @@ export const syncPools = async (
                 ...((poolDynamicData && [
                     prisma.prismaPoolDynamicData.update({
                         where: { poolId_chain: { poolId: pool.id, chain } },
-                        data: poolDynamicData,
+                        data: {
+                            ...poolDynamicData,
+                            protocolSwapFee: poolDynamicData.aggregateSwapFee,
+                            protocolYieldFee: poolDynamicData.aggregateYieldFee,
+                        },
                     }),
                 ]) ||
                     []),

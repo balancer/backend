@@ -51,3 +51,16 @@ export async function beetsGetCirculatingSupplySonic() {
 
     return utils.formatUnits(totalSupply);
 }
+
+export async function beetsGetTotalSupplySonic() {
+    const sonicNetworkConfig = AllNetworkConfigs['146'];
+    const beetsContract = getContractAtForNetwork(
+        sonicNetworkConfig.data.beets!.address,
+        beetsAbi,
+        sonicNetworkConfig.provider,
+    );
+
+    let totalSupply = await beetsContract.totalSupply();
+
+    return utils.formatUnits(totalSupply);
+}
