@@ -34,7 +34,6 @@ export class PoolUsdDataService {
             where: { id: { in: subgraphPoolIds }, chain: this.chain },
             include: {
                 dynamicData: true,
-                snapshots: true,
             },
         });
 
