@@ -699,9 +699,13 @@ export interface GqlPoolDynamicData {
     apr: GqlPoolApr;
     aprItems: Array<GqlPoolAprItem>;
     fees24h: Scalars['BigDecimal'];
+    /** @deprecated Field no longer supported */
     fees24hAth: Scalars['BigDecimal'];
+    /** @deprecated Field no longer supported */
     fees24hAthTimestamp: Scalars['Int'];
+    /** @deprecated Field no longer supported */
     fees24hAtl: Scalars['BigDecimal'];
+    /** @deprecated Field no longer supported */
     fees24hAtlTimestamp: Scalars['Int'];
     fees48h: Scalars['BigDecimal'];
     holdersCount: Scalars['BigInt'];
@@ -715,9 +719,13 @@ export interface GqlPoolDynamicData {
     protocolFees48h: Scalars['BigDecimal'];
     protocolYieldCapture24h: Scalars['BigDecimal'];
     protocolYieldCapture48h: Scalars['BigDecimal'];
+    /** @deprecated Field no longer supported */
     sharePriceAth: Scalars['BigDecimal'];
+    /** @deprecated Field no longer supported */
     sharePriceAthTimestamp: Scalars['Int'];
+    /** @deprecated Field no longer supported */
     sharePriceAtl: Scalars['BigDecimal'];
+    /** @deprecated Field no longer supported */
     sharePriceAtlTimestamp: Scalars['Int'];
     /** CowAmm specific, equivalent of swap fees */
     surplus24h: Scalars['BigDecimal'];
@@ -729,17 +737,25 @@ export interface GqlPoolDynamicData {
     swapsCount: Scalars['BigInt'];
     totalLiquidity: Scalars['BigDecimal'];
     totalLiquidity24hAgo: Scalars['BigDecimal'];
+    /** @deprecated Field no longer supported */
     totalLiquidityAth: Scalars['BigDecimal'];
+    /** @deprecated Field no longer supported */
     totalLiquidityAthTimestamp: Scalars['Int'];
+    /** @deprecated Field no longer supported */
     totalLiquidityAtl: Scalars['BigDecimal'];
+    /** @deprecated Field no longer supported */
     totalLiquidityAtlTimestamp: Scalars['Int'];
     totalShares: Scalars['BigDecimal'];
     totalShares24hAgo: Scalars['BigDecimal'];
     totalSupply: Scalars['BigDecimal'];
     volume24h: Scalars['BigDecimal'];
+    /** @deprecated Field no longer supported */
     volume24hAth: Scalars['BigDecimal'];
+    /** @deprecated Field no longer supported */
     volume24hAthTimestamp: Scalars['Int'];
+    /** @deprecated Field no longer supported */
     volume24hAtl: Scalars['BigDecimal'];
+    /** @deprecated Field no longer supported */
     volume24hAtlTimestamp: Scalars['Int'];
     volume48h: Scalars['BigDecimal'];
     yieldCapture24h: Scalars['BigDecimal'];
