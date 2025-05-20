@@ -14,7 +14,7 @@ export default <NetworkData>{
         startDate: '2021-08-23',
         balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmPbjY6L1NhPjpBv7wDTfG9EPx5FpCuBqeg1XxByzBTLcs`,
         balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmWYjRi4vSRZnf6wEAzYPvCYyS6rh4JnEbuYEDKHwKEuJw`,
-        balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmdCwwR9yXuApNE5HMBDET13jPhaaZ66Qq3Qsw9bTzHTcT`,
+        balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmZHmzYSUsTfLrQ5JwiXW6AWDrpq8wdiiuxyqrhciSV7Cd`,
         cowAmm: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmUDGSJXdMzG4ezDzf1LvXVb2igwY6rnaNFLC62ZJZ3Pbv`,
         gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmT3h6pogdPkxfWsBxKNtpq7kR9fqKaQ9jGxe7fZx7MUVE`,
         aura: 'https://data.aura.finance/graphql',
@@ -185,6 +185,12 @@ export default <NetworkData>{
             token: '0xbc404429558292ee2d769e57d57d6e74bbd2792d',
         },
         defaultHandlers: {
+            sUSDai: {
+                tokenAddress: '0x0b2b2b2076d95dda7817e785989fe353fe955ef9',
+                sourceUrl: 'https://api-platform-analytics.metastreet.xyz/v2/usdai/dashboard/apy',
+                path: '',
+                scale: 1e18,
+            },
             apxETH: {
                 tokenAddress: '0xcf6c2bb97a8978321c9e207afe8a2037fa9be45c',
                 sourceUrl: 'https://dinero.xyz/api/apr',
