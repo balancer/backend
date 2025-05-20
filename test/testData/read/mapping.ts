@@ -8,18 +8,20 @@ import { getDecimalsFromScalingFactor } from '../../utils';
 import {
     BufferPool,
     GyroEPool,
+    ReClammPool,
     StablePool,
     WeightedPool,
     LiquidityBootstrappingPool,
     LiquidityBootstrappingImmutable,
     LiquidityBootstrappingMutable,
 } from './readTestData';
+import { chainIdToChain } from '../../../modules/network/chain-id-to-chain';
 
 export function mapGyroPoolStateToPrismaPool(
     poolState: GyroEPool,
     chainId: number,
     protocolVersion: number,
-    bufferPools: (BufferPool & { underlyingTokenDecimals: number })[],
+    bufferPools: BufferPool[],
 ): PrismaPoolAndHookWithDynamic {
     const decimals = poolState.scalingFactors.map((scalingFactor: bigint) =>
         getDecimalsFromScalingFactor(scalingFactor),
@@ -46,10 +48,11 @@ export function mapGyroPoolStateToPrismaPool(
         const token = bufferPool
             ? {
                   decimals: decimals[i],
-                  unwrapRate: formatUnits(bufferPool.rate, 18 - decimals[i] + bufferPool.underlyingTokenDecimals),
+                  unwrapRate: formatUnits(bufferPool.rate, 18 - decimals[i] + bufferPool.decimals[1]),
                   underlyingTokenAddress: bufferPool.tokens[1],
+                  chain: chainIdToChain[chainId],
               }
-            : { decimals: decimals[i] };
+            : { decimals: decimals[i], chain: chainIdToChain[chainId] };
 
         return prismaPoolTokenFactory.build({
             address: _token as Address,
@@ -57,8 +60,15 @@ export function mapGyroPoolStateToPrismaPool(
             index: i,
             priceRate: formatEther(poolState.tokenRates[i]),
             token,
+            chain: chainIdToChain[chainId],
         });
     });
+
+    // transform hook dynamicData values to bigInt and then apply formatEther to them
+    const _hookDynamicData = poolState.hook?.dynamicData;
+    const hookDynamicData = _hookDynamicData
+        ? Object.fromEntries(Object.entries(_hookDynamicData).map(([key, value]) => [key, formatEther(BigInt(value))]))
+        : undefined;
 
     // map pool state to prisma pool using prisma pool factory
     const prismaPool = prismaPoolFactory
@@ -88,6 +98,11 @@ export function mapGyroPoolStateToPrismaPool(
                 aggregateSwapFee: formatEther(poolState.aggregateSwapFee),
                 totalShares: formatEther(poolState.totalSupply),
             },
+            hook: {
+                ...poolState.hook,
+                dynamicData: hookDynamicData,
+            },
+            chain: chainIdToChain[chainId],
         });
     return prismaPool;
 }
@@ -96,7 +111,7 @@ export function mapStablePoolStateToPrismaPool(
     poolState: StablePool,
     chainId: number,
     protocolVersion: number,
-    bufferPools: (BufferPool & { underlyingTokenDecimals: number })[],
+    bufferPools: BufferPool[],
 ): PrismaPoolAndHookWithDynamic {
     const decimals = poolState.scalingFactors.map((scalingFactor: bigint) =>
         getDecimalsFromScalingFactor(scalingFactor),
@@ -123,18 +138,26 @@ export function mapStablePoolStateToPrismaPool(
         const token = bufferPool
             ? {
                   decimals: decimals[i],
-                  unwrapRate: formatUnits(bufferPool.rate, 18 - decimals[i] + bufferPool.underlyingTokenDecimals),
+                  unwrapRate: formatUnits(bufferPool.rate, 18 - decimals[i] + bufferPool.decimals[1]),
                   underlyingTokenAddress: bufferPool.tokens[1],
+                  chain: chainIdToChain[chainId],
               }
-            : { decimals: decimals[i] };
+            : { decimals: decimals[i], chain: chainIdToChain[chainId] };
         return prismaPoolTokenFactory.build({
             address: _token as Address,
             balance: formatUnits(tokenAmounts[i].amount, decimals[i]),
             index: i,
             priceRate: formatEther(poolState.tokenRates[i]),
             token,
+            chain: chainIdToChain[chainId],
         });
     });
+
+    // transform hook dynamicData values to bigInt and then apply formatEther to them
+    const _hookDynamicData = poolState.hook?.dynamicData;
+    const hookDynamicData = _hookDynamicData
+        ? Object.fromEntries(Object.entries(_hookDynamicData).map(([key, value]) => [key, formatEther(BigInt(value))]))
+        : undefined;
 
     // map pool state to prisma pool using prisma pool factory
     const prismaPool = prismaPoolFactory.stable(formatUnits(poolState.amp, 3)).build({
@@ -146,6 +169,11 @@ export function mapStablePoolStateToPrismaPool(
             aggregateSwapFee: formatEther(poolState.aggregateSwapFee),
             totalShares: formatEther(poolState.totalSupply),
         },
+        hook: {
+            ...poolState.hook,
+            dynamicData: hookDynamicData,
+        },
+        chain: chainIdToChain[chainId],
     });
     return prismaPool;
 }
@@ -154,7 +182,7 @@ export function mapWeightedPoolStateToPrismaPool(
     poolState: WeightedPool,
     chainId: number,
     protocolVersion: number,
-    bufferPools: (BufferPool & { underlyingTokenDecimals: number })[],
+    bufferPools: BufferPool[],
 ): PrismaPoolAndHookWithDynamic {
     const decimals = poolState.scalingFactors.map((scalingFactor: bigint) =>
         getDecimalsFromScalingFactor(scalingFactor),
@@ -181,10 +209,11 @@ export function mapWeightedPoolStateToPrismaPool(
         const token = bufferPool
             ? {
                   decimals: decimals[i],
-                  unwrapRate: formatUnits(bufferPool.rate, 18 - decimals[i] + bufferPool.underlyingTokenDecimals),
+                  unwrapRate: formatUnits(bufferPool.rate, 18 - decimals[i] + bufferPool.decimals[1]),
                   underlyingTokenAddress: bufferPool.tokens[1],
+                  chain: chainIdToChain[chainId],
               }
-            : { decimals: decimals[i] };
+            : { decimals: decimals[i], chain: chainIdToChain[chainId] };
 
         return prismaPoolTokenFactory.build({
             address: _token as Address,
@@ -193,8 +222,15 @@ export function mapWeightedPoolStateToPrismaPool(
             token,
             weight: formatUnits(poolState.weights[i], 18),
             priceRate: formatEther(poolState.tokenRates[i]),
+            chain: chainIdToChain[chainId],
         });
     });
+
+    // transform hook dynamicData values to bigInt and then apply formatEther to them
+    const _hookDynamicData = poolState.hook?.dynamicData;
+    const hookDynamicData = _hookDynamicData
+        ? Object.fromEntries(Object.entries(_hookDynamicData).map(([key, value]) => [key, formatEther(BigInt(value))]))
+        : undefined;
 
     // map pool state to prisma pool using prisma pool factory
     const prismaPool = prismaPoolFactory.build({
@@ -269,6 +305,95 @@ export function mapLiquidityBootstrappingPoolStateToPrismaPool(
             address: poolState.poolAddress,
             protocolVersion,
             tokens: tokens,
+            hook: {
+                ...poolState.hook,
+                dynamicData: hookDynamicData,
+            },
+            chain: chainIdToChain[chainId],
+        });
+    return prismaPool;
+}
+
+export function mapReClammPoolStateToPrismaPool(
+    poolState: ReClammPool,
+    chainId: number,
+    protocolVersion: number,
+    bufferPools: BufferPool[],
+): PrismaPoolAndHookWithDynamic {
+    const decimals = poolState.scalingFactors.map((scalingFactor: bigint) =>
+        getDecimalsFromScalingFactor(scalingFactor),
+    );
+
+    const poolTokens = poolState.tokens.map(
+        (token: string, i: number) => new Token(chainId, token as Address, decimals[i]),
+    );
+
+    const tokenAmounts = poolTokens.map((token: Token, i: number) =>
+        PoolTokenWithRate.fromScale18AmountWithRate(
+            token,
+            poolState.balancesLiveScaled18[i],
+            poolState.tokenRates[i],
+            i,
+        ),
+    );
+
+    // map tokenIn and tokenOut to prisma tokens using prisma token factory
+    const tokens = poolState.tokens.map((_token, i) => {
+        const bufferPool = bufferPools.find((bufferPool) =>
+            isSameAddress(_token as Address, bufferPool.poolAddress as Address),
+        );
+        const token = bufferPool
+            ? {
+                  decimals: decimals[i],
+                  unwrapRate: formatUnits(bufferPool.rate, 18 - decimals[i] + bufferPool.decimals[1]),
+                  underlyingTokenAddress: bufferPool.tokens[1],
+                  chain: chainIdToChain[chainId],
+              }
+            : { decimals: decimals[i], chain: chainIdToChain[chainId] };
+
+        return prismaPoolTokenFactory.build({
+            address: _token as Address,
+            balance: formatUnits(tokenAmounts[i].amount, decimals[i]),
+            index: i,
+            priceRate: formatEther(poolState.tokenRates[i]),
+            token,
+            chain: chainIdToChain[chainId],
+        });
+    });
+
+    // transform hook dynamicData values to bigInt and then apply formatEther to them
+    const _hookDynamicData = poolState.hook?.dynamicData;
+    const hookDynamicData = _hookDynamicData
+        ? Object.fromEntries(Object.entries(_hookDynamicData).map(([key, value]) => [key, formatEther(BigInt(value))]))
+        : undefined;
+
+    // map pool state to prisma pool using prisma pool factory
+    const prismaPool = prismaPoolFactory
+        .reClamm({
+            centerednessMargin: formatEther(poolState.centerednessMargin),
+            currentFourthRootPriceRatio: '0', // not needed for SOR/balancer-maths which recalculate given other parameters
+            endFourthRootPriceRatio: formatEther(poolState.endFourthRootPriceRatio),
+            lastTimestamp: Number(poolState.lastTimestamp),
+            lastVirtualBalances: poolState.lastVirtualBalances.map((b) => formatEther(b)),
+            priceRatioUpdateEndTime: Number(poolState.priceRatioUpdateEndTime),
+            priceRatioUpdateStartTime: Number(poolState.priceRatioUpdateStartTime),
+            dailyPriceShiftBase: formatEther(poolState.dailyPriceShiftBase),
+            startFourthRootPriceRatio: formatEther(poolState.startFourthRootPriceRatio),
+        })
+        .build({
+            address: poolState.poolAddress,
+            protocolVersion,
+            tokens,
+            dynamicData: {
+                swapFee: formatEther(poolState.swapFee),
+                aggregateSwapFee: formatEther(poolState.aggregateSwapFee),
+                totalShares: formatEther(poolState.totalSupply),
+            },
+            hook: {
+                ...poolState.hook,
+                dynamicData: hookDynamicData,
+            },
+            chain: chainIdToChain[chainId],
         });
     return prismaPool;
 }

@@ -10,6 +10,7 @@ import { readTestData } from '../../test/testData/read/readTestData';
 import { PrismaPoolAndHookWithDynamic } from '../../prisma/prisma-types';
 import { getTokensFromPrismaPools } from '../../test/utils';
 import { formatUnits } from 'viem';
+import { BufferPoolData } from './utils/data';
 
 // This test will run against all files added to test/testData/read
 // In order to add new scenarios, please add them to test/testData/config.json
@@ -21,12 +22,12 @@ describe('SOR V3 Swap Paths Integration Tests', () => {
     // read all test files in test/testData/read
     const testData = readTestData();
     test.each(testData.swapPaths)('$test $swapKind $amount', async (swapPath) => {
-        const { amountRaw, pools, tokens, outputRaw, swapKind } = swapPath;
+        const { amountRaw, pools, tokens, outputRaw, swapKind, currentTimestamp, chainId } = swapPath;
 
         const index = testData.swapPaths.indexOf(swapPath);
         const prismaPools: PrismaPoolAndHookWithDynamic[] = testData.swapPathPools[index];
-        const underlyingTokens = testData.underlyingTokens[index];
-        const { tokenIn, tokenOut } = getTokensFromPrismaPools(prismaPools, tokens, underlyingTokens);
+        const bufferPools: BufferPoolData[] = testData.bufferPools[index];
+        const { tokenIn, tokenOut } = getTokensFromPrismaPools(Number(chainId), prismaPools, tokens, bufferPools);
 
         const paths = (await SOR.getPathsWithPools(
             tokenIn,
@@ -34,8 +35,11 @@ describe('SOR V3 Swap Paths Integration Tests', () => {
             swapKind,
             amountRaw,
             prismaPools,
-            underlyingTokens,
+            bufferPools,
             protocolVersion,
+            {
+                currentTimestamp,
+            },
         )) as PathWithAmount[];
 
         // make sure path found is the same as the onde described in the test
@@ -49,7 +53,7 @@ describe('SOR V3 Swap Paths Integration Tests', () => {
         );
         const returnAmountSOR = swapKind === SwapKind.GivenIn ? getOutputAmount(paths) : getInputAmount(paths);
 
-        const isSwapPathWithBufferPools = underlyingTokens.length > 0;
+        const isSwapPathWithBufferPools = bufferPools.length > 0;
         if (isSwapPathWithBufferPools) {
             const returnAmountQueryFloat = parseFloat(
                 formatUnits(returnAmountQuery.amount, returnAmountQuery.token.decimals),

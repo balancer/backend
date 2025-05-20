@@ -18,6 +18,7 @@ import config from '../../config';
 import { UserSyncAuraBalanceService } from '../user/lib/user-sync-aura-balance.service';
 import { UserSyncVebalLockBalanceService } from '../user/lib/user-sync-vebal-lock-balance.service';
 import { AaveApiAprService } from '../pool/lib/apr-data-sources/aave-api-apr-handler';
+import { QuantAmmAprService } from '../pool/lib/apr-data-sources/quant-amm-apr-handler';
 
 export const data: NetworkData = config.MAINNET;
 
@@ -34,6 +35,7 @@ export const mainnetNetworkConfig: NetworkConfig = {
         new VeBalVotingAprService(),
         new MorphoRewardsAprService(),
         new AaveApiAprService(),
+        new QuantAmmAprService(),
     ],
     userStakedBalanceServices: [
         new UserSyncGaugeBalanceService(),
@@ -238,6 +240,10 @@ export const mainnetNetworkConfig: NetworkConfig = {
         {
             name: 'post-subgraph-lag-metrics',
             interval: every(2, 'minutes'),
+        },
+        {
+            name: 'sync-weights',
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(60, 'minutes') : every(10, 'minutes'),
         },
     ],
 };

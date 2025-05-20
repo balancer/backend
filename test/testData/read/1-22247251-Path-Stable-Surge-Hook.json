@@ -1,0 +1,71 @@
+{
+    "test": {
+        "chainId": "1",
+        "blockNumber": "22247251"
+    },
+    "swapPath": {
+        "swapKind": 0,
+        "amountRaw": "100000000000000000000",
+        "tokens": [
+            "0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0",
+            "0x775f661b0bd1739349b9a2a3ef60be277c5d2d29",
+            "0xd11c452fc99cf405034ee446803b6f6c1f6d5ed8"
+        ],
+        "pools": [
+            "0x775f661b0bd1739349b9a2a3ef60be277c5d2d29",
+            "0x9ed5175aecb6653c1bdaa19793c16fd74fbeeb37"
+        ],
+        "outputRaw": "99216988453505115973"
+    },
+    "pools": [
+        {
+            "chainId": "1",
+            "blockNumber": "22247251",
+            "poolType": "Buffer",
+            "poolAddress": "0x775f661b0bd1739349b9a2a3ef60be277c5d2d29",
+            "tokens": [
+                "0x775f661b0bd1739349b9a2a3ef60be277c5d2d29",
+                "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0"
+            ],
+            "decimals": [
+                18,
+                18
+            ],
+            "rate": "1002103555283985552"
+        },
+        {
+            "chainId": "1",
+            "blockNumber": "22247251",
+            "poolType": "STABLE",
+            "poolAddress": "0x9ed5175aecb6653c1bdaa19793c16fd74fbeeb37",
+            "hook": {
+                "address": "0xb18fa0cb5de8cecb8899aae6e38b1b7ed77885da",
+                "type": "STABLE_SURGE",
+                "dynamicData": {
+                    "surgeThresholdPercentage": "100000000000000000",
+                    "maxSurgeFeePercentage": "50000000000000000"
+                }
+            },
+            "tokens": [
+                "0x775F661b0bD1739349b9A2A3EF60be277c5d2D29",
+                "0xD11c452fc99cF405034ee446803b6F6c1F6d5ED8"
+            ],
+            "scalingFactors": [
+                "1",
+                "1"
+            ],
+            "swapFee": "500000000000000",
+            "totalSupply": "717342064432930816122",
+            "balancesLiveScaled18": [
+                "311845355307990821859",
+                "409096377821670037730"
+            ],
+            "tokenRates": [
+                "1202060848670267307",
+                "1201509974239215142"
+            ],
+            "amp": "200000",
+            "aggregateSwapFee": "500000000000000000"
+        }
+    ]
+}

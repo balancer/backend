@@ -70,6 +70,12 @@ export class DefaultAprHandler implements AprHandler {
                 const variableName = selector.split('==')[0].trim();
                 const variableValue = selector.split('==')[1].trim().replace(/"/g, '');
                 value = value.find((v: any) => v[variableName] === variableValue);
+            } else if (part.includes('[')) {
+                const indexStart = part.indexOf('[');
+                const indexEnd = part.indexOf(']');
+                const arrayName = part.slice(0, indexStart);
+                const index = parseInt(part.slice(indexStart + 1, indexEnd), 10);
+                value = value[arrayName][index];
             } else {
                 value = value[part];
             }

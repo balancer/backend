@@ -4,9 +4,10 @@ import { prismaPoolTokenFactory } from './prismaToken.factory';
 import { createRandomAddress } from '../utils';
 import { Chain, PrismaPoolType } from '@prisma/client';
 import { prismaPoolDynamicDataFactory } from './prismaPoolDynamicData.factory';
-import { LiquidityManagement } from '../../modules/sor/types';
-import { GyroEParams } from '../../modules/sources/subgraphs/balancer-v3-pools/generated/types';
+import { GyroEParams, ReClammParams } from '../../modules/sources/subgraphs/balancer-v3-pools/generated/types';
 import { LiquidityBootstrappingPool } from '../testData/read/readTestData';
+import { ReclammData } from '../../modules/pool/subgraph-mapper';
+
 class PrismaPoolFactory extends Factory<PrismaPoolAndHookWithDynamic> {
     stable(amp?: string) {
         return this.params({ type: PrismaPoolType.STABLE, typeData: { amp: amp ?? '10' } });
@@ -27,6 +28,9 @@ class PrismaPoolFactory extends Factory<PrismaPoolAndHookWithDynamic> {
                 swapFee: lbpParams.swapFee.toString(),
             },
         });
+    }
+    reClamm(reClammData: ReclammData) {
+        return this.params({ type: PrismaPoolType.RECLAMM, typeData: { ...reClammData } });
     }
 }
 

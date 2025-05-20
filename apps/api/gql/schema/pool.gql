@@ -337,6 +337,7 @@ enum GqlPoolType {
     FX
     COW_AMM
     QUANT_AMM_WEIGHTED
+    RECLAMM
 }
 
 type GqlPoolAggregator {
@@ -500,6 +501,42 @@ type GqlPoolAggregator {
     QuantAmmWeighted specific fields
     """
     quantAmmWeightedParams: QuantAmmWeightedParams
+    """
+    The timestamp of the last user interaction
+    """
+    lastTimestamp: Int
+    """
+    ReClamm: The last virtual balances of the pool
+    """
+    lastVirtualBalances: [BigDecimal!]
+    """
+    ReClamm: Represents how fast the pool can move the virtual balances per day
+    """
+    dailyPriceShiftBase: BigDecimal
+    """
+    ReClamm: The centeredness margin of the pool
+    """
+    centerednessMargin: BigDecimal
+    """
+    ReClamm: The current fourth root price ratio, an interpolation of the price ratio state
+    """
+    currentFourthRootPriceRatio: BigDecimal
+    """
+    ReClamm: The fourth root price ratio at the start of an update
+    """
+    startFourthRootPriceRatio: BigDecimal
+    """
+    ReClamm: The fourth root price ratio at the end of an update
+    """
+    endFourthRootPriceRatio: BigDecimal
+    """
+    ReClamm: The timestamp when the update begins
+    """
+    priceRatioUpdateStartTime: Int
+    """
+    ReClamm: The timestamp when the update ends
+    """
+    priceRatioUpdateEndTime: Int
 }
 
 """
@@ -692,25 +729,25 @@ type GqlPoolDynamicData {
     holdersCount: BigInt!
     swapsCount: BigInt!
 
-    sharePriceAth: BigDecimal!
-    sharePriceAthTimestamp: Int!
-    sharePriceAtl: BigDecimal!
-    sharePriceAtlTimestamp: Int!
+    sharePriceAth: BigDecimal! @deprecated
+    sharePriceAthTimestamp: Int! @deprecated
+    sharePriceAtl: BigDecimal! @deprecated
+    sharePriceAtlTimestamp: Int! @deprecated
 
-    totalLiquidityAth: BigDecimal!
-    totalLiquidityAthTimestamp: Int!
-    totalLiquidityAtl: BigDecimal!
-    totalLiquidityAtlTimestamp: Int!
+    totalLiquidityAth: BigDecimal! @deprecated
+    totalLiquidityAthTimestamp: Int! @deprecated
+    totalLiquidityAtl: BigDecimal! @deprecated
+    totalLiquidityAtlTimestamp: Int! @deprecated
 
-    volume24hAth: BigDecimal!
-    volume24hAthTimestamp: Int!
-    volume24hAtl: BigDecimal!
-    volume24hAtlTimestamp: Int!
+    volume24hAth: BigDecimal! @deprecated
+    volume24hAthTimestamp: Int! @deprecated
+    volume24hAtl: BigDecimal! @deprecated
+    volume24hAtlTimestamp: Int! @deprecated
 
-    fees24hAth: BigDecimal!
-    fees24hAthTimestamp: Int!
-    fees24hAtl: BigDecimal!
-    fees24hAtlTimestamp: Int!
+    fees24hAth: BigDecimal! @deprecated
+    fees24hAthTimestamp: Int! @deprecated
+    fees24hAtl: BigDecimal! @deprecated
+    fees24hAtlTimestamp: Int! @deprecated
 }
 
 type GqlPoolInvestConfig @deprecated(reason: "Removed without replacement") {
@@ -1288,6 +1325,96 @@ type GqlPoolElement implements GqlPoolBase {
     userBalance: GqlPoolUserBalance
 }
 
+type GqlPoolReClamm implements GqlPoolBase {
+    id: ID!
+    chain: GqlChain!
+    vaultVersion: Int! @deprecated(reason: "use protocolVersion instead")
+    protocolVersion: Int!
+    name: String!
+    type: GqlPoolType!
+    symbol: String!
+    address: Bytes!
+    decimals: Int!
+    """
+    The wallet address of the owner of the pool. Pool owners can set certain properties like swapFees or AMP.
+    """
+    owner: Bytes @deprecated(reason: "Use swapFeeManager instead")
+    """
+    Account empowered to set static swap fees for a pool (when 0 on V2 swap fees are immutable, on V3 delegate to governance)
+    """
+    swapFeeManager: Bytes
+    """
+    Account empowered to pause/unpause the pool (or 0 to delegate to governance)
+    """
+    pauseManager: Bytes
+    """
+    Account empowered to set the pool creator fee percentage
+    """
+    poolCreator: Bytes
+    factory: Bytes
+    createTime: Int!
+    investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
+    withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
+    dynamicData: GqlPoolDynamicData!
+    displayTokens: [GqlPoolTokenDisplay!]! @deprecated(reason: "Use poolTokens instead")
+    allTokens: [GqlPoolTokenExpanded!]! @deprecated(reason: "Use poolTokens instead")
+    poolTokens: [GqlPoolTokenDetail!]!
+    categories: [GqlPoolFilterCategory]
+    tags: [String]
+    liquidityManagement: LiquidityManagement
+    hasErc4626: Boolean!
+    hasNestedErc4626: Boolean!
+    hasAnyAllowedBuffer: Boolean!
+    hook: GqlHook
+
+    """
+    All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
+    """
+    tokens: [GqlPoolTokenUnion!]! @deprecated(reason: "Use poolTokens instead")
+    nestingType: GqlPoolNestingType! @deprecated(reason: "Removed without replacement")
+    staking: GqlPoolStaking
+    version: Int!
+
+    userBalance: GqlPoolUserBalance
+
+    """
+    The timestamp of the last user interaction
+    """
+    lastTimestamp: Int!
+    """
+    The last virtual balances of the pool
+    """
+    lastVirtualBalances: [BigDecimal!]!
+    """
+    Represents how fast the pool can move the virtual balances per day
+    """
+    dailyPriceShiftBase: BigDecimal!
+    """
+    The centeredness margin of the pool
+    """
+    centerednessMargin: BigDecimal!
+    """
+    The current fourth root price ratio, an interpolation of the price ratio state
+    """
+    currentFourthRootPriceRatio: BigDecimal!
+    """
+    The fourth root price ratio at the start of an update
+    """
+    startFourthRootPriceRatio: BigDecimal!
+    """
+    The fourth root price ratio at the end of an update
+    """
+    endFourthRootPriceRatio: BigDecimal!
+    """
+    The timestamp when the update begins
+    """
+    priceRatioUpdateStartTime: Int!
+    """
+    The timestamp when the update ends
+    """
+    priceRatioUpdateEndTime: Int!
+}
+
 type GqlPoolComposableStableNested @deprecated(reason: "use GqlPoolTokenDetail instead") {
     id: ID!
     name: String!
@@ -1336,6 +1463,7 @@ union GqlPoolUnion =
     | GqlPoolLiquidityBootstrapping
     | GqlPoolGyro
     | GqlPoolFx
+    | GqlPoolReClamm
 
 union GqlPoolNestedUnion @deprecated(reason: "use GqlPoolTokenDetail instead") = GqlPoolComposableStableNested
 
@@ -1909,6 +2037,10 @@ enum GqlPoolAprItemType {
     Rewards distributed by merkl.xyz
     """
     MERKL
+    """
+    APR calculated for QUANT-AMM pools based on performance measurements over a month
+    """
+    QUANT_AMM_UPLIFT
     """
     Cow AMM specific APR
     """

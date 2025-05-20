@@ -1,7 +1,4 @@
 export interface YbAprConfig {
-    morpho?: {
-        tokens: { [wrapper: string]: string };
-    };
     aave?: AaveAprConfig;
     avalon?: AvalonAprConfig;
     bloom?: BloomAprConfig;
@@ -23,6 +20,9 @@ export interface YbAprConfig {
     stakewise?: {
         url: string;
         token: string;
+    };
+    fluid?: {
+        url: string;
     };
     maple?: {
         url: string;
@@ -110,13 +110,8 @@ export interface SftmxAprConfig {
 }
 
 export interface EulerAprConfig {
-    subgraphUrl: string;
-    tokens: {
-        [tokenName: string]: {
-            address: string;
-            isIbYield?: boolean;
-        };
-    };
+    vaultsJsonUrl: string;
+    lensContractAddress: string;
 }
 
 export interface GearBoxAprConfig {

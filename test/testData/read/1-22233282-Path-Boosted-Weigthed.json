@@ -65,6 +65,5 @@
             ],
             "aggregateSwapFee": "500000000000000000"
         }
-    ],
-    "underlyingTokens": []
+    ]
 }

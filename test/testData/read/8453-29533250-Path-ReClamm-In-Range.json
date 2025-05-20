@@ -1,0 +1,57 @@
+{
+    "test": {
+        "chainId": "8453",
+        "blockNumber": "29533250"
+    },
+    "swapPath": {
+        "swapKind": 0,
+        "amountRaw": "100000",
+        "tokens": [
+            "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+            "0x4200000000000000000000000000000000000006"
+        ],
+        "pools": [
+            "0x035d7213cbc08483aa78ced076dbdc8ac5a509c1"
+        ],
+        "outputRaw": "55832896064590"
+    },
+    "pools": [
+        {
+            "chainId": "8453",
+            "blockNumber": "29533250",
+            "poolType": "RECLAMM",
+            "poolAddress": "0x035d7213cbc08483aa78ced076dbdc8ac5a509c1",
+            "tokens": [
+                "0x4200000000000000000000000000000000000006",
+                "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+            ],
+            "scalingFactors": [
+                "1",
+                "1000000000000"
+            ],
+            "aggregateSwapFee": "500000000000000000",
+            "swapFee": "500000000000000",
+            "totalSupply": "50410971148635723477836",
+            "balancesLiveScaled18": [
+                "14552907646299798",
+                "174459788000000000000"
+            ],
+            "tokenRates": [
+                "1000000000000000000",
+                "1000000000000000000"
+            ],
+            "lastTimestamp": "1745855815",
+            "lastVirtualBalances": [
+                "5292078522152179508",
+                "9325176954769209651335"
+            ],
+            "dailyPriceShiftBase": "999991977472743464",
+            "centerednessMargin": "100000000000000000",
+            "startFourthRootPriceRatio": "0",
+            "endFourthRootPriceRatio": "1010696708667094804",
+            "priceRatioUpdateStartTime": "1745855663",
+            "priceRatioUpdateEndTime": "1745855663",
+            "currentTimestamp": "1745855847"
+        }
+    ]
+}

@@ -15,6 +15,7 @@ import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer
 import config from '../../config';
 import { UserSyncAuraBalanceService } from '../user/lib/user-sync-aura-balance.service';
 import { AaveApiAprService } from '../pool/lib/apr-data-sources/aave-api-apr-handler';
+import { QuantAmmAprService } from '../pool/lib/apr-data-sources/quant-amm-apr-handler';
 
 const baseNetworkData: NetworkData = config.BASE;
 
@@ -29,6 +30,7 @@ export const baseNetworkConfig: NetworkConfig = {
         new GaugeAprService(),
         new MorphoRewardsAprService(),
         new AaveApiAprService(),
+        new QuantAmmAprService(),
     ],
     userStakedBalanceServices: [new UserSyncGaugeBalanceService(), new UserSyncAuraBalanceService()],
     services: {
@@ -182,6 +184,10 @@ export const baseNetworkConfig: NetworkConfig = {
         {
             name: 'sync-erc4626-unwrap-rate',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(60, 'minutes') : every(20, 'minutes'),
+        },
+        {
+            name: 'sync-weights',
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(60, 'minutes') : every(10, 'minutes'),
         },
     ],
 };

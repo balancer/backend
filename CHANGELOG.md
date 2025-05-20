@@ -1,5 +1,106 @@
 # backend
 
+## 1.40.5
+
+### Patch Changes
+
+-   70da6c8: SOR - Fix LBP swap
+
+## 1.40.4
+
+### Patch Changes
+
+-   edda5b7: allow text search to filter for token addr
+-   f0fc480: maintenance task for V2 onchain syncing
+-   488d7fa: category syncing db load optimisation
+-   8e61261: simplify category syncing
+-   d8588e2: swaps pricing handler can use all prices
+
+## 1.40.3
+
+### Patch Changes
+
+-   e09e9cf: new yUSD token APRs
+
+## 1.40.2
+
+### Patch Changes
+
+-   064e670: quant pools apr filter
+
+## 1.40.1
+
+### Patch Changes
+
+-   2a5f580: handle obsolete hook state
+
+## 1.40.0
+
+### Minor Changes
+
+-   af5056e: SOR - Add support for ReClamm
+-   291ebb0: refactor wrapped token APRs calculation
+
+### Patch Changes
+
+-   2c87585: add akron hook
+-   b6bd71b: fluid APRs
+-   c2b738a: fix hardcoded cron pools for vebal voting list
+-   845f210: fix to apr updater service
+-   57e06f9: fix: total APR for cow pools
+
+## 1.39.4
+
+### Patch Changes
+
+-   02255aa: enable aave apr on avax
+-   12f59f5: wusdn apr
+
+## 1.39.3
+
+### Patch Changes
+
+-   a991765: merkl forwarded apr
+-   bcc9b8f: handle if pool is hook
+
+## 1.39.2
+
+### Patch Changes
+
+-   81c74e2: add weights syncing on mainnet
+-   89c7150: use new morpho query and combine reward apr
+-   510f37a: add euler APRs for sonic and avax
+-   5cc93c9: add tags and pooltokens to vebal query
+-   80690df: new vault subgraphs, pools subgraphs for reclamm and quant
+
+## 1.39.1
+
+### Patch Changes
+
+-   831af6e: filter tokens for quant apr
+-   4272d59: fix error reporting for underlying not found
+
+## 1.39.0
+
+### Minor Changes
+
+-   33e8fe3: add reclamm
+
+### Patch Changes
+
+-   7ecf9be: SOR - Fix underlying token not found
+
+## 1.38.3
+
+### Patch Changes
+
+-   d6d6b00: SOR - Fix weighted pool tokens with rate
+-   dd5d2ec: add surplus to protocol metrics and change calc for fees
+-   bb946f3: SOR - Fix non-erc4626 token rates
+-   132b6f4: add quant-amm apr
+-   e0fed17: add sdeUSD and savUSD APRs on avax
+-   3f85da3: LBP weight syncing
+
 ## 1.38.2
 
 ### Patch Changes

@@ -18,23 +18,26 @@ export function SubgraphMonitorController(tracer?: any) {
 
                     const latestBlock = await viemClient.getBlockNumber();
                     let lag = 0;
+                    try {
+                        const subgraph = new GaugeSubgraphService(subgraphUrl as string);
 
-                    const subgraph = new GaugeSubgraphService(subgraphUrl as string);
+                        const blockNumber = await subgraph.lastSyncedBlock();
+                        lag = Math.max(Number(latestBlock) - blockNumber, 0);
 
-                    const blockNumber = await subgraph.lastSyncedBlock();
-                    lag = Math.max(Number(latestBlock) - blockNumber, 0);
+                        let subgraphUrlClean = subgraphUrl;
+                        if (subgraphUrl.includes('gateway')) {
+                            const parts = subgraphUrl.split('/');
+                            parts.splice(4, 1);
+                            subgraphUrlClean = parts.join('/');
+                        }
 
-                    let subgraphUrlClean = subgraphUrl;
-                    if (subgraphUrl.includes('gateway')) {
-                        const parts = subgraphUrl.split('/');
-                        parts.splice(4, 1);
-                        subgraphUrlClean = parts.join('/');
+                        subgraphMetricPublisher.publish(
+                            `${config.data.chain.slug}-${subgraphName}-lag-${subgraphUrlClean}`,
+                            lag,
+                        );
+                    } catch (e) {
+                        console.log(`Error fetching subgraph lag for ${subgraphName} on ${config.data.chain.slug}`);
                     }
-
-                    subgraphMetricPublisher.publish(
-                        `${config.data.chain.slug}-${subgraphName}-lag-${subgraphUrlClean}`,
-                        lag,
-                    );
                 }
             }
         },

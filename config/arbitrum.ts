@@ -13,8 +13,8 @@ export default <NetworkData>{
     subgraphs: {
         startDate: '2021-08-23',
         balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmPbjY6L1NhPjpBv7wDTfG9EPx5FpCuBqeg1XxByzBTLcs`,
-        balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmPHAu4eYkYVBbhcBErZbfNYPT2vadkJrgDTRnNiCHWWcs`,
-        balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmYhQurTdQGXtEua1t6fMvo5QaqqF7r9zoEANFG14EsBgb`,
+        balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmWYjRi4vSRZnf6wEAzYPvCYyS6rh4JnEbuYEDKHwKEuJw`,
+        balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmZHmzYSUsTfLrQ5JwiXW6AWDrpq8wdiiuxyqrhciSV7Cd`,
         cowAmm: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmUDGSJXdMzG4ezDzf1LvXVb2igwY6rnaNFLC62ZJZ3Pbv`,
         gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmT3h6pogdPkxfWsBxKNtpq7kR9fqKaQ9jGxe7fZx7MUVE`,
         aura: 'https://data.aura.finance/graphql',
@@ -23,6 +23,7 @@ export default <NetworkData>{
         ['0x0fa0f9990d7969a7ae6f9961d663e4a201ed6417']: 'STABLE_SURGE',
         ['0x7c1b7a97bfacd39975de53e989a16c7bc4c78275']: 'STABLE_SURGE',
         ['0x5b42ec6d40f7b7965be5308c70e2603c0281c1e9']: 'MEV_TAX',
+        ['0xd221affabdd3c1281ea14c5781dec6b0fca8937e']: 'AKRON',
     },
     eth: {
         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -184,6 +185,12 @@ export default <NetworkData>{
             token: '0xbc404429558292ee2d769e57d57d6e74bbd2792d',
         },
         defaultHandlers: {
+            sUSDai: {
+                tokenAddress: '0x0b2b2b2076d95dda7817e785989fe353fe955ef9',
+                sourceUrl: 'https://api-platform-analytics.metastreet.xyz/v2/usdai/dashboard/apy',
+                path: '',
+                scale: 1e18,
+            },
             apxETH: {
                 tokenAddress: '0xcf6c2bb97a8978321c9e207afe8a2037fa9be45c',
                 sourceUrl: 'https://dinero.xyz/api/apr',
@@ -194,6 +201,12 @@ export default <NetworkData>{
                 tokenAddress: '0x895e15020c3f52ddd4d8e9514eb83c39f53b1579',
                 sourceUrl: 'https://ctrl.yield.fi/t/apy',
                 path: 'apy',
+                isIbYield: true,
+            },
+            yUSD2: {
+                tokenAddress: '0x4772d2e014f9fc3a820c444e3313968e9a5c8121',
+                sourceUrl: 'https://api.yield.fi/t/7Dapy',
+                path: '7d-apy[0].weighted_apy_7d_avg',
                 isIbYield: true,
             },
             usdm: {
@@ -263,12 +276,6 @@ export default <NetworkData>{
                 sourceUrl: 'https://kobe.mainnet.jito.network/api/v1/stake_pool_stats',
                 path: 'apy.0.data',
                 scale: 1,
-                isIbYield: true,
-            },
-            woETH: {
-                tokenAddress: '0xd8724322f44e5c58d7a815f542036fb17dbbf839',
-                sourceUrl: 'https://analytics.ousd.com/api/v2/oeth/apr/trailing',
-                path: 'apr',
                 isIbYield: true,
             },
             ETHx: {

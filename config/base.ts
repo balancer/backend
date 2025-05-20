@@ -13,8 +13,8 @@ export default <NetworkData>{
     subgraphs: {
         startDate: '2023-07-10',
         balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmRKBwBwPKtFz4mQp5jvH44USVprM4C77Nr4m77UGCbGv9`,
-        balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmchLChWDwNZoaoYnEwBKDtrQymKKpWHa5gLn4vgsY9Bt7`,
-        balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmQqz8XVzUFesgXtW4yBk8ZatMKiWcUKbgKnN6MwW4LGiM`,
+        balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmXs2bcH91cbcC8Sz7qW8SFWpDRWbDvZzsz6RmAX5wgxj3`,
+        balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmTtX262pSiqSHnQ95UjMPAsUp31rFPsc7rDpfVi9MrEsV`,
         cowAmm: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmVRCjhFz7XXJoeJ5t4FdysN2JaBVdUCvpTVoMzXRNjA87`,
         gauge: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/CfBvJNYsbKZdxXzaCtNc6dUbHH6TjDupprjKKo9gnmwg`,
         aura: 'https://data.aura.finance/graphql',
@@ -25,6 +25,7 @@ export default <NetworkData>{
         ['0x97b05bafb3c592089d382ba7cfa7abb9d85f599e']: 'UNKNOWN',
         ['0xa64cde229697d500ecaceb0611d603ad21fe4ce5']: 'UNKNOWN',
         ['0x7a2535f5fb47b8e44c02ef5d9990588313fe8f05']: 'MEV_TAX',
+        ['0xa45570815dbe7bf7010c41f1f74479be322d02bd']: 'AKRON',
     },
     gyro: {
         config: '0x8a5eb9a5b726583a213c7e4de2403d2dfd42c8a6',
@@ -109,6 +110,12 @@ export default <NetworkData>{
                 tokenAddress: '0x895e15020c3f52ddd4d8e9514eb83c39f53b1579',
                 sourceUrl: 'https://ctrl.yield.fi/t/apy',
                 path: 'apy',
+                isIbYield: true,
+            },
+            yUSD2: {
+                tokenAddress: '0x4772d2e014f9fc3a820c444e3313968e9a5c8121',
+                sourceUrl: 'https://api.yield.fi/t/7Dapy',
+                path: '7d-apy[0].weighted_apy_7d_avg',
                 isIbYield: true,
             },
             cbETH: {

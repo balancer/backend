@@ -105,6 +105,7 @@ type GqlHookReviewData {
 }
 
 enum GqlHookType {
+    AKRON
     FEE_TAKING
     EXIT_FEE
     STABLE_SURGE
@@ -113,5 +114,7 @@ enum GqlHookType {
     VEBAL_DISCOUNT
     DIRECTIONAL_FEE
     NFTLIQUIDITY_POSITION
+    RECLAMM
+    LBP
     UNKNOWN
 }

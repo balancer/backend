@@ -13,7 +13,7 @@ export class BasePoolV3 {
     public readonly chain: Chain;
     public readonly id: Hex;
     public readonly address: string;
-    public declare readonly poolType: PoolType;
+    public declare readonly poolType: PoolType | string;
     public readonly swapFee: bigint;
     public readonly aggregateSwapFee: bigint;
     public readonly tokenPairs: TokenPairData[];

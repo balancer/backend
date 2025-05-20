@@ -16,6 +16,7 @@ type GqlProtocolMetricsAggregated {
     swapFee24h: BigDecimal!
     swapVolume24h: BigDecimal!
     yieldCapture24h: BigDecimal!
+    surplus24h: BigDecimal!
     numLiquidityProviders: BigInt!
     chains: [GqlProtocolMetricsChain!]!
 }
@@ -29,6 +30,7 @@ type GqlProtocolMetricsChain {
     swapFee24h: BigDecimal!
     swapVolume24h: BigDecimal!
     yieldCapture24h: BigDecimal!
+    surplus24h: BigDecimal!
     numLiquidityProviders: BigInt!
 }
 

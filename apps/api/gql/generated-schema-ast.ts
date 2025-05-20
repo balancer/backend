@@ -191,12 +191,15 @@ export const schema = gql`
     }
 
     enum GqlHookType {
+        AKRON
         DIRECTIONAL_FEE
         EXIT_FEE
         FEE_TAKING
+        LBP
         LOTTERY
         MEV_TAX
         NFTLIQUIDITY_POSITION
+        RECLAMM
         STABLE_SURGE
         UNKNOWN
         VEBAL_DISCOUNT
@@ -420,6 +423,11 @@ export const schema = gql`
         c: String
 
         """
+        ReClamm: The centeredness margin of the pool
+        """
+        centerednessMargin: BigDecimal
+
+        """
         The chain on which the pool is deployed
         """
         chain: GqlChain!
@@ -430,9 +438,19 @@ export const schema = gql`
         createTime: Int!
 
         """
+        ReClamm: The current fourth root price ratio, an interpolation of the price ratio state
+        """
+        currentFourthRootPriceRatio: BigDecimal
+
+        """
         Data specific to gyro pools
         """
         dSq: String
+
+        """
+        ReClamm: Represents how fast the pool can move the virtual balances per day
+        """
+        dailyPriceShiftBase: BigDecimal
 
         """
         The decimals of the BPT, usually 18
@@ -448,6 +466,11 @@ export const schema = gql`
         Dynamic data such as token balances, swap fees or volume
         """
         dynamicData: GqlPoolDynamicData!
+
+        """
+        ReClamm: The fourth root price ratio at the end of an update
+        """
+        endFourthRootPriceRatio: BigDecimal
 
         """
         Data specific to fx pools
@@ -473,6 +496,16 @@ export const schema = gql`
         Data specific to gyro/fx pools
         """
         lambda: String
+
+        """
+        The timestamp of the last user interaction
+        """
+        lastTimestamp: Int
+
+        """
+        ReClamm: The last virtual balances of the pool
+        """
+        lastVirtualBalances: [BigDecimal!]
 
         """
         Liquidity management settings for v3 pools.
@@ -505,6 +538,16 @@ export const schema = gql`
         poolTokens: [GqlPoolTokenDetail!]!
 
         """
+        ReClamm: The timestamp when the update ends
+        """
+        priceRatioUpdateEndTime: Int
+
+        """
+        ReClamm: The timestamp when the update begins
+        """
+        priceRatioUpdateStartTime: Int
+
+        """
         The protocol version on which the pool is deployed, 1, 2 or 3
         """
         protocolVersion: Int!
@@ -533,6 +576,11 @@ export const schema = gql`
         Data specific to gyro pools
         """
         sqrtBeta: String
+
+        """
+        ReClamm: The fourth root price ratio at the start of an update
+        """
+        startFourthRootPriceRatio: BigDecimal
 
         """
         Account empowered to set static swap fees for a pool (when 0 on V2 swap fees are immutable, on V3 delegate to governance)
@@ -677,6 +725,11 @@ export const schema = gql`
         Represents if the APR items comes from a nested pool.
         """
         NESTED
+
+        """
+        APR calculated for QUANT-AMM pools based on performance measurements over a month
+        """
+        QUANT_AMM_UPLIFT
 
         """
         Staking reward APR in a pool from a reward token.
@@ -1055,10 +1108,10 @@ export const schema = gql`
         apr: GqlPoolApr! @deprecated(reason: "Use aprItems instead")
         aprItems: [GqlPoolAprItem!]!
         fees24h: BigDecimal!
-        fees24hAth: BigDecimal!
-        fees24hAthTimestamp: Int!
-        fees24hAtl: BigDecimal!
-        fees24hAtlTimestamp: Int!
+        fees24hAth: BigDecimal! @deprecated
+        fees24hAthTimestamp: Int! @deprecated
+        fees24hAtl: BigDecimal! @deprecated
+        fees24hAtlTimestamp: Int! @deprecated
         fees48h: BigDecimal!
         holdersCount: BigInt!
 
@@ -1074,10 +1127,10 @@ export const schema = gql`
         protocolFees48h: BigDecimal!
         protocolYieldCapture24h: BigDecimal!
         protocolYieldCapture48h: BigDecimal!
-        sharePriceAth: BigDecimal!
-        sharePriceAthTimestamp: Int!
-        sharePriceAtl: BigDecimal!
-        sharePriceAtlTimestamp: Int!
+        sharePriceAth: BigDecimal! @deprecated
+        sharePriceAthTimestamp: Int! @deprecated
+        sharePriceAtl: BigDecimal! @deprecated
+        sharePriceAtlTimestamp: Int! @deprecated
 
         """
         CowAmm specific, equivalent of swap fees
@@ -1097,18 +1150,18 @@ export const schema = gql`
         swapsCount: BigInt!
         totalLiquidity: BigDecimal!
         totalLiquidity24hAgo: BigDecimal!
-        totalLiquidityAth: BigDecimal!
-        totalLiquidityAthTimestamp: Int!
-        totalLiquidityAtl: BigDecimal!
-        totalLiquidityAtlTimestamp: Int!
+        totalLiquidityAth: BigDecimal! @deprecated
+        totalLiquidityAthTimestamp: Int! @deprecated
+        totalLiquidityAtl: BigDecimal! @deprecated
+        totalLiquidityAtlTimestamp: Int! @deprecated
         totalShares: BigDecimal!
         totalShares24hAgo: BigDecimal!
         totalSupply: BigDecimal!
         volume24h: BigDecimal!
-        volume24hAth: BigDecimal!
-        volume24hAthTimestamp: Int!
-        volume24hAtl: BigDecimal!
-        volume24hAtlTimestamp: Int!
+        volume24hAth: BigDecimal! @deprecated
+        volume24hAthTimestamp: Int! @deprecated
+        volume24hAtl: BigDecimal! @deprecated
+        volume24hAtlTimestamp: Int! @deprecated
         volume48h: BigDecimal!
         yieldCapture24h: BigDecimal!
         yieldCapture48h: BigDecimal!
@@ -1882,6 +1935,107 @@ export const schema = gql`
         withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
     }
 
+    type GqlPoolReClamm implements GqlPoolBase {
+        address: Bytes!
+        allTokens: [GqlPoolTokenExpanded!]! @deprecated(reason: "Use poolTokens instead")
+        categories: [GqlPoolFilterCategory]
+
+        """
+        The centeredness margin of the pool
+        """
+        centerednessMargin: BigDecimal!
+        chain: GqlChain!
+        createTime: Int!
+
+        """
+        The current fourth root price ratio, an interpolation of the price ratio state
+        """
+        currentFourthRootPriceRatio: BigDecimal!
+
+        """
+        Represents how fast the pool can move the virtual balances per day
+        """
+        dailyPriceShiftBase: BigDecimal!
+        decimals: Int!
+        displayTokens: [GqlPoolTokenDisplay!]! @deprecated(reason: "Use poolTokens instead")
+        dynamicData: GqlPoolDynamicData!
+
+        """
+        The fourth root price ratio at the end of an update
+        """
+        endFourthRootPriceRatio: BigDecimal!
+        factory: Bytes
+        hasAnyAllowedBuffer: Boolean!
+        hasErc4626: Boolean!
+        hasNestedErc4626: Boolean!
+        hook: GqlHook
+        id: ID!
+        investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
+
+        """
+        The timestamp of the last user interaction
+        """
+        lastTimestamp: Int!
+
+        """
+        The last virtual balances of the pool
+        """
+        lastVirtualBalances: [BigDecimal!]!
+        liquidityManagement: LiquidityManagement
+        name: String!
+        nestingType: GqlPoolNestingType! @deprecated(reason: "Removed without replacement")
+
+        """
+        The wallet address of the owner of the pool. Pool owners can set certain properties like swapFees or AMP.
+        """
+        owner: Bytes @deprecated(reason: "Use swapFeeManager instead")
+
+        """
+        Account empowered to pause/unpause the pool (or 0 to delegate to governance)
+        """
+        pauseManager: Bytes
+
+        """
+        Account empowered to set the pool creator fee percentage
+        """
+        poolCreator: Bytes
+        poolTokens: [GqlPoolTokenDetail!]!
+
+        """
+        The timestamp when the update ends
+        """
+        priceRatioUpdateEndTime: Int!
+
+        """
+        The timestamp when the update begins
+        """
+        priceRatioUpdateStartTime: Int!
+        protocolVersion: Int!
+        staking: GqlPoolStaking
+
+        """
+        The fourth root price ratio at the start of an update
+        """
+        startFourthRootPriceRatio: BigDecimal!
+
+        """
+        Account empowered to set static swap fees for a pool (when 0 on V2 swap fees are immutable, on V3 delegate to governance)
+        """
+        swapFeeManager: Bytes
+        symbol: String!
+        tags: [String]
+
+        """
+        All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
+        """
+        tokens: [GqlPoolTokenUnion!]! @deprecated(reason: "Use poolTokens instead")
+        type: GqlPoolType!
+        userBalance: GqlPoolUserBalance
+        vaultVersion: Int! @deprecated(reason: "use protocolVersion instead")
+        version: Int!
+        withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
+    }
+
     type GqlPoolSnapshot {
         amounts: [String!]!
         chain: GqlChain!
@@ -2481,6 +2635,7 @@ export const schema = gql`
         META_STABLE
         PHANTOM_STABLE
         QUANT_AMM_WEIGHTED
+        RECLAMM
         STABLE
         UNKNOWN
         WEIGHTED
@@ -2494,6 +2649,7 @@ export const schema = gql`
         | GqlPoolLiquidityBootstrapping
         | GqlPoolMetaStable
         | GqlPoolQuantAmmWeighted
+        | GqlPoolReClamm
         | GqlPoolStable
         | GqlPoolWeighted
 
@@ -2679,6 +2835,7 @@ export const schema = gql`
         chains: [GqlProtocolMetricsChain!]!
         numLiquidityProviders: BigInt!
         poolCount: BigInt!
+        surplus24h: BigDecimal!
         swapFee24h: BigDecimal!
         swapVolume24h: BigDecimal!
         totalLiquidity: BigDecimal!
@@ -2691,6 +2848,7 @@ export const schema = gql`
         chainId: String!
         numLiquidityProviders: BigInt!
         poolCount: BigInt!
+        surplus24h: BigDecimal!
         swapFee24h: BigDecimal!
         swapVolume24h: BigDecimal!
         totalLiquidity: BigDecimal!
@@ -3745,12 +3903,22 @@ export const schema = gql`
         Pool ID
         """
         id: ID!
+
+        """
+        Returns all pool tokens, including BPTs and nested pools if there are any. Only one nested level deep.
+        """
+        poolTokens: [GqlPoolTokenDetail!]!
         protocolVersion: Int!
 
         """
         The symbol of the pool.
         """
         symbol: String!
+
+        """
+        List of tags assigned by the team based on external factors
+        """
+        tags: [String]
 
         """
         The tokens inside the pool.

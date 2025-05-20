@@ -2,4 +2,4 @@
 'backend': patch
 ---
 
-LBP weight syncing
+sUSDai APRs on Arbitrum

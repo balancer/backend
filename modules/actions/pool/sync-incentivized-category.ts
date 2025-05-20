@@ -14,19 +14,42 @@ export const syncIncentivizedCategory = async () => {
         },
     });
 
-    const ids = poolsWithReward.map(({ poolId }) => poolId);
+    const incentivizedPoolIds = await prisma.prismaPool.findMany({
+        select: { id: true },
+        where: {
+            categories: {
+                has: 'INCENTIVIZED',
+            },
+        },
+    });
 
-    if (!ids.length) return;
+    const incentivizedIds = incentivizedPoolIds.map(({ id }) => id);
+    const rewardPoolIds = poolsWithReward.map(({ poolId }) => poolId);
 
-    await prisma.$transaction([
-        // Remove incentivized category from pools
-        prisma.$executeRaw`UPDATE "PrismaPool"
-        SET categories = array_remove(categories, 'INCENTIVIZED')
-        WHERE 'INCENTIVIZED' = ANY(categories);`,
+    const idsToAdd = rewardPoolIds.filter((id) => !incentivizedIds.includes(id));
+    const idsToRemove = incentivizedIds.filter((id) => !rewardPoolIds.includes(id));
 
-        // Readd 'incentivized' category to incentivized pools only
-        prisma.$executeRaw`UPDATE "PrismaPool"
-        SET categories = array_append(categories, 'INCENTIVIZED')
-        WHERE id IN (${Prisma.join(ids)});`,
-    ]);
+    const queries = [];
+
+    if (idsToRemove.length > 0) {
+        console.log('[sync-categories] Removing incentivized category from pools:', idsToRemove);
+        queries.push(
+            prisma.$executeRaw`UPDATE "PrismaPool"
+            SET categories = array_remove(categories, 'INCENTIVIZED')
+            WHERE id IN (${Prisma.join(idsToRemove)});`,
+        );
+    }
+
+    if (idsToAdd.length > 0) {
+        console.log('[sync-categories] Adding incentivized category to pools:', idsToAdd);
+        queries.push(
+            prisma.$executeRaw`UPDATE "PrismaPool"
+            SET categories = array_append(categories, 'INCENTIVIZED')
+            WHERE id IN (${Prisma.join(idsToAdd)});`,
+        );
+    }
+
+    if (queries.length > 0) {
+        await prisma.$transaction(queries);
+    }
 };

@@ -209,6 +209,62 @@
                     }
                 ]
             }
+        },
+        {
+            "testName": "Path-Stable-Surge-Hook",
+            "chainId": "1",
+            "blockNumber": "22247251",
+            "swapPathInput": {
+                "swapKind": 0,
+                "amountRaw": "100000000000000000000",
+                "tokens": [
+                    "0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0",
+                    "0x775f661b0bd1739349b9a2a3ef60be277c5d2d29",
+                    "0xd11c452fc99cf405034ee446803b6f6c1f6d5ed8"
+                ],
+                "pools": [
+                    {
+                        "poolAddress": "0x775f661b0bd1739349b9a2a3ef60be277c5d2d29",
+                        "poolType": "Buffer"
+                    },
+                    {
+                        "poolAddress": "0x9ed5175aecb6653c1bdaa19793c16fd74fbeeb37",
+                        "poolType": "STABLE"
+                    }
+                ]
+            }
+        },
+        {
+            "testName": "Path-ReClamm-In-Range",
+            "chainId": "8453",
+            "blockNumber": "29533250",
+            "swapPathInput": {
+                "swapKind": 0,
+                "amountRaw": "100000",
+                "tokens": ["0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913", "0x4200000000000000000000000000000000000006"],
+                "pools": [
+                    {
+                        "poolAddress": "0x035d7213cbc08483aa78ced076dbdc8ac5a509c1",
+                        "poolType": "RECLAMM"
+                    }
+                ]
+            }
+        },
+        {
+            "testName": "Path-Buffer",
+            "chainId": "1",
+            "blockNumber": "21671845",
+            "swapPathInput": {
+                "swapKind": 0,
+                "amountRaw": "1000000000000000000",
+                "tokens": ["0x7204B7Dbf9412567835633B6F00C3Edc3a8D6330", "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"],
+                "pools": [
+                    {
+                        "poolAddress": "0x7204B7Dbf9412567835633B6F00C3Edc3a8D6330",
+                        "poolType": "Buffer"
+                    }
+                ]
+            }
         }
     ]
 }

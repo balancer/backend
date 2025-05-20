@@ -1,7 +1,7 @@
 import type { SwapPathTestInput, SwapPathTestOutput } from '../types';
 import { getSwapPath } from './getSwapPath';
 import { getPool } from './getPool';
-import { getUnderlyingTokens } from './getUnderlyingTokens';
+import { enrichPoolsWithHookData } from './enrichPoolsWithHookData';
 
 export async function generateSwapPathTestData(input: SwapPathTestInput, overwrite = false) {
     const path = `./test/testData/read/${input.chainId}-${input.blockNumber}-${input.testName}.json`;
@@ -27,12 +27,11 @@ async function fetchTestData(input: SwapPathTestInput): Promise<SwapPathTestOutp
         swapPathInput.pools.map((pool) => getPool(rpcUrl, chainId, blockNumber, pool.poolType, pool.poolAddress)),
     );
 
-    const underlyingTokens = await getUnderlyingTokens(pools, rpcUrl, chainId);
+    const poolsWithHooks = await enrichPoolsWithHookData(pools, chainId, blockNumber);
 
     return {
         test: { chainId, blockNumber },
         swapPath,
-        pools,
-        underlyingTokens,
+        pools: poolsWithHooks,
     };
 }

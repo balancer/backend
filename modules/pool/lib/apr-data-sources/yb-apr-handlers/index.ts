@@ -8,7 +8,8 @@ const sourceToHandler = {
     aave: sources.AaveAprHandler,
     avalon: sources.AvalonAprHandler,
     beefy: sources.BeefyAprHandler,
-    // euler: sources.EulerAprHandler, // Removed, pools rekt
+    euler: sources.EulerAprHandler,
+    fluid: sources.FluidAprHandler,
     // gearbox: sources.GearboxAprHandler, // Removed, endpoint is down
     // idle: sources.IdleAprHandler, // Removed, endpoint is down
     maker: sources.MakerAprHandler,

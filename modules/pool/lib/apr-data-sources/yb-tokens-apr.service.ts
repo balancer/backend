@@ -1,5 +1,5 @@
 import { PoolAprService } from '../../pool-types';
-import { PrismaPoolWithTokens } from '../../../../prisma/prisma-types';
+import { PoolForAPRs } from '../../../../prisma/prisma-types';
 import { prisma } from '../../../../prisma/prisma-client';
 import { prismaBulkExecuteOperations } from '../../../../prisma/prisma-util';
 import { Chain, PrismaPoolAprItemGroup, PrismaPoolAprType } from '@prisma/client';
@@ -10,33 +10,16 @@ import { YbAprConfig } from '../../../network/apr-config-types';
 
 export class YbTokensAprService implements PoolAprService {
     private ybTokensAprHandlers: YbAprHandlers;
-    private underlyingMap: { [wrapper: string]: string } = {};
 
     constructor(private aprConfig: YbAprConfig, private chain: Chain) {
         this.ybTokensAprHandlers = new YbAprHandlers(this.aprConfig, chain);
-        // Build a map of wrapped tokens to underlying tokens for Aave
-        const aaveMerged = {
-            ...aprConfig.aave?.v3?.tokens,
-            ...aprConfig.aave?.lido?.tokens,
-        };
-
-        const aaveTokens = Object.fromEntries(
-            Object.values(aaveMerged).flatMap((market) =>
-                Object.values(market.wrappedTokens).map((wrapper) => [wrapper, market.underlyingAssetAddress]),
-            ),
-        );
-
-        this.underlyingMap = {
-            ...aaveTokens,
-            ...(aprConfig.morpho?.tokens || {}),
-        };
     }
 
     getAprServiceName(): string {
         return 'YbTokensAprService';
     }
 
-    public async updateAprForPools(pools: PrismaPoolWithTokens[]): Promise<void> {
+    public async updateAprForPools(pools: PoolForAPRs[]): Promise<void> {
         const operations: any[] = [];
         const chains = Array.from(new Set(pools.map((pool) => pool.chain)));
         const tokenPrices = await tokenService.getCurrentTokenPrices(chains).then((prices) =>
@@ -47,28 +30,28 @@ export class YbTokensAprService implements PoolAprService {
             ),
         );
         const aprs = await this.fetchYieldTokensApr();
+        const aprKeysLowercase = Array.from(aprs.keys()).map((key) => key.toLowerCase());
+        const aprKeysLowercaseSet = new Set(aprKeysLowercase);
+
         const poolsWithYbTokens = pools.filter((pool) => {
-            return pool.tokens.find((token) => {
-                return Array.from(aprs.keys())
-                    .map((key) => key.toLowerCase())
-                    .includes(token.address.toLowerCase());
-            });
+            const addresses = new Set(
+                pool.tokens
+                    .flatMap((token) => [
+                        token.token.underlyingTokenAddress?.toLowerCase(),
+                        token.address.toLowerCase(),
+                    ])
+                    .filter((address): address is string => address !== null && address !== undefined),
+            );
+
+            for (const address of addresses) {
+                if (aprKeysLowercaseSet.has(address)) {
+                    return true;
+                }
+            }
+            return false;
         });
 
-        const poolsWithYbTokensExpanded = await prisma.prismaPool.findMany({
-            where: { chain: this.chain, id: { in: poolsWithYbTokens.map((pool) => pool.id) } },
-            include: {
-                dynamicData: true,
-                tokens: {
-                    orderBy: { index: 'asc' },
-                    include: {
-                        token: true,
-                    },
-                },
-            },
-        });
-
-        for (const pool of poolsWithYbTokensExpanded) {
+        for (const pool of poolsWithYbTokens) {
             if (!pool.dynamicData) {
                 continue;
             }
@@ -79,9 +62,9 @@ export class YbTokensAprService implements PoolAprService {
 
             const tokenAprs = pool.tokens.map((token) => {
                 const tokenApr = aprs.get(token.address);
-                // AAVE + LST case, we need to apply the underlying token APR on top of the AAVE market APR
-                const underlying = this.underlyingMap[token.address] || token.token.underlyingTokenAddress;
-                const underlyingApr = aprs.get(underlying || '');
+
+                // Wrapper + underlying case, we need to apply the underlying token APR on top of the lending protocol market APR
+                const underlyingApr = aprs.get(token.token.underlyingTokenAddress?.toLowerCase() || '');
 
                 let apr = tokenApr?.apr || 0;
                 if (underlyingApr) {

@@ -84,7 +84,7 @@ export class SorService {
         input: GetSwapPathsInput,
     ): Promise<{ paths: PathWithAmount[] | null; protocolVersion: number; returnAmount: string }> {
         try {
-            const { pools: poolsFromDb, underlyingTokens } = await getBasePoolsFromDb(
+            const { pools: poolsFromDb, bufferPools } = await getBasePoolsFromDb(
                 input.chain,
                 input.protocolVersion,
                 input.considerPoolsWithHooks,
@@ -103,7 +103,7 @@ export class SorService {
                 swapKind,
                 input.swapAmount.amount,
                 poolsFromDb,
-                underlyingTokens,
+                bufferPools,
                 input.protocolVersion,
                 swapOptions,
             );
@@ -116,7 +116,7 @@ export class SorService {
                     swapKind,
                     input.swapAmount.amount,
                     poolsFromDb,
-                    underlyingTokens,
+                    bufferPools,
                     input.protocolVersion,
                     swapOptions,
                 );

@@ -1,7 +1,7 @@
 import { addressesMatch } from '../../../../web3/addresses';
 import { PrismaPoolAprType } from '@prisma/client';
 import { prisma } from '../../../../../prisma/prisma-client';
-import { PrismaPoolWithTokens } from '../../../../../prisma/prisma-types';
+import { PoolForAPRs } from '../../../../../prisma/prisma-types';
 import { prismaBulkExecuteOperations } from '../../../../../prisma/prisma-util';
 import { secondsPerYear } from '../../../../common/time';
 import { tokenService } from '../../../../token/token.service';
@@ -16,7 +16,7 @@ export class ReliquaryFarmAprService implements PoolAprService {
         return 'ReliquaryFarmAprService';
     }
 
-    public async updateAprForPools(pools: PrismaPoolWithTokens[]): Promise<void> {
+    public async updateAprForPools(pools: PoolForAPRs[]): Promise<void> {
         const chain = pools[0].chain;
         const reliquarySubgraphService = new ReliquarySubgraphService(networkContext.data.subgraphs.reliquary!);
         const allSubgraphFarms = await reliquarySubgraphService.getAllFarms({});

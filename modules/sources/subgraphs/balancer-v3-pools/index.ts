@@ -1,12 +1,5 @@
 import { GraphQLClient } from 'graphql-request';
-import {
-    OrderDirection,
-    Pool_OrderBy,
-    PoolsQueryVariables,
-    SepoliaTypePoolFragment,
-    TypePoolFragment,
-    getSdk,
-} from './generated/types';
+import { OrderDirection, Pool_OrderBy, PoolsQueryVariables, TypePoolFragment, getSdk } from './generated/types';
 import { Chain } from '@prisma/client';
 
 /**
@@ -31,15 +24,13 @@ export const getPoolsSubgraphClient = (subgraphUrl: string, chain: Chain) => {
                 }
             });
         },
-        async getAllPools(
-            where: PoolsQueryVariables['where'],
-        ): Promise<SepoliaTypePoolFragment[] | TypePoolFragment[]> {
+        async getAllPools(where: PoolsQueryVariables['where']): Promise<TypePoolFragment[]> {
             const limit = 1000;
             let hasMore = true;
             let id = `0x`;
             let pools: TypePoolFragment[] = [];
 
-            const query = chain === 'SEPOLIA' ? sdk.SepoliaPools : sdk.Pools;
+            const query = sdk.Pools;
 
             while (hasMore) {
                 const response = await query({

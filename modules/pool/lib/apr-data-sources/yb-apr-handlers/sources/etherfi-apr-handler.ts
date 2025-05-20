@@ -1,4 +1,5 @@
-const url = 'https://api.studio.thegraph.com/query/41778/syko-dev-mainnet/v0.0.3';
+const url =
+    'https://ded76165a2fb6f7887260a3a0f626de7.thegraph.chainnodes.org/subgraphs/name/etherfi/etherfi-subgraph-v0-8-2';
 
 const query = `
   {

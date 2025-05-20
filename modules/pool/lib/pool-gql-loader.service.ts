@@ -28,15 +28,12 @@ import {
     GqlPoolWithdrawConfig,
     GqlPoolWithdrawOption,
     QueryPoolGetPoolsArgs,
-    GqlPoolTokenDetail,
-    GqlNestedPool,
     GqlPoolAprItem,
     GqlPoolAprItemType,
     GqlUserStakedBalance,
     GqlPoolFilterCategory,
     GqlPoolAggregator,
     LiquidityManagement,
-    GqlHook,
     QueryAggregatorPoolsArgs,
     QuantAmmWeightSnapshot,
 } from '../../../apps/api/gql/generated-schema';
@@ -44,19 +41,17 @@ import _ from 'lodash';
 import { prisma } from '../../../prisma/prisma-client';
 import { Chain, Prisma, PrismaPoolAprType, PrismaUserStakedBalance, PrismaUserWalletBalance } from '@prisma/client';
 import { fixedNumber } from '../../view-helpers/fixed-number';
-import { chainToChainId as chainToIdMap } from '../../network/chain-id-to-chain';
 import { GithubContentService } from '../../content/github-content.service';
-import { ElementData, FxData, GyroData, StableData, QuantAmmWeightedData } from '../subgraph-mapper';
+import { ElementData, FxData, GyroData, StableData, QuantAmmWeightedData, ReclammData } from '../subgraph-mapper';
 import { LBPoolData } from '../pool-data';
 import { ZERO_ADDRESS } from '@balancer/sdk';
-import { tokenService } from '../../token/token.service';
 import { mapHookToGqlHook } from '../../sources/transformers';
 import { GraphQLError } from 'graphql';
-import { floatToExactString } from '../../common/numbers';
 import { isWeightedPoolV2 } from './pool-utils';
 import { addressesMatch } from '../../web3/addresses';
 import { networkContext } from '../../network/network-context.service';
 import { getWeightSnapshots } from '../../actions/quant-amm/get-weight-snapshots';
+import { mapPoolToken, enrichWithErc4626Data } from './pool-gql-mapper-helper';
 
 const isToken = (text: string) => text.match(/^0x[0-9a-fA-F]{40}$/);
 const isPoolId = (text: string) => isToken(text) || text.match(/^0x[0-9a-fA-F]{64}$/);
@@ -95,87 +90,9 @@ export class PoolGqlLoaderService {
         await this.enrichWithRateproviderData(mappedPool);
 
         // load underlying token info into PoolTokenDetail
-        await this.enrichWithErc4626Data(mappedPool);
+        await enrichWithErc4626Data(mappedPool.poolTokens, mappedPool.chain);
 
         return mappedPool;
-    }
-
-    private async enrichWithErc4626Data(mappedPool: GqlPoolUnion | GqlPoolAggregator | GqlPoolMinimal) {
-        for (const token of mappedPool.poolTokens) {
-            if (token.isErc4626) {
-                const prismaToken = await prisma.prismaToken.findUnique({
-                    where: { address_chain: { address: token.address, chain: mappedPool.chain } },
-                });
-                if (prismaToken?.underlyingTokenAddress) {
-                    const underlyingTokenDefinition = await tokenService.getTokenDefinition(
-                        prismaToken.underlyingTokenAddress,
-                        mappedPool.chain,
-                    );
-                    token.underlyingToken = underlyingTokenDefinition;
-                }
-
-                const erc4626ReviewData = await prisma.prismaErc4626ReviewData.findUnique({
-                    where: {
-                        chain_erc4626Address: {
-                            chain: mappedPool.chain,
-                            erc4626Address: token.address,
-                        },
-                    },
-                });
-                if (erc4626ReviewData) {
-                    token.erc4626ReviewData = {
-                        ...erc4626ReviewData,
-                        warnings: erc4626ReviewData.warnings?.split(',') || [],
-                    };
-                    token.useUnderlyingForAddRemove = erc4626ReviewData.useUnderlyingForAddRemove;
-                    token.useWrappedForAddRemove = erc4626ReviewData.useUnderlyingForAddRemove;
-                    token.canUseBufferForSwaps = erc4626ReviewData.canUseBufferForSwaps;
-                } else {
-                    token.useUnderlyingForAddRemove = false;
-                    token.useWrappedForAddRemove = true;
-                    token.canUseBufferForSwaps = false;
-                }
-            }
-
-            if (token.hasNestedPool) {
-                for (const nestedToken of token.nestedPool!.tokens) {
-                    if (nestedToken.isErc4626) {
-                        const prismaToken = await prisma.prismaToken.findUnique({
-                            where: { address_chain: { address: nestedToken.address, chain: mappedPool.chain } },
-                        });
-                        if (prismaToken?.underlyingTokenAddress) {
-                            const tokenDefinition = await tokenService.getTokenDefinition(
-                                prismaToken.underlyingTokenAddress,
-                                mappedPool.chain,
-                            );
-                            nestedToken.underlyingToken = tokenDefinition;
-                        }
-
-                        const erc4626ReviewData = await prisma.prismaErc4626ReviewData.findUnique({
-                            where: {
-                                chain_erc4626Address: {
-                                    chain: mappedPool.chain,
-                                    erc4626Address: nestedToken.address,
-                                },
-                            },
-                        });
-                        if (erc4626ReviewData) {
-                            nestedToken.erc4626ReviewData = {
-                                ...erc4626ReviewData,
-                                warnings: erc4626ReviewData.warnings?.split(',') || [],
-                            };
-                            nestedToken.useUnderlyingForAddRemove = erc4626ReviewData.useUnderlyingForAddRemove;
-                            nestedToken.useWrappedForAddRemove = erc4626ReviewData.useUnderlyingForAddRemove;
-                            nestedToken.canUseBufferForSwaps = erc4626ReviewData.canUseBufferForSwaps;
-                        } else {
-                            nestedToken.useUnderlyingForAddRemove = false;
-                            nestedToken.useWrappedForAddRemove = true;
-                            nestedToken.canUseBufferForSwaps = false;
-                        }
-                    }
-                }
-            }
-        }
     }
 
     private async enrichWithRateproviderData(mappedPool: GqlPoolMinimal | GqlPoolAggregator | GqlPoolUnion) {
@@ -258,7 +175,7 @@ export class PoolGqlLoaderService {
             await this.enrichWithRateproviderData(mappedPool);
 
             // load underlying token info into PoolTokenDetail
-            await this.enrichWithErc4626Data(mappedPool);
+            await enrichWithErc4626Data(mappedPool.poolTokens, mappedPool.chain);
         }
 
         return gqlPools;
@@ -307,7 +224,7 @@ export class PoolGqlLoaderService {
             await this.enrichWithRateproviderData(mappedPool);
 
             // load underlying token info into PoolTokenDetail
-            await this.enrichWithErc4626Data(mappedPool);
+            await enrichWithErc4626Data(mappedPool.poolTokens, mappedPool.chain);
 
             filteredPools.push(mappedPool);
         }
@@ -348,7 +265,7 @@ export class PoolGqlLoaderService {
                 await this.enrichWithRateproviderData(mappedPool);
 
                 // load underlying token info into PoolTokenDetail
-                await this.enrichWithErc4626Data(mappedPool);
+                await enrichWithErc4626Data(mappedPool.poolTokens, mappedPool.chain);
             }
 
             if (args.orderBy === 'userbalanceUsd') {
@@ -380,7 +297,7 @@ export class PoolGqlLoaderService {
             await this.enrichWithRateproviderData(mappedPool);
 
             // load underlying token info into PoolTokenDetail
-            await this.enrichWithErc4626Data(mappedPool);
+            await enrichWithErc4626Data(mappedPool.poolTokens, mappedPool.chain);
         }
 
         return gqlPools;
@@ -401,7 +318,7 @@ export class PoolGqlLoaderService {
             dynamicData: this.getPoolDynamicData(pool),
             allTokens: this.mapAllTokens(pool),
             displayTokens: this.mapDisplayTokens(pool),
-            poolTokens: pool.tokens.map((token) => this.mapPoolToken(token)),
+            poolTokens: pool.tokens.map((token) => mapPoolToken(token)),
             staking: this.getStakingData(pool),
             userBalance: this.getUserBalance(pool, userWalletbalances, userStakedBalances),
             categories: pool.categories as GqlPoolFilterCategory[],
@@ -640,8 +557,11 @@ export class PoolGqlLoaderService {
                         allTokens: {
                             some: {
                                 token: {
-                                    symbol: textSearch,
-                                    address: filterArgs.allTokens?.some?.token?.address,
+                                    OR: [
+                                        { symbol: textSearch },
+                                        { address: filterArgs.allTokens?.some?.token?.address },
+                                        { address: textSearch },
+                                    ],
                                 },
                             },
                         },
@@ -782,7 +702,7 @@ export class PoolGqlLoaderService {
         const mappedData = {
             decimals: 18,
             dynamicData: this.getPoolDynamicData(pool),
-            poolTokens: pool.tokens.map((token) => this.mapPoolToken(token)),
+            poolTokens: pool.tokens.map((token) => mapPoolToken(token)),
             vaultVersion: poolWithoutTypeData.protocolVersion,
             liquidityManagement: (pool.liquidityManagement as LiquidityManagement) || undefined,
             hook: mapHookToGqlHook(hook as HookData),
@@ -839,6 +759,12 @@ export class PoolGqlLoaderService {
                     ...mappedData,
                     quantAmmWeightedParams: typeData as QuantAmmWeightedData,
                 };
+            case 'RECLAMM':
+                return {
+                    ...poolWithoutTypeData,
+                    ...(typeData as ReclammData),
+                    ...mappedData,
+                };
         }
 
         return {
@@ -866,7 +792,7 @@ export class PoolGqlLoaderService {
             tokens: pool.tokens.map((token) => this.mapPoolTokenToGqlUnion(token)), // TODO DEPRECATE
             allTokens: this.mapAllTokens(pool),
             displayTokens: this.mapDisplayTokens(pool),
-            poolTokens: pool.tokens.map((token) => this.mapPoolToken(token)),
+            poolTokens: pool.tokens.map((token) => mapPoolToken(token)),
             userBalance: this.getUserBalance(pool, userWalletbalances, userStakedBalances),
             vaultVersion: poolWithoutTypeData.protocolVersion,
             categories: pool.categories as GqlPoolFilterCategory[],
@@ -965,6 +891,13 @@ export class PoolGqlLoaderService {
                     quantAmmWeightedParams: typeData as QuantAmmWeightedData,
                     weightSnapshots: quantWeightSnapshots,
                 };
+            case 'RECLAMM':
+                return {
+                    __typename: 'GqlPoolReClamm',
+                    ...poolWithoutTypeData,
+                    ...(typeData as ReclammData),
+                    ...mappedData,
+                };
         }
 
         return {
@@ -1023,65 +956,6 @@ export class PoolGqlLoaderService {
                     ...poolToken.token,
                 };
             });
-    }
-
-    private mapPoolToken(poolToken: PrismaPoolTokenWithExpandedNesting, nestedPercentage = 1): GqlPoolTokenDetail {
-        const { nestedPool } = poolToken;
-
-        const hasNestedPool = nestedPool !== null && nestedPool.id !== poolToken.poolId;
-
-        return {
-            id: `${poolToken.poolId}-${poolToken.token.address}`,
-            ...poolToken.token,
-            index: poolToken.index,
-            balance: floatToExactString(parseFloat(poolToken.balance || '0') * nestedPercentage),
-            balanceUSD: floatToExactString((poolToken.balanceUSD || 0) * nestedPercentage),
-            priceRate: poolToken.priceRate || '1.0',
-            priceRateProvider: poolToken.priceRateProvider,
-            weight: poolToken.weight,
-            hasNestedPool: hasNestedPool,
-            nestedPool: hasNestedPool ? this.mapNestedPool(nestedPool, poolToken.balance || '0') : undefined,
-            isAllowed: poolToken.token.types.some(
-                (type) => type.type === 'WHITE_LISTED' || type.type === 'PHANTOM_BPT' || type.type === 'BPT',
-            ),
-            isErc4626: poolToken.token.types.some((type) => type.type === 'ERC4626'),
-            isExemptFromProtocolYieldFee: poolToken.exemptFromProtocolYieldFee,
-            scalingFactor: poolToken.scalingFactor,
-            tradable: !poolToken.token.types.find((type) => type.type === 'PHANTOM_BPT' || type.type === 'BPT'),
-            chain: poolToken.chain,
-            chainId: Number(chainToIdMap[poolToken.chain]),
-        };
-    }
-
-    private mapNestedPool(nestedPool: PrismaNestedPoolWithSingleLayerNesting, tokenBalance: string): GqlNestedPool {
-        const totalShares = parseFloat(nestedPool.dynamicData?.totalShares || '0');
-        const percentOfSupplyNested = totalShares > 0 ? parseFloat(tokenBalance) / totalShares : 0;
-        const totalLiquidity = nestedPool.dynamicData?.totalLiquidity || 0;
-
-        const hook = (nestedPool.hook as HookData)?.address ? (nestedPool.hook as HookData) : null;
-
-        return {
-            ...nestedPool,
-            owner: nestedPool.swapFeeManager, // Keep for backwards compatibility
-            liquidityManagement: (nestedPool.liquidityManagement as LiquidityManagement) || undefined,
-            totalLiquidity: `${totalLiquidity}`,
-            totalShares: `${totalShares}`,
-            nestedShares: `${totalShares * percentOfSupplyNested}`,
-            nestedLiquidity: `${totalLiquidity * percentOfSupplyNested}`,
-            nestedPercentage: `${percentOfSupplyNested}`,
-            tokens: nestedPool.tokens.map((token) =>
-                this.mapPoolToken(
-                    {
-                        ...token,
-                        nestedPool: null,
-                    },
-                    percentOfSupplyNested,
-                ),
-            ),
-            swapFee: nestedPool.dynamicData?.swapFee || '0',
-            bptPriceRate: (nestedPool.typeData as StableData).bptPriceRate || '1.0',
-            hook: hook as GqlHook,
-        };
     }
 
     private getStakingData(pool: PrismaPoolMinimal): GqlPoolStaking | null {
@@ -1219,22 +1093,6 @@ export class PoolGqlLoaderService {
             lifetimeSwapFees,
             holdersCount,
             swapsCount,
-            sharePriceAth,
-            sharePriceAthTimestamp,
-            sharePriceAtl,
-            sharePriceAtlTimestamp,
-            totalLiquidityAth,
-            totalLiquidityAthTimestamp,
-            totalLiquidityAtl,
-            totalLiquidityAtlTimestamp,
-            volume24hAtl,
-            volume24hAthTimestamp,
-            volume24hAth,
-            volume24hAtlTimestamp,
-            fees24hAtl,
-            fees24hAthTimestamp,
-            fees24hAth,
-            fees24hAtlTimestamp,
             protocolFees24h,
             protocolFees48h,
             protocolYieldCapture24h,
@@ -1253,7 +1111,7 @@ export class PoolGqlLoaderService {
         const aprItemsWithNoGroup = aprItems.filter((item) => !item.group);
 
         const hasAprRange = !!aprItems.find((item) => item.range);
-        let aprTotal = `0`;
+        let aprTotal = `${pool.dynamicData?.apr || 0}`;
         let swapAprTotal = `0`;
         let nativeRewardAprTotal = `0`;
         let thirdPartyAprTotal = `0`;
@@ -1328,7 +1186,6 @@ export class PoolGqlLoaderService {
         } else {
             const nativeRewardAprItems = aprItems.filter((item) => item.type === 'NATIVE_REWARD');
             const thirdPartyRewardAprItems = aprItems.filter((item) => item.type === 'THIRD_PARTY_REWARD');
-            aprTotal = `${_.sumBy(aprItems, 'apr')}`;
             swapAprTotal = `${_.sumBy(swapAprItems, 'apr')}`;
             nativeRewardAprTotal = `${_.sumBy(nativeRewardAprItems, 'apr')}`;
             thirdPartyAprTotal = `${_.sumBy(thirdPartyRewardAprItems, 'apr')}`;
@@ -1358,22 +1215,22 @@ export class PoolGqlLoaderService {
             lifetimeSwapFees: `${fixedNumber(lifetimeSwapFees, 2)}`,
             holdersCount: `${holdersCount}`,
             swapsCount: `${swapsCount}`,
-            sharePriceAth: `${sharePriceAth}`,
-            sharePriceAtl: `${sharePriceAtl}`,
-            totalLiquidityAth: `${fixedNumber(totalLiquidityAth, 2)}`,
-            totalLiquidityAtl: `${fixedNumber(totalLiquidityAtl, 2)}`,
-            volume24hAtl: `${fixedNumber(volume24hAtl, 2)}`,
-            volume24hAth: `${fixedNumber(volume24hAth, 2)}`,
-            fees24hAtl: `${fixedNumber(fees24hAtl, 2)}`,
-            fees24hAth: `${fixedNumber(fees24hAth, 2)}`,
-            sharePriceAthTimestamp,
-            sharePriceAtlTimestamp,
-            totalLiquidityAthTimestamp,
-            totalLiquidityAtlTimestamp,
-            fees24hAthTimestamp,
-            fees24hAtlTimestamp,
-            volume24hAthTimestamp,
-            volume24hAtlTimestamp,
+            sharePriceAth: '0',
+            sharePriceAtl: '0',
+            totalLiquidityAth: '0',
+            totalLiquidityAtl: '0',
+            volume24hAtl: '0',
+            volume24hAth: '0',
+            fees24hAtl: '0',
+            fees24hAth: '0',
+            sharePriceAthTimestamp: 0,
+            sharePriceAtlTimestamp: 0,
+            totalLiquidityAthTimestamp: 0,
+            totalLiquidityAtlTimestamp: 0,
+            fees24hAthTimestamp: 0,
+            fees24hAtlTimestamp: 0,
+            volume24hAthTimestamp: 0,
+            volume24hAtlTimestamp: 0,
             protocolYieldCapture24h: `${fixedNumber(protocolYieldCapture24h || 0, 2)}`,
             protocolYieldCapture48h: `${fixedNumber(protocolYieldCapture48h || 0, 2)}`,
             protocolFees24h: `${fixedNumber(protocolFees24h || 0, 2)}`,
@@ -1539,7 +1396,20 @@ export class PoolGqlLoaderService {
             }
         }
 
-        return aprItems;
+        let filteredItems = aprItems;
+        if (pool.type === 'QUANT_AMM_WEIGHTED') {
+            filteredItems = aprItems.filter(
+                (item) =>
+                    item.type === 'QUANT_AMM_UPLIFT' ||
+                    item.type === 'AURA' ||
+                    item.type === 'VEBAL_EMISSIONS' ||
+                    item.type === 'STAKING' ||
+                    item.type === 'STAKING_BOOST' ||
+                    item.type === 'MERKL',
+            );
+        }
+
+        return filteredItems;
     }
 
     private getPoolInvestConfig(pool: PrismaPoolWithExpandedNesting): GqlPoolInvestConfig {

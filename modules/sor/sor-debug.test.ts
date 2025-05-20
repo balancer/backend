@@ -7,7 +7,7 @@ import { sorService } from './sor.service';
 describe('sor debugging', () => {
     it('sor v2', async () => {
         const useProtocolVersion = 2;
-        const chain = Chain.SONIC;
+        const chain = Chain.GNOSIS;
 
         const chainId = Object.keys(chainIdToChain).find((key) => chainIdToChain[key] === chain) as string;
         initRequestScopedContext();
@@ -18,17 +18,17 @@ describe('sor debugging', () => {
 
         const swaps = await sorService.getSorSwapPaths({
             chain,
-            tokenIn: '0xd3dce716f3ef535c5ff8d041c1a41c3bd89b97ae', // scUSD
-            tokenOut: '0x3bce5cb273f0f148010bbea2470e7b5df84c7812', // sETH
-            swapType: 'EXACT_OUT',
-            swapAmount: '1',
+            tokenIn: '0xaf204776c7245bf4147c2612bf6e5972ee483701', // sDAI
+            tokenOut: '0xe0ed85f76d9c552478929fab44693e03f0899f23', // s-KPK
+            swapType: 'EXACT_IN',
+            swapAmount: '10',
             useProtocolVersion,
             // callDataInput: {
             //     receiver: '0xb5e6b895734409Df411a052195eb4EE7e40d8696',
             //     sender: '0xb5e6b895734409Df411a052195eb4EE7e40d8696',
             //     slippagePercentage: '0.1',
             // },
-            poolIds: ['0xe7734b495a552ab6f4c78406e672cca7175181e10002000000000000000000c5'],
+            poolIds: ['0x40d2cbc586dd8df50001cdba3f65cd4bbc32d596000200000000000000000154'],
         });
 
         console.log(swaps.returnAmount);
@@ -43,7 +43,7 @@ describe('sor debugging', () => {
 
     it('sor v3', async () => {
         const useProtocolVersion = 3;
-        const chain = Chain.SONIC;
+        const chain = Chain.BASE;
 
         const chainId = Object.keys(chainIdToChain).find((key) => chainIdToChain[key] === chain) as string;
         initRequestScopedContext();
@@ -53,12 +53,12 @@ describe('sor debugging', () => {
 
         const swaps = await sorService.getSorSwapPaths({
             chain,
-            tokenIn: '0x039e2fB66102314Ce7b64Ce5Ce3E5183bc94aD38', // wS
-            tokenOut: '0x29219dd400f2Bf60E5a23d13Be72B486D4038894', // USDC.e
+            tokenIn: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913', // USDC
+            tokenOut: '0x4200000000000000000000000000000000000006', // WETH
             swapType: 'EXACT_IN',
-            swapAmount: '0.001',
+            swapAmount: '1',
             useProtocolVersion,
-            poolIds: ['0x0af8ea4de2ecfb962cdbb66033a46afe99836994'],
+            poolIds: ['0x035d7213cbc08483aa78ced076dbdc8ac5a509c1'],
         });
 
         console.log(swaps.returnAmount);

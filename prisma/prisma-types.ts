@@ -53,11 +53,11 @@ export type JoinExitEvent = PrismaPoolEvent & {
     };
 };
 
-export const poolWithTokens = Prisma.validator<Prisma.PrismaPoolDefaultArgs>()({
-    include: { tokens: true },
+export const poolsIncludeForAprs = Prisma.validator<Prisma.PrismaPoolDefaultArgs>()({
+    include: { dynamicData: true, tokens: { include: { token: true } } },
 });
 
-export type PrismaPoolWithTokens = Prisma.PrismaPoolGetPayload<typeof poolWithTokens>;
+export type PoolForAPRs = Prisma.PrismaPoolGetPayload<typeof poolsIncludeForAprs>;
 
 const poolTokenWithDynamicData = Prisma.validator<Prisma.PrismaPool$tokensArgs>()({
     include: { token: true },
@@ -419,6 +419,7 @@ export type HookData = {
     address: string;
     name?: string;
     type:
+        | 'AKRON'
         | 'FEE_TAKING'
         | 'EXIT_FEE'
         | 'STABLE_SURGE'
@@ -427,6 +428,8 @@ export type HookData = {
         | 'LOTTERY'
         | 'NFTLIQUIDITY_POSITION'
         | 'VEBAL_DISCOUNT'
+        | 'RECLAMM'
+        | 'LBP'
         | 'UNKNOWN';
     enableHookAdjustedAmounts: boolean;
     shouldCallAfterSwap: boolean;

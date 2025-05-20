@@ -7,6 +7,7 @@ import { getVeVotingGauges, veGauges, vePools } from './special-pools/ve-pools';
 import { hardCodedPools } from './special-pools/hardcoded-pools';
 import { GqlVotingPool } from '../../apps/api/gql/generated-schema';
 import { Chain } from '@prisma/client';
+import { enrichWithErc4626Data, mapPoolToken } from '../pool/lib/pool-gql-mapper-helper';
 
 export class VeBalVotingListService {
     constructor(private votingGauges = new VotingGaugesRepository()) {}
@@ -33,7 +34,7 @@ export class VeBalVotingListService {
         const allGauges = [...validGauges, ...(await getVeVotingGauges())];
 
         // For each voting gauge returns a pool with its gauge info inside
-        return allGauges.map((votingGauge) => {
+        const gauges = allGauges.map((votingGauge) => {
             const pool = poolsById[votingGauge.stakingGauge!.staking.poolId];
             // Only L2 networks have childGaugeAddress
             const childGaugeAddress = pool.chain === Chain.MAINNET ? null : votingGauge.stakingGauge?.staking.address;
@@ -44,6 +45,7 @@ export class VeBalVotingListService {
                 address: pool.address,
                 type: pool.type,
                 protocolVersion: pool.protocolVersion,
+                tags: pool.categories,
                 tokens: pool.tokens.map((token) => ({
                     address: token.address,
                     weight: token.weight,
@@ -51,6 +53,7 @@ export class VeBalVotingListService {
                     logoURI: token.token.logoURI || '',
                     underlyingTokenAddress: token.token.underlyingTokenAddress,
                 })),
+                poolTokens: pool.tokens.map((token) => mapPoolToken(token)),
                 gauge: {
                     address: votingGauge.id,
                     relativeWeightCap: votingGauge.relativeWeightCap,
@@ -62,6 +65,11 @@ export class VeBalVotingListService {
             };
             return votingPool;
         });
+
+        for (const gauge of gauges) {
+            await enrichWithErc4626Data(gauge.poolTokens, gauge.chain);
+        }
+        return gauges;
     }
 
     public async getPoolsForVotingList(poolIds: string[]) {
@@ -71,8 +79,24 @@ export class VeBalVotingListService {
             },
             include: {
                 tokens: {
+                    orderBy: { index: 'asc' },
                     include: {
-                        token: true,
+                        token: {
+                            include: { types: true },
+                        },
+                        nestedPool: {
+                            include: {
+                                dynamicData: true,
+                                tokens: {
+                                    orderBy: { index: 'asc' },
+                                    include: {
+                                        token: {
+                                            include: { types: true },
+                                        },
+                                    },
+                                },
+                            },
+                        },
                     },
                 },
             },

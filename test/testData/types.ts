@@ -14,6 +14,7 @@ export type TestBase = {
 export type PoolBase = {
     poolType: string;
     poolAddress: Address;
+    hook?: { address: string };
 };
 
 type SwapPathTestConfig = TestBase & {
@@ -28,9 +29,5 @@ export type SwapPathTestInput = SwapPathTestConfig & {
 export type SwapPathTestOutput = {
     swapPath: SwapPathResult;
     pools: PoolBase[];
-    underlyingTokens: {
-        address: Address;
-        decimals: number;
-    }[];
     test: TestBase;
 };
