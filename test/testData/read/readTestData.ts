@@ -9,7 +9,8 @@ import {
     mapStablePoolStateToPrismaPool,
     mapWeightedPoolStateToPrismaPool,
 } from './mapping';
-import { Address, isSameAddress } from '@balancer/sdk';
+import { Address } from '@balancer/sdk';
+import { BufferPoolData } from '../../../modules/sor/utils/data';
 
 type PoolBase = {
     poolAddress: string;
@@ -21,7 +22,7 @@ export type WeightedPool = PoolBase & WeightedState;
 
 export type StablePool = PoolBase & StableState;
 
-export type BufferPool = PoolBase & BufferState;
+export type BufferPool = PoolBase & BufferState & { decimals: number[] };
 
 export type GyroEPool = PoolBase & GyroECLPState;
 
@@ -37,12 +38,13 @@ type SwapPath = {
     pools: string[];
     test: string;
     currentTimestamp: bigint;
+    chainId: string;
 };
 
 export type TestData = {
     swapPathPools: PrismaPoolAndHookWithDynamic[][];
     swapPaths: SwapPath[];
-    underlyingTokens: { address: string; decimals: number }[][];
+    bufferPools: BufferPoolData[][];
 };
 
 // Reads all json test files and parses to relevant swap/pool bigint format
@@ -50,7 +52,7 @@ export function readTestData(): TestData {
     const testData: TestData = {
         swapPathPools: [],
         swapPaths: [],
-        underlyingTokens: [],
+        bufferPools: [],
     };
 
     // Resolve the directory path relative to the current file's directory
@@ -70,13 +72,12 @@ export function readTestData(): TestData {
             try {
                 const jsonData = JSON.parse(fileContent);
 
-                // add underlying tokens
-                const underlyingTokens = jsonData.underlyingTokens as { address: string; decimals: number }[];
-                testData.underlyingTokens.push(underlyingTokens);
-
                 // map pools to prisma pools
-                const pools: PrismaPoolAndHookWithDynamic[] = mapPools(jsonData.pools, underlyingTokens);
+                const pools: PrismaPoolAndHookWithDynamic[] = mapPools(jsonData.pools);
                 testData.swapPathPools.push(pools);
+
+                const bufferPools: BufferPoolData[] = mapBufferPools(jsonData.pools);
+                testData.bufferPools.push(bufferPools);
 
                 const currentTimestamp = (jsonData.pools as { poolType: string; currentTimestamp?: bigint }[]).find(
                     (pool) => pool.poolType === 'RECLAMM',
@@ -91,6 +92,7 @@ export function readTestData(): TestData {
                     outputRaw: BigInt(jsonData.swapPath.outputRaw),
                     test: file,
                     currentTimestamp,
+                    chainId: jsonData.test.chainId,
                 });
             } catch (error) {
                 console.error(`Error parsing JSON file ${file}:`, error);
@@ -105,18 +107,12 @@ type TransformBigintToString<T> = {
     [K in keyof T]: T[K] extends bigint ? string : T[K] extends bigint[] ? string[] : T[K];
 };
 
-function mapPools(
-    pools: TransformBigintToString<SupportedPools>[],
-    underlyingTokens: { address: string; decimals: number }[],
-): PrismaPoolAndHookWithDynamic[] {
-    const bufferPools: (BufferPool & { underlyingTokenDecimals: number })[] = pools
+function mapPools(pools: TransformBigintToString<SupportedPools>[]): PrismaPoolAndHookWithDynamic[] {
+    const bufferPools: BufferPool[] = pools
         .filter((pool) => pool.poolType === 'Buffer')
         .map((pool) => ({
             ...pool,
             rate: BigInt(pool.rate),
-            underlyingTokenDecimals:
-                underlyingTokens.find((token) => isSameAddress(token.address as Address, pool.tokens[1] as Address))
-                    ?.decimals || 0,
         }));
 
     const nonBufferPools = pools.filter((pool) => pool.poolType !== 'Buffer');
@@ -203,4 +199,24 @@ function mapPools(
         }
     }
     return prismaPools;
+}
+
+function mapBufferPools(pools: TransformBigintToString<SupportedPools>[]): BufferPoolData[] {
+    const bufferPools: BufferPool[] = pools
+        .filter((pool) => pool.poolType === 'Buffer')
+        .map((pool) => ({
+            ...pool,
+            rate: BigInt(pool.rate),
+        }));
+
+    const bufferPoolData: BufferPoolData[] = bufferPools.map((pool) => ({
+        ...pool,
+        address: pool.poolAddress as Address,
+        mainToken: { address: pool.tokens[0] as Address, decimals: pool.decimals[0] },
+        underlyingToken: { address: pool.tokens[1] as Address, decimals: pool.decimals[1] },
+        unwrapRate: pool.rate,
+        chainId: Number(pool.chainId),
+    }));
+
+    return bufferPoolData;
 }

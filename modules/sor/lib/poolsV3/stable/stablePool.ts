@@ -11,14 +11,13 @@ import { TokenPairData } from '../../../../sources/contracts/v3/fetch-tokenpair-
 import { WAD } from '../../utils/math';
 import { BasePoolMethodsV3 } from '../basePoolMethodsV3';
 import { PoolTokenWithRate } from '../../utils/poolTokenWithRate';
-import { Erc4626PoolToken } from '../../utils/erc4626PoolToken';
 
 import { getHookState } from '../../utils/helpers';
 
 import { LiquidityManagement } from '../../../../sor/types';
 import { BasePoolV3 } from '../basePoolV3';
 
-type StablePoolToken = PoolTokenWithRate | Erc4626PoolToken;
+type StablePoolToken = PoolTokenWithRate;
 
 export class StablePoolV3 extends BasePoolV3 implements BasePoolMethodsV3 {
     public readonly poolType: PoolType = PoolType.Stable;
@@ -28,10 +27,7 @@ export class StablePoolV3 extends BasePoolV3 implements BasePoolMethodsV3 {
 
     private readonly tokenMap: Map<string, StablePoolToken>;
 
-    static fromPrismaPool(
-        pool: PrismaPoolAndHookWithDynamic,
-        underlyingTokens: { address: string; decimals: number }[] = [],
-    ): StablePoolV3 {
+    static fromPrismaPool(pool: PrismaPoolAndHookWithDynamic): StablePoolV3 {
         const poolTokens: StablePoolToken[] = [];
 
         if (!pool.dynamicData) throw new Error(`${pool.type} pool has no dynamic data`);
@@ -47,30 +43,7 @@ export class StablePoolV3 extends BasePoolV3 implements BasePoolMethodsV3 {
             );
             const amount = parseUnits(poolToken.balance, poolToken.token.decimals);
 
-            if (poolToken.token.underlyingTokenAddress) {
-                const underlyingToken = underlyingTokens.find(
-                    (token) => token.address === poolToken.token.underlyingTokenAddress,
-                );
-                if (underlyingToken) {
-                    const unwrapRateDecimals = 18 - poolToken.token.decimals + underlyingToken.decimals;
-                    poolTokens.push(
-                        new Erc4626PoolToken(
-                            token,
-                            amount,
-                            poolToken.index,
-                            parseEther(poolToken.priceRate),
-                            parseUnits(poolToken.token.unwrapRate, unwrapRateDecimals),
-                            poolToken.token.underlyingTokenAddress,
-                        ),
-                    );
-                } else {
-                    poolTokens.push(
-                        new PoolTokenWithRate(token, amount, poolToken.index, parseEther(poolToken.priceRate)),
-                    );
-                }
-            } else {
-                poolTokens.push(new PoolTokenWithRate(token, amount, poolToken.index, parseEther(poolToken.priceRate)));
-            }
+            poolTokens.push(new PoolTokenWithRate(token, amount, poolToken.index, parseEther(poolToken.priceRate)));
         }
 
         const totalShares = parseEther(pool.dynamicData.totalShares);

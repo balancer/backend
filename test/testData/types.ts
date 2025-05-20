@@ -29,9 +29,5 @@ export type SwapPathTestInput = SwapPathTestConfig & {
 export type SwapPathTestOutput = {
     swapPath: SwapPathResult;
     pools: PoolBase[];
-    underlyingTokens: {
-        address: Address;
-        decimals: number;
-    }[];
     test: TestBase;
 };

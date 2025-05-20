@@ -1108,10 +1108,10 @@ export const schema = gql`
         apr: GqlPoolApr! @deprecated(reason: "Use aprItems instead")
         aprItems: [GqlPoolAprItem!]!
         fees24h: BigDecimal!
-        fees24hAth: BigDecimal!
-        fees24hAthTimestamp: Int!
-        fees24hAtl: BigDecimal!
-        fees24hAtlTimestamp: Int!
+        fees24hAth: BigDecimal! @deprecated
+        fees24hAthTimestamp: Int! @deprecated
+        fees24hAtl: BigDecimal! @deprecated
+        fees24hAtlTimestamp: Int! @deprecated
         fees48h: BigDecimal!
         holdersCount: BigInt!
 
@@ -1127,10 +1127,10 @@ export const schema = gql`
         protocolFees48h: BigDecimal!
         protocolYieldCapture24h: BigDecimal!
         protocolYieldCapture48h: BigDecimal!
-        sharePriceAth: BigDecimal!
-        sharePriceAthTimestamp: Int!
-        sharePriceAtl: BigDecimal!
-        sharePriceAtlTimestamp: Int!
+        sharePriceAth: BigDecimal! @deprecated
+        sharePriceAthTimestamp: Int! @deprecated
+        sharePriceAtl: BigDecimal! @deprecated
+        sharePriceAtlTimestamp: Int! @deprecated
 
         """
         CowAmm specific, equivalent of swap fees
@@ -1150,18 +1150,18 @@ export const schema = gql`
         swapsCount: BigInt!
         totalLiquidity: BigDecimal!
         totalLiquidity24hAgo: BigDecimal!
-        totalLiquidityAth: BigDecimal!
-        totalLiquidityAthTimestamp: Int!
-        totalLiquidityAtl: BigDecimal!
-        totalLiquidityAtlTimestamp: Int!
+        totalLiquidityAth: BigDecimal! @deprecated
+        totalLiquidityAthTimestamp: Int! @deprecated
+        totalLiquidityAtl: BigDecimal! @deprecated
+        totalLiquidityAtlTimestamp: Int! @deprecated
         totalShares: BigDecimal!
         totalShares24hAgo: BigDecimal!
         totalSupply: BigDecimal!
         volume24h: BigDecimal!
-        volume24hAth: BigDecimal!
-        volume24hAthTimestamp: Int!
-        volume24hAtl: BigDecimal!
-        volume24hAtlTimestamp: Int!
+        volume24hAth: BigDecimal! @deprecated
+        volume24hAthTimestamp: Int! @deprecated
+        volume24hAtl: BigDecimal! @deprecated
+        volume24hAtlTimestamp: Int! @deprecated
         volume48h: BigDecimal!
         yieldCapture24h: BigDecimal!
         yieldCapture48h: BigDecimal!

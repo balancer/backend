@@ -233,6 +233,22 @@
                     }
                 ]
             }
+        },
+        {
+            "testName": "Path-Buffer",
+            "chainId": "1",
+            "blockNumber": "21671845",
+            "swapPathInput": {
+                "swapKind": 0,
+                "amountRaw": "1000000000000000000",
+                "tokens": ["0x7204B7Dbf9412567835633B6F00C3Edc3a8D6330", "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"],
+                "pools": [
+                    {
+                        "poolAddress": "0x7204B7Dbf9412567835633B6F00C3Edc3a8D6330",
+                        "poolType": "Buffer"
+                    }
+                ]
+            }
         }
     ]
 }

@@ -12,7 +12,7 @@ export function mapGyroPoolStateToPrismaPool(
     poolState: GyroEPool,
     chainId: number,
     protocolVersion: number,
-    bufferPools: (BufferPool & { underlyingTokenDecimals: number })[],
+    bufferPools: BufferPool[],
 ): PrismaPoolAndHookWithDynamic {
     const decimals = poolState.scalingFactors.map((scalingFactor: bigint) =>
         getDecimalsFromScalingFactor(scalingFactor),
@@ -39,7 +39,7 @@ export function mapGyroPoolStateToPrismaPool(
         const token = bufferPool
             ? {
                   decimals: decimals[i],
-                  unwrapRate: formatUnits(bufferPool.rate, 18 - decimals[i] + bufferPool.underlyingTokenDecimals),
+                  unwrapRate: formatUnits(bufferPool.rate, 18 - decimals[i] + bufferPool.decimals[1]),
                   underlyingTokenAddress: bufferPool.tokens[1],
                   chain: chainIdToChain[chainId],
               }
@@ -102,7 +102,7 @@ export function mapStablePoolStateToPrismaPool(
     poolState: StablePool,
     chainId: number,
     protocolVersion: number,
-    bufferPools: (BufferPool & { underlyingTokenDecimals: number })[],
+    bufferPools: BufferPool[],
 ): PrismaPoolAndHookWithDynamic {
     const decimals = poolState.scalingFactors.map((scalingFactor: bigint) =>
         getDecimalsFromScalingFactor(scalingFactor),
@@ -129,7 +129,7 @@ export function mapStablePoolStateToPrismaPool(
         const token = bufferPool
             ? {
                   decimals: decimals[i],
-                  unwrapRate: formatUnits(bufferPool.rate, 18 - decimals[i] + bufferPool.underlyingTokenDecimals),
+                  unwrapRate: formatUnits(bufferPool.rate, 18 - decimals[i] + bufferPool.decimals[1]),
                   underlyingTokenAddress: bufferPool.tokens[1],
                   chain: chainIdToChain[chainId],
               }
@@ -173,7 +173,7 @@ export function mapWeightedPoolStateToPrismaPool(
     poolState: WeightedPool,
     chainId: number,
     protocolVersion: number,
-    bufferPools: (BufferPool & { underlyingTokenDecimals: number })[],
+    bufferPools: BufferPool[],
 ): PrismaPoolAndHookWithDynamic {
     const decimals = poolState.scalingFactors.map((scalingFactor: bigint) =>
         getDecimalsFromScalingFactor(scalingFactor),
@@ -200,7 +200,7 @@ export function mapWeightedPoolStateToPrismaPool(
         const token = bufferPool
             ? {
                   decimals: decimals[i],
-                  unwrapRate: formatUnits(bufferPool.rate, 18 - decimals[i] + bufferPool.underlyingTokenDecimals),
+                  unwrapRate: formatUnits(bufferPool.rate, 18 - decimals[i] + bufferPool.decimals[1]),
                   underlyingTokenAddress: bufferPool.tokens[1],
                   chain: chainIdToChain[chainId],
               }
@@ -246,7 +246,7 @@ export function mapReClammPoolStateToPrismaPool(
     poolState: ReClammPool,
     chainId: number,
     protocolVersion: number,
-    bufferPools: (BufferPool & { underlyingTokenDecimals: number })[],
+    bufferPools: BufferPool[],
 ): PrismaPoolAndHookWithDynamic {
     const decimals = poolState.scalingFactors.map((scalingFactor: bigint) =>
         getDecimalsFromScalingFactor(scalingFactor),
@@ -273,7 +273,7 @@ export function mapReClammPoolStateToPrismaPool(
         const token = bufferPool
             ? {
                   decimals: decimals[i],
-                  unwrapRate: formatUnits(bufferPool.rate, 18 - decimals[i] + bufferPool.underlyingTokenDecimals),
+                  unwrapRate: formatUnits(bufferPool.rate, 18 - decimals[i] + bufferPool.decimals[1]),
                   underlyingTokenAddress: bufferPool.tokens[1],
                   chain: chainIdToChain[chainId],
               }

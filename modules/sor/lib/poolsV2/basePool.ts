@@ -1,9 +1,7 @@
-import { BufferState, PoolState } from '@balancer-labs/balancer-maths';
 import { PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { Hex } from 'viem';
 
 import { BasePoolToken } from '../utils/basePoolToken';
-import { Erc4626PoolToken } from '../utils/erc4626PoolToken';
 
 export interface BasePool {
     readonly poolType: PoolType | string;

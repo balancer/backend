@@ -729,25 +729,25 @@ type GqlPoolDynamicData {
     holdersCount: BigInt!
     swapsCount: BigInt!
 
-    sharePriceAth: BigDecimal!
-    sharePriceAthTimestamp: Int!
-    sharePriceAtl: BigDecimal!
-    sharePriceAtlTimestamp: Int!
+    sharePriceAth: BigDecimal! @deprecated
+    sharePriceAthTimestamp: Int! @deprecated
+    sharePriceAtl: BigDecimal! @deprecated
+    sharePriceAtlTimestamp: Int! @deprecated
 
-    totalLiquidityAth: BigDecimal!
-    totalLiquidityAthTimestamp: Int!
-    totalLiquidityAtl: BigDecimal!
-    totalLiquidityAtlTimestamp: Int!
+    totalLiquidityAth: BigDecimal! @deprecated
+    totalLiquidityAthTimestamp: Int! @deprecated
+    totalLiquidityAtl: BigDecimal! @deprecated
+    totalLiquidityAtlTimestamp: Int! @deprecated
 
-    volume24hAth: BigDecimal!
-    volume24hAthTimestamp: Int!
-    volume24hAtl: BigDecimal!
-    volume24hAtlTimestamp: Int!
+    volume24hAth: BigDecimal! @deprecated
+    volume24hAthTimestamp: Int! @deprecated
+    volume24hAtl: BigDecimal! @deprecated
+    volume24hAtlTimestamp: Int! @deprecated
 
-    fees24hAth: BigDecimal!
-    fees24hAthTimestamp: Int!
-    fees24hAtl: BigDecimal!
-    fees24hAtlTimestamp: Int!
+    fees24hAth: BigDecimal! @deprecated
+    fees24hAthTimestamp: Int! @deprecated
+    fees24hAtl: BigDecimal! @deprecated
+    fees24hAtlTimestamp: Int! @deprecated
 }
 
 type GqlPoolInvestConfig @deprecated(reason: "Removed without replacement") {

@@ -2,8 +2,6 @@ import { Address, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { PathGraphEdgeData, PathGraphTraversalConfig } from './pathGraphTypes';
 import { BasePool } from '../poolsV2/basePool';
 import { PathLocal } from '../path';
-import { BufferPool } from '../poolsV3/buffer/bufferPool';
-import { Erc4626PoolToken } from '../utils/erc4626PoolToken';
 
 const DEFAULT_MAX_PATHS_PER_TOKEN_PAIR = 2;
 
@@ -38,8 +36,6 @@ export class PathGraph {
         this.nodes = new Map();
         this.edges = new Map();
         this.maxPathsPerTokenPair = maxPathsPerTokenPair;
-
-        this.insertBufferPools(pools); // Add buffer pools to the pool list
 
         this.buildPoolAddressMap(pools);
 
@@ -168,23 +164,6 @@ export class PathGraph {
         }
 
         return filtered;
-    }
-
-    /**
-     * Create buffer pools from ERC4626 tokens and add them to the pool list
-     * @param pools
-     */
-    private insertBufferPools(pools: BasePool[]) {
-        const bufferPools = new Set<BufferPool>();
-        for (const pool of pools) {
-            for (const token of pool.tokens) {
-                if ('underlyingTokenAddress' in token) {
-                    const erc4626Token = token as Erc4626PoolToken;
-                    bufferPools.add(BufferPool.fromErc4626Token(erc4626Token));
-                }
-            }
-        }
-        pools.push(...bufferPools);
     }
 
     private buildPoolAddressMap(pools: BasePool[]) {

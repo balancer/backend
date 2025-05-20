@@ -130,7 +130,6 @@ export class QuantAmmAprService implements PoolAprService {
             const relativeReturn = endLpPrice.price / endWeightedValue - 1;
 
             const totalYearlyReturn = relativeReturn * 12;
-            const apr = totalYearlyReturn / pool.dynamicData.totalLiquidity;
 
             if (pool.address.toLowerCase() === '0x6b61d8680c4f9e560c8306807908553f95c749c5') {
                 // nice console log for debug
@@ -143,17 +142,17 @@ export class QuantAmmAprService implements PoolAprService {
                 console.log(`End token prices: ${sortedEndTokenPrices.map((price) => price.price)}`);
                 console.log(`Price ratios: ${priceRatios}`);
                 console.log(`End weighted value: ${endWeightedValue}`);
-                console.log(`Relative return: ${relativeReturn}`);
+                console.log(`Yearly return: ${totalYearlyReturn}`);
             }
 
             await prisma.prismaPoolAprItem.upsert({
                 where: { id_chain: { id: `${pool.id}-quant-amm-apr`, chain: chain } },
-                update: { apr: relativeReturn },
+                update: { apr: totalYearlyReturn },
                 create: {
                     id: `${pool.id}-quant-amm-apr`,
                     chain: chain,
                     poolId: pool.id,
-                    apr: relativeReturn,
+                    apr: totalYearlyReturn,
                     title: 'Quant AMM APR',
                     type: 'QUANT_AMM_UPLIFT',
                     group: null,

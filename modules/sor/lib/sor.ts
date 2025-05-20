@@ -16,7 +16,8 @@ import {
 import { BasePool } from './poolsV2/basePool';
 import { SorSwapOptions } from './types';
 import { PathWithAmount } from './path';
-import { Gyro2CLPPool, GyroECLPPool, ReClammPool, StablePoolV3, WeightedPoolV3 } from './poolsV3';
+import { BufferPool, Gyro2CLPPool, GyroECLPPool, ReClammPool, StablePoolV3, WeightedPoolV3 } from './poolsV3';
+import { BufferPoolData } from '../utils/data';
 
 export class SOR {
     static async getPathsWithPools(
@@ -25,7 +26,7 @@ export class SOR {
         swapKind: SwapKind,
         swapAmountEvm: bigint,
         prismaPools: PrismaPoolAndHookWithDynamic[],
-        underlyingTokens: { address: string; decimals: number }[],
+        bufferPools: BufferPoolData[],
         protocolVersion: number,
         swapOptions?: Omit<SorSwapOptions, 'graphTraversalConfig.poolIdsToInclude'>,
     ): Promise<PathWithAmount[] | null> {
@@ -53,7 +54,7 @@ export class SOR {
                         if (prismaPool.protocolVersion === 2) {
                             basePools.push(WeightedPool.fromPrismaPool(prismaPool));
                         } else {
-                            basePools.push(WeightedPoolV3.fromPrismaPool(prismaPool, underlyingTokens));
+                            basePools.push(WeightedPoolV3.fromPrismaPool(prismaPool));
                         }
                     }
                     break;
@@ -65,7 +66,7 @@ export class SOR {
                     // Since we allowed all the pools, we started getting BAL#322 errors
                     // Enabling pools one by one until we find the issue
                     if (protocolVersion === 3) {
-                        basePools.push(StablePoolV3.fromPrismaPool(prismaPool, underlyingTokens));
+                        basePools.push(StablePoolV3.fromPrismaPool(prismaPool));
                     } else {
                         if (
                             [
@@ -86,7 +87,7 @@ export class SOR {
                     break;
                 case 'GYRO':
                     if (protocolVersion === 3) {
-                        basePools.push(Gyro2CLPPool.fromPrismaPool(prismaPool, underlyingTokens));
+                        basePools.push(Gyro2CLPPool.fromPrismaPool(prismaPool));
                     } else {
                         basePools.push(Gyro2Pool.fromPrismaPool(prismaPool));
                     }
@@ -96,18 +97,22 @@ export class SOR {
                     break;
                 case 'GYROE':
                     if (protocolVersion === 3) {
-                        basePools.push(GyroECLPPool.fromPrismaPool(prismaPool, underlyingTokens));
+                        basePools.push(GyroECLPPool.fromPrismaPool(prismaPool));
                     } else {
                         basePools.push(GyroEPool.fromPrismaPool(prismaPool));
                     }
                     break;
                 case 'RECLAMM':
-                    basePools.push(ReClammPool.fromPrismaPool(prismaPool, underlyingTokens, currentTimestamp));
+                    basePools.push(ReClammPool.fromPrismaPool(prismaPool, currentTimestamp));
                     break;
                 default:
                     console.log('Unsupported pool type');
                     break;
             }
+        }
+
+        for (const bufferPool of bufferPools) {
+            basePools.push(BufferPool.fromBufferPoolData(bufferPool));
         }
 
         const router = new Router();
