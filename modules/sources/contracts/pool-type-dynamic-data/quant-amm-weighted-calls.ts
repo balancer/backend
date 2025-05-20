@@ -57,19 +57,14 @@ export const quantAmmWeightedCalls = (id: string): ViemMulticallCall[] => [
         abi: quantAmmWeighted,
         functionName: 'getQuantAMMWeightedPoolDynamicData',
         parser: (result: QuantAMMWeightedPoolDynamicData, results: any, index: number) => {
-            const [[weightsA, multipliersA], [weightsB, multipliersB]] = [
-                result.firstFourWeightsAndMultipliers,
-                result.secondFourWeightsAndMultipliers,
-            ].map((arr) => [arr.slice(0, 4), arr.slice(4)]);
-
-            const weightsAtLastUpdateInterval = [...weightsA, ...weightsB];
-            const weightBlockMultipliers = [...multipliersA, ...multipliersB].map(Number);
+            const firstFourWeightsAndMultipliers = result.firstFourWeightsAndMultipliers.map(Number);
+            const secondFourWeightsAndMultipliers = result.secondFourWeightsAndMultipliers.map(Number);
             const lastUpdateIntervalTime = Number(result.lastUpdateTime);
             const lastInterpolationTimePossible = Number(result.lastInteropTime);
 
             return {
-                weightsAtLastUpdateInterval: weightsAtLastUpdateInterval.map(Number),
-                weightBlockMultipliers,
+                firstFourWeightsAndMultipliers,
+                secondFourWeightsAndMultipliers,
                 lastUpdateIntervalTime,
                 lastInterpolationTimePossible,
             };
