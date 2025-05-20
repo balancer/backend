@@ -1,5 +1,12 @@
 # backend
 
+## 1.40.7
+
+### Patch Changes
+
+-   593a6b4: fix: quantAMM dynamic data format
+-   694b1ee: SOR - Prevent buffers to be added to v2 swap paths
+
 ## 1.40.6
 
 ### Patch Changes
