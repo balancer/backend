@@ -249,8 +249,16 @@ export function PoolController(tracer?: any) {
             const subgraphClient = getVaultSubgraphClient(balancerV3, chain);
 
             const fromBlock = await getLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.POOLS_V3);
-            const latestBlock = await viemClient.getBlockNumber().then(Number);
+            const rpcLatestBlock = await viemClient.getBlockNumber().then(Number);
             const sgLastSyncedBlock = await subgraphClient.lastSyncedBlock();
+
+            // Guard against subgraph lag
+            let useSubgraph = true;
+            if (rpcLatestBlock - sgLastSyncedBlock > acceptableSGLag) {
+                useSubgraph = false;
+            }
+
+            const latestBlock = useSubgraph ? sgLastSyncedBlock : rpcLatestBlock;
 
             if (fromBlock === undefined || fromBlock > latestBlock) {
                 return [];
@@ -258,12 +266,6 @@ export function PoolController(tracer?: any) {
 
             // Sepolia vault deployment block, uncomment to test from the beginning
             // const fromBlock = 5274748n;
-
-            // Guard against subgraph lag
-            let useSubgraph = true;
-            if (latestBlock - sgLastSyncedBlock > acceptableSGLag) {
-                useSubgraph = false;
-            }
 
             let changedIds: string[] = [];
             if (useSubgraph) {
