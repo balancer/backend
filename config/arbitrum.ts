@@ -185,6 +185,12 @@ export default <NetworkData>{
             token: '0xbc404429558292ee2d769e57d57d6e74bbd2792d',
         },
         defaultHandlers: {
+            sUSDai: {
+                tokenAddress: '0x0b2b2b2076d95dda7817e785989fe353fe955ef9',
+                sourceUrl: 'https://api-platform-analytics.metastreet.xyz/v2/usdai/dashboard/apy',
+                path: '',
+                scale: 1e18,
+            },
             apxETH: {
                 tokenAddress: '0xcf6c2bb97a8978321c9e207afe8a2037fa9be45c',
                 sourceUrl: 'https://dinero.xyz/api/apr',
