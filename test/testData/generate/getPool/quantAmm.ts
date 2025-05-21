@@ -1,9 +1,10 @@
 import { PublicClient, Address, http, createPublicClient, Chain } from 'viem';
-import { quantAmmAbi } from '../abi/quantAmm';
 import { VAULT_V3 } from '@balancer/sdk';
 import { CHAINS } from '@balancer/sdk';
-import { vaultExplorerAbi } from '../abi/vaultExplorer';
+
 import { TransformBigintToString } from '../../types';
+import { quantAmmAbi } from '../abi/quantAmm';
+import { vaultExplorerAbi } from '../abi/vaultExplorer';
 
 export interface QuantAmmMutableData {
     balancesLiveScaled18: bigint[];

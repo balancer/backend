@@ -6,10 +6,13 @@ import {
     StableState,
     WeightedState,
 } from '@balancer-labs/balancer-maths';
+import { Address } from '@balancer/sdk';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
 import { HookData, PrismaPoolAndHookWithDynamic } from '../../../prisma/prisma-types';
+import { BufferPoolData } from '../../../modules/sor/utils/data';
+import { TransformBigintToString } from '../types';
 import {
     mapGyroPoolStateToPrismaPool,
     mapQuantAmmPoolStateToPrismaPool,
@@ -17,8 +20,6 @@ import {
     mapStablePoolStateToPrismaPool,
     mapWeightedPoolStateToPrismaPool,
 } from './mapping';
-import { Address } from '@balancer/sdk';
-import { BufferPoolData } from '../../../modules/sor/utils/data';
 
 type PoolBase = {
     poolAddress: string;
@@ -112,10 +113,6 @@ export function readTestData(): TestData {
 
     return testData;
 }
-
-type TransformBigintToString<T> = {
-    [K in keyof T]: T[K] extends bigint ? string : T[K] extends bigint[] ? string[] : T[K];
-};
 
 function mapPools(pools: TransformBigintToString<SupportedPools>[]): PrismaPoolAndHookWithDynamic[] {
     const bufferPools: BufferPool[] = pools
