@@ -31,3 +31,7 @@ export type SwapPathTestOutput = {
     pools: PoolBase[];
     test: TestBase;
 };
+
+export type TransformBigintToString<T> = {
+    [K in keyof T]: T[K] extends bigint ? string : T[K] extends bigint[] ? string[] : T[K];
+};

@@ -4,7 +4,7 @@ import { prismaPoolTokenFactory } from './prismaToken.factory';
 import { createRandomAddress } from '../utils';
 import { Chain, PrismaPoolType } from '@prisma/client';
 import { prismaPoolDynamicDataFactory } from './prismaPoolDynamicData.factory';
-import { GyroEParams, ReClammParams } from '../../modules/sources/subgraphs/balancer-v3-pools/generated/types';
+import { GyroEParams } from '../../modules/sources/subgraphs/balancer-v3-pools/generated/types';
 import { ReclammData } from '../../modules/pool/subgraph-mapper';
 
 class PrismaPoolFactory extends Factory<PrismaPoolAndHookWithDynamic> {
@@ -16,6 +16,15 @@ class PrismaPoolFactory extends Factory<PrismaPoolAndHookWithDynamic> {
     }
     reClamm(reClammData: ReclammData) {
         return this.params({ type: PrismaPoolType.RECLAMM, typeData: { ...reClammData } });
+    }
+    quantAmm(quantAmmData: {
+        firstFourWeightsAndMultipliers: string[];
+        secondFourWeightsAndMultipliers: string[];
+        maxTradeSizeRatio: string;
+        lastUpdateIntervalTime: string;
+        lastInterpolationTimePossible: string;
+    }) {
+        return this.params({ type: PrismaPoolType.QUANT_AMM_WEIGHTED, typeData: { ...quantAmmData } });
     }
 }
 
