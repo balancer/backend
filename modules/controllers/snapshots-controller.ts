@@ -37,6 +37,8 @@ export function SnapshotsController(tracer?: any) {
 
             const subgraphClient = getV2SubgraphClient(balancer, chain);
             const entries = await syncSnapshotsV2(subgraphClient, chain);
+            // update lifetime values based on snapshots
+            await updateLifetimeValues(chain, 2);
             return entries;
         },
         async syncSnapshotForPools(poolIds: string[], chain: Chain, reload = false) {

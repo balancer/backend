@@ -166,13 +166,6 @@ const balancerResolvers: Resolvers = {
 
             return 'success';
         },
-        poolUpdateLifetimeValuesForAllPools: async (parent, args, context) => {
-            isAdminRoute(context);
-
-            await poolService.updateLifetimeValuesForAllPools();
-
-            return 'success';
-        },
         poolLoadOnChainDataForAllPools: async (parent, { chains }, context) => {
             isAdminRoute(context);
             const result: { type: string; chain: GqlChain; success: boolean; error: string | undefined }[] = [];
