@@ -7,7 +7,6 @@ import {
     GqlPoolAggregator,
     GqlPoolBatchSwap,
     GqlPoolFeaturedPool,
-    GqlPoolFeaturedPoolGroup,
     GqlPoolJoinExit,
     GqlPoolMinimal,
     GqlPoolSnapshotDataRange,
@@ -23,7 +22,6 @@ import { PoolGqlLoaderService } from './lib/pool-gql-loader.service';
 import { PoolOnChainDataService, PoolOnChainDataServiceOptions } from './lib/pool-on-chain-data.service';
 import { PoolSnapshotService } from './lib/pool-snapshot.service';
 import { PoolSwapService } from './lib/pool-swap.service';
-import { PoolUsdDataService } from './lib/pool-usd-data.service';
 import { networkContext } from '../network/network-context.service';
 import { ReliquarySubgraphService } from '../subgraphs/reliquary-subgraph/reliquary.service';
 import { ReliquarySnapshotService } from './lib/reliquary-snapshot.service';
@@ -48,7 +46,6 @@ import config from '../../config';
 export class PoolService {
     constructor(
         private readonly poolOnChainDataService: PoolOnChainDataService,
-        private readonly poolUsdDataService: PoolUsdDataService,
         private readonly poolGqlLoaderService: PoolGqlLoaderService,
         private readonly poolAprUpdaterService: PoolAprUpdaterService,
         private readonly poolSwapService: PoolSwapService,
@@ -229,10 +226,6 @@ export class PoolService {
             config[chain].reliquary?.excludedFarmIds,
         );
     }
-
-    public async updateLifetimeValuesForAllPools() {
-        await this.poolUsdDataService.updateLifetimeValuesForAllPools();
-    }
 }
 
 const optionsResolverForPoolOnChainDataService: () => PoolOnChainDataServiceOptions = () => {
@@ -248,7 +241,6 @@ const optionsResolverForPoolOnChainDataService: () => PoolOnChainDataServiceOpti
 
 export const poolService = new PoolService(
     new PoolOnChainDataService(optionsResolverForPoolOnChainDataService),
-    new PoolUsdDataService(tokenService),
     new PoolGqlLoaderService(),
     new PoolAprUpdaterService(),
     new PoolSwapService(),

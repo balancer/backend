@@ -212,9 +212,6 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
                 next,
             );
             break;
-        case 'update-lifetime-values-for-all-pools':
-            await runIfNotAlreadyRunning(name, chainId, () => poolService.updateLifetimeValuesForAllPools(), res, next);
-            break;
         case 'feed-data-to-datastudio':
             await runIfNotAlreadyRunning(
                 name,
@@ -378,16 +375,6 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
                 next,
             );
             break;
-        // TODO
-        // case 'update-lifetime-values-for-all-pools-v3':
-        //     await runIfNotAlreadyRunning(
-        //         name,
-        //         chainId,
-        //         () => poolService.updateLifetimeValuesForAllPoolsV3(),
-        //         res,
-        //         next,
-        //     );
-        //     break;
         // COW AMM
         case 'sync-cow-amm-pools':
             await runIfNotAlreadyRunning(name, chainId, () => CowAmmController().syncPools(chain), res, next);
