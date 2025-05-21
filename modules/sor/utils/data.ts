@@ -43,11 +43,15 @@ export async function getBasePoolsFromDb(
         ] as PrismaPoolType[],
     };
 
+    let bufferPools: BufferPoolData[] = [];
+
     if (poolIds?.length) {
         const typeWithLBP = { in: [...type.in, 'LIQUIDITY_BOOTSTRAPPING'] as PrismaPoolType[] };
         const pools = await getPoolsByIds(chain, protocolVersion, typeWithLBP, poolIds);
-        const underlyingTokens = await getUnderlyingTokensFromDBPools(pools, chain);
-        const bufferPools = getBufferPoolsFromDBPools(pools, underlyingTokens, chain);
+        if (protocolVersion === 3) {
+            const underlyingTokens = await getUnderlyingTokensFromDBPools(pools, chain);
+            bufferPools = getBufferPoolsFromDBPools(pools, underlyingTokens, chain);
+        }
         return { pools, bufferPools };
     }
 
@@ -56,8 +60,10 @@ export async function getBasePoolsFromDb(
     if (cached) return cached;
 
     const pools = await getFilteredPools(chain, protocolVersion, considerPoolsWithHooks, type);
-    const underlyingTokens = await getUnderlyingTokensFromDBPools(pools, chain);
-    const bufferPools = getBufferPoolsFromDBPools(pools, underlyingTokens, chain);
+    if (protocolVersion === 3) {
+        const underlyingTokens = await getUnderlyingTokensFromDBPools(pools, chain);
+        bufferPools = getBufferPoolsFromDBPools(pools, underlyingTokens, chain);
+    }
 
     // cache for 10s
     cache.put(cacheKey, { pools, bufferPools }, 10 * 1000);

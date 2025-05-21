@@ -1,5 +1,22 @@
 # backend
 
+## 1.40.7
+
+### Patch Changes
+
+-   593a6b4: fix: quantAMM dynamic data format
+-   694b1ee: SOR - Prevent buffers to be added to v2 swap paths
+
+## 1.40.6
+
+### Patch Changes
+
+-   05f5d42: patch v3 pool sync block caching
+-   aaa90a4: SOR - Refactor to accept bufferPools as input
+-   fa95aee: dropping unused ALT ATH columns
+-   6beea60: sUSDai APRs on Arbitrum
+-   a382804: updating pool SG with quantAMM support on BASE and ARBITRUM
+
 ## 1.40.5
 
 ### Patch Changes

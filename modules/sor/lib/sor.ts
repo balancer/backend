@@ -118,8 +118,10 @@ export class SOR {
             }
         }
 
-        for (const bufferPool of bufferPools) {
-            basePools.push(BufferPool.fromBufferPoolData(bufferPool));
+        if (protocolVersion === 3) {
+            for (const bufferPool of bufferPools) {
+                basePools.push(BufferPool.fromBufferPoolData(bufferPool));
+            }
         }
 
         const router = new Router();
