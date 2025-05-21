@@ -2699,7 +2699,6 @@ export interface Mutation {
     poolSyncAllCowSnapshots: Array<GqlPoolMutationResult>;
     poolSyncAllPoolsFromSubgraph: Array<Scalars['String']>;
     poolSyncFxQuoteTokens: Array<GqlPoolMutationResult>;
-    poolUpdateLifetimeValuesForAllPools: Scalars['String'];
     poolUpdateLiquidityValuesForAllPools: Scalars['String'];
     protocolCacheMetrics: Scalars['String'];
     sftmxSyncStakingData: Scalars['String'];
@@ -5837,7 +5836,6 @@ export type MutationResolvers<
         ContextType,
         RequireFields<MutationPoolSyncFxQuoteTokensArgs, 'chains'>
     >;
-    poolUpdateLifetimeValuesForAllPools?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     poolUpdateLiquidityValuesForAllPools?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     protocolCacheMetrics?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     sftmxSyncStakingData?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
