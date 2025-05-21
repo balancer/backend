@@ -60,9 +60,16 @@ export class QuantAmmPool extends BasePoolV3 implements BasePoolMethodsV3 {
 
         const quantAmmData = pool.typeData as QuantAmmWeightedData;
 
+        const firstFourWeightsAndMultipliers = quantAmmData.firstFourWeightsAndMultipliers?.map((w) => parseEther(w));
+        const secondFourWeightsAndMultipliers = quantAmmData.secondFourWeightsAndMultipliers?.map((m) => parseEther(m));
+
+        if (!firstFourWeightsAndMultipliers || !secondFourWeightsAndMultipliers) {
+            throw new Error('QuantAmm weights and multipliers must be defined');
+        }
+
         const quantAmmParams: QuantAmmWeightedParams = {
-            firstFourWeightsAndMultipliers: quantAmmData.firstFourWeightsAndMultipliers.map((w) => parseEther(w)),
-            secondFourWeightsAndMultipliers: quantAmmData.secondFourWeightsAndMultipliers.map((m) => parseEther(m)),
+            firstFourWeightsAndMultipliers,
+            secondFourWeightsAndMultipliers,
             lastUpdateTime: BigInt(quantAmmData.lastUpdateIntervalTime),
             lastInteropTime: BigInt(quantAmmData.lastInterpolationTimePossible),
             currentTimestamp,
