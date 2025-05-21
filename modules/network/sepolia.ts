@@ -78,10 +78,6 @@ export const sepoliaNetworkConfig: NetworkConfig = {
             interval: every(90, 'minutes'),
         },
         {
-            name: 'update-lifetime-values-for-all-pools',
-            interval: every(50, 'minutes'),
-        },
-        {
             name: 'sync-changed-pools',
             interval: every(30, 'seconds'),
             alarmEvaluationPeriod: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,

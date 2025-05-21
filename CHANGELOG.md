@@ -1,5 +1,13 @@
 # backend
 
+## 1.40.8
+
+### Patch Changes
+
+-   054b36b: use v3 flow to update v2 lifetimedata
+-   ba9daac: add swapfee apr back to quant
+-   7c114ac: fix quantAMM onchain data type
+
 ## 1.40.7
 
 ### Patch Changes
