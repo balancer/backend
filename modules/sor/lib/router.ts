@@ -66,10 +66,13 @@ export class Router {
                         quotePathsByRatio[i].push(pathWithAmount);
                         selectedPaths.push(path);
                     }
-                } catch {
-                    // console.log('Invalid path:');
-                    // console.log(path.tokens.map((token) => token.symbol).join(' -> '));
-                    // console.log(path.pools.map((pool) => pool.id).join(' -> '));
+                } catch (error) {
+                    // const pathString =
+                    //     path.tokens[0].address +
+                    //     ' ' +
+                    //     path.pools.map((pool, index) => `[${pool.id}] ${path.tokens[index + 1].address}`).join(' ');
+                    // console.log('Invalid path: ' + pathString);
+                    console.log(error);
                     return;
                 }
             });
