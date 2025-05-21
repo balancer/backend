@@ -203,8 +203,8 @@ export class PoolService {
         }
     }
 
-    public async updatePoolAprs(chain: Chain) {
-        await this.poolAprUpdaterService.updatePoolAprs(chain);
+    public async updatePoolAprs(chain: Chain, poolIds?: string[]) {
+        await this.poolAprUpdaterService.updatePoolAprs(chain, poolIds);
         await syncIncentivizedCategory();
     }
 

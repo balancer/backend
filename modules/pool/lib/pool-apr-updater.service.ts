@@ -13,10 +13,10 @@ export class PoolAprUpdaterService {
         return networkContext.config.poolAprServices;
     }
 
-    async updatePoolAprs(chain: Chain) {
+    async updatePoolAprs(chain: Chain, poolIds?: string[]) {
         const pools = await prisma.prismaPool.findMany({
             ...poolsIncludeForAprs,
-            where: { chain: chain },
+            where: { chain: chain, ...(poolIds?.length ? { id: { in: poolIds } } : {}) },
         });
 
         await this.updateAprsForPools(pools);
