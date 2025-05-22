@@ -95,7 +95,7 @@ export const optimismNetworkConfig: NetworkConfig = {
         },
         {
             name: 'update-fee-volume-yield-all-pools',
-            interval: every(1, 'hours'),
+            interval: every(30, 'minutes'),
         },
         {
             name: 'sync-vebal-balances',

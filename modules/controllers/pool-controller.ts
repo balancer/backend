@@ -285,7 +285,7 @@ export function PoolController(tracer?: any) {
 
             const ids = await syncPoolsV3(dbPools, chain, vaultAddress, viemClient, latestBlock);
             await syncTokenPairs(ids, viemClient, routerAddress, chain);
-            await updateVolumeAndFees(chain, ids);
+            // await updateVolumeAndFees(chain, ids);
             await upsertLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.POOLS_V3, latestBlock);
 
             return ids;
