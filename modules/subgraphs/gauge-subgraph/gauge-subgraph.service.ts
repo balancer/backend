@@ -239,6 +239,10 @@ export class GaugeSubgraphService {
         const chunks = _.chunk(gaugeIds, 1000);
 
         for (const chunk of chunks) {
+            if (chunk.length === 0) {
+                continue;
+            }
+
             const gauges = await this.sdk.RootGauges({
                 where: {
                     id_in: chunk,
@@ -258,6 +262,10 @@ export class GaugeSubgraphService {
         const chunks = _.chunk(gaugeIds, 1000);
 
         for (const chunk of chunks) {
+            if (chunk.length === 0) {
+                continue;
+            }
+
             const gauges = await this.sdk.GaugeLiquidityGauges({
                 where: {
                     id_in: chunk,
