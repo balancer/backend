@@ -1,5 +1,11 @@
 # backend
 
+## 1.41.1
+
+### Patch Changes
+
+-   723a59b: update volume and fees query
+
 ## 1.41.0
 
 ### Minor Changes
