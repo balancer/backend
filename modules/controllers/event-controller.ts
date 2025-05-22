@@ -102,5 +102,8 @@ export function EventController() {
             // await updateVolumeAndFees(chain, poolsWithNewSwaps);
             return poolsWithNewSwaps;
         },
+        async updateVolumeAndFees(chain: Chain) {
+            return updateVolumeAndFees(chain);
+        },
     };
 }
