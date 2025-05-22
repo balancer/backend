@@ -2927,10 +2927,16 @@ export interface Query {
     tokenGetTokensDynamicData: Array<GqlTokenDynamicData>;
     userGetFbeetsBalance: GqlUserFbeetsBalance;
     userGetPoolBalances: Array<GqlUserPoolBalance>;
-    /** Will de deprecated in favor of poolGetEvents */
+    /**
+     * Will de deprecated in favor of poolGetEvents
+     * @deprecated Use poolEvents instead
+     */
     userGetPoolJoinExits: Array<GqlPoolJoinExit>;
     userGetStaking: Array<GqlPoolStaking>;
-    /** Will de deprecated in favor of poolGetEvents */
+    /**
+     * Will de deprecated in favor of poolGetEvents
+     * @deprecated Use poolEvents instead
+     */
     userGetSwaps: Array<GqlPoolSwap>;
     veBalGetTotalSupply: Scalars['AmountHumanReadable'];
     veBalGetUser: GqlVeBalUserData;

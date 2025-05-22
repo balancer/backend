@@ -353,26 +353,6 @@ export const prismaPoolMinimal = Prisma.validator<Prisma.PrismaPoolDefaultArgs>(
 
 export type PrismaPoolMinimal = Prisma.PrismaPoolGetPayload<typeof prismaPoolMinimal>;
 
-export const prismaPoolBatchSwapWithSwaps = Prisma.validator<Prisma.PrismaPoolSwap$batchSwapArgs>()({
-    include: {
-        swaps: {
-            include: {
-                pool: {
-                    include: {
-                        tokens: {
-                            include: {
-                                token: true,
-                            },
-                        },
-                    },
-                },
-            },
-        },
-    },
-});
-
-export type PrismaPoolBatchSwapWithSwaps = Prisma.PrismaPoolBatchSwapGetPayload<typeof prismaPoolBatchSwapWithSwaps>;
-
 export const prismaPoolAndHookWithDynamic = Prisma.validator<Prisma.PrismaPoolDefaultArgs>()({
     include: {
         dynamicData: true,

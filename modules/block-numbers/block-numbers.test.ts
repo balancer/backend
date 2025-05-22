@@ -32,17 +32,6 @@ describe('blockNumbers', () => {
         });
     });
 
-    describe('getBlocksPerDay', () => {
-        test('should return count of blocks in last 24 hours', async () => {
-            mockEvents.$queryRawUnsafe.mockResolvedValue([{ max: 4000, min: 1000 }]);
-
-            const service = blockNumbers(mockEvents as any);
-            const result = await service.getBlocksPerDay(Chain.MAINNET);
-
-            expect(result).toBe(1000);
-        });
-    });
-
     describe('getDailyBlocks', () => {
         test('should return daily block numbers', async () => {
             const mockBlocks = [

@@ -265,6 +265,38 @@
                     }
                 ]
             }
+        },
+        {
+            "testName": "Path-Akron-Hook-Minimum-Swap-Fee",
+            "chainId": "8453",
+            "blockNumber": "30210725",
+            "swapPathInput": {
+                "swapKind": 0,
+                "amountRaw": "10000",
+                "tokens": ["0xc768c589647798a6ee01a91fde98ef2ed046dbd6", "0xe298b938631f750DD409fB18227C4a23dCdaab9b"],
+                "pools": [
+                    {
+                        "poolAddress": "0x4fbb7870dbe7a7ef4866a33c0eed73d395730dc0",
+                        "poolType": "WEIGHTED"
+                    }
+                ]
+            }
+        },
+        {
+            "testName": "Path-Akron-Hook-LVR-Fee",
+            "chainId": "8453",
+            "blockNumber": "30210725",
+            "swapPathInput": {
+                "swapKind": 0,
+                "amountRaw": "10000000",
+                "tokens": ["0xc768c589647798a6ee01a91fde98ef2ed046dbd6", "0xe298b938631f750DD409fB18227C4a23dCdaab9b"],
+                "pools": [
+                    {
+                        "poolAddress": "0x4fbb7870dbe7a7ef4866a33c0eed73d395730dc0",
+                        "poolType": "WEIGHTED"
+                    }
+                ]
+            }
         }
     ]
 }
