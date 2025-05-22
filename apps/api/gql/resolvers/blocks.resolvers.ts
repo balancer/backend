@@ -9,6 +9,7 @@ const balancerResolvers: Resolvers = {
         blocksGetAverageBlockTime: async (parent, {}, context) => {
             const chainId = context.chainId || env.DEFAULT_CHAIN_ID;
             const chain = chainIdToChain[chainId];
+            return 1;
 
             const service = blockNumbers();
             const blocksPerDay = await service.getBlocksPerDay(chain);
@@ -17,6 +18,7 @@ const balancerResolvers: Resolvers = {
         blocksGetBlocksPerSecond: async (parent, {}, context) => {
             const chainId = context.chainId || env.DEFAULT_CHAIN_ID;
             const chain = chainIdToChain[chainId];
+            return 1;
 
             const service = blockNumbers();
             const blocksPerDay = await service.getBlocksPerDay(chain);
@@ -25,6 +27,7 @@ const balancerResolvers: Resolvers = {
         blocksGetBlocksPerDay: async (parent, {}, context) => {
             const chainId = context.chainId || env.DEFAULT_CHAIN_ID;
             const chain = chainIdToChain[chainId];
+            return 300;
 
             const service = blockNumbers();
             const blocksPerDay = await service.getBlocksPerDay(chain);
@@ -33,6 +36,7 @@ const balancerResolvers: Resolvers = {
         blocksGetBlocksPerYear: async (parent, {}, context) => {
             const chainId = context.chainId || env.DEFAULT_CHAIN_ID;
             const chain = chainIdToChain[chainId];
+            return 3000;
 
             const service = blockNumbers();
             const blocksPerDay = await service.getBlocksPerDay(chain);
