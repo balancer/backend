@@ -50,16 +50,7 @@ BEGIN
 
   -- Optional: hook types (least important)
   SELECT
-    COALESCE((
-      SELECT string_agg(value->>'type', ' ')
-      FROM jsonb_array_elements(
-        CASE
-          WHEN jsonb_typeof(p.hook) = 'array' THEN p.hook
-          ELSE '[]'::jsonb
-        END
-      )
-      WHERE value ? 'type'
-    ), '')
+    COALESCE(hook->>'type', '')
   INTO hook_data_part
   FROM "PrismaPool" p
   WHERE p.id = pool_id AND p.chain::TEXT = chain_id AND p.hook IS NOT NULL;
@@ -79,7 +70,7 @@ SET search_vector = generate_pool_search_vector(id, chain::TEXT);
 CREATE OR REPLACE FUNCTION update_search_vector()
 RETURNS TRIGGER AS $$
 BEGIN
-  -- Case 1: Called from PrismaPool trigger (BEFORE INSERT/UPDATE)
+  -- Case 1: Called from PrismaPool trigger (AFTER INSERT/UPDATE)
   IF TG_TABLE_NAME = 'PrismaPool' THEN
     UPDATE "PrismaPool"
     SET search_vector = generate_pool_search_vector(id, chain::TEXT)
