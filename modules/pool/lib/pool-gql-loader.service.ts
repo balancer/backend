@@ -291,8 +291,6 @@ export class PoolGqlLoaderService {
                 .replace(/[^a-zA-Z0-9 ]/g, '') // Escape non asci
                 .trim();
 
-            console.log(searchQuery);
-
             // Use raw SQL for the search vector condition
             // Weighted results don't work yet, because the query is finding IDs for the second query only.
             // But setting it up already so it can be used with the refactored searching
