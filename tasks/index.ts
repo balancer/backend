@@ -145,8 +145,8 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         return CowAmmController().syncJoinExits(chain);
     } else if (job === 'update-surplus-aprs') {
         return CowAmmController().updateSurplusAprs();
-    } else if (job === 'update-cow-amm-volume-and-fees') {
-        return CowAmmController().updateVolumeAndFees(chain);
+        // } else if (job === 'update-cow-amm-volume-and-fees') {
+        //     return CowAmmController().updateVolumeAndFees(chain);
     } else if (job === 'sync-cow-amm-balances') {
         return CowAmmController().syncBalances(chain);
     } else if (job === 'sync-categories') {
