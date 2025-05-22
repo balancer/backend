@@ -215,6 +215,12 @@ export default <NetworkData>{
                 isIbYield: true,
             },
             sFRAX: {
+                tokenAddress: '0x5bff88ca1442c2496f7e475e9e7786383bc070c0',
+                sourceUrl: 'https://api.frax.finance/v2/frax/sfrax/summary/history?range=1d',
+                path: 'items.0.sfraxApr',
+                isIbYield: true,
+            },
+            sfrxUSD: {
                 tokenAddress: '0x2dd1b4d4548accea497050619965f91f78b3b532',
                 sourceUrl: 'https://api.frax.finance/v2/frax/sfrax/summary/history?range=1d',
                 path: 'items.0.sfraxApr',
