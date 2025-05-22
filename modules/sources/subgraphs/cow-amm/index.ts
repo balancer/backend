@@ -100,6 +100,11 @@ export const getCowAmmSubgraphClient = (subgraphUrl: string, chain: Chain) => {
             let id = `0x`;
             let pools: CowAmmPoolFragment[] = [];
 
+            // Handle id_in: [] - empty array condition, because the SG fails on it
+            if (where && where.id_in && where.id_in.length === 0) {
+                return pools;
+            }
+
             while (hasMore) {
                 const response = await sdk.Pools({
                     where: { ...where, id_gt: id },
