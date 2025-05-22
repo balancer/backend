@@ -44,52 +44,57 @@ const balancerResolvers: Resolvers = {
         },
         // TODO: Deprecate in favor of poolGetEvents
         poolGetSwaps: async (parent, args, context) => {
-            const currentChain = headerChain();
-            if (!args.where?.chainIn && currentChain) {
-                args.where = { ...args.where, chainIn: [currentChain] };
-            } else if (!args.where?.chainIn) {
-                throw new GraphQLError('Provide "chainIn" param', {
-                    extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
-                });
-            }
-            return poolService.getPoolSwaps(args);
+            return [];
+            // const currentChain = headerChain();
+            // if (!args.where?.chainIn && currentChain) {
+            //     args.where = { ...args.where, chainIn: [currentChain] };
+            // } else if (!args.where?.chainIn) {
+            //     throw new GraphQLError('Provide "chainIn" param', {
+            //         extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
+            //     });
+            // }
+            // return poolService.getPoolSwaps(args);
         },
         // TODO: Deprecate in favor of poolGetEvents
         poolGetBatchSwaps: async (parent, args, context) => {
-            const currentChain = headerChain();
-            if (!args.where?.chainIn && currentChain) {
-                args.where = { ...args.where, chainIn: [currentChain] };
-            } else if (!args.where?.chainIn) {
-                throw new GraphQLError('Provide "chainIn" param', {
-                    extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
-                });
-            }
-            return poolService.getPoolBatchSwaps(args);
+            return [];
+            // const currentChain = headerChain();
+            // if (!args.where?.chainIn && currentChain) {
+            //     args.where = { ...args.where, chainIn: [currentChain] };
+            // } else if (!args.where?.chainIn) {
+            //     throw new GraphQLError('Provide "chainIn" param', {
+            //         extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
+            //     });
+            // }
+            // return poolService.getPoolBatchSwaps(args);
         },
         // TODO: Deprecate in favor of poolGetEvents
         poolGetJoinExits: async (parent, args, context) => {
-            const currentChain = headerChain();
-            if (!args.where?.chainIn && currentChain) {
-                args.where = { ...args.where, chainIn: [currentChain] };
-            } else if (!args.where?.chainIn) {
-                throw new GraphQLError('Provide "chainIn" param', {
-                    extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
-                });
-            }
-            return poolService.getPoolJoinExits(args);
+            return [];
+            // const currentChain = headerChain();
+            // if (!args.where?.chainIn && currentChain) {
+            //     args.where = { ...args.where, chainIn: [currentChain] };
+            // } else if (!args.where?.chainIn) {
+            //     throw new GraphQLError('Provide "chainIn" param', {
+            //         extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
+            //     });
+            // }
+            // return poolService.getPoolJoinExits(args);
         },
         poolGetEvents: async (parent, { range, poolId, chain, typeIn, userAddress }) => {
-            return EventsQueryController().getEvents({
-                first: 1000,
-                where: { range, poolIdIn: [poolId], chainIn: [chain], typeIn, userAddress },
-            });
+            return [];
+            // return EventsQueryController().getEvents({
+            //     first: 1000,
+            //     where: { range, poolIdIn: [poolId], chainIn: [chain], typeIn, userAddress },
+            // });
         },
         poolEvents: async (parent: any, { first, skip, where }) => {
-            return EventsQueryController().getEvents({
-                first,
-                skip,
-                where,
-            });
+            return [];
+            // return EventsQueryController().getEvents({
+            //     first,
+            //     skip,
+            //     where,
+            // });
         },
         poolGetFeaturedPools: async (parent, { chains }, context) => {
             return poolService.getFeaturedPools(chains);
