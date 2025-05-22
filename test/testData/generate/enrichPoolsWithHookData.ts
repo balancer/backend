@@ -40,7 +40,7 @@ export async function enrichPoolsWithHookData(pools: PoolBase[], chainId: number
 
     // append hook data to pool
     const poolsWithHookData = poolsWithHookType.map((pool) => {
-        if (!pool.hook) {
+        if (!pool.hook || !hookData[pool.poolAddress]) {
             return pool;
         }
 
