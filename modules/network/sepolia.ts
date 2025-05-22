@@ -157,10 +157,6 @@ export const sepoliaNetworkConfig: NetworkConfig = {
         },
         { name: 'sync-cow-amm-snapshots', interval: every(90, 'minutes') },
         {
-            name: 'update-cow-amm-volume-and-fees',
-            interval: every(20, 'minutes'),
-        },
-        {
             name: 'sync-erc4626-unwrap-rate',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(60, 'minutes') : every(20, 'minutes'),
         },
