@@ -44,6 +44,7 @@ const balancerResolvers: Resolvers = {
         },
         // TODO: Deprecate in favor of poolGetEvents
         poolGetSwaps: async (parent, args, context) => {
+            return [];
             const currentChain = headerChain();
             if (!args.where?.chainIn && currentChain) {
                 args.where = { ...args.where, chainIn: [currentChain] };
@@ -56,6 +57,7 @@ const balancerResolvers: Resolvers = {
         },
         // TODO: Deprecate in favor of poolGetEvents
         poolGetBatchSwaps: async (parent, args, context) => {
+            return [];
             const currentChain = headerChain();
             if (!args.where?.chainIn && currentChain) {
                 args.where = { ...args.where, chainIn: [currentChain] };
@@ -68,6 +70,7 @@ const balancerResolvers: Resolvers = {
         },
         // TODO: Deprecate in favor of poolGetEvents
         poolGetJoinExits: async (parent, args, context) => {
+            return [];
             const currentChain = headerChain();
             if (!args.where?.chainIn && currentChain) {
                 args.where = { ...args.where, chainIn: [currentChain] };
@@ -79,12 +82,14 @@ const balancerResolvers: Resolvers = {
             return poolService.getPoolJoinExits(args);
         },
         poolGetEvents: async (parent, { range, poolId, chain, typeIn, userAddress }) => {
+            return [];
             return EventsQueryController().getEvents({
                 first: 1000,
                 where: { range, poolIdIn: [poolId], chainIn: [chain], typeIn, userAddress },
             });
         },
         poolEvents: async (parent: any, { first, skip, where }) => {
+            return [];
             return EventsQueryController().getEvents({
                 first,
                 skip,
