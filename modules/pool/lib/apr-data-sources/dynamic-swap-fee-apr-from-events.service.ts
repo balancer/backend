@@ -3,6 +3,7 @@ import { PoolForAPRs } from '../../../../prisma/prisma-types';
 import { prisma } from '../../../../prisma/prisma-client';
 import { prismaBulkExecuteOperations } from '../../../../prisma/prisma-util';
 import { Chain, PrismaPoolType } from '@prisma/client';
+import { daysAgo } from '../../../common/time';
 
 type PoolSwapFeeData = {
     poolId: string;
@@ -10,18 +11,18 @@ type PoolSwapFeeData = {
     fees_24h: number;
 };
 
-const query = (chain: Chain) => `
-    SELECT 
+const query = (chain: Chain, timestamp: number) => `
+    SELECT
         "poolId",
         chain,
         SUM((payload->'dynamicFee'->>'valueUSD')::numeric) AS fees_24h
-    FROM 
+    FROM
         "PartitionedPoolEvent"
-    WHERE 
-        "blockTimestamp" >= extract(epoch from now() - interval '1 days')::int
+    WHERE
+        "blockTimestamp" >= ${timestamp}
     AND chain = '${chain}'
     AND type = 'SWAP'
-    GROUP BY 
+    GROUP BY
         1, 2
 `;
 
@@ -34,6 +35,7 @@ export class DynamicSwapFeeFromEventsAprService implements PoolAprService {
 
     public async updateAprForPools(pools: PoolForAPRs[]): Promise<void> {
         const chain = pools[0].chain;
+        const yesterday = daysAgo(1);
 
         const typeMap = pools.reduce((acc, pool) => {
             acc[pool.id] = pool.type;
@@ -45,7 +47,7 @@ export class DynamicSwapFeeFromEventsAprService implements PoolAprService {
         });
 
         // Fetch the swap fees for the last 30 days
-        const swapFeeData = await prisma.$queryRawUnsafe<PoolSwapFeeData[]>(query(chain));
+        const swapFeeData = await prisma.$queryRawUnsafe<PoolSwapFeeData[]>(query(chain, yesterday));
 
         // Map the swap fee data to the pool id
         const swapFeeDataMap = swapFeeData.reduce((acc, data) => {
