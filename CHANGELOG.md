@@ -1,5 +1,14 @@
 # backend
 
+## 1.41.2
+
+### Patch Changes
+
+-   c394aef: using dynamicData instead of events for protocol stats
+-   840f513: update fees in cron only
+-   1ca7f9a: disable events queries
+-   ff1b24e: pool 48h stats are doubled 24h
+
 ## 1.41.1
 
 ### Patch Changes
