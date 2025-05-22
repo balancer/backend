@@ -1,7 +1,6 @@
 import { Chain, PrismaPoolStaking, PrismaPoolStakingType } from '@prisma/client';
 import { prisma } from '../../prisma/prisma-client';
 import { GqlPoolJoinExit, GqlPoolSwap } from '../../apps/api/gql/generated-schema';
-import { PoolSwapService } from '../pool/lib/pool-swap.service';
 import { tokenService } from '../token/token.service';
 import { UserBalanceService } from './lib/user-balance.service';
 import { UserSyncWalletBalanceService } from './lib/user-sync-wallet-balance.service';
@@ -12,7 +11,6 @@ export class UserService {
     constructor(
         private readonly userBalanceService: UserBalanceService,
         private readonly walletSyncService: UserSyncWalletBalanceService,
-        private readonly poolSwapService: PoolSwapService,
     ) {}
 
     private get stakedSyncServices(): UserStakedBalanceService[] {
@@ -21,26 +19,6 @@ export class UserService {
 
     public async getUserPoolBalances(address: string, chains: Chain[]): Promise<UserPoolBalance[]> {
         return this.userBalanceService.getUserPoolBalances(address, chains);
-    }
-
-    public async getUserPoolInvestments(
-        address: string,
-        poolId: string,
-        chain: Chain,
-        first?: number,
-        skip?: number,
-    ): Promise<GqlPoolJoinExit[]> {
-        return this.poolSwapService.getUserJoinExitsForPool(address, poolId, chain, first, skip);
-    }
-
-    public async getUserSwaps(
-        address: string,
-        poolId: string,
-        chain: Chain,
-        first?: number,
-        skip?: number,
-    ): Promise<GqlPoolSwap[]> {
-        return this.poolSwapService.getUserSwapsForPool(address, poolId, chain, first, skip);
     }
 
     public async getUserFbeetsBalance(address: string): Promise<Omit<UserPoolBalance, 'poolId'>> {
@@ -101,8 +79,4 @@ export class UserService {
     }
 }
 
-export const userService = new UserService(
-    new UserBalanceService(),
-    new UserSyncWalletBalanceService(),
-    new PoolSwapService(),
-);
+export const userService = new UserService(new UserBalanceService(), new UserSyncWalletBalanceService());

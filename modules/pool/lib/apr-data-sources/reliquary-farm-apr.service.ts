@@ -1,13 +1,13 @@
-import { addressesMatch } from '../../../../web3/addresses';
+import { addressesMatch } from '../../../web3/addresses';
 import { PrismaPoolAprType } from '@prisma/client';
-import { prisma } from '../../../../../prisma/prisma-client';
-import { PoolForAPRs } from '../../../../../prisma/prisma-types';
-import { prismaBulkExecuteOperations } from '../../../../../prisma/prisma-util';
-import { secondsPerYear } from '../../../../common/time';
-import { tokenService } from '../../../../token/token.service';
-import { PoolAprService } from '../../../pool-types';
-import { networkContext } from '../../../../network/network-context.service';
-import { ReliquarySubgraphService } from '../../../../subgraphs/reliquary-subgraph/reliquary.service';
+import { prisma } from '../../../../prisma/prisma-client';
+import { PoolForAPRs } from '../../../../prisma/prisma-types';
+import { prismaBulkExecuteOperations } from '../../../../prisma/prisma-util';
+import { secondsPerYear } from '../../../common/time';
+import { tokenService } from '../../../token/token.service';
+import { PoolAprService } from '../../pool-types';
+import { networkContext } from '../../../network/network-context.service';
+import { ReliquarySubgraphService } from '../../../subgraphs/reliquary-subgraph/reliquary.service';
 
 export class ReliquaryFarmAprService implements PoolAprService {
     constructor(private readonly beetsAddress: string) {}
