@@ -94,7 +94,7 @@ export const modeNetworkConfig: NetworkConfig = {
         },
         {
             name: 'update-fee-volume-yield-all-pools',
-            interval: every(30, 'minutes'),
+            interval: every(1, 'hours'),
         },
         {
             name: 'sync-vebal-balances',

@@ -39,7 +39,7 @@ export function EventController() {
 
             const subgraphClient = getV2SubgraphClient(balancer, chain);
             const poolsWithNewSwaps = await syncSwapsV2(subgraphClient, chain);
-            // await updateVolumeAndFees(chain, poolsWithNewSwaps);
+            await updateVolumeAndFees(chain, poolsWithNewSwaps);
 
             return poolsWithNewSwaps;
         },
@@ -99,7 +99,7 @@ export function EventController() {
             const vaultSubgraphClient = getVaultSubgraphClient(balancerV3, chain);
 
             const poolsWithNewSwaps = await syncSwapsV3(vaultSubgraphClient, chain);
-            // await updateVolumeAndFees(chain, poolsWithNewSwaps);
+            await updateVolumeAndFees(chain, poolsWithNewSwaps);
             return poolsWithNewSwaps;
         },
     };
