@@ -84,19 +84,14 @@ export class ProtocolService {
 
         const poolCount = pools.length;
 
-        const swaps = await prisma.prismaPoolEvent.findMany({
-            select: { poolId: true, valueUSD: true, blockTimestamp: true, payload: true },
-            where: { blockTimestamp: { gte: oneDayAgo }, chain, type: 'SWAP' },
-        });
-
         const holdersQueryResponse = await prisma.prismaPoolDynamicData.aggregate({
             _sum: { holdersCount: true },
             where: { chain },
         });
 
         const totalLiquidity = _.sumBy(pools, (pool) => (!pool.dynamicData ? 0 : pool.dynamicData.totalLiquidity));
-        const swapVolume24h = _.sumBy(swaps, (swap) => swap.valueUSD);
-        const swapFee24h = _.sumBy(swaps, (swap) => parseFloat((swap as SwapEvent).payload.fee.valueUSD));
+        const swapVolume24h = _.sumBy(pools, (pool) => pool.dynamicData?.volume24h || 0);
+        const swapFee24h = _.sumBy(pools, (pool) => pool.dynamicData?.fees24h || 0);
 
         const yieldCapture24h = _.sumBy(pools, (pool) => (!pool.dynamicData ? 0 : pool.dynamicData.yieldCapture24h));
         const surplus24 = _.sumBy(pools, (pool) => (!pool.dynamicData ? 0 : pool.dynamicData.surplus24h));

@@ -116,6 +116,8 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         return snapshotsController.forwardFillSnapshotsForPoolsWithoutUpdatesV3(chain);
     } else if (job === 'sync-swaps-v3') {
         return EventController().syncSwapsV3(chain);
+    } else if (job === 'update-volume-and-fees') {
+        return EventController().updateVolumeAndFees(chain);
     } else if (job === 'update-liquidity-24h-ago-v3') {
         return PoolController().updateLiquidity24hAgoV3(chain);
     } else if (job === 'sync-sftmx-staking') {
@@ -145,8 +147,6 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         return CowAmmController().syncJoinExits(chain);
     } else if (job === 'update-surplus-aprs') {
         return CowAmmController().updateSurplusAprs();
-        // } else if (job === 'update-cow-amm-volume-and-fees') {
-        //     return CowAmmController().updateVolumeAndFees(chain);
     } else if (job === 'sync-cow-amm-balances') {
         return CowAmmController().syncBalances(chain);
     } else if (job === 'sync-categories') {

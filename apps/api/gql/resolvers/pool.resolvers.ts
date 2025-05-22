@@ -45,41 +45,14 @@ const balancerResolvers: Resolvers = {
         // TODO: Deprecate in favor of poolGetEvents
         poolGetSwaps: async (parent, args, context) => {
             return [];
-            // const currentChain = headerChain();
-            // if (!args.where?.chainIn && currentChain) {
-            //     args.where = { ...args.where, chainIn: [currentChain] };
-            // } else if (!args.where?.chainIn) {
-            //     throw new GraphQLError('Provide "chainIn" param', {
-            //         extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
-            //     });
-            // }
-            // return poolService.getPoolSwaps(args);
         },
         // TODO: Deprecate in favor of poolGetEvents
         poolGetBatchSwaps: async (parent, args, context) => {
             return [];
-            // const currentChain = headerChain();
-            // if (!args.where?.chainIn && currentChain) {
-            //     args.where = { ...args.where, chainIn: [currentChain] };
-            // } else if (!args.where?.chainIn) {
-            //     throw new GraphQLError('Provide "chainIn" param', {
-            //         extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
-            //     });
-            // }
-            // return poolService.getPoolBatchSwaps(args);
         },
         // TODO: Deprecate in favor of poolGetEvents
         poolGetJoinExits: async (parent, args, context) => {
             return [];
-            // const currentChain = headerChain();
-            // if (!args.where?.chainIn && currentChain) {
-            //     args.where = { ...args.where, chainIn: [currentChain] };
-            // } else if (!args.where?.chainIn) {
-            //     throw new GraphQLError('Provide "chainIn" param', {
-            //         extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
-            //     });
-            // }
-            // return poolService.getPoolJoinExits(args);
         },
         poolGetEvents: async (parent, { range, poolId, chain, typeIn, userAddress }) => {
             return [];

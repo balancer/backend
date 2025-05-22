@@ -19,6 +19,9 @@ model PrismaPool {
 
     protocolVersion        Int                 @default(2)
 
+    /// @db.Tsvector
+    search_vector       Unsupported("tsvector")?
+
     typeData            Json @default("{}")
 
     tokens              PrismaPoolToken[]
@@ -28,7 +31,6 @@ model PrismaPool {
     liquidityManagement  Json @default("{}")
 
     snapshots           PrismaPoolSnapshot[]
-    swaps               PrismaPoolSwap[]
     aprItems            PrismaPoolAprItem[]
     categories          String[] @default([])
     tokensWithPoolNested PrismaPoolToken[] @relation(name: "PoolNestedInToken")
@@ -47,6 +49,7 @@ model PrismaPool {
 
     @@index([id, chain])
     @@index([categories(ops: ArrayOps)], type: Gin)
+    @@index([search_vector], type: Gin)
 }
 
 enum PrismaPoolType {
@@ -147,51 +150,6 @@ model PrismaPoolToken {
     @@index([poolId, chain])
     @@index([address, chain])
     @@index([nestedPoolId, chain])
-}
-
-model PrismaPoolSwap {
-    @@id([id, chain])
-
-    id                  String
-    poolId              String
-    pool                PrismaPool          @relation(fields:[poolId, chain], references: [id, chain], onDelete: Cascade)
-    chain               Chain
-
-    userAddress         String
-    tokenIn             String
-    tokenInSym          String
-    tokenOut            String
-    tokenOutSym         String
-    tokenAmountIn       String
-    tokenAmountOut      String
-    timestamp           Int
-    tx                  String
-    valueUSD            Float
-
-    batchSwapId         String?
-    batchSwap           PrismaPoolBatchSwap? @relation(fields:[batchSwapId, chain], references: [id, chain])
-    batchSwapIdx        Int?
-
-    @@index([poolId, chain])
-}
-
-model PrismaPoolBatchSwap {
-    @@id([id, chain])
-
-    id                  String
-    chain               Chain
-    userAddress         String
-    tokenIn             String
-    tokenOut            String
-    tokenAmountIn       String
-    tokenAmountOut      String
-    timestamp           Int
-    tx                  String
-    valueUSD            Float
-    tokenInPrice        Float               @default(0)
-    tokenOutPrice       Float               @default(0)
-
-    swaps               PrismaPoolSwap[]
 }
 
 model PrismaPoolAprItem {
@@ -576,6 +534,7 @@ model PrismaPoolEvent {
     @@id([id, chain])
     @@index([type])
     @@index([chain, poolId, userAddress])
+    @@index([chain, type, blockTimestamp])
     @@index([protocolVersion])
     @@index([blockTimestamp(sort: Desc), blockNumber(sort: Desc), logIndex(sort: Desc)])
     @@map("PartitionedPoolEvent")

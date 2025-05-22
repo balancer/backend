@@ -14,6 +14,10 @@ export const getLiquidityAndSharesAtTimestamp = async (
 ) => {
     const blockNumber = await blockNumbers().getBlock(chain, timestamp);
 
+    if (ids.length === 0) {
+        return null;
+    }
+
     //  If ids count is >= 1000 just get all
     const where = ids.length >= 1000 ? {} : { id_in: ids };
     const allBalances = await vaultClient.getAllPoolBalances({

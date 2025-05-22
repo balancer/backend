@@ -1,5 +1,7 @@
 import { type PublicClient, createPublicClient, http, type Address, parseAbi, type Chain } from 'viem';
 import { CHAINS, VAULT_V3, vaultExtensionAbi_V3 } from '@balancer/sdk';
+
+import { TransformBigintToString } from '../../types';
 import { vaultExplorerAbi } from '../abi/vaultExplorer';
 import { gyroECLPAbi } from '../abi/gyroECLP';
 
@@ -28,10 +30,6 @@ type GyroECLPImmutable = {
     w: bigint;
     z: bigint;
     dSq: bigint;
-};
-
-type TransformBigintToString<T> = {
-    [K in keyof T]: T[K] extends bigint ? string : T[K] extends bigint[] ? string[] : T[K];
 };
 
 export class GyroECLPPool {

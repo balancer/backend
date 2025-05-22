@@ -1,14 +1,10 @@
 import { ethers } from 'ethers';
 import { DeploymentEnv, NetworkConfig, NetworkData } from './network-config-types';
-import { BoostedPoolAprService } from '../pool/lib/apr-data-sources/nested-pool-apr.service';
 import { SwapFeeAprService } from '../pool/lib/apr-data-sources/';
-import { MasterchefFarmAprService } from '../pool/lib/apr-data-sources/fantom/masterchef-farm-apr.service';
-import { ReliquaryFarmAprService } from '../pool/lib/apr-data-sources/fantom/reliquary-farm-apr.service';
 import { UserSyncMasterchefFarmBalanceService } from '../user/lib/user-sync-masterchef-farm-balance.service';
 import { UserSyncReliquaryFarmBalanceService } from '../user/lib/user-sync-reliquary-farm-balance.service';
 import { every } from '../../apps/scheduler/intervals';
 import { env } from '../../apps/env';
-import { YbTokensAprService } from '../pool/lib/apr-data-sources/yb-tokens-apr.service';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import config from '../../config';
 
@@ -17,13 +13,7 @@ const fantomNetworkData: NetworkData = config.FANTOM;
 export const fantomNetworkConfig: NetworkConfig = {
     data: fantomNetworkData,
     provider: new ethers.providers.JsonRpcProvider({ url: fantomNetworkData.rpcUrl, timeout: 60000 }),
-    poolAprServices: [
-        new YbTokensAprService(fantomNetworkData.ybAprConfig, fantomNetworkData.chain.prismaId),
-        new BoostedPoolAprService(),
-        new SwapFeeAprService(),
-        new MasterchefFarmAprService(fantomNetworkData.beets!.address),
-        new ReliquaryFarmAprService(fantomNetworkData.beets!.address),
-    ],
+    poolAprServices: [new SwapFeeAprService()],
     userStakedBalanceServices: [
         new UserSyncMasterchefFarmBalanceService(
             fantomNetworkData.fbeets!.address,
@@ -60,10 +50,6 @@ export const fantomNetworkConfig: NetworkConfig = {
         {
             name: 'update-pool-apr',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(6, 'minutes') : every(2, 'minutes'),
-        },
-        {
-            name: 'update-7-30-days-swap-apr',
-            interval: every(8, 'hours'),
         },
         {
             name: 'load-on-chain-data-for-pools-with-active-updates',
@@ -104,16 +90,8 @@ export const fantomNetworkConfig: NetworkConfig = {
             alarmDatapointsToAlarm: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
         },
         {
-            name: 'sync-latest-reliquary-snapshots',
-            interval: every(1, 'hours'),
-        },
-        {
             name: 'update-fee-volume-yield-all-pools',
             interval: every(30, 'minutes'),
-        },
-        {
-            name: 'feed-data-to-datastudio',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(10, 'minutes'),
         },
         {
             name: 'sync-sftmx-staking-data',
@@ -131,14 +109,6 @@ export const fantomNetworkConfig: NetworkConfig = {
         {
             name: 'update-liquidity-24h-ago-v2',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(5, 'minutes'),
-        },
-        {
-            name: 'sync-join-exits-v2',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(1, 'minutes'),
-        },
-        {
-            name: 'sync-swaps-v2',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(1, 'minutes'),
         },
     ],
 };

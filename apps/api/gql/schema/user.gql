@@ -10,11 +10,12 @@ extend type Query {
         poolId: String!
         chain: GqlChain
         address: String
-    ): [GqlPoolJoinExit!]!
+    ): [GqlPoolJoinExit!]! @deprecated(reason: "Use poolEvents instead")
     """
     Will de deprecated in favor of poolGetEvents
     """
     userGetSwaps(first: Int = 10, skip: Int = 0, poolId: String!, chain: GqlChain, address: String): [GqlPoolSwap!]!
+        @deprecated(reason: "Use poolEvents instead")
 }
 
 extend type Mutation {

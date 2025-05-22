@@ -5,7 +5,6 @@ import { getCowAmmSubgraphClient } from '../sources/subgraphs';
 import { fetchChangedPools, upsertPools, syncSwaps, syncJoinExits, updateSurplusAPRs } from '../actions/cow-amm';
 import { syncSnapshots } from '../actions/snapshots/sync-snapshots';
 import { Chain, PrismaLastBlockSyncedCategory } from '@prisma/client';
-import { updateVolumeAndFees } from '../actions/pool/update-volume-and-fees';
 import { syncBptBalancesFromSubgraph } from '../actions/user/bpt-balances/helpers/sync-bpt-balances-from-subgraph';
 import { getLastSyncedBlock, upsertLastSyncedBlock } from '../actions/last-synced-block';
 import { updateLifetimeValues } from '../actions/pool/update-liftetime-values';
@@ -89,6 +88,10 @@ export function CowAmmController(tracer?: any) {
                 ids.push(...pools);
             }
 
+            if (ids.length === 0) {
+                return [];
+            }
+
             // When adding new pools, balances need to be added separately
             // Since balance table has a constraint on poolId they cannot be added independently
             const existingIds = await prisma.prismaPool
@@ -100,7 +103,6 @@ export function CowAmmController(tracer?: any) {
 
             await upsertPools(ids, viemClient, subgraphClient, chain, latestBlock);
             await syncTokenPairs(ids, viemClient, routerAddress, chain);
-            // await updateVolumeAndFees(chain, ids);
             await updateSurplusAPRs(chain, ids);
             // Sync balances for the pools
             const newIds = ids.filter((id) => !existingIds.includes(id));

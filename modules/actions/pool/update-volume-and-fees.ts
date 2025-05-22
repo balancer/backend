@@ -1,10 +1,23 @@
-import { Chain } from '@prisma/client';
+import { Prisma, Chain } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
 import _ from 'lodash';
 import moment from 'moment';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { SwapEvent } from '../../../prisma/prisma-types';
 import { capturesYield } from '../../pool/lib/pool-utils';
+
+type PoolStats = {
+    poolId: string;
+    volume: number;
+    fees: number;
+    surplus?: number;
+};
+
+const emptyStats = {
+    volume: 0,
+    fees: 0,
+    surplus: 0,
+};
 
 /**
  * Updates 24h and 48h volume and fees for the pools provided based on swaps in the DB. Updates it for all pools if no poolIds provided.
@@ -23,53 +36,45 @@ export async function updateVolumeAndFees(chain: Chain, poolIds?: string[]) {
         },
     });
 
-    const swapEvents = await prisma.prismaPoolEvent.findMany({
-        where: {
-            chain,
-            poolId: { in: pools.map((pool) => pool.id) },
-            type: 'SWAP',
-            blockTimestamp: { gte: twoDaysAgo },
-        },
-    });
+    const query = (timestamp: number) =>
+        Prisma.raw(`SELECT
+        "poolId",
+        SUM("valueUSD") AS volume,
+        SUM((payload->'fee'->>'valueUSD')::numeric) AS fees,
+        SUM((payload->'surplus'->>'valueUSD')::numeric) AS surplus
+      FROM "PartitionedPoolEvent"
+      WHERE
+        "blockTimestamp" >= ${timestamp}
+        AND chain = '${chain}'
+        AND type = 'SWAP'
+      GROUP BY 1`);
+
+    // Fetch the stats
+    const stats24h = await prisma.$queryRaw<PoolStats[]>(query(yesterday));
+    // const stats48h = await prisma.$queryRaw<PoolStats[]>(query(twoDaysAgo));
+
+    // Prepare maps
+    const stats24hMap = _.keyBy(stats24h, 'poolId');
+    const stats48hMap = _.keyBy(stats24h, 'poolId');
 
     const operations: any[] = [];
 
     for (const pool of pools) {
         const protocolYieldFeePercentage = parseFloat(pool.dynamicData?.protocolYieldFee || '0');
         const protocolSwapFeePercentage = parseFloat(pool.dynamicData?.protocolSwapFee || '0');
+        const poolStats24h = stats24hMap[pool.id] || emptyStats;
+        const poolStats48h = stats48hMap[pool.id] || emptyStats;
 
-        const volume24h = _.sumBy(
-            swapEvents.filter((swap) => swap.blockTimestamp >= yesterday && swap.poolId === pool.id),
-            (swap) => swap.valueUSD,
-        );
+        const volume24h = poolStats24h.volume;
+        const fees24h = poolStats24h.fees;
+        const surplus24h = poolStats24h.surplus || 0;
 
-        const fees24h = _.sumBy(
-            swapEvents.filter((swap) => swap.blockTimestamp >= yesterday && swap.poolId === pool.id),
-            (swap) => parseFloat((swap as SwapEvent).payload.fee.valueUSD),
-        );
+        const volume48h = poolStats48h.volume * 2;
+        const fees48h = poolStats48h.fees * 2;
+        const surplus48h = (poolStats48h.surplus || 0) * 2;
 
-        const surplus24h = _.sumBy(
-            swapEvents.filter((swap) => swap.blockTimestamp >= yesterday && swap.poolId === pool.id),
-            (swap) => parseFloat((swap as SwapEvent).payload.surplus?.valueUSD || '0'),
-        );
-
-        const volume48h = _.sumBy(
-            swapEvents.filter((swap) => swap.poolId === pool.id),
-            (swap) => swap.valueUSD,
-        );
-
-        const fees48h = _.sumBy(
-            swapEvents.filter((swap) => swap.poolId === pool.id),
-            (swap) => parseFloat((swap as SwapEvent).payload.fee.valueUSD),
-        );
-
-        const surplus48h = _.sumBy(
-            swapEvents.filter((swap) => swap.poolId === pool.id),
-            (swap) => parseFloat((swap as SwapEvent).payload.surplus?.valueUSD || '0'),
-        );
-
-        let protocolFees24h = fees24h * protocolSwapFeePercentage;
-        let protocolFees48h = fees48h * protocolSwapFeePercentage;
+        let protocolFees24h = poolStats24h.fees * protocolSwapFeePercentage;
+        let protocolFees48h = poolStats48h.fees * protocolSwapFeePercentage;
 
         if (pool.dynamicData?.isInRecoveryMode || pool.type === 'LIQUIDITY_BOOTSTRAPPING') {
             protocolFees24h = 0;
@@ -78,14 +83,14 @@ export async function updateVolumeAndFees(chain: Chain, poolIds?: string[]) {
 
         if (
             pool.dynamicData &&
-            (pool.dynamicData.volume24h !== volume24h ||
-                pool.dynamicData.fees24h !== fees24h ||
-                pool.dynamicData.surplus24h !== surplus24h ||
-                pool.dynamicData.volume48h !== volume48h ||
-                pool.dynamicData.fees48h !== fees48h ||
-                pool.dynamicData.surplus48h !== surplus48h ||
-                pool.dynamicData.protocolFees24h !== protocolFees24h ||
-                pool.dynamicData.protocolFees48h !== protocolFees48h)
+            (pool.dynamicData.volume24h - volume24h > 1 ||
+                pool.dynamicData.fees24h - fees24h > 1 ||
+                pool.dynamicData.surplus24h - surplus24h > 1 ||
+                pool.dynamicData.volume48h - volume48h > 1 ||
+                pool.dynamicData.fees48h - fees48h > 1 ||
+                pool.dynamicData.surplus48h - surplus48h > 1 ||
+                pool.dynamicData.protocolFees24h - protocolFees24h > 1 ||
+                pool.dynamicData.protocolFees48h - protocolFees48h > 1)
         ) {
             operations.push(
                 prisma.prismaPoolDynamicData.update({
