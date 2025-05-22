@@ -1,5 +1,23 @@
 # backend
 
+## 1.41.0
+
+### Minor Changes
+
+-   6a09188: text search
+-   41451a0: SOR - Add support for Akron Hook
+-   570a104: SOR - Update QuantAmm support
+
+### Patch Changes
+
+-   ab7f25c: sfrxusd apr OP
+-   bc416fd: patch failing SG query when id_in is empty
+-   17084dd: events type timestamp index
+-   33b912b: temp volume fees off
+-   75dadbe: update fees in cron only
+-   e0a704a: remove unused data related to legacy swaps and blocks
+-   ce8eb5a: disable events queries
+
 ## 1.40.8
 
 ### Patch Changes
