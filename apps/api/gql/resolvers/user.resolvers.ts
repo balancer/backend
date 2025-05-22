@@ -30,32 +30,11 @@ const resolvers: Resolvers = {
                 ),
             }));
         },
-        // TODO: Deprecate in favor of poolGetEvents
         userGetPoolJoinExits: async (parent, { first, skip, poolId, chain, address }, context) => {
-            const currentChain = headerChain();
-            if (!chain && currentChain) {
-                chain = currentChain;
-            } else if (!chain) {
-                throw new GraphQLError('Provide "chain" param', {
-                    extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
-                });
-            }
-            const accountAddress = address || getRequiredAccountAddress(context);
-
-            return userService.getUserPoolInvestments(accountAddress, poolId, chain, first, skip);
+            return [];
         },
-        // TODO: Deprecate in favor of poolGetEvents
         userGetSwaps: async (parent, { first, skip, poolId, chain, address }, context) => {
-            const currentChain = headerChain();
-            if (!chain && currentChain) {
-                chain = currentChain;
-            } else if (!chain) {
-                throw new GraphQLError('Provide "chain" param', {
-                    extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
-                });
-            }
-            const accountAddress = address || getRequiredAccountAddress(context);
-            return userService.getUserSwaps(accountAddress, poolId, chain, first, skip);
+            return [];
         },
         userGetStaking: async (parent, { chains, address }, context) => {
             const currentChain = headerChain();

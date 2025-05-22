@@ -2699,7 +2699,6 @@ export interface Mutation {
     poolSyncAllCowSnapshots: Array<GqlPoolMutationResult>;
     poolSyncAllPoolsFromSubgraph: Array<Scalars['String']>;
     poolSyncFxQuoteTokens: Array<GqlPoolMutationResult>;
-    poolUpdateLifetimeValuesForAllPools: Scalars['String'];
     poolUpdateLiquidityValuesForAllPools: Scalars['String'];
     protocolCacheMetrics: Scalars['String'];
     sftmxSyncStakingData: Scalars['String'];
@@ -2928,10 +2927,16 @@ export interface Query {
     tokenGetTokensDynamicData: Array<GqlTokenDynamicData>;
     userGetFbeetsBalance: GqlUserFbeetsBalance;
     userGetPoolBalances: Array<GqlUserPoolBalance>;
-    /** Will de deprecated in favor of poolGetEvents */
+    /**
+     * Will de deprecated in favor of poolGetEvents
+     * @deprecated Use poolEvents instead
+     */
     userGetPoolJoinExits: Array<GqlPoolJoinExit>;
     userGetStaking: Array<GqlPoolStaking>;
-    /** Will de deprecated in favor of poolGetEvents */
+    /**
+     * Will de deprecated in favor of poolGetEvents
+     * @deprecated Use poolEvents instead
+     */
     userGetSwaps: Array<GqlPoolSwap>;
     veBalGetTotalSupply: Scalars['AmountHumanReadable'];
     veBalGetUser: GqlVeBalUserData;
@@ -5837,7 +5842,6 @@ export type MutationResolvers<
         ContextType,
         RequireFields<MutationPoolSyncFxQuoteTokensArgs, 'chains'>
     >;
-    poolUpdateLifetimeValuesForAllPools?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     poolUpdateLiquidityValuesForAllPools?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     protocolCacheMetrics?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     sftmxSyncStakingData?: Resolver<ResolversTypes['String'], ParentType, ContextType>;

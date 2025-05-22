@@ -3996,7 +3996,6 @@ export const schema = gql`
         poolSyncAllCowSnapshots(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
         poolSyncAllPoolsFromSubgraph: [String!]!
         poolSyncFxQuoteTokens(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
-        poolUpdateLifetimeValuesForAllPools: String!
         poolUpdateLiquidityValuesForAllPools: String!
         protocolCacheMetrics: String!
         sftmxSyncStakingData: String!
@@ -4328,13 +4327,19 @@ export const schema = gql`
             first: Int = 10
             poolId: String!
             skip: Int = 0
-        ): [GqlPoolJoinExit!]!
+        ): [GqlPoolJoinExit!]! @deprecated(reason: "Use poolEvents instead")
         userGetStaking(address: String, chains: [GqlChain!]): [GqlPoolStaking!]!
 
         """
         Will de deprecated in favor of poolGetEvents
         """
-        userGetSwaps(address: String, chain: GqlChain, first: Int = 10, poolId: String!, skip: Int = 0): [GqlPoolSwap!]!
+        userGetSwaps(
+            address: String
+            chain: GqlChain
+            first: Int = 10
+            poolId: String!
+            skip: Int = 0
+        ): [GqlPoolSwap!]! @deprecated(reason: "Use poolEvents instead")
         veBalGetTotalSupply(chain: GqlChain): AmountHumanReadable!
         veBalGetUser(address: String!, chain: GqlChain): GqlVeBalUserData!
         veBalGetUserBalance(address: String, chain: GqlChain): AmountHumanReadable!

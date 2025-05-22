@@ -26,28 +26,6 @@ export const blockNumbers = (db = prisma) => ({
         return event?.blockNumber;
     },
     /**
-     * Gets the number of blocks per day meaning the speed of the chain.
-     * Calculated from average number of blocks per day for the last 3 days.
-     *
-     * @param chain
-     * @param timestamp
-     * @returns
-     */
-    async getBlocksPerDay(chain: Chain) {
-        const [blocks] = await db.$queryRawUnsafe<{ max: number; min: number }[]>(`
-            SELECT
-                MAX("blockNumber") as max,
-                MIN("blockNumber") as min
-            FROM "PartitionedPoolEvent"
-            WHERE chain = '${chain}'
-            AND "blockTimestamp" >= (EXTRACT(EPOCH FROM NOW()) - 86400 * 3)::integer;
-        `);
-
-        const range = blocks.max - blocks.min;
-
-        return Math.ceil(range / 3);
-    },
-    /**
      * Block numbers for the last n days closest to 00:00:00 (UTC)
      *
      * @param chain
