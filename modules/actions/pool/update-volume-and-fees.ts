@@ -51,11 +51,11 @@ export async function updateVolumeAndFees(chain: Chain, poolIds?: string[]) {
 
     // Fetch the stats
     const stats24h = await prisma.$queryRaw<PoolStats[]>(query(yesterday));
-    // const stats48h = await prisma.$queryRaw<PoolStats[]>(query(twoDaysAgo));
+    const stats48h = await prisma.$queryRaw<PoolStats[]>(query(twoDaysAgo));
 
     // Prepare maps
     const stats24hMap = _.keyBy(stats24h, 'poolId');
-    const stats48hMap = _.keyBy(stats24h, 'poolId');
+    const stats48hMap = _.keyBy(stats48h, 'poolId');
 
     const operations: any[] = [];
 
@@ -69,9 +69,9 @@ export async function updateVolumeAndFees(chain: Chain, poolIds?: string[]) {
         const fees24h = poolStats24h.fees;
         const surplus24h = poolStats24h.surplus || 0;
 
-        const volume48h = poolStats48h.volume * 2;
-        const fees48h = poolStats48h.fees * 2;
-        const surplus48h = (poolStats48h.surplus || 0) * 2;
+        const volume48h = poolStats48h.volume;
+        const fees48h = poolStats48h.fees;
+        const surplus48h = poolStats48h.surplus || 0;
 
         let protocolFees24h = poolStats24h.fees * protocolSwapFeePercentage;
         let protocolFees48h = poolStats48h.fees * protocolSwapFeePercentage;
