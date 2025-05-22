@@ -89,6 +89,10 @@ export function CowAmmController(tracer?: any) {
                 ids.push(...pools);
             }
 
+            if (ids.length === 0) {
+                return [];
+            }
+
             // When adding new pools, balances need to be added separately
             // Since balance table has a constraint on poolId they cannot be added independently
             const existingIds = await prisma.prismaPool

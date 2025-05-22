@@ -4,11 +4,8 @@ import { PoolsQueryVariables } from './balancer-v3-vault/generated/types';
 
 export type V3JoinedSubgraphClient = ReturnType<typeof getV3JoinedSubgraphClient>;
 
-export type V3JoinedSubgraphPool = ReturnType<V3JoinedSubgraphClient['getAllInitializedPools']> extends Promise<
-    (infer T)[]
->
-    ? T
-    : never;
+export type V3JoinedSubgraphPool =
+    ReturnType<V3JoinedSubgraphClient['getAllInitializedPools']> extends Promise<(infer T)[]> ? T : never;
 
 export const getV3JoinedSubgraphClient = (
     vaultSubgraphClient: V3VaultSubgraphClient,
@@ -34,6 +31,9 @@ export const getV3JoinedSubgraphClient = (
                 return acc;
             }, {} as Record<string, (typeof vaultPools)[0]>);
             const vaultPoolIds = Object.keys(vaultPoolsMap);
+            if (vaultPoolIds.length === 0) {
+                return [];
+            }
             const pools = await poolsSubgraphClient.getAllPools({ id_in: vaultPoolIds });
             return pools.map((pool) => ({
                 ...pool,
