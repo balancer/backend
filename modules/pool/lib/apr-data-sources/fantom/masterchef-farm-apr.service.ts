@@ -24,7 +24,7 @@ export class MasterchefFarmAprService implements PoolAprService {
         const masterchefService = new MasterchefSubgraphService(networkContext.data.subgraphs.masterchef!);
         const farms = await masterchefService.getAllFarms({});
 
-        const blocksPerDay = await blockNumbers().getBlocksPerDay(chain);
+        const blocksPerDay = 10;
         const blocksPerYear = blocksPerDay * 365;
         const tokenPrices = await tokenService.getTokenPrices(chain);
         const operations: any[] = [];

@@ -9,34 +9,38 @@ const balancerResolvers: Resolvers = {
         blocksGetAverageBlockTime: async (parent, {}, context) => {
             const chainId = context.chainId || env.DEFAULT_CHAIN_ID;
             const chain = chainIdToChain[chainId];
+            return 1;
 
-            const service = blockNumbers();
-            const blocksPerDay = await service.getBlocksPerDay(chain);
-            return 86400 / blocksPerDay;
+            // const service = blockNumbers();
+            // const blocksPerDay = await service.getBlocksPerDay(chain);
+            // return 86400 / blocksPerDay;
         },
         blocksGetBlocksPerSecond: async (parent, {}, context) => {
             const chainId = context.chainId || env.DEFAULT_CHAIN_ID;
             const chain = chainIdToChain[chainId];
+            return 1;
 
-            const service = blockNumbers();
-            const blocksPerDay = await service.getBlocksPerDay(chain);
-            return blocksPerDay / 86400;
+            // const service = blockNumbers();
+            // const blocksPerDay = await service.getBlocksPerDay(chain);
+            // return blocksPerDay / 86400;
         },
         blocksGetBlocksPerDay: async (parent, {}, context) => {
             const chainId = context.chainId || env.DEFAULT_CHAIN_ID;
             const chain = chainIdToChain[chainId];
+            return 300;
 
-            const service = blockNumbers();
-            const blocksPerDay = await service.getBlocksPerDay(chain);
-            return blocksPerDay;
+            // const service = blockNumbers();
+            // const blocksPerDay = await service.getBlocksPerDay(chain);
+            // return blocksPerDay;
         },
         blocksGetBlocksPerYear: async (parent, {}, context) => {
             const chainId = context.chainId || env.DEFAULT_CHAIN_ID;
             const chain = chainIdToChain[chainId];
+            return 3000;
 
-            const service = blockNumbers();
-            const blocksPerDay = await service.getBlocksPerDay(chain);
-            return blocksPerDay * 365;
+            // const service = blockNumbers();
+            // const blocksPerDay = await service.getBlocksPerDay(chain);
+            // return blocksPerDay * 365;
         },
     },
 };
