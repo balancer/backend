@@ -98,7 +98,7 @@ export const gnosisNetworkConfig: NetworkConfig = {
         },
         {
             name: 'update-fee-volume-yield-all-pools',
-            interval: every(1, 'hours'),
+            interval: every(30, 'minutes'),
         },
         {
             name: 'sync-vebal-balances',
@@ -132,10 +132,6 @@ export const gnosisNetworkConfig: NetworkConfig = {
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(1, 'minutes'),
         },
         { name: 'sync-cow-amm-snapshots', interval: every(90, 'minutes') },
-        {
-            name: 'update-cow-amm-volume-and-fees',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(60, 'minutes') : every(20, 'minutes'),
-        },
         // V3 jobs
         {
             name: 'add-pools-v3',
