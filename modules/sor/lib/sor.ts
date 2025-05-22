@@ -40,7 +40,7 @@ export class SOR {
     ): Promise<PathWithAmount[] | null> {
         const checkedSwapAmount = checkInputs(tokenIn, tokenOut, swapKind, swapAmountEvm);
 
-        // get current block timestamp for ReClamm math
+        // get current block timestamp if not provided
         const currentTimestamp = swapOptions?.currentTimestamp ?? BigInt(Date.now()) / 1000n;
 
         const basePools: BasePool[] = [];
