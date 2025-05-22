@@ -1,16 +1,25 @@
-import { BufferState, GyroECLPState, ReClammState, StableState, WeightedState } from '@balancer-labs/balancer-maths';
+import {
+    BufferState,
+    GyroECLPState,
+    QuantAmmState,
+    ReClammState,
+    StableState,
+    WeightedState,
+} from '@balancer-labs/balancer-maths';
+import { Address } from '@balancer/sdk';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
 import { HookData, PrismaPoolAndHookWithDynamic } from '../../../prisma/prisma-types';
+import { BufferPoolData } from '../../../modules/sor/utils/data';
+import { TransformBigintToString } from '../types';
 import {
     mapGyroPoolStateToPrismaPool,
+    mapQuantAmmPoolStateToPrismaPool,
     mapReClammPoolStateToPrismaPool,
     mapStablePoolStateToPrismaPool,
     mapWeightedPoolStateToPrismaPool,
 } from './mapping';
-import { Address } from '@balancer/sdk';
-import { BufferPoolData } from '../../../modules/sor/utils/data';
 
 type PoolBase = {
     poolAddress: string;
@@ -28,7 +37,9 @@ export type GyroEPool = PoolBase & GyroECLPState;
 
 export type ReClammPool = PoolBase & ReClammState;
 
-export type SupportedPools = WeightedPool | StablePool | BufferPool | GyroEPool | ReClammPool;
+export type QuantAmmPool = PoolBase & QuantAmmState;
+
+export type SupportedPools = WeightedPool | StablePool | BufferPool | GyroEPool | ReClammPool | QuantAmmPool;
 
 type SwapPath = {
     swapKind: number;
@@ -79,8 +90,8 @@ export function readTestData(): TestData {
                 const bufferPools: BufferPoolData[] = mapBufferPools(jsonData.pools);
                 testData.bufferPools.push(bufferPools);
 
-                const currentTimestamp = (jsonData.pools as { poolType: string; currentTimestamp?: bigint }[]).find(
-                    (pool) => pool.poolType === 'RECLAMM',
+                const currentTimestampString = (jsonData.pools as { currentTimestamp?: string }[]).find(
+                    (pool) => pool.currentTimestamp,
                 )?.currentTimestamp;
 
                 // add swapPaths
@@ -91,7 +102,7 @@ export function readTestData(): TestData {
                     amountRaw: BigInt(jsonData.swapPath.amountRaw),
                     outputRaw: BigInt(jsonData.swapPath.outputRaw),
                     test: file,
-                    currentTimestamp,
+                    currentTimestamp: currentTimestampString ? BigInt(currentTimestampString) : undefined,
                     chainId: jsonData.test.chainId,
                 });
             } catch (error) {
@@ -102,10 +113,6 @@ export function readTestData(): TestData {
 
     return testData;
 }
-
-type TransformBigintToString<T> = {
-    [K in keyof T]: T[K] extends bigint ? string : T[K] extends bigint[] ? string[] : T[K];
-};
 
 function mapPools(pools: TransformBigintToString<SupportedPools>[]): PrismaPoolAndHookWithDynamic[] {
     const bufferPools: BufferPool[] = pools
@@ -196,6 +203,25 @@ function mapPools(pools: TransformBigintToString<SupportedPools>[]): PrismaPoolA
                 currentTimestamp: BigInt(pool.currentTimestamp),
             };
             prismaPools.push(mapReClammPoolStateToPrismaPool(reClammPool, Number(pool.chainId), 3, bufferPools));
+        } else if (pool.poolType === 'QUANT_AMM_WEIGHTED') {
+            const quantAmmPool = {
+                ...pool,
+                scalingFactors: pool.scalingFactors.map((sf) => BigInt(sf)),
+                swapFee: BigInt(pool.swapFee),
+                balancesLiveScaled18: pool.balancesLiveScaled18.map((b) => BigInt(b)),
+                tokenRates: pool.tokenRates.map((r) => BigInt(r)),
+                totalSupply: BigInt(pool.totalSupply),
+                aggregateSwapFee: BigInt(pool.aggregateSwapFee ?? '0'),
+                supportsUnbalancedLiquidity:
+                    pool.supportsUnbalancedLiquidity === undefined ? true : pool.supportsUnbalancedLiquidity,
+                firstFourWeightsAndMultipliers: pool.firstFourWeightsAndMultipliers.map((w) => BigInt(w)),
+                secondFourWeightsAndMultipliers: pool.secondFourWeightsAndMultipliers.map((m) => BigInt(m)),
+                maxTradeSizeRatio: BigInt(pool.maxTradeSizeRatio),
+                lastUpdateTime: BigInt(pool.lastUpdateTime),
+                lastInteropTime: BigInt(pool.lastInteropTime),
+                currentTimestamp: BigInt(pool.currentTimestamp),
+            };
+            prismaPools.push(mapQuantAmmPoolStateToPrismaPool(quantAmmPool, Number(pool.chainId), 3, bufferPools));
         }
     }
     return prismaPools;

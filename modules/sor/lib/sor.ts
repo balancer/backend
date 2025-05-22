@@ -16,7 +16,15 @@ import {
 import { BasePool } from './poolsV2/basePool';
 import { SorSwapOptions } from './types';
 import { PathWithAmount } from './path';
-import { BufferPool, Gyro2CLPPool, GyroECLPPool, ReClammPool, StablePoolV3, WeightedPoolV3 } from './poolsV3';
+import {
+    BufferPool,
+    Gyro2CLPPool,
+    GyroECLPPool,
+    QuantAmmPool,
+    ReClammPool,
+    StablePoolV3,
+    WeightedPoolV3,
+} from './poolsV3';
 import { BufferPoolData } from '../utils/data';
 
 export class SOR {
@@ -32,7 +40,7 @@ export class SOR {
     ): Promise<PathWithAmount[] | null> {
         const checkedSwapAmount = checkInputs(tokenIn, tokenOut, swapKind, swapAmountEvm);
 
-        // get current block timestamp for ReClamm math
+        // get current block timestamp if not provided
         const currentTimestamp = swapOptions?.currentTimestamp ?? BigInt(Date.now()) / 1000n;
 
         const basePools: BasePool[] = [];
@@ -49,7 +57,6 @@ export class SOR {
                 case 'WEIGHTED':
                 /// LBPs can be handled like weighted pools
                 case 'LIQUIDITY_BOOTSTRAPPING':
-                case 'QUANT_AMM_WEIGHTED':
                     {
                         if (prismaPool.protocolVersion === 2) {
                             basePools.push(WeightedPool.fromPrismaPool(prismaPool));
@@ -104,6 +111,9 @@ export class SOR {
                     break;
                 case 'RECLAMM':
                     basePools.push(ReClammPool.fromPrismaPool(prismaPool, currentTimestamp));
+                    break;
+                case 'QUANT_AMM_WEIGHTED':
+                    basePools.push(QuantAmmPool.fromPrismaPool(prismaPool, currentTimestamp));
                     break;
                 default:
                     console.log('Unsupported pool type');

@@ -1,0 +1,72 @@
+{
+    "test": {
+        "chainId": "1",
+        "blockNumber": "22524240"
+    },
+    "swapPath": {
+        "swapKind": 0,
+        "amountRaw": "10000000000000000",
+        "tokens": [
+            "0x45804880de22913dafe09f4980848ece6ecbaf78",
+            "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+        ],
+        "pools": [
+            "0x6b61d8680c4f9e560c8306807908553f95c749c5"
+        ],
+        "outputRaw": "32186254"
+    },
+    "pools": [
+        {
+            "chainId": "1",
+            "blockNumber": "22524240",
+            "poolType": "QUANT_AMM_WEIGHTED",
+            "poolAddress": "0x6b61d8680c4f9e560c8306807908553f95c749c5",
+            "tokens": [
+                "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+                "0x45804880de22913dafe09f4980848ece6ecbaf78",
+                "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+            ],
+            "maxTradeSizeRatio": "100000000000000000",
+            "scalingFactors": [
+                "10000000000",
+                "1",
+                "1000000000000"
+            ],
+            "swapFee": "20000000000000000",
+            "balancesLiveScaled18": [
+                "900794470000000000",
+                "1304051331499334098",
+                "41955655751000000000000"
+            ],
+            "tokenRates": [
+                "1000000000000000000",
+                "1000000000000000000",
+                "1000000000000000000"
+            ],
+            "totalSupply": "8935547542387177179",
+            "firstFourWeightsAndMultipliers": [
+                "670600731000000000",
+                "30079278000000000",
+                "299405491000000000",
+                "129000000000",
+                "0",
+                "-129000000000",
+                "0",
+                "0"
+            ],
+            "secondFourWeightsAndMultipliers": [
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0"
+            ],
+            "lastUpdateTime": "1747699223",
+            "lastInteropTime": "1747785323",
+            "currentTimestamp": "1747745435"
+        }
+    ]
+}
