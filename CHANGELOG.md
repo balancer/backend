@@ -1,5 +1,12 @@
 # backend
 
+## 1.41.3
+
+### Patch Changes
+
+-   556dbb8: balanceUSD update guards
+-   befa825: patch events query for dynamic aprs
+
 ## 1.41.2
 
 ### Patch Changes

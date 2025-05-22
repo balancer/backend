@@ -83,14 +83,14 @@ export async function updateVolumeAndFees(chain: Chain, poolIds?: string[]) {
 
         if (
             pool.dynamicData &&
-            (pool.dynamicData.volume24h - volume24h > 1 ||
-                pool.dynamicData.fees24h - fees24h > 1 ||
-                pool.dynamicData.surplus24h - surplus24h > 1 ||
-                pool.dynamicData.volume48h - volume48h > 1 ||
-                pool.dynamicData.fees48h - fees48h > 1 ||
-                pool.dynamicData.surplus48h - surplus48h > 1 ||
-                pool.dynamicData.protocolFees24h - protocolFees24h > 1 ||
-                pool.dynamicData.protocolFees48h - protocolFees48h > 1)
+            (Math.abs(pool.dynamicData.volume24h - volume24h) > 1 ||
+                Math.abs(pool.dynamicData.fees24h - fees24h) > 1 ||
+                Math.abs(pool.dynamicData.surplus24h - surplus24h) > 1 ||
+                Math.abs(pool.dynamicData.volume48h - volume48h) > 1 ||
+                Math.abs(pool.dynamicData.fees48h - fees48h) > 1 ||
+                Math.abs(pool.dynamicData.surplus48h - surplus48h) > 1 ||
+                Math.abs(pool.dynamicData.protocolFees24h - protocolFees24h) > 1 ||
+                Math.abs(pool.dynamicData.protocolFees48h - protocolFees48h) > 1)
         ) {
             operations.push(
                 prisma.prismaPoolDynamicData.update({

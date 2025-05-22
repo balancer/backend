@@ -107,7 +107,8 @@ export const updateLiquidityValuesForPools = async (chain: Chain, poolIds?: stri
                 );
                 continue;
             }
-            if (item.balanceUSD !== item.previousBalanceUSD) {
+
+            if (Math.abs(item.balanceUSD - item.previousBalanceUSD) > 1) {
                 updates.push(
                     prisma.prismaPoolToken.update({
                         where: { id_chain: { id: item.id, chain: pool.chain } },
@@ -130,7 +131,7 @@ export const updateLiquidityValuesForPools = async (chain: Chain, poolIds?: stri
             continue;
         }
 
-        if (totalLiquidity !== pdt.totalLiquidity) {
+        if (Math.abs(totalLiquidity - pdt.totalLiquidity) > 1) {
             updates.push(
                 prisma.prismaPoolDynamicData.update({
                     where: { id_chain: { id: pool.id, chain: pool.chain } },
