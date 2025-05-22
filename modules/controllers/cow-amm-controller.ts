@@ -104,7 +104,7 @@ export function CowAmmController(tracer?: any) {
 
             await upsertPools(ids, viemClient, subgraphClient, chain, latestBlock);
             await syncTokenPairs(ids, viemClient, routerAddress, chain);
-            await updateVolumeAndFees(chain, ids);
+            // await updateVolumeAndFees(chain, ids);
             await updateSurplusAPRs(chain, ids);
             // Sync balances for the pools
             const newIds = ids.filter((id) => !existingIds.includes(id));
@@ -146,14 +146,6 @@ export function CowAmmController(tracer?: any) {
         async updateSurplusAprs() {
             const aprs = await updateSurplusAPRs();
             return aprs;
-        },
-        async updateVolumeAndFees(chain: Chain) {
-            const cowPools = await prisma.prismaPool.findMany({ where: { chain, type: 'COW_AMM' } });
-            await updateVolumeAndFees(
-                chain,
-                cowPools.map((pool) => pool.id),
-            );
-            return true;
         },
         async syncBalances(chain: Chain) {
             let subgraphClient: ReturnType<typeof getSubgraphClient>;

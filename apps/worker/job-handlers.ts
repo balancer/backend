@@ -388,9 +388,6 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
         case 'sync-cow-amm-snapshots':
             await runIfNotAlreadyRunning(name, chainId, () => CowAmmController().syncSnapshots(chain), res, next);
             break;
-        case 'update-cow-amm-volume-and-fees':
-            await runIfNotAlreadyRunning(name, chainId, () => CowAmmController().updateVolumeAndFees(chain), res, next);
-            break;
         case 'sync-categories':
             await runIfNotAlreadyRunning(name, chainId, () => ContentController().syncCategories(), res, next);
             break;
