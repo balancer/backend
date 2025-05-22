@@ -19,6 +19,9 @@ model PrismaPool {
 
     protocolVersion        Int                 @default(2)
 
+    /// @db.Tsvector
+    search_vector       Unsupported("tsvector")?
+
     typeData            Json @default("{}")
 
     tokens              PrismaPoolToken[]
@@ -47,6 +50,7 @@ model PrismaPool {
 
     @@index([id, chain])
     @@index([categories(ops: ArrayOps)], type: Gin)
+    @@index([search_vector], type: Gin)
 }
 
 enum PrismaPoolType {

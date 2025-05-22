@@ -285,6 +285,29 @@ export class PoolGqlLoaderService {
             return gqlPools;
         }
 
+        // Use full-text search using search_vector
+        if (args.textSearch && args.textSearch.trim().length > 0) {
+            const searchQuery = args.textSearch
+                .replace(/[^a-zA-Z0-9 ]/g, '') // Escape non asci
+                .trim();
+
+            console.log(searchQuery);
+
+            // Use raw SQL for the search vector condition
+            // Weighted results don't work yet, because the query is finding IDs for the second query only.
+            // But setting it up already so it can be used with the refactored searching
+            const searchResults = await prisma.$queryRaw<
+                { id: string }[]
+            >`SELECT id, chain, ts_rank(ARRAY[0.01, 0.01, 0.01, 1.0]::float4[], p.search_vector, websearch_to_tsquery('simple', ${searchQuery}), 0) as rank FROM "PrismaPool" p WHERE p.search_vector @@ websearch_to_tsquery('simple', ${searchQuery})
+            ORDER BY rank DESC LIMIT 50`;
+
+            // Use the results to show pools
+            const idIn = searchResults.map((r) => r.id);
+            args.where ||= {};
+            args.where.idIn = idIn;
+            args.textSearch = undefined;
+        }
+
         const pools = await prisma.prismaPool.findMany({
             ...this.mapQueryArgsToPoolQuery(args),
             include: this.getPoolInclude(),
@@ -531,8 +554,8 @@ export class PoolGqlLoaderService {
             ...(where?.hasHook !== undefined && where.hasHook
                 ? { hook: { path: ['address'], string_starts_with: '0x' } }
                 : where?.hasHook !== undefined && !where.hasHook
-                ? { hook: { equals: Prisma.DbNull } }
-                : {}),
+                  ? { hook: { equals: Prisma.DbNull } }
+                  : {}),
         };
 
         if (!textSearch) {
