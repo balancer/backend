@@ -77,7 +77,16 @@ async function getPoolsByIds(
     poolIds: string[],
 ): Promise<PrismaPoolAndHookWithDynamic[]> {
     const pools = await prisma.prismaPool.findMany({
-        where: { id: { in: poolIds }, chain, protocolVersion, type },
+        where: {
+            id: { in: poolIds },
+            chain,
+            protocolVersion,
+            type,
+            dynamicData: {
+                swapEnabled: true,
+                isPaused: false,
+            },
+        },
         include: {
             dynamicData: true,
             tokens: { include: { token: true } },
@@ -137,6 +146,7 @@ async function getPrimaryPools(
             dynamicData: {
                 totalSharesNum: { gt: 0.000000000001 },
                 swapEnabled: true,
+                isPaused: false,
                 totalLiquidity: { gte: chain === 'SEPOLIA' ? 0 : 100 },
             },
             id: { notIn: [...poolIdsToExclude, ...poolsToIgnore] },
@@ -161,6 +171,7 @@ async function getLiquidityBootstrappingPools(
             dynamicData: {
                 totalSharesNum: { gt: 0.000000000001 },
                 swapEnabled: true,
+                isPaused: false,
             },
             id: { notIn: [...poolIdsToExclude, ...poolsToIgnore] },
             type: { in: ['LIQUIDITY_BOOTSTRAPPING'] },

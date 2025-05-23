@@ -1,5 +1,12 @@
 # backend
 
+## 1.41.5
+
+### Patch Changes
+
+-   aa81b48: yo APRs on base
+-   e7dc927: exclude paused pools from the sor
+
 ## 1.41.4
 
 ### Patch Changes
