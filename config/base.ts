@@ -83,6 +83,24 @@ export default <NetworkData>{
             tokens: {},
         },
         defaultHandlers: {
+            yoETH: {
+                tokenAddress: '0x3a43aec53490cb9fa922847385d82fe25d0e9de7',
+                sourceUrl: 'https://api.yo.xyz/api/v1/vault/base/0x3A43AEC53490CB9Fa922847385D82fe25d0E9De7',
+                path: 'data.stats.yield.7d',
+                isIbYield: true,
+            },
+            yoUSD: {
+                tokenAddress: '0x0000000f2eb9f69274678c76222b35eec7588a65',
+                sourceUrl: 'https://api.yo.xyz/api/v1/vault/base/0x0000000f2eB9f69274678c76222B35eEc7588a65',
+                path: 'data.stats.yield.7d',
+                isIbYield: true,
+            },
+            yoBTC: {
+                tokenAddress: '0xbcbc8cb4d1e8ed048a6276a5e94a3e952660bcbc',
+                sourceUrl: 'https://api.yo.xyz/api/v1/vault/base/0xbCbc8cb4D1e8ED048a6276a5E94A3e952660BcbC',
+                path: 'data.stats.yield.7d',
+                isIbYield: true,
+            },
             ezETH: {
                 tokenAddress: '0x2416092f143378750bb29b79ed961ab195cceea5',
                 sourceUrl: 'https://app.renzoprotocol.com/api/apr',
