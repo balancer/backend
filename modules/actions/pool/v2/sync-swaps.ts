@@ -79,5 +79,5 @@ export async function syncSwaps(subgraphClient: V2SubgraphClient, chain: Chain):
     });
     console.timeEnd('prismaPoolEvent.createMany');
 
-    return dbEntries.map((entry) => entry.poolId);
+    return [...new Set(dbEntries.map((entry) => entry.poolId))];
 }
