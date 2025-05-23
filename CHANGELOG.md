@@ -1,5 +1,13 @@
 # backend
 
+## 1.41.4
+
+### Patch Changes
+
+-   69b1d7d: bring back event queries and 48h stat updates
+-   e629fa3: enable volume and fees updates on swaps
+-   3f156e9: token indexes
+
 ## 1.41.3
 
 ### Patch Changes
