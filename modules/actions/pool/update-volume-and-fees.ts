@@ -36,7 +36,7 @@ export async function updateVolumeAndFees(chain: Chain, poolIds?: string[]) {
         },
     });
 
-    const query = (timestamp: number) =>
+    const query = (timestamp: number, poolIds?: string[]) =>
         Prisma.raw(`SELECT
         "poolId",
         SUM("valueUSD") AS volume,
@@ -47,11 +47,12 @@ export async function updateVolumeAndFees(chain: Chain, poolIds?: string[]) {
         "blockTimestamp" >= ${timestamp}
         AND chain = '${chain}'
         AND type = 'SWAP'
+        ${poolIds && poolIds.length < 30 ? 'AND "poolId" IN (\'' + poolIds.join("','") + "')" : ''}
       GROUP BY 1`);
 
     // Fetch the stats
-    const stats24h = await prisma.$queryRaw<PoolStats[]>(query(yesterday));
-    const stats48h = await prisma.$queryRaw<PoolStats[]>(query(twoDaysAgo));
+    const stats24h = await prisma.$queryRaw<PoolStats[]>(query(yesterday, poolIds));
+    const stats48h = await prisma.$queryRaw<PoolStats[]>(query(twoDaysAgo, poolIds));
 
     // Prepare maps
     const stats24hMap = _.keyBy(stats24h, 'poolId');
