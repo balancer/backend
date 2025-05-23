@@ -16,7 +16,6 @@ import {
 import { PoolAprUpdaterService } from '../modules/pool/lib/pool-apr-updater.service';
 import { chainIdToChain } from '../modules/network/chain-id-to-chain';
 
-import { backsyncSwaps } from './subgraph-syncing/backsync-swaps';
 import { poolService } from '../modules/pool/pool.service';
 import { initRequestScopedContext, setRequestScopedContextValue } from '../modules/context/request-scoped-context';
 import { tokenService } from '../modules/token/token.service';
@@ -153,18 +152,6 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         return ContentController().syncCategories();
     } else if (job === 'sync-latest-fx-prices') {
         return FXPoolsController().syncLatestPrices(chain);
-    } else if (job === 'backsync-swaps') {
-        // Run in loop until no new swaps are found
-        let status: string | undefined = 'true';
-        let i = 0;
-        while (status) {
-            console.time('backsyncSwaps page time');
-            status = await backsyncSwaps(chain);
-            console.timeEnd('backsyncSwaps page time');
-            i += 1000;
-            console.log('Processed', i, 'swaps');
-        }
-        return 'OK';
     } else if (job === 'sync-merkl') {
         return AprsController().syncMerkl();
     } else if (job === 'update-7-30-days-swap-apr') {

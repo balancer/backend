@@ -1,17 +1,10 @@
-import { Prisma, Chain } from '@prisma/client';
+import { Chain } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
 import _ from 'lodash';
 import moment from 'moment';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
-import { SwapEvent } from '../../../prisma/prisma-types';
 import { capturesYield } from '../../pool/lib/pool-utils';
-
-type PoolStats = {
-    poolId: string;
-    volume: number;
-    fees: number;
-    surplus?: number;
-};
+import { SwapStatsRepository, eventsRepository } from '../../repositories/events';
 
 const emptyStats = {
     volume: 0,
@@ -26,7 +19,11 @@ const emptyStats = {
  * @param poolIds
  * @param chain
  */
-export async function updateVolumeAndFees(chain: Chain, poolIds?: string[]) {
+export async function updateVolumeAndFees(
+    chain: Chain,
+    poolIds?: string[],
+    eventRepo: SwapStatsRepository = eventsRepository,
+) {
     const yesterday = moment().subtract(1, 'day').unix();
     const twoDaysAgo = moment().subtract(2, 'day').unix();
     const pools = await prisma.prismaPool.findMany({
@@ -36,23 +33,9 @@ export async function updateVolumeAndFees(chain: Chain, poolIds?: string[]) {
         },
     });
 
-    const query = (timestamp: number, poolIds?: string[]) =>
-        Prisma.raw(`SELECT
-        "poolId",
-        SUM("valueUSD") AS volume,
-        SUM((payload->'fee'->>'valueUSD')::numeric) AS fees,
-        SUM((payload->'surplus'->>'valueUSD')::numeric) AS surplus
-      FROM "PartitionedPoolEvent"
-      WHERE
-        "blockTimestamp" >= ${timestamp}
-        AND chain = '${chain}'
-        AND type = 'SWAP'
-        ${poolIds && poolIds.length < 30 ? 'AND "poolId" IN (\'' + poolIds.join("','") + "')" : ''}
-      GROUP BY 1`);
-
     // Fetch the stats
-    const stats24h = await prisma.$queryRaw<PoolStats[]>(query(yesterday, poolIds));
-    const stats48h = await prisma.$queryRaw<PoolStats[]>(query(twoDaysAgo, poolIds));
+    const stats24h = await eventRepo.getSwapStats({ chain, poolIds, since: yesterday });
+    const stats48h = await eventRepo.getSwapStats({ chain, poolIds, since: twoDaysAgo });
 
     // Prepare maps
     const stats24hMap = _.keyBy(stats24h, 'poolId');
