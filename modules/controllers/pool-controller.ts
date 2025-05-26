@@ -118,28 +118,15 @@ export function PoolController(tracer?: any) {
             return updates;
         },
 
-        async updateLiquidityValuesForActivePools(chain: Chain) {
-            const pools = await prisma.prismaPool.findMany({
-                where: {
-                    chain,
-                    dynamicData: {
-                        totalSharesNum: { gt: 0.00000000001 },
-                    },
-                },
-                select: { id: true },
-            });
-
-            await updateLiquidityValuesForPools(
-                chain,
-                pools.map(({ id }) => id),
-            );
-        },
         async updateLiquidityValuesForInactivePools(chain: Chain) {
             const pools = await prisma.prismaPool.findMany({
                 where: {
                     chain,
                     dynamicData: {
-                        totalSharesNum: { lte: 0.00000000001 },
+                        // Do the update only when the record wasn't touched in the last 30 minutes
+                        updatedAt: {
+                            lt: new Date(Date.now() - 60 * 20 * 1000),
+                        },
                     },
                 },
                 select: { id: true },
