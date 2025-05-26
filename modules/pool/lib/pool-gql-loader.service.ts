@@ -287,17 +287,35 @@ export class PoolGqlLoaderService {
 
         // Use full-text search using search_vector
         if (args.textSearch && args.textSearch.trim().length > 0) {
-            const searchQuery = args.textSearch
-                .replace(/[^a-zA-Z0-9 ]/g, '') // Escape non asci
+            const orderColumn =
+                orderingColumnsMap[(args.orderBy || 'totalLiquidity') as keyof typeof orderingColumnsMap] ||
+                'totalLiquidity';
+
+            // Replace terms like LBP and BTF
+            const replacements = {
+                lbp: 'LIQUIDITY_BOOTSTRAPPING',
+                btf: 'QUANT_AMM_WEIGHTED',
+            };
+
+            let searchQuery = args.textSearch
+                .toLowerCase()
+                .replace(/[^a-zA-Z0-9. ]/g, '') // Escape non asci
                 .trim();
+
+            // Apply replacements for whole words only
+            for (const [key, value] of Object.entries(replacements)) {
+                const wordRegex = new RegExp(`\\b${key}\\b`, 'g');
+                searchQuery = searchQuery.replace(wordRegex, value);
+            }
 
             // Use raw SQL for the search vector condition
             // Weighted results don't work yet, because the query is finding IDs for the second query only.
             // But setting it up already so it can be used with the refactored searching
-            const searchResults = await prisma.$queryRaw<
-                { id: string }[]
-            >`SELECT id, chain, ts_rank(ARRAY[0.01, 0.01, 0.01, 1.0]::float4[], p.search_vector, websearch_to_tsquery('simple', ${searchQuery}), 0) as rank FROM "PrismaPool" p WHERE p.search_vector @@ websearch_to_tsquery('simple', ${searchQuery})
-            ORDER BY rank DESC LIMIT 50`;
+            const query =
+                Prisma.raw(`SELECT p.id, p.chain FROM "PrismaPool" p LEFT JOIN "PrismaPoolDynamicData" d on (p.id = d."poolId") WHERE p.search_vector @@ websearch_to_tsquery('simple', '${searchQuery}') AND d."totalSharesNum" > 0.000000000001 AND NOT ('BLACK_LISTED' = ANY(p.categories))
+            ORDER BY d."${orderColumn}" ${args.orderDirection || 'DESC'} LIMIT 50`);
+
+            const searchResults = await prisma.$queryRaw<{ id: string }[]>(query);
 
             // Use the results to show pools
             const idIn = searchResults.map((r) => r.id);
@@ -378,27 +396,8 @@ export class PoolGqlLoaderService {
     }
 
     private mapQueryArgsToPoolQuery(args: QueryPoolGetPoolsArgs): Prisma.PrismaPoolFindManyArgs {
-        let orderBy: Prisma.PrismaPoolOrderByWithRelationInput = {};
-        const orderDirection = args.orderDirection || 'desc';
+        const orderBy = getOrderBy(args);
         const userAddress = args.where?.userAddress;
-
-        switch (args.orderBy) {
-            case 'totalLiquidity':
-                orderBy = { dynamicData: { totalLiquidity: orderDirection } };
-                break;
-            case 'totalShares':
-                orderBy = { dynamicData: { totalSharesNum: orderDirection } };
-                break;
-            case 'volume24h':
-                orderBy = { dynamicData: { volume24h: orderDirection } };
-                break;
-            case 'fees24h':
-                orderBy = { dynamicData: { fees24h: orderDirection } };
-                break;
-            case 'apr':
-                orderBy = { dynamicData: { apr: orderDirection } };
-                break;
-        }
 
         const baseQuery: Prisma.PrismaPoolFindManyArgs = {
             take: args.first || undefined,
@@ -593,26 +592,7 @@ export class PoolGqlLoaderService {
     }
 
     private mapAggregatorArgsToPoolQuery(args: QueryAggregatorPoolsArgs): Prisma.PrismaPoolFindManyArgs {
-        let orderBy: Prisma.PrismaPoolOrderByWithRelationInput = {};
-        const orderDirection = args.orderDirection || 'desc';
-
-        switch (args.orderBy) {
-            case 'totalLiquidity':
-                orderBy = { dynamicData: { totalLiquidity: orderDirection } };
-                break;
-            case 'totalShares':
-                orderBy = { dynamicData: { totalSharesNum: orderDirection } };
-                break;
-            case 'volume24h':
-                orderBy = { dynamicData: { volume24h: orderDirection } };
-                break;
-            case 'fees24h':
-                orderBy = { dynamicData: { fees24h: orderDirection } };
-                break;
-            case 'apr':
-                orderBy = { dynamicData: { apr: orderDirection } };
-                break;
-        }
+        const orderBy = getOrderBy(args);
 
         const baseQuery: Prisma.PrismaPoolFindManyArgs = {
             take: args.first || undefined,
@@ -1666,3 +1646,23 @@ export class PoolGqlLoaderService {
         };
     }
 }
+
+const orderingColumnsMap = {
+    totalLiquidity: 'totalLiquidity',
+    totalShares: 'totalSharesNum',
+    volume24h: 'volume24h',
+    fees24h: 'fees24h',
+    apr: 'apr',
+};
+
+const getOrderBy = (args: QueryPoolGetPoolsArgs) => {
+    const orderDirection = args.orderDirection || 'desc';
+    const orderColumn = orderingColumnsMap[(args.orderBy || 'totalLiquidity') as keyof typeof orderingColumnsMap];
+    const orderBy = {
+        dynamicData: {
+            [orderColumn]: orderDirection,
+        },
+    };
+
+    return orderBy;
+};
