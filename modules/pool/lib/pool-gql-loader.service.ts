@@ -1701,7 +1701,7 @@ const searchFilters = (args: QueryPoolGetPoolsArgs) => {
     }
 
     if (args.where?.protocolVersionIn) {
-        where += `AND p."protocolVersionIn" = ANY('{${args.where?.protocolVersionIn.map(sanitizeInput).join(',')}}')`;
+        where += `AND p."protocolVersion" = ANY('{${args.where?.protocolVersionIn.map(sanitizeInput).join(',')}}')`;
     }
 
     if (args.where?.poolTypeIn) {
