@@ -1672,7 +1672,7 @@ const getOrderBy = (args: QueryPoolGetPoolsArgs) => {
     return orderBy;
 };
 
-const sanitizeInput = (input: any) => `${input}`.replace(/[^a-zA-Z0-9. ]/g, '').trim();
+const sanitizeInput = (input: any) => `${input}`.replace(/[^a-zA-Z0-9._ ]/g, '').trim();
 
 const sanitiseTextSearch = (textSearch: string) => {
     let searchQuery = sanitizeInput(textSearch).toLowerCase();
