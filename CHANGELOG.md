@@ -1,5 +1,13 @@
 # backend
 
+## 1.41.7
+
+### Patch Changes
+
+-   07c91a7: fixing search query filter
+-   63c215c: fix: text search pagination
+-   85903fb: include search filters in text search
+
 ## 1.41.6
 
 ### Patch Changes
