@@ -91,6 +91,7 @@ export class PoolOnChainDataService {
                 id: { in: poolIds },
                 chain,
                 type: { in: SUPPORTED_POOL_TYPES },
+                protocolVersion: 2,
             },
             include: {
                 tokens: { orderBy: { index: 'asc' }, include: { token: true } },

@@ -23,6 +23,7 @@ export const syncOnchainDataForAllPools = async (
                     },
                 },
                 chain,
+                protocolVersion: 2,
             },
         })
     ).map((item) => item.id);

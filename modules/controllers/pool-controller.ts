@@ -123,9 +123,9 @@ export function PoolController(tracer?: any) {
                 where: {
                     chain,
                     dynamicData: {
-                        // Do the update only when the record wasn't touched in the last 30 minutes
+                        // Do the update only when the record wasn't touched in the last 10 minutes
                         updatedAt: {
-                            lt: new Date(Date.now() - 60 * 20 * 1000),
+                            lt: new Date(Date.now() - 60 * 10 * 1000),
                         },
                     },
                 },
