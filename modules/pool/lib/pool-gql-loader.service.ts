@@ -310,6 +310,7 @@ export class PoolGqlLoaderService {
             args.where ||= {};
             args.where.idIn = idIn;
             args.textSearch = undefined;
+            args.skip = undefined;
         }
 
         const pools = await prisma.prismaPool.findMany({
@@ -1693,7 +1694,7 @@ const sanitiseTextSearch = (textSearch: string) => {
 };
 
 const searchFilters = (args: QueryPoolGetPoolsArgs) => {
-    let where = '1=1';
+    let where = '1=1 ';
 
     if (args.where?.chainIn) {
         where += `AND p.chain = ANY('{${args.where?.chainIn.map(sanitizeInput).join(',')}}')`;
