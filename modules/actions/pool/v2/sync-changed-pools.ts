@@ -71,6 +71,7 @@ export const syncChangedPools = async (
         where: {
             chain,
             type: 'LIQUIDITY_BOOTSTRAPPING',
+            protocolVersion: 2,
         },
         select: { id: true },
     });

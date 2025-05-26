@@ -133,15 +133,6 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
                 next,
             );
             break;
-        case 'update-liquidity-for-active-pools':
-            await runIfNotAlreadyRunning(
-                name,
-                chainId,
-                () => PoolController().updateLiquidityValuesForActivePools(chain),
-                res,
-                next,
-            );
-            break;
         case 'update-liquidity-for-inactive-pools':
             await runIfNotAlreadyRunning(
                 name,

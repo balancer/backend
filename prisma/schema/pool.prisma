@@ -146,6 +146,8 @@ model PrismaPoolToken {
     weight              String?
     priceRate           String  @default("1.0")
     latestFxPrice       Float?
+    
+    updatedAt           DateTime @updatedAt @default(now())
 
     @@index([id, chain]) // Used for updates
     @@index([poolId, chain])

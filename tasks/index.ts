@@ -67,7 +67,7 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         await EventController().syncLastSwaps(chain);
         await syncCurrentPricesFromApi(chain);
 
-        await PoolController().updateLiquidityValuesForActivePools(chain);
+        await PoolController().updateLiquidityValuesForInactivePools(chain);
 
         return 'OK';
     } else if (job === 'sor-sync-v3') {
@@ -87,15 +87,15 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         await EventController().syncLastSwaps(chain);
         await syncCurrentPricesFromApi(chain);
 
-        await PoolController().updateLiquidityValuesForActivePools(chain);
+        await PoolController().updateLiquidityValuesForInactivePools(chain);
 
         return 'OK';
     } else if (job === 'add-pools-v3') {
         return PoolController().addPoolsV3(chain);
     } else if (job === 'sync-pools-v3') {
         return PoolController().syncPoolsV3(chain);
-    } else if (job === 'update-liquidity-for-active-pools') {
-        return PoolController().updateLiquidityValuesForActivePools(chain);
+    } else if (job === 'update-liquidity-for-inactive-pools') {
+        return PoolController().updateLiquidityValuesForInactivePools(chain);
     } else if (job === 'sync-staking') {
         return StakingController().syncStaking(chain);
     } else if (job === 'sync-join-exits-v3') {
