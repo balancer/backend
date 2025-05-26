@@ -1,5 +1,11 @@
 # backend
 
+## 1.41.6
+
+### Patch Changes
+
+-   5702a23: text search ordering and custom term mapping
+
 ## 1.41.5
 
 ### Patch Changes
