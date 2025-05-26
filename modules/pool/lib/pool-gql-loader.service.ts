@@ -291,29 +291,17 @@ export class PoolGqlLoaderService {
                 orderingColumnsMap[(args.orderBy || 'totalLiquidity') as keyof typeof orderingColumnsMap] ||
                 'totalLiquidity';
 
-            // Replace terms like LBP and BTF
-            const replacements = {
-                lbp: 'LIQUIDITY_BOOTSTRAPPING',
-                btf: 'QUANT_AMM_WEIGHTED',
-            };
-
-            let searchQuery = args.textSearch
-                .toLowerCase()
-                .replace(/[^a-zA-Z0-9. ]/g, '') // Escape non asci
-                .trim();
-
-            // Apply replacements for whole words only
-            for (const [key, value] of Object.entries(replacements)) {
-                const wordRegex = new RegExp(`\\b${key}\\b`, 'g');
-                searchQuery = searchQuery.replace(wordRegex, value);
-            }
+            const searchQuery = sanitiseTextSearch(args.textSearch);
+            const limit = Math.min(100, parseInt(`${args.first}`) || 20);
+            const offset = parseInt(`${args.skip}`) || 0;
+            const filters = searchFilters(args);
 
             // Use raw SQL for the search vector condition
             // Weighted results don't work yet, because the query is finding IDs for the second query only.
             // But setting it up already so it can be used with the refactored searching
             const query =
-                Prisma.raw(`SELECT p.id, p.chain FROM "PrismaPool" p LEFT JOIN "PrismaPoolDynamicData" d on (p.id = d."poolId") WHERE p.search_vector @@ websearch_to_tsquery('simple', '${searchQuery}') AND d."totalSharesNum" > 0.000000000001 AND NOT ('BLACK_LISTED' = ANY(p.categories))
-            ORDER BY d."${orderColumn}" ${args.orderDirection || 'DESC'} LIMIT 50`);
+                Prisma.raw(`SELECT p.id, p.chain FROM "PrismaPool" p LEFT JOIN "PrismaPoolDynamicData" d on (p.id = d."poolId") WHERE p.search_vector @@ websearch_to_tsquery('simple', '${searchQuery}') AND d."totalSharesNum" > 0.000000000001 AND NOT ('BLACK_LISTED' = ANY(p.categories)) AND ${filters}
+            ORDER BY d."${orderColumn}" ${args.orderDirection && args.orderDirection === 'asc' ? 'ASC' : 'DESC'} LIMIT ${limit} OFFSET ${offset}`);
 
             const searchResults = await prisma.$queryRaw<{ id: string }[]>(query);
 
@@ -373,7 +361,24 @@ export class PoolGqlLoaderService {
     }
 
     public async getPoolsCount(args: QueryPoolGetPoolsArgs): Promise<number> {
-        return prisma.prismaPool.count({ where: this.mapQueryArgsToPoolQuery(args).where });
+        if (args.textSearch && args.textSearch.trim().length > 0) {
+            const searchQuery = sanitiseTextSearch(args.textSearch);
+            const filters = searchFilters(args);
+
+            // Use raw SQL for the search vector condition
+            // Weighted results don't work yet, because the query is finding IDs for the second query only.
+            // But setting it up already so it can be used with the refactored searching
+            const query = Prisma.raw(
+                `SELECT count(*) as count FROM "PrismaPool" p LEFT JOIN "PrismaPoolDynamicData" d on (p.id = d."poolId") WHERE p.search_vector @@ websearch_to_tsquery('simple', '${searchQuery}') AND d."totalSharesNum" > 0.000000000001 AND NOT ('BLACK_LISTED' = ANY(p.categories)) AND ${filters}`,
+            );
+
+            const searchResults = await prisma.$queryRaw<{ count: bigint }[]>(query);
+
+            // graphql type parsing doesnt seem to understand bigints
+            return parseInt(searchResults[0].count as unknown as string);
+        } else {
+            return prisma.prismaPool.count({ where: this.mapQueryArgsToPoolQuery(args).where });
+        }
     }
 
     public async getFeaturedPools(chains: Chain[]): Promise<GqlPoolFeaturedPool[]> {
@@ -1665,4 +1670,42 @@ const getOrderBy = (args: QueryPoolGetPoolsArgs) => {
     };
 
     return orderBy;
+};
+
+const sanitizeInput = (input: any) => `${input}`.replace(/[^a-zA-Z0-9. ]/g, '').trim();
+
+const sanitiseTextSearch = (textSearch: string) => {
+    let searchQuery = sanitizeInput(textSearch).toLowerCase();
+
+    // Replace terms like LBP and BTF
+    const replacements = {
+        lbp: 'LIQUIDITY_BOOTSTRAPPING',
+        btf: 'QUANT_AMM_WEIGHTED',
+    };
+
+    // Apply replacements for whole words only
+    for (const [key, value] of Object.entries(replacements)) {
+        const wordRegex = new RegExp(`\\b${key}\\b`, 'g');
+        searchQuery = searchQuery.replace(wordRegex, value);
+    }
+
+    return searchQuery;
+};
+
+const searchFilters = (args: QueryPoolGetPoolsArgs) => {
+    let where = '1=1';
+
+    if (args.where?.chainIn) {
+        where += `AND p.chain = ANY('{${args.where?.chainIn.map(sanitizeInput).join(',')}}')`;
+    }
+
+    if (args.where?.protocolVersionIn) {
+        where += `AND p."protocolVersionIn" = ANY('{${args.where?.protocolVersionIn.map(sanitizeInput).join(',')}}')`;
+    }
+
+    if (args.where?.poolTypeIn) {
+        where += `AND p.type = ANY('{${args.where?.poolTypeIn.map(sanitizeInput).join(',')}}')`;
+    }
+
+    return where;
 };
