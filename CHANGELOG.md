@@ -1,5 +1,11 @@
 # backend
 
+## 1.41.8
+
+### Patch Changes
+
+-   6110f16: fix: protocol version in text search
+
 ## 1.41.7
 
 ### Patch Changes
