@@ -39,13 +39,7 @@ export const zkevmNetworkConfig: NetworkConfig = {
     workerJobs: [
         {
             name: 'update-liquidity-for-inactive-pools',
-            interval: every(1, 'days'),
-            alarmEvaluationPeriod: 1,
-            alarmDatapointsToAlarm: 1,
-        },
-        {
-            name: 'update-liquidity-for-active-pools',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(6, 'minutes') : every(2, 'minutes'),
+            interval: every(10, 'minutes'),
         },
         {
             name: 'update-pool-apr',
@@ -76,10 +70,6 @@ export const zkevmNetworkConfig: NetworkConfig = {
             interval: every(90, 'minutes'),
         },
         {
-            name: 'update-lifetime-values-for-all-pools',
-            interval: every(50, 'minutes'),
-        },
-        {
             name: 'sync-changed-pools',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(2, 'minutes') : every(30, 'seconds'),
             alarmEvaluationPeriod: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
@@ -99,7 +89,7 @@ export const zkevmNetworkConfig: NetworkConfig = {
         },
         {
             name: 'update-fee-volume-yield-all-pools',
-            interval: every(1, 'hours'),
+            interval: every(30, 'minutes'),
         },
         {
             name: 'sync-vebal-balances',

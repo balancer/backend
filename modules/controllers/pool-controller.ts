@@ -12,7 +12,6 @@ import { getPoolsSubgraphClient, getV3JoinedSubgraphClient, getVaultSubgraphClie
 import { prisma } from '../../prisma/prisma-client';
 import { updateLiquidity24hAgo, updateLiquidityValuesForPools } from '../actions/pool/update-liquidity';
 import { Chain, PrismaLastBlockSyncedCategory } from '@prisma/client';
-import { getVaultClient } from '../sources/contracts/v3/vault-client';
 import { syncPools as syncPoolsV3 } from '../actions/pool/v3/sync-pools';
 import { syncTokenPairs } from '../actions/pool/v3/sync-tokenpairs';
 import { syncHookData } from '../actions/pool/v3/sync-hook-data';
@@ -23,8 +22,6 @@ import { syncHookReviews } from '../actions/content/sync-hook-reviews';
 import { syncErc4626Tokens } from '../actions/token/sync-erc4626-tokens';
 import { syncRateProviderReviews } from '../actions/content/sync-rate-provider-reviews';
 import { PoolWithMappedJsonFields } from '../../prisma/prisma-types';
-import { updateVolumeAndFees } from '../actions/pool/update-volume-and-fees';
-import { getPoolsClient } from '../sources/contracts';
 
 export function PoolController(tracer?: any) {
     return {
@@ -121,37 +118,22 @@ export function PoolController(tracer?: any) {
             return updates;
         },
 
-        async updateLiquidityValuesForActivePools(chain: Chain) {
-            const pools = await prisma.prismaPool.findMany({
-                where: {
-                    chain,
-                    dynamicData: {
-                        totalSharesNum: { gt: 0.00000000001 },
-                    },
-                },
-                select: { id: true },
-            });
-
-            await updateLiquidityValuesForPools(
-                chain,
-                pools.map(({ id }) => id),
-            );
-        },
         async updateLiquidityValuesForInactivePools(chain: Chain) {
-            const pools = await prisma.prismaPool.findMany({
+            const poolTokens = await prisma.prismaPoolToken.findMany({
                 where: {
                     chain,
-                    dynamicData: {
-                        totalSharesNum: { lte: 0.00000000001 },
+                    updatedAt: {
+                        // Do the update only when the pool wasn't synced in the last 10 minutes
+                        lt: new Date(Date.now() - 60 * 10 * 1000),
                     },
                 },
-                select: { id: true },
             });
 
-            await updateLiquidityValuesForPools(
-                chain,
-                pools.map(({ id }) => id),
-            );
+            const ids = [...new Set(poolTokens.map((pt) => pt.poolId))];
+
+            await updateLiquidityValuesForPools(chain, ids);
+
+            return ids;
         },
         async addPoolsV3(chain: Chain, checkForExistingPools = true) {
             const {
@@ -285,7 +267,6 @@ export function PoolController(tracer?: any) {
 
             const ids = await syncPoolsV3(dbPools, chain, vaultAddress, viemClient, latestBlock);
             await syncTokenPairs(ids, viemClient, routerAddress, chain);
-            await updateVolumeAndFees(chain, ids);
             await upsertLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.POOLS_V3, latestBlock);
 
             return ids;

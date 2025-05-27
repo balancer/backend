@@ -1,29 +1,21 @@
-import { Chain, PrismaPoolFilter, PrismaPoolStakingType, PrismaPoolSwap } from '@prisma/client';
+import { Chain, PrismaPoolFilter, PrismaPoolStakingType } from '@prisma/client';
 import _ from 'lodash';
 import moment from 'moment-timezone';
 import { prisma } from '../../prisma/prisma-client';
 import {
     GqlChain,
     GqlPoolAggregator,
-    GqlPoolBatchSwap,
     GqlPoolFeaturedPool,
-    GqlPoolFeaturedPoolGroup,
-    GqlPoolJoinExit,
     GqlPoolMinimal,
     GqlPoolSnapshotDataRange,
     GqlPoolUnion,
-    QueryPoolGetBatchSwapsArgs,
-    QueryPoolGetJoinExitsArgs,
     QueryPoolGetPoolsArgs,
-    QueryPoolGetSwapsArgs,
 } from '../../apps/api/gql/generated-schema';
 import { tokenService } from '../token/token.service';
 import { PoolAprUpdaterService } from './lib/pool-apr-updater.service';
 import { PoolGqlLoaderService } from './lib/pool-gql-loader.service';
 import { PoolOnChainDataService, PoolOnChainDataServiceOptions } from './lib/pool-on-chain-data.service';
 import { PoolSnapshotService } from './lib/pool-snapshot.service';
-import { PoolSwapService } from './lib/pool-swap.service';
-import { PoolUsdDataService } from './lib/pool-usd-data.service';
 import { networkContext } from '../network/network-context.service';
 import { ReliquarySubgraphService } from '../subgraphs/reliquary-subgraph/reliquary.service';
 import { ReliquarySnapshotService } from './lib/reliquary-snapshot.service';
@@ -48,10 +40,8 @@ import config from '../../config';
 export class PoolService {
     constructor(
         private readonly poolOnChainDataService: PoolOnChainDataService,
-        private readonly poolUsdDataService: PoolUsdDataService,
         private readonly poolGqlLoaderService: PoolGqlLoaderService,
         private readonly poolAprUpdaterService: PoolAprUpdaterService,
-        private readonly poolSwapService: PoolSwapService,
         private readonly poolSnapshotService: PoolSnapshotService,
     ) {}
 
@@ -84,39 +74,6 @@ export class PoolService {
 
     public async getPoolFilters(): Promise<PrismaPoolFilter[]> {
         return prisma.prismaPoolFilter.findMany({ where: { chain: this.chain } });
-    }
-
-    public async getPoolSwaps(args: QueryPoolGetSwapsArgs): Promise<PrismaPoolSwap[]> {
-        return this.poolSwapService.getSwaps(args);
-    }
-
-    public async getPoolBatchSwaps(args: QueryPoolGetBatchSwapsArgs): Promise<GqlPoolBatchSwap[]> {
-        const batchSwaps = await this.poolSwapService.getBatchSwaps(args);
-
-        return batchSwaps.map((batchSwap) => ({
-            ...batchSwap,
-            swaps: batchSwap.swaps.map((swap) => {
-                return {
-                    ...swap,
-                    pool: {
-                        id: swap.pool.id,
-                        name: swap.pool.name,
-                        type: swap.pool.type,
-                        symbol: swap.pool.symbol,
-                        allTokens: swap.pool.tokens.map((token) => ({
-                            address: token.address,
-                            isNested: token.nestedPoolId !== null,
-                            isPhantomBpt: token.address === swap.pool.address,
-                            weight: token.weight,
-                        })),
-                    },
-                };
-            }),
-        }));
-    }
-
-    public async getPoolJoinExits(args: QueryPoolGetJoinExitsArgs): Promise<GqlPoolJoinExit[]> {
-        return this.poolSwapService.getJoinExits(args);
     }
 
     public async getFeaturedPools(chains: Chain[]): Promise<GqlPoolFeaturedPool[]> {
@@ -229,10 +186,6 @@ export class PoolService {
             config[chain].reliquary?.excludedFarmIds,
         );
     }
-
-    public async updateLifetimeValuesForAllPools() {
-        await this.poolUsdDataService.updateLifetimeValuesForAllPools();
-    }
 }
 
 const optionsResolverForPoolOnChainDataService: () => PoolOnChainDataServiceOptions = () => {
@@ -248,9 +201,7 @@ const optionsResolverForPoolOnChainDataService: () => PoolOnChainDataServiceOpti
 
 export const poolService = new PoolService(
     new PoolOnChainDataService(optionsResolverForPoolOnChainDataService),
-    new PoolUsdDataService(tokenService),
     new PoolGqlLoaderService(),
     new PoolAprUpdaterService(),
-    new PoolSwapService(),
     new PoolSnapshotService(coingeckoDataService),
 );

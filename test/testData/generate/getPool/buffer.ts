@@ -1,6 +1,8 @@
 import { type PublicClient, createPublicClient, http, type Address, type Chain, erc4626Abi, erc20Abi } from 'viem';
 import { CHAINS, balancerV3Contracts } from '@balancer/sdk';
 
+import { TransformBigintToString } from '../../types';
+
 export type BufferImmutable = {
     tokens: Address[];
     decimals: number[]; // this is an addition required to scale the rate and transform from/to fixedPoint/floatPoint
@@ -8,10 +10,6 @@ export type BufferImmutable = {
 
 type BufferMutable = {
     rate: bigint;
-};
-
-type TransformBigintToString<T> = {
-    [K in keyof T]: T[K] extends bigint ? string : T[K] extends bigint[] ? string[] : T[K];
 };
 
 export class BufferPool {

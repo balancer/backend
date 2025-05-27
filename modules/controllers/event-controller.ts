@@ -4,7 +4,7 @@ import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer
 import { getV2SubgraphClient } from '../subgraphs/balancer-subgraph';
 import { syncJoinExits as syncJoinExitsV2 } from '../actions/pool/v2/sync-join-exits';
 import { syncJoinExits as syncJoinExitsV3 } from '../actions/pool/v3/sync-join-exits';
-import { syncSwaps as syncSwapsV2, syncSwapsForLast48Hours } from '../actions/pool/v2/sync-swaps';
+import { syncSwaps as syncSwapsV2 } from '../actions/pool/v2/sync-swaps';
 import { syncSwaps as syncSwapsV3 } from '../actions/pool/v3/sync-swaps';
 import { Chain } from '@prisma/client';
 import { updateVolumeAndFees } from '../actions/pool/update-volume-and-fees';
@@ -39,7 +39,6 @@ export function EventController() {
 
             const subgraphClient = getV2SubgraphClient(balancer, chain);
             const poolsWithNewSwaps = await syncSwapsV2(subgraphClient, chain);
-            await syncSwapsForLast48Hours(subgraphClient, chain);
             await updateVolumeAndFees(chain, poolsWithNewSwaps);
 
             return poolsWithNewSwaps;
@@ -102,6 +101,9 @@ export function EventController() {
             const poolsWithNewSwaps = await syncSwapsV3(vaultSubgraphClient, chain);
             await updateVolumeAndFees(chain, poolsWithNewSwaps);
             return poolsWithNewSwaps;
+        },
+        async updateVolumeAndFees(chain: Chain) {
+            return updateVolumeAndFees(chain);
         },
     };
 }

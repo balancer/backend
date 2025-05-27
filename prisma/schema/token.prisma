@@ -2,7 +2,7 @@ model PrismaToken {
     @@id([address, chain])
 
     address             String
-    chain               Chain               
+    chain               Chain
 
     symbol              String
     name                String
@@ -45,7 +45,7 @@ model PrismaTokenCurrentPrice {
 
     tokenAddress        String
     token               PrismaToken          @relation(fields:[tokenAddress, chain], references: [address, chain], onDelete: Cascade)
-    chain               Chain                
+    chain               Chain
 
     updatedAt           DateTime             @updatedAt
     updatedBy           String?
@@ -54,6 +54,7 @@ model PrismaTokenCurrentPrice {
 
     @@index(tokenAddress)
     @@index(chain)
+    @@unique([tokenAddress, chain])
 }
 
 model PrismaTokenPrice {
@@ -61,7 +62,7 @@ model PrismaTokenPrice {
 
     tokenAddress        String
     token               PrismaToken         @relation(fields:[tokenAddress, chain], references: [address, chain], onDelete: Cascade)
-    chain               Chain               
+    chain               Chain
     updatedAt           DateTime            @updatedAt
     updatedBy           String?
     timestamp           Int
@@ -82,7 +83,7 @@ model PrismaTokenDynamicData {
     coingeckoId         String
     tokenAddress        String
     token               PrismaToken         @relation(fields:[tokenAddress, chain], references: [address, chain], onDelete: Cascade)
-    chain               Chain               
+    chain               Chain
     updatedAt           DateTime            @updatedAt
 
     price               Float
@@ -108,7 +109,7 @@ model PrismaTokenType {
     id                  String
     tokenAddress        String
     token               PrismaToken         @relation(fields:[tokenAddress, chain], references: [address, chain], onDelete: Cascade)
-    chain               Chain               
+    chain               Chain
     type                PrismaTokenTypeOption
 }
 
@@ -133,7 +134,7 @@ model PrismaPriceRateProviderData {
     reviewUrl           String?
     warnings            String?
     upgradableComponents Json?
-    
+
     @@index([chain, rateProviderAddress])
     @@index([tokenAddress])
 }
@@ -154,7 +155,7 @@ model PrismaErc4626ReviewData {
     canUseBufferForSwaps        Boolean     @default(false)
     useUnderlyingForAddRemove   Boolean     @default(false)
     useWrappedForAddRemove      Boolean     @default(true)
-    
+
     @@index([chain, erc4626Address])
     @@index([assetAddress])
 }

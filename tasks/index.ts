@@ -67,7 +67,7 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         await EventController().syncLastSwaps(chain);
         await syncCurrentPricesFromApi(chain);
 
-        await PoolController().updateLiquidityValuesForActivePools(chain);
+        await PoolController().updateLiquidityValuesForInactivePools(chain);
 
         return 'OK';
     } else if (job === 'sor-sync-v3') {
@@ -87,15 +87,15 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         await EventController().syncLastSwaps(chain);
         await syncCurrentPricesFromApi(chain);
 
-        await PoolController().updateLiquidityValuesForActivePools(chain);
+        await PoolController().updateLiquidityValuesForInactivePools(chain);
 
         return 'OK';
     } else if (job === 'add-pools-v3') {
         return PoolController().addPoolsV3(chain);
     } else if (job === 'sync-pools-v3') {
         return PoolController().syncPoolsV3(chain);
-    } else if (job === 'update-liquidity-for-active-pools') {
-        return PoolController().updateLiquidityValuesForActivePools(chain);
+    } else if (job === 'update-liquidity-for-inactive-pools') {
+        return PoolController().updateLiquidityValuesForInactivePools(chain);
     } else if (job === 'sync-staking') {
         return StakingController().syncStaking(chain);
     } else if (job === 'sync-join-exits-v3') {
@@ -116,6 +116,8 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         return snapshotsController.forwardFillSnapshotsForPoolsWithoutUpdatesV3(chain);
     } else if (job === 'sync-swaps-v3') {
         return EventController().syncSwapsV3(chain);
+    } else if (job === 'update-volume-and-fees') {
+        return EventController().updateVolumeAndFees(chain);
     } else if (job === 'update-liquidity-24h-ago-v3') {
         return PoolController().updateLiquidity24hAgoV3(chain);
     } else if (job === 'sync-sftmx-staking') {
@@ -145,8 +147,6 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         return CowAmmController().syncJoinExits(chain);
     } else if (job === 'update-surplus-aprs') {
         return CowAmmController().updateSurplusAprs();
-    } else if (job === 'update-cow-amm-volume-and-fees') {
-        return CowAmmController().updateVolumeAndFees(chain);
     } else if (job === 'sync-cow-amm-balances') {
         return CowAmmController().syncBalances(chain);
     } else if (job === 'sync-categories') {

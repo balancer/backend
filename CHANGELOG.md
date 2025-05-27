@@ -1,5 +1,88 @@
 # backend
 
+## 1.41.8
+
+### Patch Changes
+
+-   6110f16: fix: protocol version in text search
+
+## 1.41.7
+
+### Patch Changes
+
+-   07c91a7: fixing search query filter
+-   63c215c: fix: text search pagination
+-   85903fb: include search filters in text search
+
+## 1.41.6
+
+### Patch Changes
+
+-   5702a23: text search ordering and custom term mapping
+
+## 1.41.5
+
+### Patch Changes
+
+-   aa81b48: yo APRs on base
+-   e7dc927: exclude paused pools from the sor
+
+## 1.41.4
+
+### Patch Changes
+
+-   69b1d7d: bring back event queries and 48h stat updates
+-   e629fa3: enable volume and fees updates on swaps
+-   3f156e9: token indexes
+
+## 1.41.3
+
+### Patch Changes
+
+-   556dbb8: balanceUSD update guards
+-   befa825: patch events query for dynamic aprs
+
+## 1.41.2
+
+### Patch Changes
+
+-   c394aef: using dynamicData instead of events for protocol stats
+-   840f513: update fees in cron only
+-   1ca7f9a: disable events queries
+-   ff1b24e: pool 48h stats are doubled 24h
+
+## 1.41.1
+
+### Patch Changes
+
+-   723a59b: update volume and fees query
+
+## 1.41.0
+
+### Minor Changes
+
+-   6a09188: text search
+-   41451a0: SOR - Add support for Akron Hook
+-   570a104: SOR - Update QuantAmm support
+
+### Patch Changes
+
+-   ab7f25c: sfrxusd apr OP
+-   bc416fd: patch failing SG query when id_in is empty
+-   17084dd: events type timestamp index
+-   33b912b: temp volume fees off
+-   75dadbe: update fees in cron only
+-   e0a704a: remove unused data related to legacy swaps and blocks
+-   ce8eb5a: disable events queries
+
+## 1.40.8
+
+### Patch Changes
+
+-   054b36b: use v3 flow to update v2 lifetimedata
+-   ba9daac: add swapfee apr back to quant
+-   7c114ac: fix quantAMM onchain data type
+
 ## 1.40.7
 
 ### Patch Changes

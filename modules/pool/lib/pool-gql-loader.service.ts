@@ -285,6 +285,34 @@ export class PoolGqlLoaderService {
             return gqlPools;
         }
 
+        // Use full-text search using search_vector
+        if (args.textSearch && args.textSearch.trim().length > 0) {
+            const orderColumn =
+                orderingColumnsMap[(args.orderBy || 'totalLiquidity') as keyof typeof orderingColumnsMap] ||
+                'totalLiquidity';
+
+            const searchQuery = sanitiseTextSearch(args.textSearch);
+            const limit = Math.min(100, parseInt(`${args.first}`) || 20);
+            const offset = parseInt(`${args.skip}`) || 0;
+            const filters = searchFilters(args);
+
+            // Use raw SQL for the search vector condition
+            // Weighted results don't work yet, because the query is finding IDs for the second query only.
+            // But setting it up already so it can be used with the refactored searching
+            const query =
+                Prisma.raw(`SELECT p.id, p.chain FROM "PrismaPool" p LEFT JOIN "PrismaPoolDynamicData" d on (p.id = d."poolId") WHERE p.search_vector @@ websearch_to_tsquery('simple', '${searchQuery}') AND d."totalSharesNum" > 0.000000000001 AND NOT ('BLACK_LISTED' = ANY(p.categories)) AND ${filters}
+            ORDER BY d."${orderColumn}" ${args.orderDirection && args.orderDirection === 'asc' ? 'ASC' : 'DESC'} LIMIT ${limit} OFFSET ${offset}`);
+
+            const searchResults = await prisma.$queryRaw<{ id: string }[]>(query);
+
+            // Use the results to show pools
+            const idIn = searchResults.map((r) => r.id);
+            args.where ||= {};
+            args.where.idIn = idIn;
+            args.textSearch = undefined;
+            args.skip = undefined;
+        }
+
         const pools = await prisma.prismaPool.findMany({
             ...this.mapQueryArgsToPoolQuery(args),
             include: this.getPoolInclude(),
@@ -334,7 +362,24 @@ export class PoolGqlLoaderService {
     }
 
     public async getPoolsCount(args: QueryPoolGetPoolsArgs): Promise<number> {
-        return prisma.prismaPool.count({ where: this.mapQueryArgsToPoolQuery(args).where });
+        if (args.textSearch && args.textSearch.trim().length > 0) {
+            const searchQuery = sanitiseTextSearch(args.textSearch);
+            const filters = searchFilters(args);
+
+            // Use raw SQL for the search vector condition
+            // Weighted results don't work yet, because the query is finding IDs for the second query only.
+            // But setting it up already so it can be used with the refactored searching
+            const query = Prisma.raw(
+                `SELECT count(*) as count FROM "PrismaPool" p LEFT JOIN "PrismaPoolDynamicData" d on (p.id = d."poolId") WHERE p.search_vector @@ websearch_to_tsquery('simple', '${searchQuery}') AND d."totalSharesNum" > 0.000000000001 AND NOT ('BLACK_LISTED' = ANY(p.categories)) AND ${filters}`,
+            );
+
+            const searchResults = await prisma.$queryRaw<{ count: bigint }[]>(query);
+
+            // graphql type parsing doesnt seem to understand bigints
+            return parseInt(searchResults[0].count as unknown as string);
+        } else {
+            return prisma.prismaPool.count({ where: this.mapQueryArgsToPoolQuery(args).where });
+        }
     }
 
     public async getFeaturedPools(chains: Chain[]): Promise<GqlPoolFeaturedPool[]> {
@@ -357,27 +402,8 @@ export class PoolGqlLoaderService {
     }
 
     private mapQueryArgsToPoolQuery(args: QueryPoolGetPoolsArgs): Prisma.PrismaPoolFindManyArgs {
-        let orderBy: Prisma.PrismaPoolOrderByWithRelationInput = {};
-        const orderDirection = args.orderDirection || 'desc';
+        const orderBy = getOrderBy(args);
         const userAddress = args.where?.userAddress;
-
-        switch (args.orderBy) {
-            case 'totalLiquidity':
-                orderBy = { dynamicData: { totalLiquidity: orderDirection } };
-                break;
-            case 'totalShares':
-                orderBy = { dynamicData: { totalSharesNum: orderDirection } };
-                break;
-            case 'volume24h':
-                orderBy = { dynamicData: { volume24h: orderDirection } };
-                break;
-            case 'fees24h':
-                orderBy = { dynamicData: { fees24h: orderDirection } };
-                break;
-            case 'apr':
-                orderBy = { dynamicData: { apr: orderDirection } };
-                break;
-        }
 
         const baseQuery: Prisma.PrismaPoolFindManyArgs = {
             take: args.first || undefined,
@@ -531,8 +557,8 @@ export class PoolGqlLoaderService {
             ...(where?.hasHook !== undefined && where.hasHook
                 ? { hook: { path: ['address'], string_starts_with: '0x' } }
                 : where?.hasHook !== undefined && !where.hasHook
-                ? { hook: { equals: Prisma.DbNull } }
-                : {}),
+                  ? { hook: { equals: Prisma.DbNull } }
+                  : {}),
         };
 
         if (!textSearch) {
@@ -572,26 +598,7 @@ export class PoolGqlLoaderService {
     }
 
     private mapAggregatorArgsToPoolQuery(args: QueryAggregatorPoolsArgs): Prisma.PrismaPoolFindManyArgs {
-        let orderBy: Prisma.PrismaPoolOrderByWithRelationInput = {};
-        const orderDirection = args.orderDirection || 'desc';
-
-        switch (args.orderBy) {
-            case 'totalLiquidity':
-                orderBy = { dynamicData: { totalLiquidity: orderDirection } };
-                break;
-            case 'totalShares':
-                orderBy = { dynamicData: { totalSharesNum: orderDirection } };
-                break;
-            case 'volume24h':
-                orderBy = { dynamicData: { volume24h: orderDirection } };
-                break;
-            case 'fees24h':
-                orderBy = { dynamicData: { fees24h: orderDirection } };
-                break;
-            case 'apr':
-                orderBy = { dynamicData: { apr: orderDirection } };
-                break;
-        }
+        const orderBy = getOrderBy(args);
 
         const baseQuery: Prisma.PrismaPoolFindManyArgs = {
             take: args.first || undefined,
@@ -1398,15 +1405,7 @@ export class PoolGqlLoaderService {
 
         let filteredItems = aprItems;
         if (pool.type === 'QUANT_AMM_WEIGHTED') {
-            filteredItems = aprItems.filter(
-                (item) =>
-                    item.type === 'QUANT_AMM_UPLIFT' ||
-                    item.type === 'AURA' ||
-                    item.type === 'VEBAL_EMISSIONS' ||
-                    item.type === 'STAKING' ||
-                    item.type === 'STAKING_BOOST' ||
-                    item.type === 'MERKL',
-            );
+            filteredItems = aprItems.filter((item) => item.type !== 'QUANT_AMM_UPLIFT');
         }
 
         return filteredItems;
@@ -1653,3 +1652,61 @@ export class PoolGqlLoaderService {
         };
     }
 }
+
+const orderingColumnsMap = {
+    totalLiquidity: 'totalLiquidity',
+    totalShares: 'totalSharesNum',
+    volume24h: 'volume24h',
+    fees24h: 'fees24h',
+    apr: 'apr',
+};
+
+const getOrderBy = (args: QueryPoolGetPoolsArgs) => {
+    const orderDirection = args.orderDirection || 'desc';
+    const orderColumn = orderingColumnsMap[(args.orderBy || 'totalLiquidity') as keyof typeof orderingColumnsMap];
+    const orderBy = {
+        dynamicData: {
+            [orderColumn]: orderDirection,
+        },
+    };
+
+    return orderBy;
+};
+
+const sanitizeInput = (input: any) => `${input}`.replace(/[^a-zA-Z0-9._ ]/g, '').trim();
+
+const sanitiseTextSearch = (textSearch: string) => {
+    let searchQuery = sanitizeInput(textSearch).toLowerCase();
+
+    // Replace terms like LBP and BTF
+    const replacements = {
+        lbp: 'LIQUIDITY_BOOTSTRAPPING',
+        btf: 'QUANT_AMM_WEIGHTED',
+    };
+
+    // Apply replacements for whole words only
+    for (const [key, value] of Object.entries(replacements)) {
+        const wordRegex = new RegExp(`\\b${key}\\b`, 'g');
+        searchQuery = searchQuery.replace(wordRegex, value);
+    }
+
+    return searchQuery;
+};
+
+const searchFilters = (args: QueryPoolGetPoolsArgs) => {
+    let where = '1=1 ';
+
+    if (args.where?.chainIn) {
+        where += `AND p.chain = ANY('{${args.where?.chainIn.map(sanitizeInput).join(',')}}')`;
+    }
+
+    if (args.where?.protocolVersionIn) {
+        where += `AND p."protocolVersion" = ANY('{${args.where?.protocolVersionIn.map(sanitizeInput).join(',')}}')`;
+    }
+
+    if (args.where?.poolTypeIn) {
+        where += `AND p.type = ANY('{${args.where?.poolTypeIn.map(sanitizeInput).join(',')}}')`;
+    }
+
+    return where;
+};
