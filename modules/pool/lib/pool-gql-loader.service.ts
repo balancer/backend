@@ -1664,6 +1664,11 @@ const orderingColumnsMap = {
 const getOrderBy = (args: QueryPoolGetPoolsArgs) => {
     const orderDirection = args.orderDirection || 'desc';
     const orderColumn = orderingColumnsMap[(args.orderBy || 'totalLiquidity') as keyof typeof orderingColumnsMap];
+
+    if (!orderColumn) {
+        return undefined;
+    }
+
     const orderBy = {
         dynamicData: {
             [orderColumn]: orderDirection,
