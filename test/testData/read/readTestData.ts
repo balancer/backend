@@ -121,14 +121,9 @@ export function readTestData(): TestData {
                 const bufferPools: BufferPoolData[] = mapBufferPools(jsonData.pools);
                 testData.bufferPools.push(bufferPools);
 
-                // data comes from JSON. All values are strings, so we need to convert them to bigint.
-                const poolWithTimestamp = (jsonData.pools as { poolType: string; currentTimestamp?: string }[]).find(
-                    (pool) => pool.poolType === 'RECLAMM' || pool.poolType === 'LIQUIDITY_BOOTSTRAPPING',
-                );
-
-                const currentTimestamp = poolWithTimestamp?.currentTimestamp
-                    ? BigInt(poolWithTimestamp.currentTimestamp)
-                    : undefined;
+                const currentTimestampString = (jsonData.pools as { currentTimestamp?: string }[]).find(
+                    (pool) => pool.currentTimestamp,
+                )?.currentTimestamp;
 
                 // add swapPaths
                 testData.swapPaths.push({

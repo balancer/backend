@@ -1,5 +1,5 @@
 import { PublicClient, Address, http, createPublicClient, Chain } from 'viem';
-import { VAULT_V3 } from '@balancer/sdk';
+import { balancerV3Contracts } from '@balancer/sdk';
 import { CHAINS } from '@balancer/sdk';
 
 import { TransformBigintToString } from '../../types';
@@ -33,7 +33,7 @@ export class QuantAmmPool {
             transport: http(this.rpcUrl),
             chain: CHAINS[this.chainId] as Chain,
         });
-        this.vault = VAULT_V3[this.chainId];
+        this.vault = balancerV3Contracts.Vault[this.chainId as keyof typeof balancerV3Contracts.Vault];
     }
 
     async fetchImmutableData(
