@@ -69,15 +69,32 @@ export const eventsRepository = {
         const where: Prisma.PrismaPoolEventWhereInput = {
             chain,
             ...(protocolVersion ? { protocolVersion } : {}),
-            ...(types
-                ? {
-                      type: {
-                          in: types,
-                      },
-                  }
-                : {}),
             ...(timestamp ? { blockTimestamp: { lte: timestamp } } : {}),
         };
+
+        if (types) {
+            // Get latest for both separately and match which one is newer
+            const events = await Promise.all(
+                types.map(async (type) =>
+                    prisma.prismaPoolEvent.findFirst({
+                        where: {
+                            ...where,
+                            type,
+                        },
+                        orderBy,
+                    }),
+                ),
+            );
+
+            const latestEvent =
+                events.filter((event) => event !== null).sort((a, b) => b!.blockNumber - a!.blockNumber)[0] || null;
+
+            if (!latestEvent) {
+                return null;
+            }
+
+            return latestEvent.type === 'SWAP' ? (latestEvent as SwapEvent) : (latestEvent as JoinExitEvent);
+        }
 
         const latestEvent = await prisma.prismaPoolEvent.findFirst({
             where,

@@ -13,10 +13,10 @@ const commands: Record<string, Command> = {
         description: 'Get events with optional filters',
         handler: async (args: string[]) => {
             const chain = args[0] as Chain;
-            const poolId = args[1] !== 'undefined' ? args[1] : undefined;
-            const userAddress = args[2] !== 'undefined' ? args[2] : undefined;
-            const limit = args[3] !== 'undefined' ? parseInt(args[3], 10) : undefined;
-            const offset = args[4] !== 'undefined' ? parseInt(args[4], 10) : undefined;
+            const poolId = args[1] !== undefined ? args[1] : undefined;
+            const userAddress = args[2] !== undefined ? args[2] : undefined;
+            const limit = args[3] !== undefined ? parseInt(args[3], 10) : undefined;
+            const offset = args[4] !== undefined ? parseInt(args[4], 10) : undefined;
 
             return eventsRepository.getEvents({
                 chain,
@@ -31,9 +31,9 @@ const commands: Record<string, Command> = {
         description: 'Get the latest event with optional filters',
         handler: async (args: string[]) => {
             const chain = args[0] as Chain;
-            const protocolVersion = args[1] !== 'undefined' ? parseInt(args[1], 10) : undefined;
-            const types = args[2] !== 'undefined' ? (args[2].split(',') as PoolEventType[]) : undefined;
-            const timestamp = args[3] !== 'undefined' ? parseInt(args[3], 10) : undefined;
+            const protocolVersion = args[1] !== undefined ? parseInt(args[1], 10) : undefined;
+            const types = args[2] !== undefined ? (args[2].split(',') as PoolEventType[]) : undefined;
+            const timestamp = args[3] !== undefined ? parseInt(args[3], 10) : undefined;
 
             return eventsRepository.getLatestEvent({
                 chain,
@@ -47,7 +47,7 @@ const commands: Record<string, Command> = {
         description: 'Get swap statistics',
         handler: async (args: string[]) => {
             const chain = args[0] as Chain;
-            const poolIds = args[1] !== 'undefined' ? args[1].split(',') : undefined;
+            const poolIds = args[1] !== undefined ? args[1].split(',') : undefined;
             const since = parseInt(args[2], 10);
 
             return eventsRepository.getSwapStats({
