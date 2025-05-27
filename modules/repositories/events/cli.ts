@@ -31,8 +31,10 @@ const commands: Record<string, Command> = {
         description: 'Get the latest event with optional filters',
         handler: async (args: string[]) => {
             const chain = args[0] as Chain;
-            const protocolVersion = args[1] !== undefined ? parseInt(args[1], 10) : undefined;
-            const types = args[2] !== undefined ? (args[2].split(',') as PoolEventType[]) : undefined;
+            const protocolVersion =
+                args[1] !== undefined && args[1] !== 'undefined' ? parseInt(args[1], 10) : undefined;
+            const types =
+                args[2] !== undefined && args[2] !== 'undefined' ? (args[2].split(',') as PoolEventType[]) : undefined;
             const timestamp = args[3] !== undefined ? parseInt(args[3], 10) : undefined;
 
             return eventsRepository.getLatestEvent({

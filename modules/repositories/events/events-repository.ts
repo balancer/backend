@@ -72,34 +72,29 @@ export const eventsRepository = {
             ...(timestamp ? { blockTimestamp: { lte: timestamp } } : {}),
         };
 
-        if (types) {
-            // Get latest for both separately and match which one is newer
-            const events = await Promise.all(
-                types.map(async (type) =>
-                    prisma.prismaPoolEvent.findFirst({
-                        where: {
-                            ...where,
-                            type,
-                        },
-                        orderBy,
-                    }),
-                ),
-            );
-
-            const latestEvent =
-                events.filter((event) => event !== null).sort((a, b) => b!.blockNumber - a!.blockNumber)[0] || null;
-
-            if (!latestEvent) {
-                return null;
-            }
-
-            return latestEvent.type === 'SWAP' ? (latestEvent as SwapEvent) : (latestEvent as JoinExitEvent);
+        if (!types) {
+            types = ['EXIT', 'JOIN', 'SWAP'];
         }
 
-        const latestEvent = await prisma.prismaPoolEvent.findFirst({
-            where,
-            orderBy,
-        });
+        // To use the index properly, query must have a type
+        // Get events for all types separately and match which one is the latest
+        const events = await Promise.all(
+            types.map(async (type) =>
+                prisma.prismaPoolEvent.findFirst({
+                    where: {
+                        ...where,
+                        type,
+                    },
+                    orderBy,
+                }),
+            ),
+        );
+
+        const sortedEvents = events
+            .filter((event): event is NonNullable<typeof event> => event !== null)
+            .sort((a, b) => b.blockNumber - a.blockNumber);
+
+        const latestEvent = sortedEvents[0] || null;
 
         if (!latestEvent) {
             return null;
