@@ -36,13 +36,14 @@ export const syncChangedPools = async (
     }));
 
     // Update status for all the pools
-    await prisma.prismaPool
+    const poolIds = await prisma.prismaPool
         .findMany({
-            where: { chain },
+            where: { chain, protocolVersion: 2 },
             select: { id: true },
         })
-        .then((pools) => pools.map((pool) => pool.id))
-        .then((poolIds) => poolOnChainDataService.updateOnChainStatus(poolIds, chain));
+        .then((pools) => pools.map((pool) => pool.id));
+
+    await poolOnChainDataService.updateOnChainStatus(poolIds, chain);
 
     // Update other data only for the pools that have changed
     const tokenPrices = await prisma.prismaTokenCurrentPrice.findMany({
@@ -58,12 +59,16 @@ export const syncChangedPools = async (
 
     const allChangedPools = new Set<string>();
 
-    for (let i = 0; i < numBatches; i++) {
-        const from = startBlock + (i > 0 ? 1 : 0) + i * rpcMaxBlockRange;
-        const to = Math.min(startBlock + (i + 1) * rpcMaxBlockRange, Number(endBlock));
+    if (lastSyncBlock === 0) {
+        poolIds.forEach((id) => allChangedPools.add(id));
+    } else {
+        for (let i = 0; i < numBatches; i++) {
+            const from = startBlock + (i > 0 ? 1 : 0) + i * rpcMaxBlockRange;
+            const to = Math.min(startBlock + (i + 1) * rpcMaxBlockRange, Number(endBlock));
 
-        const changedPools = await getChangedPoolsV2(vaultAddress, viemClient, BigInt(from), BigInt(to));
-        changedPools.forEach((pool) => allChangedPools.add(pool));
+            const changedPools = await getChangedPoolsV2(vaultAddress, viemClient, BigInt(from), BigInt(to));
+            changedPools.forEach((pool) => allChangedPools.add(pool));
+        }
     }
 
     // always sync LBP pools

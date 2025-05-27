@@ -205,28 +205,31 @@ export class PoolOnChainDataService {
                         bptPriceRate = priceRate;
                     }
 
-                    if (
-                        poolToken.balance !== balance ||
-                        poolToken.priceRate !== priceRate ||
-                        poolToken.weight !== weight
-                    ) {
+                    const balanceUSD =
+                        poolToken.address === pool.address
+                            ? 0
+                            : (tokenPrices.find(
+                                  (tokenPrice) =>
+                                      tokenPrice.tokenAddress.toLowerCase() === poolToken.address.toLowerCase() &&
+                                      tokenPrice.chain === poolToken.chain,
+                              )?.price || 0) * parseFloat(balance);
+
+                    // This check might not be needed, because balances almost always change here due to the events
+                    const changedColumns = {
+                        ...(poolToken.balance !== balance
+                            ? {
+                                  balance,
+                                  balanceUSD,
+                              }
+                            : {}),
+                        ...(poolToken.priceRate !== priceRate ? { priceRate } : {}),
+                        ...(poolToken.weight !== weight ? { weight } : {}),
+                    };
+                    if (Object.keys(changedColumns).length > 0) {
                         operations.push(
                             prisma.prismaPoolToken.update({
                                 where: { id_chain: { id: poolToken.id, chain: poolToken.chain } },
-                                data: {
-                                    balance,
-                                    priceRate,
-                                    weight,
-                                    balanceUSD:
-                                        poolToken.address === pool.address
-                                            ? 0
-                                            : (tokenPrices.find(
-                                                  (tokenPrice) =>
-                                                      tokenPrice.tokenAddress.toLowerCase() ===
-                                                          poolToken.address.toLowerCase() &&
-                                                      tokenPrice.chain === poolToken.chain,
-                                              )?.price || 0) * parseFloat(balance),
-                                },
+                                data: changedColumns,
                             }),
                         );
                     }
