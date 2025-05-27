@@ -7,6 +7,8 @@ import { prismaPoolDynamicDataFactory } from './prismaPoolDynamicData.factory';
 import { GyroEParams, ReClammParams } from '../../modules/sources/subgraphs/balancer-v3-pools/generated/types';
 import { LiquidityBootstrappingPool } from '../testData/read/readTestData';
 import { ReclammData } from '../../modules/pool/subgraph-mapper';
+import { LBPoolData } from '../../modules/pool/pool-data';
+import { formatEther } from 'viem';
 
 class PrismaPoolFactory extends Factory<PrismaPoolAndHookWithDynamic> {
     stable(amp?: string) {
@@ -15,17 +17,24 @@ class PrismaPoolFactory extends Factory<PrismaPoolAndHookWithDynamic> {
     gyroE(gyroEParams: GyroEParams) {
         return this.params({ id: gyroEParams.id, type: PrismaPoolType.GYROE, typeData: { ...gyroEParams } });
     }
-    lbp(lbpParams: LiquidityBootstrappingPool) {
+    lbp(lbpParams: LBPoolData & { startWeights: bigint[]; endWeights: bigint[] }) {
+        const reserveTokenIndex = 1 - lbpParams.projectTokenIndex;
+
         return this.params({
             type: PrismaPoolType.LIQUIDITY_BOOTSTRAPPING,
             typeData: {
                 projectTokenIndex: lbpParams.projectTokenIndex,
-                reserveTokenIndex: lbpParams.reserveTokenIndex,
                 isProjectTokenSwapInBlocked: lbpParams.isProjectTokenSwapInBlocked,
-                isSwapEnabled: lbpParams.isSwapEnabled,
-            },
-            dynamicData: {
-                swapFee: lbpParams.swapFee.toString(),
+                //isSwapEnabled: lbpParams.isSwapEnabled,
+                //startWeights: lbpParams.startWeights.map((w) => w.toString()), // not provided by API
+                //endWeights: lbpParams.endWeights.map((w) => w.toString()), // not provided by API
+                projectTokenStartWeight: formatEther(lbpParams.startWeights[lbpParams.projectTokenIndex]),
+                projectTokenEndWeight: formatEther(lbpParams.endWeights[lbpParams.projectTokenIndex]),
+                reserveTokenStartWeight: formatEther(lbpParams.startWeights[reserveTokenIndex]),
+                reserveTokenEndWeight: formatEther(lbpParams.endWeights[reserveTokenIndex]),
+                startTime: lbpParams.startTime.toString(),
+                endTime: lbpParams.endTime.toString(),
+                //currentTimestamp: lbpParams.currentTimestamp.toString(),
             },
         });
     }

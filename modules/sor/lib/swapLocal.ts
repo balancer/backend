@@ -8,7 +8,7 @@ import {
     SwapKind,
     TokenAmount,
     ZERO_ADDRESS,
-    balancerQueriesAbi,
+    balancerQueriesAbi_V2 as balancerQueriesAbi,
     vaultV2Abi,
 } from '@balancer/sdk';
 import { PathWithAmount } from './path';

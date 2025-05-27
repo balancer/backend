@@ -3,7 +3,6 @@ import { PoolType, Token, TokenAmount, WAD } from '@balancer/sdk';
 import { HookState } from '@balancer-labs/balancer-maths';
 import { BasePoolMethodsV3 } from '../basePoolMethodsV3';
 import { WeightedPoolTokenWithRate } from '../weighted/weightedPoolTokenWithRate';
-import { WeightedErc4626PoolToken } from '../weighted/weightedErc4626PoolToken';
 import { LiquidityManagement } from '../../../../sor/types';
 
 import { BasePoolV3 } from '../basePoolV3';
@@ -18,7 +17,7 @@ import { TokenPairData } from '../../../../sources/contracts/v3/fetch-tokenpair-
 import { LiquidityBootstrappingState } from '../../../../../test/testData/read/readTestData';
 import { LBPoolData } from '../../../../../modules/pool/pool-data/lbpool';
 
-type WeightedPoolToken = WeightedPoolTokenWithRate | WeightedErc4626PoolToken;
+type WeightedPoolToken = WeightedPoolTokenWithRate;
 
 export class LiquidityBootstrappingPoolV3 extends BasePoolV3 implements BasePoolMethodsV3 {
     public readonly poolType: PoolType = PoolType.LiquidityBootstrapping;
@@ -35,22 +34,46 @@ export class LiquidityBootstrappingPoolV3 extends BasePoolV3 implements BasePool
     public projectTokenIndex: number;
     public isProjectTokenSwapInBlocked: boolean;
     public isSwapEnabled: boolean;
+    public currentTimestamp: bigint;
+    public startTime: bigint;
+    public endTime: bigint;
+    public startWeights: bigint[];
+    public endWeights: bigint[];
 
-    static fromPrismaPool(
-        pool: PrismaPoolAndHookWithDynamic,
-        underlyingTokens: { address: string; decimals: number }[] = [],
-    ): LiquidityBootstrappingPoolV3 {
+    static fromPrismaPool(pool: PrismaPoolAndHookWithDynamic, currentTimestamp: bigint): LiquidityBootstrappingPoolV3 {
         const poolTokens: WeightedPoolToken[] = [];
 
         if (!pool.dynamicData) {
             throw new Error('No dynamic data for pool');
         }
 
-        for (const poolToken of pool.tokens) {
+        if (!pool.typeData) {
+            throw new Error('No type data for pool');
+        }
+
+        //access typeData
+        const typeData = pool.typeData as LBPoolData;
+
+        // startweights and endweights need to be available as arrays. API does not provide both
+        // so calculate them. Weights sum to 100% 1e16 and are sorted according to the alphbetical order
+        // of the pool tokens.
+        const SCALE = 1_000_000_000_000_000_000;
+
+        const reserveTokenIndex = 1 - typeData.projectTokenIndex;
+
+        const startWeights: bigint[] = Array(2);
+        const endWeights: bigint[] = Array(2);
+
+        startWeights[typeData.projectTokenIndex] = BigInt(typeData.projectTokenStartWeight * SCALE);
+        startWeights[reserveTokenIndex] = BigInt(typeData.reserveTokenStartWeight * SCALE);
+
+        endWeights[typeData.projectTokenIndex] = BigInt(typeData.projectTokenEndWeight * SCALE);
+        endWeights[reserveTokenIndex] = BigInt(typeData.reserveTokenEndWeight * SCALE);
+
+        pool.tokens.forEach((poolToken, i) => {
             if (!poolToken.weight) {
                 throw new Error('Weighted pool token does not have a weight');
             }
-
             const token = new Token(
                 parseFloat(chainToIdMap[pool.chain]),
                 poolToken.address as Address,
@@ -60,45 +83,22 @@ export class LiquidityBootstrappingPoolV3 extends BasePoolV3 implements BasePool
             );
             const scale18 = parseEther(poolToken.balance);
             const tokenAmount = TokenAmount.fromScale18Amount(token, scale18);
-            if (poolToken.token.underlyingTokenAddress) {
-                const underlyingToken = underlyingTokens.find(
-                    (token) => token.address === poolToken.token.underlyingTokenAddress,
-                );
-                if (underlyingToken) {
-                    const unwrapRateDecimals = 18 - poolToken.token.decimals + underlyingToken.decimals;
-                    // erc4626 token
-                    poolTokens.push(
-                        new WeightedErc4626PoolToken(
-                            token,
-                            tokenAmount.amount,
-                            poolToken.index,
-                            parseEther(poolToken.priceRate),
-                            parseUnits(poolToken.token.unwrapRate, unwrapRateDecimals),
-                            poolToken.token.underlyingTokenAddress,
-                            parseEther(poolToken.weight),
-                        ),
-                    );
-                } else {
-                    throw new Error('SOR - ERC4626 underlying token not found');
-                }
-            } else {
-                poolTokens.push(
-                    new WeightedPoolTokenWithRate(
-                        token,
-                        tokenAmount.amount,
-                        poolToken.index,
-                        parseEther(poolToken.priceRate),
-                        parseEther(poolToken.weight),
-                    ),
-                );
-            }
-        }
+
+            // LBPs don't allow tokens with rate providers. Hardcode rate to 1 to stick with
+            // WeightedPoolTokenWithRate. API provides cached weights.
+            poolTokens.push(
+                new WeightedPoolTokenWithRate(
+                    token,
+                    tokenAmount.amount,
+                    poolToken.index,
+                    parseEther('1'),
+                    parseEther(poolToken.weight),
+                ),
+            );
+        });
 
         //transform
         const hookState = getHookState(pool);
-
-        //access typeData
-        const typeData = pool.typeData as LBPoolData;
 
         return new LiquidityBootstrappingPoolV3(
             pool.id as Hex,
@@ -116,6 +116,11 @@ export class LiquidityBootstrappingPoolV3 extends BasePoolV3 implements BasePool
             typeData.projectTokenIndex,
             typeData.isProjectTokenSwapInBlocked,
             pool.dynamicData.swapEnabled,
+            currentTimestamp,
+            BigInt(typeData.startTime),
+            BigInt(typeData.endTime),
+            startWeights,
+            endWeights,
         );
     }
 
@@ -135,6 +140,11 @@ export class LiquidityBootstrappingPoolV3 extends BasePoolV3 implements BasePool
         projectTokenIndex: number,
         isProjectTokenSwapInBlocked: boolean,
         isSwapEnabled: boolean,
+        currentTimestamp: bigint,
+        startTime: bigint,
+        endTime: bigint,
+        startWeights: bigint[],
+        endWeights: bigint[],
     ) {
         super(id, address, chain, swapFee, aggregateSwapFee, totalShares, tokenPairs, liquidityManagement, hookState);
         this.tokens = tokens;
@@ -144,17 +154,22 @@ export class LiquidityBootstrappingPoolV3 extends BasePoolV3 implements BasePool
         const bpt = new Token(tokens[0].token.chainId, this.id, 18, 'BPT', 'BPT');
         this.tokenMap.set(bpt.address, new WeightedPoolTokenWithRate(bpt, totalShares, -1, WAD, 0n));
 
-        this.poolState = this.getPoolState(hookState?.hookType);
         this.projectToken = projectToken;
         this.reserveTokenIndex = reserveTokenIndex;
         this.projectTokenIndex = projectTokenIndex;
         this.isProjectTokenSwapInBlocked = isProjectTokenSwapInBlocked;
         this.isSwapEnabled = isSwapEnabled;
+        this.currentTimestamp = currentTimestamp;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.startWeights = startWeights;
+        this.endWeights = endWeights;
+        this.poolState = this.getPoolState(hookState?.hookType);
     }
 
     public getPoolState(hookName?: string): LiquidityBootstrappingState {
         const poolState: LiquidityBootstrappingState = {
-            poolType: 'WEIGHTED',
+            poolType: 'LIQUIDITY_BOOTSTRAPPING',
             poolAddress: this.address,
             tokens: this.tokens.map((t) => t.token.address),
             scalingFactors: this.tokens.map((t) => t.scalar),
@@ -166,8 +181,13 @@ export class LiquidityBootstrappingPoolV3 extends BasePoolV3 implements BasePool
             weights: this.tokens.map((t) => t.weight),
             supportsUnbalancedLiquidity: !this.liquidityManagement.disableUnbalancedLiquidity,
             projectTokenIndex: this.projectTokenIndex,
-            reserveTokenIndex: this.reserveTokenIndex,
             isProjectTokenSwapInBlocked: this.isProjectTokenSwapInBlocked,
+            isSwapEnabled: this.isSwapEnabled,
+            currentTimestamp: this.currentTimestamp,
+            startTime: this.startTime,
+            endTime: this.endTime,
+            startWeights: this.startWeights,
+            endWeights: this.endWeights,
         };
 
         poolState.hookType = hookName;
@@ -176,6 +196,7 @@ export class LiquidityBootstrappingPoolV3 extends BasePoolV3 implements BasePool
     }
 
     public swapGivenIn(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount {
+        // TODO: Instead of throwing an error, we could return a TokenAmount with 0 amount?
         // has the LBP started already? Indicated by swapEnabled
         if (!this.isSwapEnabled) {
             throw new Error('LBP has not started yet');
@@ -186,12 +207,17 @@ export class LiquidityBootstrappingPoolV3 extends BasePoolV3 implements BasePool
             throw new Error('Project token swap in is blocked');
         }
 
-        // handle add & remove liquidity paths
+        // handle add & remove liquidity paths - return 0 as add & remove liq not supported for the SOR
+        // the pool allows the owner to add & remove liquidity (after LBP end)
+        if (tokenIn.isSameAddress(this.id) || tokenOut.isSameAddress(this.id)) {
+            return TokenAmount.fromRawAmount(tokenOut, 0n);
+        }
 
         // call into BasePoolV3 to do the swap
         return super.swapGivenIn(tokenIn, tokenOut, swapAmount);
     }
-    swapGivenOut(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount {
+    public swapGivenOut(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount {
+        // TODO: Instead of throwing an error, we could return a TokenAmount with 0 amount?
         // has the LBP started already? Indicated by swapEnabled
         if (!this.isSwapEnabled) {
             throw new Error('LBP has not started yet');
@@ -201,7 +227,11 @@ export class LiquidityBootstrappingPoolV3 extends BasePoolV3 implements BasePool
             throw new Error('Project token swap in is blocked');
         }
 
-        // handle add & remove liquidity paths
+        // handle add & remove liquidity paths - return 0 as add & remove liq not supported for the SOR
+        // the pool allows the owner to add & remove liquidity (after LBP end)
+        if (tokenIn.isSameAddress(this.id) || tokenOut.isSameAddress(this.id)) {
+            return TokenAmount.fromRawAmount(tokenOut, 0n);
+        }
 
         // call into BasePoolV3 to do the swap
         // this includes potential for adding and removing liquidity paths

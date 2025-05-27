@@ -23,7 +23,7 @@ export class BufferPool {
             transport: http(this.rpcUrl),
             chain: CHAINS[this.chainId] as Chain,
         });
-        this.vault = balancerV3Contracts.Vault[this.chainId];
+        this.vault = balancerV3Contracts.Vault[this.chainId as keyof typeof balancerV3Contracts.Vault];
     }
 
     async fetchImmutableData(address: Address, blockNumber: bigint): Promise<TransformBigintToString<BufferImmutable>> {

@@ -1,5 +1,5 @@
 import { type PublicClient, createPublicClient, http, type Address, type Chain } from 'viem';
-import { CHAINS, VAULT_V3, vaultExtensionAbi_V3 } from '@balancer/sdk';
+import { CHAINS, balancerV3Contracts, vaultExtensionAbi_V3 } from '@balancer/sdk';
 import { vaultExplorerAbi } from '../abi/vaultExplorer';
 import { reclammAbi } from '../abi/reClamm';
 
@@ -39,7 +39,7 @@ export class ReClammPool {
             transport: http(this.rpcUrl),
             chain: CHAINS[this.chainId] as Chain,
         });
-        this.vault = VAULT_V3[this.chainId];
+        this.vault = balancerV3Contracts.Vault[this.chainId as keyof typeof balancerV3Contracts.Vault];
     }
 
     async fetchImmutableData(

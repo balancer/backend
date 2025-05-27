@@ -20,6 +20,7 @@ import {
 } from './mapping';
 import { Address } from '@balancer/sdk';
 import { BufferPoolData } from '../../../modules/sor/utils/data';
+import { start } from 'node:repl';
 
 type PoolBase = {
     poolAddress: string;
@@ -28,17 +29,23 @@ type PoolBase = {
 };
 
 export type LiquidityBootstrappingState = BasePoolState & {
-    poolType: 'LIQUIDITY_BOOTSTRAPPING' | 'WEIGHTED';
+    poolType: 'LIQUIDITY_BOOTSTRAPPING';
+    currentTimestamp: bigint;
 } & LiquidityBootstrappingImmutable &
     LiquidityBootstrappingMutable;
 
 export type LiquidityBootstrappingImmutable = {
     projectTokenIndex: number;
-    reserveTokenIndex: number;
     isProjectTokenSwapInBlocked: boolean;
+    startWeights: bigint[];
+    endWeights: bigint[];
+    startTime: bigint;
+    endTime: bigint;
 };
 
-export type LiquidityBootstrappingMutable = {} & WeightedImmutable;
+export type LiquidityBootstrappingMutable = {
+    isSwapEnabled: boolean;
+} & WeightedImmutable;
 
 export type WeightedPool = PoolBase & WeightedState;
 
@@ -109,9 +116,14 @@ export function readTestData(): TestData {
                 const bufferPools: BufferPoolData[] = mapBufferPools(jsonData.pools);
                 testData.bufferPools.push(bufferPools);
 
-                const currentTimestamp = (jsonData.pools as { poolType: string; currentTimestamp?: bigint }[]).find(
-                    (pool) => pool.poolType === 'RECLAMM',
-                )?.currentTimestamp;
+                // data comes from JSON. All values are strings, so we need to convert them to bigint.
+                const poolWithTimestamp = (jsonData.pools as { poolType: string; currentTimestamp?: string }[]).find(
+                    (pool) => pool.poolType === 'RECLAMM' || pool.poolType === 'LIQUIDITY_BOOTSTRAPPING',
+                );
+
+                const currentTimestamp = poolWithTimestamp?.currentTimestamp
+                    ? BigInt(poolWithTimestamp.currentTimestamp)
+                    : undefined;
 
                 // add swapPaths
                 testData.swapPaths.push({
@@ -206,6 +218,7 @@ function mapPools(pools: TransformBigintToString<SupportedPools>[]): PrismaPoolA
             prismaPools.push(mapGyroPoolStateToPrismaPool(gyroPool, Number(pool.chainId), 3, bufferPools));
         } else if (pool.poolType === 'LIQUIDITY_BOOTSTRAPPING') {
             // the return obect here need to be a PrismaPoolAndHookWithDynamic
+            // this is read from the test file
             const lbpPool = {
                 ...pool,
                 scalingFactors: pool.scalingFactors.map((sf) => BigInt(sf)),
@@ -218,6 +231,11 @@ function mapPools(pools: TransformBigintToString<SupportedPools>[]): PrismaPoolA
                     pool.supportsUnbalancedLiquidity === undefined ? true : pool.supportsUnbalancedLiquidity,
                 projectTokenIndex: Number(pool.projectTokenIndex),
                 weights: pool.weights.map((weight) => BigInt(weight)),
+                currentTimestamp: BigInt(pool.currentTimestamp),
+                endWeights: pool.endWeights.map((w) => BigInt(w)),
+                startWeights: pool.startWeights.map((w) => BigInt(w)),
+                startTime: BigInt(pool.startTime),
+                endTime: BigInt(pool.endTime),
             };
             prismaPools.push(mapLiquidityBootstrappingPoolStateToPrismaPool(lbpPool, Number(pool.chainId), 3));
         } else if (pool.poolType === 'RECLAMM') {

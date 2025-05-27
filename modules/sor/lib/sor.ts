@@ -61,7 +61,7 @@ export class SOR {
                     if (prismaPool.protocolVersion === 2) {
                         // TODO: relevant?
                     } else {
-                        basePools.push(LiquidityBootstrappingPoolV3.fromPrismaPool(prismaPool, underlyingTokens));
+                        basePools.push(LiquidityBootstrappingPoolV3.fromPrismaPool(prismaPool, currentTimestamp));
                     }
                     break;
                 }

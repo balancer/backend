@@ -129,9 +129,10 @@
             "testName": "Path-LBP",
             "chainId": "11155111",
             "blockNumber": "8085514",
+            "currentTimestamp": "1744221012",
             "swapPathInput": {
                 "swapKind": 0,
-                "amountRaw": "1230000000000000",
+                "amountRaw": "10000000",
                 "tokens": ["0xb19382073c7A0aDdbb56Ac6AF1808Fa49e377B75", "0xB77EB1A70A96fDAAeB31DB1b42F2b8b5846b2613"],
                 "pools": [
                     {

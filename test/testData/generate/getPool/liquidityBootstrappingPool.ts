@@ -3,15 +3,18 @@ import { CHAINS } from '@balancer/sdk';
 import { balancerV3Contracts, vaultExtensionAbi_V3 } from '@balancer/sdk';
 import { liquidityBootstrappingAbi } from '../abi/liquidityBootstrapping';
 
+type TransformBigintToString<T> = {
+    [K in keyof T]: T[K] extends bigint ? string : T[K] extends bigint[] ? string[] : T[K];
+};
+
 export type LBPoolImmutableData = {
     tokens: string[];
-    decimalScalingFactors: bigint[];
+    scalingFactors: bigint[];
     startWeights: bigint[];
     endWeights: bigint[];
     startTime: bigint;
     endTime: bigint;
     projectTokenIndex: number;
-    reserveTokenIndex: number;
     isProjectTokenSwapInBlocked: boolean;
 };
 
@@ -26,10 +29,6 @@ export type LBPoolDynamicData = {
     isSwapEnabled: boolean;
 };
 
-type TransformBigintToString<T> = {
-    [K in keyof T]: T[K] extends bigint ? string : T[K] extends bigint[] ? string[] : T[K];
-};
-
 export class LiquidityBootstrappingPool {
     client: PublicClient;
     vault: Address;
@@ -39,7 +38,7 @@ export class LiquidityBootstrappingPool {
             transport: http(this.rpcUrl),
             chain: CHAINS[this.chainId] as Chain,
         });
-        this.vault = balancerV3Contracts.Vault[this.chainId];
+        this.vault = balancerV3Contracts.Vault[this.chainId as keyof typeof balancerV3Contracts.Vault];
     }
 
     /**
@@ -49,27 +48,20 @@ export class LiquidityBootstrappingPool {
     async fetchImmutableData(
         address: Address,
         blockNumber: bigint,
-    ): Promise<
-        TransformBigintToString<Omit<LBPoolImmutableData, 'decimalScalingFactors'> & { scalingFactors: string[] }>
-    > {
-        const call = {
-            address,
-            abi: liquidityBootstrappingAbi,
-            functionName: 'getLBPoolImmutableData',
-        } as const;
-
+    ): Promise<TransformBigintToString<LBPoolImmutableData>> {
         const {
             tokens,
-            decimalScalingFactors,
+            scalingFactors: decimalScalingFactors,
             startWeights,
             endWeights,
             startTime,
             endTime,
             projectTokenIndex,
-            reserveTokenIndex,
             isProjectTokenSwapInBlocked,
         } = (await this.client.readContract({
-            ...call,
+            address,
+            abi: liquidityBootstrappingAbi,
+            functionName: 'getLBPoolImmutableData',
             blockNumber,
         })) as LBPoolImmutableData;
 
@@ -81,7 +73,6 @@ export class LiquidityBootstrappingPool {
             startTime: startTime.toString(),
             endTime: endTime.toString(),
             projectTokenIndex: Number(projectTokenIndex),
-            reserveTokenIndex: Number(reserveTokenIndex),
             isProjectTokenSwapInBlocked,
         };
     }
@@ -99,6 +90,7 @@ export class LiquidityBootstrappingPool {
                 weights: string[];
                 swapFee: string;
                 tokenRates: string[];
+                currentTimestamp: string;
             }
         >
     > {
@@ -134,6 +126,8 @@ export class LiquidityBootstrappingPool {
 
         const tokenRates = multicallResult[1][1] as bigint[];
 
+        const { timestamp } = await this.client.getBlock({ blockNumber });
+
         return {
             balancesLiveScaled18: balancesLiveScaled18.map((b) => b.toString()),
             weights: normalizedWeights.map((w) => w.toString()),
@@ -144,6 +138,7 @@ export class LiquidityBootstrappingPool {
             isPoolPaused,
             isPoolInRecoveryMode,
             isSwapEnabled,
+            currentTimestamp: timestamp.toString(),
         };
     }
 }

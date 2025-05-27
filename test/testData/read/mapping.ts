@@ -280,26 +280,35 @@ export function mapLiquidityBootstrappingPoolStateToPrismaPool(
         }),
     );
 
+    // transform hook dynamicData values to bigInt and then apply formatEther to them
+    const _hookDynamicData = poolState.hook?.dynamicData;
+    const hookDynamicData = _hookDynamicData
+        ? Object.fromEntries(Object.entries(_hookDynamicData).map(([key, value]) => [key, formatEther(BigInt(value))]))
+        : undefined;
+
     // map pool state to prisma pool using prisma pool factory
+    // calculate the not included parameters for the LBP
+
+    const reserveTokenIndex = 1 - poolState.projectTokenIndex;
+
     const prismaPool = prismaPoolFactory
         .lbp({
             projectTokenIndex: poolState.projectTokenIndex,
-            reserveTokenIndex: poolState.reserveTokenIndex,
-            tokens: poolState.tokens,
             isProjectTokenSwapInBlocked: poolState.isProjectTokenSwapInBlocked,
-            balancesLiveScaled18: poolState.balancesLiveScaled18,
-            weights: poolState.weights,
-            swapFee: formatEther(poolState.swapFee),
-            totalSupply: poolState.totalSupply,
-            isPoolInRecoveryMode: poolState.isPoolInRecoveryMode,
-            isSwapEnabled: poolState.isSwapEnabled,
-            poolAddress: '',
-            chainId: '',
-            poolType: 'LIQUIDITY_BOOTSTRAPPING',
-            scalingFactors: [],
-            tokenRates: [],
-            aggregateSwapFee: 0n,
-            supportsUnbalancedLiquidity: false,
+            //isSwapEnabled: poolState.isSwapEnabled,
+            //currentTimestamp: poolState.currentTimestamp,
+            startWeights: poolState.startWeights,
+            endWeights: poolState.endWeights,
+            startTime: Number(poolState.startTime),
+            endTime: Number(poolState.endTime),
+            lbpOwner: '',
+            projectToken: '',
+            projectTokenStartWeight: Number(formatEther(poolState.startWeights[poolState.projectTokenIndex])),
+            projectTokenEndWeight: Number(formatEther(poolState.endWeights[poolState.projectTokenIndex])),
+            reserveToken: '',
+            reserveTokenIndex: reserveTokenIndex,
+            reserveTokenStartWeight: Number(formatEther(poolState.startWeights[reserveTokenIndex])),
+            reserveTokenEndWeight: Number(formatEther(poolState.endWeights[reserveTokenIndex])),
         })
         .build({
             address: poolState.poolAddress,
@@ -309,7 +318,11 @@ export function mapLiquidityBootstrappingPoolStateToPrismaPool(
                 ...poolState.hook,
                 dynamicData: hookDynamicData,
             },
-            chain: chainIdToChain[chainId],
+            dynamicData: {
+                swapFee: formatEther(poolState.swapFee),
+                aggregateSwapFee: formatEther(poolState.aggregateSwapFee),
+                totalShares: formatEther(poolState.totalSupply),
+            },
         });
     return prismaPool;
 }

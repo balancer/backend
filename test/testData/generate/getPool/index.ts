@@ -1,6 +1,6 @@
 import type { Address } from 'viem';
 import { createPublicClient, http, zeroAddress } from 'viem';
-import { CHAINS, isSameAddress, VAULT_V3, vaultExtensionAbi_V3 } from '@balancer/sdk';
+import { CHAINS, isSameAddress, balancerV3Contracts, vaultExtensionAbi_V3 } from '@balancer/sdk';
 
 import type { PoolBase, TestBase } from '../../types';
 import { WeightedPool } from './weightedPool';
@@ -64,7 +64,7 @@ async function fetchHookAddress(
             chain: CHAINS[chainId],
         });
         ({ hooksContract } = await publicClient.readContract({
-            address: VAULT_V3[chainId],
+            address: balancerV3Contracts.Vault[chainId as keyof typeof balancerV3Contracts.Vault],
             abi: vaultExtensionAbi_V3,
             functionName: 'getHooksConfig',
             args: [poolAddress],
