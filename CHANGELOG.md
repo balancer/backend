@@ -1,5 +1,17 @@
 # backend
 
+## 1.42.0
+
+### Minor Changes
+
+-   53aa72f: events repository
+
+### Patch Changes
+
+-   0829f5e: pool sync update optimisations
+-   6d99a70: fix: order by userbalanceUsd
+-   1ea209e: update TVL only for records not updates in the last 20min
+
 ## 1.41.8
 
 ### Patch Changes
