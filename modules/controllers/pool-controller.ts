@@ -118,37 +118,22 @@ export function PoolController(tracer?: any) {
             return updates;
         },
 
-        async updateLiquidityValuesForActivePools(chain: Chain) {
-            const pools = await prisma.prismaPool.findMany({
-                where: {
-                    chain,
-                    dynamicData: {
-                        totalSharesNum: { gt: 0.00000000001 },
-                    },
-                },
-                select: { id: true },
-            });
-
-            await updateLiquidityValuesForPools(
-                chain,
-                pools.map(({ id }) => id),
-            );
-        },
         async updateLiquidityValuesForInactivePools(chain: Chain) {
-            const pools = await prisma.prismaPool.findMany({
+            const poolTokens = await prisma.prismaPoolToken.findMany({
                 where: {
                     chain,
-                    dynamicData: {
-                        totalSharesNum: { lte: 0.00000000001 },
+                    updatedAt: {
+                        // Do the update only when the pool wasn't synced in the last 10 minutes
+                        lt: new Date(Date.now() - 60 * 10 * 1000),
                     },
                 },
-                select: { id: true },
             });
 
-            await updateLiquidityValuesForPools(
-                chain,
-                pools.map(({ id }) => id),
-            );
+            const ids = [...new Set(poolTokens.map((pt) => pt.poolId))];
+
+            await updateLiquidityValuesForPools(chain, ids);
+
+            return ids;
         },
         async addPoolsV3(chain: Chain, checkForExistingPools = true) {
             const {

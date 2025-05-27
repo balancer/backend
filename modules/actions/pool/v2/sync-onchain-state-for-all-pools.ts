@@ -25,7 +25,7 @@ export const syncOnchainStateForAllPools = async (
     // Update status for all the pools
     const ids = await prisma.prismaPool
         .findMany({
-            where: { chain },
+            where: { chain, protocolVersion: 2 },
             select: { id: true },
         })
         .then((pools) => pools.map((pool) => pool.id));
