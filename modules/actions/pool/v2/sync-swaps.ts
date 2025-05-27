@@ -5,6 +5,7 @@ import _ from 'lodash';
 import { swapV2Transformer } from '../../../sources/transformers/swap-v2-transformer';
 import { OrderDirection, Swap_OrderBy } from '../../../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
 import { swapsUsd } from '../../../sources/enrichers/swaps-usd';
+import { eventsRepository, LatestEventRepository, EventStoreRepository } from '../../../repositories/events';
 
 /**
  * Adds all swaps since daysToSync to the database. Checks for latest synced swap to avoid duplicate work.
@@ -13,23 +14,18 @@ import { swapsUsd } from '../../../sources/enrichers/swaps-usd';
  * @param chain
  * @returns
  */
-export async function syncSwaps(subgraphClient: V2SubgraphClient, chain: Chain): Promise<string[]> {
+export async function syncSwaps(
+    subgraphClient: V2SubgraphClient,
+    chain: Chain,
+    eventRepo: LatestEventRepository & EventStoreRepository = eventsRepository,
+): Promise<string[]> {
     const protocolVersion = 2;
 
     // Get latest event from the DB
-    const latestEvent = await prisma.prismaPoolEvent.findFirst({
-        select: {
-            blockNumber: true,
-            blockTimestamp: true,
-        },
-        where: {
-            type: 'SWAP',
-            chain: chain,
-            protocolVersion,
-        },
-        orderBy: {
-            blockTimestamp: 'desc',
-        },
+    const latestEvent = await eventRepo.getLatestEvent({
+        types: ['SWAP'],
+        chain,
+        protocolVersion,
     });
 
     // Get list of FX pool addresses for the fee calculation
@@ -73,10 +69,7 @@ export async function syncSwaps(subgraphClient: V2SubgraphClient, chain: Chain):
     console.timeEnd('swapsUsd');
 
     console.time('prismaPoolEvent.createMany');
-    await prisma.prismaPoolEvent.createMany({
-        skipDuplicates: true,
-        data: dbEntries,
-    });
+    await eventRepo.storeEvents(dbEntries);
     console.timeEnd('prismaPoolEvent.createMany');
 
     return [...new Set(dbEntries.map((entry) => entry.poolId))];
