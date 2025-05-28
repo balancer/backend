@@ -30,10 +30,14 @@ export const eventsRepository = {
 
         const where: Prisma.PrismaPoolEventWhereInput = {
             chain,
-            ...(poolId ? { poolId } : {}),
-            ...(userAddress
+            ...(poolId
                 ? {
-                      userAddress: userAddress.toLowerCase(),
+                      poolId,
+                      ...(userAddress
+                          ? {
+                                userAddress: userAddress.toLowerCase(),
+                            }
+                          : {}),
                   }
                 : {}),
         };
