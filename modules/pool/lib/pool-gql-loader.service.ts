@@ -851,7 +851,15 @@ export class PoolGqlLoaderService {
                 return {
                     __typename: 'GqlPoolLiquidityBootstrapping',
                     ...poolWithoutTypeData,
-                    ...(typeData as LBPoolData),
+                    ...(typeData as LBPoolData & {
+                        lbpName?: string;
+                        description?: string;
+                        website?: string;
+                        x?: string;
+                        discord?: string;
+                        telegram?: string;
+                        farcaster?: string;
+                    }),
                     ...mappedData,
                 };
             case 'GYRO':
