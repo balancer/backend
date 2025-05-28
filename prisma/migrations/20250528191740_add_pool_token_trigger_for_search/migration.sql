@@ -38,7 +38,7 @@ BEGIN
 END;
 $BODY$;
 
-CREATE TRIGGER trig_update_pool_search_vector_on_token_change
+CREATE OR REPLACE TRIGGER trig_update_pool_search_vector_on_token_change
 AFTER INSERT ON "PrismaPoolToken"
 FOR EACH ROW EXECUTE FUNCTION update_search_vector();
 
