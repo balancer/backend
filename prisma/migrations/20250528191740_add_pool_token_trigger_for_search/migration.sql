@@ -5,7 +5,6 @@ CREATE OR REPLACE FUNCTION public.update_search_vector()
     VOLATILE NOT LEAKPROOF
 AS $BODY$
 BEGIN
-	RAISE NOTICE 'Trigger fired for % (%), op: %', TG_TABLE_NAME, NEW.id, TG_OP;
   -- Case 1: Called from PrismaPool trigger (AFTER INSERT/UPDATE)
   IF TG_TABLE_NAME ILIKE 'PrismaPool' THEN
     UPDATE "PrismaPool"
