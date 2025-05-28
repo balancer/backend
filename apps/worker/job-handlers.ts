@@ -47,9 +47,22 @@ async function runIfNotAlreadyRunning(
 ): Promise<void> {
     const jobId = `${id}-${chainId}`;
 
+    // Check if event sync jobs are enabled
+    const eventSyncEnabled = process.env.ENABLE_EVENTS === 'true';
+
+    const eventSyncJobs = [
+        'sync-swaps-v2',
+        'sync-swaps-v3',
+        'sync-join-exits-v2',
+        'sync-join-exits-v3',
+        'sync-cow-amm-swaps',
+        'sync-cow-amm-join-exits',
+        'update-fee-volume-yield-all-pools',
+    ];
+
     console.log(`Current jobqueue length: ${runningJobs.size}`);
 
-    if (runningJobs.has(jobId)) {
+    if ((eventSyncJobs.includes(id) && !eventSyncEnabled) || runningJobs.has(jobId)) {
         if (process.env.AWS_ALERTS === 'true') {
             await cronsMetricPublisher.publish(`${jobId}-skip`);
         }
