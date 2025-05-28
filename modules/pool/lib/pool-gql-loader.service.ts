@@ -211,12 +211,9 @@ export class PoolGqlLoaderService {
 
         for (const mappedPool of gqlPools) {
             // if a pool has a hook, we skip it if either there are no included hooks, or its type does not match an included hook
-            // always include MEV_TAX hook
             if (mappedPool.hook) {
-                if (mappedPool.hook.type !== 'MEV_TAX') {
-                    if (!args.where?.includeHooks || !args.where.includeHooks.includes(mappedPool.hook.type)) {
-                        continue;
-                    }
+                if (!args.where?.includeHooks || !args.where.includeHooks.includes(mappedPool.hook.type)) {
+                    continue;
                 }
             }
 
@@ -301,7 +298,9 @@ export class PoolGqlLoaderService {
             // But setting it up already so it can be used with the refactored searching
             const query =
                 Prisma.raw(`SELECT p.id, p.chain FROM "PrismaPool" p LEFT JOIN "PrismaPoolDynamicData" d on (p.id = d."poolId") WHERE p.search_vector @@ websearch_to_tsquery('simple', '${searchQuery}') AND d."totalSharesNum" > 0.000000000001 AND NOT ('BLACK_LISTED' = ANY(p.categories)) AND ${filters}
-            ORDER BY d."${orderColumn}" ${args.orderDirection && args.orderDirection === 'asc' ? 'ASC' : 'DESC'} LIMIT ${limit} OFFSET ${offset}`);
+            ORDER BY d."${orderColumn}" ${
+                    args.orderDirection && args.orderDirection === 'asc' ? 'ASC' : 'DESC'
+                } LIMIT ${limit} OFFSET ${offset}`);
 
             const searchResults = await prisma.$queryRaw<{ id: string }[]>(query);
 
@@ -557,8 +556,8 @@ export class PoolGqlLoaderService {
             ...(where?.hasHook !== undefined && where.hasHook
                 ? { hook: { path: ['address'], string_starts_with: '0x' } }
                 : where?.hasHook !== undefined && !where.hasHook
-                  ? { hook: { equals: Prisma.DbNull } }
-                  : {}),
+                ? { hook: { equals: Prisma.DbNull } }
+                : {}),
         };
 
         if (!textSearch) {
