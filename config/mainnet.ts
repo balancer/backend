@@ -319,6 +319,12 @@ export default <NetworkData>{
             url: 'https://api.fluid.instad.app/v2/lending/1/tokens',
         },
         defaultHandlers: {
+            siUSD: {
+                tokenAddress: '0xdbdc1ef57537e34680b898e1febd3d68c7389bcb',
+                sourceUrl: 'https://api.infinifi.xyz/api/protocol/data',
+                path: 'data.stats.siusd.lastWeekAPY',
+                scale: 100,
+            },
             cUSDO: {
                 tokenAddress: '0xad55aebc9b8c03fc43cd9f62260391c13c23e7c0',
                 sourceUrl: 'https://prod-gw.openeden.com/sys/apy',
