@@ -132,6 +132,7 @@ export const eventsRepository = {
                 MIN("blockNumber") as number
             FROM "PartitionedPoolEvent"
             WHERE chain = '${chain}'
+            AND type = 'SWAP'
             AND "blockTimestamp" >= ${daysAgo(days)}
             GROUP BY 1
             ORDER BY 1 DESC`);
