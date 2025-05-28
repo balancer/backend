@@ -1,5 +1,5 @@
 import { type PublicClient, createPublicClient, http, type Address, parseAbi, type Chain } from 'viem';
-import { CHAINS, balancerV3Contracts, vaultExtensionAbi_V3 } from '@balancer/sdk';
+import { CHAINS, VAULT_V3, vaultExtensionAbi_V3 } from '@balancer/sdk';
 
 import { TransformBigintToString } from '../../types';
 import { vaultExplorerAbi } from '../abi/vaultExplorer';
@@ -27,7 +27,7 @@ export class WeightedPool {
             transport: http(this.rpcUrl),
             chain: CHAINS[this.chainId] as Chain,
         });
-        this.vault = balancerV3Contracts.Vault[this.chainId as keyof typeof balancerV3Contracts.Vault];
+        this.vault = VAULT_V3[this.chainId];
     }
 
     async fetchImmutableData(

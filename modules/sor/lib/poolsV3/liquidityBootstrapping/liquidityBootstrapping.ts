@@ -20,7 +20,7 @@ import { LBPoolData } from '../../../../../modules/pool/pool-data/lbpool';
 type WeightedPoolToken = WeightedPoolTokenWithRate;
 
 export class LiquidityBootstrappingPoolV3 extends BasePoolV3 implements BasePoolMethodsV3 {
-    public readonly poolType: PoolType = PoolType.LiquidityBootstrapping;
+    public readonly poolType: string = 'LIQUIDITY_BOOTSTRAPPING';
 
     // LBP is also a weighted pool
     public readonly MAX_IN_RATIO = 300000000000000000n; // 0.3
