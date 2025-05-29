@@ -1,5 +1,11 @@
 # backend
 
+## 1.42.2
+
+### Patch Changes
+
+-   d66e574: user address in event indexing
+
 ## 1.42.1
 
 ### Patch Changes
