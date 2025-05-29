@@ -1,5 +1,20 @@
 # backend
 
+## 1.42.1
+
+### Patch Changes
+
+-   4cf8fed: test if swap type helps with daily block numbers query
+-   794c7e6: fix for the latest event query
+-   1ec2f46: fix fetching latest events
+-   21c8710: siUSD APR
+-   8cfc29c: events indexing review
+-   f287857: events feature flag
+-   0da8f59: fix merkl opportunities
+-   50200ac: dont include default hooks in agg query
+-   7210d9e: events for user address only with a pool
+-   3fb128e: text search migration fix
+
 ## 1.42.0
 
 ### Minor Changes
