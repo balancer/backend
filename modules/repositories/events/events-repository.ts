@@ -30,10 +30,14 @@ export const eventsRepository = {
 
         const where: Prisma.PrismaPoolEventWhereInput = {
             chain,
-            ...(poolId ? { poolId } : {}),
-            ...(userAddress
+            ...(poolId
                 ? {
-                      userAddress: userAddress.toLowerCase(),
+                      poolId,
+                      ...(userAddress
+                          ? {
+                                userAddress: userAddress.toLowerCase(),
+                            }
+                          : {}),
                   }
                 : {}),
         };
@@ -69,20 +73,32 @@ export const eventsRepository = {
         const where: Prisma.PrismaPoolEventWhereInput = {
             chain,
             ...(protocolVersion ? { protocolVersion } : {}),
-            ...(types
-                ? {
-                      type: {
-                          in: types,
-                      },
-                  }
-                : {}),
             ...(timestamp ? { blockTimestamp: { lte: timestamp } } : {}),
         };
 
-        const latestEvent = await prisma.prismaPoolEvent.findFirst({
-            where,
-            orderBy,
-        });
+        if (!types) {
+            types = ['EXIT', 'JOIN', 'SWAP'];
+        }
+
+        // To use the index properly, query must have a type
+        // Get events for all types separately and match which one is the latest
+        const events = await Promise.all(
+            types.map(async (type) =>
+                prisma.prismaPoolEvent.findFirst({
+                    where: {
+                        ...where,
+                        type,
+                    },
+                    orderBy,
+                }),
+            ),
+        );
+
+        const sortedEvents = events
+            .filter((event): event is NonNullable<typeof event> => event !== null)
+            .sort((a, b) => b.blockNumber - a.blockNumber);
+
+        const latestEvent = sortedEvents[0] || null;
 
         if (!latestEvent) {
             return null;
@@ -120,6 +136,7 @@ export const eventsRepository = {
                 MIN("blockNumber") as number
             FROM "PartitionedPoolEvent"
             WHERE chain = '${chain}'
+            AND type = 'SWAP'
             AND "blockTimestamp" >= ${daysAgo(days)}
             GROUP BY 1
             ORDER BY 1 DESC`);
