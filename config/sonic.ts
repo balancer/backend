@@ -168,7 +168,7 @@ export default <NetworkData>{
                 sourceUrl:
                     'https://v2.silo.finance/api/detailed-vault/sonic-0xf6f87073cf8929c206a77b0694619dc776f89885',
                 path: 'supplyApr',
-                scale: 0.0000000000000000001,
+                scale: 1000000000000000000,
                 isIbYield: true,
             },
             varlamorewS: {
@@ -176,7 +176,7 @@ export default <NetworkData>{
                 sourceUrl:
                     'https://v2.silo.finance/api/detailed-vault/sonic-0xded4ac8645619334186f28b8798e07ca354cfa0e',
                 path: 'supplyApr',
-                scale: 0.0000000000000000001,
+                scale: 1000000000000000000,
                 isIbYield: true,
             },
             varlamorescUSD: {
@@ -184,7 +184,7 @@ export default <NetworkData>{
                 sourceUrl:
                     'https://v2.silo.finance/api/detailed-vault/sonic-0xb6a23cb29e512df41876b28d7a848bd831f9c5ba',
                 path: 'supplyApr',
-                scale: 0.0000000000000000001,
+                scale: 1000000000000000000,
                 isIbYield: true,
             },
         },
