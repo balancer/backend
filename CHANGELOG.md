@@ -1,5 +1,15 @@
 # backend
 
+## 1.42.3
+
+### Patch Changes
+
+-   d443964: sepolia fix
+-   6bf4836: add varlamore vault apr
+-   1b55772: avoid performance overhead of Prisma's nested includes
+-   5dcaaae: Prisma's includes
+-   fa4ab43: Bump balancer-maths dependency to 0.0.33
+
 ## 1.42.2
 
 ### Patch Changes
