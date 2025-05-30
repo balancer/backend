@@ -48,10 +48,6 @@ export const sepoliaNetworkConfig: NetworkConfig = {
             interval: every(2, 'minutes'),
         },
         {
-            name: 'update-7-30-days-swap-apr',
-            interval: every(8, 'hours'),
-        },
-        {
             name: 'load-on-chain-data-for-pools-with-active-updates',
             interval: every(1, 'minutes'),
         },

@@ -299,8 +299,8 @@ export class PoolGqlLoaderService {
             const query =
                 Prisma.raw(`SELECT p.id, p.chain FROM "PrismaPool" p LEFT JOIN "PrismaPoolDynamicData" d on (p.id = d."poolId") WHERE p.search_vector @@ websearch_to_tsquery('simple', '${searchQuery}') AND d."totalSharesNum" > 0.000000000001 AND NOT ('BLACK_LISTED' = ANY(p.categories)) AND ${filters}
             ORDER BY d."${orderColumn}" ${
-                    args.orderDirection && args.orderDirection === 'asc' ? 'ASC' : 'DESC'
-                } LIMIT ${limit} OFFSET ${offset}`);
+                args.orderDirection && args.orderDirection === 'asc' ? 'ASC' : 'DESC'
+            } LIMIT ${limit} OFFSET ${offset}`);
 
             const searchResults = await prisma.$queryRaw<{ id: string }[]>(query);
 
@@ -556,8 +556,8 @@ export class PoolGqlLoaderService {
             ...(where?.hasHook !== undefined && where.hasHook
                 ? { hook: { path: ['address'], string_starts_with: '0x' } }
                 : where?.hasHook !== undefined && !where.hasHook
-                ? { hook: { equals: Prisma.DbNull } }
-                : {}),
+                  ? { hook: { equals: Prisma.DbNull } }
+                  : {}),
         };
 
         if (!textSearch) {
@@ -1336,6 +1336,11 @@ export class PoolGqlLoaderService {
         for (const aprItem of pool.aprItems) {
             // Skipping SWAP_FEE as the DB state is not updated, safe to remove after deployment of the patch, because all instances of SWAP_FEE_24H will be replaced with SWAP_FEE should be removed from the DB already
             if (aprItem.type === 'SWAP_FEE') {
+                continue;
+            }
+
+            // Skip 7D, 30D swap APRs - they aren't updated anymore, because noone was using them
+            if (['SWAP_FEE_7D', 'SWAP_FEE_30D'].includes(String(aprItem.type))) {
                 continue;
             }
 

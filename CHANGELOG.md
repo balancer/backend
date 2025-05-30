@@ -1,5 +1,11 @@
 # backend
 
+## 1.42.4
+
+### Patch Changes
+
+-   0716368: APRs select/update and 7d/30d cleanup
+
 ## 1.42.3
 
 ### Patch Changes
