@@ -316,13 +316,7 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
             await runIfNotAlreadyRunning(name, chainId, () => AprsController().syncMerkl(), res, next);
             break;
         case 'update-7-30-days-swap-apr':
-            await runIfNotAlreadyRunning(
-                name,
-                chainId,
-                () => AprsController().update7And30DaysSwapAprs(chain),
-                res,
-                next,
-            );
+            // Disabling unused APRs
             break;
         case 'update-surplus-aprs':
             await runIfNotAlreadyRunning(name, chainId, () => CowAmmController().updateSurplusAprs(), res, next);

@@ -14,14 +14,14 @@ export class SwapFeeAprService implements PoolAprService {
         const chain = pools[0].chain;
         const operations: any[] = [];
 
-        const poolsExpanded = await prisma.prismaPool.findMany({
-            where: { chain, id: { in: pools.map((pool) => pool.id) } },
-            include: {
-                dynamicData: true,
-            },
-        });
+        const existingAprItems = await prisma.prismaPoolAprItem
+            .findMany({
+                select: { id: true, apr: true },
+                where: { chain },
+            })
+            .then((records) => Object.fromEntries(records.map((item) => [item.id, item.apr])));
 
-        for (const pool of poolsExpanded) {
+        for (const pool of pools) {
             if (pool.dynamicData) {
                 const apr =
                     pool.dynamicData.totalLiquidity > 0
@@ -50,20 +50,24 @@ export class SwapFeeAprService implements PoolAprService {
                     userApr = 0;
                 }
 
-                operations.push(
-                    prisma.prismaPoolAprItem.upsert({
-                        where: { id_chain: { id: `${pool.id}-swap-apr-24h`, chain } },
-                        create: {
-                            id: `${pool.id}-swap-apr-24h`,
-                            chain,
-                            poolId: pool.id,
-                            title: 'Swap fees APR (24h)',
-                            apr: userApr,
-                            type: 'SWAP_FEE_24H',
-                        },
-                        update: { apr: userApr },
-                    }),
-                );
+                const id = `${pool.id}-swap-apr-24h`;
+
+                if (Math.abs((existingAprItems[id] || 0) - userApr) > 0.0001) {
+                    operations.push(
+                        prisma.prismaPoolAprItem.upsert({
+                            where: { id_chain: { id, chain } },
+                            create: {
+                                id,
+                                chain,
+                                poolId: pool.id,
+                                title: 'Swap fees APR (24h)',
+                                apr: userApr,
+                                type: 'SWAP_FEE_24H',
+                            },
+                            update: { apr: userApr },
+                        }),
+                    );
+                }
             }
         }
 
