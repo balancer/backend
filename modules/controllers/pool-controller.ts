@@ -53,7 +53,7 @@ export function PoolController(tracer?: any) {
             );
         },
 
-        async syncOnchainDataForPoolsV2(chain: Chain, poolIds: string[]) {
+        async syncOnchainDataForPoolsV2(chain: Chain, poolIds?: string[]) {
             const vaultAddress = config[chain].balancer.v2.vaultAddress;
             const balancerQueriesAddress = config[chain].balancer.v2.balancerQueriesAddress;
             const yieldProtocolFeePercentage = config[chain].balancer.v2.defaultYieldFeePercentage;
@@ -64,7 +64,6 @@ export function PoolController(tracer?: any) {
             const latestBlock = await viemClient.getBlockNumber();
 
             return syncOnChainDataForPoolsV2(
-                poolIds,
                 Number(latestBlock),
                 chain,
                 vaultAddress,
@@ -72,6 +71,7 @@ export function PoolController(tracer?: any) {
                 yieldProtocolFeePercentage,
                 swapProtocolFeePercentage,
                 gyroConfig,
+                poolIds,
             );
         },
 

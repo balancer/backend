@@ -103,13 +103,33 @@ export async function updateVolumeAndFees(
     We approximate the yield fee capture of the last 48h by taking the current total yield APR and apply it to the totalLiquidity from 24 hours ago.
 */
 async function updateYieldCaptureForAllPools(chain: Chain) {
-    const pools = await prisma.prismaPool.findMany({
-        where: { chain: chain },
-        include: {
-            dynamicData: true,
-            aprItems: true,
-        },
-    });
+    // Loading pools, their dynamic data, and tokens separately, then manually assembling them into `PoolForAPRs` objects to avoid the performance overhead of Prisma's nested includes.
+    const [dbPools, dynamicData, aprItems] = await Promise.all([
+        prisma.prismaPool.findMany({
+            where: { chain },
+        }),
+        prisma.prismaPoolDynamicData
+            .findMany({ where: { chain } })
+            .then((records) => _.keyBy(records, 'id') as Record<string, (typeof records)[0]>),
+        prisma.prismaPoolAprItem
+            .findMany({
+                where: {
+                    chain,
+                    OR: [{ type: 'IB_YIELD' }, { type: null }],
+                },
+            })
+            .then((records) => _.groupBy(records, 'poolId') as Record<string, typeof records>),
+    ]);
+
+    const pools = dbPools
+        .map((pool) => ({
+            ...pool,
+            dynamicData: dynamicData[pool.id],
+            aprItems: aprItems[pool.id],
+        }))
+        // Filter needed for test pools on Sepolia
+        .filter((pool) => pool.aprItems && pool.dynamicData);
+
     const operations: any[] = [];
 
     for (const pool of pools) {
