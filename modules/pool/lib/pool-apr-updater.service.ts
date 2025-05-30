@@ -1,5 +1,5 @@
 import { prisma } from '../../../prisma/prisma-client';
-import { PoolForAPRs, poolsIncludeForAprs } from '../../../prisma/prisma-types';
+import { PoolForAPRs } from '../../../prisma/prisma-types';
 import { PoolAprService } from '../pool-types';
 import _ from 'lodash';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
@@ -14,12 +14,29 @@ export class PoolAprUpdaterService {
     }
 
     async updatePoolAprs(chain: Chain) {
-        const pools = await prisma.prismaPool.findMany({
-            ...poolsIncludeForAprs,
-            where: { chain: chain },
-        });
+        // Loading pools, their dynamic data, and tokens separately, then manually assembling them into `PoolForAPRs` objects to avoid the performance overhead of Prisma's nested includes.
+        const [pools, dynamicData, tokens] = await Promise.all([
+            prisma.prismaPool.findMany({
+                where: { chain },
+            }),
+            prisma.prismaPoolDynamicData
+                .findMany({ where: { chain } })
+                .then((records) => _.keyBy(records, 'id') as Record<string, (typeof records)[0]>),
+            prisma.prismaPoolToken
+                .findMany({
+                    where: { chain },
+                    include: { token: true },
+                })
+                .then((records) => _.groupBy(records, 'poolId') as Record<string, typeof records>),
+        ]);
 
-        await this.updateAprsForPools(pools);
+        const poolsWithData: PoolForAPRs[] = pools.map((pool) => ({
+            ...pool,
+            dynamicData: dynamicData[pool.id],
+            tokens: tokens[pool.id],
+        }));
+
+        await this.updateAprsForPools(poolsWithData);
     }
 
     async reloadAllPoolAprs(chain: Chain) {
@@ -77,7 +94,7 @@ export class PoolAprUpdaterService {
         //store the total APR on the dynamic data so we can sort by it
         for (const poolId in grouped) {
             const apr = _.sumBy(grouped[poolId], (item) => item.apr);
-            if (dynamicData[poolId]?.apr !== apr && dynamicData[poolId]?.chain) {
+            if (Math.abs(dynamicData[poolId]?.apr || 0 - apr) > 0.01 && dynamicData[poolId]?.chain) {
                 operations.push(
                     prisma.prismaPoolDynamicData.update({
                         where: { id_chain: { id: poolId, chain: dynamicData[poolId].chain } },
