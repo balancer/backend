@@ -30,11 +30,14 @@ export class PoolAprUpdaterService {
                 .then((records) => _.groupBy(records, 'poolId') as Record<string, typeof records>),
         ]);
 
-        const poolsWithData: PoolForAPRs[] = pools.map((pool) => ({
-            ...pool,
-            dynamicData: dynamicData[pool.id],
-            tokens: tokens[pool.id],
-        }));
+        const poolsWithData: PoolForAPRs[] = pools
+            .map((pool) => ({
+                ...pool,
+                dynamicData: dynamicData[pool.id],
+                tokens: tokens[pool.id],
+            }))
+            // Filter needed for test pools on Sepolia
+            .filter((pool) => pool.tokens && pool.dynamicData);
 
         await this.updateAprsForPools(poolsWithData);
     }
