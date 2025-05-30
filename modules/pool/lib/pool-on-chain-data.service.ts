@@ -8,6 +8,7 @@ import { fetchOnChainPoolData } from './pool-onchain-data';
 import { fetchOnChainGyroFees } from './pool-onchain-gyro-fee';
 import { StableData } from '../subgraph-mapper';
 import { fetchTokenPairData } from './pool-on-chain-tokenpair-data';
+import _ from 'lodash';
 
 export const SUPPORTED_POOL_TYPES: PrismaPoolType[] = [
     'WEIGHTED',
@@ -38,20 +39,33 @@ export class PoolOnChainDataService {
         return this.optionsResolver();
     }
 
-    public async updateOnChainStatus(poolIds: string[], chain: Chain): Promise<void> {
-        if (poolIds.length === 0) return;
+    public async updateOnChainStatus(chain: Chain, poolIds?: string[]): Promise<void> {
+        if (poolIds) {
+            poolIds = poolIds.filter(Boolean);
+            if (poolIds.length === 0) return;
+        }
 
-        const filteredPools = await prisma.prismaPool.findMany({
-            where: {
-                id: { in: poolIds },
-                chain,
-                type: { in: SUPPORTED_POOL_TYPES },
-                protocolVersion: 2,
-            },
-            include: {
-                dynamicData: true,
-            },
-        });
+        const where = {
+            type: { notIn: ['UNKNOWN', 'ELEMENT'] as PrismaPoolType[] },
+            NOT: { categories: { has: 'BLACK_LISTED' } },
+            protocolVersion: 2,
+            ...(poolIds ? { id: { in: poolIds } } : {}),
+        };
+
+        const [dbPools, dynamicData] = await Promise.all([
+            prisma.prismaPool.findMany({ where }),
+            prisma.prismaPoolDynamicData
+                .findMany({ where: { pool: { ...where } } })
+                .then((records) => _.keyBy(records, 'id') as Record<string, (typeof records)[0]>),
+        ]);
+
+        const filteredPools = dbPools
+            .map((pool) => ({
+                ...pool,
+                dynamicData: dynamicData[pool.id],
+            }))
+            // Filter needed for test pools on Sepolia
+            .filter((pool) => pool.dynamicData);
 
         const state = await fetchOnChainPoolState(filteredPools, ['ZKEVM', 'FANTOM'].includes(chain) ? 8192 : 32768);
 
@@ -77,27 +91,49 @@ export class PoolOnChainDataService {
     }
 
     public async updateOnChainData(
-        poolIds: string[],
         chain: Chain,
         blockNumber: number,
         tokenPrices: PrismaTokenCurrentPrice[],
+        poolIds?: string[],
     ): Promise<void> {
-        if (poolIds.length === 0) {
-            return;
+        if (poolIds) {
+            poolIds = poolIds.filter(Boolean);
+            if (poolIds.length === 0) return;
         }
 
-        const filteredPools = await prisma.prismaPool.findMany({
-            where: {
-                id: { in: poolIds },
-                chain,
-                type: { in: SUPPORTED_POOL_TYPES },
-                protocolVersion: 2,
-            },
-            include: {
-                tokens: { orderBy: { index: 'asc' }, include: { token: true } },
-                dynamicData: true,
-            },
-        });
+        const where = {
+            chain,
+            type: { in: SUPPORTED_POOL_TYPES },
+            protocolVersion: 2,
+            ...(poolIds ? { id: { in: poolIds } } : {}),
+        };
+
+        const [dbPools, poolTokens, dynamicData, tokens] = await Promise.all([
+            prisma.prismaPool.findMany({
+                where,
+            }),
+            prisma.prismaPoolToken
+                .findMany({ where: { pool: { ...where } }, orderBy: { index: 'asc' } })
+                .then((records) => _.groupBy(records, 'poolId') as Record<string, typeof records>),
+            prisma.prismaPoolDynamicData
+                .findMany({ where: { pool: { ...where } } })
+                .then((records) => _.keyBy(records, 'id') as Record<string, (typeof records)[0]>),
+            prisma.prismaToken
+                .findMany({ select: { address: true, decimals: true }, where: { chain } })
+                .then((records) => _.keyBy(records, 'address') as Record<string, (typeof records)[0]>),
+        ]);
+
+        const filteredPools = dbPools
+            .map((pool) => ({
+                ...pool,
+                dynamicData: dynamicData[pool.id],
+                tokens: poolTokens[pool.id].map((pt) => ({
+                    ...pt,
+                    token: tokens[pt.address],
+                })),
+            }))
+            // Filter needed for test pools on Sepolia
+            .filter((pool) => pool.dynamicData);
 
         const gyroPools = filteredPools.filter((pool) => pool.type.includes('GYRO'));
 

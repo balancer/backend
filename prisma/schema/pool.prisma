@@ -172,6 +172,7 @@ model PrismaPoolAprItem {
     group               PrismaPoolAprItemGroup?
 
     @@index([poolId, chain])
+    @@index([chain, type])
 }
 
 model PrismaPoolAprRange {

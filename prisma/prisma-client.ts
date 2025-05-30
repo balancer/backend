@@ -1,23 +1,23 @@
 import { PrismaClient } from '@prisma/client';
 import { env } from '../apps/env';
 
-export let prisma = new PrismaClient({
-    datasources: {
-        db: {
-            url: env.DATABASE_URL,
-        },
-    },
-});
-
-// Debugging query times
 // export let prisma = new PrismaClient({
-//     log: ['query'],
 //     datasources: {
 //         db: {
 //             url: env.DATABASE_URL,
 //         },
 //     },
 // });
+
+// Debugging query times
+export let prisma = new PrismaClient({
+    log: ['query'],
+    datasources: {
+        db: {
+            url: env.DATABASE_URL,
+        },
+    },
+});
 
 // prisma.$use(async (params, next) => {
 //     const before = Date.now()

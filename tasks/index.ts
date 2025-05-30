@@ -204,8 +204,12 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
     }
     // Maintenance
     else if (job === 'sync-onchain-data-v2') {
-        const poolId = process.argv[4];
-        await PoolController().syncOnchainDataForPoolsV2(chain, [poolId]);
+        const poolIds = process.argv[4]?.split(',');
+        if (poolIds) {
+            await PoolController().syncOnchainDataForPoolsV2(chain, poolIds);
+        } else {
+            await PoolController().syncOnchainDataForPoolsV2(chain);
+        }
         return 'OK';
     } else if (job === 'sync-fx-quote-tokens') {
         return FXPoolsController().syncQuoteTokens(chain);

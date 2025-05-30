@@ -115,7 +115,7 @@ export class PoolService {
         const poolIds = await this.balancerSubgraphService.getPoolsWithActiveUpdates(timestamp);
         const tokenPrices = await tokenService.getTokenPrices(this.chain);
 
-        await this.poolOnChainDataService.updateOnChainData(poolIds, this.chain, blockNumber, tokenPrices);
+        await this.poolOnChainDataService.updateOnChainData(this.chain, blockNumber, tokenPrices, poolIds);
     }
 
     /**

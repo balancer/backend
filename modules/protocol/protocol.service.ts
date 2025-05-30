@@ -69,18 +69,33 @@ export class ProtocolService {
     public async cacheProtocolMetrics(chain: Chain): Promise<GqlProtocolMetricsChain> {
         const oneDayAgo = moment().subtract(24, 'hours').unix();
 
-        const pools = await prisma.prismaPool.findMany({
-            where: {
-                NOT: { categories: { has: 'BLACK_LISTED' } },
-                dynamicData: {
-                    totalSharesNum: {
-                        gt: 0.000000000001,
+        const [dbPools, dynamicData] = await Promise.all([
+            prisma.prismaPool.findMany({
+                where: {
+                    NOT: { categories: { has: 'BLACK_LISTED' } },
+                    dynamicData: {
+                        totalSharesNum: {
+                            gt: 0.000000000001,
+                        },
                     },
+                    chain,
                 },
-                chain,
-            },
-            include: { dynamicData: true },
-        });
+            }),
+            prisma.prismaPoolDynamicData
+                .findMany({
+                    where: { chain },
+                })
+                .then((records) => _.keyBy(records, 'id') as Record<string, (typeof records)[0]>),
+            ,
+        ]);
+
+        const pools = dbPools
+            .map((pool) => ({
+                ...pool,
+                dynamicData: dynamicData[pool.id],
+            }))
+            // Filter needed for test pools on Sepolia
+            .filter((pool) => pool.dynamicData);
 
         const poolCount = pools.length;
 
