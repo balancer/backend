@@ -28,6 +28,11 @@ export interface Scalars {
     JSON: any;
 }
 
+export interface CreateLbpInput {
+    metadata: LbpMetadataInput;
+    poolContract: LbPoolInput;
+}
+
 /** The review data for the ERC4626 token */
 export interface Erc4626ReviewData {
     __typename?: 'Erc4626ReviewData';
@@ -1102,11 +1107,14 @@ export interface GqlPoolLiquidityBootstrapping extends GqlPoolBase {
     chain: GqlChain;
     createTime: Scalars['Int'];
     decimals: Scalars['Int'];
+    description?: Maybe<Scalars['String']>;
+    discord?: Maybe<Scalars['String']>;
     /** @deprecated Use poolTokens instead */
     displayTokens: Array<GqlPoolTokenDisplay>;
     dynamicData: GqlPoolDynamicData;
     endTime: Scalars['Int'];
     factory?: Maybe<Scalars['Bytes']>;
+    farcaster?: Maybe<Scalars['String']>;
     hasAnyAllowedBuffer: Scalars['Boolean'];
     hasErc4626: Scalars['Boolean'];
     hasNestedErc4626: Scalars['Boolean'];
@@ -1115,6 +1123,7 @@ export interface GqlPoolLiquidityBootstrapping extends GqlPoolBase {
     /** @deprecated Removed without replacement */
     investConfig: GqlPoolInvestConfig;
     isProjectTokenSwapInBlocked: Scalars['Boolean'];
+    lbpName?: Maybe<Scalars['String']>;
     lbpOwner: Scalars['String'];
     liquidityManagement?: Maybe<LiquidityManagement>;
     name: Scalars['String'];
@@ -1145,6 +1154,7 @@ export interface GqlPoolLiquidityBootstrapping extends GqlPoolBase {
     swapFeeManager?: Maybe<Scalars['Bytes']>;
     symbol: Scalars['String'];
     tags?: Maybe<Array<Maybe<Scalars['String']>>>;
+    telegram?: Maybe<Scalars['String']>;
     /**
      * All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
      * @deprecated Use poolTokens instead
@@ -1155,8 +1165,10 @@ export interface GqlPoolLiquidityBootstrapping extends GqlPoolBase {
     /** @deprecated use protocolVersion instead */
     vaultVersion: Scalars['Int'];
     version: Scalars['Int'];
+    website?: Maybe<Scalars['String']>;
     /** @deprecated Removed without replacement */
     withdrawConfig: GqlPoolWithdrawConfig;
+    x?: Maybe<Scalars['String']>;
 }
 
 export interface GqlPoolMetaStable extends GqlPoolBase {
@@ -2666,6 +2678,22 @@ export interface HookConfig {
 
 export type HookParams = ExitFeeHookParams | FeeTakingHookParams | MevTaxHookParams | StableSurgeHookParams;
 
+export interface LbpMetadataInput {
+    description: Scalars['String'];
+    discord?: InputMaybe<Scalars['String']>;
+    farcaster?: InputMaybe<Scalars['String']>;
+    lbpName: Scalars['String'];
+    telegram?: InputMaybe<Scalars['String']>;
+    tokenLogo: Scalars['String'];
+    website: Scalars['String'];
+    x?: InputMaybe<Scalars['String']>;
+}
+
+export interface LbPoolInput {
+    address: Scalars['String'];
+    chain: GqlChain;
+}
+
 /** Liquidity management settings for v3 pools. */
 export interface LiquidityManagement {
     __typename?: 'LiquidityManagement';
@@ -2691,6 +2719,7 @@ export interface Mutation {
     __typename?: 'Mutation';
     beetsPoolLoadReliquarySnapshotsForAllFarms: Scalars['String'];
     beetsSyncFbeetsRatio: Scalars['String'];
+    createLBP: Scalars['Boolean'];
     poolLoadOnChainDataForAllPools: Array<GqlPoolMutationResult>;
     poolLoadSnapshotsForPools: Scalars['String'];
     poolReloadAllPoolAprs: Scalars['String'];
@@ -2722,6 +2751,10 @@ export interface Mutation {
 
 export interface MutationBeetsPoolLoadReliquarySnapshotsForAllFarmsArgs {
     chain: GqlChain;
+}
+
+export interface MutationCreateLbpArgs {
+    input: CreateLbpInput;
 }
 
 export interface MutationPoolLoadOnChainDataForAllPoolsArgs {
@@ -3274,6 +3307,7 @@ export type ResolversTypes = ResolversObject<{
     BigInt: ResolverTypeWrapper<Scalars['BigInt']>;
     Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
     Bytes: ResolverTypeWrapper<Scalars['Bytes']>;
+    CreateLBPInput: CreateLbpInput;
     Date: ResolverTypeWrapper<Scalars['Date']>;
     Erc4626ReviewData: ResolverTypeWrapper<Erc4626ReviewData>;
     ExitFeeHookParams: ResolverTypeWrapper<ExitFeeHookParams>;
@@ -3481,6 +3515,8 @@ export type ResolversTypes = ResolversObject<{
     ID: ResolverTypeWrapper<Scalars['ID']>;
     Int: ResolverTypeWrapper<Scalars['Int']>;
     JSON: ResolverTypeWrapper<Scalars['JSON']>;
+    LBPMetadataInput: LbpMetadataInput;
+    LBPoolInput: LbPoolInput;
     LiquidityManagement: ResolverTypeWrapper<LiquidityManagement>;
     MevTaxHookParams: ResolverTypeWrapper<MevTaxHookParams>;
     Mutation: ResolverTypeWrapper<{}>;
@@ -3502,6 +3538,7 @@ export type ResolversParentTypes = ResolversObject<{
     BigInt: Scalars['BigInt'];
     Boolean: Scalars['Boolean'];
     Bytes: Scalars['Bytes'];
+    CreateLBPInput: CreateLbpInput;
     Date: Scalars['Date'];
     Erc4626ReviewData: Erc4626ReviewData;
     ExitFeeHookParams: ExitFeeHookParams;
@@ -3676,6 +3713,8 @@ export type ResolversParentTypes = ResolversObject<{
     ID: Scalars['ID'];
     Int: Scalars['Int'];
     JSON: Scalars['JSON'];
+    LBPMetadataInput: LbpMetadataInput;
+    LBPoolInput: LbPoolInput;
     LiquidityManagement: LiquidityManagement;
     MevTaxHookParams: MevTaxHookParams;
     Mutation: {};
@@ -4490,10 +4529,13 @@ export type GqlPoolLiquidityBootstrappingResolvers<
     chain?: Resolver<ResolversTypes['GqlChain'], ParentType, ContextType>;
     createTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     decimals?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+    description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    discord?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     displayTokens?: Resolver<Array<ResolversTypes['GqlPoolTokenDisplay']>, ParentType, ContextType>;
     dynamicData?: Resolver<ResolversTypes['GqlPoolDynamicData'], ParentType, ContextType>;
     endTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     factory?: Resolver<Maybe<ResolversTypes['Bytes']>, ParentType, ContextType>;
+    farcaster?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     hasAnyAllowedBuffer?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
     hasErc4626?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
     hasNestedErc4626?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
@@ -4501,6 +4543,7 @@ export type GqlPoolLiquidityBootstrappingResolvers<
     id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
     investConfig?: Resolver<ResolversTypes['GqlPoolInvestConfig'], ParentType, ContextType>;
     isProjectTokenSwapInBlocked?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+    lbpName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     lbpOwner?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     liquidityManagement?: Resolver<Maybe<ResolversTypes['LiquidityManagement']>, ParentType, ContextType>;
     name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -4523,12 +4566,15 @@ export type GqlPoolLiquidityBootstrappingResolvers<
     swapFeeManager?: Resolver<Maybe<ResolversTypes['Bytes']>, ParentType, ContextType>;
     symbol?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     tags?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>;
+    telegram?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     tokens?: Resolver<Array<ResolversTypes['GqlPoolTokenUnion']>, ParentType, ContextType>;
     type?: Resolver<ResolversTypes['GqlPoolType'], ParentType, ContextType>;
     userBalance?: Resolver<Maybe<ResolversTypes['GqlPoolUserBalance']>, ParentType, ContextType>;
     vaultVersion?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     version?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+    website?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     withdrawConfig?: Resolver<ResolversTypes['GqlPoolWithdrawConfig'], ParentType, ContextType>;
+    x?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -5799,6 +5845,12 @@ export type MutationResolvers<
         RequireFields<MutationBeetsPoolLoadReliquarySnapshotsForAllFarmsArgs, 'chain'>
     >;
     beetsSyncFbeetsRatio?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+    createLBP?: Resolver<
+        ResolversTypes['Boolean'],
+        ParentType,
+        ContextType,
+        RequireFields<MutationCreateLbpArgs, 'input'>
+    >;
     poolLoadOnChainDataForAllPools?: Resolver<
         Array<ResolversTypes['GqlPoolMutationResult']>,
         ParentType,
