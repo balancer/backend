@@ -66,7 +66,7 @@ export class SOR {
                     break;
                 case 'LIQUIDITY_BOOTSTRAPPING': {
                     if (prismaPool.protocolVersion === 2) {
-                        // TODO: relevant?
+                        basePools.push(WeightedPool.fromPrismaPool(prismaPool));
                     } else {
                         basePools.push(LiquidityBootstrappingPoolV3.fromPrismaPool(prismaPool, currentTimestamp));
                     }
