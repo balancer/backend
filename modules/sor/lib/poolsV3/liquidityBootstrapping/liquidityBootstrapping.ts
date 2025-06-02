@@ -213,7 +213,8 @@ export class LiquidityBootstrappingPoolV3 extends BasePoolV3 implements BasePool
         // call into BasePoolV3 to do the swap
         // this includes potential for adding and removing liquidity paths (which are disabled
         // and checked in the BasePoolV3). Any other LBP swap validation happens in the balancer-maths
-        // library.        return super.swapGivenIn(tokenIn, tokenOut, swapAmount);
+        // library.
+        return super.swapGivenIn(tokenIn, tokenOut, swapAmount);
     }
     public swapGivenOut(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount {
         // call into BasePoolV3 to do the swap
