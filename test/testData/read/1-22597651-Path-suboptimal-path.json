@@ -1,0 +1,131 @@
+{
+    "test": {
+        "chainId": "1",
+        "blockNumber": "22597651"
+    },
+    "swapPath": {
+        "swapKind": 1,
+        "amountRaw": "88500000",
+        "tokens": [
+            "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+            "0x0fe906e030a44ef24ca8c7dc7b7c53a6c4f00ce9",
+            "0x775f661b0bd1739349b9a2a3ef60be277c5d2d29",
+            "0xd4fa2d31b7968e448877f69a96de69f5de8cd23e",
+            "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+        ],
+        "pools": [
+            "0x0fe906e030a44ef24ca8c7dc7b7c53a6c4f00ce9",
+            "0xc4ce391d82d164c166df9c8336ddf84206b2f812",
+            "0x8523bcadcda4bd329435940dcc49a7c4c0a14d94",
+            "0xd4fa2d31b7968e448877f69a96de69f5de8cd23e"
+        ],
+        "outputRaw": "44288278019192549"
+    },
+    "pools": [
+        {
+            "chainId": "1",
+            "blockNumber": "22597651",
+            "poolType": "Buffer",
+            "poolAddress": "0x0fe906e030a44ef24ca8c7dc7b7c53a6c4f00ce9",
+            "tokens": [
+                "0x0fe906e030a44ef24ca8c7dc7b7c53a6c4f00ce9",
+                "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+            ],
+            "decimals": [
+                18,
+                18
+            ],
+            "rate": "1016973320035754316"
+        },
+        {
+            "chainId": "1",
+            "blockNumber": "22597651",
+            "poolType": "STABLE",
+            "poolAddress": "0xc4ce391d82d164c166df9c8336ddf84206b2f812",
+            "tokens": [
+                "0x0FE906e030a44eF24CA8c7dC7B7c53A6C4F00ce9",
+                "0x775F661b0bD1739349b9A2A3EF60be277c5d2D29"
+            ],
+            "scalingFactors": [
+                "1",
+                "1"
+            ],
+            "swapFee": "20000000000000",
+            "totalSupply": "3163431501263522643893",
+            "balancesLiveScaled18": [
+                "818258816425227363493",
+                "2392060335854172581295"
+            ],
+            "tokenRates": [
+                "1016973320035754316",
+                "1207106296230884867"
+            ],
+            "amp": "5000000",
+            "aggregateSwapFee": "500000000000000000"
+        },
+        {
+            "chainId": "1",
+            "blockNumber": "22597651",
+            "poolType": "WEIGHTED",
+            "poolAddress": "0x8523bcadcda4bd329435940dcc49a7c4c0a14d94",
+            "tokens": [
+                "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+                "0x514910771AF9Ca656af840dff83E8264EcF986CA",
+                "0x775F661b0bD1739349b9A2A3EF60be277c5d2D29",
+                "0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9",
+                "0xD31a59c85aE9D8edEFeC411D448f90841571b89c",
+                "0xD4fa2D31b7968E448877f69A96DE69f5de8cD23E"
+            ],
+            "scalingFactors": [
+                "10000000000",
+                "1",
+                "1",
+                "1",
+                "1000000000",
+                "1000000000000"
+            ],
+            "weights": [
+                "250000000000000000",
+                "100000000000000000",
+                "100000000000000000",
+                "100000000000000000",
+                "100000000000000000",
+                "350000000000000000"
+            ],
+            "swapFee": "3000000000000000",
+            "totalSupply": "3212435434202465621",
+            "balancesLiveScaled18": [
+                "5933080000000000",
+                "16499408417590760559",
+                "97621294518343413",
+                "987863818894784232",
+                "1516594940000000000",
+                "876620438097897528165"
+            ],
+            "tokenRates": [
+                "1000000000000000000",
+                "1000000000000000000",
+                "1204100144063642918",
+                "1000000000000000000",
+                "1000000000000000000",
+                "1130799521323441331"
+            ],
+            "aggregateSwapFee": "500000000000000000"
+        },
+        {
+            "chainId": "1",
+            "blockNumber": "22597651",
+            "poolType": "Buffer",
+            "poolAddress": "0xd4fa2d31b7968e448877f69a96de69f5de8cd23e",
+            "tokens": [
+                "0xd4fa2d31b7968e448877f69a96de69f5de8cd23e",
+                "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+            ],
+            "decimals": [
+                6,
+                6
+            ],
+            "rate": "1130799521323441331"
+        }
+    ]
+}
