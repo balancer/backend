@@ -210,33 +210,16 @@ export class LiquidityBootstrappingPoolV3 extends BasePoolV3 implements BasePool
     }
 
     public swapGivenIn(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount {
-        // TODO: Instead of throwing an error, we could return a TokenAmount with 0 amount?
-        // has the LBP started already? Indicated by swapEnabled
-        if (!this.isSwapEnabled) {
-            throw new Error('LBP has not started yet');
-        }
-
-        // project token swap in can be blocked so check for it here
-        if (this.isProjectTokenSwapInBlocked && tokenIn.isSameAddress(this.projectToken)) {
-            throw new Error('Project token swap in is blocked');
-        }
-
         // call into BasePoolV3 to do the swap
-        return super.swapGivenIn(tokenIn, tokenOut, swapAmount);
+        // this includes potential for adding and removing liquidity paths (which are disabled
+        // and checked in the BasePoolV3). Any other LBP swap validation happens in the balancer-maths
+        // library.        return super.swapGivenIn(tokenIn, tokenOut, swapAmount);
     }
     public swapGivenOut(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount {
-        // TODO: Instead of throwing an error, we could return a TokenAmount with 0 amount?
-        // has the LBP started already? Indicated by swapEnabled
-        if (!this.isSwapEnabled) {
-            throw new Error('LBP has not started yet');
-        }
-
-        if (this.isProjectTokenSwapInBlocked && tokenIn.isSameAddress(this.projectToken)) {
-            throw new Error('Project token swap in is blocked');
-        }
-
         // call into BasePoolV3 to do the swap
-        // this includes potential for adding and removing liquidity paths
+        // this includes potential for adding and removing liquidity paths (which are disabled
+        // and checked in the BasePoolV3). Any other LBP swap validation happens in the balancer-maths
+        // library.
         return super.swapGivenOut(tokenIn, tokenOut, swapAmount);
     }
 
