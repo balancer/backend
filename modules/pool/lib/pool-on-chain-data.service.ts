@@ -1,4 +1,4 @@
-import { Chain, PrismaPoolType, PrismaTokenCurrentPrice } from '@prisma/client';
+import { Prisma, Chain, PrismaPoolType, PrismaTokenCurrentPrice } from '@prisma/client';
 import { addressesMatch } from '../../web3/addresses';
 import { prisma } from '../../../prisma/prisma-client';
 import { isStablePool } from './pool-utils';
@@ -46,17 +46,22 @@ export class PoolOnChainDataService {
         }
 
         const where = {
+            chain,
             type: { notIn: ['UNKNOWN', 'ELEMENT'] as PrismaPoolType[] },
             NOT: { categories: { has: 'BLACK_LISTED' } },
             protocolVersion: 2,
             ...(poolIds ? { id: { in: poolIds } } : {}),
         };
 
+        const query = Prisma.raw(
+            `SELECT d.id, d."isInRecoveryMode", d."isPaused" FROM "PrismaPoolDynamicData" d WHERE LENGTH(d.id) = 66 AND chain = '${chain}'::"Chain"${poolIds ? ` AND d.id = ANY('{${poolIds.join(',')}}')` : ''}`,
+        );
+
         const [dbPools, dynamicData] = await Promise.all([
-            prisma.prismaPool.findMany({ where }),
-            prisma.prismaPoolDynamicData
-                .findMany({ where: { pool: { ...where } } })
-                .then((records) => _.keyBy(records, 'id') as Record<string, (typeof records)[0]>),
+            prisma.prismaPool.findMany({ select: { id: true, chain: true, type: true, address: true }, where }),
+            prisma
+                .$queryRaw<{ id: string; isPaused: boolean; isInRecoveryMode: true }[]>(query)
+                .then((records) => Object.fromEntries(records.map((r) => [r.id, r]))),
         ]);
 
         const filteredPools = dbPools
