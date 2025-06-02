@@ -24,9 +24,6 @@ export type LBPoolDynamicData = {
     normalizedWeights: bigint[];
     staticSwapFeePercentage: bigint;
     totalSupply: bigint;
-    isPoolInitialized: boolean;
-    isPoolPaused: boolean;
-    isPoolInRecoveryMode: boolean;
     isSwapEnabled: boolean;
 };
 
@@ -114,16 +111,8 @@ export class LiquidityBootstrappingPool {
             blockNumber,
         });
 
-        const {
-            balancesLiveScaled18,
-            normalizedWeights,
-            staticSwapFeePercentage,
-            totalSupply,
-            isPoolInitialized,
-            isPoolPaused,
-            isPoolInRecoveryMode,
-            isSwapEnabled,
-        } = multicallResult[0] as LBPoolDynamicData;
+        const { balancesLiveScaled18, normalizedWeights, staticSwapFeePercentage, totalSupply, isSwapEnabled } =
+            multicallResult[0] as LBPoolDynamicData;
 
         const tokenRates = multicallResult[1][1] as bigint[];
 
@@ -135,9 +124,6 @@ export class LiquidityBootstrappingPool {
             swapFee: staticSwapFeePercentage.toString(),
             totalSupply: totalSupply.toString(),
             tokenRates: tokenRates.map((rate) => rate.toString()),
-            isPoolInitialized,
-            isPoolPaused,
-            isPoolInRecoveryMode,
             isSwapEnabled,
             currentTimestamp: timestamp.toString(),
         };
