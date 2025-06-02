@@ -25,7 +25,6 @@ class PrismaPoolFactory extends Factory<PrismaPoolAndHookWithDynamic> {
             typeData: {
                 projectTokenIndex: lbpParams.projectTokenIndex,
                 isProjectTokenSwapInBlocked: lbpParams.isProjectTokenSwapInBlocked,
-
                 projectTokenStartWeight: formatEther(lbpParams.startWeights[lbpParams.projectTokenIndex]),
                 projectTokenEndWeight: formatEther(lbpParams.endWeights[lbpParams.projectTokenIndex]),
                 reserveTokenStartWeight: formatEther(lbpParams.startWeights[reserveTokenIndex]),
