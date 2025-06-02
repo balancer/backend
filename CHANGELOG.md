@@ -1,5 +1,12 @@
 # backend
 
+## 1.42.5
+
+### Patch Changes
+
+-   3210c67: update unwrap rates only when changed
+-   68237e4: slow dynamic data query fix
+
 ## 1.42.4
 
 ### Patch Changes
