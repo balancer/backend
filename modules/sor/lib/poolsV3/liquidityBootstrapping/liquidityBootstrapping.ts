@@ -126,6 +126,12 @@ export class LiquidityBootstrappingPoolV3 extends BasePoolV3 implements BasePool
             endWeights,
         };
 
+        // Force disableUnbalancedLiquidity to true for LBP pools.
+        const liquidityManagement: LiquidityManagement = {
+            ...(pool.liquidityManagement as unknown as LiquidityManagement),
+            disableUnbalancedLiquidity: true,
+        };
+
         return new LiquidityBootstrappingPoolV3(
             pool.id as Hex,
             pool.address,
@@ -135,7 +141,7 @@ export class LiquidityBootstrappingPoolV3 extends BasePoolV3 implements BasePool
             parseEther(pool.dynamicData.totalShares),
             poolTokens,
             pool.dynamicData.tokenPairsData as TokenPairData[],
-            pool.liquidityManagement as unknown as LiquidityManagement,
+            liquidityManagement,
             hookState,
             lbpParams,
         );
@@ -215,12 +221,6 @@ export class LiquidityBootstrappingPoolV3 extends BasePoolV3 implements BasePool
             throw new Error('Project token swap in is blocked');
         }
 
-        // handle add & remove liquidity paths - return 0 as add & remove liq not supported for the SOR
-        // the pool allows the owner to add & remove liquidity (after LBP end)
-        if (tokenIn.isSameAddress(this.id) || tokenOut.isSameAddress(this.id)) {
-            return TokenAmount.fromRawAmount(tokenOut, 0n);
-        }
-
         // call into BasePoolV3 to do the swap
         return super.swapGivenIn(tokenIn, tokenOut, swapAmount);
     }
@@ -233,12 +233,6 @@ export class LiquidityBootstrappingPoolV3 extends BasePoolV3 implements BasePool
 
         if (this.isProjectTokenSwapInBlocked && tokenIn.isSameAddress(this.projectToken)) {
             throw new Error('Project token swap in is blocked');
-        }
-
-        // handle add & remove liquidity paths - return 0 as add & remove liq not supported for the SOR
-        // the pool allows the owner to add & remove liquidity (after LBP end)
-        if (tokenIn.isSameAddress(this.id) || tokenOut.isSameAddress(this.id)) {
-            return TokenAmount.fromRawAmount(tokenOut, 0n);
         }
 
         // call into BasePoolV3 to do the swap
