@@ -19,6 +19,19 @@ import { LBPoolData } from '../../../../../modules/pool/pool-data/lbpool';
 
 type WeightedPoolToken = WeightedPoolTokenWithRate;
 
+export interface LBPParams {
+    projectToken: Address;
+    reserveTokenIndex: number;
+    projectTokenIndex: number;
+    isProjectTokenSwapInBlocked: boolean;
+    isSwapEnabled: boolean;
+    currentTimestamp: bigint;
+    startTime: bigint;
+    endTime: bigint;
+    startWeights: bigint[];
+    endWeights: bigint[];
+}
+
 export class LiquidityBootstrappingPoolV3 extends BasePoolV3 implements BasePoolMethodsV3 {
     public readonly poolType: string = 'LIQUIDITY_BOOTSTRAPPING';
 
@@ -100,6 +113,19 @@ export class LiquidityBootstrappingPoolV3 extends BasePoolV3 implements BasePool
         //transform
         const hookState = getHookState(pool);
 
+        const lbpParams: LBPParams = {
+            projectToken: typeData.projectToken as Address,
+            reserveTokenIndex: typeData.reserveTokenIndex,
+            projectTokenIndex: typeData.projectTokenIndex,
+            isProjectTokenSwapInBlocked: typeData.isProjectTokenSwapInBlocked,
+            isSwapEnabled: pool.dynamicData.swapEnabled,
+            currentTimestamp,
+            startTime: BigInt(typeData.startTime),
+            endTime: BigInt(typeData.endTime),
+            startWeights,
+            endWeights,
+        };
+
         return new LiquidityBootstrappingPoolV3(
             pool.id as Hex,
             pool.address,
@@ -111,16 +137,7 @@ export class LiquidityBootstrappingPoolV3 extends BasePoolV3 implements BasePool
             pool.dynamicData.tokenPairsData as TokenPairData[],
             pool.liquidityManagement as unknown as LiquidityManagement,
             hookState,
-            typeData.projectToken as Address,
-            typeData.reserveTokenIndex,
-            typeData.projectTokenIndex,
-            typeData.isProjectTokenSwapInBlocked,
-            pool.dynamicData.swapEnabled,
-            currentTimestamp,
-            BigInt(typeData.startTime),
-            BigInt(typeData.endTime),
-            startWeights,
-            endWeights,
+            lbpParams,
         );
     }
 
@@ -135,16 +152,7 @@ export class LiquidityBootstrappingPoolV3 extends BasePoolV3 implements BasePool
         tokenPairs: TokenPairData[],
         liquidityManagement: LiquidityManagement,
         hookState: HookState | undefined = undefined,
-        projectToken: Address,
-        reserveTokenIndex: number,
-        projectTokenIndex: number,
-        isProjectTokenSwapInBlocked: boolean,
-        isSwapEnabled: boolean,
-        currentTimestamp: bigint,
-        startTime: bigint,
-        endTime: bigint,
-        startWeights: bigint[],
-        endWeights: bigint[],
+        lbpParams: LBPParams,
     ) {
         super(id, address, chain, swapFee, aggregateSwapFee, totalShares, tokenPairs, liquidityManagement, hookState);
         this.tokens = tokens;
@@ -154,16 +162,16 @@ export class LiquidityBootstrappingPoolV3 extends BasePoolV3 implements BasePool
         const bpt = new Token(tokens[0].token.chainId, this.id, 18, 'BPT', 'BPT');
         this.tokenMap.set(bpt.address, new WeightedPoolTokenWithRate(bpt, totalShares, -1, WAD, 0n));
 
-        this.projectToken = projectToken;
-        this.reserveTokenIndex = reserveTokenIndex;
-        this.projectTokenIndex = projectTokenIndex;
-        this.isProjectTokenSwapInBlocked = isProjectTokenSwapInBlocked;
-        this.isSwapEnabled = isSwapEnabled;
-        this.currentTimestamp = currentTimestamp;
-        this.startTime = startTime;
-        this.endTime = endTime;
-        this.startWeights = startWeights;
-        this.endWeights = endWeights;
+        this.projectToken = lbpParams.projectToken;
+        this.reserveTokenIndex = lbpParams.reserveTokenIndex;
+        this.projectTokenIndex = lbpParams.projectTokenIndex;
+        this.isProjectTokenSwapInBlocked = lbpParams.isProjectTokenSwapInBlocked;
+        this.isSwapEnabled = lbpParams.isSwapEnabled;
+        this.currentTimestamp = lbpParams.currentTimestamp;
+        this.startTime = lbpParams.startTime;
+        this.endTime = lbpParams.endTime;
+        this.startWeights = lbpParams.startWeights;
+        this.endWeights = lbpParams.endWeights;
         this.poolState = this.getPoolState(hookState?.hookType);
     }
 
