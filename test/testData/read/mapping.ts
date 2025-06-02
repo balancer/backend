@@ -296,8 +296,6 @@ export function mapLiquidityBootstrappingPoolStateToPrismaPool(
         .lbp({
             projectTokenIndex: poolState.projectTokenIndex,
             isProjectTokenSwapInBlocked: poolState.isProjectTokenSwapInBlocked,
-            //isSwapEnabled: poolState.isSwapEnabled,
-            //currentTimestamp: poolState.currentTimestamp,
             startWeights: poolState.startWeights,
             endWeights: poolState.endWeights,
             startTime: Number(poolState.startTime),
