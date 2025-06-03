@@ -1,4 +1,5 @@
 import { poolService } from '../../../../modules/pool/pool.service';
+import { PoolAggregatorLoader } from '../../../../modules/pool/lib/pool-aggregator-loader';
 import { GqlChain, Resolvers } from '../generated-schema';
 import { isAdminRoute } from '../../../../modules/auth/auth-context';
 import { networkContext } from '../../../../modules/network/network-context.service';
@@ -37,7 +38,10 @@ const balancerResolvers: Resolvers = {
             return poolService.getAggregatorPools(args);
         },
         aggregatorPools: async (parent, args, context) => {
-            return poolService.aggregatorPools(args);
+            console.log('aggregatorPools', JSON.stringify(args.where));
+            const loader = new PoolAggregatorLoader();
+            const pools = loader.aggregatorPools(args);
+            return pools;
         },
         poolGetPoolsCount: async (parent, args, context) => {
             return poolService.getPoolsCount(args);
