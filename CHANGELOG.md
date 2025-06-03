@@ -1,5 +1,13 @@
 # backend
 
+## 1.42.6
+
+### Patch Changes
+
+-   0fad268: LBP create mutation
+-   a9acc71: pool's subgraph update
+-   3d09f5e: fluid APRs on base
+
 ## 1.42.5
 
 ### Patch Changes
