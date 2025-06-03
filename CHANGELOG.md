@@ -1,5 +1,12 @@
 # backend
 
+## 1.42.7
+
+### Patch Changes
+
+-   2fabae3: fix V2 LBPs data schema
+-   22fa2c6: isolate aggregator pool loader
+
 ## 1.42.6
 
 ### Patch Changes

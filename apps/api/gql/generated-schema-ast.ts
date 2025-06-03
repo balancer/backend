@@ -1571,7 +1571,11 @@ export const schema = gql`
         discord: String
         displayTokens: [GqlPoolTokenDisplay!]! @deprecated(reason: "Use poolTokens instead")
         dynamicData: GqlPoolDynamicData!
-        endTime: Int!
+
+        """
+        V3 Specific
+        """
+        endTime: Int
         factory: Bytes
         farcaster: String
         hasAnyAllowedBuffer: Boolean!
@@ -1580,9 +1584,17 @@ export const schema = gql`
         hook: GqlHook
         id: ID!
         investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
-        isProjectTokenSwapInBlocked: Boolean!
+
+        """
+        V3 Specific
+        """
+        isProjectTokenSwapInBlocked: Boolean
         lbpName: String
-        lbpOwner: String!
+
+        """
+        V3 Specific
+        """
+        lbpOwner: String
         liquidityManagement: LiquidityManagement
         name: String!
         nestingType: GqlPoolNestingType! @deprecated(reason: "Removed without replacement")
@@ -1602,17 +1614,53 @@ export const schema = gql`
         """
         poolCreator: Bytes
         poolTokens: [GqlPoolTokenDetail!]!
-        projectToken: String!
-        projectTokenEndWeight: Float!
-        projectTokenIndex: Int!
-        projectTokenStartWeight: Float!
+
+        """
+        V3 Specific
+        """
+        projectToken: String
+
+        """
+        V3 Specific
+        """
+        projectTokenEndWeight: Float
+
+        """
+        V3 Specific
+        """
+        projectTokenIndex: Int
+
+        """
+        V3 Specific
+        """
+        projectTokenStartWeight: Float
         protocolVersion: Int!
-        reserveToken: String!
-        reserveTokenEndWeight: Float!
-        reserveTokenIndex: Int!
-        reserveTokenStartWeight: Float!
+
+        """
+        V3 Specific
+        """
+        reserveToken: String
+
+        """
+        V3 Specific
+        """
+        reserveTokenEndWeight: Float
+
+        """
+        V3 Specific
+        """
+        reserveTokenIndex: Int
+
+        """
+        V3 Specific
+        """
+        reserveTokenStartWeight: Float
         staking: GqlPoolStaking
-        startTime: Int!
+
+        """
+        V3 Specific
+        """
+        startTime: Int
 
         """
         Account empowered to set static swap fees for a pool (when 0 on V2 swap fees are immutable, on V3 delegate to governance)

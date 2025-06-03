@@ -1098,18 +1098,54 @@ type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
     telegram: String
     farcaster: String
 
-    startTime: Int!
-    endTime: Int!
-    lbpOwner: String!
-    isProjectTokenSwapInBlocked: Boolean!
-    reserveToken: String!
-    reserveTokenStartWeight: Float!
-    reserveTokenEndWeight: Float!
-    reserveTokenIndex: Int!
-    projectToken: String!
-    projectTokenStartWeight: Float!
-    projectTokenEndWeight: Float!
-    projectTokenIndex: Int!
+    """
+    V3 Specific
+    """
+    startTime: Int
+    """
+    V3 Specific
+    """
+    endTime: Int
+    """
+    V3 Specific
+    """
+    lbpOwner: String
+    """
+    V3 Specific
+    """
+    isProjectTokenSwapInBlocked: Boolean
+    """
+    V3 Specific
+    """
+    reserveToken: String
+    """
+    V3 Specific
+    """
+    reserveTokenStartWeight: Float
+    """
+    V3 Specific
+    """
+    reserveTokenEndWeight: Float
+    """
+    V3 Specific
+    """
+    reserveTokenIndex: Int
+    """
+    V3 Specific
+    """
+    projectToken: String
+    """
+    V3 Specific
+    """
+    projectTokenStartWeight: Float
+    """
+    V3 Specific
+    """
+    projectTokenEndWeight: Float
+    """
+    V3 Specific
+    """
+    projectTokenIndex: Int
 
     """
     All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
