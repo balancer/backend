@@ -1,5 +1,4 @@
 import { Chain } from '@prisma/client';
-import { prisma } from '../../../../prisma/prisma-client';
 import type { BalancerSubgraphService } from '../../../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import {
     JoinExit_OrderBy,
@@ -7,27 +6,25 @@ import {
 } from '../../../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
 import { joinExitsUsd } from '../../../sources/enrichers/join-exits-usd';
 import { joinExitV2Transformer } from '../../../sources/transformers/join-exit-v2-transformer';
+import { eventsRepository, LatestEventRepository, EventStoreRepository } from '../../../repositories/events';
 
 /**
  * Get the join and exit events from the subgraph and store them in the database
  *
  * @param vaultSubgraphClient
  */
-export const syncJoinExits = async (v2SubgraphClient: BalancerSubgraphService, chain: Chain): Promise<string[]> => {
+export const syncJoinExits = async (
+    v2SubgraphClient: BalancerSubgraphService,
+    chain: Chain,
+    eventRepo: LatestEventRepository & EventStoreRepository = eventsRepository,
+): Promise<string[]> => {
     const protocolVersion = 2;
 
     // Get latest event from the DB
-    const latestEvent = await prisma.prismaPoolEvent.findFirst({
-        where: {
-            type: {
-                in: ['JOIN', 'EXIT'],
-            },
-            chain: chain,
-            protocolVersion,
-        },
-        orderBy: {
-            blockTimestamp: 'desc',
-        },
+    const latestEvent = await eventRepo.getLatestEvent({
+        types: ['JOIN', 'EXIT'],
+        chain,
+        protocolVersion,
     });
 
     // We need to use gte, because of pagination.
@@ -49,10 +46,7 @@ export const syncJoinExits = async (v2SubgraphClient: BalancerSubgraphService, c
     const dbEntriesWithUsd = await joinExitsUsd(dbEntries, chain);
 
     // Create entries and skip duplicates
-    await prisma.prismaPoolEvent.createMany({
-        data: dbEntriesWithUsd,
-        skipDuplicates: true,
-    });
+    await eventRepo.storeEvents(dbEntriesWithUsd);
 
     return dbEntries.map((entry) => entry.id);
 };

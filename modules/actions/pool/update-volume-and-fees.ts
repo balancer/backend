@@ -1,17 +1,10 @@
-import { Prisma, Chain } from '@prisma/client';
+import { Chain } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
 import _ from 'lodash';
 import moment from 'moment';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
-import { SwapEvent } from '../../../prisma/prisma-types';
 import { capturesYield } from '../../pool/lib/pool-utils';
-
-type PoolStats = {
-    poolId: string;
-    volume: number;
-    fees: number;
-    surplus?: number;
-};
+import { SwapStatsRepository, eventsRepository } from '../../repositories/events';
 
 const emptyStats = {
     volume: 0,
@@ -26,7 +19,11 @@ const emptyStats = {
  * @param poolIds
  * @param chain
  */
-export async function updateVolumeAndFees(chain: Chain, poolIds?: string[]) {
+export async function updateVolumeAndFees(
+    chain: Chain,
+    poolIds?: string[],
+    eventRepo: SwapStatsRepository = eventsRepository,
+) {
     const yesterday = moment().subtract(1, 'day').unix();
     const twoDaysAgo = moment().subtract(2, 'day').unix();
     const pools = await prisma.prismaPool.findMany({
@@ -36,23 +33,9 @@ export async function updateVolumeAndFees(chain: Chain, poolIds?: string[]) {
         },
     });
 
-    const query = (timestamp: number, poolIds?: string[]) =>
-        Prisma.raw(`SELECT
-        "poolId",
-        SUM("valueUSD") AS volume,
-        SUM((payload->'fee'->>'valueUSD')::numeric) AS fees,
-        SUM((payload->'surplus'->>'valueUSD')::numeric) AS surplus
-      FROM "PartitionedPoolEvent"
-      WHERE
-        "blockTimestamp" >= ${timestamp}
-        AND chain = '${chain}'
-        AND type = 'SWAP'
-        ${poolIds && poolIds.length < 30 ? 'AND "poolId" IN (\'' + poolIds.join("','") + "')" : ''}
-      GROUP BY 1`);
-
     // Fetch the stats
-    const stats24h = await prisma.$queryRaw<PoolStats[]>(query(yesterday, poolIds));
-    const stats48h = await prisma.$queryRaw<PoolStats[]>(query(twoDaysAgo, poolIds));
+    const stats24h = await eventRepo.getSwapStats({ chain, poolIds, since: yesterday });
+    const stats48h = await eventRepo.getSwapStats({ chain, poolIds, since: twoDaysAgo });
 
     // Prepare maps
     const stats24hMap = _.keyBy(stats24h, 'poolId');
@@ -120,13 +103,33 @@ export async function updateVolumeAndFees(chain: Chain, poolIds?: string[]) {
     We approximate the yield fee capture of the last 48h by taking the current total yield APR and apply it to the totalLiquidity from 24 hours ago.
 */
 async function updateYieldCaptureForAllPools(chain: Chain) {
-    const pools = await prisma.prismaPool.findMany({
-        where: { chain: chain },
-        include: {
-            dynamicData: true,
-            aprItems: true,
-        },
-    });
+    // Loading pools, their dynamic data, and tokens separately, then manually assembling them into `PoolForAPRs` objects to avoid the performance overhead of Prisma's nested includes.
+    const [dbPools, dynamicData, aprItems] = await Promise.all([
+        prisma.prismaPool.findMany({
+            where: { chain },
+        }),
+        prisma.prismaPoolDynamicData
+            .findMany({ where: { chain } })
+            .then((records) => _.keyBy(records, 'id') as Record<string, (typeof records)[0]>),
+        prisma.prismaPoolAprItem
+            .findMany({
+                where: {
+                    chain,
+                    OR: [{ type: 'IB_YIELD' }, { type: null }],
+                },
+            })
+            .then((records) => _.groupBy(records, 'poolId') as Record<string, typeof records>),
+    ]);
+
+    const pools = dbPools
+        .map((pool) => ({
+            ...pool,
+            dynamicData: dynamicData[pool.id],
+            aprItems: aprItems[pool.id],
+        }))
+        // Filter needed for test pools on Sepolia
+        .filter((pool) => pool.aprItems && pool.dynamicData);
+
     const operations: any[] = [];
 
     for (const pool of pools) {

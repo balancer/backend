@@ -172,6 +172,7 @@ model PrismaPoolAprItem {
     group               PrismaPoolAprItemGroup?
 
     @@index([poolId, chain])
+    @@index([chain, type])
 }
 
 model PrismaPoolAprRange {
@@ -535,10 +536,9 @@ model PrismaPoolEvent {
     payload             Json
 
     @@id([id, chain])
-    @@index([type])
-    @@index([chain, poolId, userAddress])
-    @@index([chain, type, blockTimestamp])
-    @@index([protocolVersion])
-    @@index([blockTimestamp(sort: Desc), blockNumber(sort: Desc), logIndex(sort: Desc)])
+    @@index([chain, type, blockTimestamp(sort: Desc), blockNumber(sort: Desc), logIndex(sort: Desc)])
+    @@index([chain, poolId, blockTimestamp(sort: Desc), blockNumber(sort: Desc), logIndex(sort: Desc)])
+    @@index([chain, userAddress])
+    
     @@map("PartitionedPoolEvent")
 }

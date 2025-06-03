@@ -1,14 +1,12 @@
 import {
-    GqlPoolEventsDataRange,
     GqlPoolAddRemoveEventV3,
     GqlPoolSwapEventV3,
     QueryPoolEventsArgs,
     GqlPoolSwapEventCowAmm,
 } from '../../apps/api/gql/generated-schema';
-import { prisma } from '../../prisma/prisma-client';
-import { Chain, PoolEventType, Prisma } from '@prisma/client';
+import { Chain } from '@prisma/client';
 import { JoinExitEvent, SwapEvent } from '../../prisma/prisma-types';
-import { daysAgo } from '../common/time';
+import { eventsRepository } from '../repositories/events';
 
 const parseJoinExit = (event: JoinExitEvent): GqlPoolAddRemoveEventV3 => {
     return {
@@ -60,44 +58,15 @@ const parseCowAmmSwap = (event: SwapEvent): GqlPoolSwapEventCowAmm => {
     };
 };
 
-const rangeToTimestamp = (range: GqlPoolEventsDataRange): number => {
-    switch (range) {
-        case 'THIRTY_DAYS':
-            return daysAgo(30);
-        case 'NINETY_DAYS':
-            return daysAgo(90);
-        default:
-            return daysAgo(7);
-    }
-};
-
-const getMultichainEvents = async (chainIn: Chain[]) => {
+const getMultichainEvents = async (chainIn: Chain[], limit: number = 100) => {
     const results = await Promise.all(
         chainIn.map(async (chain) => {
-            return (
-                await prisma.prismaPoolEvent.findMany({
-                    where: {
-                        chain,
-                    },
-                    take: 100,
-                    orderBy: [
-                        {
-                            blockTimestamp: 'desc',
-                        },
-                        {
-                            blockNumber: 'desc',
-                        },
-                        {
-                            logIndex: 'desc',
-                        },
-                    ],
-                })
-            ).map((event) =>
+            return (await eventsRepository.getEvents({ chain, limit: Math.min(100, limit) })).map((event) =>
                 event.type === 'SWAP' && (event as SwapEvent).payload?.surplus
                     ? parseCowAmmSwap(event as SwapEvent)
                     : event.type === 'SWAP'
-                    ? parseSwap(event as SwapEvent)
-                    : parseJoinExit(event as JoinExitEvent),
+                      ? parseSwap(event as SwapEvent)
+                      : parseJoinExit(event as JoinExitEvent),
             );
         }),
     );
@@ -113,7 +82,9 @@ const getMultichainEvents = async (chainIn: Chain[]) => {
     });
 };
 
-export function EventsQueryController(tracer?: any) {
+export function EventsQueryController(env = process.env) {
+    const eventsEnabled = env.ENABLE_EVENTS === 'true';
+
     return {
         /**
          * Getting pool events, with pagination and filtering. This is for all vault versions.
@@ -128,94 +99,42 @@ export function EventsQueryController(tracer?: any) {
             skip,
             where,
         }: QueryPoolEventsArgs): Promise<(GqlPoolSwapEventV3 | GqlPoolSwapEventCowAmm | GqlPoolAddRemoveEventV3)[]> => {
+            if (!eventsEnabled) {
+                return [];
+            }
+
             // Setting default values
             first = Math.min(1000, first ?? 1000); // Limiting to 1000 items
             skip = skip ?? 0;
-            let { chainIn, poolIdIn, userAddress, typeIn, range, valueUSD_gt, valueUSD_gte } = where || {};
+            let { chainIn, poolIdIn, userAddress } = where || {};
 
-            const conditions: Prisma.PrismaPoolEventWhereInput = {};
+            if (!chainIn) {
+                return [];
+            }
 
             // Table is partitioned by chain, so querying by many chains is extermenly inefficient.
             if (chainIn && chainIn.length > 1) {
-                return getMultichainEvents(chainIn as Chain[]);
+                return getMultichainEvents(chainIn as Chain[], first);
             }
 
-            if (chainIn && chainIn.length) {
-                conditions.chain = {
-                    in: chainIn as Chain[],
-                };
-            }
+            const conditions = {
+                chain: chainIn[0] as Chain,
+                ...(poolIdIn && poolIdIn.length > 0 ? { poolId: poolIdIn[0] as string } : {}),
+                userAddress: userAddress || undefined,
+            };
 
-            if (poolIdIn && poolIdIn.length) {
-                conditions.poolId = {
-                    in: poolIdIn as string[],
-                };
-            }
-
-            if (typeIn && typeIn.length) {
-                // Translate JOIN / EXIT to ADD / REMOVE
-                const dbTypes: PoolEventType[] = [];
-                if (typeIn.includes('ADD')) {
-                    dbTypes.push('JOIN');
-                }
-                if (typeIn.includes('REMOVE')) {
-                    dbTypes.push('EXIT');
-                }
-                if (typeIn.includes('SWAP')) {
-                    dbTypes.push('SWAP');
-                }
-                conditions.type = {
-                    in: dbTypes,
-                };
-            }
-
-            if (userAddress) {
-                conditions.userAddress = {
-                    equals: userAddress.toLowerCase(),
-                };
-            }
-
-            if (range) {
-                conditions.blockTimestamp = {
-                    gte: rangeToTimestamp(range),
-                };
-            }
-
-            if (typeof valueUSD_gt === 'number' && !isNaN(valueUSD_gt) && valueUSD_gte === undefined) {
-                conditions.valueUSD = {
-                    gt: valueUSD_gt,
-                };
-            }
-
-            if (typeof valueUSD_gte === 'number' && !isNaN(valueUSD_gte) && valueUSD_gt === undefined) {
-                conditions.valueUSD = {
-                    gte: valueUSD_gte,
-                };
-            }
-
-            const dbEvents = await prisma.prismaPoolEvent.findMany({
-                where: conditions,
-                take: first,
-                skip,
-                orderBy: [
-                    {
-                        blockTimestamp: 'desc',
-                    },
-                    {
-                        blockNumber: 'desc',
-                    },
-                    {
-                        logIndex: 'desc',
-                    },
-                ],
+            const dbEvents = await eventsRepository.getEvents({
+                ...conditions,
+                limit: first,
+                offset: skip,
             });
 
             const results = dbEvents.map((event) =>
                 event.type === 'SWAP' && (event as SwapEvent).payload?.surplus
                     ? parseCowAmmSwap(event as SwapEvent)
                     : event.type === 'SWAP'
-                    ? parseSwap(event as SwapEvent)
-                    : parseJoinExit(event as JoinExitEvent),
+                      ? parseSwap(event as SwapEvent)
+                      : parseJoinExit(event as JoinExitEvent),
             );
 
             return results;

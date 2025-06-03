@@ -49,10 +49,6 @@ export const gnosisNetworkConfig: NetworkConfig = {
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(6, 'minutes') : every(2, 'minutes'),
         },
         {
-            name: 'update-7-30-days-swap-apr',
-            interval: every(8, 'hours'),
-        },
-        {
             name: 'load-on-chain-data-for-pools-with-active-updates',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(4, 'minutes') : every(1, 'minutes'),
         },

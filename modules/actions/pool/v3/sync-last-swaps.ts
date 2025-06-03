@@ -1,5 +1,4 @@
 import { Chain } from '@prisma/client';
-import { prisma } from '../../../../prisma/prisma-client';
 import { V3VaultSubgraphClient } from '../../../sources/subgraphs';
 import _ from 'lodash';
 import { swapV3Transformer } from '../../../sources/transformers/swap-v3-transformer';
@@ -9,6 +8,7 @@ import { swapsUsd } from '../../../sources/enrichers/swaps-usd';
 import { V2SubgraphClient } from '../../../subgraphs/balancer-subgraph';
 import { SwapEvent } from '../../../../prisma/prisma-types';
 import { swapV2Transformer } from '../../../sources/transformers/swap-v2-transformer';
+import { eventsRepository, EventStoreRepository } from '../../../repositories/events';
 
 /**
  * Adds all swaps since daysToSync to the database. Checks for latest synced swap to avoid duplicate work.
@@ -21,6 +21,7 @@ export async function syncLastSwaps(
     vaultSubgraphClient: V3VaultSubgraphClient,
     v2SubgraphClient: V2SubgraphClient,
     chain = 'SEPOLIA' as Chain,
+    eventRepo: EventStoreRepository = eventsRepository,
 ): Promise<string[]> {
     // Get swaps
     let swaps: SwapEvent[] = [];
@@ -65,11 +66,7 @@ export async function syncLastSwaps(
 
     // Enrich with USD values
     const dbEntries = await swapsUsd(swaps, chain);
-
-    await prisma.prismaPoolEvent.createMany({
-        skipDuplicates: true,
-        data: dbEntries,
-    });
+    await eventRepo.storeEvents(dbEntries);
 
     return dbEntries.map((entry) => entry.poolId);
 }

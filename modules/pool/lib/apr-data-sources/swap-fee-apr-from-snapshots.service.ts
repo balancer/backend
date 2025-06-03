@@ -64,26 +64,42 @@ export class SwapFeeFromSnapshotsAprService implements PoolAprService {
         return 'SwapFeeAprService';
     }
 
+    // This service is used outside of main APRs look, only for 7,30 day swap fee aprs.
     public async updateAprForPools(pools: PoolForAPRs[]): Promise<void> {
+        // It will receive one pool only, because data is refetched in the body later
         const chain = pools[0].chain;
 
-        const typeMap = pools.reduce((acc, pool) => {
-            acc[pool.id] = pool.type;
-            return acc;
-        }, {} as Record<string, PrismaPoolType>);
-
-        const dynamicData = await prisma.prismaPoolDynamicData.findMany({
-            where: { chain, poolId: { in: pools.map((pool) => pool.id) } },
-        });
+        // Get pool type map
+        const [typeMap, dynamicData, currentAprs] = await Promise.all([
+            prisma.prismaPool.findMany({ select: { id: true, type: true }, where: { chain } }).then((records) =>
+                records.reduce(
+                    (acc, pool) => {
+                        acc[pool.id] = pool.type;
+                        return acc;
+                    },
+                    {} as Record<string, PrismaPoolType>,
+                ),
+            ),
+            prisma.prismaPoolDynamicData.findMany({ where: { chain } }),
+            prisma.prismaPoolAprItem
+                .findMany({
+                    select: { id: true, apr: true },
+                    where: { chain, type: { in: ['SWAP_FEE_7D', 'SWAP_FEE_30D'] } },
+                })
+                .then((records) => Object.fromEntries(records.map((item) => [item.id, item.apr]))),
+        ]);
 
         // Fetch the swap fees for the last 30 days
         const swapFeeData = await fetchSwapFeeData(chain);
 
         // Map the swap fee data to the pool id
-        const swapFeeDataMap = swapFeeData.reduce((acc, data) => {
-            acc[data.poolId] = data;
-            return acc;
-        }, {} as Record<string, PoolSwapFeeData>);
+        const swapFeeDataMap = swapFeeData.reduce(
+            (acc, data) => {
+                acc[data.poolId] = data;
+                return acc;
+            },
+            {} as Record<string, PoolSwapFeeData>,
+        );
 
         const operations = dynamicData.flatMap((pool) => {
             let apr_7d = 0;
@@ -116,30 +132,38 @@ export class SwapFeeFromSnapshotsAprService implements PoolAprService {
             }
 
             return [
-                prisma.prismaPoolAprItem.upsert({
-                    where: { id_chain: { id: `${pool.poolId}-swap-apr-7d`, chain } },
-                    create: {
-                        id: `${pool.poolId}-swap-apr-7d`,
-                        chain,
-                        poolId: pool.poolId,
-                        title: 'Swap fees APR (7d)',
-                        apr: apr_7d,
-                        type: 'SWAP_FEE_7D',
-                    },
-                    update: { apr: apr_7d },
-                }),
-                prisma.prismaPoolAprItem.upsert({
-                    where: { id_chain: { id: `${pool.poolId}-swap-apr-30d`, chain } },
-                    create: {
-                        id: `${pool.poolId}-swap-apr-30d`,
-                        chain,
-                        poolId: pool.poolId,
-                        title: 'Swap fees APR (30d)',
-                        apr: apr_30d,
-                        type: 'SWAP_FEE_30D',
-                    },
-                    update: { apr: apr_30d },
-                }),
+                ...(Math.abs((currentAprs[`${pool.poolId}-swap-apr-7d`] || 0) - apr_7d) > 0.0001
+                    ? [
+                          prisma.prismaPoolAprItem.upsert({
+                              where: { id_chain: { id: `${pool.poolId}-swap-apr-7d`, chain } },
+                              create: {
+                                  id: `${pool.poolId}-swap-apr-7d`,
+                                  chain,
+                                  poolId: pool.poolId,
+                                  title: 'Swap fees APR (7d)',
+                                  apr: apr_7d,
+                                  type: 'SWAP_FEE_7D',
+                              },
+                              update: { apr: apr_7d },
+                          }),
+                      ]
+                    : []),
+                ...(Math.abs((currentAprs[`${pool.poolId}-swap-apr-30d`] || 0) - apr_30d) > 0.0001
+                    ? [
+                          prisma.prismaPoolAprItem.upsert({
+                              where: { id_chain: { id: `${pool.poolId}-swap-apr-30d`, chain } },
+                              create: {
+                                  id: `${pool.poolId}-swap-apr-30d`,
+                                  chain,
+                                  poolId: pool.poolId,
+                                  title: 'Swap fees APR (30d)',
+                                  apr: apr_7d,
+                                  type: 'SWAP_FEE_30D',
+                              },
+                              update: { apr: apr_30d },
+                          }),
+                      ]
+                    : []),
             ];
         });
 

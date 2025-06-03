@@ -1,3 +1,4 @@
+import { validateSiweMessage } from 'viem/_types/utils/siwe/validateSiweMessage';
 import { env } from '../apps/env';
 import { NetworkData } from '../modules/network/network-config-types';
 
@@ -160,6 +161,30 @@ export default <NetworkData>{
                 sourceUrl: 'https://eth-locks-api.rings.money/wrapper/apy',
                 path: 'apy',
                 scale: 1,
+                isIbYield: true,
+            },
+            varlamoreUSDC: {
+                tokenAddress: '0xf6f87073cf8929c206a77b0694619dc776f89885',
+                sourceUrl:
+                    'https://v2.silo.finance/api/detailed-vault/sonic-0xf6f87073cf8929c206a77b0694619dc776f89885',
+                path: 'supplyApr',
+                scale: 1000000000000000000,
+                isIbYield: true,
+            },
+            varlamorewS: {
+                tokenAddress: '0xded4ac8645619334186f28b8798e07ca354cfa0e',
+                sourceUrl:
+                    'https://v2.silo.finance/api/detailed-vault/sonic-0xded4ac8645619334186f28b8798e07ca354cfa0e',
+                path: 'supplyApr',
+                scale: 1000000000000000000,
+                isIbYield: true,
+            },
+            varlamorescUSD: {
+                tokenAddress: '0xb6a23cb29e512df41876b28d7a848bd831f9c5ba',
+                sourceUrl:
+                    'https://v2.silo.finance/api/detailed-vault/sonic-0xb6a23cb29e512df41876b28d7a848bd831f9c5ba',
+                path: 'supplyApr',
+                scale: 1000000000000000000,
                 isIbYield: true,
             },
         },

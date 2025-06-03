@@ -211,12 +211,9 @@ export class PoolGqlLoaderService {
 
         for (const mappedPool of gqlPools) {
             // if a pool has a hook, we skip it if either there are no included hooks, or its type does not match an included hook
-            // always include MEV_TAX hook
             if (mappedPool.hook) {
-                if (mappedPool.hook.type !== 'MEV_TAX') {
-                    if (!args.where?.includeHooks || !args.where.includeHooks.includes(mappedPool.hook.type)) {
-                        continue;
-                    }
+                if (!args.where?.includeHooks || !args.where.includeHooks.includes(mappedPool.hook.type)) {
+                    continue;
                 }
             }
 
@@ -301,7 +298,9 @@ export class PoolGqlLoaderService {
             // But setting it up already so it can be used with the refactored searching
             const query =
                 Prisma.raw(`SELECT p.id, p.chain FROM "PrismaPool" p LEFT JOIN "PrismaPoolDynamicData" d on (p.id = d."poolId") WHERE p.search_vector @@ websearch_to_tsquery('simple', '${searchQuery}') AND d."totalSharesNum" > 0.000000000001 AND NOT ('BLACK_LISTED' = ANY(p.categories)) AND ${filters}
-            ORDER BY d."${orderColumn}" ${args.orderDirection && args.orderDirection === 'asc' ? 'ASC' : 'DESC'} LIMIT ${limit} OFFSET ${offset}`);
+            ORDER BY d."${orderColumn}" ${
+                args.orderDirection && args.orderDirection === 'asc' ? 'ASC' : 'DESC'
+            } LIMIT ${limit} OFFSET ${offset}`);
 
             const searchResults = await prisma.$queryRaw<{ id: string }[]>(query);
 
@@ -852,7 +851,15 @@ export class PoolGqlLoaderService {
                 return {
                     __typename: 'GqlPoolLiquidityBootstrapping',
                     ...poolWithoutTypeData,
-                    ...(typeData as LBPoolData),
+                    ...(typeData as LBPoolData & {
+                        lbpName?: string;
+                        description?: string;
+                        website?: string;
+                        x?: string;
+                        discord?: string;
+                        telegram?: string;
+                        farcaster?: string;
+                    }),
                     ...mappedData,
                 };
             case 'GYRO':
@@ -1340,6 +1347,11 @@ export class PoolGqlLoaderService {
                 continue;
             }
 
+            // Skip 7D, 30D swap APRs - they aren't updated anymore, because noone was using them
+            if (['SWAP_FEE_7D', 'SWAP_FEE_30D'].includes(String(aprItem.type))) {
+                continue;
+            }
+
             if (aprItem.apr === 0 || (aprItem.range && aprItem.range.max === 0)) {
                 continue;
             }
@@ -1664,6 +1676,11 @@ const orderingColumnsMap = {
 const getOrderBy = (args: QueryPoolGetPoolsArgs) => {
     const orderDirection = args.orderDirection || 'desc';
     const orderColumn = orderingColumnsMap[(args.orderBy || 'totalLiquidity') as keyof typeof orderingColumnsMap];
+
+    if (!orderColumn) {
+        return undefined;
+    }
+
     const orderBy = {
         dynamicData: {
             [orderColumn]: orderDirection,

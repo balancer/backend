@@ -1,5 +1,69 @@
 # backend
 
+## 1.42.6
+
+### Patch Changes
+
+-   0fad268: LBP create mutation
+-   a9acc71: pool's subgraph update
+-   3d09f5e: fluid APRs on base
+
+## 1.42.5
+
+### Patch Changes
+
+-   3210c67: update unwrap rates only when changed
+-   68237e4: slow dynamic data query fix
+
+## 1.42.4
+
+### Patch Changes
+
+-   0716368: APRs select/update and 7d/30d cleanup
+
+## 1.42.3
+
+### Patch Changes
+
+-   d443964: sepolia fix
+-   6bf4836: add varlamore vault apr
+-   1b55772: avoid performance overhead of Prisma's nested includes
+-   5dcaaae: Prisma's includes
+-   fa4ab43: Bump balancer-maths dependency to 0.0.33
+
+## 1.42.2
+
+### Patch Changes
+
+-   d66e574: user address in event indexing
+
+## 1.42.1
+
+### Patch Changes
+
+-   4cf8fed: test if swap type helps with daily block numbers query
+-   794c7e6: fix for the latest event query
+-   1ec2f46: fix fetching latest events
+-   21c8710: siUSD APR
+-   8cfc29c: events indexing review
+-   f287857: events feature flag
+-   0da8f59: fix merkl opportunities
+-   50200ac: dont include default hooks in agg query
+-   7210d9e: events for user address only with a pool
+-   3fb128e: text search migration fix
+
+## 1.42.0
+
+### Minor Changes
+
+-   53aa72f: events repository
+
+### Patch Changes
+
+-   0829f5e: pool sync update optimisations
+-   6d99a70: fix: order by userbalanceUsd
+-   1ea209e: update TVL only for records not updates in the last 20min
+
 ## 1.41.8
 
 ### Patch Changes

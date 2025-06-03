@@ -31,22 +31,23 @@ export const syncErc4626UnwrapRates = async (chain: Chain) => {
 
     const unwrapRates = await fetchUnwrapRates(erc4626Tokens, underlyingTokenMap);
 
-    for (const token of erc4626Tokens) {
-        await prisma.prismaToken.upsert({
-            where: {
-                address_chain: {
-                    address: token.address,
-                    chain: chain,
+    const operations = erc4626Tokens
+        .map((token) => {
+            if (unwrapRates[token.address] === token.unwrapRate) return null;
+
+            return prisma.prismaToken.update({
+                where: {
+                    address_chain: {
+                        address: token.address,
+                        chain: chain,
+                    },
                 },
-            },
-            create: {
-                ...token,
-                unwrapRate: unwrapRates[token.address],
-            },
-            update: {
-                ...token,
-                unwrapRate: unwrapRates[token.address],
-            },
-        });
-    }
+                data: {
+                    unwrapRate: unwrapRates[token.address],
+                },
+            });
+        })
+        .filter((op): op is NonNullable<typeof op> => !!op);
+
+    await prisma.$transaction(operations);
 };

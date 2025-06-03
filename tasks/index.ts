@@ -16,7 +16,6 @@ import {
 import { PoolAprUpdaterService } from '../modules/pool/lib/pool-apr-updater.service';
 import { chainIdToChain } from '../modules/network/chain-id-to-chain';
 
-import { backsyncSwaps } from './subgraph-syncing/backsync-swaps';
 import { poolService } from '../modules/pool/pool.service';
 import { initRequestScopedContext, setRequestScopedContextValue } from '../modules/context/request-scoped-context';
 import { tokenService } from '../modules/token/token.service';
@@ -153,18 +152,6 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         return ContentController().syncCategories();
     } else if (job === 'sync-latest-fx-prices') {
         return FXPoolsController().syncLatestPrices(chain);
-    } else if (job === 'backsync-swaps') {
-        // Run in loop until no new swaps are found
-        let status: string | undefined = 'true';
-        let i = 0;
-        while (status) {
-            console.time('backsyncSwaps page time');
-            status = await backsyncSwaps(chain);
-            console.timeEnd('backsyncSwaps page time');
-            i += 1000;
-            console.log('Processed', i, 'swaps');
-        }
-        return 'OK';
     } else if (job === 'sync-merkl') {
         return AprsController().syncMerkl();
     } else if (job === 'update-7-30-days-swap-apr') {
@@ -186,21 +173,25 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         setRequestScopedContextValue('chainId', chainId);
         return poolService.reloadAllPoolAprs(chain);
     } else if (job === 'update-pool-aprs') {
-        const id = process.argv[4];
         const chain = chainIdToChain[chainId];
+        const id = process.argv[4];
         const service = new PoolAprUpdaterService();
-        const pools = await prisma.prismaPool.findMany({
-            where: { id: id, chain: chain },
-            include: {
-                dynamicData: true,
-                tokens: {
-                    include: {
-                        token: true,
+        if (id) {
+            const pools = await prisma.prismaPool.findMany({
+                where: { id: id, chain: chain },
+                include: {
+                    dynamicData: true,
+                    tokens: {
+                        include: {
+                            token: true,
+                        },
                     },
                 },
-            },
-        });
-        return service.updateAprsForPools(pools);
+            });
+            return service.updateAprsForPools(pools);
+        } else {
+            return service.updatePoolAprs(chain);
+        }
     } else if (job === 'update-prices') {
         await tokenService.syncTokenContentData(chain);
         return tokenService.updateTokenPrices([chain]);
@@ -213,8 +204,12 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
     }
     // Maintenance
     else if (job === 'sync-onchain-data-v2') {
-        const poolId = process.argv[4];
-        await PoolController().syncOnchainDataForPoolsV2(chain, [poolId]);
+        const poolIds = process.argv[4]?.split(',');
+        if (poolIds) {
+            await PoolController().syncOnchainDataForPoolsV2(chain, poolIds);
+        } else {
+            await PoolController().syncOnchainDataForPoolsV2(chain);
+        }
         return 'OK';
     } else if (job === 'sync-fx-quote-tokens') {
         return FXPoolsController().syncQuoteTokens(chain);

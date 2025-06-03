@@ -2,25 +2,19 @@ import { TokenPriceHandler } from '../../token-types';
 import { PrismaTokenWithTypes } from '../../../../prisma/prisma-types';
 import { prisma } from '../../../../prisma/prisma-client';
 import { timestampRoundedUpToNearestHour } from '../../../common/time';
-import moment from 'moment-timezone';
 import _ from 'lodash';
 import { tokenAndPrice, updatePrices } from './price-handler-helper';
 import { Chain } from '@prisma/client';
-
-type SwapPayload = {
-    tokenIn: {
-        address: string;
-        amount: string;
-    };
-    tokenOut: {
-        address: string;
-        amount: string;
-    };
-};
+import { SwapRepository, eventsRepository } from '../../../repositories/events';
 
 export class SwapsPriceHandlerService implements TokenPriceHandler {
     public readonly exitIfFails = false;
     public readonly id = 'SwapsPriceHandlerService';
+    swapRepository: SwapRepository;
+
+    constructor(swapRepository: SwapRepository = eventsRepository) {
+        this.swapRepository = swapRepository;
+    }
 
     private getAcceptedTokens(tokens: PrismaTokenWithTypes[]): PrismaTokenWithTypes[] {
         return tokens.filter((token) => !token.types.includes('BPT') && !token.types.includes('PHANTOM_BPT'));
@@ -41,23 +35,15 @@ export class SwapsPriceHandlerService implements TokenPriceHandler {
             const acceptedTokensForChain = acceptedTokens.filter((token) => token.chain === chain);
             const tokenAddresses = acceptedTokensForChain.map((token) => token.address);
 
-            const swaps = await prisma.prismaPoolEvent.findMany({
-                where: {
-                    chain: chain,
-                    blockTimestamp: { gt: moment().unix() - 900 }, //only search for the last 15 minutes
-                    type: 'SWAP',
-                },
-                orderBy: { blockTimestamp: 'desc' },
-                select: { payload: true },
-            });
+            const swaps = await this.swapRepository.getSwapsForPricing(chain);
 
             const otherTokenAddresses = [
                 ...swaps
-                    .filter((swap) => !tokenAddresses.includes((swap.payload as SwapPayload).tokenIn.address))
-                    .map((swap) => (swap.payload as SwapPayload).tokenIn.address),
+                    .filter((swap) => !tokenAddresses.includes(swap.payload.tokenIn.address))
+                    .map((swap) => swap.payload.tokenIn.address),
                 ...swaps
-                    .filter((swap) => !tokenAddresses.includes((swap.payload as SwapPayload).tokenOut.address))
-                    .map((swap) => (swap.payload as SwapPayload).tokenOut.address),
+                    .filter((swap) => !tokenAddresses.includes(swap.payload.tokenOut.address))
+                    .map((swap) => swap.payload.tokenOut.address),
             ];
             const tokenPrices = await prisma.prismaTokenCurrentPrice.findMany({
                 where: { chain: chain, tokenAddress: { in: otherTokenAddresses } },
@@ -66,26 +52,22 @@ export class SwapsPriceHandlerService implements TokenPriceHandler {
             for (const token of acceptedTokensForChain) {
                 const tokenSwaps = swaps.filter(
                     (swap) =>
-                        (swap.payload as SwapPayload).tokenIn.address === token.address ||
-                        (swap.payload as SwapPayload).tokenOut.address === token.address,
+                        swap.payload.tokenIn.address === token.address ||
+                        swap.payload.tokenOut.address === token.address,
                 );
 
                 for (const tokenSwap of tokenSwaps) {
                     const tokenSide: 'token-in' | 'token-out' =
-                        (tokenSwap.payload as SwapPayload).tokenIn.address === token.address ? 'token-in' : 'token-out';
+                        tokenSwap.payload.tokenIn.address === token.address ? 'token-in' : 'token-out';
                     const tokenAmount = parseFloat(
-                        tokenSide === 'token-in'
-                            ? (tokenSwap.payload as SwapPayload).tokenIn.amount
-                            : (tokenSwap.payload as SwapPayload).tokenOut.amount,
+                        tokenSide === 'token-in' ? tokenSwap.payload.tokenIn.amount : tokenSwap.payload.tokenOut.amount,
                     );
                     const otherToken =
                         tokenSide === 'token-in'
-                            ? (tokenSwap.payload as SwapPayload).tokenOut.address
-                            : (tokenSwap.payload as SwapPayload).tokenIn.address;
+                            ? tokenSwap.payload.tokenOut.address
+                            : tokenSwap.payload.tokenIn.address;
                     const otherTokenAmount = parseFloat(
-                        tokenSide === 'token-in'
-                            ? (tokenSwap.payload as SwapPayload).tokenOut.amount
-                            : (tokenSwap.payload as SwapPayload).tokenIn.amount,
+                        tokenSide === 'token-in' ? tokenSwap.payload.tokenOut.amount : tokenSwap.payload.tokenIn.amount,
                     );
                     const otherTokenPrice = tokenPrices.find((tokenPrice) => tokenPrice.tokenAddress === otherToken);
 

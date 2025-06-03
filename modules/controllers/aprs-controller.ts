@@ -16,6 +16,7 @@ export function AprsController(tracer?: any) {
             const pools = await prisma.prismaPool.findMany({
                 ...poolsIncludeForAprs,
                 where: { chain },
+                take: 1,
             });
             await service.updateAprForPools(pools);
             return 'Done';

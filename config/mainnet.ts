@@ -26,7 +26,7 @@ export default <NetworkData>{
         cowAmm: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmQ3c9CTJBZdgy3uTLB929ARZucMUCf6piZBDxSgBKnf6m`,
         balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmQ5TT2yYBZgoUxsat3bKmNe5Fr9LW9YAtDs8aeuc1BRhj`,
         balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmNnNEjysGvpPqYDA9aQE1FjB2emtUXgSMiZ4ez11UdcaW`,
-        balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmbmcgYACFyuhw9Vr8ZMUNpCepgroQrfTxu2n7VBq9eA1N`,
+        balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmPnUDFjj4PTRK8vRKbGKdLotowY4rwgbPobfP6eWahd2j`,
         gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmNrMRgSeUUkQsvhE6ExBEPETZ6P2jiJL3SzXftNQcAEcW`,
         aura: 'https://data.aura.finance/graphql',
     },
@@ -319,6 +319,12 @@ export default <NetworkData>{
             url: 'https://api.fluid.instad.app/v2/lending/1/tokens',
         },
         defaultHandlers: {
+            siUSD: {
+                tokenAddress: '0xdbdc1ef57537e34680b898e1febd3d68c7389bcb',
+                sourceUrl: 'https://api.infinifi.xyz/api/protocol/data',
+                path: 'data.stats.siusd.lastWeekAPY',
+                scale: 100,
+            },
             cUSDO: {
                 tokenAddress: '0xad55aebc9b8c03fc43cd9f62260391c13c23e7c0',
                 sourceUrl: 'https://prod-gw.openeden.com/sys/apy',
