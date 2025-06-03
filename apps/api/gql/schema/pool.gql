@@ -1090,6 +1090,14 @@ type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
     hasAnyAllowedBuffer: Boolean!
     hook: GqlHook
 
+    lbpName: String
+    description: String
+    website: String
+    x: String
+    discord: String
+    telegram: String
+    farcaster: String
+
     startTime: Int!
     endTime: Int!
     lbpOwner: String!
