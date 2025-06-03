@@ -59,7 +59,7 @@ export type TestData = {
 };
 
 // Reads all json test files and parses to relevant swap/pool bigint format
-export function readTestData(): TestData {
+export function readTestData(debug = false): TestData {
     const testData: TestData = {
         swapPathPools: [],
         swapPaths: [],
@@ -67,7 +67,7 @@ export function readTestData(): TestData {
     };
 
     // Resolve the directory path relative to the current file's directory
-    const absoluteDirectoryPath = path.resolve(__dirname);
+    const absoluteDirectoryPath = path.resolve(__dirname, debug ? 'debug' : '');
 
     // Read all files in the directory
     const files = fs.readdirSync(absoluteDirectoryPath);

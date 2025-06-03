@@ -3,8 +3,10 @@ import { getSwapPath } from './getSwapPath';
 import { getPool } from './getPool';
 import { enrichPoolsWithHookData } from './enrichPoolsWithHookData';
 
-export async function generateSwapPathTestData(input: SwapPathTestInput, overwrite = false) {
-    const path = `./test/testData/read/${input.chainId}-${input.blockNumber}-${input.testName}.json`;
+export async function generateSwapPathTestData(input: SwapPathTestInput, overwrite = false, debug = false) {
+    const path = `./test/testData/read/${debug ? 'debug/' : ''}${input.chainId}-${input.blockNumber}-${
+        input.testName
+    }.json`;
     if (!overwrite) {
         const file = Bun.file(path);
         if (await file.exists()) {

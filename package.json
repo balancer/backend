@@ -18,6 +18,7 @@
         "mutation": "sh scripts/run_mutation.sh",
         "sor-data": "bun run test/testData/index.ts false",
         "sor-data:overwrite": "bun run test/testData/index.ts true",
+        "sor-data:debug": "bun run test/testData/index.ts true true"
     },
     "dependencies": {
         "@apollo/server": "^4.11.3",
