@@ -16,8 +16,8 @@
         "vitest": "vitest",
         "task": "bun run tasks/index.ts",
         "mutation": "sh scripts/run_mutation.sh",
-        "generate-sor-test-data": "bun run test/testData/index.ts false",
-        "generate-sor-test-data:overwrite": "bun run test/testData/index.ts true"
+        "sor-data": "bun run test/testData/index.ts false",
+        "sor-data:overwrite": "bun run test/testData/index.ts true",
     },
     "dependencies": {
         "@apollo/server": "^4.11.3",
