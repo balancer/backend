@@ -55,9 +55,6 @@
                 "1000000000000000000",
                 "1000000000000000000"
             ],
-            "isPoolInitialized": true,
-            "isPoolPaused": false,
-            "isPoolInRecoveryMode": false,
             "isSwapEnabled": true,
             "currentTimestamp": "1744221012"
         }
