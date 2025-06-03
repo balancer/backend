@@ -13,8 +13,6 @@ import {
     StablePool,
     WeightedPool,
     LiquidityBootstrappingPool,
-    LiquidityBootstrappingImmutable,
-    LiquidityBootstrappingMutable,
 } from './readTestData';
 import { chainIdToChain } from '../../../modules/network/chain-id-to-chain';
 

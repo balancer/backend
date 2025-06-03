@@ -14,7 +14,7 @@ import { Chain } from '@prisma/client';
 import { PrismaPoolAndHookWithDynamic } from '../../../../../prisma/prisma-types';
 import { TokenPairData } from '../../../../sources/contracts/v3/fetch-tokenpair-data';
 
-import { LiquidityBootstrappingState } from '../../../../../test/testData/read/readTestData';
+import { LiquidityBootstrappingState } from '@balancer-labs/balancer-maths';
 import { LBPoolData } from '../../../../../modules/pool/pool-data/lbpool';
 
 type WeightedPoolToken = WeightedPoolTokenWithRate;

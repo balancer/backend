@@ -7,6 +7,7 @@ import {
     WeightedState,
     BasePoolState,
     WeightedImmutable,
+    LiquidityBootstrappingState,
 } from '@balancer-labs/balancer-maths';
 import { Address } from '@balancer/sdk';
 import * as fs from 'node:fs';
@@ -29,25 +30,6 @@ type PoolBase = {
     chainId: string;
     hook?: HookData;
 };
-
-export type LiquidityBootstrappingState = BasePoolState & {
-    poolType: 'LIQUIDITY_BOOTSTRAPPING';
-    currentTimestamp: bigint;
-} & LiquidityBootstrappingImmutable &
-    LiquidityBootstrappingMutable;
-
-export type LiquidityBootstrappingImmutable = {
-    projectTokenIndex: number;
-    isProjectTokenSwapInBlocked: boolean;
-    startWeights: bigint[];
-    endWeights: bigint[];
-    startTime: bigint;
-    endTime: bigint;
-};
-
-export type LiquidityBootstrappingMutable = {
-    isSwapEnabled: boolean;
-} & WeightedImmutable;
 
 export type WeightedPool = PoolBase & WeightedState;
 
