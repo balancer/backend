@@ -49,7 +49,7 @@ export class LiquidityBootstrappingPool {
     ): Promise<TransformBigintToString<LBPoolImmutableData>> {
         const {
             tokens,
-            scalingFactors: decimalScalingFactors,
+            decimalScalingFactors,
             startWeights,
             endWeights,
             startTime,
@@ -61,13 +61,13 @@ export class LiquidityBootstrappingPool {
             abi: liquidityBootstrappingAbi,
             functionName: 'getLBPoolImmutableData',
             blockNumber,
-        })) as LBPoolImmutableData;
+        })) as any;
 
         return {
             tokens: [...tokens],
-            scalingFactors: decimalScalingFactors.map((sf) => sf.toString()),
-            startWeights: startWeights.map((weight) => weight.toString()),
-            endWeights: endWeights.map((weight) => weight.toString()),
+            scalingFactors: decimalScalingFactors.map((sf: bigint) => sf.toString()),
+            startWeights: startWeights.map((weight: bigint) => weight.toString()),
+            endWeights: endWeights.map((weight: bigint) => weight.toString()),
             startTime: startTime.toString(),
             endTime: endTime.toString(),
             projectTokenIndex: Number(projectTokenIndex),
