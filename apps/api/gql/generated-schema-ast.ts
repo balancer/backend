@@ -1627,7 +1627,7 @@ export const schema = gql`
         discord: String
         displayTokens: [GqlPoolTokenDisplay!]! @deprecated(reason: "Use poolTokens instead")
         dynamicData: GqlPoolDynamicData!
-        endTime: Int
+        endTime: Int!
         factory: Bytes
         farcaster: String
         hasAnyAllowedBuffer: Boolean!
@@ -1636,9 +1636,9 @@ export const schema = gql`
         hook: GqlHook
         id: ID!
         investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
-        isProjectTokenSwapInBlocked: Boolean
+        isProjectTokenSwapInBlocked: Boolean!
         lbpName: String
-        lbpOwner: String
+        lbpOwner: String!
         liquidityManagement: LiquidityManagement
         name: String!
 
@@ -1657,21 +1657,21 @@ export const schema = gql`
         """
         poolCreator: Bytes
         poolTokens: [GqlPoolTokenDetail!]!
-        projectToken: String
-        projectTokenEndWeight: Float
-        projectTokenIndex: Int
-        projectTokenStartWeight: Float
+        projectToken: String!
+        projectTokenEndWeight: Float!
+        projectTokenIndex: Int!
+        projectTokenStartWeight: Float!
         protocolVersion: Int!
-        reserveToken: String
-        reserveTokenEndWeight: Float
-        reserveTokenIndex: Int
-        reserveTokenStartWeight: Float
+        reserveToken: String!
+        reserveTokenEndWeight: Float!
+        reserveTokenIndex: Int!
+        reserveTokenStartWeight: Float!
 
         """
         All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
         """
         staking: GqlPoolStaking
-        startTime: Int
+        startTime: Int!
 
         """
         Account empowered to set static swap fees for a pool (when 0 on V2 swap fees are immutable, on V3 delegate to governance)

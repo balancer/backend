@@ -1166,7 +1166,7 @@ export interface GqlPoolLiquidityBootstrappingV3 extends GqlPoolBase {
     /** @deprecated Use poolTokens instead */
     displayTokens: Array<GqlPoolTokenDisplay>;
     dynamicData: GqlPoolDynamicData;
-    endTime?: Maybe<Scalars['Int']>;
+    endTime: Scalars['Int'];
     factory?: Maybe<Scalars['Bytes']>;
     farcaster?: Maybe<Scalars['String']>;
     hasAnyAllowedBuffer: Scalars['Boolean'];
@@ -1176,9 +1176,9 @@ export interface GqlPoolLiquidityBootstrappingV3 extends GqlPoolBase {
     id: Scalars['ID'];
     /** @deprecated Removed without replacement */
     investConfig: GqlPoolInvestConfig;
-    isProjectTokenSwapInBlocked?: Maybe<Scalars['Boolean']>;
+    isProjectTokenSwapInBlocked: Scalars['Boolean'];
     lbpName?: Maybe<Scalars['String']>;
-    lbpOwner?: Maybe<Scalars['String']>;
+    lbpOwner: Scalars['String'];
     liquidityManagement?: Maybe<LiquidityManagement>;
     name: Scalars['String'];
     /**
@@ -1191,18 +1191,18 @@ export interface GqlPoolLiquidityBootstrappingV3 extends GqlPoolBase {
     /** Account empowered to set the pool creator fee percentage */
     poolCreator?: Maybe<Scalars['Bytes']>;
     poolTokens: Array<GqlPoolTokenDetail>;
-    projectToken?: Maybe<Scalars['String']>;
-    projectTokenEndWeight?: Maybe<Scalars['Float']>;
-    projectTokenIndex?: Maybe<Scalars['Int']>;
-    projectTokenStartWeight?: Maybe<Scalars['Float']>;
+    projectToken: Scalars['String'];
+    projectTokenEndWeight: Scalars['Float'];
+    projectTokenIndex: Scalars['Int'];
+    projectTokenStartWeight: Scalars['Float'];
     protocolVersion: Scalars['Int'];
-    reserveToken?: Maybe<Scalars['String']>;
-    reserveTokenEndWeight?: Maybe<Scalars['Float']>;
-    reserveTokenIndex?: Maybe<Scalars['Int']>;
-    reserveTokenStartWeight?: Maybe<Scalars['Float']>;
+    reserveToken: Scalars['String'];
+    reserveTokenEndWeight: Scalars['Float'];
+    reserveTokenIndex: Scalars['Int'];
+    reserveTokenStartWeight: Scalars['Float'];
     /** All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again. */
     staking?: Maybe<GqlPoolStaking>;
-    startTime?: Maybe<Scalars['Int']>;
+    startTime: Scalars['Int'];
     /** Account empowered to set static swap fees for a pool (when 0 on V2 swap fees are immutable, on V3 delegate to governance) */
     swapFeeManager?: Maybe<Scalars['Bytes']>;
     symbol: Scalars['String'];
@@ -4629,7 +4629,7 @@ export type GqlPoolLiquidityBootstrappingV3Resolvers<
     discord?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     displayTokens?: Resolver<Array<ResolversTypes['GqlPoolTokenDisplay']>, ParentType, ContextType>;
     dynamicData?: Resolver<ResolversTypes['GqlPoolDynamicData'], ParentType, ContextType>;
-    endTime?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+    endTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     factory?: Resolver<Maybe<ResolversTypes['Bytes']>, ParentType, ContextType>;
     farcaster?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     hasAnyAllowedBuffer?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
@@ -4638,26 +4638,26 @@ export type GqlPoolLiquidityBootstrappingV3Resolvers<
     hook?: Resolver<Maybe<ResolversTypes['GqlHook']>, ParentType, ContextType>;
     id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
     investConfig?: Resolver<ResolversTypes['GqlPoolInvestConfig'], ParentType, ContextType>;
-    isProjectTokenSwapInBlocked?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+    isProjectTokenSwapInBlocked?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
     lbpName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-    lbpOwner?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    lbpOwner?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     liquidityManagement?: Resolver<Maybe<ResolversTypes['LiquidityManagement']>, ParentType, ContextType>;
     name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     owner?: Resolver<Maybe<ResolversTypes['Bytes']>, ParentType, ContextType>;
     pauseManager?: Resolver<Maybe<ResolversTypes['Bytes']>, ParentType, ContextType>;
     poolCreator?: Resolver<Maybe<ResolversTypes['Bytes']>, ParentType, ContextType>;
     poolTokens?: Resolver<Array<ResolversTypes['GqlPoolTokenDetail']>, ParentType, ContextType>;
-    projectToken?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-    projectTokenEndWeight?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
-    projectTokenIndex?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-    projectTokenStartWeight?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+    projectToken?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+    projectTokenEndWeight?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+    projectTokenIndex?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+    projectTokenStartWeight?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
     protocolVersion?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-    reserveToken?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-    reserveTokenEndWeight?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
-    reserveTokenIndex?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-    reserveTokenStartWeight?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+    reserveToken?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+    reserveTokenEndWeight?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+    reserveTokenIndex?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+    reserveTokenStartWeight?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
     staking?: Resolver<Maybe<ResolversTypes['GqlPoolStaking']>, ParentType, ContextType>;
-    startTime?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+    startTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     swapFeeManager?: Resolver<Maybe<ResolversTypes['Bytes']>, ParentType, ContextType>;
     symbol?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     tags?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>;
