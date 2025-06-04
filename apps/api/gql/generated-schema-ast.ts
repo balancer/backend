@@ -1567,34 +1567,15 @@ export const schema = gql`
         chain: GqlChain!
         createTime: Int!
         decimals: Int!
-        description: String
-        discord: String
         displayTokens: [GqlPoolTokenDisplay!]! @deprecated(reason: "Use poolTokens instead")
         dynamicData: GqlPoolDynamicData!
-
-        """
-        V3 Specific
-        """
-        endTime: Int
         factory: Bytes
-        farcaster: String
         hasAnyAllowedBuffer: Boolean!
         hasErc4626: Boolean!
         hasNestedErc4626: Boolean!
         hook: GqlHook
         id: ID!
         investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
-
-        """
-        V3 Specific
-        """
-        isProjectTokenSwapInBlocked: Boolean
-        lbpName: String
-
-        """
-        V3 Specific
-        """
-        lbpOwner: String
         liquidityManagement: LiquidityManagement
         name: String!
         nestingType: GqlPoolNestingType! @deprecated(reason: "Removed without replacement")
@@ -1614,52 +1595,82 @@ export const schema = gql`
         """
         poolCreator: Bytes
         poolTokens: [GqlPoolTokenDetail!]!
-
-        """
-        V3 Specific
-        """
-        projectToken: String
-
-        """
-        V3 Specific
-        """
-        projectTokenEndWeight: Float
-
-        """
-        V3 Specific
-        """
-        projectTokenIndex: Int
-
-        """
-        V3 Specific
-        """
-        projectTokenStartWeight: Float
         protocolVersion: Int!
-
-        """
-        V3 Specific
-        """
-        reserveToken: String
-
-        """
-        V3 Specific
-        """
-        reserveTokenEndWeight: Float
-
-        """
-        V3 Specific
-        """
-        reserveTokenIndex: Int
-
-        """
-        V3 Specific
-        """
-        reserveTokenStartWeight: Float
         staking: GqlPoolStaking
 
         """
-        V3 Specific
+        Account empowered to set static swap fees for a pool (when 0 on V2 swap fees are immutable, on V3 delegate to governance)
         """
+        swapFeeManager: Bytes
+        symbol: String!
+        tags: [String]
+
+        """
+        All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
+        """
+        tokens: [GqlPoolTokenUnion!]! @deprecated(reason: "Use poolTokens instead")
+        type: GqlPoolType!
+        userBalance: GqlPoolUserBalance
+        vaultVersion: Int! @deprecated(reason: "use protocolVersion instead")
+        version: Int!
+        withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
+    }
+
+    type GqlPoolLiquidityBootstrappingV3 implements GqlPoolBase {
+        address: Bytes!
+        allTokens: [GqlPoolTokenExpanded!]! @deprecated(reason: "Use poolTokens instead")
+        categories: [GqlPoolFilterCategory]
+        chain: GqlChain!
+        createTime: Int!
+        decimals: Int!
+        description: String
+        discord: String
+        displayTokens: [GqlPoolTokenDisplay!]! @deprecated(reason: "Use poolTokens instead")
+        dynamicData: GqlPoolDynamicData!
+        endTime: Int
+        factory: Bytes
+        farcaster: String
+        hasAnyAllowedBuffer: Boolean!
+        hasErc4626: Boolean!
+        hasNestedErc4626: Boolean!
+        hook: GqlHook
+        id: ID!
+        investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
+        isProjectTokenSwapInBlocked: Boolean
+        lbpName: String
+        lbpOwner: String
+        liquidityManagement: LiquidityManagement
+        name: String!
+
+        """
+        The wallet address of the owner of the pool. Pool owners can set certain properties like swapFees or AMP.
+        """
+        owner: Bytes @deprecated(reason: "Use swapFeeManager instead")
+
+        """
+        Account empowered to pause/unpause the pool (or 0 to delegate to governance)
+        """
+        pauseManager: Bytes
+
+        """
+        Account empowered to set the pool creator fee percentage
+        """
+        poolCreator: Bytes
+        poolTokens: [GqlPoolTokenDetail!]!
+        projectToken: String
+        projectTokenEndWeight: Float
+        projectTokenIndex: Int
+        projectTokenStartWeight: Float
+        protocolVersion: Int!
+        reserveToken: String
+        reserveTokenEndWeight: Float
+        reserveTokenIndex: Int
+        reserveTokenStartWeight: Float
+
+        """
+        All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
+        """
+        staking: GqlPoolStaking
         startTime: Int
 
         """
@@ -1669,11 +1680,6 @@ export const schema = gql`
         symbol: String!
         tags: [String]
         telegram: String
-
-        """
-        All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
-        """
-        tokens: [GqlPoolTokenUnion!]! @deprecated(reason: "Use poolTokens instead")
         type: GqlPoolType!
         userBalance: GqlPoolUserBalance
         vaultVersion: Int! @deprecated(reason: "use protocolVersion instead")
@@ -2707,6 +2713,7 @@ export const schema = gql`
         | GqlPoolFx
         | GqlPoolGyro
         | GqlPoolLiquidityBootstrapping
+        | GqlPoolLiquidityBootstrappingV3
         | GqlPoolMetaStable
         | GqlPoolQuantAmmWeighted
         | GqlPoolReClamm
