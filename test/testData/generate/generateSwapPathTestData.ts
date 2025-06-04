@@ -26,7 +26,9 @@ async function fetchTestData(input: SwapPathTestInput): Promise<SwapPathTestOutp
     const swapPath = await getSwapPath(swapPathInput, rpcUrl, chainId, blockNumber);
 
     const pools = await Promise.all(
-        swapPathInput.pools.map((pool) => getPool(rpcUrl, chainId, blockNumber, pool.poolType, pool.poolAddress)),
+        swapPathInput.paths.flatMap((path) =>
+            path.pools.map((pool) => getPool(rpcUrl, chainId, blockNumber, pool.poolType, pool.poolAddress)),
+        ),
     );
 
     const poolsWithHooks = await enrichPoolsWithHookData(pools, chainId, blockNumber);

@@ -17,23 +17,31 @@ import { BufferPoolData } from './utils/data';
 
 // Note: these tests are only available for Balancer V3
 const protocolVersion = 3;
+const DEBUG = true;
 
 describe('SOR V3 Swap Paths Integration Tests', () => {
     // read all test files in test/testData/read
-    const testData = readTestData();
+    const testData = readTestData(DEBUG);
     test.each(testData.swapPaths)('$test $swapKind $amount', async (swapPath) => {
-        const { amountRaw, pools, tokens, outputRaw, swapKind, currentTimestamp, chainId } = swapPath;
+        const { paths: queryPaths, swapKind, currentTimestamp, chainId } = swapPath;
 
         const index = testData.swapPaths.indexOf(swapPath);
         const prismaPools: PrismaPoolAndHookWithDynamic[] = testData.swapPathPools[index];
         const bufferPools: BufferPoolData[] = testData.bufferPools[index];
-        const { tokenIn, tokenOut } = getTokensFromPrismaPools(Number(chainId), prismaPools, tokens, bufferPools);
+        const { tokenIn, tokenOut } = getTokensFromPrismaPools(
+            Number(chainId),
+            prismaPools,
+            queryPaths[0].tokens,
+            bufferPools,
+        );
 
-        const paths = (await SOR.getPathsWithPools(
+        const amountRawSum = queryPaths.reduce((acc, path) => acc + path.amountRaw, 0n);
+
+        const sorPaths = (await SOR.getPathsWithPools(
             tokenIn,
             tokenOut,
             swapKind,
-            amountRaw,
+            amountRawSum,
             prismaPools,
             bufferPools,
             protocolVersion,
@@ -43,28 +51,31 @@ describe('SOR V3 Swap Paths Integration Tests', () => {
         )) as PathWithAmount[];
 
         // make sure path found is the same as the onde described in the test
-        expect(pools.map((pool) => pool.toLowerCase())).toEqual(
-            paths[0].pools.map((pool) => pool.address.toLowerCase()),
+        expect(sorPaths.map((path) => path.pools.map((pool) => pool.address.toLowerCase()))).toEqual(
+            queryPaths.map((path) => path.pools.map((pool) => pool.poolAddress.toLowerCase())),
         );
 
-        const returnAmountQuery = TokenAmount.fromRawAmount(
+        const calculatedAmountRawSum = queryPaths.reduce((acc, path) => acc + path.calculatedAmountRaw, 0n);
+
+        const calculatedAmountQuery = TokenAmount.fromRawAmount(
             swapKind === SwapKind.GivenIn ? tokenOut : tokenIn,
-            outputRaw,
+            calculatedAmountRawSum,
         );
-        const returnAmountSOR = swapKind === SwapKind.GivenIn ? getOutputAmount(paths) : getInputAmount(paths);
+        const calculatedAmountSOR =
+            swapKind === SwapKind.GivenIn ? getOutputAmount(sorPaths) : getInputAmount(sorPaths);
 
         const isSwapPathWithBufferPools = bufferPools.length > 0;
         if (isSwapPathWithBufferPools) {
-            const returnAmountQueryFloat = parseFloat(
-                formatUnits(returnAmountQuery.amount, returnAmountQuery.token.decimals),
+            const calculatedAmountQueryFloat = parseFloat(
+                formatUnits(calculatedAmountQuery.amount, calculatedAmountQuery.token.decimals),
             );
-            const returnAmountSORFloat = parseFloat(
-                formatUnits(returnAmountSOR.amount, returnAmountSOR.token.decimals),
+            const calculatedAmountSORFloat = parseFloat(
+                formatUnits(calculatedAmountSOR.amount, calculatedAmountSOR.token.decimals),
             );
-            const minDecimals = Math.min(returnAmountQuery.token.decimals, returnAmountSOR.token.decimals);
-            expect(returnAmountQueryFloat).toBeCloseTo(returnAmountSORFloat, minDecimals - 2);
+            const minDecimals = Math.min(calculatedAmountQuery.token.decimals, calculatedAmountSOR.token.decimals);
+            expect(calculatedAmountQueryFloat).toBeCloseTo(calculatedAmountSORFloat, minDecimals - 2);
         } else {
-            expect(returnAmountQuery.amount).toBe(returnAmountSOR.amount);
+            expect(calculatedAmountQuery.amount).toBe(calculatedAmountSOR.amount);
         }
     });
 });
