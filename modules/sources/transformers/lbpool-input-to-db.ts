@@ -23,11 +23,21 @@ export const lbPoolInputToDB = async (input: CreateLbpInput) => {
 
     // Parse data for the DB
     const projectToken = rpcData.pool.typeData.projectToken;
-    const tokenData: Prisma.PrismaTokenCreateManyArgs['data'] = rpcData.tokens.map((token) => ({
-        ...token,
-        chain: input.poolContract.chain as Chain,
-        logoURI: (token.address === projectToken ? input.metadata.tokenLogo : '') || '',
-    }));
+    const tokenData: Prisma.PrismaTokenCreateManyArgs['data'] = [
+        // BPT token
+        {
+            address: input.poolContract.address.toLowerCase(),
+            chain: input.poolContract.chain as Chain,
+            symbol: rpcData.pool.symbol,
+            name: rpcData.pool.name,
+            decimals: 18,
+        },
+        ...rpcData.tokens.map((token) => ({
+            ...token,
+            chain: input.poolContract.chain as Chain,
+            logoURI: (token.address === projectToken ? input.metadata.tokenLogo : '') || '',
+        })),
+    ];
 
     const poolTokensData: Prisma.PrismaPoolTokenCreateManyPoolInput[] = rpcData.pool.tokens.map((token, idx) => ({
         ...token,
