@@ -82,15 +82,15 @@ export const syncMerklRewards = async () => {
         .flat(2)
         .filter((item) => item !== null) as string[];
 
-    const allAffectedPoolIds = [
+    const allAffectedPoolAddresses = [
         ...opportunities.map((campaign) => campaign.identifier.toLowerCase()),
         ...poolIdsFromForwardedOpportunities,
     ];
 
     const affectedPools = await prisma.prismaPool.findMany({
         where: {
-            id: {
-                in: allAffectedPoolIds,
+            address: {
+                in: allAffectedPoolAddresses,
             },
         },
         include: { dynamicData: true, tokens: { include: { token: true } } },
