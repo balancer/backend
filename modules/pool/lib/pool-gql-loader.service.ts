@@ -848,20 +848,28 @@ export class PoolGqlLoaderService {
                     tokens: mappedData.tokens as GqlPoolToken[],
                 };
             case 'LIQUIDITY_BOOTSTRAPPING':
-                return {
-                    __typename: 'GqlPoolLiquidityBootstrapping',
-                    ...poolWithoutTypeData,
-                    ...(typeData as LBPoolData & {
-                        lbpName?: string;
-                        description?: string;
-                        website?: string;
-                        x?: string;
-                        discord?: string;
-                        telegram?: string;
-                        farcaster?: string;
-                    }),
-                    ...mappedData,
-                };
+                if (pool.protocolVersion === 3) {
+                    return {
+                        __typename: 'GqlPoolLiquidityBootstrappingV3',
+                        ...poolWithoutTypeData,
+                        ...(typeData as LBPoolData & {
+                            lbpName?: string;
+                            description?: string;
+                            website?: string;
+                            x?: string;
+                            discord?: string;
+                            telegram?: string;
+                            farcaster?: string;
+                        }),
+                        ...mappedData,
+                    };
+                } else {
+                    return {
+                        __typename: 'GqlPoolLiquidityBootstrapping',
+                        ...poolWithoutTypeData,
+                        ...mappedData,
+                    };
+                }
             case 'GYRO':
             case 'GYRO3':
             case 'GYROE':
