@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { env } from '../../apps/env';
 import { getViemClient } from '../sources/viem-client';
 import { Chain } from '@prisma/client';
 import { parseAbi } from 'viem';
@@ -34,7 +35,20 @@ export const validateLBPoolInput = async (input: CreateLbpInput) => {
     const poolContractSchema = z
         .object({
             address: z.string().length(42),
-            chain: z.string().min(1),
+            chain: z
+                .string()
+                .min(1)
+                .refine(
+                    (chain) => {
+                        if (env.DEPLOYMENT_ENV === 'production') {
+                            return chain !== 'SEPOLIA';
+                        }
+                        return true;
+                    },
+                    {
+                        message: 'SEPOLIA chain is not allowed in production',
+                    },
+                ),
         })
         .refine((schema) => validateContractExists(schema.address, schema.chain as Chain), {
             message: "Contract doesn't exist",
