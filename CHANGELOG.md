@@ -1,5 +1,12 @@
 # backend
 
+## 1.42.8
+
+### Patch Changes
+
+-   0395f4c: adding LBPv3 type for graphql
+-   cb47c0a: make LBP V3 fields required
+
 ## 1.42.7
 
 ### Patch Changes
