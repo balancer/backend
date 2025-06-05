@@ -1,5 +1,12 @@
 # backend
 
+## 1.42.9
+
+### Patch Changes
+
+-   014732e: skip Sepolia LBPs on prod
+-   d3da29e: add missing BPT for LBPs
+
 ## 1.42.8
 
 ### Patch Changes
