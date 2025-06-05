@@ -5,6 +5,7 @@ import { getChangedPoolsV2 } from '../../../sources/logs';
 import { getViemClient } from '../../../sources/viem-client';
 import { getLastSyncedBlock, upsertLastSyncedBlock } from '../../last-synced-block';
 import config from '../../../../config';
+import { updateLiquidityValuesForPools } from '../update-liquidity';
 
 export const syncChangedPools = async (
     chain: Chain,
@@ -77,6 +78,7 @@ export const syncChangedPools = async (
     }
 
     await poolOnChainDataService.updateOnChainData(chain, Number(endBlock), tokenPrices, Array.from(allChangedPools));
+    await updateLiquidityValuesForPools(chain, Array.from(allChangedPools));
 
     await upsertLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.POOLS, Number(endBlock));
 
