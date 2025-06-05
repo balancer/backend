@@ -1,5 +1,11 @@
 # backend
 
+## 1.42.11
+
+### Patch Changes
+
+-   ca25252: fix v2 tvl updates
+
 ## 1.42.10
 
 ### Patch Changes
