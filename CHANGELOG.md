@@ -1,5 +1,12 @@
 # backend
 
+## 1.42.10
+
+### Patch Changes
+
+-   413d942: match merkl rewards by pool address
+-   5c38233: filter out sepolia in production
+
 ## 1.42.9
 
 ### Patch Changes
