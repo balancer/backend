@@ -13,8 +13,8 @@ read -r -d '' QUERY << 'EOF'
   "variables": {
     "input": {
       "poolContract": {
-        "address": "0x812C1217EA39c5242eD1C6D1015EbeD31261E28A",
-        "chain": "BASE"
+        "address": "0xa4f835f42fc6a0a4337290d9afe8d0b5082a69b1",
+        "chain": "SEPOLIA"
       },
       "metadata": {
         "lbpName": "Example LBP Token",
