@@ -273,7 +273,7 @@
         {
             "testName": "Path-ReClamm-In-Range",
             "chainId": "8453",
-            "blockNumber": "29533250",
+            "blockNumber": "31094200",
             "swapPathInput": {
                 "swapKind": 0,
                 "paths": [
@@ -285,7 +285,7 @@
                         ],
                         "pools": [
                             {
-                                "poolAddress": "0x035d7213cbc08483aa78ced076dbdc8ac5a509c1",
+                                "poolAddress": "0xBa615a0A9237b64BFb3051f8160483C10Dde0012",
                                 "poolType": "RECLAMM"
                             }
                         ]

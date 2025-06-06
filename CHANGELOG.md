@@ -1,5 +1,32 @@
 # backend
 
+## 1.42.11
+
+### Patch Changes
+
+-   ca25252: fix v2 tvl updates
+
+## 1.42.10
+
+### Patch Changes
+
+-   413d942: match merkl rewards by pool address
+-   5c38233: filter out sepolia in production
+
+## 1.42.9
+
+### Patch Changes
+
+-   014732e: skip Sepolia LBPs on prod
+-   d3da29e: add missing BPT for LBPs
+
+## 1.42.8
+
+### Patch Changes
+
+-   0395f4c: adding LBPv3 type for graphql
+-   cb47c0a: make LBP V3 fields required
+
 ## 1.42.7
 
 ### Patch Changes

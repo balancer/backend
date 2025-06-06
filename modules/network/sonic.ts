@@ -151,5 +151,9 @@ export const sonicNetworkConfig: NetworkConfig = {
             name: 'sync-hook-data',
             interval: every(1, 'hours'),
         },
+        {
+            name: 'sync-weights',
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(60, 'minutes') : every(10, 'minutes'),
+        },
     ],
 };

@@ -1,7 +1,7 @@
 {
     "test": {
         "chainId": "8453",
-        "blockNumber": "29533250"
+        "blockNumber": "31094200"
     },
     "swapPath": {
         "swapKind": 0,
@@ -14,20 +14,20 @@
                 ],
                 "pools": [
                     {
-                        "poolAddress": "0x035d7213cbc08483aa78ced076dbdc8ac5a509c1",
+                        "poolAddress": "0xBa615a0A9237b64BFb3051f8160483C10Dde0012",
                         "poolType": "RECLAMM"
                     }
                 ],
-                "calculatedAmountRaw": "55832896064590"
+                "calculatedAmountRaw": "39137633922798"
             }
         ]
     },
     "pools": [
         {
             "chainId": "8453",
-            "blockNumber": "29533250",
+            "blockNumber": "31094200",
             "poolType": "RECLAMM",
-            "poolAddress": "0x035d7213cbc08483aa78ced076dbdc8ac5a509c1",
+            "poolAddress": "0xBa615a0A9237b64BFb3051f8160483C10Dde0012",
             "tokens": [
                 "0x4200000000000000000000000000000000000006",
                 "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
@@ -38,27 +38,27 @@
             ],
             "aggregateSwapFee": "500000000000000000",
             "swapFee": "500000000000000",
-            "totalSupply": "50410971148635723477836",
+            "totalSupply": "1756787520963604219",
             "balancesLiveScaled18": [
-                "14552907646299798",
-                "174459788000000000000"
+                "500000000000000",
+                "1325504000000000000"
             ],
             "tokenRates": [
                 "1000000000000000000",
                 "1000000000000000000"
             ],
-            "lastTimestamp": "1745855815",
+            "lastTimestamp": "1748887259",
             "lastVirtualBalances": [
-                "5292078522152179508",
-                "9325176954769209651335"
+                "25747595929315187",
+                "65605864712572210447"
             ],
             "dailyPriceShiftBase": "999991977472743464",
-            "centerednessMargin": "100000000000000000",
+            "centerednessMargin": "250000000000000000",
             "startFourthRootPriceRatio": "0",
-            "endFourthRootPriceRatio": "1010696708667094804",
-            "priceRatioUpdateStartTime": "1745855663",
-            "priceRatioUpdateEndTime": "1745855663",
-            "currentTimestamp": "1745855847"
+            "endFourthRootPriceRatio": "1019811599497007812",
+            "priceRatioUpdateStartTime": "1748887259",
+            "priceRatioUpdateEndTime": "1748887259",
+            "currentTimestamp": "1748977747"
         }
     ]
 }
