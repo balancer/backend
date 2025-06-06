@@ -3,6 +3,8 @@ import { Chain } from '@prisma/client';
 import { initRequestScopedContext, setRequestScopedContextValue } from '../context/request-scoped-context';
 import { chainIdToChain } from '../network/chain-id-to-chain';
 import { sorService } from './sor.service';
+import { Address, Path, Swap, SwapInput, SwapKind } from '@balancer/sdk';
+import { formatUnits } from 'viem';
 
 describe('sor debugging', () => {
     it('sor v2', async () => {
@@ -43,7 +45,7 @@ describe('sor debugging', () => {
 
     it('sor v3', async () => {
         const useProtocolVersion = 3;
-        const chain = Chain.BASE;
+        const chain = Chain.MAINNET;
 
         const chainId = Object.keys(chainIdToChain).find((key) => chainIdToChain[key] === chain) as string;
         initRequestScopedContext();
@@ -51,14 +53,17 @@ describe('sor debugging', () => {
         // only do once before starting to debug
         // bun task sor-sync-v3 {chainId}
 
+        const swapType = 'EXACT_OUT';
+        const swapKind: SwapKind = SwapKind.GivenOut;
+
         const swaps = await sorService.getSorSwapPaths({
             chain,
-            tokenIn: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913', // USDC
-            tokenOut: '0x4200000000000000000000000000000000000006', // WETH
-            swapType: 'EXACT_IN',
-            swapAmount: '1',
+            tokenIn: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee', // ETH
+            tokenOut: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', // USDC
+            swapType,
+            swapAmount: '170',
             useProtocolVersion,
-            poolIds: ['0x035d7213cbc08483aa78ced076dbdc8ac5a509c1'],
+            // poolIds: ['0x035d7213cbc08483aa78ced076dbdc8ac5a509c1'],
         });
 
         console.log(swaps.returnAmount);
@@ -67,6 +72,34 @@ describe('sor debugging', () => {
                 console.log(hop.pool.address);
             }
         }
-        expect(parseFloat(swaps.returnAmount)).toBeGreaterThan(0);
+
+        // Perform sanity check against on-chain query
+
+        const swapInput: SwapInput = {
+            chainId: Number(chainId),
+            paths: swaps.paths.map((path) => {
+                return {
+                    pools: path.pools as Address[],
+                    tokens: path.tokens.map((token) => ({
+                        address: token.address as Address,
+                        decimals: token.decimals,
+                    })),
+                    outputAmountRaw: BigInt(path.outputAmountRaw),
+                    inputAmountRaw: BigInt(path.inputAmountRaw),
+                    protocolVersion: useProtocolVersion,
+                    isBuffer: path.isBuffer,
+                };
+            }),
+            swapKind,
+        };
+        const sdkSwap = new Swap(swapInput);
+        const queryResult = await sdkSwap.query();
+        const queryResultAmount =
+            queryResult.swapKind === SwapKind.GivenIn ? queryResult.expectedAmountOut : queryResult.expectedAmountIn;
+
+        const queryResultFloat = parseFloat(formatUnits(queryResultAmount.amount, queryResultAmount.token.decimals));
+        const sorResultFloat = parseFloat(swaps.returnAmount);
+
+        expect(queryResultFloat).toBeCloseTo(sorResultFloat, 4);
     }, 5000000);
 });

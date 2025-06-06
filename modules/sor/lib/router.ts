@@ -117,13 +117,22 @@ export class Router {
         }
 
         if (quotePaths75.length > 0 && quotePaths25.length > 1) {
-            // prevent bestPath25 from being the same as bestPath75
-            const bestPath25 = quotePaths25.find((path) => path.pools !== quotePaths75[0].pools) as PathWithAmount;
-            splitPaths.push(this.splitPaths(swapAmount, bestPath25, quotePaths75[0])); // 25/75
+            // select first path from quotePaths25 that has no pool in common with quotePaths75[0]
+            const bestPath25 = quotePaths25.find(
+                (path) => !quotePaths75[0].pools.some((pool) => path.pools.includes(pool)),
+            );
+            if (bestPath25) {
+                splitPaths.push(this.splitPaths(swapAmount, bestPath25, quotePaths75[0])); // 25/75
+            }
         }
 
         if (quotePaths50.length > 1) {
-            splitPaths.push(this.splitPaths(swapAmount, quotePaths50[0], quotePaths50[1])); // 50/50
+            const secondBestPath50 = quotePaths50.find(
+                (path) => !quotePaths50[0].pools.some((pool) => path.pools.includes(pool)),
+            );
+            if (secondBestPath50) {
+                splitPaths.push(this.splitPaths(swapAmount, quotePaths50[0], secondBestPath50)); // 50/50
+            }
         }
 
         if (splitPaths.length === 0) {
