@@ -128,7 +128,7 @@ export class Router {
 
         if (quotePaths50.length > 1) {
             const secondBestPath50 = quotePaths50.find(
-                (path) => !quotePaths25[0].pools.some((pool) => path.pools.includes(pool)),
+                (path) => !quotePaths50[0].pools.some((pool) => path.pools.includes(pool)),
             );
             if (secondBestPath50) {
                 splitPaths.push(this.splitPaths(swapAmount, quotePaths50[0], secondBestPath50)); // 50/50
