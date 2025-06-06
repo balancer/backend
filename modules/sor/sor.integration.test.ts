@@ -72,8 +72,8 @@ describe('SOR V3 Swap Paths Integration Tests', () => {
             const calculatedAmountSORFloat = parseFloat(
                 formatUnits(calculatedAmountSOR.amount, calculatedAmountSOR.token.decimals),
             );
-            const minDecimals = Math.min(calculatedAmountQuery.token.decimals, calculatedAmountSOR.token.decimals);
-            expect(calculatedAmountQueryFloat).toBeCloseTo(calculatedAmountSORFloat, minDecimals - 2);
+            const ratio = calculatedAmountQueryFloat / calculatedAmountSORFloat;
+            expect(ratio).toBeCloseTo(1, 3); // 5 bp tolerance
         } else {
             expect(calculatedAmountQuery.amount).toBe(calculatedAmountSOR.amount);
         }

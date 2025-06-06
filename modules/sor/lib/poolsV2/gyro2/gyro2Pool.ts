@@ -9,16 +9,7 @@ import { chainToChainId as chainToIdMap } from '../../../../network/chain-id-to-
 import { GyroData } from '../../../../pool/subgraph-mapper';
 import { TokenPairData } from '../../../../pool/lib/pool-on-chain-tokenpair-data';
 import { BasePool } from '../basePool';
-import { BasePoolToken } from '../../utils/basePoolToken';
-
-export class Gyro2PoolToken extends BasePoolToken {
-    public readonly rate: bigint;
-
-    public constructor(token: Token, amount: BigintIsh, index: number, rate: BigintIsh) {
-        super(token, amount, index);
-        this.rate = BigInt(rate);
-    }
-}
+import { PoolTokenWithRate } from '../../utils';
 
 export class Gyro2Pool implements BasePool {
     public readonly chain: Chain;
@@ -27,15 +18,15 @@ export class Gyro2Pool implements BasePool {
     public readonly poolType: PoolType = PoolType.Gyro2;
     public readonly poolTypeVersion: number;
     public readonly swapFee: bigint;
-    public readonly tokens: Gyro2PoolToken[];
+    public readonly tokens: PoolTokenWithRate[];
     public readonly tokenPairs: TokenPairData[];
 
     private readonly sqrtAlpha: bigint;
     private readonly sqrtBeta: bigint;
-    private readonly tokenMap: Map<string, Gyro2PoolToken>;
+    private readonly tokenMap: Map<string, PoolTokenWithRate>;
 
     static fromPrismaPool(pool: PrismaPoolAndHookWithDynamic): Gyro2Pool {
-        const poolTokens: Gyro2PoolToken[] = [];
+        const poolTokens: PoolTokenWithRate[] = [];
 
         if (!pool.dynamicData || !pool.typeData) {
             throw new Error('No dynamic data for pool');
@@ -56,7 +47,7 @@ export class Gyro2Pool implements BasePool {
             const tokenAmount = TokenAmount.fromScale18Amount(token, scale18);
 
             poolTokens.push(
-                new Gyro2PoolToken(token, tokenAmount.amount, poolToken.index, parseEther(poolToken.priceRate)),
+                new PoolTokenWithRate(token, tokenAmount.amount, poolToken.index, parseEther(poolToken.priceRate)),
             );
         }
 
@@ -83,7 +74,7 @@ export class Gyro2Pool implements BasePool {
         swapFee: bigint,
         sqrtAlpha: bigint,
         sqrtBeta: bigint,
-        tokens: Gyro2PoolToken[],
+        tokens: PoolTokenWithRate[],
         tokenPairs: TokenPairData[],
     ) {
         this.id = id;
@@ -230,7 +221,7 @@ export class Gyro2Pool implements BasePool {
         return amount.divUpFixed(MathSol.complementFixed(this.swapFee));
     }
 
-    public getPoolTokens(tokenIn: Token, tokenOut: Token): { tIn: Gyro2PoolToken; tOut: Gyro2PoolToken } {
+    public getPoolTokens(tokenIn: Token, tokenOut: Token): { tIn: PoolTokenWithRate; tOut: PoolTokenWithRate } {
         const tIn = this.tokenMap.get(tokenIn.wrapped);
         const tOut = this.tokenMap.get(tokenOut.wrapped);
 
@@ -245,8 +236,8 @@ export class Gyro2Pool implements BasePool {
         tokenIn: Token,
         tokenOut: Token,
     ): {
-        tIn: Gyro2PoolToken;
-        tOut: Gyro2PoolToken;
+        tIn: PoolTokenWithRate;
+        tOut: PoolTokenWithRate;
         sqrtAlpha: bigint;
         sqrtBeta: bigint;
     } {
@@ -256,5 +247,19 @@ export class Gyro2Pool implements BasePool {
         const sqrtBeta = tIn.index === 0 ? this.sqrtBeta : MathSol.divDownFixed(WAD, this.sqrtAlpha);
 
         return { tIn, tOut, sqrtAlpha, sqrtBeta };
+    }
+
+    public copy(): Gyro2Pool {
+        return new Gyro2Pool(
+            this.id,
+            this.address,
+            this.chain,
+            this.poolTypeVersion,
+            this.swapFee,
+            this.sqrtAlpha,
+            this.sqrtBeta,
+            this.tokens.map((token) => token.copy()),
+            this.tokenPairs,
+        );
     }
 }
