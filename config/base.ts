@@ -78,6 +78,9 @@ export default <NetworkData>{
         fluid: {
             url: 'https://api.fluid.instad.app/v2/lending/8453/tokens',
         },
+        extra: {
+            url: 'https://extra-static.s3.amazonaws.com/data/xlend/pools/apr.json',
+        },
         susds: {
             oracle: '0x65d946e533748a998b1f0e430803e39a6388f7a1',
             token: '0x5875eee11cf8398102fdad704c9e96607675467a',
