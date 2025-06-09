@@ -87,7 +87,12 @@ export class BasePoolV3 {
         );
     }
 
-    public swapGivenIn(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount {
+    public swapGivenIn(
+        tokenIn: Token,
+        tokenOut: Token,
+        swapAmount: TokenAmount,
+        mutateBalances?: boolean,
+    ): TokenAmount {
         const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
 
         let calculatedAmount: bigint;
@@ -145,10 +150,22 @@ export class BasePoolV3 {
                 this.hookState,
             );
         }
+
+        if (mutateBalances) {
+            tIn.increase(swapAmount.amount);
+            tOut.decrease(calculatedAmount);
+            this.poolState.balancesLiveScaled18 = this.tokens.map((t) => t.scale18);
+        }
+
         return TokenAmount.fromRawAmount(tOut.token, calculatedAmount);
     }
 
-    public swapGivenOut(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount {
+    public swapGivenOut(
+        tokenIn: Token,
+        tokenOut: Token,
+        swapAmount: TokenAmount,
+        mutateBalances?: boolean,
+    ): TokenAmount {
         const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
 
         let calculatedAmount: bigint;
@@ -206,6 +223,13 @@ export class BasePoolV3 {
                 this.hookState,
             );
         }
+
+        if (mutateBalances) {
+            tIn.increase(calculatedAmount);
+            tOut.decrease(swapAmount.amount);
+            this.poolState.balancesLiveScaled18 = this.tokens.map((t) => t.scale18);
+        }
+
         return TokenAmount.fromRawAmount(tIn.token, calculatedAmount);
     }
 
@@ -229,6 +253,10 @@ export class BasePoolV3 {
     }
 
     public getPoolTokens(tokenIn: Token, tokenOut: Token): { tIn: BasePoolToken; tOut: BasePoolToken } {
+        throw new Error('Must be implemented by the subclass');
+    }
+
+    public copy(): BasePoolV3 {
         throw new Error('Must be implemented by the subclass');
     }
 }

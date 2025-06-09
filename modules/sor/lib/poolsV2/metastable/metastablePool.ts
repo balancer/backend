@@ -204,4 +204,16 @@ export class MetaStablePool implements BasePool {
 
         return { tIn, tOut };
     }
+
+    public copy(): MetaStablePool {
+        return new MetaStablePool(
+            this.id,
+            this.address,
+            this.chain,
+            this.amp,
+            this.swapFee,
+            this.tokens.map((token) => token.copy()),
+            this.tokenPairs,
+        );
+    }
 }

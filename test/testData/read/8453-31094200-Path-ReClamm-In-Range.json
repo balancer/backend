@@ -5,15 +5,22 @@
     },
     "swapPath": {
         "swapKind": 0,
-        "amountRaw": "100000",
-        "tokens": [
-            "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-            "0x4200000000000000000000000000000000000006"
-        ],
-        "pools": [
-            "0xBa615a0A9237b64BFb3051f8160483C10Dde0012"
-        ],
-        "outputRaw": "39137633922798"
+        "paths": [
+            {
+                "amountRaw": "100000",
+                "tokens": [
+                    "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                    "0x4200000000000000000000000000000000000006"
+                ],
+                "pools": [
+                    {
+                        "poolAddress": "0xBa615a0A9237b64BFb3051f8160483C10Dde0012",
+                        "poolType": "RECLAMM"
+                    }
+                ],
+                "calculatedAmountRaw": "39137633922798"
+            }
+        ]
     },
     "pools": [
         {

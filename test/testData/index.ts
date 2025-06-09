@@ -4,7 +4,8 @@ import { generateSwapPathTestData } from './generate/generateSwapPathTestData';
 import type { Config } from './types';
 
 async function generateTestData() {
-    const configFile = './test/testData/config.json';
+    const debug = Bun.argv[3] === 'true';
+    const configFile = debug ? './test/testData/config-debug.json' : './test/testData/config.json';
     const testConfig = await readConfig(configFile);
     const overWrite = Bun.argv[2] === 'true';
     for (const swapPathTest of testConfig.swapPathTests) {
@@ -17,6 +18,7 @@ async function generateTestData() {
                 rpcUrl,
             },
             overWrite,
+            debug,
         );
     }
 }

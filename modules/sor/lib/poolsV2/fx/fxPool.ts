@@ -233,4 +233,21 @@ export class FxPool implements BasePool {
             swapKind,
         };
     }
+
+    public copy(): FxPool {
+        return new FxPool(
+            this.id,
+            this.address,
+            this.chain,
+            this.poolTypeVersion,
+            this.swapFee,
+            this.alpha,
+            this.beta,
+            this.lambda,
+            this.delta,
+            this.epsilon,
+            this.tokens.map((token) => token.copy()),
+            this.tokenPairs,
+        );
+    }
 }

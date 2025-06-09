@@ -145,4 +145,20 @@ export class ReClammPool extends BasePoolV3 implements BasePoolMethodsV3 {
 
         return { tIn, tOut };
     }
+
+    public copy(): ReClammPool {
+        return new ReClammPool(
+            this.id,
+            this.address,
+            this.chain,
+            this.reClammParams,
+            this.swapFee,
+            this.aggregateSwapFee,
+            this.tokens.map((token) => token.copy()),
+            this.totalShares,
+            this.tokenPairs,
+            this.liquidityManagement,
+            this.hookState,
+        );
+    }
 }

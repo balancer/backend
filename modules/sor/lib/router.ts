@@ -4,7 +4,8 @@ import { PathGraphTraversalConfig } from './pathGraph/pathGraphTypes';
 import { MathSol, WAD, max, min } from './utils/math';
 import { BasePool } from './poolsV2/basePool';
 import { PathLocal, PathWithAmount } from './path';
-import { parseEther } from 'viem';
+import { formatEther, formatUnits, parseEther } from 'viem';
+import { BasePoolV3 } from './poolsV3/basePoolV3';
 
 export class Router {
     private readonly pathGraph: PathGraph;
@@ -166,8 +167,15 @@ export class Router {
         const swapAmountUp = pathA.swapAmount;
         const swapAmountDown = swapAmount.sub(swapAmountUp);
 
-        const pathUp = new PathWithAmount(pathA.tokens, pathA.pools, pathA.isBuffer, swapAmountUp);
-        const pathDown = new PathWithAmount(pathB.tokens, pathB.pools, pathB.isBuffer, swapAmountDown);
+        // copy pools to avoid mutating the original pools
+        const pools = [...new Set(pathA.pools.concat(pathB.pools))];
+        const poolsCopy = pools.map((pool) => pool.copy());
+        const poolsA = pathA.pools.map((pool) => poolsCopy.find((p) => p.id === pool.id)) as BasePool[];
+        const poolsB = pathB.pools.map((pool) => poolsCopy.find((p) => p.id === pool.id)) as BasePool[];
+
+        // create paths with copied pools and `mutateBalances = true` to make sure reusing pools works as expected
+        const pathUp = new PathWithAmount(pathA.tokens, poolsA, pathA.isBuffer, swapAmountUp, true);
+        const pathDown = new PathWithAmount(pathB.tokens, poolsB, pathB.isBuffer, swapAmountDown, true);
 
         return [pathUp, pathDown];
     }

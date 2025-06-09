@@ -5,17 +5,27 @@
     },
     "swapPath": {
         "swapKind": 0,
-        "amountRaw": "100000000000000000000",
-        "tokens": [
-            "0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0",
-            "0x775f661b0bd1739349b9a2a3ef60be277c5d2d29",
-            "0xd11c452fc99cf405034ee446803b6f6c1f6d5ed8"
-        ],
-        "pools": [
-            "0x775f661b0bd1739349b9a2a3ef60be277c5d2d29",
-            "0x9ed5175aecb6653c1bdaa19793c16fd74fbeeb37"
-        ],
-        "outputRaw": "99216988453505115973"
+        "paths": [
+            {
+                "amountRaw": "100000000000000000000",
+                "tokens": [
+                    "0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0",
+                    "0x775f661b0bd1739349b9a2a3ef60be277c5d2d29",
+                    "0xd11c452fc99cf405034ee446803b6f6c1f6d5ed8"
+                ],
+                "pools": [
+                    {
+                        "poolAddress": "0x775f661b0bd1739349b9a2a3ef60be277c5d2d29",
+                        "poolType": "Buffer"
+                    },
+                    {
+                        "poolAddress": "0x9ed5175aecb6653c1bdaa19793c16fd74fbeeb37",
+                        "poolType": "STABLE"
+                    }
+                ],
+                "calculatedAmountRaw": "99216988453505115973"
+            }
+        ]
     },
     "pools": [
         {
