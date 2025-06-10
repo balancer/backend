@@ -1,5 +1,11 @@
 # backend
 
+## 1.43.1
+
+### Patch Changes
+
+-   a6f764b: fix extra finance APRs
+
 ## 1.43.0
 
 ### Minor Changes
