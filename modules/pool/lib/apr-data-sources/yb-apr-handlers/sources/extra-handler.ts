@@ -14,6 +14,11 @@ interface ExtraAPIResponse {
     }[];
 }
 
+const wrappers = {
+    '0x589a7339c6d0c8777e7429f57f2f95c069c37288': 'USDC',
+    '0x98efe85735f253a0ed0be8e2915ff39f9e4aff0f': 'USR',
+};
+
 export class ExtraHandler implements AprHandler {
     url: string;
 
@@ -26,12 +31,16 @@ export class ExtraHandler implements AprHandler {
         const tokens = response.base
             .filter((token) => ['USR', 'USDC'].includes(token.symbol))
             .map((token) => [
-                token.address.toLowerCase(),
+                token.symbol.toUpperCase(),
                 {
                     apr: parseFloat(token.totalAPY),
                 },
             ]);
-        console.log(tokens);
-        return Object.fromEntries(tokens);
+        const aprMap = Object.fromEntries(tokens);
+        const aprs = Object.keys(wrappers).map((wrapper) => [
+            wrapper,
+            aprMap[wrappers[wrapper as keyof typeof wrappers]],
+        ]);
+        return Object.fromEntries(aprs);
     }
 }
