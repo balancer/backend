@@ -35,6 +35,7 @@ const balancerResolvers: Resolvers = {
             return poolService.getGqlPools(args);
         },
         poolGetAggregatorPools: async (parent, args, context) => {
+            console.log('poolGetAggregatorPools', JSON.stringify(args.where));
             return poolService.getAggregatorPools(args);
         },
         aggregatorPools: async (parent, args, context) => {

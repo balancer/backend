@@ -132,4 +132,21 @@ export class Gyro2CLPPool extends BasePoolV3 implements BasePoolMethodsV3 {
 
         return { tIn, tOut };
     }
+
+    public copy(): Gyro2CLPPool {
+        return new Gyro2CLPPool(
+            this.id,
+            this.address,
+            this.chain,
+            this.swapFee,
+            this.aggregateSwapFee,
+            this.tokens.map((token) => token.copy()),
+            this.totalShares,
+            this.sqrtAlpha,
+            this.sqrtBeta,
+            this.tokenPairs,
+            this.liquidityManagement,
+            this.hookState,
+        );
+    }
 }

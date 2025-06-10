@@ -90,6 +90,7 @@ export class BufferPool implements BasePoolMethodsV3 {
             },
             this.poolState,
         );
+
         return TokenAmount.fromRawAmount(tOut.token, calculatedAmount);
     }
 
@@ -129,5 +130,16 @@ export class BufferPool implements BasePoolMethodsV3 {
         }
 
         return { tIn, tOut };
+    }
+
+    public copy(): BufferPool {
+        return new BufferPool(
+            this.id,
+            this.address,
+            this.chainId,
+            this.rate,
+            this.tokens[0].copy(),
+            this.tokens[1].copy(),
+        );
     }
 }

@@ -1,5 +1,18 @@
 # backend
 
+## 1.43.0
+
+### Minor Changes
+
+-   9107bbf: SOR - Fix split paths reusing same pool
+
+### Patch Changes
+
+-   d9823d7: extra finance APR
+-   df75815: add aggregator filter log
+-   a969a39: SOR - Prevent split path reusing any pools
+-   3f6c7fe: Bump balancer-maths dependency to 0.0.35
+
 ## 1.42.11
 
 ### Patch Changes

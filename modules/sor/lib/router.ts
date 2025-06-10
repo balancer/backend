@@ -4,7 +4,8 @@ import { PathGraphTraversalConfig } from './pathGraph/pathGraphTypes';
 import { MathSol, WAD, max, min } from './utils/math';
 import { BasePool } from './poolsV2/basePool';
 import { PathLocal, PathWithAmount } from './path';
-import { parseEther } from 'viem';
+import { formatEther, formatUnits, parseEther } from 'viem';
+import { BasePoolV3 } from './poolsV3/basePoolV3';
 
 export class Router {
     private readonly pathGraph: PathGraph;
@@ -117,13 +118,22 @@ export class Router {
         }
 
         if (quotePaths75.length > 0 && quotePaths25.length > 1) {
-            // prevent bestPath25 from being the same as bestPath75
-            const bestPath25 = quotePaths25.find((path) => path.pools !== quotePaths75[0].pools) as PathWithAmount;
-            splitPaths.push(this.splitPaths(swapAmount, bestPath25, quotePaths75[0])); // 25/75
+            // select first path from quotePaths25 that has no pool in common with quotePaths75[0]
+            const bestPath25 = quotePaths25.find(
+                (path) => !quotePaths75[0].pools.some((pool) => path.pools.includes(pool)),
+            );
+            if (bestPath25) {
+                splitPaths.push(this.splitPaths(swapAmount, bestPath25, quotePaths75[0])); // 25/75
+            }
         }
 
         if (quotePaths50.length > 1) {
-            splitPaths.push(this.splitPaths(swapAmount, quotePaths50[0], quotePaths50[1])); // 50/50
+            const secondBestPath50 = quotePaths50.find(
+                (path) => !quotePaths50[0].pools.some((pool) => path.pools.includes(pool)),
+            );
+            if (secondBestPath50) {
+                splitPaths.push(this.splitPaths(swapAmount, quotePaths50[0], secondBestPath50)); // 50/50
+            }
         }
 
         if (splitPaths.length === 0) {
@@ -157,8 +167,15 @@ export class Router {
         const swapAmountUp = pathA.swapAmount;
         const swapAmountDown = swapAmount.sub(swapAmountUp);
 
-        const pathUp = new PathWithAmount(pathA.tokens, pathA.pools, pathA.isBuffer, swapAmountUp);
-        const pathDown = new PathWithAmount(pathB.tokens, pathB.pools, pathB.isBuffer, swapAmountDown);
+        // copy pools to avoid mutating the original pools
+        const pools = [...new Set(pathA.pools.concat(pathB.pools))];
+        const poolsCopy = pools.map((pool) => pool.copy());
+        const poolsA = pathA.pools.map((pool) => poolsCopy.find((p) => p.id === pool.id)) as BasePool[];
+        const poolsB = pathB.pools.map((pool) => poolsCopy.find((p) => p.id === pool.id)) as BasePool[];
+
+        // create paths with copied pools and `mutateBalances = true` to make sure reusing pools works as expected
+        const pathUp = new PathWithAmount(pathA.tokens, poolsA, pathA.isBuffer, swapAmountUp, true);
+        const pathDown = new PathWithAmount(pathB.tokens, poolsB, pathB.isBuffer, swapAmountDown, true);
 
         return [pathUp, pathDown];
     }

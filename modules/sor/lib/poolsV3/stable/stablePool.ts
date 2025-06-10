@@ -123,4 +123,20 @@ export class StablePoolV3 extends BasePoolV3 implements BasePoolMethodsV3 {
 
         return { tIn, tOut };
     }
+
+    public copy(): StablePoolV3 {
+        return new StablePoolV3(
+            this.id,
+            this.address,
+            this.chain,
+            this.amp,
+            this.swapFee,
+            this.aggregateSwapFee,
+            this.tokens.map((token) => token.copy()),
+            this.totalShares,
+            this.tokenPairs,
+            this.liquidityManagement,
+            this.hookState,
+        );
+    }
 }

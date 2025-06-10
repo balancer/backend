@@ -264,4 +264,18 @@ export class GyroEPool implements BasePool {
 
         return { tIn, tOut };
     }
+
+    public copy(): GyroEPool {
+        return new GyroEPool(
+            this.id,
+            this.address,
+            this.chain,
+            this.poolTypeVersion,
+            this.swapFee,
+            this.tokens.map((token) => token.copy()),
+            this.gyroEParams,
+            this.derivedGyroEParams,
+            this.tokenPairs,
+        );
+    }
 }

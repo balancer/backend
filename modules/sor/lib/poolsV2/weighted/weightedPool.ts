@@ -194,4 +194,16 @@ export class WeightedPool implements BasePool {
         const ratio = power - WAD;
         return MathSol.mulUpFixed(balanceIn, ratio);
     }
+
+    public copy(): WeightedPool {
+        return new WeightedPool(
+            this.id,
+            this.address,
+            this.chain,
+            this.poolTypeVersion,
+            this.swapFee,
+            this.tokens.map((token) => token.copy()),
+            this.tokenPairs,
+        );
+    }
 }

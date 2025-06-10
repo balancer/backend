@@ -6,21 +6,25 @@ import {
     type ExactInQueryOutput,
     type ExactOutQueryOutput,
 } from '@balancer/sdk';
+import { TransformBigintToString } from '../types';
 
-export type SwapPathInput = {
-    swapKind: SwapKind;
+export type Path = {
     pools: {
         poolAddress: Address;
         poolType: string;
     }[];
     tokens: Address[];
     amountRaw: bigint;
+    calculatedAmountRaw: bigint;
 };
 
-export type SwapPathResult = Omit<SwapPathInput, 'amountRaw' | 'pools'> & {
-    pools: Address[];
-    amountRaw: string;
-    outputRaw: string;
+export type SwapPathInput = {
+    swapKind: SwapKind;
+    paths: Path[];
+};
+
+export type SwapPathResult = Omit<SwapPathInput, 'paths'> & {
+    paths: TransformBigintToString<Path>[];
 };
 
 async function querySwapPath(
@@ -28,32 +32,30 @@ async function querySwapPath(
     rpcUrl: string,
     swapPathInput: SwapPathInput,
     blockNumber: bigint,
-): Promise<bigint> {
+): Promise<bigint[]> {
     const swapInput: SdkSwapInput = {
         chainId: chainId,
         swapKind: swapPathInput.swapKind,
-        paths: [
-            {
-                pools: swapPathInput.pools.map((pool) => pool.poolAddress),
-                tokens: swapPathInput.tokens.map((token) => ({
-                    address: token,
-                    decimals: 18, // does not need decimals because uses raw amounts everywhere
-                })),
-                isBuffer: swapPathInput.pools.map((pool) => pool.poolType === 'Buffer'),
-                protocolVersion: 3,
-                inputAmountRaw: swapPathInput.swapKind === SwapKind.GivenIn ? BigInt(swapPathInput.amountRaw) : 0n,
-                outputAmountRaw: swapPathInput.swapKind === SwapKind.GivenOut ? BigInt(swapPathInput.amountRaw) : 0n,
-            },
-        ],
+        paths: swapPathInput.paths.map((path) => ({
+            pools: path.pools.map((pool) => pool.poolAddress),
+            tokens: path.tokens.map((token) => ({
+                address: token,
+                decimals: 18, // does not need decimals because uses raw amounts everywhere
+            })),
+            isBuffer: path.pools.map((pool) => pool.poolType === 'Buffer'),
+            protocolVersion: 3,
+            inputAmountRaw: swapPathInput.swapKind === SwapKind.GivenIn ? path.amountRaw : 0n,
+            outputAmountRaw: swapPathInput.swapKind === SwapKind.GivenOut ? path.amountRaw : 0n,
+        })),
     };
     const sdkSwap = new Swap(swapInput);
-    let result = 0n;
+    let result = [];
     if (swapPathInput.swapKind === SwapKind.GivenIn) {
         const queryResult = (await sdkSwap.query(rpcUrl, blockNumber)) as ExactInQueryOutput;
-        result = queryResult.expectedAmountOut.amount;
+        result = queryResult.pathAmounts ? [...queryResult.pathAmounts] : [queryResult.expectedAmountOut.amount];
     } else {
         const queryResult = (await sdkSwap.query(rpcUrl, blockNumber)) as ExactOutQueryOutput;
-        result = queryResult.expectedAmountIn.amount;
+        result = queryResult.pathAmounts ? [...queryResult.pathAmounts] : [queryResult.expectedAmountIn.amount];
     }
     return result;
 }
@@ -67,11 +69,19 @@ export async function getSwapPath(
     console.log('Querying swap paths...');
     const result = await querySwapPath(chainId, rpcUrl, swapPathInput, blockNumber);
 
+    if (result.length !== swapPathInput.paths.length) {
+        throw new Error(
+            `Result length ${result.length} does not match swapPath.paths length ${swapPathInput.paths.length}`,
+        );
+    }
+
     console.log('Done');
     return {
         ...swapPathInput,
-        pools: swapPathInput.pools.map((pool) => pool.poolAddress),
-        amountRaw: swapPathInput.amountRaw.toString(),
-        outputRaw: result.toString(),
+        paths: swapPathInput.paths.map((path, index) => ({
+            ...path,
+            amountRaw: path.amountRaw.toString(),
+            calculatedAmountRaw: result[index].toString(),
+        })),
     };
 }
