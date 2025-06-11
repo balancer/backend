@@ -10,6 +10,8 @@ import {
     Swap_Filter,
     Swap_OrderBy,
     PoolSnapshot_OrderBy,
+    BalancerJoinExitFragment,
+    JoinExit_OrderBy,
 } from './generated/balancer-subgraph-types';
 import { BalancerSubgraphService } from './balancer-subgraph.service';
 import { Chain } from '@prisma/client';
@@ -140,6 +142,34 @@ export function getV2SubgraphClient(url: string, chain: Chain) {
             );
 
             return uniqueSwaps;
+        },
+        async getAllJoinsExits(poolId: string) {
+            const limit = 1000;
+            let fromBlock = '0';
+            let hasMore = true;
+            let events: BalancerJoinExitFragment[] = [];
+
+            while (hasMore) {
+                const response = await sdk.BalancerJoinExits({
+                    where: { pool_: { id: poolId }, block_gte: fromBlock },
+                    orderBy: JoinExit_OrderBy.Timestamp,
+                    orderDirection: OrderDirection.Asc,
+                    first: limit,
+                });
+
+                events = [...events, ...response.joinExits];
+                if (response.joinExits.length < limit) {
+                    hasMore = false;
+                } else {
+                    fromBlock = events[events.length - 1].block!;
+                }
+            }
+
+            const uniqueEvents = events.filter(
+                (event, index, array) => array.findIndex((s) => s.id === event.id) === index,
+            );
+
+            return uniqueEvents;
         },
     };
 }
