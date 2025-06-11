@@ -1,5 +1,14 @@
 # backend
 
+## 1.43.2
+
+### Patch Changes
+
+-   3af9cd6: additional V2 subgraph swap fetching methods
+-   c154245: add poolIds to updateYieldCaptureForAllPools for debugging
+-   78aa630: V2 subgraph client join/exit methods
+-   9330d0a: handle pool parsing errors
+
 ## 1.43.1
 
 ### Patch Changes
