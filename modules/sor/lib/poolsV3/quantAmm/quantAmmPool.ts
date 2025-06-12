@@ -157,4 +157,19 @@ export class QuantAmmPool extends BasePoolV3 implements BasePoolMethodsV3 {
 
         return { tIn, tOut };
     }
+
+    public copy(): QuantAmmPool {
+        return new QuantAmmPool(
+            this.id,
+            this.address,
+            this.chain,
+            this.swapFee,
+            this.aggregateSwapFee,
+            this.totalShares,
+            this.quantAmmParams,
+            this.tokens.map((token) => token.copy()),
+            this.tokenPairs,
+            this.liquidityManagement,
+        );
+    }
 }

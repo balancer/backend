@@ -130,4 +130,19 @@ export class WeightedPoolV3 extends BasePoolV3 implements BasePoolMethodsV3 {
 
         return { tIn, tOut };
     }
+
+    public copy(): WeightedPoolV3 {
+        return new WeightedPoolV3(
+            this.id,
+            this.address,
+            this.chain,
+            this.swapFee,
+            this.aggregateSwapFee,
+            this.totalShares,
+            this.tokens,
+            this.tokenPairs,
+            this.liquidityManagement,
+            this.hookState,
+        );
+    }
 }

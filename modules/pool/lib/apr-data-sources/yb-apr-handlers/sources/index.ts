@@ -1,5 +1,6 @@
 export * from './default-apr-handler';
 export * from './fluid-apr-handler';
+export * from './extra-handler';
 export * from './aave-apr-handler';
 export * from './avalon-apr-handler';
 export * from './euler-apr-handler';

@@ -24,6 +24,7 @@ import {
     mapWeightedPoolStateToPrismaPool,
     mapLiquidityBootstrappingPoolStateToPrismaPool,
 } from './mapping';
+import { Path, SwapPathInput } from '../generate/getSwapPath';
 
 type PoolBase = {
     poolAddress: string;
@@ -54,12 +55,7 @@ export type SupportedPools =
     | ReClammPool
     | QuantAmmPool;
 
-type SwapPath = {
-    swapKind: number;
-    amountRaw: bigint;
-    outputRaw: bigint;
-    tokens: string[];
-    pools: string[];
+type SwapPathData = SwapPathInput & {
     test: string;
     currentTimestamp: bigint;
     chainId: string;
@@ -67,12 +63,12 @@ type SwapPath = {
 
 export type TestData = {
     swapPathPools: PrismaPoolAndHookWithDynamic[][];
-    swapPaths: SwapPath[];
+    swapPaths: SwapPathData[];
     bufferPools: BufferPoolData[][];
 };
 
 // Reads all json test files and parses to relevant swap/pool bigint format
-export function readTestData(): TestData {
+export function readTestData(debug = false): TestData {
     const testData: TestData = {
         swapPathPools: [],
         swapPaths: [],
@@ -80,7 +76,7 @@ export function readTestData(): TestData {
     };
 
     // Resolve the directory path relative to the current file's directory
-    const absoluteDirectoryPath = path.resolve(__dirname);
+    const absoluteDirectoryPath = path.resolve(__dirname, debug ? 'debug' : '');
 
     // Read all files in the directory
     const files = fs.readdirSync(absoluteDirectoryPath);
@@ -110,10 +106,12 @@ export function readTestData(): TestData {
                 // add swapPaths
                 testData.swapPaths.push({
                     ...jsonData.swapPath,
-                    pools: jsonData.swapPath.pools,
                     swapKind: Number(jsonData.swapPath.swapKind),
-                    amountRaw: BigInt(jsonData.swapPath.amountRaw),
-                    outputRaw: BigInt(jsonData.swapPath.outputRaw),
+                    paths: jsonData.swapPath.paths.map((path: TransformBigintToString<Path>) => ({
+                        ...path,
+                        amountRaw: BigInt(path.amountRaw),
+                        calculatedAmountRaw: BigInt(path.calculatedAmountRaw),
+                    })),
                     test: file,
                     currentTimestamp: currentTimestampString ? BigInt(currentTimestampString) : undefined,
                     chainId: jsonData.test.chainId,

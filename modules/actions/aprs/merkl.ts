@@ -11,6 +11,7 @@ interface MerklOpportunity {
     chainId: number;
     identifier: string;
     apr: number;
+    tvl: number;
     campaigns: {
         startTimestamp: number;
         endTimestamp: number;
@@ -29,8 +30,9 @@ const fetchMerklOpportunities = async () => {
     const data = (await response.json()) as MerklOpportunity[];
 
     // remove opportunities with whitelist
-    const opportunities = data.filter((opportunity) =>
-        opportunity.campaigns.every((campaign) => campaign.params.whitelist.length === 0),
+    const opportunities = data.filter(
+        (opportunity) =>
+            opportunity.tvl > 0 && opportunity.campaigns.every((campaign) => campaign.params.whitelist.length === 0),
     );
 
     return opportunities;
@@ -82,15 +84,15 @@ export const syncMerklRewards = async () => {
         .flat(2)
         .filter((item) => item !== null) as string[];
 
-    const allAffectedPoolIds = [
+    const allAffectedPoolAddresses = [
         ...opportunities.map((campaign) => campaign.identifier.toLowerCase()),
         ...poolIdsFromForwardedOpportunities,
     ];
 
     const affectedPools = await prisma.prismaPool.findMany({
         where: {
-            id: {
-                in: allAffectedPoolIds,
+            address: {
+                in: allAffectedPoolAddresses,
             },
         },
         include: { dynamicData: true, tokens: { include: { token: true } } },

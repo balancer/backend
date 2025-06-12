@@ -10,6 +10,7 @@ const sourceToHandler = {
     beefy: sources.BeefyAprHandler,
     euler: sources.EulerAprHandler,
     fluid: sources.FluidAprHandler,
+    extra: sources.ExtraHandler,
     // gearbox: sources.GearboxAprHandler, // Removed, endpoint is down
     // idle: sources.IdleAprHandler, // Removed, endpoint is down
     maker: sources.MakerAprHandler,
@@ -40,7 +41,10 @@ export class YbAprHandlers {
     private handlers: AprHandler[] = [];
     fixedAprTokens?: { [tokenName: string]: { address: string; apr: number; group?: string; isIbYield?: boolean } };
 
-    constructor(aprConfig: YbAprConfig, private chain?: Chain) {
+    constructor(
+        aprConfig: YbAprConfig,
+        private chain?: Chain,
+    ) {
         const { fixedAprHandler, ...config } = aprConfig;
         this.handlers = this.buildAprHandlers(config);
         this.fixedAprTokens = fixedAprHandler;

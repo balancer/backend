@@ -1,5 +1,74 @@
 # backend
 
+## 1.43.3
+
+### Patch Changes
+
+-   105bc6b: SG deployment IDs for reclamms
+-   aaa817e: patch high merkl aprs
+
+## 1.43.2
+
+### Patch Changes
+
+-   3af9cd6: additional V2 subgraph swap fetching methods
+-   c154245: add poolIds to updateYieldCaptureForAllPools for debugging
+-   78aa630: V2 subgraph client join/exit methods
+-   9330d0a: handle pool parsing errors
+
+## 1.43.1
+
+### Patch Changes
+
+-   a6f764b: fix extra finance APRs
+
+## 1.43.0
+
+### Minor Changes
+
+-   9107bbf: SOR - Fix split paths reusing same pool
+
+### Patch Changes
+
+-   d9823d7: extra finance APR
+-   df75815: add aggregator filter log
+-   a969a39: SOR - Prevent split path reusing any pools
+-   3f6c7fe: Bump balancer-maths dependency to 0.0.35
+
+## 1.42.11
+
+### Patch Changes
+
+-   ca25252: fix v2 tvl updates
+
+## 1.42.10
+
+### Patch Changes
+
+-   413d942: match merkl rewards by pool address
+-   5c38233: filter out sepolia in production
+
+## 1.42.9
+
+### Patch Changes
+
+-   014732e: skip Sepolia LBPs on prod
+-   d3da29e: add missing BPT for LBPs
+
+## 1.42.8
+
+### Patch Changes
+
+-   0395f4c: adding LBPv3 type for graphql
+-   cb47c0a: make LBP V3 fields required
+
+## 1.42.7
+
+### Patch Changes
+
+-   2fabae3: fix V2 LBPs data schema
+-   22fa2c6: isolate aggregator pool loader
+
 ## 1.42.6
 
 ### Patch Changes

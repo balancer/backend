@@ -1,6 +1,6 @@
 {
     "name": "backend",
-    "version": "1.42.6",
+    "version": "1.43.3",
     "description": "Backend service for Beethoven X and Balancer",
     "repository": "https://github.com/balancer/backend",
     "author": "Beethoven X",
@@ -16,8 +16,9 @@
         "vitest": "vitest",
         "task": "bun run tasks/index.ts",
         "mutation": "sh scripts/run_mutation.sh",
-        "generate-sor-test-data": "bun run test/testData/index.ts false",
-        "generate-sor-test-data:overwrite": "bun run test/testData/index.ts true"
+        "sor-data": "bun run test/testData/index.ts false",
+        "sor-data:overwrite": "bun run test/testData/index.ts true",
+        "sor-data:debug": "bun run test/testData/index.ts true true"
     },
     "dependencies": {
         "@apollo/server": "^4.11.3",

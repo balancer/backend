@@ -41,4 +41,8 @@ export class PoolTokenWithRate extends BasePoolToken {
         const amount = divUp ? MathSol.divUpFixed(scale18, scaledRate) : MathSol.divDownFixed(scale18, scaledRate);
         return new PoolTokenWithRate(token, amount, index, rate);
     }
+
+    public copy(): PoolTokenWithRate {
+        return new PoolTokenWithRate(this.token, this.amount, this.index, this.rate);
+    }
 }

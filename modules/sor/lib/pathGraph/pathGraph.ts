@@ -168,7 +168,7 @@ export class PathGraph {
 
     private buildPoolAddressMap(pools: BasePool[]) {
         for (const pool of pools) {
-            this.poolAddressMap.set(pool.address, pool);
+            this.poolAddressMap.set(pool.address.toLowerCase(), pool);
         }
     }
 
@@ -182,7 +182,7 @@ export class PathGraph {
         for (const pool of pools) {
             const tokens = [...pool.tokens.map((t) => t.token)];
             if (enableAddRemoveLiquidityPaths && pool.poolType !== 'Buffer') {
-                tokens.push(new Token(pool.tokens[0].token.chainId, pool.address as Address, 18)); // Add BPT as token nodes
+                tokens.push(new Token(pool.tokens[0].token.chainId, pool.address.toLowerCase() as Address, 18)); // Add BPT as token nodes
             }
             for (const token of tokens) {
                 if (!this.nodes.has(token.wrapped)) {
@@ -203,8 +203,8 @@ export class PathGraph {
     }) {
         for (const pool of pools) {
             const tokens = [...pool.tokens.map((t) => t.token)];
-            if (enableAddRemoveLiquidityPaths) {
-                tokens.push(new Token(pool.tokens[0].token.chainId, pool.address as Address, 18)); // Also consider BPT token pairs
+            if (enableAddRemoveLiquidityPaths && pool.poolType !== 'Buffer') {
+                tokens.push(new Token(pool.tokens[0].token.chainId, pool.address.toLowerCase() as Address, 18)); // Also consider BPT token pairs
             }
             for (const tokenIn of tokens) {
                 for (const tokenOut of tokens) {
@@ -413,7 +413,7 @@ export class PathGraph {
 
         if (config.poolIdsToInclude) {
             for (const poolId of poolIdsInPath) {
-                if (!config.poolIdsToInclude.includes(poolId)) {
+                if (!config.poolIdsToInclude.map((id) => id.toLowerCase()).includes(poolId.toLowerCase())) {
                     //path includes a pool that is not allowed for this traversal
                     return false;
                 }

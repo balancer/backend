@@ -73,4 +73,8 @@ export class FxPoolToken extends BasePoolToken {
             poolToken.fxOracleDecimals,
         );
     }
+
+    public copy(): FxPoolToken {
+        return new FxPoolToken(this.token, this.amount, this.index, this.latestFXPrice, this.fxOracleDecimals);
+    }
 }

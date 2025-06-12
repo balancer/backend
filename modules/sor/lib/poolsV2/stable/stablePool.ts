@@ -194,4 +194,16 @@ export class StablePool implements BasePool {
 
         return { tIn, tOut };
     }
+
+    public copy(): StablePool {
+        return new StablePool(
+            this.id,
+            this.address,
+            this.chain,
+            this.amp,
+            this.swapFee,
+            this.tokens.map((token) => token.copy()),
+            this.tokenPairs,
+        );
+    }
 }

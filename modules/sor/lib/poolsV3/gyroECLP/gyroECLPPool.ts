@@ -169,4 +169,21 @@ export class GyroECLPPool extends BasePoolV3 implements BasePoolMethodsV3 {
 
         return { tIn, tOut };
     }
+
+    public copy(): GyroECLPPool {
+        return new GyroECLPPool(
+            this.id,
+            this.address,
+            this.chain,
+            this.swapFee,
+            this.aggregateSwapFee,
+            this.tokens.map((token) => token.copy()),
+            this.totalShares,
+            this.gyroEParams,
+            this.derivedGyroEParams,
+            this.tokenPairs,
+            this.liquidityManagement,
+            this.hookState,
+        );
+    }
 }

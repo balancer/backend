@@ -102,19 +102,20 @@ export async function updateVolumeAndFees(
     We approximate the yield fee capture of the last 24h by taking the current total yield APR and apply it to the average totalLiquidity from now and 24 hours ago.
     We approximate the yield fee capture of the last 48h by taking the current total yield APR and apply it to the totalLiquidity from 24 hours ago.
 */
-async function updateYieldCaptureForAllPools(chain: Chain) {
+export async function updateYieldCaptureForAllPools(chain: Chain, poolIds?: string[]) {
     // Loading pools, their dynamic data, and tokens separately, then manually assembling them into `PoolForAPRs` objects to avoid the performance overhead of Prisma's nested includes.
     const [dbPools, dynamicData, aprItems] = await Promise.all([
         prisma.prismaPool.findMany({
-            where: { chain },
+            where: { chain, ...(poolIds ? { id: { in: poolIds } } : {}) },
         }),
         prisma.prismaPoolDynamicData
-            .findMany({ where: { chain } })
+            .findMany({ where: { chain, ...(poolIds ? { id: { in: poolIds } } : {}) } })
             .then((records) => _.keyBy(records, 'id') as Record<string, (typeof records)[0]>),
         prisma.prismaPoolAprItem
             .findMany({
                 where: {
                     chain,
+                    ...(poolIds ? { poolId: { in: poolIds } } : {}),
                     OR: [{ type: 'IB_YIELD' }, { type: null }],
                 },
             })

@@ -19,4 +19,8 @@ export class BasePoolToken extends TokenAmount {
         this.scale18 = this.amount * this.scalar;
         return this;
     }
+
+    public copy(): BasePoolToken {
+        return new BasePoolToken(this.token, this.amount, this.index);
+    }
 }

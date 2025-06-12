@@ -1090,6 +1090,59 @@ type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
     hasAnyAllowedBuffer: Boolean!
     hook: GqlHook
 
+    """
+    All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
+    """
+    tokens: [GqlPoolTokenUnion!]! @deprecated(reason: "Use poolTokens instead")
+    nestingType: GqlPoolNestingType! @deprecated(reason: "Removed without replacement")
+    staking: GqlPoolStaking
+    type: GqlPoolType!
+    version: Int!
+
+    userBalance: GqlPoolUserBalance
+}
+
+type GqlPoolLiquidityBootstrappingV3 implements GqlPoolBase {
+    id: ID!
+    chain: GqlChain!
+    vaultVersion: Int! @deprecated(reason: "use protocolVersion instead")
+    protocolVersion: Int!
+    name: String!
+    symbol: String!
+    address: Bytes!
+    decimals: Int!
+    """
+    The wallet address of the owner of the pool. Pool owners can set certain properties like swapFees or AMP.
+    """
+    owner: Bytes @deprecated(reason: "Use swapFeeManager instead")
+    """
+    Account empowered to set static swap fees for a pool (when 0 on V2 swap fees are immutable, on V3 delegate to governance)
+    """
+    swapFeeManager: Bytes
+    """
+    Account empowered to pause/unpause the pool (or 0 to delegate to governance)
+    """
+    pauseManager: Bytes
+    """
+    Account empowered to set the pool creator fee percentage
+    """
+    poolCreator: Bytes
+    factory: Bytes
+    createTime: Int!
+    investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
+    withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
+    dynamicData: GqlPoolDynamicData!
+    displayTokens: [GqlPoolTokenDisplay!]! @deprecated(reason: "Use poolTokens instead")
+    allTokens: [GqlPoolTokenExpanded!]! @deprecated(reason: "Use poolTokens instead")
+    poolTokens: [GqlPoolTokenDetail!]!
+    categories: [GqlPoolFilterCategory]
+    tags: [String]
+    liquidityManagement: LiquidityManagement
+    hasErc4626: Boolean!
+    hasNestedErc4626: Boolean!
+    hasAnyAllowedBuffer: Boolean!
+    hook: GqlHook
+
     lbpName: String
     description: String
     website: String
@@ -1114,8 +1167,6 @@ type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
     """
     All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
     """
-    tokens: [GqlPoolTokenUnion!]! @deprecated(reason: "Use poolTokens instead")
-    nestingType: GqlPoolNestingType! @deprecated(reason: "Removed without replacement")
     staking: GqlPoolStaking
     type: GqlPoolType!
     version: Int!
@@ -1468,6 +1519,7 @@ union GqlPoolUnion =
     | GqlPoolComposableStable
     | GqlPoolElement
     | GqlPoolLiquidityBootstrapping
+    | GqlPoolLiquidityBootstrappingV3
     | GqlPoolGyro
     | GqlPoolFx
     | GqlPoolReClamm
