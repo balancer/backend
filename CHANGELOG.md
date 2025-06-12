@@ -1,5 +1,12 @@
 # backend
 
+## 1.43.3
+
+### Patch Changes
+
+-   105bc6b: SG deployment IDs for reclamms
+-   aaa817e: patch high merkl aprs
+
 ## 1.43.2
 
 ### Patch Changes
