@@ -241,6 +241,11 @@ export function mapWeightedPoolStateToPrismaPool(
             aggregateSwapFee: formatEther(poolState.aggregateSwapFee),
             totalShares: formatEther(poolState.totalSupply),
         },
+        hook: {
+            ...poolState.hook,
+            dynamicData: hookDynamicData,
+        },
+        chain: chainIdToChain[chainId],
     });
     return prismaPool;
 }
