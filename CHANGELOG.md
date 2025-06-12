@@ -1,5 +1,11 @@
 # backend
 
+## 1.43.5
+
+### Patch Changes
+
+-   94e0733: patching volume24h in snapshots
+
 ## 1.43.4
 
 ### Patch Changes
