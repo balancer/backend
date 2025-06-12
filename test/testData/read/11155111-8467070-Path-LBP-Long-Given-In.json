@@ -5,15 +5,22 @@
     },
     "swapPath": {
         "swapKind": 0,
-        "amountRaw": "10000000",
-        "tokens": [
-            "0xb19382073c7A0aDdbb56Ac6AF1808Fa49e377B75",
-            "0xB77EB1A70A96fDAAeB31DB1b42F2b8b5846b2613"
-        ],
-        "pools": [
-            "0x36Da4444Fd9ea9Bcbc66a5b768497F7f68520aB8"
-        ],
-        "outputRaw": "4837417"
+        "paths": [
+            {
+                "amountRaw": "10000000",
+                "tokens": [
+                    "0xb19382073c7A0aDdbb56Ac6AF1808Fa49e377B75",
+                    "0xB77EB1A70A96fDAAeB31DB1b42F2b8b5846b2613"
+                ],
+                "pools": [
+                    {
+                        "poolAddress": "0x36Da4444Fd9ea9Bcbc66a5b768497F7f68520aB8",
+                        "poolType": "LIQUIDITY_BOOTSTRAPPING"
+                    }
+                ],
+                "calculatedAmountRaw": "4837417"
+            }
+        ]
     },
     "pools": [
         {
