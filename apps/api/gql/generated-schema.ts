@@ -2738,6 +2738,13 @@ export interface LbpMetadataInput {
     x?: InputMaybe<Scalars['String']>;
 }
 
+export interface LbpPriceChartData {
+    __typename?: 'LBPPriceChartData';
+    intervalTimestamp: Scalars['Int'];
+    projectTokenPrice: Scalars['Float'];
+    reservePrice: Scalars['Float'];
+}
+
 export interface LbPoolInput {
     address: Scalars['String'];
     chain: GqlChain;
@@ -2922,6 +2929,7 @@ export interface Query {
     /** @deprecated Field no longer supported */
     blocksGetBlocksPerYear: Scalars['Float'];
     latestSyncedBlocks: GqlLatestSyncedBlocks;
+    lbpPriceChart?: Maybe<Array<LbpPriceChartData>>;
     /** Getting swap, add and remove events with paging */
     poolEvents: Array<GqlPoolEvent>;
     /**
@@ -3040,6 +3048,12 @@ export interface QueryBeetsPoolGetReliquaryFarmSnapshotsArgs {
     chain?: InputMaybe<GqlChain>;
     id: Scalars['String'];
     range: GqlPoolSnapshotDataRange;
+}
+
+export interface QueryLbpPriceChartArgs {
+    chain: GqlChain;
+    id: Scalars['String'];
+    interval?: InputMaybe<Scalars['Int']>;
 }
 
 export interface QueryPoolEventsArgs {
@@ -3568,6 +3582,7 @@ export type ResolversTypes = ResolversObject<{
     Int: ResolverTypeWrapper<Scalars['Int']>;
     JSON: ResolverTypeWrapper<Scalars['JSON']>;
     LBPMetadataInput: LbpMetadataInput;
+    LBPPriceChartData: ResolverTypeWrapper<LbpPriceChartData>;
     LBPoolInput: LbPoolInput;
     LiquidityManagement: ResolverTypeWrapper<LiquidityManagement>;
     MevTaxHookParams: ResolverTypeWrapper<MevTaxHookParams>;
@@ -3769,6 +3784,7 @@ export type ResolversParentTypes = ResolversObject<{
     Int: Scalars['Int'];
     JSON: Scalars['JSON'];
     LBPMetadataInput: LbpMetadataInput;
+    LBPPriceChartData: LbpPriceChartData;
     LBPoolInput: LbPoolInput;
     LiquidityManagement: LiquidityManagement;
     MevTaxHookParams: MevTaxHookParams;
@@ -5908,6 +5924,16 @@ export interface JsonScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes
     name: 'JSON';
 }
 
+export type LbpPriceChartDataResolvers<
+    ContextType = ResolverContext,
+    ParentType extends ResolversParentTypes['LBPPriceChartData'] = ResolversParentTypes['LBPPriceChartData'],
+> = ResolversObject<{
+    intervalTimestamp?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+    projectTokenPrice?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+    reservePrice?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+    __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export type LiquidityManagementResolvers<
     ContextType = ResolverContext,
     ParentType extends ResolversParentTypes['LiquidityManagement'] = ResolversParentTypes['LiquidityManagement'],
@@ -6123,6 +6149,12 @@ export type QueryResolvers<
     blocksGetBlocksPerSecond?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
     blocksGetBlocksPerYear?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
     latestSyncedBlocks?: Resolver<ResolversTypes['GqlLatestSyncedBlocks'], ParentType, ContextType>;
+    lbpPriceChart?: Resolver<
+        Maybe<Array<ResolversTypes['LBPPriceChartData']>>,
+        ParentType,
+        ContextType,
+        RequireFields<QueryLbpPriceChartArgs, 'chain' | 'id'>
+    >;
     poolEvents?: Resolver<
         Array<ResolversTypes['GqlPoolEvent']>,
         ParentType,
@@ -6503,6 +6535,7 @@ export type Resolvers<ContextType = ResolverContext> = ResolversObject<{
     HookConfig?: HookConfigResolvers<ContextType>;
     HookParams?: HookParamsResolvers<ContextType>;
     JSON?: GraphQLScalarType;
+    LBPPriceChartData?: LbpPriceChartDataResolvers<ContextType>;
     LiquidityManagement?: LiquidityManagementResolvers<ContextType>;
     MevTaxHookParams?: MevTaxHookParamsResolvers<ContextType>;
     Mutation?: MutationResolvers<ContextType>;

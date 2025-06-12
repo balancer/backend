@@ -1,10 +1,42 @@
+import { Chain } from '@prisma/client';
 import { prisma } from '../../../../prisma/prisma-client';
 import { GraphQLError } from 'graphql';
 import { CreateLbpInput, Resolvers } from '../generated-schema';
 import { validateLBPoolInput } from '../../../../modules/validators/lbpool-input-validator';
 import { lbPoolInputToDB } from '../../../../modules/sources/transformers/lbpool-input-to-db';
+import { priceChartData } from '../../../../modules/pool/lbp/price-chart-data';
+import { LBPoolData } from '../../../../modules/pool/pool-data';
 
 export default {
+    Query: {
+        /**
+         * Get LB Pool price chart data
+         */
+        lbpPriceChart: async (parent: any, { id, chain, interval }) => {
+            try {
+                const pool = await prisma.prismaPool.findFirst({
+                    where: {
+                        id,
+                        chain,
+                        type: 'LIQUIDITY_BOOTSTRAPPING',
+                        protocolVersion: 3,
+                    },
+                });
+                if (!pool) {
+                    throw new GraphQLError('Pool with id does not exist', { extensions: { code: 'NOT_FOUND' } });
+                }
+                const input = {
+                    id: pool.id,
+                    chain: pool.chain,
+                    ...(pool.typeData as LBPoolData),
+                };
+                return await priceChartData(input, interval || undefined);
+            } catch (error) {
+                console.error('Error fetching LB Pool chart:', error);
+                return null;
+            }
+        },
+    },
     Mutation: {
         createLBP: async (_: any, { input }: { input: CreateLbpInput }) => {
             // Validate input
@@ -68,5 +100,4 @@ export default {
             }
         },
     },
-    Query: {},
 } as Resolvers;

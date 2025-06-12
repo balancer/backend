@@ -68,6 +68,22 @@ const commands: Record<string, Command> = {
             return eventsRepository.getDailyBlockNumbers(chain, days);
         },
     },
+    getTokenFlows: {
+        description: 'Get token flows for a specific pool and token pair',
+        handler: async (args: string[]) => {
+            const chain = args[0] as Chain;
+            const poolId = args[1];
+            const projectTokenAddress = args[2];
+            const reserveTokenAddress = args[3];
+            const interval = (args[4] && Number(args[4])) || undefined;
+
+            if (!poolId || !chain || !projectTokenAddress || !reserveTokenAddress) {
+                throw new Error('Missing required arguments: poolId, chain, projectTokenAddress, reserveTokenAddress');
+            }
+
+            return eventsRepository.getTokenFlows(chain, poolId, projectTokenAddress, reserveTokenAddress, interval);
+        },
+    },
 };
 
 function printUsage() {
@@ -83,6 +99,7 @@ function printUsage() {
     console.log('  ts-node cli.ts getLatestEvent MAINNET undefined "SWAP,JOIN,EXIT"');
     console.log('  ts-node cli.ts getSwapStats MAINNET "0x12345...,0xabcde..." 1640995200');
     console.log('  ts-node cli.ts getDailyBlockNumbers MAINNET 30');
+    console.log('  ts-node cli.ts getTokenFlows MAINNET "0x12345..." "0xProjectToken..." "0xReserveToken..."');
 }
 
 async function cli(command: string, args: string[]) {
