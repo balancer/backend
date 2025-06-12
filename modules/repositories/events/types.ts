@@ -30,6 +30,16 @@ export interface BlockNumbersRepository extends LatestEventRepository {
     getDailyBlockNumbers: (chain: Chain, days: number) => Promise<{ timestamp: number; number: number }[]>;
 }
 
+export interface TokenFlowsRepository {
+    getTokenFlows: (
+        chain: Chain,
+        poolId: string,
+        tokenA: string,
+        tokenB: string,
+        interval?: number,
+    ) => Promise<{ intervalTimestamp: number; swapCount: number; volume: number; [token: string]: number }[]>;
+}
+
 export interface EventStoreRepository {
     storeEvents: (events: (SwapEvent | JoinExitEvent)[]) => Promise<boolean>;
 }

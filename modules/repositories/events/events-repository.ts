@@ -156,6 +156,80 @@ export const eventsRepository = {
 
         return swaps as SwapEvent[];
     },
+    getTokenFlows: async (chain: Chain, poolId: string, tokenA: string, tokenB: string, interval = 3600) => {
+        const whereClause = ['chain = $1::"Chain"', '"poolId" = $2'];
+        const params = [chain, poolId, interval];
+
+        const query = `
+          SELECT
+              FLOOR("blockTimestamp" / $3) * $3 as "intervalTimestamp",
+
+              -- token A flows
+              SUM(CASE
+                  WHEN type = 'SWAP' AND LOWER(payload->'tokenIn'->>'address') = $${params.length + 1}
+                    THEN (payload->'tokenIn'->>'amount')::float
+                  WHEN type = 'SWAP' AND LOWER(payload->'tokenOut'->>'address') = $${params.length + 1}
+                    THEN -(payload->'tokenOut'->>'amount')::float
+                  WHEN type = 'JOIN' AND joined_tokens.token_address = $${params.length + 1}
+                    THEN (joined_tokens.token_amount)::float
+                  WHEN type = 'EXIT' AND exited_tokens.token_address = $${params.length + 1}
+                    THEN -(exited_tokens.token_amount)::float
+                  ELSE 0
+              END) as "tokenAFlow",
+
+              -- token B flows
+              SUM(CASE
+                  WHEN type = 'SWAP' AND LOWER(payload->'tokenIn'->>'address') = $${params.length + 2}
+                    THEN (payload->'tokenIn'->>'amount')::float
+                  WHEN type = 'SWAP' AND LOWER(payload->'tokenOut'->>'address') = $${params.length + 2}
+                    THEN -(payload->'tokenOut'->>'amount')::float
+                  WHEN type = 'JOIN' AND joined_tokens.token_address = $${params.length + 2}
+                    THEN (joined_tokens.token_amount)::float
+                  WHEN type = 'EXIT' AND exited_tokens.token_address = $${params.length + 2}
+                    THEN -(exited_tokens.token_amount)::float
+                  ELSE 0
+              END) as "tokenBFlow",
+
+              COUNT(CASE WHEN type = 'SWAP' THEN 1 END) AS "swapCount",
+              SUM("valueUSD") as volume
+
+          FROM "PartitionedPoolEvent"
+
+          -- join tokens for JOIN
+          LEFT JOIN LATERAL (
+            SELECT
+              LOWER(token->>'address') AS token_address,
+              token->>'amount' AS token_amount
+            FROM jsonb_array_elements(payload->'tokens') AS token
+          ) AS joined_tokens ON type = 'JOIN'
+
+          -- join tokens for EXIT
+          LEFT JOIN LATERAL (
+            SELECT
+              LOWER(token->>'address') AS token_address,
+              token->>'amount' AS token_amount
+            FROM jsonb_array_elements(payload->'tokens') AS token
+          ) AS exited_tokens ON type = 'EXIT'
+
+          WHERE ${whereClause.join(' AND ')}
+          GROUP BY 1
+      `;
+
+        params.push(tokenA.toLowerCase());
+        params.push(tokenB.toLowerCase());
+
+        const results = (await prisma.$queryRawUnsafe(query, ...params)) as any[];
+
+        return results
+            .map((row) => ({
+                intervalTimestamp: Number(row.intervalTimestamp),
+                [tokenA]: Number(row.tokenAFlow || 0),
+                [tokenB]: Number(row.tokenBFlow || 0),
+                swapCount: Number(row.swapCount),
+                volume: Number(row.volume),
+            }))
+            .sort((a, b) => a.intervalTimestamp - b.intervalTimestamp);
+    },
     storeEvents: async (events: (SwapEvent | JoinExitEvent)[]) => {
         await prisma.prismaPoolEvent.createMany({
             skipDuplicates: true,
