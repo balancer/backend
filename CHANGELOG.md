@@ -1,5 +1,11 @@
 # backend
 
+## 1.43.4
+
+### Patch Changes
+
+-   90dcaa9: volume24 patch in V3 snapshots
+
 ## 1.43.3
 
 ### Patch Changes
