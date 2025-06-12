@@ -187,6 +187,13 @@ export default <NetworkData>{
                 scale: 1000000000000000000,
                 isIbYield: true,
             },
+            xUSD: {
+                tokenAddress: '0x6202b9f02e30e5e1c62cc01e4305450e5d83b926',
+                sourceUrl: 'https://api-v2.streamprotocol.money/vaults/xUSD/apy',
+                path: 'apy',
+                scale: 100,
+                isIbYield: true,
+            },
         },
     },
     datastudio: {
