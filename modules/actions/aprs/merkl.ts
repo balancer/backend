@@ -11,6 +11,7 @@ interface MerklOpportunity {
     chainId: number;
     identifier: string;
     apr: number;
+    tvl: number;
     campaigns: {
         startTimestamp: number;
         endTimestamp: number;
@@ -29,8 +30,9 @@ const fetchMerklOpportunities = async () => {
     const data = (await response.json()) as MerklOpportunity[];
 
     // remove opportunities with whitelist
-    const opportunities = data.filter((opportunity) =>
-        opportunity.campaigns.every((campaign) => campaign.params.whitelist.length === 0),
+    const opportunities = data.filter(
+        (opportunity) =>
+            opportunity.tvl > 0 && opportunity.campaigns.every((campaign) => campaign.params.whitelist.length === 0),
     );
 
     return opportunities;
