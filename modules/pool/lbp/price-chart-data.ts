@@ -162,12 +162,9 @@ const calculatePrice = (
 const findReservePriceForTimestamp = (sortedPrices: any[], targetTimestamp: number): number => {
     if (sortedPrices.length === 0) return 0;
 
-    // Convert target timestamp to milliseconds for comparison
-    const targetTime = targetTimestamp * 1000;
-
     // If timestamp is after all available prices, use the last price
     const lastPrice = sortedPrices[sortedPrices.length - 1];
-    if (targetTime >= lastPrice.timestamp.getTime()) {
+    if (targetTimestamp >= lastPrice.timestamp) {
         return lastPrice.price || 0;
     }
 
@@ -180,26 +177,23 @@ const findReservePriceForTimestamp = (sortedPrices: any[], targetTimestamp: numb
 function findClosestPrice(sortedPrices: any[], targetTimestamp: number) {
     if (sortedPrices.length === 0) return null;
 
-    // Convert target timestamp to milliseconds if it's in seconds
-    const targetTime = targetTimestamp * 1000; // Assuming Unix timestamp in seconds
-
     // Binary search for efficiency with large datasets
     let left = 0;
     let right = sortedPrices.length - 1;
     let closest = sortedPrices[0];
-    let minDiff = Math.abs(sortedPrices[0].timestamp.getTime() - targetTime);
+    let minDiff = Math.abs(sortedPrices[0].timestamp - targetTimestamp);
 
     while (left <= right) {
         const mid = Math.floor((left + right) / 2);
-        const midTime = sortedPrices[mid].timestamp.getTime();
-        const diff = Math.abs(midTime - targetTime);
+        const midTime = sortedPrices[mid].timestamp;
+        const diff = Math.abs(midTime - targetTimestamp);
 
         if (diff < minDiff) {
             minDiff = diff;
             closest = sortedPrices[mid];
         }
 
-        if (midTime < targetTime) {
+        if (midTime < targetTimestamp) {
             left = mid + 1;
         } else {
             right = mid - 1;
