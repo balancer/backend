@@ -97,7 +97,7 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
 
         const gauges = await prisma.prismaPoolStaking.findMany({
             select: { address: true, poolId: true },
-            where: { type: 'GAUGE' },
+            where: { type: 'GAUGE', chain: chain },
         });
 
         const gaugeToPoolMap = Object.fromEntries(gauges.map((gauge) => [gauge.address, gauge.poolId]));
