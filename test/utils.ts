@@ -5,8 +5,7 @@ import { Token } from '@balancer/sdk';
 import { PrismaPoolAndHookWithDynamic } from '../prisma/prisma-types';
 import { isSameAddress } from '@balancer/sdk';
 import { Address } from 'viem';
-import { chainToChainId as chainToIdMap } from '../modules/network/chain-id-to-chain';
-import { PrismaToken } from '@prisma/client';
+import { BufferPoolData } from '../modules/sor/utils';
 
 // anvil --fork-url https://eth-mainnet.alchemyapi.io/v2/7gYoDJEw6-QyVP5hd2UfZyelzDIDemGz --port 8555 --fork-block-number=17878719
 
@@ -56,20 +55,22 @@ export function getDecimalsFromScalingFactor(scalingFactor: bigint): number {
 }
 
 export function getTokensFromPrismaPools(
+    chainId: number,
     supportedPools: PrismaPoolAndHookWithDynamic[],
     tokens: string[],
-    underlyingTokens: { address: string; decimals: number }[],
+    bufferPools: BufferPoolData[],
 ): {
     tokenIn: Token;
     tokenOut: Token;
 } {
-    const chainId = Number(chainToIdMap[supportedPools[0].chain]);
     const prismaTokens = supportedPools.flatMap((p) =>
         p.tokens.map((t) => ({ address: t.token.address as Address, decimals: t.token.decimals })),
     );
-    if (underlyingTokens.length > 0) {
-        prismaTokens.push(...(underlyingTokens as { address: Address; decimals: number }[]));
-    }
+
+    bufferPools.forEach((p) => {
+        prismaTokens.push({ address: p.mainToken.address, decimals: p.mainToken.decimals });
+        prismaTokens.push({ address: p.underlyingToken.address, decimals: p.underlyingToken.decimals });
+    });
 
     const prismaTokenIn = prismaTokens.find((p) => isSameAddress(p.address, tokens[0] as Address))!;
     const prismaTokenOut = prismaTokens.find((p) => isSameAddress(p.address, tokens[tokens.length - 1] as Address))!;

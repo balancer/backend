@@ -1,4 +1,5 @@
 import { Chain } from '@prisma/client';
+import { env } from '../../apps/env';
 
 export const chainIdToChain: { [id: string]: Chain } = {
     '1': Chain.MAINNET,
@@ -10,10 +11,10 @@ export const chainIdToChain: { [id: string]: Chain } = {
     '8453': Chain.BASE,
     '42161': Chain.ARBITRUM,
     '43114': Chain.AVALANCHE,
-    '11155111': Chain.SEPOLIA,
     '252': Chain.FRAXTAL,
     '34443': Chain.MODE,
     '146': Chain.SONIC,
+    ...(env.DEPLOYMENT_ENV !== 'production' ? { '11155111': Chain.SEPOLIA } : {}),
 };
 
 export const chainToChainId: { [chain: string]: string } = {
@@ -26,8 +27,8 @@ export const chainToChainId: { [chain: string]: string } = {
     BASE: '8453',
     ARBITRUM: '42161',
     AVALANCHE: '43114',
-    SEPOLIA: '11155111',
     FRAXTAL: '252',
     MODE: '34443',
     SONIC: '146',
+    ...(env.DEPLOYMENT_ENV !== 'production' ? { SEPOLIA: '11155111' } : {}),
 };

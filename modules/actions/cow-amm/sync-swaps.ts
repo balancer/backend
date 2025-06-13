@@ -5,6 +5,7 @@ import _ from 'lodash';
 import { OrderDirection, Swap_OrderBy } from '../../sources/subgraphs/cow-amm/generated/types';
 import { swapsUsd } from '../../sources/enrichers/swaps-usd';
 import { swapCowAmmTransformer } from '../../sources/transformers/swap-cowamm-transformer';
+import { eventsRepository, EventStoreRepository } from '../../repositories/events';
 
 /**
  * Adds all swaps since daysToSync to the database. Checks for latest synced swap to avoid duplicate work.
@@ -13,7 +14,11 @@ import { swapCowAmmTransformer } from '../../sources/transformers/swap-cowamm-tr
  * @param chain
  * @returns
  */
-export async function syncSwaps(subgraphClient: CowAmmSubgraphClient, chain = 'SEPOLIA' as Chain) {
+export async function syncSwaps(
+    subgraphClient: CowAmmSubgraphClient,
+    chain = 'SEPOLIA' as Chain,
+    eventRepo: EventStoreRepository = eventsRepository,
+) {
     // Get the last synced block number from the PrismaLastBlockSynced table
     const lastSyncedBlock = await prisma.prismaLastBlockSynced.findFirst({
         where: {
@@ -38,10 +43,7 @@ export async function syncSwaps(subgraphClient: CowAmmSubgraphClient, chain = 'S
     // Enrich with USD values
     const dbEntries = await swapsUsd(dbSwaps, chain);
 
-    await prisma.prismaPoolEvent.createMany({
-        skipDuplicates: true,
-        data: dbEntries,
-    });
+    await eventRepo.storeEvents(dbEntries);
 
     // Update the last synced block number in the PrismaLastBlockSynced table
     const latestBlockNumber = Math.max(...dbEntries.map((entry) => entry.blockNumber));

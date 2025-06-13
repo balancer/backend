@@ -33,30 +33,20 @@ export const gnosisNetworkConfig: NetworkConfig = {
         ),
     },
     /*
-    For sub-minute jobs we set the alarmEvaluationPeriod and alarmDatapointsToAlarm to 1 instead of the default 3. 
+    For sub-minute jobs we set the alarmEvaluationPeriod and alarmDatapointsToAlarm to 1 instead of the default 3.
     This is needed because the minimum alarm period is 1 minute and we want the alarm to trigger already after 1 minute instead of 3.
 
-    For every 1 days jobs we set the alarmEvaluationPeriod and alarmDatapointsToAlarm to 1 instead of the default 3. 
+    For every 1 days jobs we set the alarmEvaluationPeriod and alarmDatapointsToAlarm to 1 instead of the default 3.
     This is needed because the maximum alarm evaluation period is 1 day (period * evaluationPeriod).
     */
     workerJobs: [
         {
             name: 'update-liquidity-for-inactive-pools',
-            interval: every(1, 'days'),
-            alarmEvaluationPeriod: 1,
-            alarmDatapointsToAlarm: 1,
-        },
-        {
-            name: 'update-liquidity-for-active-pools',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(6, 'minutes') : every(2, 'minutes'),
+            interval: every(10, 'minutes'),
         },
         {
             name: 'update-pool-apr',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(6, 'minutes') : every(2, 'minutes'),
-        },
-        {
-            name: 'update-7-30-days-swap-apr',
-            interval: every(8, 'hours'),
         },
         {
             name: 'load-on-chain-data-for-pools-with-active-updates',
@@ -79,10 +69,6 @@ export const gnosisNetworkConfig: NetworkConfig = {
             interval: every(90, 'minutes'),
         },
         {
-            name: 'update-lifetime-values-for-all-pools',
-            interval: every(50, 'minutes'),
-        },
-        {
             name: 'sync-changed-pools',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(2, 'minutes') : every(30, 'seconds'),
             alarmEvaluationPeriod: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
@@ -102,7 +88,7 @@ export const gnosisNetworkConfig: NetworkConfig = {
         },
         {
             name: 'update-fee-volume-yield-all-pools',
-            interval: every(1, 'hours'),
+            interval: every(30, 'minutes'),
         },
         {
             name: 'sync-vebal-balances',
@@ -136,10 +122,6 @@ export const gnosisNetworkConfig: NetworkConfig = {
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(1, 'minutes'),
         },
         { name: 'sync-cow-amm-snapshots', interval: every(90, 'minutes') },
-        {
-            name: 'update-cow-amm-volume-and-fees',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(60, 'minutes') : every(20, 'minutes'),
-        },
         // V3 jobs
         {
             name: 'add-pools-v3',

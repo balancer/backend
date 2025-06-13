@@ -10,7 +10,6 @@ import { TokenPairData } from '../../../../sources/contracts/v3/fetch-tokenpair-
 import { WAD } from '../../utils/math';
 import { BasePoolMethodsV3 } from '../basePoolMethodsV3';
 import { PoolTokenWithRate } from '../../utils/poolTokenWithRate';
-import { Erc4626PoolToken } from '../../utils/erc4626PoolToken';
 
 import { getHookState } from '../../utils/helpers';
 
@@ -19,7 +18,7 @@ import { BasePoolV3 } from '../basePoolV3';
 import { ReclammData } from '../../../../pool/subgraph-mapper';
 import { ReClammParams } from './types';
 
-type ReClammPoolToken = PoolTokenWithRate | Erc4626PoolToken;
+type ReClammPoolToken = PoolTokenWithRate;
 
 export class ReClammPool extends BasePoolV3 implements BasePoolMethodsV3 {
     public readonly poolType = 'RECLAMM';
@@ -29,11 +28,7 @@ export class ReClammPool extends BasePoolV3 implements BasePoolMethodsV3 {
 
     private readonly tokenMap: Map<string, ReClammPoolToken>;
 
-    static fromPrismaPool(
-        pool: PrismaPoolAndHookWithDynamic,
-        underlyingTokens: { address: string; decimals: number }[] = [],
-        currentTimestamp: bigint,
-    ): ReClammPool {
+    static fromPrismaPool(pool: PrismaPoolAndHookWithDynamic, currentTimestamp: bigint): ReClammPool {
         const poolTokens: ReClammPoolToken[] = [];
 
         if (!pool.dynamicData) throw new Error(`${pool.type} pool has no dynamic data`);
@@ -49,30 +44,7 @@ export class ReClammPool extends BasePoolV3 implements BasePoolMethodsV3 {
             );
             const amount = parseUnits(poolToken.balance, poolToken.token.decimals);
 
-            if (poolToken.token.underlyingTokenAddress) {
-                const underlyingToken = underlyingTokens.find(
-                    (token) => token.address === poolToken.token.underlyingTokenAddress,
-                );
-                if (underlyingToken) {
-                    const unwrapRateDecimals = 18 - poolToken.token.decimals + underlyingToken.decimals;
-                    poolTokens.push(
-                        new Erc4626PoolToken(
-                            token,
-                            amount,
-                            poolToken.index,
-                            parseEther(poolToken.priceRate),
-                            parseUnits(poolToken.token.unwrapRate, unwrapRateDecimals),
-                            poolToken.token.underlyingTokenAddress,
-                        ),
-                    );
-                } else {
-                    poolTokens.push(
-                        new PoolTokenWithRate(token, amount, poolToken.index, parseEther(poolToken.priceRate)),
-                    );
-                }
-            } else {
-                poolTokens.push(new PoolTokenWithRate(token, amount, poolToken.index, parseEther(poolToken.priceRate)));
-            }
+            poolTokens.push(new PoolTokenWithRate(token, amount, poolToken.index, parseEther(poolToken.priceRate)));
         }
 
         const totalShares = parseEther(pool.dynamicData.totalShares);
@@ -172,5 +144,21 @@ export class ReClammPool extends BasePoolV3 implements BasePoolMethodsV3 {
         }
 
         return { tIn, tOut };
+    }
+
+    public copy(): ReClammPool {
+        return new ReClammPool(
+            this.id,
+            this.address,
+            this.chain,
+            this.reClammParams,
+            this.swapFee,
+            this.aggregateSwapFee,
+            this.tokens.map((token) => token.copy()),
+            this.totalShares,
+            this.tokenPairs,
+            this.liquidityManagement,
+            this.hookState,
+        );
     }
 }

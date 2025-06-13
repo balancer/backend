@@ -9,14 +9,13 @@ import { chainToChainId as chainToIdMap } from '../../../../network/chain-id-to-
 
 import { BasePoolMethodsV3 } from '../basePoolMethodsV3';
 import { WeightedPoolTokenWithRate } from './weightedPoolTokenWithRate';
-import { WeightedErc4626PoolToken } from './weightedErc4626PoolToken';
 
 import { getHookState } from '../../utils/helpers';
 
 import { LiquidityManagement } from '../../../../sor/types';
 import { BasePoolV3 } from '../basePoolV3';
 
-type WeightedPoolToken = WeightedPoolTokenWithRate | WeightedErc4626PoolToken;
+type WeightedPoolToken = WeightedPoolTokenWithRate;
 
 export class WeightedPoolV3 extends BasePoolV3 implements BasePoolMethodsV3 {
     public readonly poolType: PoolType = PoolType.Weighted;
@@ -27,10 +26,7 @@ export class WeightedPoolV3 extends BasePoolV3 implements BasePoolMethodsV3 {
     public readonly tokens: WeightedPoolToken[];
     private readonly tokenMap: Map<string, WeightedPoolToken>;
 
-    static fromPrismaPool(
-        pool: PrismaPoolAndHookWithDynamic,
-        underlyingTokens: { address: string; decimals: number }[] = [],
-    ): WeightedPoolV3 {
+    static fromPrismaPool(pool: PrismaPoolAndHookWithDynamic): WeightedPoolV3 {
         const poolTokens: WeightedPoolToken[] = [];
 
         if (!pool.dynamicData) {
@@ -51,46 +47,15 @@ export class WeightedPoolV3 extends BasePoolV3 implements BasePoolMethodsV3 {
             );
             const scale18 = parseEther(poolToken.balance);
             const tokenAmount = TokenAmount.fromScale18Amount(token, scale18);
-            if (poolToken.token.underlyingTokenAddress) {
-                const underlyingToken = underlyingTokens.find(
-                    (token) => token.address === poolToken.token.underlyingTokenAddress,
-                );
-                if (underlyingToken) {
-                    const unwrapRateDecimals = 18 - poolToken.token.decimals + underlyingToken.decimals;
-                    // erc4626 token
-                    poolTokens.push(
-                        new WeightedErc4626PoolToken(
-                            token,
-                            tokenAmount.amount,
-                            poolToken.index,
-                            parseEther(poolToken.priceRate),
-                            parseUnits(poolToken.token.unwrapRate, unwrapRateDecimals),
-                            poolToken.token.underlyingTokenAddress,
-                            parseEther(poolToken.weight),
-                        ),
-                    );
-                } else {
-                    poolTokens.push(
-                        new WeightedPoolTokenWithRate(
-                            token,
-                            tokenAmount.amount,
-                            poolToken.index,
-                            parseEther(poolToken.priceRate),
-                            parseEther(poolToken.weight),
-                        ),
-                    );
-                }
-            } else {
-                poolTokens.push(
-                    new WeightedPoolTokenWithRate(
-                        token,
-                        tokenAmount.amount,
-                        poolToken.index,
-                        parseEther(poolToken.priceRate),
-                        parseEther(poolToken.weight),
-                    ),
-                );
-            }
+            poolTokens.push(
+                new WeightedPoolTokenWithRate(
+                    token,
+                    tokenAmount.amount,
+                    poolToken.index,
+                    parseEther(poolToken.priceRate),
+                    parseEther(poolToken.weight),
+                ),
+            );
         }
 
         //transform
@@ -164,5 +129,20 @@ export class WeightedPoolV3 extends BasePoolV3 implements BasePoolMethodsV3 {
         }
 
         return { tIn, tOut };
+    }
+
+    public copy(): WeightedPoolV3 {
+        return new WeightedPoolV3(
+            this.id,
+            this.address,
+            this.chain,
+            this.swapFee,
+            this.aggregateSwapFee,
+            this.totalShares,
+            this.tokens,
+            this.tokenPairs,
+            this.liquidityManagement,
+            this.hookState,
+        );
     }
 }

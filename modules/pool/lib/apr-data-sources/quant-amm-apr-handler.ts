@@ -39,13 +39,13 @@ export class QuantAmmAprService implements PoolAprService {
         const midnightOneMonthAgo = moment().utc().startOf('day').subtract(30, 'days').unix();
 
         // launch date of Quant AMM
-        const midnightMay14th = moment('2023-05-14T00:00:00Z').unix();
+        const quantLaunchDate = moment('2025-05-15T00:00:00Z').unix();
 
         const prices = await prisma.prismaTokenPrice.findMany({
             where: {
                 tokenAddress: { in: uniqueTokensToPrice },
                 chain: chain,
-                timestamp: { gte: Math.max(midnightOneMonthAgo, midnightMay14th) },
+                timestamp: { gte: Math.max(midnightOneMonthAgo, quantLaunchDate) },
             },
             orderBy: { timestamp: 'asc' },
         });
@@ -119,7 +119,10 @@ export class QuantAmmAprService implements PoolAprService {
 
             const weight = 1 / pool.tokens.length;
 
-            const priceRatios = endTokenPrices.map((end, i) => end.price / startTokenPrices[i].price);
+            const sortedStartTokenPrices = _.sortBy(startTokenPrices, (price) => price.tokenAddress);
+            const sortedEndTokenPrices = _.sortBy(endTokenPrices, (price) => price.tokenAddress);
+
+            const priceRatios = sortedEndTokenPrices.map((end, i) => end.price / sortedStartTokenPrices[i].price);
 
             const endWeightedValue =
                 startLpPrice.price * priceRatios.reduce((acc, ratio) => acc * Math.pow(ratio, weight), 1);
@@ -127,16 +130,29 @@ export class QuantAmmAprService implements PoolAprService {
             const relativeReturn = endLpPrice.price / endWeightedValue - 1;
 
             const totalYearlyReturn = relativeReturn * 12;
-            const apr = totalYearlyReturn / pool.dynamicData.totalLiquidity;
+
+            if (pool.address.toLowerCase() === '0x6b61d8680c4f9e560c8306807908553f95c749c5') {
+                // nice console log for debug
+                console.log(`Quant AMM APR for pool ${pool.id} on chain ${chain}`);
+                console.log(`Start timestamp: ${sortedStartTokenPrices[0].timestamp}`);
+                console.log(`End timestamp: ${sortedEndTokenPrices[0].timestamp}`);
+                console.log(`Start LP price: ${startLpPrice.price}`);
+                console.log(`End LP price: ${endLpPrice.price}`);
+                console.log(`Start token prices: ${sortedStartTokenPrices.map((price) => price.price)}`);
+                console.log(`End token prices: ${sortedEndTokenPrices.map((price) => price.price)}`);
+                console.log(`Price ratios: ${priceRatios}`);
+                console.log(`End weighted value: ${endWeightedValue}`);
+                console.log(`Yearly return: ${totalYearlyReturn}`);
+            }
 
             await prisma.prismaPoolAprItem.upsert({
                 where: { id_chain: { id: `${pool.id}-quant-amm-apr`, chain: chain } },
-                update: { apr: relativeReturn },
+                update: { apr: totalYearlyReturn },
                 create: {
                     id: `${pool.id}-quant-amm-apr`,
                     chain: chain,
                     poolId: pool.id,
-                    apr: relativeReturn,
+                    apr: totalYearlyReturn,
                     title: 'Quant AMM APR',
                     type: 'QUANT_AMM_UPLIFT',
                     group: null,

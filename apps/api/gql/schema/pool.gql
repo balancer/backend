@@ -93,7 +93,6 @@ extend type Mutation {
     poolReloadAllPoolAprs(chain: GqlChain!): String!
     poolReloadStakingForAllPools(stakingTypes: [GqlPoolStakingType!]!): String!
     poolLoadSnapshotsForPools(poolIds: [String!]!, reload: Boolean): String!
-    poolUpdateLifetimeValuesForAllPools: String!
     poolLoadOnChainDataForAllPools(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
     poolReloadPools(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
     poolSyncAllCowSnapshots(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
@@ -729,25 +728,25 @@ type GqlPoolDynamicData {
     holdersCount: BigInt!
     swapsCount: BigInt!
 
-    sharePriceAth: BigDecimal!
-    sharePriceAthTimestamp: Int!
-    sharePriceAtl: BigDecimal!
-    sharePriceAtlTimestamp: Int!
+    sharePriceAth: BigDecimal! @deprecated
+    sharePriceAthTimestamp: Int! @deprecated
+    sharePriceAtl: BigDecimal! @deprecated
+    sharePriceAtlTimestamp: Int! @deprecated
 
-    totalLiquidityAth: BigDecimal!
-    totalLiquidityAthTimestamp: Int!
-    totalLiquidityAtl: BigDecimal!
-    totalLiquidityAtlTimestamp: Int!
+    totalLiquidityAth: BigDecimal! @deprecated
+    totalLiquidityAthTimestamp: Int! @deprecated
+    totalLiquidityAtl: BigDecimal! @deprecated
+    totalLiquidityAtlTimestamp: Int! @deprecated
 
-    volume24hAth: BigDecimal!
-    volume24hAthTimestamp: Int!
-    volume24hAtl: BigDecimal!
-    volume24hAtlTimestamp: Int!
+    volume24hAth: BigDecimal! @deprecated
+    volume24hAthTimestamp: Int! @deprecated
+    volume24hAtl: BigDecimal! @deprecated
+    volume24hAtlTimestamp: Int! @deprecated
 
-    fees24hAth: BigDecimal!
-    fees24hAthTimestamp: Int!
-    fees24hAtl: BigDecimal!
-    fees24hAtlTimestamp: Int!
+    fees24hAth: BigDecimal! @deprecated
+    fees24hAthTimestamp: Int! @deprecated
+    fees24hAtl: BigDecimal! @deprecated
+    fees24hAtlTimestamp: Int! @deprecated
 }
 
 type GqlPoolInvestConfig @deprecated(reason: "Removed without replacement") {
@@ -1091,6 +1090,67 @@ type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
     hasAnyAllowedBuffer: Boolean!
     hook: GqlHook
 
+    """
+    All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
+    """
+    tokens: [GqlPoolTokenUnion!]! @deprecated(reason: "Use poolTokens instead")
+    nestingType: GqlPoolNestingType! @deprecated(reason: "Removed without replacement")
+    staking: GqlPoolStaking
+    type: GqlPoolType!
+    version: Int!
+
+    userBalance: GqlPoolUserBalance
+}
+
+type GqlPoolLiquidityBootstrappingV3 implements GqlPoolBase {
+    id: ID!
+    chain: GqlChain!
+    vaultVersion: Int! @deprecated(reason: "use protocolVersion instead")
+    protocolVersion: Int!
+    name: String!
+    symbol: String!
+    address: Bytes!
+    decimals: Int!
+    """
+    The wallet address of the owner of the pool. Pool owners can set certain properties like swapFees or AMP.
+    """
+    owner: Bytes @deprecated(reason: "Use swapFeeManager instead")
+    """
+    Account empowered to set static swap fees for a pool (when 0 on V2 swap fees are immutable, on V3 delegate to governance)
+    """
+    swapFeeManager: Bytes
+    """
+    Account empowered to pause/unpause the pool (or 0 to delegate to governance)
+    """
+    pauseManager: Bytes
+    """
+    Account empowered to set the pool creator fee percentage
+    """
+    poolCreator: Bytes
+    factory: Bytes
+    createTime: Int!
+    investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
+    withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
+    dynamicData: GqlPoolDynamicData!
+    displayTokens: [GqlPoolTokenDisplay!]! @deprecated(reason: "Use poolTokens instead")
+    allTokens: [GqlPoolTokenExpanded!]! @deprecated(reason: "Use poolTokens instead")
+    poolTokens: [GqlPoolTokenDetail!]!
+    categories: [GqlPoolFilterCategory]
+    tags: [String]
+    liquidityManagement: LiquidityManagement
+    hasErc4626: Boolean!
+    hasNestedErc4626: Boolean!
+    hasAnyAllowedBuffer: Boolean!
+    hook: GqlHook
+
+    lbpName: String
+    description: String
+    website: String
+    x: String
+    discord: String
+    telegram: String
+    farcaster: String
+
     startTime: Int!
     endTime: Int!
     lbpOwner: String!
@@ -1107,8 +1167,6 @@ type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
     """
     All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
     """
-    tokens: [GqlPoolTokenUnion!]! @deprecated(reason: "Use poolTokens instead")
-    nestingType: GqlPoolNestingType! @deprecated(reason: "Removed without replacement")
     staking: GqlPoolStaking
     type: GqlPoolType!
     version: Int!
@@ -1461,6 +1519,7 @@ union GqlPoolUnion =
     | GqlPoolComposableStable
     | GqlPoolElement
     | GqlPoolLiquidityBootstrapping
+    | GqlPoolLiquidityBootstrappingV3
     | GqlPoolGyro
     | GqlPoolFx
     | GqlPoolReClamm

@@ -203,4 +203,17 @@ export class Gyro3Pool implements BasePool {
 
         return { tIn, tOut, tertiary };
     }
+
+    public copy(): Gyro3Pool {
+        return new Gyro3Pool(
+            this.id,
+            this.address,
+            this.chain,
+            this.poolTypeVersion,
+            this.swapFee,
+            this.root3Alpha,
+            this.tokens.map((token) => token.copy()),
+            this.tokenPairs,
+        );
+    }
 }

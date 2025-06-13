@@ -9,7 +9,7 @@ import { YbTokensAprService } from '../pool/lib/apr-data-sources/yb-tokens-apr.s
 import { env } from '../../apps/env';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import config from '../../config';
-import { ReliquaryFarmAprService } from '../pool/lib/apr-data-sources/fantom/reliquary-farm-apr.service';
+import { ReliquaryFarmAprService } from '../pool/lib/apr-data-sources/reliquary-farm-apr.service';
 import { UserSyncReliquaryFarmBalanceService } from '../user/lib/user-sync-reliquary-farm-balance.service';
 import { BeetswarsGaugeVotingAprService } from '../pool/lib/apr-data-sources/beetswars-gauge-voting-apr';
 
@@ -38,30 +38,20 @@ export const sonicNetworkConfig: NetworkConfig = {
         ),
     },
     /*
-    For sub-minute jobs we set the alarmEvaluationPeriod and alarmDatapointsToAlarm to 1 instead of the default 3. 
+    For sub-minute jobs we set the alarmEvaluationPeriod and alarmDatapointsToAlarm to 1 instead of the default 3.
     This is needed because the minimum alarm period is 1 minute and we want the alarm to trigger already after 1 minute instead of 3.
 
-    For every 1 days jobs we set the alarmEvaluationPeriod and alarmDatapointsToAlarm to 1 instead of the default 3. 
+    For every 1 days jobs we set the alarmEvaluationPeriod and alarmDatapointsToAlarm to 1 instead of the default 3.
     This is needed because the maximum alarm evaluation period is 1 day (period * evaluationPeriod).
     */
     workerJobs: [
         {
             name: 'update-liquidity-for-inactive-pools',
-            interval: every(1, 'days'),
-            alarmEvaluationPeriod: 1,
-            alarmDatapointsToAlarm: 1,
-        },
-        {
-            name: 'update-liquidity-for-active-pools',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(6, 'minutes') : every(2, 'minutes'),
+            interval: every(10, 'minutes'),
         },
         {
             name: 'update-pool-apr',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(6, 'minutes') : every(2, 'minutes'),
-        },
-        {
-            name: 'update-7-30-days-swap-apr',
-            interval: every(8, 'hours'),
         },
         {
             name: 'load-on-chain-data-for-pools-with-active-updates',
@@ -82,10 +72,6 @@ export const sonicNetworkConfig: NetworkConfig = {
         {
             name: 'sync-snapshots-v2',
             interval: every(90, 'minutes'),
-        },
-        {
-            name: 'update-lifetime-values-for-all-pools',
-            interval: every(50, 'minutes'),
         },
         {
             name: 'sync-changed-pools',
@@ -164,6 +150,10 @@ export const sonicNetworkConfig: NetworkConfig = {
         {
             name: 'sync-hook-data',
             interval: every(1, 'hours'),
+        },
+        {
+            name: 'sync-weights',
+            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(60, 'minutes') : every(10, 'minutes'),
         },
     ],
 };

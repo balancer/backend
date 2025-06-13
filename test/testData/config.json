@@ -6,12 +6,19 @@
             "blockNumber": "7439300",
             "swapPathInput": {
                 "swapKind": 0,
-                "amountRaw": "10000000",
-                "tokens": ["0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8", "0xff34b3d4aee8ddcd6f9afffb6fe49bd371b8a357"],
-                "pools": [
+                "paths": [
                     {
-                        "poolAddress": "0x86fde41ff01b35846eb2f27868fb2938addd44c4",
-                        "poolType": "WEIGHTED"
+                        "amountRaw": "10000000",
+                        "tokens": [
+                            "0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8",
+                            "0xff34b3d4aee8ddcd6f9afffb6fe49bd371b8a357"
+                        ],
+                        "pools": [
+                            {
+                                "poolAddress": "0x86fde41ff01b35846eb2f27868fb2938addd44c4",
+                                "poolType": "WEIGHTED"
+                            }
+                        ]
                     }
                 ]
             }
@@ -22,20 +29,24 @@
             "blockNumber": "7303517",
             "swapPathInput": {
                 "swapKind": 0,
-                "amountRaw": "1000000",
-                "tokens": [
-                    "0x8a88124522dbbf1e56352ba3de1d9f78c143751e",
-                    "0x59fa488dda749cdd41772bb068bb23ee955a6d7a",
-                    "0x7b79995e5f793a07bc00c21412e50ecae098e7f9"
-                ],
-                "pools": [
+                "paths": [
                     {
-                        "poolAddress": "0x59fa488dda749cdd41772bb068bb23ee955a6d7a",
-                        "poolType": "STABLE"
-                    },
-                    {
-                        "poolAddress": "0x693cc6a39bbf35464f53d6a5dbf7d6c2fa93741c",
-                        "poolType": "WEIGHTED"
+                        "amountRaw": "1000000",
+                        "tokens": [
+                            "0x8a88124522dbbf1e56352ba3de1d9f78c143751e",
+                            "0x59fa488dda749cdd41772bb068bb23ee955a6d7a",
+                            "0x7b79995e5f793a07bc00c21412e50ecae098e7f9"
+                        ],
+                        "pools": [
+                            {
+                                "poolAddress": "0x59fa488dda749cdd41772bb068bb23ee955a6d7a",
+                                "poolType": "STABLE"
+                            },
+                            {
+                                "poolAddress": "0x693cc6a39bbf35464f53d6a5dbf7d6c2fa93741c",
+                                "poolType": "WEIGHTED"
+                            }
+                        ]
                     }
                 ]
             }
@@ -46,20 +57,24 @@
             "blockNumber": "7303517",
             "swapPathInput": {
                 "swapKind": 0,
-                "amountRaw": "100000000000000",
-                "tokens": [
-                    "0x7b79995e5f793a07bc00c21412e50ecae098e7f9",
-                    "0x59fa488dda749cdd41772bb068bb23ee955a6d7a",
-                    "0x8a88124522dbbf1e56352ba3de1d9f78c143751e"
-                ],
-                "pools": [
+                "paths": [
                     {
-                        "poolAddress": "0x693cc6a39bbf35464f53d6a5dbf7d6c2fa93741c",
-                        "poolType": "WEIGHTED"
-                    },
-                    {
-                        "poolAddress": "0x59fa488dda749cdd41772bb068bb23ee955a6d7a",
-                        "poolType": "STABLE"
+                        "amountRaw": "100000000000000",
+                        "tokens": [
+                            "0x7b79995e5f793a07bc00c21412e50ecae098e7f9",
+                            "0x59fa488dda749cdd41772bb068bb23ee955a6d7a",
+                            "0x8a88124522dbbf1e56352ba3de1d9f78c143751e"
+                        ],
+                        "pools": [
+                            {
+                                "poolAddress": "0x693cc6a39bbf35464f53d6a5dbf7d6c2fa93741c",
+                                "poolType": "WEIGHTED"
+                            },
+                            {
+                                "poolAddress": "0x59fa488dda749cdd41772bb068bb23ee955a6d7a",
+                                "poolType": "STABLE"
+                            }
+                        ]
                     }
                 ]
             }
@@ -70,12 +85,19 @@
             "blockNumber": "7748718",
             "swapPathInput": {
                 "swapKind": 0,
-                "amountRaw": "1000000000000000000",
-                "tokens": ["0xB77EB1A70A96fDAAeB31DB1b42F2b8b5846b2613", "0xb19382073c7A0aDdbb56Ac6AF1808Fa49e377B75"],
-                "pools": [
+                "paths": [
                     {
-                        "poolAddress": "0x80fd5bc9d4fA6C22132f8bb2d9d30B01c3336FB3",
-                        "poolType": "GYROE"
+                        "amountRaw": "1000000000000000000",
+                        "tokens": [
+                            "0xB77EB1A70A96fDAAeB31DB1b42F2b8b5846b2613",
+                            "0xb19382073c7A0aDdbb56Ac6AF1808Fa49e377B75"
+                        ],
+                        "pools": [
+                            {
+                                "poolAddress": "0x80fd5bc9d4fA6C22132f8bb2d9d30B01c3336FB3",
+                                "poolType": "GYROE"
+                            }
+                        ]
                     }
                 ]
             }
@@ -86,12 +108,19 @@
             "blockNumber": "7439300",
             "swapPathInput": {
                 "swapKind": 0,
-                "amountRaw": "10000000",
-                "tokens": ["0x8A88124522dbBF1E56352ba3DE1d9F78C143751e", "0x978206fAe13faF5a8d293FB614326B237684B750"],
-                "pools": [
+                "paths": [
                     {
-                        "poolAddress": "0x59fa488dda749cdd41772bb068bb23ee955a6d7a",
-                        "poolType": "STABLE"
+                        "amountRaw": "10000000",
+                        "tokens": [
+                            "0x8A88124522dbBF1E56352ba3DE1d9F78C143751e",
+                            "0x978206fAe13faF5a8d293FB614326B237684B750"
+                        ],
+                        "pools": [
+                            {
+                                "poolAddress": "0x59fa488dda749cdd41772bb068bb23ee955a6d7a",
+                                "poolType": "STABLE"
+                            }
+                        ]
                     }
                 ]
             }
@@ -102,25 +131,29 @@
             "blockNumber": "7748718",
             "swapPathInput": {
                 "swapKind": 0,
-                "amountRaw": "10000004",
-                "tokens": [
-                    "0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8",
-                    "0x8A88124522dbBF1E56352ba3DE1d9F78C143751e",
-                    "0x978206fAe13faF5a8d293FB614326B237684B750",
-                    "0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0"
-                ],
-                "pools": [
+                "paths": [
                     {
-                        "poolAddress": "0x8A88124522dbBF1E56352ba3DE1d9F78C143751e",
-                        "poolType": "Buffer"
-                    },
-                    {
-                        "poolAddress": "0x59fa488dda749cdd41772bb068bb23ee955a6d7a",
-                        "poolType": "STABLE"
-                    },
-                    {
-                        "poolAddress": "0x978206fAe13faF5a8d293FB614326B237684B750",
-                        "poolType": "Buffer"
+                        "amountRaw": "10000004",
+                        "tokens": [
+                            "0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8",
+                            "0x8A88124522dbBF1E56352ba3DE1d9F78C143751e",
+                            "0x978206fAe13faF5a8d293FB614326B237684B750",
+                            "0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0"
+                        ],
+                        "pools": [
+                            {
+                                "poolAddress": "0x8A88124522dbBF1E56352ba3DE1d9F78C143751e",
+                                "poolType": "Buffer"
+                            },
+                            {
+                                "poolAddress": "0x59fa488dda749cdd41772bb068bb23ee955a6d7a",
+                                "poolType": "STABLE"
+                            },
+                            {
+                                "poolAddress": "0x978206fAe13faF5a8d293FB614326B237684B750",
+                                "poolType": "Buffer"
+                            }
+                        ]
                     }
                 ]
             }
@@ -131,12 +164,19 @@
             "blockNumber": "22233282",
             "swapPathInput": {
                 "swapKind": 0,
-                "amountRaw": "42348",
-                "tokens": ["0x2260fac5e5542a773aa44fbcfedf7c193bc2c599", "0x775f661b0bd1739349b9a2a3ef60be277c5d2d29"],
-                "pools": [
+                "paths": [
                     {
-                        "poolAddress": "0x8523bcadcda4bd329435940dcc49a7c4c0a14d94",
-                        "poolType": "WEIGHTED"
+                        "amountRaw": "42348",
+                        "tokens": [
+                            "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+                            "0x775f661b0bd1739349b9a2a3ef60be277c5d2d29"
+                        ],
+                        "pools": [
+                            {
+                                "poolAddress": "0x8523bcadcda4bd329435940dcc49a7c4c0a14d94",
+                                "poolType": "WEIGHTED"
+                            }
+                        ]
                     }
                 ]
             }
@@ -147,25 +187,29 @@
             "blockNumber": "19424406",
             "swapPathInput": {
                 "swapKind": 0,
-                "amountRaw": "1000000000000000",
-                "tokens": [
-                    "0x039e2fB66102314Ce7b64Ce5Ce3E5183bc94aD38",
-                    "0x6c49b18333a1135e9a376560c07e6d1fd0350eaf",
-                    "0x6646248971427b80ce531bdd793e2eb859347e55",
-                    "0x29219dd400f2Bf60E5a23d13Be72B486D4038894"
-                ],
-                "pools": [
+                "paths": [
                     {
-                        "poolAddress": "0x6c49b18333a1135e9a376560c07e6d1fd0350eaf",
-                        "poolType": "Buffer"
-                    },
-                    {
-                        "poolAddress": "0x0af8ea4de2ecfb962cdbb66033a46afe99836994",
-                        "poolType": "GYROE"
-                    },
-                    {
-                        "poolAddress": "0x6646248971427b80ce531bdd793e2eb859347e55",
-                        "poolType": "Buffer"
+                        "amountRaw": "1000000000000000",
+                        "tokens": [
+                            "0x039e2fB66102314Ce7b64Ce5Ce3E5183bc94aD38",
+                            "0x6c49b18333a1135e9a376560c07e6d1fd0350eaf",
+                            "0x6646248971427b80ce531bdd793e2eb859347e55",
+                            "0x29219dd400f2Bf60E5a23d13Be72B486D4038894"
+                        ],
+                        "pools": [
+                            {
+                                "poolAddress": "0x6c49b18333a1135e9a376560c07e6d1fd0350eaf",
+                                "poolType": "Buffer"
+                            },
+                            {
+                                "poolAddress": "0x0af8ea4de2ecfb962cdbb66033a46afe99836994",
+                                "poolType": "GYROE"
+                            },
+                            {
+                                "poolAddress": "0x6646248971427b80ce531bdd793e2eb859347e55",
+                                "poolType": "Buffer"
+                            }
+                        ]
                     }
                 ]
             }
@@ -176,20 +220,24 @@
             "blockNumber": "22247251",
             "swapPathInput": {
                 "swapKind": 0,
-                "amountRaw": "100000000",
-                "tokens": [
-                    "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
-                    "0xd4fa2d31b7968e448877f69a96de69f5de8cd23e",
-                    "0x68749665ff8d2d112fa859aa293f07a622782f38"
-                ],
-                "pools": [
+                "paths": [
                     {
-                        "poolAddress": "0xd4fa2d31b7968e448877f69a96de69f5de8cd23e",
-                        "poolType": "Buffer"
-                    },
-                    {
-                        "poolAddress": "0x2232b91ceb6d291b7d82935cefc2f7744d8f1a09",
-                        "poolType": "WEIGHTED"
+                        "amountRaw": "100000000",
+                        "tokens": [
+                            "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+                            "0xd4fa2d31b7968e448877f69a96de69f5de8cd23e",
+                            "0x68749665ff8d2d112fa859aa293f07a622782f38"
+                        ],
+                        "pools": [
+                            {
+                                "poolAddress": "0xd4fa2d31b7968e448877f69a96de69f5de8cd23e",
+                                "poolType": "Buffer"
+                            },
+                            {
+                                "poolAddress": "0x2232b91ceb6d291b7d82935cefc2f7744d8f1a09",
+                                "poolType": "WEIGHTED"
+                            }
+                        ]
                     }
                 ]
             }
@@ -200,20 +248,24 @@
             "blockNumber": "22247251",
             "swapPathInput": {
                 "swapKind": 0,
-                "amountRaw": "100000000000000000000",
-                "tokens": [
-                    "0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0",
-                    "0x775f661b0bd1739349b9a2a3ef60be277c5d2d29",
-                    "0xd11c452fc99cf405034ee446803b6f6c1f6d5ed8"
-                ],
-                "pools": [
+                "paths": [
                     {
-                        "poolAddress": "0x775f661b0bd1739349b9a2a3ef60be277c5d2d29",
-                        "poolType": "Buffer"
-                    },
-                    {
-                        "poolAddress": "0x9ed5175aecb6653c1bdaa19793c16fd74fbeeb37",
-                        "poolType": "STABLE"
+                        "amountRaw": "100000000000000000000",
+                        "tokens": [
+                            "0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0",
+                            "0x775f661b0bd1739349b9a2a3ef60be277c5d2d29",
+                            "0xd11c452fc99cf405034ee446803b6f6c1f6d5ed8"
+                        ],
+                        "pools": [
+                            {
+                                "poolAddress": "0x775f661b0bd1739349b9a2a3ef60be277c5d2d29",
+                                "poolType": "Buffer"
+                            },
+                            {
+                                "poolAddress": "0x9ed5175aecb6653c1bdaa19793c16fd74fbeeb37",
+                                "poolType": "STABLE"
+                            }
+                        ]
                     }
                 ]
             }
@@ -221,15 +273,114 @@
         {
             "testName": "Path-ReClamm-In-Range",
             "chainId": "8453",
-            "blockNumber": "29533250",
+            "blockNumber": "31094200",
             "swapPathInput": {
                 "swapKind": 0,
-                "amountRaw": "100000",
-                "tokens": ["0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913", "0x4200000000000000000000000000000000000006"],
-                "pools": [
+                "paths": [
                     {
-                        "poolAddress": "0x035d7213cbc08483aa78ced076dbdc8ac5a509c1",
-                        "poolType": "RECLAMM"
+                        "amountRaw": "100000",
+                        "tokens": [
+                            "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                            "0x4200000000000000000000000000000000000006"
+                        ],
+                        "pools": [
+                            {
+                                "poolAddress": "0xBa615a0A9237b64BFb3051f8160483C10Dde0012",
+                                "poolType": "RECLAMM"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "testName": "Path-Buffer",
+            "chainId": "1",
+            "blockNumber": "21671845",
+            "swapPathInput": {
+                "swapKind": 0,
+                "paths": [
+                    {
+                        "amountRaw": "1000000000000000000",
+                        "tokens": [
+                            "0x7204B7Dbf9412567835633B6F00C3Edc3a8D6330",
+                            "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+                        ],
+                        "pools": [
+                            {
+                                "poolAddress": "0x7204B7Dbf9412567835633B6F00C3Edc3a8D6330",
+                                "poolType": "Buffer"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "testName": "Path-QuantAmm",
+            "chainId": "1",
+            "blockNumber": "22524240",
+            "swapPathInput": {
+                "swapKind": 0,
+                "paths": [
+                    {
+                        "amountRaw": "10000000000000000",
+                        "tokens": [
+                            "0x45804880de22913dafe09f4980848ece6ecbaf78",
+                            "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+                        ],
+                        "pools": [
+                            {
+                                "poolAddress": "0x6b61d8680c4f9e560c8306807908553f95c749c5",
+                                "poolType": "QUANT_AMM_WEIGHTED"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "testName": "Path-Akron-Hook-Minimum-Swap-Fee",
+            "chainId": "8453",
+            "blockNumber": "30210725",
+            "swapPathInput": {
+                "swapKind": 0,
+                "paths": [
+                    {
+                        "amountRaw": "10000",
+                        "tokens": [
+                            "0xc768c589647798a6ee01a91fde98ef2ed046dbd6",
+                            "0xe298b938631f750DD409fB18227C4a23dCdaab9b"
+                        ],
+                        "pools": [
+                            {
+                                "poolAddress": "0x4fbb7870dbe7a7ef4866a33c0eed73d395730dc0",
+                                "poolType": "WEIGHTED"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "testName": "Path-Akron-Hook-LVR-Fee",
+            "chainId": "8453",
+            "blockNumber": "30210725",
+            "swapPathInput": {
+                "swapKind": 0,
+                "paths": [
+                    {
+                        "amountRaw": "10000000",
+                        "tokens": [
+                            "0xc768c589647798a6ee01a91fde98ef2ed046dbd6",
+                            "0xe298b938631f750DD409fB18227C4a23dCdaab9b"
+                        ],
+                        "pools": [
+                            {
+                                "poolAddress": "0x4fbb7870dbe7a7ef4866a33c0eed73d395730dc0",
+                                "poolType": "WEIGHTED"
+                            }
+                        ]
                     }
                 ]
             }

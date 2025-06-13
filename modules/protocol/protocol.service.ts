@@ -69,25 +69,35 @@ export class ProtocolService {
     public async cacheProtocolMetrics(chain: Chain): Promise<GqlProtocolMetricsChain> {
         const oneDayAgo = moment().subtract(24, 'hours').unix();
 
-        const pools = await prisma.prismaPool.findMany({
-            where: {
-                NOT: { categories: { has: 'BLACK_LISTED' } },
-                dynamicData: {
-                    totalSharesNum: {
-                        gt: 0.000000000001,
+        const [dbPools, dynamicData] = await Promise.all([
+            prisma.prismaPool.findMany({
+                where: {
+                    NOT: { categories: { has: 'BLACK_LISTED' } },
+                    dynamicData: {
+                        totalSharesNum: {
+                            gt: 0.000000000001,
+                        },
                     },
+                    chain,
                 },
-                chain,
-            },
-            include: { dynamicData: true },
-        });
+            }),
+            prisma.prismaPoolDynamicData
+                .findMany({
+                    where: { chain },
+                })
+                .then((records) => _.keyBy(records, 'id') as Record<string, (typeof records)[0]>),
+            ,
+        ]);
+
+        const pools = dbPools
+            .map((pool) => ({
+                ...pool,
+                dynamicData: dynamicData[pool.id],
+            }))
+            // Filter needed for test pools on Sepolia
+            .filter((pool) => pool.dynamicData);
 
         const poolCount = pools.length;
-
-        const swaps = await prisma.prismaPoolEvent.findMany({
-            select: { poolId: true, valueUSD: true, blockTimestamp: true, payload: true },
-            where: { blockTimestamp: { gte: oneDayAgo }, chain, type: 'SWAP' },
-        });
 
         const holdersQueryResponse = await prisma.prismaPoolDynamicData.aggregate({
             _sum: { holdersCount: true },
@@ -95,8 +105,8 @@ export class ProtocolService {
         });
 
         const totalLiquidity = _.sumBy(pools, (pool) => (!pool.dynamicData ? 0 : pool.dynamicData.totalLiquidity));
-        const swapVolume24h = _.sumBy(swaps, (swap) => swap.valueUSD);
-        const swapFee24h = _.sumBy(swaps, (swap) => parseFloat((swap as SwapEvent).payload.fee.valueUSD));
+        const swapVolume24h = _.sumBy(pools, (pool) => pool.dynamicData?.volume24h || 0);
+        const swapFee24h = _.sumBy(pools, (pool) => pool.dynamicData?.fees24h || 0);
 
         const yieldCapture24h = _.sumBy(pools, (pool) => (!pool.dynamicData ? 0 : pool.dynamicData.yieldCapture24h));
         const surplus24 = _.sumBy(pools, (pool) => (!pool.dynamicData ? 0 : pool.dynamicData.surplus24h));

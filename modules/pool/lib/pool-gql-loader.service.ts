@@ -211,12 +211,9 @@ export class PoolGqlLoaderService {
 
         for (const mappedPool of gqlPools) {
             // if a pool has a hook, we skip it if either there are no included hooks, or its type does not match an included hook
-            // always include MEV_TAX hook
             if (mappedPool.hook) {
-                if (mappedPool.hook.type !== 'MEV_TAX') {
-                    if (!args.where?.includeHooks || !args.where.includeHooks.includes(mappedPool.hook.type)) {
-                        continue;
-                    }
+                if (!args.where?.includeHooks || !args.where.includeHooks.includes(mappedPool.hook.type)) {
+                    continue;
                 }
             }
 
@@ -285,6 +282,36 @@ export class PoolGqlLoaderService {
             return gqlPools;
         }
 
+        // Use full-text search using search_vector
+        if (args.textSearch && args.textSearch.trim().length > 0) {
+            const orderColumn =
+                orderingColumnsMap[(args.orderBy || 'totalLiquidity') as keyof typeof orderingColumnsMap] ||
+                'totalLiquidity';
+
+            const searchQuery = sanitiseTextSearch(args.textSearch);
+            const limit = Math.min(100, parseInt(`${args.first}`) || 20);
+            const offset = parseInt(`${args.skip}`) || 0;
+            const filters = searchFilters(args);
+
+            // Use raw SQL for the search vector condition
+            // Weighted results don't work yet, because the query is finding IDs for the second query only.
+            // But setting it up already so it can be used with the refactored searching
+            const query =
+                Prisma.raw(`SELECT p.id, p.chain FROM "PrismaPool" p LEFT JOIN "PrismaPoolDynamicData" d on (p.id = d."poolId") WHERE p.search_vector @@ websearch_to_tsquery('simple', '${searchQuery}') AND d."totalSharesNum" > 0.000000000001 AND NOT ('BLACK_LISTED' = ANY(p.categories)) AND ${filters}
+            ORDER BY d."${orderColumn}" ${
+                args.orderDirection && args.orderDirection === 'asc' ? 'ASC' : 'DESC'
+            } LIMIT ${limit} OFFSET ${offset}`);
+
+            const searchResults = await prisma.$queryRaw<{ id: string }[]>(query);
+
+            // Use the results to show pools
+            const idIn = searchResults.map((r) => r.id);
+            args.where ||= {};
+            args.where.idIn = idIn;
+            args.textSearch = undefined;
+            args.skip = undefined;
+        }
+
         const pools = await prisma.prismaPool.findMany({
             ...this.mapQueryArgsToPoolQuery(args),
             include: this.getPoolInclude(),
@@ -334,7 +361,24 @@ export class PoolGqlLoaderService {
     }
 
     public async getPoolsCount(args: QueryPoolGetPoolsArgs): Promise<number> {
-        return prisma.prismaPool.count({ where: this.mapQueryArgsToPoolQuery(args).where });
+        if (args.textSearch && args.textSearch.trim().length > 0) {
+            const searchQuery = sanitiseTextSearch(args.textSearch);
+            const filters = searchFilters(args);
+
+            // Use raw SQL for the search vector condition
+            // Weighted results don't work yet, because the query is finding IDs for the second query only.
+            // But setting it up already so it can be used with the refactored searching
+            const query = Prisma.raw(
+                `SELECT count(*) as count FROM "PrismaPool" p LEFT JOIN "PrismaPoolDynamicData" d on (p.id = d."poolId") WHERE p.search_vector @@ websearch_to_tsquery('simple', '${searchQuery}') AND d."totalSharesNum" > 0.000000000001 AND NOT ('BLACK_LISTED' = ANY(p.categories)) AND ${filters}`,
+            );
+
+            const searchResults = await prisma.$queryRaw<{ count: bigint }[]>(query);
+
+            // graphql type parsing doesnt seem to understand bigints
+            return parseInt(searchResults[0].count as unknown as string);
+        } else {
+            return prisma.prismaPool.count({ where: this.mapQueryArgsToPoolQuery(args).where });
+        }
     }
 
     public async getFeaturedPools(chains: Chain[]): Promise<GqlPoolFeaturedPool[]> {
@@ -357,27 +401,8 @@ export class PoolGqlLoaderService {
     }
 
     private mapQueryArgsToPoolQuery(args: QueryPoolGetPoolsArgs): Prisma.PrismaPoolFindManyArgs {
-        let orderBy: Prisma.PrismaPoolOrderByWithRelationInput = {};
-        const orderDirection = args.orderDirection || 'desc';
+        const orderBy = getOrderBy(args);
         const userAddress = args.where?.userAddress;
-
-        switch (args.orderBy) {
-            case 'totalLiquidity':
-                orderBy = { dynamicData: { totalLiquidity: orderDirection } };
-                break;
-            case 'totalShares':
-                orderBy = { dynamicData: { totalSharesNum: orderDirection } };
-                break;
-            case 'volume24h':
-                orderBy = { dynamicData: { volume24h: orderDirection } };
-                break;
-            case 'fees24h':
-                orderBy = { dynamicData: { fees24h: orderDirection } };
-                break;
-            case 'apr':
-                orderBy = { dynamicData: { apr: orderDirection } };
-                break;
-        }
 
         const baseQuery: Prisma.PrismaPoolFindManyArgs = {
             take: args.first || undefined,
@@ -531,8 +556,8 @@ export class PoolGqlLoaderService {
             ...(where?.hasHook !== undefined && where.hasHook
                 ? { hook: { path: ['address'], string_starts_with: '0x' } }
                 : where?.hasHook !== undefined && !where.hasHook
-                ? { hook: { equals: Prisma.DbNull } }
-                : {}),
+                  ? { hook: { equals: Prisma.DbNull } }
+                  : {}),
         };
 
         if (!textSearch) {
@@ -572,26 +597,7 @@ export class PoolGqlLoaderService {
     }
 
     private mapAggregatorArgsToPoolQuery(args: QueryAggregatorPoolsArgs): Prisma.PrismaPoolFindManyArgs {
-        let orderBy: Prisma.PrismaPoolOrderByWithRelationInput = {};
-        const orderDirection = args.orderDirection || 'desc';
-
-        switch (args.orderBy) {
-            case 'totalLiquidity':
-                orderBy = { dynamicData: { totalLiquidity: orderDirection } };
-                break;
-            case 'totalShares':
-                orderBy = { dynamicData: { totalSharesNum: orderDirection } };
-                break;
-            case 'volume24h':
-                orderBy = { dynamicData: { volume24h: orderDirection } };
-                break;
-            case 'fees24h':
-                orderBy = { dynamicData: { fees24h: orderDirection } };
-                break;
-            case 'apr':
-                orderBy = { dynamicData: { apr: orderDirection } };
-                break;
-        }
+        const orderBy = getOrderBy(args);
 
         const baseQuery: Prisma.PrismaPoolFindManyArgs = {
             take: args.first || undefined,
@@ -842,12 +848,28 @@ export class PoolGqlLoaderService {
                     tokens: mappedData.tokens as GqlPoolToken[],
                 };
             case 'LIQUIDITY_BOOTSTRAPPING':
-                return {
-                    __typename: 'GqlPoolLiquidityBootstrapping',
-                    ...poolWithoutTypeData,
-                    ...(typeData as LBPoolData),
-                    ...mappedData,
-                };
+                if (pool.protocolVersion === 3) {
+                    return {
+                        __typename: 'GqlPoolLiquidityBootstrappingV3',
+                        ...poolWithoutTypeData,
+                        ...(typeData as LBPoolData & {
+                            lbpName?: string;
+                            description?: string;
+                            website?: string;
+                            x?: string;
+                            discord?: string;
+                            telegram?: string;
+                            farcaster?: string;
+                        }),
+                        ...mappedData,
+                    };
+                } else {
+                    return {
+                        __typename: 'GqlPoolLiquidityBootstrapping',
+                        ...poolWithoutTypeData,
+                        ...mappedData,
+                    };
+                }
             case 'GYRO':
             case 'GYRO3':
             case 'GYROE':
@@ -1093,22 +1115,6 @@ export class PoolGqlLoaderService {
             lifetimeSwapFees,
             holdersCount,
             swapsCount,
-            sharePriceAth,
-            sharePriceAthTimestamp,
-            sharePriceAtl,
-            sharePriceAtlTimestamp,
-            totalLiquidityAth,
-            totalLiquidityAthTimestamp,
-            totalLiquidityAtl,
-            totalLiquidityAtlTimestamp,
-            volume24hAtl,
-            volume24hAthTimestamp,
-            volume24hAth,
-            volume24hAtlTimestamp,
-            fees24hAtl,
-            fees24hAthTimestamp,
-            fees24hAth,
-            fees24hAtlTimestamp,
             protocolFees24h,
             protocolFees48h,
             protocolYieldCapture24h,
@@ -1231,22 +1237,22 @@ export class PoolGqlLoaderService {
             lifetimeSwapFees: `${fixedNumber(lifetimeSwapFees, 2)}`,
             holdersCount: `${holdersCount}`,
             swapsCount: `${swapsCount}`,
-            sharePriceAth: `${sharePriceAth}`,
-            sharePriceAtl: `${sharePriceAtl}`,
-            totalLiquidityAth: `${fixedNumber(totalLiquidityAth, 2)}`,
-            totalLiquidityAtl: `${fixedNumber(totalLiquidityAtl, 2)}`,
-            volume24hAtl: `${fixedNumber(volume24hAtl, 2)}`,
-            volume24hAth: `${fixedNumber(volume24hAth, 2)}`,
-            fees24hAtl: `${fixedNumber(fees24hAtl, 2)}`,
-            fees24hAth: `${fixedNumber(fees24hAth, 2)}`,
-            sharePriceAthTimestamp,
-            sharePriceAtlTimestamp,
-            totalLiquidityAthTimestamp,
-            totalLiquidityAtlTimestamp,
-            fees24hAthTimestamp,
-            fees24hAtlTimestamp,
-            volume24hAthTimestamp,
-            volume24hAtlTimestamp,
+            sharePriceAth: '0',
+            sharePriceAtl: '0',
+            totalLiquidityAth: '0',
+            totalLiquidityAtl: '0',
+            volume24hAtl: '0',
+            volume24hAth: '0',
+            fees24hAtl: '0',
+            fees24hAth: '0',
+            sharePriceAthTimestamp: 0,
+            sharePriceAtlTimestamp: 0,
+            totalLiquidityAthTimestamp: 0,
+            totalLiquidityAtlTimestamp: 0,
+            fees24hAthTimestamp: 0,
+            fees24hAtlTimestamp: 0,
+            volume24hAthTimestamp: 0,
+            volume24hAtlTimestamp: 0,
             protocolYieldCapture24h: `${fixedNumber(protocolYieldCapture24h || 0, 2)}`,
             protocolYieldCapture48h: `${fixedNumber(protocolYieldCapture48h || 0, 2)}`,
             protocolFees24h: `${fixedNumber(protocolFees24h || 0, 2)}`,
@@ -1349,6 +1355,11 @@ export class PoolGqlLoaderService {
                 continue;
             }
 
+            // Skip 7D, 30D swap APRs - they aren't updated anymore, because noone was using them
+            if (['SWAP_FEE_7D', 'SWAP_FEE_30D'].includes(String(aprItem.type))) {
+                continue;
+            }
+
             if (aprItem.apr === 0 || (aprItem.range && aprItem.range.max === 0)) {
                 continue;
             }
@@ -1414,15 +1425,7 @@ export class PoolGqlLoaderService {
 
         let filteredItems = aprItems;
         if (pool.type === 'QUANT_AMM_WEIGHTED') {
-            filteredItems = aprItems.filter(
-                (item) =>
-                    item.type === 'QUANT_AMM_UPLIFT' ||
-                    item.type === 'AURA' ||
-                    item.type === 'VEBAL_EMISSIONS' ||
-                    item.type === 'STAKING' ||
-                    item.type === 'STAKING_BOOST' ||
-                    item.type === 'MERKL',
-            );
+            filteredItems = aprItems.filter((item) => item.type !== 'QUANT_AMM_UPLIFT');
         }
 
         return filteredItems;
@@ -1669,3 +1672,66 @@ export class PoolGqlLoaderService {
         };
     }
 }
+
+const orderingColumnsMap = {
+    totalLiquidity: 'totalLiquidity',
+    totalShares: 'totalSharesNum',
+    volume24h: 'volume24h',
+    fees24h: 'fees24h',
+    apr: 'apr',
+};
+
+const getOrderBy = (args: QueryPoolGetPoolsArgs) => {
+    const orderDirection = args.orderDirection || 'desc';
+    const orderColumn = orderingColumnsMap[(args.orderBy || 'totalLiquidity') as keyof typeof orderingColumnsMap];
+
+    if (!orderColumn) {
+        return undefined;
+    }
+
+    const orderBy = {
+        dynamicData: {
+            [orderColumn]: orderDirection,
+        },
+    };
+
+    return orderBy;
+};
+
+const sanitizeInput = (input: any) => `${input}`.replace(/[^a-zA-Z0-9._ ]/g, '').trim();
+
+const sanitiseTextSearch = (textSearch: string) => {
+    let searchQuery = sanitizeInput(textSearch).toLowerCase();
+
+    // Replace terms like LBP and BTF
+    const replacements = {
+        lbp: 'LIQUIDITY_BOOTSTRAPPING',
+        btf: 'QUANT_AMM_WEIGHTED',
+    };
+
+    // Apply replacements for whole words only
+    for (const [key, value] of Object.entries(replacements)) {
+        const wordRegex = new RegExp(`\\b${key}\\b`, 'g');
+        searchQuery = searchQuery.replace(wordRegex, value);
+    }
+
+    return searchQuery;
+};
+
+const searchFilters = (args: QueryPoolGetPoolsArgs) => {
+    let where = '1=1 ';
+
+    if (args.where?.chainIn) {
+        where += `AND p.chain = ANY('{${args.where?.chainIn.map(sanitizeInput).join(',')}}')`;
+    }
+
+    if (args.where?.protocolVersionIn) {
+        where += `AND p."protocolVersion" = ANY('{${args.where?.protocolVersionIn.map(sanitizeInput).join(',')}}')`;
+    }
+
+    if (args.where?.poolTypeIn) {
+        where += `AND p.type = ANY('{${args.where?.poolTypeIn.map(sanitizeInput).join(',')}}')`;
+    }
+
+    return where;
+};

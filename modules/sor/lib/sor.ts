@@ -16,7 +16,16 @@ import {
 import { BasePool } from './poolsV2/basePool';
 import { SorSwapOptions } from './types';
 import { PathWithAmount } from './path';
-import { Gyro2CLPPool, GyroECLPPool, ReClammPool, StablePoolV3, WeightedPoolV3 } from './poolsV3';
+import {
+    BufferPool,
+    Gyro2CLPPool,
+    GyroECLPPool,
+    QuantAmmPool,
+    ReClammPool,
+    StablePoolV3,
+    WeightedPoolV3,
+} from './poolsV3';
+import { BufferPoolData } from '../utils/data';
 
 export class SOR {
     static async getPathsWithPools(
@@ -25,13 +34,13 @@ export class SOR {
         swapKind: SwapKind,
         swapAmountEvm: bigint,
         prismaPools: PrismaPoolAndHookWithDynamic[],
-        underlyingTokens: { address: string; decimals: number }[],
+        bufferPools: BufferPoolData[],
         protocolVersion: number,
         swapOptions?: Omit<SorSwapOptions, 'graphTraversalConfig.poolIdsToInclude'>,
     ): Promise<PathWithAmount[] | null> {
         const checkedSwapAmount = checkInputs(tokenIn, tokenOut, swapKind, swapAmountEvm);
 
-        // get current block timestamp for ReClamm math
+        // get current block timestamp if not provided
         const currentTimestamp = swapOptions?.currentTimestamp ?? BigInt(Date.now()) / 1000n;
 
         const basePools: BasePool[] = [];
@@ -44,69 +53,83 @@ export class SOR {
                     continue;
                 }
             }
-            switch (prismaPool.type) {
-                case 'WEIGHTED':
-                /// LBPs can be handled like weighted pools
-                case 'LIQUIDITY_BOOTSTRAPPING':
-                case 'QUANT_AMM_WEIGHTED':
-                    {
-                        if (prismaPool.protocolVersion === 2) {
-                            basePools.push(WeightedPool.fromPrismaPool(prismaPool));
+            try {
+                switch (prismaPool.type) {
+                    case 'WEIGHTED':
+                    /// LBPs can be handled like weighted pools
+                    case 'LIQUIDITY_BOOTSTRAPPING':
+                        {
+                            if (prismaPool.protocolVersion === 2) {
+                                basePools.push(WeightedPool.fromPrismaPool(prismaPool));
+                            } else {
+                                basePools.push(WeightedPoolV3.fromPrismaPool(prismaPool));
+                            }
+                        }
+                        break;
+                    case 'COMPOSABLE_STABLE':
+                    case 'PHANTOM_STABLE':
+                        basePools.push(ComposableStablePool.fromPrismaPool(prismaPool));
+                        break;
+                    case 'STABLE':
+                        // Since we allowed all the pools, we started getting BAL#322 errors
+                        // Enabling pools one by one until we find the issue
+                        if (protocolVersion === 3) {
+                            basePools.push(StablePoolV3.fromPrismaPool(prismaPool));
                         } else {
-                            basePools.push(WeightedPoolV3.fromPrismaPool(prismaPool, underlyingTokens));
+                            if (
+                                [
+                                    '0x3dd0843a028c86e0b760b1a76929d1c5ef93a2dd000200000000000000000249', // auraBal/8020
+                                    '0x2d011adf89f0576c9b722c28269fcb5d50c2d17900020000000000000000024d', // sdBal/8020
+                                    '0xff4ce5aaab5a627bf82f4a571ab1ce94aa365ea6000200000000000000000426', // dola/usdc
+                                ].includes(prismaPool.id)
+                            ) {
+                                basePools.push(StablePool.fromPrismaPool(prismaPool));
+                            }
                         }
-                    }
-                    break;
-                case 'COMPOSABLE_STABLE':
-                case 'PHANTOM_STABLE':
-                    basePools.push(ComposableStablePool.fromPrismaPool(prismaPool));
-                    break;
-                case 'STABLE':
-                    // Since we allowed all the pools, we started getting BAL#322 errors
-                    // Enabling pools one by one until we find the issue
-                    if (protocolVersion === 3) {
-                        basePools.push(StablePoolV3.fromPrismaPool(prismaPool, underlyingTokens));
-                    } else {
-                        if (
-                            [
-                                '0x3dd0843a028c86e0b760b1a76929d1c5ef93a2dd000200000000000000000249', // auraBal/8020
-                                '0x2d011adf89f0576c9b722c28269fcb5d50c2d17900020000000000000000024d', // sdBal/8020
-                                '0xff4ce5aaab5a627bf82f4a571ab1ce94aa365ea6000200000000000000000426', // dola/usdc
-                            ].includes(prismaPool.id)
-                        ) {
-                            basePools.push(StablePool.fromPrismaPool(prismaPool));
+                        break;
+                    case 'META_STABLE':
+                        basePools.push(MetaStablePool.fromPrismaPool(prismaPool));
+                        break;
+                    case 'FX':
+                        const fxPool = FxPool.fromPrismaPool(prismaPool);
+                        basePools.push(fxPool);
+                        break;
+                    case 'GYRO':
+                        if (protocolVersion === 3) {
+                            basePools.push(Gyro2CLPPool.fromPrismaPool(prismaPool));
+                        } else {
+                            basePools.push(Gyro2Pool.fromPrismaPool(prismaPool));
                         }
-                    }
-                    break;
-                case 'META_STABLE':
-                    basePools.push(MetaStablePool.fromPrismaPool(prismaPool));
-                    break;
-                case 'FX':
-                    basePools.push(FxPool.fromPrismaPool(prismaPool));
-                    break;
-                case 'GYRO':
-                    if (protocolVersion === 3) {
-                        basePools.push(Gyro2CLPPool.fromPrismaPool(prismaPool, underlyingTokens));
-                    } else {
-                        basePools.push(Gyro2Pool.fromPrismaPool(prismaPool));
-                    }
-                    break;
-                case 'GYRO3':
-                    basePools.push(Gyro3Pool.fromPrismaPool(prismaPool));
-                    break;
-                case 'GYROE':
-                    if (protocolVersion === 3) {
-                        basePools.push(GyroECLPPool.fromPrismaPool(prismaPool, underlyingTokens));
-                    } else {
-                        basePools.push(GyroEPool.fromPrismaPool(prismaPool));
-                    }
-                    break;
-                case 'RECLAMM':
-                    basePools.push(ReClammPool.fromPrismaPool(prismaPool, underlyingTokens, currentTimestamp));
-                    break;
-                default:
-                    console.log('Unsupported pool type');
-                    break;
+                        break;
+                    case 'GYRO3':
+                        basePools.push(Gyro3Pool.fromPrismaPool(prismaPool));
+                        break;
+                    case 'GYROE':
+                        if (protocolVersion === 3) {
+                            basePools.push(GyroECLPPool.fromPrismaPool(prismaPool));
+                        } else {
+                            basePools.push(GyroEPool.fromPrismaPool(prismaPool));
+                        }
+                        break;
+                    case 'RECLAMM':
+                        basePools.push(ReClammPool.fromPrismaPool(prismaPool, currentTimestamp));
+                        break;
+                    case 'QUANT_AMM_WEIGHTED':
+                        basePools.push(QuantAmmPool.fromPrismaPool(prismaPool, currentTimestamp));
+                        break;
+                    default:
+                        console.log('Unsupported pool type');
+                        break;
+                }
+            } catch (e: any) {
+                // Do nothing, just skip the pool
+                console.error('Skipping pool', prismaPool.id, prismaPool.chain, e.message);
+            }
+        }
+
+        if (protocolVersion === 3) {
+            for (const bufferPool of bufferPools) {
+                basePools.push(BufferPool.fromBufferPoolData(bufferPool));
             }
         }
 

@@ -1,4 +1,5 @@
 import { poolService } from '../../../../modules/pool/pool.service';
+import { PoolAggregatorLoader } from '../../../../modules/pool/lib/pool-aggregator-loader';
 import { GqlChain, Resolvers } from '../generated-schema';
 import { isAdminRoute } from '../../../../modules/auth/auth-context';
 import { networkContext } from '../../../../modules/network/network-context.service';
@@ -34,49 +35,31 @@ const balancerResolvers: Resolvers = {
             return poolService.getGqlPools(args);
         },
         poolGetAggregatorPools: async (parent, args, context) => {
+            // used filters: chainIn, idIn
+            console.log('poolGetAggregatorPools', JSON.stringify(args.where));
             return poolService.getAggregatorPools(args);
         },
         aggregatorPools: async (parent, args, context) => {
-            return poolService.aggregatorPools(args);
+            // used filters: chainIn, protocolVersion[3], includeHooks[stablesurge], minTvl[1000]
+            console.log('aggregatorPools', JSON.stringify(args.where));
+            const loader = new PoolAggregatorLoader();
+            const pools = loader.aggregatorPools(args);
+            return pools;
         },
         poolGetPoolsCount: async (parent, args, context) => {
             return poolService.getPoolsCount(args);
         },
         // TODO: Deprecate in favor of poolGetEvents
         poolGetSwaps: async (parent, args, context) => {
-            const currentChain = headerChain();
-            if (!args.where?.chainIn && currentChain) {
-                args.where = { ...args.where, chainIn: [currentChain] };
-            } else if (!args.where?.chainIn) {
-                throw new GraphQLError('Provide "chainIn" param', {
-                    extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
-                });
-            }
-            return poolService.getPoolSwaps(args);
+            return [];
         },
         // TODO: Deprecate in favor of poolGetEvents
         poolGetBatchSwaps: async (parent, args, context) => {
-            const currentChain = headerChain();
-            if (!args.where?.chainIn && currentChain) {
-                args.where = { ...args.where, chainIn: [currentChain] };
-            } else if (!args.where?.chainIn) {
-                throw new GraphQLError('Provide "chainIn" param', {
-                    extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
-                });
-            }
-            return poolService.getPoolBatchSwaps(args);
+            return [];
         },
         // TODO: Deprecate in favor of poolGetEvents
         poolGetJoinExits: async (parent, args, context) => {
-            const currentChain = headerChain();
-            if (!args.where?.chainIn && currentChain) {
-                args.where = { ...args.where, chainIn: [currentChain] };
-            } else if (!args.where?.chainIn) {
-                throw new GraphQLError('Provide "chainIn" param', {
-                    extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
-                });
-            }
-            return poolService.getPoolJoinExits(args);
+            return [];
         },
         poolGetEvents: async (parent, { range, poolId, chain, typeIn, userAddress }) => {
             return EventsQueryController().getEvents({
@@ -163,13 +146,6 @@ const balancerResolvers: Resolvers = {
                 chainIdToChain[networkContext.chainId],
                 reload || false,
             );
-
-            return 'success';
-        },
-        poolUpdateLifetimeValuesForAllPools: async (parent, args, context) => {
-            isAdminRoute(context);
-
-            await poolService.updateLifetimeValuesForAllPools();
 
             return 'success';
         },

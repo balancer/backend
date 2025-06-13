@@ -25,6 +25,7 @@ export const prismaPoolTokenFactory = Factory.define<PrismaPoolTokenWithDynamicD
         priceRate: '1',
         latestFxPrice: null,
         scalingFactor: null,
+        updatedAt: new Date(),
     };
 });
 

@@ -4,13 +4,18 @@ import { CowAmmSubgraphClient } from '../../sources/subgraphs';
 import { AddRemove_OrderBy, OrderDirection } from '../../sources/subgraphs/cow-amm/generated/types';
 import { joinExitsUsd } from '../../sources/enrichers/join-exits-usd';
 import { joinExitV3Transformer } from '../../sources/transformers/join-exit-v3-transformer';
+import { eventsRepository, EventStoreRepository } from '../../repositories/events';
 
 /**
  * Get the join and exit events from the subgraph and store them in the database
  *
  * @param vaultSubgraphClient
  */
-export const syncJoinExits = async (subgraphClient: CowAmmSubgraphClient, chain: Chain): Promise<string[]> => {
+export const syncJoinExits = async (
+    subgraphClient: CowAmmSubgraphClient,
+    chain: Chain,
+    eventRepo: EventStoreRepository = eventsRepository,
+): Promise<string[]> => {
     // Get the last synced block number from the PrismaLastBlockSynced table
     const lastSyncedBlock = await prisma.prismaLastBlockSynced.findFirst({
         where: {
@@ -37,15 +42,7 @@ export const syncJoinExits = async (subgraphClient: CowAmmSubgraphClient, chain:
     // Enrich with USD values
     const dbEntriesWithUsd = await joinExitsUsd(dbEntries, chain);
 
-    // Create entries and skip duplicates
-    await prisma.prismaPoolEvent
-        .createMany({
-            data: dbEntriesWithUsd,
-            skipDuplicates: true,
-        })
-        .catch((e) => {
-            console.error('Error creating DB entries', e);
-        });
+    await eventRepo.storeEvents(dbEntriesWithUsd);
 
     // Update the last synced block number in the PrismaLastBlockSynced table
     const latestBlockNumber = Math.max(...dbEntries.map((entry) => entry.blockNumber));

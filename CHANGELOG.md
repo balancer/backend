@@ -1,5 +1,256 @@
 # backend
 
+## 1.43.5
+
+### Patch Changes
+
+-   94e0733: patching volume24h in snapshots
+
+## 1.43.4
+
+### Patch Changes
+
+-   90dcaa9: volume24 patch in V3 snapshots
+
+## 1.43.3
+
+### Patch Changes
+
+-   105bc6b: SG deployment IDs for reclamms
+-   aaa817e: patch high merkl aprs
+
+## 1.43.2
+
+### Patch Changes
+
+-   3af9cd6: additional V2 subgraph swap fetching methods
+-   c154245: add poolIds to updateYieldCaptureForAllPools for debugging
+-   78aa630: V2 subgraph client join/exit methods
+-   9330d0a: handle pool parsing errors
+
+## 1.43.1
+
+### Patch Changes
+
+-   a6f764b: fix extra finance APRs
+
+## 1.43.0
+
+### Minor Changes
+
+-   9107bbf: SOR - Fix split paths reusing same pool
+
+### Patch Changes
+
+-   d9823d7: extra finance APR
+-   df75815: add aggregator filter log
+-   a969a39: SOR - Prevent split path reusing any pools
+-   3f6c7fe: Bump balancer-maths dependency to 0.0.35
+
+## 1.42.11
+
+### Patch Changes
+
+-   ca25252: fix v2 tvl updates
+
+## 1.42.10
+
+### Patch Changes
+
+-   413d942: match merkl rewards by pool address
+-   5c38233: filter out sepolia in production
+
+## 1.42.9
+
+### Patch Changes
+
+-   014732e: skip Sepolia LBPs on prod
+-   d3da29e: add missing BPT for LBPs
+
+## 1.42.8
+
+### Patch Changes
+
+-   0395f4c: adding LBPv3 type for graphql
+-   cb47c0a: make LBP V3 fields required
+
+## 1.42.7
+
+### Patch Changes
+
+-   2fabae3: fix V2 LBPs data schema
+-   22fa2c6: isolate aggregator pool loader
+
+## 1.42.6
+
+### Patch Changes
+
+-   0fad268: LBP create mutation
+-   a9acc71: pool's subgraph update
+-   3d09f5e: fluid APRs on base
+
+## 1.42.5
+
+### Patch Changes
+
+-   3210c67: update unwrap rates only when changed
+-   68237e4: slow dynamic data query fix
+
+## 1.42.4
+
+### Patch Changes
+
+-   0716368: APRs select/update and 7d/30d cleanup
+
+## 1.42.3
+
+### Patch Changes
+
+-   d443964: sepolia fix
+-   6bf4836: add varlamore vault apr
+-   1b55772: avoid performance overhead of Prisma's nested includes
+-   5dcaaae: Prisma's includes
+-   fa4ab43: Bump balancer-maths dependency to 0.0.33
+
+## 1.42.2
+
+### Patch Changes
+
+-   d66e574: user address in event indexing
+
+## 1.42.1
+
+### Patch Changes
+
+-   4cf8fed: test if swap type helps with daily block numbers query
+-   794c7e6: fix for the latest event query
+-   1ec2f46: fix fetching latest events
+-   21c8710: siUSD APR
+-   8cfc29c: events indexing review
+-   f287857: events feature flag
+-   0da8f59: fix merkl opportunities
+-   50200ac: dont include default hooks in agg query
+-   7210d9e: events for user address only with a pool
+-   3fb128e: text search migration fix
+
+## 1.42.0
+
+### Minor Changes
+
+-   53aa72f: events repository
+
+### Patch Changes
+
+-   0829f5e: pool sync update optimisations
+-   6d99a70: fix: order by userbalanceUsd
+-   1ea209e: update TVL only for records not updates in the last 20min
+
+## 1.41.8
+
+### Patch Changes
+
+-   6110f16: fix: protocol version in text search
+
+## 1.41.7
+
+### Patch Changes
+
+-   07c91a7: fixing search query filter
+-   63c215c: fix: text search pagination
+-   85903fb: include search filters in text search
+
+## 1.41.6
+
+### Patch Changes
+
+-   5702a23: text search ordering and custom term mapping
+
+## 1.41.5
+
+### Patch Changes
+
+-   aa81b48: yo APRs on base
+-   e7dc927: exclude paused pools from the sor
+
+## 1.41.4
+
+### Patch Changes
+
+-   69b1d7d: bring back event queries and 48h stat updates
+-   e629fa3: enable volume and fees updates on swaps
+-   3f156e9: token indexes
+
+## 1.41.3
+
+### Patch Changes
+
+-   556dbb8: balanceUSD update guards
+-   befa825: patch events query for dynamic aprs
+
+## 1.41.2
+
+### Patch Changes
+
+-   c394aef: using dynamicData instead of events for protocol stats
+-   840f513: update fees in cron only
+-   1ca7f9a: disable events queries
+-   ff1b24e: pool 48h stats are doubled 24h
+
+## 1.41.1
+
+### Patch Changes
+
+-   723a59b: update volume and fees query
+
+## 1.41.0
+
+### Minor Changes
+
+-   6a09188: text search
+-   41451a0: SOR - Add support for Akron Hook
+-   570a104: SOR - Update QuantAmm support
+
+### Patch Changes
+
+-   ab7f25c: sfrxusd apr OP
+-   bc416fd: patch failing SG query when id_in is empty
+-   17084dd: events type timestamp index
+-   33b912b: temp volume fees off
+-   75dadbe: update fees in cron only
+-   e0a704a: remove unused data related to legacy swaps and blocks
+-   ce8eb5a: disable events queries
+
+## 1.40.8
+
+### Patch Changes
+
+-   054b36b: use v3 flow to update v2 lifetimedata
+-   ba9daac: add swapfee apr back to quant
+-   7c114ac: fix quantAMM onchain data type
+
+## 1.40.7
+
+### Patch Changes
+
+-   593a6b4: fix: quantAMM dynamic data format
+-   694b1ee: SOR - Prevent buffers to be added to v2 swap paths
+
+## 1.40.6
+
+### Patch Changes
+
+-   05f5d42: patch v3 pool sync block caching
+-   aaa90a4: SOR - Refactor to accept bufferPools as input
+-   fa95aee: dropping unused ALT ATH columns
+-   6beea60: sUSDai APRs on Arbitrum
+-   a382804: updating pool SG with quantAMM support on BASE and ARBITRUM
+
+## 1.40.5
+
+### Patch Changes
+
+-   70da6c8: SOR - Fix LBP swap
+
 ## 1.40.4
 
 ### Patch Changes

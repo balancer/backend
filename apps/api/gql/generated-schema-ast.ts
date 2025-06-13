@@ -12,6 +12,11 @@ export const schema = gql`
 
     scalar Bytes
 
+    input CreateLBPInput {
+        metadata: LBPMetadataInput!
+        poolContract: LBPoolInput!
+    }
+
     scalar Date
 
     """
@@ -1108,10 +1113,10 @@ export const schema = gql`
         apr: GqlPoolApr! @deprecated(reason: "Use aprItems instead")
         aprItems: [GqlPoolAprItem!]!
         fees24h: BigDecimal!
-        fees24hAth: BigDecimal!
-        fees24hAthTimestamp: Int!
-        fees24hAtl: BigDecimal!
-        fees24hAtlTimestamp: Int!
+        fees24hAth: BigDecimal! @deprecated
+        fees24hAthTimestamp: Int! @deprecated
+        fees24hAtl: BigDecimal! @deprecated
+        fees24hAtlTimestamp: Int! @deprecated
         fees48h: BigDecimal!
         holdersCount: BigInt!
 
@@ -1127,10 +1132,10 @@ export const schema = gql`
         protocolFees48h: BigDecimal!
         protocolYieldCapture24h: BigDecimal!
         protocolYieldCapture48h: BigDecimal!
-        sharePriceAth: BigDecimal!
-        sharePriceAthTimestamp: Int!
-        sharePriceAtl: BigDecimal!
-        sharePriceAtlTimestamp: Int!
+        sharePriceAth: BigDecimal! @deprecated
+        sharePriceAthTimestamp: Int! @deprecated
+        sharePriceAtl: BigDecimal! @deprecated
+        sharePriceAtlTimestamp: Int! @deprecated
 
         """
         CowAmm specific, equivalent of swap fees
@@ -1150,18 +1155,18 @@ export const schema = gql`
         swapsCount: BigInt!
         totalLiquidity: BigDecimal!
         totalLiquidity24hAgo: BigDecimal!
-        totalLiquidityAth: BigDecimal!
-        totalLiquidityAthTimestamp: Int!
-        totalLiquidityAtl: BigDecimal!
-        totalLiquidityAtlTimestamp: Int!
+        totalLiquidityAth: BigDecimal! @deprecated
+        totalLiquidityAthTimestamp: Int! @deprecated
+        totalLiquidityAtl: BigDecimal! @deprecated
+        totalLiquidityAtlTimestamp: Int! @deprecated
         totalShares: BigDecimal!
         totalShares24hAgo: BigDecimal!
         totalSupply: BigDecimal!
         volume24h: BigDecimal!
-        volume24hAth: BigDecimal!
-        volume24hAthTimestamp: Int!
-        volume24hAtl: BigDecimal!
-        volume24hAtlTimestamp: Int!
+        volume24hAth: BigDecimal! @deprecated
+        volume24hAthTimestamp: Int! @deprecated
+        volume24hAtl: BigDecimal! @deprecated
+        volume24hAtlTimestamp: Int! @deprecated
         volume48h: BigDecimal!
         yieldCapture24h: BigDecimal!
         yieldCapture48h: BigDecimal!
@@ -1564,7 +1569,6 @@ export const schema = gql`
         decimals: Int!
         displayTokens: [GqlPoolTokenDisplay!]! @deprecated(reason: "Use poolTokens instead")
         dynamicData: GqlPoolDynamicData!
-        endTime: Int!
         factory: Bytes
         hasAnyAllowedBuffer: Boolean!
         hasErc4626: Boolean!
@@ -1572,11 +1576,71 @@ export const schema = gql`
         hook: GqlHook
         id: ID!
         investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
-        isProjectTokenSwapInBlocked: Boolean!
-        lbpOwner: String!
         liquidityManagement: LiquidityManagement
         name: String!
         nestingType: GqlPoolNestingType! @deprecated(reason: "Removed without replacement")
+
+        """
+        The wallet address of the owner of the pool. Pool owners can set certain properties like swapFees or AMP.
+        """
+        owner: Bytes @deprecated(reason: "Use swapFeeManager instead")
+
+        """
+        Account empowered to pause/unpause the pool (or 0 to delegate to governance)
+        """
+        pauseManager: Bytes
+
+        """
+        Account empowered to set the pool creator fee percentage
+        """
+        poolCreator: Bytes
+        poolTokens: [GqlPoolTokenDetail!]!
+        protocolVersion: Int!
+        staking: GqlPoolStaking
+
+        """
+        Account empowered to set static swap fees for a pool (when 0 on V2 swap fees are immutable, on V3 delegate to governance)
+        """
+        swapFeeManager: Bytes
+        symbol: String!
+        tags: [String]
+
+        """
+        All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
+        """
+        tokens: [GqlPoolTokenUnion!]! @deprecated(reason: "Use poolTokens instead")
+        type: GqlPoolType!
+        userBalance: GqlPoolUserBalance
+        vaultVersion: Int! @deprecated(reason: "use protocolVersion instead")
+        version: Int!
+        withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
+    }
+
+    type GqlPoolLiquidityBootstrappingV3 implements GqlPoolBase {
+        address: Bytes!
+        allTokens: [GqlPoolTokenExpanded!]! @deprecated(reason: "Use poolTokens instead")
+        categories: [GqlPoolFilterCategory]
+        chain: GqlChain!
+        createTime: Int!
+        decimals: Int!
+        description: String
+        discord: String
+        displayTokens: [GqlPoolTokenDisplay!]! @deprecated(reason: "Use poolTokens instead")
+        dynamicData: GqlPoolDynamicData!
+        endTime: Int!
+        factory: Bytes
+        farcaster: String
+        hasAnyAllowedBuffer: Boolean!
+        hasErc4626: Boolean!
+        hasNestedErc4626: Boolean!
+        hook: GqlHook
+        id: ID!
+        investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
+        isProjectTokenSwapInBlocked: Boolean!
+        lbpName: String
+        lbpOwner: String!
+        liquidityManagement: LiquidityManagement
+        name: String!
 
         """
         The wallet address of the owner of the pool. Pool owners can set certain properties like swapFees or AMP.
@@ -1602,6 +1666,10 @@ export const schema = gql`
         reserveTokenEndWeight: Float!
         reserveTokenIndex: Int!
         reserveTokenStartWeight: Float!
+
+        """
+        All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
+        """
         staking: GqlPoolStaking
         startTime: Int!
 
@@ -1611,16 +1679,14 @@ export const schema = gql`
         swapFeeManager: Bytes
         symbol: String!
         tags: [String]
-
-        """
-        All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
-        """
-        tokens: [GqlPoolTokenUnion!]! @deprecated(reason: "Use poolTokens instead")
+        telegram: String
         type: GqlPoolType!
         userBalance: GqlPoolUserBalance
         vaultVersion: Int! @deprecated(reason: "use protocolVersion instead")
         version: Int!
+        website: String
         withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
+        x: String
     }
 
     type GqlPoolMetaStable implements GqlPoolBase {
@@ -2647,6 +2713,7 @@ export const schema = gql`
         | GqlPoolFx
         | GqlPoolGyro
         | GqlPoolLiquidityBootstrapping
+        | GqlPoolLiquidityBootstrappingV3
         | GqlPoolMetaStable
         | GqlPoolQuantAmmWeighted
         | GqlPoolReClamm
@@ -3951,6 +4018,28 @@ export const schema = gql`
 
     scalar JSON
 
+    input LBPMetadataInput {
+        description: String!
+        discord: String
+        farcaster: String
+        lbpName: String!
+        telegram: String
+        tokenLogo: String!
+        website: String!
+        x: String
+    }
+
+    type LBPPriceChartData {
+        intervalTimestamp: Int!
+        projectTokenPrice: Float!
+        reservePrice: Float!
+    }
+
+    input LBPoolInput {
+        address: String!
+        chain: GqlChain!
+    }
+
     """
     Liquidity management settings for v3 pools.
     """
@@ -3988,6 +4077,7 @@ export const schema = gql`
     type Mutation {
         beetsPoolLoadReliquarySnapshotsForAllFarms(chain: GqlChain!): String!
         beetsSyncFbeetsRatio: String!
+        createLBP(input: CreateLBPInput!): Boolean!
         poolLoadOnChainDataForAllPools(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
         poolLoadSnapshotsForPools(poolIds: [String!]!, reload: Boolean): String!
         poolReloadAllPoolAprs(chain: GqlChain!): String!
@@ -3996,7 +4086,6 @@ export const schema = gql`
         poolSyncAllCowSnapshots(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
         poolSyncAllPoolsFromSubgraph: [String!]!
         poolSyncFxQuoteTokens(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
-        poolUpdateLifetimeValuesForAllPools: String!
         poolUpdateLiquidityValuesForAllPools: String!
         protocolCacheMetrics: String!
         sftmxSyncStakingData: String!
@@ -4075,6 +4164,7 @@ export const schema = gql`
         blocksGetBlocksPerSecond: Float! @deprecated
         blocksGetBlocksPerYear: Float! @deprecated
         latestSyncedBlocks: GqlLatestSyncedBlocks!
+        lbpPriceChart(chain: GqlChain!, id: String!, interval: Int): [LBPPriceChartData!]
 
         """
         Getting swap, add and remove events with paging
@@ -4328,13 +4418,19 @@ export const schema = gql`
             first: Int = 10
             poolId: String!
             skip: Int = 0
-        ): [GqlPoolJoinExit!]!
+        ): [GqlPoolJoinExit!]! @deprecated(reason: "Use poolEvents instead")
         userGetStaking(address: String, chains: [GqlChain!]): [GqlPoolStaking!]!
 
         """
         Will de deprecated in favor of poolGetEvents
         """
-        userGetSwaps(address: String, chain: GqlChain, first: Int = 10, poolId: String!, skip: Int = 0): [GqlPoolSwap!]!
+        userGetSwaps(
+            address: String
+            chain: GqlChain
+            first: Int = 10
+            poolId: String!
+            skip: Int = 0
+        ): [GqlPoolSwap!]! @deprecated(reason: "Use poolEvents instead")
         veBalGetTotalSupply(chain: GqlChain): AmountHumanReadable!
         veBalGetUser(address: String!, chain: GqlChain): GqlVeBalUserData!
         veBalGetUserBalance(address: String, chain: GqlChain): AmountHumanReadable!

@@ -238,7 +238,6 @@ export class DatastudioService {
             }
 
             // add emission data
-            const blocksPerDay = await blockNumbers().getBlocksPerDay(chain);
             const tokenPrices = await tokenService.getTokenPrices(chain);
             for (const stake of pool.staking) {
                 const beetsPrice = tokenService.getPriceForToken(
@@ -246,50 +245,6 @@ export class DatastudioService {
                     config[chain].beets?.address || '',
                     chain,
                 );
-                if (stake.farm) {
-                    const beetsPerDay = parseFloat(stake.farm.beetsPerBlock) * blocksPerDay;
-                    const beetsValuePerDay = beetsPrice * beetsPerDay;
-                    if (beetsPerDay > 0) {
-                        allEmissionDataRows.push([
-                            endOfYesterday.format('DD MMM YYYY'),
-                            `${endOfYesterday.unix()}`,
-                            `${now}`,
-                            pool.address,
-                            "'" + pool.name,
-                            'BEETS',
-                            networkContext.data.beets!.address,
-                            `${beetsPerDay}`,
-                            `${beetsValuePerDay}`,
-                            chainSlug,
-                        ]);
-                    }
-                    if (stake.farm.rewarders) {
-                        for (const rewarder of stake.farm.rewarders) {
-                            const rewardToken = await tokenService.getToken(rewarder.tokenAddress, chain);
-                            if (!rewardToken) {
-                                continue;
-                            }
-                            const rewardsPerDay = parseFloat(rewarder.rewardPerSecond) * secondsPerDay;
-                            const rewardsValuePerDay =
-                                tokenService.getPriceForToken(tokenPrices, rewarder.tokenAddress, chain) *
-                                rewardsPerDay;
-                            if (rewardsPerDay > 0) {
-                                allEmissionDataRows.push([
-                                    endOfYesterday.format('DD MMM YYYY'),
-                                    `${endOfYesterday.unix()}`,
-                                    `${now}`,
-                                    pool.address,
-                                    "'" + pool.name,
-                                    rewardToken.symbol,
-                                    rewardToken.address,
-                                    `${rewardsPerDay}`,
-                                    `${rewardsValuePerDay}`,
-                                    chainSlug,
-                                ]);
-                            }
-                        }
-                    }
-                }
                 if (stake.reliquary) {
                     const beetsPerDay = parseFloat(stake.reliquary.beetsPerSecond) * secondsPerDay;
                     const beetsValuePerDay = beetsPrice * beetsPerDay;

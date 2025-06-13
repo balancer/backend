@@ -8,4 +8,8 @@ export class WeightedPoolTokenWithRate extends PoolTokenWithRate {
         super(token, amount, index, rate);
         this.weight = BigInt(weight);
     }
+
+    public copy(): WeightedPoolTokenWithRate {
+        return new WeightedPoolTokenWithRate(this.token, this.amount, this.index, this.rate, this.weight);
+    }
 }

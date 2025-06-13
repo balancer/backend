@@ -1,9 +1,7 @@
-import { BufferState, PoolState } from '@balancer-labs/balancer-maths';
 import { PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { Hex } from 'viem';
 
 import { BasePoolToken } from '../utils/basePoolToken';
-import { Erc4626PoolToken } from '../utils/erc4626PoolToken';
 
 export interface BasePool {
     readonly poolType: PoolType | string;
@@ -19,4 +17,5 @@ export interface BasePool {
      * Validate that pool contains tokenIn and tokenOut provided and returns pool specific token data (e.g. balance, index, weight, rate, etc.)
      */
     getPoolTokens(tokenIn: Token, tokenOut: Token): { tIn: BasePoolToken; tOut: BasePoolToken };
+    copy(): BasePool;
 }

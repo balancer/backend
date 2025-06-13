@@ -1,3 +1,4 @@
+import { validateSiweMessage } from 'viem/_types/utils/siwe/validateSiweMessage';
 import { env } from '../apps/env';
 import { NetworkData } from '../modules/network/network-config-types';
 
@@ -14,7 +15,7 @@ export default <NetworkData>{
         startDate: '2024-12-12',
         balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmPXaLKDvMMZdjD1ZuMpMSkRjKf8ALLVRtjUpTwWdKSvpQ`,
         balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmUgRWkb5JUocGkVidpKtZFMHjexJzkBiSbjufURsXwn9X`,
-        balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmaZoYqkisMQ6c5bCeVKhyT1LLCYeeNza9XfKptTbd8Rhx`,
+        balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/Qmf6QJoTbJ19gmNk3T61PcTR2ufzV8mDxPP5iuVLFcXBft`,
         gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmSRNzwTmLu55ZxxyxYULS5T1Kar7upz1jzL5FsMzLpB2e`,
         reliquary: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmUM8aU6H3gFx6JL65GQV5baPPjczU9hUb6VRiDQ1jEp3B`,
         sts: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmYmPEGqVZPyJKRah4NVbCYtxkHrXq3QzqBrnVQYBt15MU`,
@@ -160,6 +161,37 @@ export default <NetworkData>{
                 sourceUrl: 'https://eth-locks-api.rings.money/wrapper/apy',
                 path: 'apy',
                 scale: 1,
+                isIbYield: true,
+            },
+            varlamoreUSDC: {
+                tokenAddress: '0xf6f87073cf8929c206a77b0694619dc776f89885',
+                sourceUrl:
+                    'https://v2.silo.finance/api/detailed-vault/sonic-0xf6f87073cf8929c206a77b0694619dc776f89885',
+                path: 'supplyApr',
+                scale: 1000000000000000000,
+                isIbYield: true,
+            },
+            varlamorewS: {
+                tokenAddress: '0xded4ac8645619334186f28b8798e07ca354cfa0e',
+                sourceUrl:
+                    'https://v2.silo.finance/api/detailed-vault/sonic-0xded4ac8645619334186f28b8798e07ca354cfa0e',
+                path: 'supplyApr',
+                scale: 1000000000000000000,
+                isIbYield: true,
+            },
+            varlamorescUSD: {
+                tokenAddress: '0xb6a23cb29e512df41876b28d7a848bd831f9c5ba',
+                sourceUrl:
+                    'https://v2.silo.finance/api/detailed-vault/sonic-0xb6a23cb29e512df41876b28d7a848bd831f9c5ba',
+                path: 'supplyApr',
+                scale: 1000000000000000000,
+                isIbYield: true,
+            },
+            xUSD: {
+                tokenAddress: '0x6202b9f02e30e5e1c62cc01e4305450e5d83b926',
+                sourceUrl: 'https://api-v2.streamprotocol.money/vaults/xUSD/apy',
+                path: 'apy',
+                scale: 100,
                 isIbYield: true,
             },
         },

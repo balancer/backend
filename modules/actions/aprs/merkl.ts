@@ -11,7 +11,10 @@ interface MerklOpportunity {
     chainId: number;
     identifier: string;
     apr: number;
+    tvl: number;
     campaigns: {
+        startTimestamp: number;
+        endTimestamp: number;
         params: {
             whitelist: string[];
             forwarders: {
@@ -27,8 +30,9 @@ const fetchMerklOpportunities = async () => {
     const data = (await response.json()) as MerklOpportunity[];
 
     // remove opportunities with whitelist
-    const opportunities = data.filter((opportunity) =>
-        opportunity.campaigns.every((campaign) => campaign.params.whitelist.length === 0),
+    const opportunities = data.filter(
+        (opportunity) =>
+            opportunity.tvl > 0 && opportunity.campaigns.every((campaign) => campaign.params.whitelist.length === 0),
     );
 
     return opportunities;
@@ -80,7 +84,7 @@ export const syncMerklRewards = async () => {
         .flat(2)
         .filter((item) => item !== null) as string[];
 
-    const allAffectedPoolIds = [
+    const allAffectedPoolAddresses = [
         ...opportunities.map((campaign) => campaign.identifier.toLowerCase()),
         ...poolIdsFromForwardedOpportunities,
     ];
@@ -88,10 +92,10 @@ export const syncMerklRewards = async () => {
     const affectedPools = await prisma.prismaPool.findMany({
         where: {
             address: {
-                in: allAffectedPoolIds,
+                in: allAffectedPoolAddresses,
             },
         },
-        ...poolsIncludeForAprs,
+        include: { dynamicData: true, tokens: { include: { token: true } } },
     });
 
     const aprsFromOpportunities = mapOpportunitiesToAprs(opportunities, affectedPools);
@@ -138,40 +142,42 @@ function mapForwardedOpportunitiesToAprs(
 
     opportunities.forEach((opportunity) => {
         opportunity.campaigns.forEach((campaign) => {
-            campaign.params.forwarders.forEach((forwarder) => {
-                if (forwarder.sender.toLowerCase() !== '0xba1333333333a1ba1108e8412f11850a5c319ba9') {
-                    return;
-                }
+            if (campaign.startTimestamp < Date.now() / 1000 && campaign.endTimestamp > Date.now() / 1000) {
+                campaign.params.forwarders.forEach((forwarder) => {
+                    if (forwarder.sender.toLowerCase() !== '0xba1333333333a1ba1108e8412f11850a5c319ba9') {
+                        return;
+                    }
 
-                const pool = affectedPools.find(
-                    (pool) =>
-                        pool.address === forwarder.token.toLowerCase() &&
-                        pool.chain === chainIdToChain[opportunity.chainId],
-                );
+                    const pool = affectedPools.find(
+                        (pool) =>
+                            pool.address === forwarder.token.toLowerCase() &&
+                            pool.chain === chainIdToChain[opportunity.chainId],
+                    );
 
-                if (!pool) {
-                    return;
-                }
+                    if (!pool) {
+                        return;
+                    }
 
-                const tokenBalanceUsd =
-                    pool.tokens.find((token) => token.address === opportunity.identifier.toLowerCase())?.balanceUSD ||
-                    0;
-                const totalLiquidity = pool.tokens.map((t) => t.balanceUSD).reduce((a, b) => a + b, 0);
-                const poolApr = opportunity.apr * (tokenBalanceUsd / totalLiquidity) || 0;
+                    const tokenBalanceUsd =
+                        pool.tokens.find((token) => token.address === opportunity.identifier.toLowerCase())
+                            ?.balanceUSD || 0;
+                    const totalLiquidity = pool.tokens.map((t) => t.balanceUSD).reduce((a, b) => a + b, 0);
+                    const poolApr = opportunity.apr * (tokenBalanceUsd / totalLiquidity) || 0;
 
-                if (poolApr === 0) {
-                    return;
-                }
+                    if (poolApr === 0) {
+                        return;
+                    }
 
-                aprs.push({
-                    id: `${pool.id}-merkl-forwarded-${opportunity.identifier}`,
-                    type: PrismaPoolAprType.MERKL,
-                    title: `Merkl Forwarded Rewards`,
-                    chain: chainIdToChain[opportunity.chainId],
-                    poolId: pool.id,
-                    apr: poolApr / 100,
+                    aprs.push({
+                        id: `${pool.id}-merkl-forwarded-${opportunity.identifier}`,
+                        type: PrismaPoolAprType.MERKL,
+                        title: `Merkl Forwarded Rewards`,
+                        chain: chainIdToChain[opportunity.chainId],
+                        poolId: pool.id,
+                        apr: poolApr / 100,
+                    });
                 });
-            });
+            }
         });
     });
 

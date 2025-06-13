@@ -1,11 +1,12 @@
 import type { SwapPathTestInput, SwapPathTestOutput } from '../types';
 import { getSwapPath } from './getSwapPath';
 import { getPool } from './getPool';
-import { getUnderlyingTokens } from './getUnderlyingTokens';
 import { enrichPoolsWithHookData } from './enrichPoolsWithHookData';
 
-export async function generateSwapPathTestData(input: SwapPathTestInput, overwrite = false) {
-    const path = `./test/testData/read/${input.chainId}-${input.blockNumber}-${input.testName}.json`;
+export async function generateSwapPathTestData(input: SwapPathTestInput, overwrite = false, debug = false) {
+    const path = `./test/testData/read/${debug ? 'debug/' : ''}${input.chainId}-${input.blockNumber}-${
+        input.testName
+    }.json`;
     if (!overwrite) {
         const file = Bun.file(path);
         if (await file.exists()) {
@@ -24,18 +25,27 @@ async function fetchTestData(input: SwapPathTestInput): Promise<SwapPathTestOutp
     const { rpcUrl, chainId, blockNumber, swapPathInput } = input;
     const swapPath = await getSwapPath(swapPathInput, rpcUrl, chainId, blockNumber);
 
+    const allPools = swapPathInput.paths.flatMap((path) => path.pools);
+
+    const uniquePoolAddresses = [...new Set(allPools.map((pool) => pool.poolAddress))];
+
+    const uniquePools = uniquePoolAddresses.map((poolAddress) => {
+        const pool = allPools.find((pool) => pool.poolAddress === poolAddress);
+        return pool as {
+            poolAddress: `0x${string}`;
+            poolType: string;
+        };
+    });
+
     const pools = await Promise.all(
-        swapPathInput.pools.map((pool) => getPool(rpcUrl, chainId, blockNumber, pool.poolType, pool.poolAddress)),
+        uniquePools.map((pool) => getPool(rpcUrl, chainId, blockNumber, pool.poolType, pool.poolAddress)),
     );
 
     const poolsWithHooks = await enrichPoolsWithHookData(pools, chainId, blockNumber);
-
-    const underlyingTokens = await getUnderlyingTokens(pools, rpcUrl, chainId);
 
     return {
         test: { chainId, blockNumber },
         swapPath,
         pools: poolsWithHooks,
-        underlyingTokens,
     };
 }

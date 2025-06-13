@@ -1,0 +1,241 @@
+import { Prisma, Chain, PoolEventType } from '@prisma/client';
+import { prisma } from '../../../prisma/prisma-client';
+import { JoinExitEvent, SwapEvent } from '../../../prisma/prisma-types';
+import type { SwapStats } from './types';
+import { daysAgo, now } from '../../common/time';
+
+const orderBy: Prisma.PrismaPoolEventOrderByWithRelationInput[] = [
+    { blockTimestamp: 'desc' },
+    { blockNumber: 'desc' },
+    { logIndex: 'desc' },
+];
+
+export const eventsRepository = {
+    getEvents: async ({
+        chain,
+        poolId,
+        userAddress,
+        limit,
+        offset,
+    }: {
+        chain: Chain;
+        poolId?: string;
+        userAddress?: string;
+        limit?: number;
+        offset?: number;
+    }): Promise<(SwapEvent | JoinExitEvent)[]> => {
+        // Defaults
+        limit = Math.min(1000, limit ?? 1000); // Limiting to 1000 events
+        offset = offset ?? 0;
+
+        const where: Prisma.PrismaPoolEventWhereInput = {
+            chain,
+            ...(poolId
+                ? {
+                      poolId,
+                      ...(userAddress
+                          ? {
+                                userAddress: userAddress.toLowerCase(),
+                            }
+                          : {}),
+                  }
+                : {}),
+        };
+
+        const dbEvents = await prisma.prismaPoolEvent.findMany({
+            where,
+            take: limit,
+            skip: offset,
+            orderBy,
+        });
+
+        const results = dbEvents.map((event) =>
+            event.type === 'SWAP' ? (event as SwapEvent) : (event as JoinExitEvent),
+        );
+
+        return results;
+    },
+    getLatestEvent: async ({
+        chain,
+        protocolVersion,
+        types,
+        timestamp,
+    }: {
+        chain: Chain;
+        protocolVersion?: number;
+        types?: PoolEventType[];
+        timestamp?: number;
+    }) => {
+        if (timestamp && (timestamp < 0 || timestamp > now() || timestamp < now() - 3 * 365 * 24 * 60 * 60)) {
+            throw new Error(`Invalid timestamp ${timestamp}`);
+        }
+
+        const where: Prisma.PrismaPoolEventWhereInput = {
+            chain,
+            ...(protocolVersion ? { protocolVersion } : {}),
+            ...(timestamp ? { blockTimestamp: { lte: timestamp } } : {}),
+        };
+
+        if (!types) {
+            types = ['EXIT', 'JOIN', 'SWAP'];
+        }
+
+        // To use the index properly, query must have a type
+        // Get events for all types separately and match which one is the latest
+        const events = await Promise.all(
+            types.map(async (type) =>
+                prisma.prismaPoolEvent.findFirst({
+                    where: {
+                        ...where,
+                        type,
+                    },
+                    orderBy,
+                }),
+            ),
+        );
+
+        const sortedEvents = events
+            .filter((event): event is NonNullable<typeof event> => event !== null)
+            .sort((a, b) => b.blockNumber - a.blockNumber);
+
+        const latestEvent = sortedEvents[0] || null;
+
+        if (!latestEvent) {
+            return null;
+        }
+
+        return latestEvent.type === 'SWAP' ? (latestEvent as SwapEvent) : (latestEvent as JoinExitEvent);
+    },
+    getSwapStats: async ({ chain, poolIds, since }: { chain: Chain; poolIds?: string[]; since: number }) => {
+        if (since < 0 || since > now() || since < now() - 3 * 365 * 24 * 60 * 60) {
+            throw new Error(`Invalid timestamp ${since}`);
+        }
+
+        const query = Prisma.raw(`SELECT
+            "poolId",
+            SUM("valueUSD") AS volume,
+            SUM((payload->'fee'->>'valueUSD')::numeric) AS fees,
+            SUM((payload->'dynamicFee'->>'valueUSD')::numeric) AS "dynamicFees",
+            SUM((payload->'surplus'->>'valueUSD')::numeric) AS surplus
+          FROM "PartitionedPoolEvent"
+          WHERE
+            "blockTimestamp" >= ${since}
+            AND chain = '${chain}'
+            AND type = 'SWAP'
+            ${poolIds && poolIds.length < 30 ? 'AND "poolId" IN (\'' + poolIds.join("','") + "')" : ''}
+          GROUP BY 1`);
+
+        const stats = await prisma.$queryRaw<SwapStats[]>(query);
+
+        return stats;
+    },
+    getDailyBlockNumbers: async (chain: Chain, days: number) => {
+        const blocks = await prisma.$queryRawUnsafe<{ timestamp: number; number: number }[]>(`
+            SELECT
+                ("blockTimestamp"/86400)::INTEGER * 86400 as timestamp,
+                MIN("blockNumber") as number
+            FROM "PartitionedPoolEvent"
+            WHERE chain = '${chain}'
+            AND type = 'SWAP'
+            AND "blockTimestamp" >= ${daysAgo(days)}
+            GROUP BY 1
+            ORDER BY 1 DESC`);
+
+        return blocks;
+    },
+    getSwapsForPricing: async (chain: Chain) => {
+        const swaps = await prisma.prismaPoolEvent.findMany({
+            select: { payload: true },
+            where: {
+                chain,
+                type: 'SWAP',
+                blockTimestamp: { gt: now() - 900 }, // only search for the last 15 minutes
+            },
+            orderBy,
+        });
+
+        return swaps as SwapEvent[];
+    },
+    getTokenFlows: async (chain: Chain, poolId: string, tokenA: string, tokenB: string, interval = 3600) => {
+        const whereClause = ['chain = $1::"Chain"', '"poolId" = $2'];
+        const params = [chain, poolId, interval];
+
+        const query = `
+          SELECT
+              FLOOR("blockTimestamp" / $3) * $3 as "intervalTimestamp",
+
+              -- token A flows
+              SUM(CASE
+                  WHEN type = 'SWAP' AND LOWER(payload->'tokenIn'->>'address') = $${params.length + 1}
+                    THEN (payload->'tokenIn'->>'amount')::float
+                  WHEN type = 'SWAP' AND LOWER(payload->'tokenOut'->>'address') = $${params.length + 1}
+                    THEN -(payload->'tokenOut'->>'amount')::float
+                  WHEN type = 'JOIN' AND joined_tokens.token_address = $${params.length + 1}
+                    THEN (joined_tokens.token_amount)::float
+                  WHEN type = 'EXIT' AND exited_tokens.token_address = $${params.length + 1}
+                    THEN -(exited_tokens.token_amount)::float
+                  ELSE 0
+              END) as "tokenAFlow",
+
+              -- token B flows
+              SUM(CASE
+                  WHEN type = 'SWAP' AND LOWER(payload->'tokenIn'->>'address') = $${params.length + 2}
+                    THEN (payload->'tokenIn'->>'amount')::float
+                  WHEN type = 'SWAP' AND LOWER(payload->'tokenOut'->>'address') = $${params.length + 2}
+                    THEN -(payload->'tokenOut'->>'amount')::float
+                  WHEN type = 'JOIN' AND joined_tokens.token_address = $${params.length + 2}
+                    THEN (joined_tokens.token_amount)::float
+                  WHEN type = 'EXIT' AND exited_tokens.token_address = $${params.length + 2}
+                    THEN -(exited_tokens.token_amount)::float
+                  ELSE 0
+              END) as "tokenBFlow",
+
+              COUNT(CASE WHEN type = 'SWAP' THEN 1 END) AS "swapCount",
+              SUM("valueUSD") as volume
+
+          FROM "PartitionedPoolEvent"
+
+          -- join tokens for JOIN
+          LEFT JOIN LATERAL (
+            SELECT
+              LOWER(token->>'address') AS token_address,
+              token->>'amount' AS token_amount
+            FROM jsonb_array_elements(payload->'tokens') AS token
+          ) AS joined_tokens ON type = 'JOIN'
+
+          -- join tokens for EXIT
+          LEFT JOIN LATERAL (
+            SELECT
+              LOWER(token->>'address') AS token_address,
+              token->>'amount' AS token_amount
+            FROM jsonb_array_elements(payload->'tokens') AS token
+          ) AS exited_tokens ON type = 'EXIT'
+
+          WHERE ${whereClause.join(' AND ')}
+          GROUP BY 1
+      `;
+
+        params.push(tokenA.toLowerCase());
+        params.push(tokenB.toLowerCase());
+
+        const results = (await prisma.$queryRawUnsafe(query, ...params)) as any[];
+
+        return results
+            .map((row) => ({
+                intervalTimestamp: Number(row.intervalTimestamp),
+                [tokenA]: Number(row.tokenAFlow || 0),
+                [tokenB]: Number(row.tokenBFlow || 0),
+                swapCount: Number(row.swapCount),
+                volume: Number(row.volume),
+            }))
+            .sort((a, b) => a.intervalTimestamp - b.intervalTimestamp);
+    },
+    storeEvents: async (events: (SwapEvent | JoinExitEvent)[]) => {
+        await prisma.prismaPoolEvent.createMany({
+            skipDuplicates: true,
+            data: events,
+        });
+
+        return true;
+    },
+};

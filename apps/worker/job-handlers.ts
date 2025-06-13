@@ -47,9 +47,22 @@ async function runIfNotAlreadyRunning(
 ): Promise<void> {
     const jobId = `${id}-${chainId}`;
 
+    // Check if event sync jobs are enabled
+    const eventSyncEnabled = process.env.ENABLE_EVENTS === 'true';
+
+    const eventSyncJobs = [
+        'sync-swaps-v2',
+        'sync-swaps-v3',
+        'sync-join-exits-v2',
+        'sync-join-exits-v3',
+        'sync-cow-amm-swaps',
+        'sync-cow-amm-join-exits',
+        'update-fee-volume-yield-all-pools',
+    ];
+
     console.log(`Current jobqueue length: ${runningJobs.size}`);
 
-    if (runningJobs.has(jobId)) {
+    if ((eventSyncJobs.includes(id) && !eventSyncEnabled) || runningJobs.has(jobId)) {
         if (process.env.AWS_ALERTS === 'true') {
             await cronsMetricPublisher.publish(`${jobId}-skip`);
         }
@@ -133,15 +146,6 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
                 next,
             );
             break;
-        case 'update-liquidity-for-active-pools':
-            await runIfNotAlreadyRunning(
-                name,
-                chainId,
-                () => PoolController().updateLiquidityValuesForActivePools(chain),
-                res,
-                next,
-            );
-            break;
         case 'update-liquidity-for-inactive-pools':
             await runIfNotAlreadyRunning(
                 name,
@@ -211,9 +215,6 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
                 res,
                 next,
             );
-            break;
-        case 'update-lifetime-values-for-all-pools':
-            await runIfNotAlreadyRunning(name, chainId, () => poolService.updateLifetimeValuesForAllPools(), res, next);
             break;
         case 'feed-data-to-datastudio':
             await runIfNotAlreadyRunning(
@@ -315,13 +316,7 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
             await runIfNotAlreadyRunning(name, chainId, () => AprsController().syncMerkl(), res, next);
             break;
         case 'update-7-30-days-swap-apr':
-            await runIfNotAlreadyRunning(
-                name,
-                chainId,
-                () => AprsController().update7And30DaysSwapAprs(chain),
-                res,
-                next,
-            );
+            // Disabling unused APRs
             break;
         case 'update-surplus-aprs':
             await runIfNotAlreadyRunning(name, chainId, () => CowAmmController().updateSurplusAprs(), res, next);
@@ -378,16 +373,6 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
                 next,
             );
             break;
-        // TODO
-        // case 'update-lifetime-values-for-all-pools-v3':
-        //     await runIfNotAlreadyRunning(
-        //         name,
-        //         chainId,
-        //         () => poolService.updateLifetimeValuesForAllPoolsV3(),
-        //         res,
-        //         next,
-        //     );
-        //     break;
         // COW AMM
         case 'sync-cow-amm-pools':
             await runIfNotAlreadyRunning(name, chainId, () => CowAmmController().syncPools(chain), res, next);
@@ -400,9 +385,6 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
             break;
         case 'sync-cow-amm-snapshots':
             await runIfNotAlreadyRunning(name, chainId, () => CowAmmController().syncSnapshots(chain), res, next);
-            break;
-        case 'update-cow-amm-volume-and-fees':
-            await runIfNotAlreadyRunning(name, chainId, () => CowAmmController().updateVolumeAndFees(chain), res, next);
             break;
         case 'sync-categories':
             await runIfNotAlreadyRunning(name, chainId, () => ContentController().syncCategories(), res, next);

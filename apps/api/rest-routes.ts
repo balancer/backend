@@ -1,5 +1,9 @@
 import { Express } from 'express';
-import { beetsGetCirculatingSupply, beetsGetCirculatingSupplySonic } from '../../modules/beets/lib/beets';
+import {
+    beetsGetCirculatingSupply,
+    beetsGetCirculatingSupplySonic,
+    beetsGetTotalSupplySonic,
+} from '../../modules/beets/lib/beets';
 
 export function loadRestRoutes(app: Express) {
     app.use('/health', (_, res) => res.sendStatus(200));
@@ -10,6 +14,11 @@ export function loadRestRoutes(app: Express) {
     });
     app.use('/circulating_supply_sonic', (_, res) => {
         beetsGetCirculatingSupplySonic().then((result) => {
+            res.send(result);
+        });
+    });
+    app.use('/total_supply_sonic', (_, res) => {
+        beetsGetTotalSupplySonic().then((result) => {
             res.send(result);
         });
     });

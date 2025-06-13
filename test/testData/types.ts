@@ -29,9 +29,9 @@ export type SwapPathTestInput = SwapPathTestConfig & {
 export type SwapPathTestOutput = {
     swapPath: SwapPathResult;
     pools: PoolBase[];
-    underlyingTokens: {
-        address: Address;
-        decimals: number;
-    }[];
     test: TestBase;
+};
+
+export type TransformBigintToString<T> = {
+    [K in keyof T]: T[K] extends bigint ? string : T[K] extends bigint[] ? string[] : T[K];
 };

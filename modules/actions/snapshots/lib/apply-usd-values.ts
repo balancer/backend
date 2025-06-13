@@ -42,13 +42,13 @@ export const applyUSDValues = async (
                 snapshot.timestamp < lastMidnight ? snapshot.timestamp : undefined,
             );
 
-            let volume24h = 0;
-            const swapTokenWithPrice = Object.values(tokens).find(({ address }) => prices[address]);
-            if (swapTokenWithPrice) {
-                const swapVolume = (snapshot.dailyVolumes as string[])[swapTokenWithPrice.index] || '0'; // Some snapshots have empty arrays
-                volume24h = parseFloat(swapVolume) * prices[swapTokenWithPrice.address];
-            }
-
+            const volume24h = Object.values(tokens)
+                .map(({ address }, index) => {
+                    const price = prices[address] || 0;
+                    const volume = (snapshot.dailyVolumes as string[])[index] || '0';
+                    return (parseFloat(volume) / 2) * price;
+                })
+                .reduce((sum, vol) => (sum += vol), 0);
             const fees24h = calculateValue(snapshot.dailySwapFees as string[], tokens, prices);
             const surplus24h = calculateValue(snapshot.dailySurpluses as string[], tokens, prices);
             const totalLiquidity = calculateValue(snapshot.amounts as string[], tokens, prices);

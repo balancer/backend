@@ -14,7 +14,7 @@ export default <NetworkData>{
         startDate: '2023-07-10',
         balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmRKBwBwPKtFz4mQp5jvH44USVprM4C77Nr4m77UGCbGv9`,
         balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmXs2bcH91cbcC8Sz7qW8SFWpDRWbDvZzsz6RmAX5wgxj3`,
-        balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmcgZcYrDS99Tt7gaDxGrLUuvZK3K9Zb921yRezpBc8x7K`,
+        balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/Qmf8TJtfoB3zB6QxenSvVvufhNyA3pdgRL8rbC3qQKSbES`,
         cowAmm: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmVRCjhFz7XXJoeJ5t4FdysN2JaBVdUCvpTVoMzXRNjA87`,
         gauge: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/CfBvJNYsbKZdxXzaCtNc6dUbHH6TjDupprjKKo9gnmwg`,
         aura: 'https://data.aura.finance/graphql',
@@ -75,6 +75,12 @@ export default <NetworkData>{
         },
     },
     ybAprConfig: {
+        fluid: {
+            url: 'https://api.fluid.instad.app/v2/lending/8453/tokens',
+        },
+        extra: {
+            url: 'https://extra-static.s3.amazonaws.com/data/xlend/pools/apr.json',
+        },
         susds: {
             oracle: '0x65d946e533748a998b1f0e430803e39a6388f7a1',
             token: '0x5875eee11cf8398102fdad704c9e96607675467a',
@@ -83,6 +89,24 @@ export default <NetworkData>{
             tokens: {},
         },
         defaultHandlers: {
+            yoETH: {
+                tokenAddress: '0x3a43aec53490cb9fa922847385d82fe25d0e9de7',
+                sourceUrl: 'https://api.yo.xyz/api/v1/vault/base/0x3A43AEC53490CB9Fa922847385D82fe25d0E9De7',
+                path: 'data.stats.yield.7d',
+                isIbYield: true,
+            },
+            yoUSD: {
+                tokenAddress: '0x0000000f2eb9f69274678c76222b35eec7588a65',
+                sourceUrl: 'https://api.yo.xyz/api/v1/vault/base/0x0000000f2eB9f69274678c76222B35eEc7588a65',
+                path: 'data.stats.yield.7d',
+                isIbYield: true,
+            },
+            yoBTC: {
+                tokenAddress: '0xbcbc8cb4d1e8ed048a6276a5e94a3e952660bcbc',
+                sourceUrl: 'https://api.yo.xyz/api/v1/vault/base/0xbCbc8cb4D1e8ED048a6276a5E94A3e952660BcbC',
+                path: 'data.stats.yield.7d',
+                isIbYield: true,
+            },
             ezETH: {
                 tokenAddress: '0x2416092f143378750bb29b79ed961ab195cceea5',
                 sourceUrl: 'https://app.renzoprotocol.com/api/apr',

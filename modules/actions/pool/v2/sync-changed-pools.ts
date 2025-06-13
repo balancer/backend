@@ -5,6 +5,7 @@ import { getChangedPoolsV2 } from '../../../sources/logs';
 import { getViemClient } from '../../../sources/viem-client';
 import { getLastSyncedBlock, upsertLastSyncedBlock } from '../../last-synced-block';
 import config from '../../../../config';
+import { updateLiquidityValuesForPools } from '../update-liquidity';
 
 export const syncChangedPools = async (
     chain: Chain,
@@ -36,13 +37,7 @@ export const syncChangedPools = async (
     }));
 
     // Update status for all the pools
-    await prisma.prismaPool
-        .findMany({
-            where: { chain },
-            select: { id: true },
-        })
-        .then((pools) => pools.map((pool) => pool.id))
-        .then((poolIds) => poolOnChainDataService.updateOnChainStatus(poolIds, chain));
+    await poolOnChainDataService.updateOnChainStatus(chain);
 
     // Update other data only for the pools that have changed
     const tokenPrices = await prisma.prismaTokenCurrentPrice.findMany({
@@ -58,25 +53,32 @@ export const syncChangedPools = async (
 
     const allChangedPools = new Set<string>();
 
-    for (let i = 0; i < numBatches; i++) {
-        const from = startBlock + (i > 0 ? 1 : 0) + i * rpcMaxBlockRange;
-        const to = Math.min(startBlock + (i + 1) * rpcMaxBlockRange, Number(endBlock));
+    if (lastSyncBlock > 0) {
+        for (let i = 0; i < numBatches; i++) {
+            const from = startBlock + (i > 0 ? 1 : 0) + i * rpcMaxBlockRange;
+            const to = Math.min(startBlock + (i + 1) * rpcMaxBlockRange, Number(endBlock));
 
-        const changedPools = await getChangedPoolsV2(vaultAddress, viemClient, BigInt(from), BigInt(to));
-        changedPools.forEach((pool) => allChangedPools.add(pool));
+            const changedPools = await getChangedPoolsV2(vaultAddress, viemClient, BigInt(from), BigInt(to));
+            changedPools.forEach((pool) => allChangedPools.add(pool));
+        }
+
+        // always sync LBP pools
+        // This might get slow on GNOSIS, because of the Circle pools
+        const lbps = await prisma.prismaPool.findMany({
+            where: {
+                chain,
+                type: 'LIQUIDITY_BOOTSTRAPPING',
+                protocolVersion: 2,
+            },
+            select: { id: true },
+        });
+        lbps.forEach((pool) => allChangedPools.add(pool.id));
+    } else {
+        // Sync all the pools
     }
 
-    // always sync LBP pools
-    const lbps = await prisma.prismaPool.findMany({
-        where: {
-            chain,
-            type: 'LIQUIDITY_BOOTSTRAPPING',
-        },
-        select: { id: true },
-    });
-    lbps.forEach((pool) => allChangedPools.add(pool.id));
-
-    await poolOnChainDataService.updateOnChainData(Array.from(allChangedPools), chain, Number(endBlock), tokenPrices);
+    await poolOnChainDataService.updateOnChainData(chain, Number(endBlock), tokenPrices, Array.from(allChangedPools));
+    await updateLiquidityValuesForPools(chain, Array.from(allChangedPools));
 
     await upsertLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.POOLS, Number(endBlock));
 

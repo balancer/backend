@@ -15,7 +15,7 @@ export default <NetworkData>{
         startDate: '2022-01-01',
         balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmWUgkiUM5c3BW1Z51DUkZfnyQfyfesE8p3BRnEtA9vyPL`,
         balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmecD1yHQqmY11rx997C2e4TMP1EGCaX4shZ8AT959bo6Z`,
-        balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmUWvTcC5qjPkdR9GFBvZa2LuzxiriJgv5cKrCNGbb5BNP`,
+        balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmNTyZhnVFUjSJNZC3U8hgUppv3uBtQ1fHWBJiufXedk8p`,
         gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/Qmdtj1ix1nUCRtSoiyF7a3oKMSvrKT8KTEFJdep53EHtRy`,
         aura: 'https://data.aura.finance/graphql',
     },
@@ -215,6 +215,12 @@ export default <NetworkData>{
                 isIbYield: true,
             },
             sFRAX: {
+                tokenAddress: '0x5bff88ca1442c2496f7e475e9e7786383bc070c0',
+                sourceUrl: 'https://api.frax.finance/v2/frax/sfrax/summary/history?range=1d',
+                path: 'items.0.sfraxApr',
+                isIbYield: true,
+            },
+            sfrxUSD: {
                 tokenAddress: '0x2dd1b4d4548accea497050619965f91f78b3b532',
                 sourceUrl: 'https://api.frax.finance/v2/frax/sfrax/summary/history?range=1d',
                 path: 'items.0.sfraxApr',

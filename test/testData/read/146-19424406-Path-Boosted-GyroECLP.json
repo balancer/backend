@@ -5,19 +5,32 @@
     },
     "swapPath": {
         "swapKind": 0,
-        "amountRaw": "1000000000000000",
-        "tokens": [
-            "0x039e2fB66102314Ce7b64Ce5Ce3E5183bc94aD38",
-            "0x6c49b18333a1135e9a376560c07e6d1fd0350eaf",
-            "0x6646248971427b80ce531bdd793e2eb859347e55",
-            "0x29219dd400f2Bf60E5a23d13Be72B486D4038894"
-        ],
-        "pools": [
-            "0x6c49b18333a1135e9a376560c07e6d1fd0350eaf",
-            "0x0af8ea4de2ecfb962cdbb66033a46afe99836994",
-            "0x6646248971427b80ce531bdd793e2eb859347e55"
-        ],
-        "outputRaw": "1424610"
+        "paths": [
+            {
+                "amountRaw": "1000000000000000",
+                "tokens": [
+                    "0x039e2fB66102314Ce7b64Ce5Ce3E5183bc94aD38",
+                    "0x6c49b18333a1135e9a376560c07e6d1fd0350eaf",
+                    "0x6646248971427b80ce531bdd793e2eb859347e55",
+                    "0x29219dd400f2Bf60E5a23d13Be72B486D4038894"
+                ],
+                "pools": [
+                    {
+                        "poolAddress": "0x6c49b18333a1135e9a376560c07e6d1fd0350eaf",
+                        "poolType": "Buffer"
+                    },
+                    {
+                        "poolAddress": "0x0af8ea4de2ecfb962cdbb66033a46afe99836994",
+                        "poolType": "GYROE"
+                    },
+                    {
+                        "poolAddress": "0x6646248971427b80ce531bdd793e2eb859347e55",
+                        "poolType": "Buffer"
+                    }
+                ],
+                "calculatedAmountRaw": "1424610"
+            }
+        ]
     },
     "pools": [
         {
@@ -28,6 +41,10 @@
             "tokens": [
                 "0x6c49b18333a1135e9a376560c07e6d1fd0350eaf",
                 "0x039e2fB66102314Ce7b64Ce5Ce3E5183bc94aD38"
+            ],
+            "decimals": [
+                18,
+                18
             ],
             "rate": "1004439602085742"
         },
@@ -79,17 +96,11 @@
                 "0x6646248971427b80ce531bdd793e2eb859347e55",
                 "0x29219dd400f2Bf60E5a23d13Be72B486D4038894"
             ],
+            "decimals": [
+                6,
+                6
+            ],
             "rate": "1000508632875933999"
-        }
-    ],
-    "underlyingTokens": [
-        {
-            "address": "0x039e2fB66102314Ce7b64Ce5Ce3E5183bc94aD38",
-            "decimals": 18
-        },
-        {
-            "address": "0x29219dd400f2Bf60E5a23d13Be72B486D4038894",
-            "decimals": 6
         }
     ]
 }

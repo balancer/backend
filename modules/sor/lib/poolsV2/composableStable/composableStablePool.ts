@@ -308,4 +308,17 @@ export class ComposableStablePool implements BasePool {
 
         return { tIn, tOut };
     }
+
+    public copy(): ComposableStablePool {
+        return new ComposableStablePool(
+            this.id,
+            this.address,
+            this.chain,
+            this.amp,
+            this.swapFee,
+            this.tokens.map((token) => token.copy()),
+            this.totalShares,
+            this.tokenPairs,
+        );
+    }
 }

@@ -1,0 +1,35 @@
+# Input types for the mutation
+input LBPoolInput {
+    address: String!
+    chain: GqlChain!
+}
+
+input LBPMetadataInput {
+    lbpName: String!
+    description: String!
+    tokenLogo: String!
+    website: String!
+    x: String
+    discord: String
+    telegram: String
+    farcaster: String
+}
+
+input CreateLBPInput {
+    poolContract: LBPoolInput!
+    metadata: LBPMetadataInput!
+}
+
+type LBPPriceChartData {
+    intervalTimestamp: Int!
+    projectTokenPrice: Float!
+    reservePrice: Float!
+}
+
+type Query {
+    lbpPriceChart(id: String!, chain: GqlChain!, interval: Int): [LBPPriceChartData!]
+}
+
+type Mutation {
+    createLBP(input: CreateLBPInput!): Boolean!
+}

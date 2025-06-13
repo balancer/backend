@@ -1,16 +1,15 @@
-import { type PublicClient, createPublicClient, http, type Address, type Chain, erc4626Abi } from 'viem';
+import { type PublicClient, createPublicClient, http, type Address, type Chain, erc4626Abi, erc20Abi } from 'viem';
 import { CHAINS, VAULT_V3 } from '@balancer/sdk';
+
+import { TransformBigintToString } from '../../types';
 
 export type BufferImmutable = {
     tokens: Address[];
+    decimals: number[]; // this is an addition required to scale the rate and transform from/to fixedPoint/floatPoint
 };
 
 type BufferMutable = {
     rate: bigint;
-};
-
-type TransformBigintToString<T> = {
-    [K in keyof T]: T[K] extends bigint ? string : T[K] extends bigint[] ? string[] : T[K];
 };
 
 export class BufferPool {
@@ -33,8 +32,23 @@ export class BufferPool {
             blockNumber,
         });
 
+        const mainTokenDecimals = await this.client.readContract({
+            address,
+            abi: erc20Abi,
+            functionName: 'decimals',
+            blockNumber,
+        });
+
+        const underlyingTokenDecimals = await this.client.readContract({
+            address: asset,
+            abi: erc20Abi,
+            functionName: 'decimals',
+            blockNumber,
+        });
+
         return {
             tokens: [address, asset],
+            decimals: [mainTokenDecimals, underlyingTokenDecimals],
         };
     }
 

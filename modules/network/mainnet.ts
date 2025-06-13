@@ -59,13 +59,7 @@ export const mainnetNetworkConfig: NetworkConfig = {
         },
         {
             name: 'update-liquidity-for-inactive-pools',
-            interval: every(1, 'days'),
-            alarmEvaluationPeriod: 1,
-            alarmDatapointsToAlarm: 1,
-        },
-        {
-            name: 'update-liquidity-for-active-pools',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(6, 'minutes') : every(2, 'minutes'),
+            interval: every(10, 'minutes'),
         },
         {
             name: 'load-on-chain-data-for-pools-with-active-updates',
@@ -92,10 +86,6 @@ export const mainnetNetworkConfig: NetworkConfig = {
             interval: every(90, 'minutes'),
         },
         {
-            name: 'update-lifetime-values-for-all-pools',
-            interval: every(50, 'minutes'),
-        },
-        {
             name: 'sync-changed-pools',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(2, 'minutes') : every(30, 'seconds'),
             alarmEvaluationPeriod: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
@@ -115,7 +105,7 @@ export const mainnetNetworkConfig: NetworkConfig = {
         },
         {
             name: 'update-fee-volume-yield-all-pools',
-            interval: every(1, 'hours'),
+            interval: every(30, 'minutes'),
         },
         {
             name: 'sync-vebal-balances',
@@ -165,10 +155,6 @@ export const mainnetNetworkConfig: NetworkConfig = {
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(6, 'minutes') : every(2, 'minutes'),
         },
         {
-            name: 'update-7-30-days-swap-apr',
-            interval: every(8, 'hours'),
-        },
-        {
             name: 'update-surplus-aprs',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(1, 'minutes'),
         },
@@ -200,10 +186,6 @@ export const mainnetNetworkConfig: NetworkConfig = {
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(1, 'minutes'),
         },
         { name: 'sync-cow-amm-snapshots', interval: every(90, 'minutes') },
-        {
-            name: 'update-cow-amm-volume-and-fees',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(60, 'minutes') : every(20, 'minutes'),
-        },
         // V3 jobs
         {
             name: 'add-pools-v3',

@@ -193,5 +193,8 @@ export type FxData = ReturnType<typeof fx>;
 export type GyroData = ReturnType<typeof gyro>;
 export type ElementData = ReturnType<typeof element>;
 export type StableData = ReturnType<typeof stable>;
-export type QuantAmmWeightedData = ReturnType<typeof quantAmmWeighted>;
+export type QuantAmmWeightedData = ReturnType<typeof quantAmmWeighted> & {
+    firstFourWeightsAndMultipliers?: string[];
+    secondFourWeightsAndMultipliers?: string[];
+};
 export type ReclammData = ReturnType<typeof reclamm>;

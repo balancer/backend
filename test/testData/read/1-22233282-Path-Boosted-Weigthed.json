@@ -5,15 +5,22 @@
     },
     "swapPath": {
         "swapKind": 0,
-        "amountRaw": "42348",
-        "tokens": [
-            "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
-            "0x775f661b0bd1739349b9a2a3ef60be277c5d2d29"
-        ],
-        "pools": [
-            "0x8523bcadcda4bd329435940dcc49a7c4c0a14d94"
-        ],
-        "outputRaw": "16239488733056225"
+        "paths": [
+            {
+                "amountRaw": "42348",
+                "tokens": [
+                    "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+                    "0x775f661b0bd1739349b9a2a3ef60be277c5d2d29"
+                ],
+                "pools": [
+                    {
+                        "poolAddress": "0x8523bcadcda4bd329435940dcc49a7c4c0a14d94",
+                        "poolType": "WEIGHTED"
+                    }
+                ],
+                "calculatedAmountRaw": "16239488733056225"
+            }
+        ]
     },
     "pools": [
         {
@@ -65,6 +72,5 @@
             ],
             "aggregateSwapFee": "500000000000000000"
         }
-    ],
-    "underlyingTokens": []
+    ]
 }

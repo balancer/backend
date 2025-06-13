@@ -11,24 +11,9 @@ export const syncOnchainDataForAllPools = async (
     yieldProtocolFeePercentage: string,
     swapProtocolFeePercentage: string,
     gyroConfig?: string,
-): Promise<string[]> => {
+) => {
     // Get all the pools
-    const poolIds = (
-        await prisma.prismaPool.findMany({
-            select: { id: true },
-            where: {
-                NOT: {
-                    categories: {
-                        has: 'BLACK_LISTED',
-                    },
-                },
-                chain,
-            },
-        })
-    ).map((item) => item.id);
-
     return syncOnChainDataForPools(
-        poolIds,
         blockNumber,
         chain,
         vaultAddress,
@@ -40,7 +25,6 @@ export const syncOnchainDataForAllPools = async (
 };
 
 export const syncOnChainDataForPools = async (
-    poolIds: string[],
     blockNumber: number,
     chain: Chain,
     vaultAddress: string,
@@ -48,9 +32,8 @@ export const syncOnChainDataForPools = async (
     yieldProtocolFeePercentage: string,
     swapProtocolFeePercentage: string,
     gyroConfig?: string,
-): Promise<string[]> => {
-    const chunks = _.chunk(poolIds, 100);
-
+    poolIds?: string[],
+) => {
     const poolOnChainDataService = new PoolOnChainDataService(() => ({
         vaultAddress,
         balancerQueriesAddress,
@@ -65,10 +48,8 @@ export const syncOnChainDataForPools = async (
         },
     });
 
-    for (const chunk of chunks) {
-        await poolOnChainDataService.updateOnChainStatus(chunk, chain);
-        await poolOnChainDataService.updateOnChainData(chunk, chain, blockNumber, tokenPrices);
-    }
+    await poolOnChainDataService.updateOnChainStatus(chain, poolIds);
+    await poolOnChainDataService.updateOnChainData(chain, blockNumber, tokenPrices, poolIds);
 
-    return poolIds;
+    return 'OK';
 };
