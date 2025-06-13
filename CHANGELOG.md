@@ -1,5 +1,11 @@
 # backend
 
+## 1.44.1
+
+### Patch Changes
+
+-   6604cbc: APR for yUTY on AVAX
+
 ## 1.44.0
 
 ### Minor Changes
