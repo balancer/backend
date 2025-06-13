@@ -2,17 +2,7 @@ import { Chain, PrismaPoolAprItem, PrismaPoolAprItemGroup, PrismaPoolAprType } f
 import { YbAprHandlers } from '../../../pool/lib/apr-data-sources/yb-apr-handlers';
 import { TokenApr, YbAprConfig } from './types';
 import { PoolAPRData, AprHandler } from '../../types';
-
-/**
- * Helper utility functions for pool operations
- */
-function collectsYieldFee(pool: PoolAPRData): boolean {
-    return pool.type === 'COMPOSABLE_STABLE' || pool.type === 'META_STABLE' || pool.type === 'PHANTOM_STABLE';
-}
-
-function tokenCollectsYieldFee(token: any): boolean {
-    return token.token.underlyingTokenAddress !== null && token.token.underlyingTokenAddress !== undefined;
-}
+import { collectsYieldFee, tokenCollectsYieldFee } from '../../../pool/lib/pool-utils';
 
 /**
  * Calculator for yield-bearing tokens APR
@@ -21,10 +11,7 @@ function tokenCollectsYieldFee(token: any): boolean {
 export class YbTokensAprHandler implements AprHandler {
     private ybTokensAprHandlers: YbAprHandlers;
 
-    constructor(
-        private aprConfig: YbAprConfig,
-        chain: Chain,
-    ) {
+    constructor(private aprConfig: YbAprConfig, chain: Chain) {
         this.ybTokensAprHandlers = new YbAprHandlers(this.aprConfig, chain);
     }
 
@@ -107,8 +94,8 @@ export class YbTokensAprHandler implements AprHandler {
                         pool.type === 'META_STABLE'
                             ? parseFloat(pool.dynamicData.protocolSwapFee || '0')
                             : pool.protocolVersion === 3
-                              ? parseFloat(pool.dynamicData.aggregateYieldFee || '0.1')
-                              : parseFloat(pool.dynamicData.protocolYieldFee || '0');
+                            ? parseFloat(pool.dynamicData.aggregateYieldFee || '0.1')
+                            : parseFloat(pool.dynamicData.protocolYieldFee || '0');
 
                     userApr = userApr * (1 - fee);
                 }
