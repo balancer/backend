@@ -1,3 +1,20 @@
+import { AaveRewardsAprConfig } from '../aprs/handlers/types';
+
+export interface AprHandlerConfigs {
+    // nestedPoolAprHandler: boolean;
+    // swapFeeAprHandler: boolean;
+    // dynamicSwapFeeAprHandler: boolean;
+    // gaugeAprHandler: boolean;
+    ybAprHandler?: YbAprConfig;
+    aaveRewardsAprHandler?: AaveRewardsAprConfig;
+    // reliquaryAprHandler?:  ReliquaryAprConfig;
+    // beetswarsAprHandler?:  BeetswarsAprConfig;
+    // veBalProtocolAprHandler?:  VeBalProtocolAprConfig;
+    // veBalVotingAprHandler?: VeBalVotingAprConfig;
+    // morphoRewardAprHandler?: MorphоRewardAprConfig;
+    // quantAmmAprHandler?: QuantAmmAprConfig;
+}
+
 export interface YbAprConfig {
     aave?: AaveAprConfig;
     avalon?: AvalonAprConfig;

@@ -15,29 +15,3 @@ export interface AprHandler {
      */
     getAprServiceName(): string;
 }
-
-/**
- * Types of APR calculators available in the system
- */
-export type AprCalculatorType =
-    | 'swapFeeApr'
-    | 'boostedPoolApr'
-    | 'dynamicSwapFeeApr'
-    | 'gaugeApr'
-    | 'veBalProtocolApr'
-    | 'veBalVotingApr'
-    | 'morphoRewardsApr'
-    | 'ybTokensApr'
-    | 'aaveApiApr'
-    | 'masterchefFarmApr'
-    | 'reliquaryFarmApr'
-    | 'beetswarsGaugeVotingApr'
-    | 'quantAmmApr';
-
-/**
- * Configuration for APR calculators
- */
-export interface AprCalculatorConfig {
-    type: AprCalculatorType;
-    params?: Record<string, any>;
-}

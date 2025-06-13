@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 import { DeploymentEnv, NetworkConfig, NetworkData } from './network-config-types';
-import { BoostedPoolAprService } from '../pool/lib/apr-data-sources/nested-pool-apr.service';
+import { NestedPoolAprService } from '../pool/lib/apr-data-sources/nested-pool-apr.service';
 import { DynamicSwapFeeFromEventsAprService, SwapFeeAprService } from '../pool/lib/apr-data-sources';
 import { GaugeAprService } from '../pool/lib/apr-data-sources/ve-bal-gauge-apr.service';
 import { UserSyncGaugeBalanceService } from '../user/lib/user-sync-gauge-balance.service';
@@ -19,8 +19,8 @@ export const sonicNetworkConfig: NetworkConfig = {
     data: sonicNetworkData,
     provider: new ethers.providers.JsonRpcProvider({ url: sonicNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
-        new YbTokensAprService(sonicNetworkData.ybAprConfig, sonicNetworkData.chain.prismaId),
-        new BoostedPoolAprService(),
+        new YbTokensAprService(sonicNetworkData.aprHandlers.ybAprHandler!, sonicNetworkData.chain.prismaId),
+        new NestedPoolAprService(),
         new SwapFeeAprService(),
         new DynamicSwapFeeFromEventsAprService(),
         new GaugeAprService(),

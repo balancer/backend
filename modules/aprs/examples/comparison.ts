@@ -17,7 +17,7 @@ async function comparisonExample(chain: Chain = 'MAINNET', poolId = '0x85b2b559b
     });
 
     // Old implementation
-    await poolService.updatePoolAprs(chain, [poolId]);
+    await poolService.updatePoolAprs(chain);
     const oldItems = await prisma.prismaPoolAprItem.findMany({ where: { poolId } });
 
     oldItems.forEach((item) => {

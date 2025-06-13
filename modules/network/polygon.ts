@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 import { DeploymentEnv, NetworkConfig, NetworkData } from './network-config-types';
-import { BoostedPoolAprService } from '../pool/lib/apr-data-sources/nested-pool-apr.service';
+import { NestedPoolAprService } from '../pool/lib/apr-data-sources/nested-pool-apr.service';
 import { SwapFeeAprService } from '../pool/lib/apr-data-sources/';
 import { GaugeAprService } from '../pool/lib/apr-data-sources/ve-bal-gauge-apr.service';
 import { UserSyncGaugeBalanceService } from '../user/lib/user-sync-gauge-balance.service';
@@ -17,8 +17,8 @@ export const polygonNetworkConfig: NetworkConfig = {
     data: polygonNetworkData,
     provider: new ethers.providers.JsonRpcProvider({ url: polygonNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
-        new YbTokensAprService(polygonNetworkData.ybAprConfig, polygonNetworkData.chain.prismaId),
-        new BoostedPoolAprService(),
+        new YbTokensAprService(polygonNetworkData.aprHandlers.ybAprHandler!, polygonNetworkData.chain.prismaId),
+        new NestedPoolAprService(),
         new SwapFeeAprService(),
         new GaugeAprService(),
     ],

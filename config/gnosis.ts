@@ -71,63 +71,65 @@ export default <NetworkData>{
     multicall: '0xbb6fab6b627947dae0a75808250d8b2652952cb5',
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',
     avgBlockSpeed: 1,
-    ybAprConfig: {
-        stakewise: {
-            url: 'https://gnosis-graph.stakewise.io/subgraphs/name/stakewise/stakewise',
-            token: '0xf490c80aae5f2616d3e3bda2483e30c4cb21d1a0',
-        },
-        defaultHandlers: {
-            wstETH: {
-                tokenAddress: '0x6c76971f98945ae98dd7d4dfca8711ebea946ea6',
-                sourceUrl: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
-                path: 'data.smaApr',
-                isIbYield: true,
+    aprHandlers: {
+        ybAprHandler: {
+            stakewise: {
+                url: 'https://gnosis-graph.stakewise.io/subgraphs/name/stakewise/stakewise',
+                token: '0xf490c80aae5f2616d3e3bda2483e30c4cb21d1a0',
             },
-            rETH: {
-                tokenAddress: '0xc791240d1f2def5938e2031364ff4ed887133c3d',
-                sourceUrl: 'https://api.rocketpool.net/mainnet/reth/apr',
-                path: 'yearlyAPR',
-                isIbYield: true,
+            defaultHandlers: {
+                wstETH: {
+                    tokenAddress: '0x6c76971f98945ae98dd7d4dfca8711ebea946ea6',
+                    sourceUrl: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
+                    path: 'data.smaApr',
+                    isIbYield: true,
+                },
+                rETH: {
+                    tokenAddress: '0xc791240d1f2def5938e2031364ff4ed887133c3d',
+                    sourceUrl: 'https://api.rocketpool.net/mainnet/reth/apr',
+                    path: 'yearlyAPR',
+                    isIbYield: true,
+                },
             },
-        },
-        aave: {
-            v3: {
-                subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/HtcDaL8L8iZ2KQNNS44EBVmLruzxuNAz1RkBYdui1QUT`,
-                tokens: {
-                    USDC: {
-                        underlyingAssetAddress: '0xddafbb505ad214d7b80b1f830fccc89b60fb7a83',
-                        aTokenAddress: '0xc6b7aca6de8a6044e0e32d0c841a89244a10d284',
-                        wrappedTokens: {
-                            stataGnoUSDC: '0x270ba1f35d8b87510d24f693fccc0da02e6e4eeb',
+            aave: {
+                v3: {
+                    subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/HtcDaL8L8iZ2KQNNS44EBVmLruzxuNAz1RkBYdui1QUT`,
+                    tokens: {
+                        USDC: {
+                            underlyingAssetAddress: '0xddafbb505ad214d7b80b1f830fccc89b60fb7a83',
+                            aTokenAddress: '0xc6b7aca6de8a6044e0e32d0c841a89244a10d284',
+                            wrappedTokens: {
+                                stataGnoUSDC: '0x270ba1f35d8b87510d24f693fccc0da02e6e4eeb',
+                            },
                         },
-                    },
-                    USDCn: {
-                        underlyingAssetAddress: '0x2a22f9c3b484c3629090feed35f17ff8f88f76f0',
-                        aTokenAddress: '0xc0333cb85b59a788d8c7cae5e1fd6e229a3e5a65',
-                        wrappedTokens: {
-                            stataGnoUSDCe: '0xf0e7ec247b918311afa054e0aedb99d74c31b809',
-                            waGnoUSDCe: '0x51350d88c1bd32cc6a79368c9fb70373fb71f375',
+                        USDCn: {
+                            underlyingAssetAddress: '0x2a22f9c3b484c3629090feed35f17ff8f88f76f0',
+                            aTokenAddress: '0xc0333cb85b59a788d8c7cae5e1fd6e229a3e5a65',
+                            wrappedTokens: {
+                                stataGnoUSDCe: '0xf0e7ec247b918311afa054e0aedb99d74c31b809',
+                                waGnoUSDCe: '0x51350d88c1bd32cc6a79368c9fb70373fb71f375',
+                            },
                         },
-                    },
-                    WETH: {
-                        underlyingAssetAddress: '0x6a023ccd1ff6f2045c3309768ead9e68f978f6e1',
-                        aTokenAddress: '0xa818f1b57c201e092c4a2017a91815034326efd1',
-                        wrappedTokens: {
-                            waGnoWETH: '0x57f664882f762fa37903fc864e2b633d384b411a',
+                        WETH: {
+                            underlyingAssetAddress: '0x6a023ccd1ff6f2045c3309768ead9e68f978f6e1',
+                            aTokenAddress: '0xa818f1b57c201e092c4a2017a91815034326efd1',
+                            wrappedTokens: {
+                                waGnoWETH: '0x57f664882f762fa37903fc864e2b633d384b411a',
+                            },
                         },
-                    },
-                    GNO: {
-                        underlyingAssetAddress: '0x9c58bacc331c9aa871afd802db6379a98e80cedb',
-                        aTokenAddress: '0xa1fa064a85266e2ca82dee5c5ccec84df445760e',
-                        wrappedTokens: {
-                            waGnoGNO: '0x7c16f0185a26db0ae7a9377f23bc18ea7ce5d644',
+                        GNO: {
+                            underlyingAssetAddress: '0x9c58bacc331c9aa871afd802db6379a98e80cedb',
+                            aTokenAddress: '0xa1fa064a85266e2ca82dee5c5ccec84df445760e',
+                            wrappedTokens: {
+                                waGnoGNO: '0x7c16f0185a26db0ae7a9377f23bc18ea7ce5d644',
+                            },
                         },
-                    },
-                    wstETH: {
-                        underlyingAssetAddress: '0x6c76971f98945ae98dd7d4dfca8711ebea946ea6',
-                        aTokenAddress: '0x23e4e76d01b2002be436ce8d6044b0aa2f68b68a',
-                        wrappedTokens: {
-                            waGnowstETH: '0x773cda0cade2a3d86e6d4e30699d40bb95174ff2',
+                        wstETH: {
+                            underlyingAssetAddress: '0x6c76971f98945ae98dd7d4dfca8711ebea946ea6',
+                            aTokenAddress: '0x23e4e76d01b2002be436ce8d6044b0aa2f68b68a',
+                            wrappedTokens: {
+                                waGnowstETH: '0x773cda0cade2a3d86e6d4e30699d40bb95174ff2',
+                            },
                         },
                     },
                 },

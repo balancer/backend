@@ -3,7 +3,7 @@ import { DeploymentEnv, NetworkConfig, NetworkData } from './network-config-type
 import {
     SwapFeeAprService,
     GaugeAprService,
-    BoostedPoolAprService,
+    NestedPoolAprService,
     YbTokensAprService,
     MorphoRewardsAprService,
     DynamicSwapFeeFromEventsAprService,
@@ -23,8 +23,8 @@ export const baseNetworkConfig: NetworkConfig = {
     data: baseNetworkData,
     provider: new ethers.providers.JsonRpcProvider({ url: baseNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
-        new YbTokensAprService(baseNetworkData.ybAprConfig, baseNetworkData.chain.prismaId),
-        new BoostedPoolAprService(),
+        new YbTokensAprService(baseNetworkData.aprHandlers.ybAprHandler!, baseNetworkData.chain.prismaId),
+        new NestedPoolAprService(),
         new SwapFeeAprService(),
         new DynamicSwapFeeFromEventsAprService(),
         new GaugeAprService(),

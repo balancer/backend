@@ -36,30 +36,32 @@ export class AprRepository {
      * Only updates when the APR value has changed
      * @returns changed poolIDs
      */
-    async savePoolAprItems(aprItems: Omit<PrismaPoolAprItem, 'createdAt' | 'updatedAt'>[]): Promise<string[]> {
+    async savePoolAprItems(
+        chain: Chain,
+        aprItems: Omit<PrismaPoolAprItem, 'createdAt' | 'updatedAt'>[],
+    ): Promise<string[]> {
         if (aprItems.length === 0) return [];
 
-        // Get unique chains and pool IDs from the items
-        const chains = [...new Set(aprItems.map((item) => item.chain))];
+        // Get unique pool IDs from the items
         const poolIds = [...new Set(aprItems.map((item) => item.poolId))];
 
         // Fetch existing APR items
         const existingItems = await prisma.prismaPoolAprItem.findMany({
             where: {
-                chain: { in: chains },
+                chain: chain,
                 poolId: { in: poolIds },
                 id: { in: aprItems.map((item) => item.id) },
             },
         });
 
         // Create a lookup map for quick access
-        const existingItemsMap = new Map(existingItems.map((item) => [`${item.id}-${item.chain}`, item]));
+        const existingItemsMap = new Map(existingItems.map((item) => [item.id, item]));
 
         // Only create operations for items that don't exist or have changed
         const changedPoolIds = new Set<string>();
         const operations = aprItems
             .filter((item) => {
-                const existingItem = existingItemsMap.get(`${item.id}-${item.chain}`);
+                const existingItem = existingItemsMap.get(item.id);
                 const changed = !existingItem || existingItem.apr !== item.apr;
                 if (changed) {
                     changedPoolIds.add(item.poolId);

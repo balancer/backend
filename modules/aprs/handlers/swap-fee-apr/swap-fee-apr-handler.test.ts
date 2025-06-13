@@ -1,7 +1,7 @@
 import { expect, test, describe, beforeEach } from 'vitest';
 import { Chain, PrismaPoolAprType, PrismaPoolType } from '@prisma/client';
 import { SwapFeeAprHandler } from './swap-fee-apr-handler';
-import { PoolAPRData } from '../types';
+import { PoolAPRData } from '../../apr-repository';
 
 describe('SwapFeeAprCalculator', () => {
     let calculator: SwapFeeAprHandler;

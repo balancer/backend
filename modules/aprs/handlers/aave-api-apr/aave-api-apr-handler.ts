@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { Chain, PrismaPoolAprItem } from '@prisma/client';
 import { AprHandler, PoolAPRData } from '../../types';
-import { AaveApiConfig } from '../types';
+import { AaveRewardsAprConfig } from '../types';
 import { AaveChanClientInterface, AaveChanResponse, AaveChanClient } from './aave-chan-client';
 
 /**
@@ -10,10 +10,7 @@ import { AaveChanClientInterface, AaveChanResponse, AaveChanClient } from './aav
 export class AaveApiAprHandler implements AprHandler {
     private client: AaveChanClientInterface;
 
-    constructor(
-        private readonly config: AaveApiConfig,
-        injectedClient?: AaveChanClientInterface,
-    ) {
+    constructor(private readonly config: AaveRewardsAprConfig, injectedClient?: AaveChanClientInterface) {
         // Create a default client if not present
         this.client = injectedClient || new AaveChanClient(this.config);
     }

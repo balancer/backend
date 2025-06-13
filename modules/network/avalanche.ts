@@ -1,6 +1,6 @@
 import { BigNumber, ethers } from 'ethers';
 import { DeploymentEnv, NetworkConfig, NetworkData } from './network-config-types';
-import { BoostedPoolAprService } from '../pool/lib/apr-data-sources/nested-pool-apr.service';
+import { NestedPoolAprService } from '../pool/lib/apr-data-sources/nested-pool-apr.service';
 import { SwapFeeAprService } from '../pool/lib/apr-data-sources/';
 import { GaugeAprService } from '../pool/lib/apr-data-sources/ve-bal-gauge-apr.service';
 import { UserSyncGaugeBalanceService } from '../user/lib/user-sync-gauge-balance.service';
@@ -18,8 +18,8 @@ export const avalancheNetworkConfig: NetworkConfig = {
     data: avalancheNetworkData,
     provider: new ethers.providers.JsonRpcProvider({ url: avalancheNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
-        new YbTokensAprService(avalancheNetworkData.ybAprConfig, avalancheNetworkData.chain.prismaId),
-        new BoostedPoolAprService(),
+        new YbTokensAprService(avalancheNetworkData.aprHandlers.ybAprHandler!, avalancheNetworkData.chain.prismaId),
+        new NestedPoolAprService(),
         new SwapFeeAprService(),
         new GaugeAprService(),
         new AaveApiAprService(),

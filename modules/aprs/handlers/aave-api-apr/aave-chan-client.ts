@@ -1,4 +1,4 @@
-import { AaveApiConfig } from '../types';
+import { AaveRewardsAprConfig } from '../types';
 
 /**
  * Represents data for a token in Aave reserves
@@ -63,7 +63,7 @@ export interface AaveChanClientInterface {
 export class AaveChanClient implements AaveChanClientInterface {
     private readonly baseUrl = 'https://apps.aavechan.com/api/aave-all-incentives?chainId=';
 
-    constructor(private readonly config: AaveApiConfig) {}
+    constructor(private readonly config: AaveRewardsAprConfig) {}
 
     /**
      * Fetch incentives for a specific chain

@@ -1,5 +1,5 @@
 export type { YbAprConfig } from './yb-tokens/types';
 
-export type AaveApiConfig = {
+export type AaveRewardsAprConfig = {
     chainId: number;
 };

@@ -3,7 +3,7 @@ import { PoolForAPRs } from '../../../../prisma/prisma-types';
 import { prisma } from '../../../../prisma/prisma-client';
 import { collectsYieldFee } from '../pool-utils';
 
-export class BoostedPoolAprService implements PoolAprService {
+export class NestedPoolAprService implements PoolAprService {
     public getAprServiceName(): string {
         return 'BoostedPoolAprService';
     }

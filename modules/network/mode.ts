@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 import { DeploymentEnv, NetworkConfig } from './network-config-types';
-import { BoostedPoolAprService } from '../pool/lib/apr-data-sources/nested-pool-apr.service';
+import { NestedPoolAprService } from '../pool/lib/apr-data-sources/nested-pool-apr.service';
 import { SwapFeeAprService } from '../pool/lib/apr-data-sources';
 import { GaugeAprService } from '../pool/lib/apr-data-sources/ve-bal-gauge-apr.service';
 import { UserSyncGaugeBalanceService } from '../user/lib/user-sync-gauge-balance.service';
@@ -16,8 +16,8 @@ export const modeNetworkConfig: NetworkConfig = {
     data: modeNetworkData,
     provider: new ethers.providers.JsonRpcProvider({ url: modeNetworkData.rpcUrl, timeout: 60000 }),
     poolAprServices: [
-        new YbTokensAprService(modeNetworkData.ybAprConfig, modeNetworkData.chain.prismaId),
-        new BoostedPoolAprService(),
+        new YbTokensAprService(modeNetworkData.aprHandlers.ybAprHandler!, modeNetworkData.chain.prismaId),
+        new NestedPoolAprService(),
         new SwapFeeAprService(),
         new GaugeAprService(),
     ],

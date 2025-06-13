@@ -116,16 +116,7 @@ export default <NetworkData>{
         ],
     },
     avgBlockSpeed: 1,
-    ybAprConfig: {
-        sftmx: {
-            tokens: {
-                sftmx: {
-                    address: '0xd7028092c830b5c8fce061af2e593413ebbc1fc1',
-                    ftmStakingAddress: '0xb458bfc855ab504a8a327720fcef98886065529b',
-                },
-            },
-        },
-    },
+    aprHandlers: {},
     datastudio: {
         main: {
             user: 'datafeed-service@datastudio-366113.iam.gserviceaccount.com',
