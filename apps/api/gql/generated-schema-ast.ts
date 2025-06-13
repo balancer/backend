@@ -4029,6 +4029,12 @@ export const schema = gql`
         x: String
     }
 
+    type LBPPriceChartData {
+        intervalTimestamp: Int!
+        projectTokenPrice: Float!
+        reservePrice: Float!
+    }
+
     input LBPoolInput {
         address: String!
         chain: GqlChain!
@@ -4158,6 +4164,7 @@ export const schema = gql`
         blocksGetBlocksPerSecond: Float! @deprecated
         blocksGetBlocksPerYear: Float! @deprecated
         latestSyncedBlocks: GqlLatestSyncedBlocks!
+        lbpPriceChart(chain: GqlChain!, id: String!, interval: Int): [LBPPriceChartData!]
 
         """
         Getting swap, add and remove events with paging

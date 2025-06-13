@@ -20,6 +20,16 @@ input CreateLBPInput {
     metadata: LBPMetadataInput!
 }
 
+type LBPPriceChartData {
+    intervalTimestamp: Int!
+    projectTokenPrice: Float!
+    reservePrice: Float!
+}
+
+type Query {
+    lbpPriceChart(id: String!, chain: GqlChain!, interval: Int): [LBPPriceChartData!]
+}
+
 type Mutation {
     createLBP(input: CreateLBPInput!): Boolean!
 }
