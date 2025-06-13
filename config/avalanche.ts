@@ -129,6 +129,12 @@ export default <NetworkData>{
             lensContractAddress: '0xc820c24905c210aefe21dae40723ec28d62c1544',
         },
         defaultHandlers: {
+            yUTY: {
+                tokenAddress: '0x580d5e1399157fd0d58218b7a514b60974f2ab01',
+                sourceUrl: 'https://api.xsy.fi/v1/yuty',
+                path: 'apy',
+                scale: 100,
+            },
             sAVAX: {
                 tokenAddress: '0x2b2c81e08f1af8835a78bb2a90ae924ace0ea4be',
                 sourceUrl: 'https://api.benqi.fi/liquidstaking/apr',
