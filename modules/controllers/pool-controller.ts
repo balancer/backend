@@ -207,7 +207,7 @@ export function PoolController(tracer?: any) {
 
             await upsertLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.ADD_POOLS_V3, latestBlock);
 
-            return poolsToSync;
+            return poolsToSync.map((pool) => pool.id);
         },
         /**
          * Syncs database pools state with the onchain state
