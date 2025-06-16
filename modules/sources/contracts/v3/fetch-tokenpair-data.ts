@@ -93,7 +93,10 @@ export async function fetchTokenPairData(
             // tokenA->tokenB with 1% of tokenA balance
             tokenPair.aToBAmountIn = parseUnits(tokenPair.tokenA.balance, tokenPair.tokenA.decimals) / 100n;
             // tokenA->tokenB with 100USD worth of tokenA
-            const oneHundredUsdOfTokenA = (parseFloat(tokenPair.tokenA.balance) / tokenPair.tokenA.balanceUsd) * 100;
+            const oneHundredUsdOfTokenA = (
+                (parseFloat(tokenPair.tokenA.balance) / tokenPair.tokenA.balanceUsd) *
+                100
+            ).toFixed(18);
             tokenPair.effectivePriceAmountIn = parseUnits(`${oneHundredUsdOfTokenA}`, tokenPair.tokenA.decimals);
 
             addEffectivePriceCallsToMulticaller(tokenPair, routerAddress, multicallerRouter);
