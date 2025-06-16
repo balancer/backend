@@ -1,5 +1,3 @@
-import { AaveRewardsAprConfig } from '../types';
-
 /**
  * Represents data for a token in Aave reserves
  */
@@ -47,7 +45,7 @@ export interface AaveChanClientInterface {
      * @param chainId Chain ID to fetch incentives for
      * @returns Promise with the incentives data
      */
-    fetchIncentives(chainId: number): Promise<AaveChanResponse>;
+    fetchIncentives(chainId: string): Promise<AaveChanResponse>;
 
     /**
      * Fetch prime incentives (Lido on Mainnet)
@@ -63,14 +61,14 @@ export interface AaveChanClientInterface {
 export class AaveChanClient implements AaveChanClientInterface {
     private readonly baseUrl = 'https://apps.aavechan.com/api/aave-all-incentives?chainId=';
 
-    constructor(private readonly config: AaveRewardsAprConfig) {}
+    constructor(private readonly chainId: string) {}
 
     /**
      * Fetch incentives for a specific chain
      * @param chainId Chain ID to fetch incentives for
      * @returns Promise with the incentives data
      */
-    async fetchIncentives(chainId: number): Promise<AaveChanResponse> {
+    async fetchIncentives(chainId: string): Promise<AaveChanResponse> {
         try {
             const response = (await fetch(`${this.baseUrl}${chainId}`).then((response) =>
                 response.json(),
@@ -88,7 +86,7 @@ export class AaveChanClient implements AaveChanClientInterface {
      * @returns Promise with the prime incentives data
      */
     async fetchPrimeIncentives(): Promise<AaveChanResponse> {
-        if (this.config.chainId !== 1) {
+        if (this.chainId !== `1`) {
             return {};
         }
 

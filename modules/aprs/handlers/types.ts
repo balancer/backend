@@ -4,17 +4,13 @@ export interface AprHandlerConfigs {
     // dynamicSwapFeeAprHandler: boolean;
     // gaugeAprHandler: boolean;
     ybAprHandler?: YbAprConfig;
-    aaveRewardsAprHandler?: AaveRewardsAprConfig;
+    aaveRewardsAprHandler?: boolean;
     maBeetsAprHandler?: MaBeetsAprConfig;
     // veBalProtocolAprHandler?:  VeBalProtocolAprConfig;
     // veBalVotingAprHandler?: VeBalVotingAprConfig;
     morphoRewardsAprHandler?: boolean;
     // quantAmmAprHandler?: QuantAmmAprConfig;
 }
-
-export type AaveRewardsAprConfig = {
-    chainId: number;
-};
 
 export interface MaBeetsAprConfig {
     beetsAddress: string;

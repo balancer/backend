@@ -3,7 +3,6 @@ import { Chain } from '@prisma/client';
 import { AaveApiAprHandler } from './aave-api-apr-handler';
 import { AaveChanClientInterface } from './aave-chan-client';
 import type { PoolAPRData } from '../../types';
-import { AaveRewardsAprConfig } from '../types';
 
 describe('AaveApiAprHandler', () => {
     // Mock implementation of the client
@@ -17,14 +16,14 @@ describe('AaveApiAprHandler', () => {
 
     let handler: AaveApiAprHandler;
     let mockPool: PoolAPRData;
-    const mockConfig: AaveRewardsAprConfig = { chainId: 1 }; // Mainnet
+    const mockChainId = '1'; // Mainnet
 
     beforeEach(() => {
         // Reset mocks
         vi.clearAllMocks();
 
         // Create handler with mocked client
-        handler = new AaveApiAprHandler(mockConfig, mockClient);
+        handler = new AaveApiAprHandler(mockChainId, mockClient);
 
         // Create a mock pool with tokens for testing
         mockPool = {
@@ -193,8 +192,8 @@ describe('AaveApiAprHandler', () => {
 
     test('should handle non-mainnet chains', async () => {
         // Create handler for Arbitrum
-        const arbitrumConfig: AaveRewardsAprConfig = { chainId: 42161 };
-        const arbitrumHandler = new AaveApiAprHandler(arbitrumConfig, mockClient);
+        const arbitrumChainId = '42161';
+        const arbitrumHandler = new AaveApiAprHandler(arbitrumChainId, mockClient);
 
         // Mock pool for Arbitrum
         const arbitrumPool = {

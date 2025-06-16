@@ -2,7 +2,7 @@ import { Chain } from '@prisma/client';
 import { AprHandler } from '../types';
 import * as handlers from '.';
 import config from '../../../config';
-import { AaveRewardsAprConfig } from './types';
+import { chainToChainId } from '../../network/chain-id-to-chain';
 
 /**
  * Creates handler instances for a specific chain
@@ -38,9 +38,7 @@ export function createHandlers(chain: Chain): AprHandler[] {
 
     // Add Aave API handler if configured for this chain
     if (config[chain].aprHandlers.aaveRewardsAprHandler) {
-        handlerList.push(
-            new handlers.AaveApiAprHandler(config[chain].aprHandlers.aaveRewardsAprHandler as AaveRewardsAprConfig),
-        );
+        handlerList.push(new handlers.AaveApiAprHandler(chainToChainId[chain]));
     }
 
     return handlerList;

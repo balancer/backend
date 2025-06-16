@@ -76,6 +76,7 @@ export default <NetworkData>{
     },
     aprHandlers: {
         morphoRewardsAprHandler: true,
+        aaveRewardsAprHandler: true,
         ybAprHandler: {
             fluid: {
                 url: 'https://api.fluid.instad.app/v2/lending/8453/tokens',

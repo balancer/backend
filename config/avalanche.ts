@@ -1,3 +1,4 @@
+import { tr } from '@faker-js/faker';
 import { env } from '../apps/env';
 import { DeploymentEnv, NetworkData } from '../modules/network/network-config-types';
 
@@ -73,6 +74,7 @@ export default <NetworkData>{
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',
     avgBlockSpeed: 2,
     aprHandlers: {
+        aaveRewardsAprHandler: true,
         ybAprHandler: {
             aave: {
                 v3: {

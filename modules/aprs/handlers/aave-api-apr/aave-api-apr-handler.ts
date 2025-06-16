@@ -2,7 +2,6 @@ import _ from 'lodash';
 import { Chain, PrismaPoolAprItem } from '@prisma/client';
 import { AprHandler, PoolAPRData } from '../../types';
 import { AaveChanClientInterface, AaveChanResponse, AaveChanClient } from './aave-chan-client';
-import { AaveRewardsAprConfig } from '../types';
 
 /**
  * Implementation of AprHandler for Aave API
@@ -10,9 +9,9 @@ import { AaveRewardsAprConfig } from '../types';
 export class AaveApiAprHandler implements AprHandler {
     private client: AaveChanClientInterface;
 
-    constructor(private readonly config: AaveRewardsAprConfig, injectedClient?: AaveChanClientInterface) {
+    constructor(private readonly chainId: string, injectedClient?: AaveChanClientInterface) {
         // Create a default client if not present
-        this.client = injectedClient || new AaveChanClient(this.config);
+        this.client = injectedClient || new AaveChanClient(chainId);
     }
 
     public getAprServiceName(): string {
@@ -25,12 +24,12 @@ export class AaveApiAprHandler implements AprHandler {
         const aprItems: Omit<PrismaPoolAprItem, 'createdAt' | 'updatedAt'>[] = [];
 
         // Fetch incentives for this chain
-        const aaveIncentives = await this.client.fetchIncentives(this.config.chainId);
+        const aaveIncentives = await this.client.fetchIncentives(this.chainId);
         const incentiveItems = await this.processIncentives(pools, aaveIncentives);
         aprItems.push(...incentiveItems);
 
         // For mainnet, also fetch prime instance items
-        if (this.config.chainId === 1) {
+        if (this.chainId === `1`) {
             const primeIncentives = await this.client.fetchPrimeIncentives();
             const primeItems = await this.processIncentives(pools, primeIncentives);
             aprItems.push(...primeItems);
