@@ -44,9 +44,6 @@ export class AprRepository {
     ): Promise<string[]> {
         if (newAprItems.length === 0) return [];
 
-        // Get unique pool IDs from the items
-        const poolIds = [...new Set(newAprItems.map((item) => item.poolId))];
-
         // Fetch all existing APR items
         const existingItems = await prisma.prismaPoolAprItem.findMany({
             where: {
@@ -127,7 +124,7 @@ export class AprRepository {
           ) AS sub
           WHERE dyn."poolId" = sub."poolId"
             AND dyn."chain" = sub."chain"
-            AND dyn.chain = ${chain}
+            AND dyn."chain" = ${chain}::"Chain"
             AND dyn."poolId" = ANY(${poolIds});
         `;
 
