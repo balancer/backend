@@ -34,7 +34,7 @@ export class BeetswarsGaugeVotingAprHandler implements AprHandler {
 
             aprItems.push({
                 id: itemId,
-                chain: networkContext.chain,
+                chain: 'SONIC',
                 poolId: this.FRESH_BEETS_POOL_ID,
                 title: 'Voting APR*',
                 apr: minApr,
@@ -45,7 +45,7 @@ export class BeetswarsGaugeVotingAprHandler implements AprHandler {
 
             aprItems.push({
                 id: `${itemId}-boost`,
-                chain: networkContext.chain,
+                chain: 'SONIC',
                 poolId: this.FRESH_BEETS_POOL_ID,
                 title: 'Voting APR Boost',
                 apr: maxApr,
