@@ -76,6 +76,9 @@ export default <NetworkData>{
     },
     avgBlockSpeed: 1,
     aprHandlers: {
+        maBeetsAprHandler: {
+            beetsAddress: '0x2d0e0814e62d80056181f5cd932274405966e4f0',
+        },
         ybAprHandler: {
             sts: {
                 token: '0xe5da20f15420ad15de0fa650600afc998bbe3955',

@@ -7,7 +7,7 @@ const aprsInclude = Prisma.validator<Prisma.PrismaPoolDefaultArgs>()({
     include: {
         dynamicData: true,
         tokens: { include: { token: true, nestedPool: true } },
-        staking: { include: { gauge: { include: { rewards: true } }, reliquary: true } },
+        staking: { include: { gauge: { include: { rewards: true } }, reliquary: { include: { levels: true } } } },
     },
 });
 
@@ -53,6 +53,8 @@ export class AprRepository {
                 id: { in: aprItems.map((item) => item.id) },
             },
         });
+
+        //TODO also remove items that are not in aprItems anymore
 
         // Create a lookup map for quick access
         const existingItemsMap = new Map(existingItems.map((item) => [item.id, item]));
