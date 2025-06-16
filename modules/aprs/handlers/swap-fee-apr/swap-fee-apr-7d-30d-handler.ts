@@ -1,7 +1,4 @@
-import { PoolAprService } from '../../pool-types';
-import { PoolForAPRs } from '../../../../prisma/prisma-types';
 import { prisma } from '../../../../prisma/prisma-client';
-import { prismaBulkExecuteOperations } from '../../../../prisma/prisma-util';
 import { Chain, PrismaPoolAprItem, PrismaPoolAprType, PrismaPoolType } from '@prisma/client';
 import { daysAgo, roundToMidnight } from '../../../common/time';
 import _ from 'lodash';
