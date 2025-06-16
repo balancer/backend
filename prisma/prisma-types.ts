@@ -113,11 +113,7 @@ export const prismaPoolWithExpandedNesting = Prisma.validator<Prisma.PrismaPoolD
                 },
             },
         },
-        aprItems: {
-            include: {
-                range: true,
-            },
-        },
+        aprItems: true,
         tokens: {
             orderBy: { index: 'asc' },
             include: {
@@ -288,11 +284,7 @@ export const prismaPoolMinimal = Prisma.validator<Prisma.PrismaPoolDefaultArgs>(
                 },
             },
         },
-        aprItems: {
-            include: {
-                range: true,
-            },
-        },
+        aprItems: true,
         tokens: {
             orderBy: { index: 'asc' },
             include: {

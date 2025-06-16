@@ -50,7 +50,6 @@ export class BeetswarsGaugeVotingAprHandler implements AprHandler {
                 title: 'Voting APR Boost',
                 apr: maxApr,
                 type: PrismaPoolAprType.STAKING_BOOST,
-                group: null,
                 rewardTokenAddress: null,
                 rewardTokenSymbol: null,
             });

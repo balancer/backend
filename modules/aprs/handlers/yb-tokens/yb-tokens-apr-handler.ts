@@ -1,4 +1,4 @@
-import { Chain, PrismaPoolAprItem, PrismaPoolAprItemGroup, PrismaPoolAprType } from '@prisma/client';
+import { Chain, PrismaPoolAprItem, PrismaPoolAprType } from '@prisma/client';
 import { YbAprHandlers } from '../../../pool/lib/apr-data-sources/yb-apr-handlers';
 import { TokenApr, YbAprConfig } from './types';
 import { PoolAPRData, AprHandler } from '../../types';

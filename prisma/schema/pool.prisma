@@ -166,7 +166,6 @@ model PrismaPoolAprItem {
     rewardTokenAddress  String?
     rewardTokenSymbol   String?
     apr                 Float
-    range               PrismaPoolAprRange?
 
     type                PrismaPoolAprType?
 
@@ -174,17 +173,6 @@ model PrismaPoolAprItem {
     @@index([chain, type])
 }
 
-model PrismaPoolAprRange {
-    @@id([id, chain])
-    @@unique([aprItemId, chain])
-
-    id                  String
-    chain               Chain
-    aprItemId           String
-    aprItem             PrismaPoolAprItem   @relation(fields:[aprItemId, chain], references: [id, chain], onDelete: Cascade)
-    min                 Float
-    max                 Float
-}
 
 enum PrismaPoolAprType {
     SWAP_FEE

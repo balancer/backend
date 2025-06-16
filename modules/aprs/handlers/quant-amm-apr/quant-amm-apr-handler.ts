@@ -130,7 +130,6 @@ export class QuantAmmAprHandler implements AprHandler {
                 apr: totalYearlyReturn,
                 title: 'Quant AMM APR',
                 type: 'QUANT_AMM_UPLIFT',
-                group: null,
                 rewardTokenAddress: null,
                 rewardTokenSymbol: null,
             });

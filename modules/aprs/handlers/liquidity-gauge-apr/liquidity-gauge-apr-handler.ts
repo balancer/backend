@@ -6,9 +6,8 @@
  * "Working balance" is 40% of a user balance in a gauge - used only for BAL rewards on v2 gauges on child gauges or on mainnet
  */
 import { secondsPerYear } from '../../../common/time';
-import { PrismaPoolAprItem, PrismaPoolAprRange, PrismaPoolAprType } from '@prisma/client';
+import { PrismaPoolAprItem, PrismaPoolAprType } from '@prisma/client';
 import { prisma } from '../../../../prisma/prisma-client';
-import { prismaBulkExecuteOperations } from '../../../../prisma/prisma-util';
 import { tokenService } from '../../../token/token.service';
 import { AprHandler, PoolAPRData } from '../../types';
 

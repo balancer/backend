@@ -56,16 +56,6 @@ export function mapAprItems(pool: PrismaPoolMinimal): GqlPoolAprItem[] {
             rewardTokenAddress: aprItem.rewardTokenAddress,
             rewardTokenSymbol: aprItem.rewardTokenSymbol,
         });
-
-        // Adding deprecated SWAP_FEE for backwards compatibility
-        if (aprItem.type === 'SWAP_FEE_24H') {
-            aprItems.push({
-                ...aprItem,
-                id: `${aprItem.id.replace('-24h', '')}`,
-                title: aprItem.title.replace(' (24h)', ''),
-                type: 'SWAP_FEE',
-            });
-        }
     }
     return aprItems;
 }

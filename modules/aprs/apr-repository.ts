@@ -138,7 +138,6 @@ export class AprRepository {
      * Delete all APR items for a chain
      */
     async deleteAllPoolAprItems(chain: Chain): Promise<void> {
-        await prisma.prismaPoolAprRange.deleteMany({ where: { chain } });
         await prisma.prismaPoolAprItem.deleteMany({ where: { chain } });
     }
 }
