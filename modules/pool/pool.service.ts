@@ -12,7 +12,6 @@ import {
     QueryPoolGetPoolsArgs,
 } from '../../apps/api/gql/generated-schema';
 import { tokenService } from '../token/token.service';
-import { PoolAprUpdaterService } from './lib/pool-apr-updater.service';
 import { PoolGqlLoaderService } from './lib/pool-gql-loader.service';
 import { PoolOnChainDataService, PoolOnChainDataServiceOptions } from './lib/pool-on-chain-data.service';
 import { PoolSnapshotService } from './lib/pool-snapshot.service';
@@ -41,7 +40,6 @@ export class PoolService {
     constructor(
         private readonly poolOnChainDataService: PoolOnChainDataService,
         private readonly poolGqlLoaderService: PoolGqlLoaderService,
-        private readonly poolAprUpdaterService: PoolAprUpdaterService,
         private readonly poolSnapshotService: PoolSnapshotService,
     ) {}
 
@@ -160,16 +158,6 @@ export class PoolService {
         }
     }
 
-    public async updatePoolAprs(chain: Chain) {
-        await this.poolAprUpdaterService.updatePoolAprs(chain);
-        await syncIncentivizedCategory();
-    }
-
-    public async reloadAllPoolAprs(chain: Chain) {
-        await this.poolAprUpdaterService.reloadAllPoolAprs(chain);
-        await syncIncentivizedCategory();
-    }
-
     public async syncLatestReliquarySnapshotsForAllFarms(chain: Chain) {
         if (config[chain].subgraphs.reliquary) {
             const reliquarySnapshotService = new ReliquarySnapshotService(
@@ -202,6 +190,5 @@ const optionsResolverForPoolOnChainDataService: () => PoolOnChainDataServiceOpti
 export const poolService = new PoolService(
     new PoolOnChainDataService(optionsResolverForPoolOnChainDataService),
     new PoolGqlLoaderService(),
-    new PoolAprUpdaterService(),
     new PoolSnapshotService(coingeckoDataService),
 );

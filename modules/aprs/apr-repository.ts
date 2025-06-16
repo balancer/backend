@@ -22,7 +22,9 @@ export class AprRepository {
             include: {
                 dynamicData: true,
                 tokens: { include: { token: true, nestedPool: true } },
-                staking: { include: { gauge: { include: { rewards: true } }, reliquary: true } },
+                staking: {
+                    include: { gauge: { include: { rewards: true } }, reliquary: { include: { levels: true } } },
+                },
             },
             where: {
                 chain,

@@ -1,29 +1,16 @@
 import { ethers } from 'ethers';
 import { DeploymentEnv, NetworkConfig } from './network-config-types';
-import { NestedPoolAprService } from '../pool/lib/apr-data-sources/nested-pool-apr.service';
-import { SwapFeeAprService, DynamicSwapFeeFromEventsAprService } from '../pool/lib/apr-data-sources/';
-import { GaugeAprService } from '../pool/lib/apr-data-sources/ve-bal-gauge-apr.service';
 import { UserSyncGaugeBalanceService } from '../user/lib/user-sync-gauge-balance.service';
 import { every } from '../../apps/scheduler/intervals';
-import { YbTokensAprService } from '../pool/lib/apr-data-sources/yb-tokens-apr.service';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import config from '../../config';
 import { env } from '../../apps/env';
-import { QuantAmmAprService } from '../pool/lib/apr-data-sources/quant-amm-apr-handler';
 
 export const sepoliaNetworkData = config.SEPOLIA;
 
 export const sepoliaNetworkConfig: NetworkConfig = {
     data: sepoliaNetworkData,
     provider: new ethers.providers.JsonRpcProvider({ url: sepoliaNetworkData.rpcUrl, timeout: 60000 }),
-    poolAprServices: [
-        new YbTokensAprService(sepoliaNetworkData.aprHandlers.ybAprHandler!, sepoliaNetworkData.chain.prismaId),
-        new NestedPoolAprService(),
-        new SwapFeeAprService(),
-        new DynamicSwapFeeFromEventsAprService(),
-        new GaugeAprService(),
-        new QuantAmmAprService(),
-    ],
     userStakedBalanceServices: [new UserSyncGaugeBalanceService()],
     services: {
         balancerSubgraphService: new BalancerSubgraphService(

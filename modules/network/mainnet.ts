@@ -1,15 +1,5 @@
 import { ethers } from 'ethers';
 import { DeploymentEnv, NetworkConfig, NetworkData } from './network-config-types';
-import {
-    NestedPoolAprService,
-    SwapFeeAprService,
-    GaugeAprService,
-    YbTokensAprService,
-    VeBalProtocolAprService,
-    VeBalVotingAprService,
-    MorphoRewardsAprService,
-    DynamicSwapFeeFromEventsAprService,
-} from '../pool/lib/apr-data-sources';
 import { UserSyncGaugeBalanceService } from '../user/lib/user-sync-gauge-balance.service';
 import { every } from '../../apps/scheduler/intervals';
 import { env } from '../../apps/env';
@@ -17,26 +7,13 @@ import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer
 import config from '../../config';
 import { UserSyncAuraBalanceService } from '../user/lib/user-sync-aura-balance.service';
 import { UserSyncVebalLockBalanceService } from '../user/lib/user-sync-vebal-lock-balance.service';
-import { AaveApiAprService } from '../pool/lib/apr-data-sources/aave-api-apr-handler';
-import { QuantAmmAprService } from '../pool/lib/apr-data-sources/quant-amm-apr-handler';
 
 export const data: NetworkData = config.MAINNET;
 
 export const mainnetNetworkConfig: NetworkConfig = {
     data,
     provider: new ethers.providers.JsonRpcProvider({ url: data.rpcUrl, timeout: 60000 }),
-    poolAprServices: [
-        new YbTokensAprService(data.aprHandlers.ybAprHandler!, data.chain.prismaId),
-        new NestedPoolAprService(),
-        new SwapFeeAprService(),
-        new DynamicSwapFeeFromEventsAprService(),
-        new GaugeAprService(),
-        new VeBalProtocolAprService(data.rpcUrl),
-        new VeBalVotingAprService(),
-        new MorphoRewardsAprService(),
-        new AaveApiAprService(),
-        new QuantAmmAprService(),
-    ],
+
     userStakedBalanceServices: [
         new UserSyncGaugeBalanceService(),
         new UserSyncAuraBalanceService(),
@@ -132,10 +109,6 @@ export const mainnetNetworkConfig: NetworkConfig = {
             interval: every(1, 'days'),
             alarmEvaluationPeriod: 1,
             alarmDatapointsToAlarm: 1,
-        },
-        {
-            name: 'sync-merkl',
-            interval: every(15, 'minutes'),
         },
         {
             name: 'sync-rate-provider-reviews',

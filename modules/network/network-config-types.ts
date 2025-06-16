@@ -9,7 +9,6 @@ import { AprHandlerConfigs } from '../aprs/handlers/types';
 
 export interface NetworkConfig {
     data: NetworkData;
-    poolAprServices: PoolAprService[];
     userStakedBalanceServices: UserStakedBalanceService[];
     provider: BaseProvider;
     workerJobs: WorkerJob[];

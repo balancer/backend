@@ -3,7 +3,6 @@ import {
     SnapshotsController,
     UserBalancesController,
     CowAmmController,
-    AprsController,
     ContentController,
     FXPoolsController,
     PoolController,
@@ -13,7 +12,6 @@ import {
     TokenController,
     QuantAmmController,
 } from '../modules/controllers';
-import { PoolAprUpdaterService } from '../modules/pool/lib/pool-apr-updater.service';
 import { chainIdToChain } from '../modules/network/chain-id-to-chain';
 
 import { poolService } from '../modules/pool/pool.service';
@@ -26,6 +24,10 @@ import { prisma } from '../prisma/prisma-client';
 import { LBPController } from '../modules/controllers/lbp-controller';
 import { request, gql } from 'graphql-request';
 import _ from 'lodash';
+import { AprRepository } from '../modules/aprs/apr-repository';
+import { MerklAprHandler } from '../modules/aprs/handlers';
+import { SwapFeeApr7d30dHandler } from '../modules/aprs/handlers/swap-fee-apr';
+import { AprService } from '../modules/aprs';
 
 // TODO needed?
 const sftmxController = SftmxController();
@@ -153,9 +155,17 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
     } else if (job === 'sync-latest-fx-prices') {
         return FXPoolsController().syncLatestPrices(chain);
     } else if (job === 'sync-merkl') {
-        return AprsController().syncMerkl();
+        const aprRepository = new AprRepository();
+        const merklAprHandler = new MerklAprHandler();
+        const pools = await aprRepository.getPoolsForAprCalculation(chain);
+        const aprs = await merklAprHandler.calculateAprForPools(pools);
+        return await aprRepository.savePoolAprItems(chain, aprs);
     } else if (job === 'update-7-30-days-swap-apr') {
-        return AprsController().update7And30DaysSwapAprs(chain);
+        const aprRepository = new AprRepository();
+        const swapFee7d30dHandler = new SwapFeeApr7d30dHandler();
+        const pools = await aprRepository.getPoolsForAprCalculation(chain);
+        const aprs = await swapFee7d30dHandler.calculateAprForPools(pools);
+        return await aprRepository.savePoolAprItems(chain, aprs);
     } else if (job === 'sync-rate-provider-reviews') {
         return ContentController().syncRateProviderReviews();
     } else if (job === 'sync-hook-reviews') {
@@ -169,28 +179,16 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
     } else if (job === 'sync-sts-data') {
         return StakedSonicController().syncSonicStakingData();
     } else if (job === 'reload-pool-aprs') {
-        initRequestScopedContext();
-        setRequestScopedContextValue('chainId', chainId);
-        return poolService.reloadAllPoolAprs(chain);
+        const aprService = new AprService();
+        return aprService.reloadAprs(chain);
     } else if (job === 'update-pool-aprs') {
+        const aprService = new AprService();
         const chain = chainIdToChain[chainId];
         const id = process.argv[4];
-        const service = new PoolAprUpdaterService();
         if (id) {
-            const pools = await prisma.prismaPool.findMany({
-                where: { id: id, chain: chain },
-                include: {
-                    dynamicData: true,
-                    tokens: {
-                        include: {
-                            token: true,
-                        },
-                    },
-                },
-            });
-            return service.updateAprsForPools(pools);
+            return aprService.updateAprForPool(chain, id);
         } else {
-            return service.updatePoolAprs(chain);
+            return aprService.updateAprs(chain);
         }
     } else if (job === 'update-prices') {
         await tokenService.syncTokenContentData(chain);

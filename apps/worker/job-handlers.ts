@@ -19,7 +19,6 @@ import {
     SftmxController,
     CowAmmController,
     SnapshotsController,
-    AprsController,
     ContentController,
     PoolController,
     EventController,
@@ -33,6 +32,7 @@ import { TokenController } from '../../modules/controllers/token-controller';
 import { SubgraphMonitorController } from '../../modules/controllers/subgraph-monitor-controller';
 import config from '../../config';
 import { LBPController } from '../../modules/controllers/lbp-controller';
+import { AprService } from '../../modules/aprs';
 
 const runningJobs: Set<string> = new Set();
 
@@ -312,12 +312,6 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
             );
             break;
         // APRs
-        case 'sync-merkl':
-            await runIfNotAlreadyRunning(name, chainId, () => AprsController().syncMerkl(), res, next);
-            break;
-        case 'update-7-30-days-swap-apr':
-            // Disabling unused APRs
-            break;
         case 'update-surplus-aprs':
             await runIfNotAlreadyRunning(name, chainId, () => CowAmmController().updateSurplusAprs(), res, next);
             break;
@@ -327,7 +321,7 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
                 chainId,
                 () => {
                     const chain = chainIdToChain[chainId];
-                    return poolService.updatePoolAprs(chain);
+                    return new AprService().updateAprs(chain);
                 },
                 res,
                 next,
