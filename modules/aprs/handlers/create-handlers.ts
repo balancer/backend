@@ -16,6 +16,7 @@ export function createHandlers(chain: Chain): AprHandler[] {
     handlerList.push(new handlers.NestedPoolAprHandler());
     handlerList.push(new handlers.QuantAmmAprHandler());
     handlerList.push(new handlers.LiquidityGaugeAprHandler());
+    handlerList.push(new handlers.MerklAprHandler());
 
     // Mainnet specific handlers
     if (chain === Chain.MAINNET) {

@@ -9,5 +9,6 @@ export { NestedPoolAprHandler } from './nested-pool-apr-handler';
 export { QuantAmmAprHandler } from './quant-amm-apr';
 export { LiquidityGaugeAprHandler } from './liquidity-gauge-apr';
 export { VeBalProtocolAprHandler, VeBalVotingAprHandler } from './vebal-apr';
+export { MerklAprHandler } from './merkl-apr';
 
 export { createHandlers } from './create-handlers';
