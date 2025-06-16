@@ -26,7 +26,7 @@ import { request, gql } from 'graphql-request';
 import _ from 'lodash';
 import { AprRepository } from '../modules/aprs/apr-repository';
 import { MerklAprHandler } from '../modules/aprs/handlers';
-import { SwapFeeApr7d30dHandler } from '../modules/aprs/handlers/swap-fee-apr';
+import { SurplusSwapFeeAprHandler, SwapFeeApr7d30dHandler } from '../modules/aprs/handlers/swap-fee-apr';
 import { AprService } from '../modules/aprs';
 
 // TODO needed?
@@ -147,7 +147,11 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
     } else if (job === 'sync-cow-amm-join-exits') {
         return CowAmmController().syncJoinExits(chain);
     } else if (job === 'update-surplus-aprs') {
-        return CowAmmController().updateSurplusAprs();
+        const aprRepository = new AprRepository();
+        const surplusSwapFeeAprHandler = new SurplusSwapFeeAprHandler();
+        const pools = await aprRepository.getPoolsForAprCalculation(chain);
+        const aprs = await surplusSwapFeeAprHandler.calculateAprForPools(pools);
+        return await aprRepository.savePoolAprItems(chain, aprs);
     } else if (job === 'sync-cow-amm-balances') {
         return CowAmmController().syncBalances(chain);
     } else if (job === 'sync-categories') {

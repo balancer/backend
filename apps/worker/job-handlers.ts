@@ -312,9 +312,6 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
             );
             break;
         // APRs
-        case 'update-surplus-aprs':
-            await runIfNotAlreadyRunning(name, chainId, () => CowAmmController().updateSurplusAprs(), res, next);
-            break;
         case 'update-pool-apr':
             await runIfNotAlreadyRunning(
                 name,
