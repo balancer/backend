@@ -4,6 +4,7 @@ export { YbTokensAprHandler } from './yb-tokens';
 export { AaveApiAprHandler } from './aave-api-apr';
 export { DynamicSwapFeeAprHandler } from './dynamic-swap-fee-apr';
 export { BeetswarsGaugeVotingAprHandler, MaBeetsAprHandler } from './mabeets-apr';
+export { MorphoRewardsAprHandler } from './morpho-apr-handler/morpho-rewards-apr-handler';
 
 // Add more handler exports as they are implemented
 // Example:

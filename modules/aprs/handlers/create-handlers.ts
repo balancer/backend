@@ -23,6 +23,10 @@ export function createHandlers(chain: Chain): AprHandler[] {
         handlerList.push(new handlers.BeetswarsGaugeVotingAprHandler());
     }
 
+    if (config[chain].aprHandlers.morphoRewardsAprHandler) {
+        handlerList.push(new handlers.MorphoRewardsAprHandler());
+    }
+
     // Add Aave API handler if configured for this chain
     if (config[chain].aprHandlers.aaveRewardsAprHandler) {
         handlerList.push(

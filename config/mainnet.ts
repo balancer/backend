@@ -116,6 +116,7 @@ export default <NetworkData>{
         },
     },
     aprHandlers: {
+        morphoRewardsAprHandler: true,
         ybAprHandler: {
             usdl: true,
             morpho: {

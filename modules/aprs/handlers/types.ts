@@ -8,7 +8,7 @@ export interface AprHandlerConfigs {
     maBeetsAprHandler?: MaBeetsAprConfig;
     // veBalProtocolAprHandler?:  VeBalProtocolAprConfig;
     // veBalVotingAprHandler?: VeBalVotingAprConfig;
-    // morphoRewardAprHandler?: MorphоRewardAprConfig;
+    morphoRewardsAprHandler?: boolean;
     // quantAmmAprHandler?: QuantAmmAprConfig;
 }
 
