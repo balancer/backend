@@ -5,6 +5,9 @@ import {
     ReClammState,
     StableState,
     WeightedState,
+    BasePoolState,
+    WeightedImmutable,
+    LiquidityBootstrappingState,
 } from '@balancer-labs/balancer-maths';
 import { Address } from '@balancer/sdk';
 import * as fs from 'node:fs';
@@ -19,6 +22,7 @@ import {
     mapReClammPoolStateToPrismaPool,
     mapStablePoolStateToPrismaPool,
     mapWeightedPoolStateToPrismaPool,
+    mapLiquidityBootstrappingPoolStateToPrismaPool,
 } from './mapping';
 import { Path, SwapPathInput } from '../generate/getSwapPath';
 
@@ -36,11 +40,20 @@ export type BufferPool = PoolBase & BufferState & { decimals: number[] };
 
 export type GyroEPool = PoolBase & GyroECLPState;
 
+export type LiquidityBootstrappingPool = PoolBase & LiquidityBootstrappingState;
+
 export type ReClammPool = PoolBase & ReClammState;
 
 export type QuantAmmPool = PoolBase & QuantAmmState;
 
-export type SupportedPools = WeightedPool | StablePool | BufferPool | GyroEPool | ReClammPool | QuantAmmPool;
+export type SupportedPools =
+    | WeightedPool
+    | StablePool
+    | BufferPool
+    | GyroEPool
+    | LiquidityBootstrappingPool
+    | ReClammPool
+    | QuantAmmPool;
 
 type SwapPathData = SwapPathInput & {
     test: string;
@@ -179,6 +192,28 @@ function mapPools(pools: TransformBigintToString<SupportedPools>[]): PrismaPoolA
                 dSq: BigInt(pool.dSq),
             };
             prismaPools.push(mapGyroPoolStateToPrismaPool(gyroPool, Number(pool.chainId), 3, bufferPools));
+        } else if (pool.poolType === 'LIQUIDITY_BOOTSTRAPPING') {
+            // the return obect here need to be a PrismaPoolAndHookWithDynamic
+            // this is read from the test file
+            const lbpPool = {
+                ...pool,
+                scalingFactors: pool.scalingFactors.map((sf) => BigInt(sf)),
+                swapFee: BigInt(pool.swapFee),
+                balancesLiveScaled18: pool.balancesLiveScaled18.map((b) => BigInt(b)),
+                tokenRates: pool.tokenRates.map((r) => BigInt(r)),
+                totalSupply: BigInt(pool.totalSupply),
+                aggregateSwapFee: BigInt(pool.aggregateSwapFee ?? '0'),
+                supportsUnbalancedLiquidity:
+                    pool.supportsUnbalancedLiquidity === undefined ? true : pool.supportsUnbalancedLiquidity,
+                projectTokenIndex: Number(pool.projectTokenIndex),
+                weights: pool.weights.map((weight) => BigInt(weight)),
+                currentTimestamp: BigInt(pool.currentTimestamp),
+                endWeights: pool.endWeights.map((w) => BigInt(w)),
+                startWeights: pool.startWeights.map((w) => BigInt(w)),
+                startTime: BigInt(pool.startTime),
+                endTime: BigInt(pool.endTime),
+            };
+            prismaPools.push(mapLiquidityBootstrappingPoolStateToPrismaPool(lbpPool, Number(pool.chainId), 3));
         } else if (pool.poolType === 'RECLAMM') {
             const reClammPool = {
                 ...pool,

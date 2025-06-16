@@ -17,7 +17,7 @@ import { BufferPoolData } from './utils/data';
 
 // Note: these tests are only available for Balancer V3
 const protocolVersion = 3;
-const DEBUG = true;
+const DEBUG = false;
 
 describe('SOR V3 Swap Paths Integration Tests', () => {
     // read all test files in test/testData/read
