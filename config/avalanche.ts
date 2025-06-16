@@ -74,8 +74,7 @@ export default <NetworkData>{
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',
     avgBlockSpeed: 2,
     aprHandlers: {
-        aaveRewardsAprHandler: true,
-        ybAprHandler: {
+        ybAprConfig: {
             aave: {
                 v3: {
                     subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/2h9woxy8RTjHu1HJsCEnmzpPHFArU33avmUh4f71JpVn`,
@@ -132,6 +131,12 @@ export default <NetworkData>{
                 lensContractAddress: '0xc820c24905c210aefe21dae40723ec28d62c1544',
             },
             defaultHandlers: {
+                yUTY: {
+                    tokenAddress: '0x580d5e1399157fd0d58218b7a514b60974f2ab01',
+                    sourceUrl: 'https://api.xsy.fi/v1/yuty',
+                    path: 'apy',
+                    scale: 100,
+                },
                 sAVAX: {
                     tokenAddress: '0x2b2c81e08f1af8835a78bb2a90ae924ace0ea4be',
                     sourceUrl: 'https://api.benqi.fi/liquidstaking/apr',

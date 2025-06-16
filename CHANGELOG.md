@@ -1,5 +1,29 @@
 # backend
 
+## 1.44.2
+
+### Patch Changes
+
+-   0c9e602: deal with small numbers for tokenpair calc
+
+## 1.44.1
+
+### Patch Changes
+
+-   6604cbc: APR for yUTY on AVAX
+
+## 1.44.0
+
+### Minor Changes
+
+-   313c613: LBP price chart data
+
+### Patch Changes
+
+-   f111157: dont check for blocks on v3 pool add
+-   7a050bf: fix price finding for lbp price chart
+-   9b4edcd: fix rpc user staking sync
+
 ## 1.43.5
 
 ### Patch Changes

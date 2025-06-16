@@ -8,7 +8,12 @@ import {
     syncOnChainDataForPools as syncOnChainDataForPoolsV2,
 } from '../actions/pool/v2';
 import { getViemClient } from '../sources/viem-client';
-import { getPoolsSubgraphClient, getV3JoinedSubgraphClient, getVaultSubgraphClient } from '../sources/subgraphs';
+import {
+    getPoolsSubgraphClient,
+    getV3JoinedSubgraphClient,
+    getVaultSubgraphClient,
+    V3JoinedSubgraphPool,
+} from '../sources/subgraphs';
 import { prisma } from '../../prisma/prisma-client';
 import { updateLiquidity24hAgo, updateLiquidityValuesForPools } from '../actions/pool/update-liquidity';
 import { Chain, PrismaLastBlockSyncedCategory } from '@prisma/client';
@@ -135,7 +140,7 @@ export function PoolController(tracer?: any) {
 
             return ids;
         },
-        async addPoolsV3(chain: Chain, checkForExistingPools = true) {
+        async addPoolsV3(chain: Chain, syncNewPoolsOnly = true) {
             const {
                 subgraphs: { balancerV3, balancerPoolsV3 },
                 balancer: {
@@ -155,11 +160,10 @@ export function PoolController(tracer?: any) {
             const poolsSubgraphClient = getPoolsSubgraphClient(balancerPoolsV3, chain);
             const subgraphClient = getV3JoinedSubgraphClient(vaultSubgraphClient, poolsSubgraphClient);
 
-            const fromBlock = await getLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.ADD_POOLS_V3);
-            const latestBlock = await subgraphClient.lastSyncedBlock();
-            const changedIds = await subgraphClient.getChangedPools(fromBlock);
+            const latestBlock = Number(await viemClient.getBlockNumber());
+            const pools = await subgraphClient.getAllInitializedPools();
 
-            if (changedIds.length === 0) {
+            if (pools.length === 0) {
                 return [];
             }
 
@@ -170,26 +174,23 @@ export function PoolController(tracer?: any) {
                 })
             ).map(({ id }) => id);
 
-            let newIds: string[] = [];
-            if (checkForExistingPools) {
-                newIds = changedIds.filter((id) => !dbIds.includes(id));
+            let poolsToSync: V3JoinedSubgraphPool[] = [];
+            if (syncNewPoolsOnly) {
+                poolsToSync = pools.filter((pool) => !dbIds.includes(pool.id));
             } else {
-                newIds = changedIds;
+                poolsToSync = pools;
             }
 
-            if (newIds.length === 0) {
+            if (poolsToSync.length === 0) {
                 return [];
             }
 
-            const pools = await subgraphClient.getAllInitializedPools({ id_in: newIds });
-            newIds = pools.map(({ id }) => id); // Some pools are missing in pools subgraph and then we don't know it's type
-
-            if (newIds.length === 0) {
-                return [];
-            }
-
-            const inserts = await addPoolsV3(pools, viemClient, vaultAddress, chain, latestBlock);
-            await syncBptBalancesFromSubgraph(newIds, vaultSubgraphClient, chain);
+            const inserts = await addPoolsV3(poolsToSync, viemClient, vaultAddress, chain, latestBlock);
+            await syncBptBalancesFromSubgraph(
+                poolsToSync.map((pool) => pool.id),
+                vaultSubgraphClient,
+                chain,
+            );
 
             // Sync token flags for the new tokens
             await syncErc4626Tokens(
@@ -206,7 +207,7 @@ export function PoolController(tracer?: any) {
 
             await upsertLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.ADD_POOLS_V3, latestBlock);
 
-            return newIds;
+            return poolsToSync.map((pool) => pool.id);
         },
         /**
          * Syncs database pools state with the onchain state

@@ -30,7 +30,7 @@ export default {
                     chain: pool.chain,
                     ...(pool.typeData as LBPoolData),
                 };
-                return await priceChartData(input, interval || undefined);
+                return await priceChartData(input);
             } catch (error) {
                 console.error('Error fetching LB Pool chart:', error);
                 return null;
