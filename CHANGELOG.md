@@ -1,5 +1,11 @@
 # backend
 
+## 1.44.2
+
+### Patch Changes
+
+-   0c9e602: deal with small numbers for tokenpair calc
+
 ## 1.44.1
 
 ### Patch Changes
