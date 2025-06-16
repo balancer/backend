@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { AprHandler } from '../types';
+import { YbAprHandler } from '../types';
 import { EulerAprConfig } from '../../../../../network/apr-config-types';
 import { Chain } from '@prisma/client';
 import { prisma } from '../../../../../../prisma/prisma-client';
@@ -19,7 +19,7 @@ type VaultsResponse = {
 
 type ComputeAPYs = AbiParametersToPrimitiveTypes<ExtractAbiFunction<typeof eulerUtilsLens, 'computeAPYs'>['outputs']>;
 
-export class EulerAprHandler implements AprHandler {
+export class EulerAprHandler implements YbAprHandler {
     /*
     best to query the computeAPYs function of the utils lens contract:
 https://github.com/euler-xyz/evk-periphery/blob/af4a193813574715532dcd8cc5e55198820941cb/src/Lens/UtilsLens.sol#L18

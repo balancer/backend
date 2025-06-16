@@ -1,8 +1,8 @@
 import { Chain, PrismaPoolAprItem, PrismaPoolAprType } from '@prisma/client';
-import { YbAprHandlers } from '../../../pool/lib/apr-data-sources/yb-apr-handlers';
 import { TokenApr, YbAprConfig } from './types';
 import { PoolAPRData, AprHandler } from '../../types';
 import { collectsYieldFee, tokenCollectsYieldFee } from '../../../pool/lib/pool-utils';
+import { YbAprHandlers } from './yb-apr-handlers';
 
 /**
  * Calculator for yield-bearing tokens APR

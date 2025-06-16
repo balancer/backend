@@ -1,6 +1,6 @@
-import type { AprHandler } from '../types';
+import type { YbAprHandler } from '../types';
 
-export class DefaultAprHandler implements AprHandler {
+export class DefaultAprHandler implements YbAprHandler {
     tokenAddress: string;
     url: string;
     path: string;

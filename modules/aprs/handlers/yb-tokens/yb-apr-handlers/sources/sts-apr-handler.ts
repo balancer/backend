@@ -1,8 +1,8 @@
 import { YbAprConfig } from '../../../../../network/apr-config-types';
 import { prisma } from '../../../../../../prisma/prisma-client';
-import { AprHandler } from '../types';
+import { YbAprHandler } from '../types';
 
-export class StsAprHandler implements AprHandler {
+export class StsAprHandler implements YbAprHandler {
     constructor(private config: YbAprConfig['sts']) {}
 
     async getAprs() {

@@ -1,5 +1,5 @@
 import { gql, request } from 'graphql-request';
-import { AprHandler } from '../types';
+import { YbAprHandler } from '../types';
 
 const url = 'https://blue-api.morpho.org/graphql';
 const query = gql`
@@ -24,7 +24,7 @@ type USDLResponse = {
     };
 };
 
-export class UsdlAprHandler implements AprHandler {
+export class UsdlAprHandler implements YbAprHandler {
     constructor() {}
 
     async getAprs() {

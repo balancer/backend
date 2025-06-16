@@ -1,8 +1,8 @@
 import * as sources from './sources';
 import { YbAprConfig } from '../../../../network/apr-config-types';
 import { Chain } from '@prisma/client';
-import { AprHandler, AprHandlerConstructor, TokenApr } from './types';
-export type { AprHandler, AprHandlerConstructor, TokenApr };
+import { YbAprHandler, AprHandlerConstructor, TokenApr } from './types';
+export type { YbAprHandler as AprHandler, AprHandlerConstructor, TokenApr };
 
 const sourceToHandler = {
     aave: sources.AaveAprHandler,
@@ -11,47 +11,34 @@ const sourceToHandler = {
     euler: sources.EulerAprHandler,
     fluid: sources.FluidAprHandler,
     extra: sources.ExtraHandler,
-    // gearbox: sources.GearboxAprHandler, // Removed, endpoint is down
-    // idle: sources.IdleAprHandler, // Removed, endpoint is down
     maker: sources.MakerAprHandler,
-    // reaper: sources.ReaperCryptAprHandler, // Removed, pools rekt
-    tetu: sources.TetuAprHandler,
-    tranchess: sources.TranchessAprHandler,
-    yearn: sources.YearnAprHandler,
     defaultHandlers: sources.DefaultAprHandler,
     stakewise: sources.Stakewise,
     maple: sources.Maple,
     yieldnest: sources.Yieldnest,
     etherfi: sources.Etherfi,
-    // sveth: sources.svEthAprHandler, // Savvy migrated to arbitrum
     dforce: sources.DForce,
     defillama: sources.Defillama,
     teth: sources.TreehouseAprHandler,
     morpho: sources.MorphoAprHandler,
     usdl: sources.UsdlAprHandler,
-    ovix: sources.OvixAprHandler,
-    bloom: sources.BloomAprHandler,
-    sftmx: sources.SftmxAprHandler,
     sts: sources.StsAprHandler,
     silo: sources.SiloAprHandler,
     susds: sources.SUSDSAprHandler,
 };
 
 export class YbAprHandlers {
-    private handlers: AprHandler[] = [];
+    private handlers: YbAprHandler[] = [];
     fixedAprTokens?: { [tokenName: string]: { address: string; apr: number; group?: string; isIbYield?: boolean } };
 
-    constructor(
-        aprConfig: YbAprConfig,
-        private chain?: Chain,
-    ) {
+    constructor(aprConfig: YbAprConfig, private chain?: Chain) {
         const { fixedAprHandler, ...config } = aprConfig;
         this.handlers = this.buildAprHandlers(config);
         this.fixedAprTokens = fixedAprHandler;
     }
 
     private buildAprHandlers(aprConfig: YbAprConfig) {
-        const handlers: AprHandler[] = [];
+        const handlers: YbAprHandler[] = [];
 
         // Add handlers from global configuration
         for (const [source, config] of Object.entries(aprConfig)) {

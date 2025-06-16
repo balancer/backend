@@ -1,10 +1,10 @@
-import { AprHandler } from '../types';
+import { YbAprHandler } from '../types';
 
 const url = 'https://api.treehouse.finance/rate/mey';
 
 // The apr config needs to be custom made as the resulting value
 // is equal to Lido's wstETH APR plus the data from the below query.
-export class TreehouseAprHandler implements AprHandler {
+export class TreehouseAprHandler implements YbAprHandler {
     constructor(private config: { address: string }) {}
 
     async getAprs() {

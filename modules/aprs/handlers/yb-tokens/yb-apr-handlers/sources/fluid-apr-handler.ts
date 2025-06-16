@@ -1,5 +1,5 @@
 import { YbAprConfig } from '../../../../../network/apr-config-types';
-import { AprHandler } from '../types';
+import { YbAprHandler } from '../types';
 
 interface FluidAPIResponse {
     data: {
@@ -8,7 +8,7 @@ interface FluidAPIResponse {
     }[];
 }
 
-export class FluidAprHandler implements AprHandler {
+export class FluidAprHandler implements YbAprHandler {
     url: string;
 
     constructor(config: NonNullable<YbAprConfig['fluid']>) {

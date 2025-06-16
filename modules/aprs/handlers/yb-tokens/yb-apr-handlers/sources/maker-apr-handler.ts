@@ -1,4 +1,4 @@
-import { AprHandler } from '../types';
+import { YbAprHandler } from '../types';
 import { MakerAprConfig } from '../../../../../network/apr-config-types';
 import { abi as makerPotAbi } from './abis/maker-pot';
 import config from '../../../../../../config';
@@ -12,7 +12,7 @@ const client = createPublicClient({
 
 const potAddress = '0x197e90f9fad81970ba7976f33cbd77088e5d7cf7';
 
-export class MakerAprHandler implements AprHandler {
+export class MakerAprHandler implements YbAprHandler {
     group = 'MAKER';
     private sdai: string;
 

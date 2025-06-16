@@ -1,4 +1,4 @@
-import { AprHandler } from '../types';
+import { YbAprHandler } from '../types';
 import config from '../../../../../../config';
 import { createPublicClient, http, parseAbiItem } from 'viem';
 import { base } from 'viem/chains';
@@ -10,7 +10,7 @@ const client = createPublicClient({
 
 const ssrOracle = '0x65d946e533748a998b1f0e430803e39a6388f7a1';
 
-export class SUSDSAprHandler implements AprHandler {
+export class SUSDSAprHandler implements YbAprHandler {
     group = 'MAKER';
     private oracle: string;
     private token: string;

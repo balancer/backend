@@ -147,15 +147,6 @@ export default <NetworkData>{
                     },
                 },
             },
-            tetu: {
-                sourceUrl: 'https://api.tetu.io/api/v1/reader/compoundAPRs?network=MATIC',
-                tokens: {
-                    tUSDC: { address: '0x113f3d54c31ebc71510fd664c8303b34fbc2b355' },
-                    tUSDT: { address: '0x236975da9f0761e9cf3c2b0f705d705e22829886' },
-                    tDAI: { address: '0xace2ac58e1e5a7bfe274916c4d82914d490ed4a5' },
-                    tetuStQI: { address: '0x4cd44ced63d9a6fef595f6ad3f7ced13fceac768' },
-                },
-            },
             defaultHandlers: {
                 wstETH: {
                     tokenAddress: '0x03b54a6e9a984069379fae1a4fc4dbae93b3bccd',

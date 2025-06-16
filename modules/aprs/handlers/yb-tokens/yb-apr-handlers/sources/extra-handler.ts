@@ -1,5 +1,5 @@
 import { YbAprConfig } from '../../../../../network/apr-config-types';
-import { AprHandler } from '../types';
+import { YbAprHandler } from '../types';
 
 interface ExtraAPIResponse {
     op: {
@@ -19,7 +19,7 @@ const wrappers = {
     '0x98efe85735f253a0ed0be8e2915ff39f9e4aff0f': 'USR',
 };
 
-export class ExtraHandler implements AprHandler {
+export class ExtraHandler implements YbAprHandler {
     url: string;
 
     constructor(config: NonNullable<YbAprConfig['extra']>) {

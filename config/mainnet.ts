@@ -246,14 +246,6 @@ export default <NetworkData>{
                     },
                 },
             },
-            bloom: {
-                tokens: {
-                    tbyFeb1924: {
-                        address: '0xc4cafefbc3dfea629c589728d648cb6111db3136',
-                        feedAddress: '0xde1f5f2d69339171d679fb84e4562febb71f36e6',
-                    },
-                },
-            },
             defillama: [
                 {
                     defillamaPoolId: '5a9c2073-2190-4002-9654-8c245d1e8534',
@@ -264,43 +256,8 @@ export default <NetworkData>{
                     tokenAddress: '0xf073bac22dab7faf4a3dd6c6189a70d54110525c',
                 },
             ],
-            gearbox: {
-                sourceUrl: 'https://charts-server.fly.dev/api/pools',
-                tokens: {
-                    dDAI: { address: '0x6cfaf95457d7688022fc53e7abe052ef8dfbbdba' },
-                    dUSDC: { address: '0xc411db5f5eb3f7d552f9b8454b2d74097ccde6e3' },
-                },
-            },
-            idle: {
-                sourceUrl: 'https://api.idle.finance/junior-rates/',
-                authorizationHeader:
-                    'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGllbnRJZCI6IkFwcDciLCJpYXQiOjE2NzAyMzc1Mjd9.L12KJEt8fW1Cvy3o7Nl4OJ2wtEjzlObaAYJ9aC_CY6M',
-                tokens: {
-                    idleDAI: {
-                        address: '0xec9482040e6483b7459cc0db05d51dfa3d3068e1',
-                        wrapped4626Address: '0x0c80f31b840c6564e6c5e18f386fad96b63514ca',
-                    },
-                    idleUSDC: {
-                        address: '0xdc7777c771a6e4b3a82830781bdde4dbc78f320e',
-                        wrapped4626Address: '0xc3da79e0de523eef7ac1e4ca9abfe3aac9973133',
-                    },
-                    idleUSDT: {
-                        address: '0xfa3afc9a194babd56e743fa3b7aa2ccbed3eaaad',
-                        wrapped4626Address: '0x544897a3b944fdeb1f94a0ed973ea31a80ae18e1',
-                    },
-                },
-            },
             maker: {
                 sdai: '0x83f20f44975d03b1b09e64809b757c47f942beea',
-            },
-            tranchess: {
-                sourceUrl: 'https://tranchess.com/eth/api/v3/funds',
-                tokens: {
-                    qETH: {
-                        address: '0x93ef1ea305d11a9b2a3ebb9bb4fcc34695292e7d',
-                        underlyingAssetName: 'WETH',
-                    },
-                },
             },
             stakewise: {
                 url: 'https://mainnet-graph.stakewise.io/subgraphs/name/stakewise/stakewise',

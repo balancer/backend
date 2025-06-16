@@ -1,10 +1,10 @@
 import { Chain } from '@prisma/client';
 
 export interface AprHandlerConstructor {
-    new (config?: any): AprHandler;
+    new (config?: any): YbAprHandler;
 }
 
-export interface AprHandler {
+export interface YbAprHandler {
     group?: string;
     getAprs(chain?: Chain): Promise<{
         [tokenAddress: string]: {
@@ -20,5 +20,4 @@ export type TokenApr = {
     apr: number;
     address: string;
     isIbYield: boolean;
-    group?: string;
 };

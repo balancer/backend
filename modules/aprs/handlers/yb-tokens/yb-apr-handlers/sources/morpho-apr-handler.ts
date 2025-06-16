@@ -1,5 +1,5 @@
 import { gql, request } from 'graphql-request';
-import { AprHandler } from '../types';
+import { YbAprHandler } from '../types';
 import { Chain } from '@prisma/client';
 
 const url = 'https://blue-api.morpho.org/graphql';
@@ -39,7 +39,7 @@ type BlueApiResponse = {
     };
 };
 
-export class MorphoAprHandler implements AprHandler {
+export class MorphoAprHandler implements YbAprHandler {
     group = 'MORPHO';
 
     constructor() {}

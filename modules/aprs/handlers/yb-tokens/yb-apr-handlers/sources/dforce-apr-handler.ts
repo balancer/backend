@@ -2,7 +2,7 @@ import { abi } from './abis/dforce-susx';
 import { createPublicClient, http } from 'viem';
 import config from '../../../../../../config';
 import { arbitrum } from 'viem/chains';
-import { AprHandler } from '../types';
+import { YbAprHandler } from '../types';
 import { YbAprConfig } from '../../../../../network/apr-config-types';
 
 // Initialize the client for Arbitrum network
@@ -14,7 +14,7 @@ const client = createPublicClient({
 const functionName: 'currentAPY' = 'currentAPY';
 const isIbYield = true;
 
-export class DForce implements AprHandler {
+export class DForce implements YbAprHandler {
     constructor(private config: YbAprConfig['dforce']) {}
 
     async getAprs() {

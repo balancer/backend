@@ -1,7 +1,7 @@
 import axios from 'axios';
-import { AprHandler } from '../types';
+import { YbAprHandler } from '../types';
 
-export class AaveAprHandler implements AprHandler {
+export class AaveAprHandler implements YbAprHandler {
     tokens: {
         [assetName: string]: {
             underlyingAssetAddress: string;

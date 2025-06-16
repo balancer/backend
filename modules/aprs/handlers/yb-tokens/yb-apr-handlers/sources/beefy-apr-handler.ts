@@ -1,8 +1,8 @@
 import { BeefyAprConfig } from '../../../../../network/apr-config-types';
-import { AprHandler } from '../types';
+import { YbAprHandler } from '../types';
 import axios from 'axios';
 
-export class BeefyAprHandler implements AprHandler {
+export class BeefyAprHandler implements YbAprHandler {
     tokens: {
         [tokenName: string]: {
             address: string;

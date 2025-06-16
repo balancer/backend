@@ -1,4 +1,4 @@
-import { AprHandler } from '../types';
+import { YbAprHandler } from '../types';
 import { YbAprConfig } from '../../../../../network/apr-config-types';
 
 const query = `
@@ -22,7 +22,7 @@ interface Response {
 
 const baseURL = 'https://yields.llama.fi/chart/';
 
-export class Defillama implements AprHandler {
+export class Defillama implements YbAprHandler {
     constructor(private config: YbAprConfig['defillama']) {}
 
     async getAprs() {

@@ -68,18 +68,6 @@ export default <NetworkData>{
     avgBlockSpeed: 1,
     aprHandlers: {
         ybAprHandler: {
-            ovix: {
-                tokens: {
-                    USDT: {
-                        yieldAddress: '0xad41c77d99e282267c1492cdefe528d7d5044253',
-                        wrappedAddress: '0x550d3bb1f77f97e4debb45d4f817d7b9f9a1affb',
-                    },
-                    USDC: {
-                        yieldAddress: '0x68d9baa40394da2e2c1ca05d30bf33f52823ee7b',
-                        wrappedAddress: '0x3a6789fc7c05a83cfdff5d2f9428ad9868b4ff85',
-                    },
-                },
-            },
             defaultHandlers: {
                 wstETH: {
                     tokenAddress: '0x5d8cff95d7a57c0bf50b30b43c7cc0d52825d4a9',
