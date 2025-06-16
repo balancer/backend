@@ -17,13 +17,19 @@ export function createHandlers(chain: Chain): AprHandler[] {
     handlerList.push(new handlers.QuantAmmAprHandler());
     handlerList.push(new handlers.LiquidityGaugeAprHandler());
 
-    if (config[chain].aprHandlers.ybAprHandler) {
-        handlerList.push(new handlers.YbTokensAprHandler(config[chain].aprHandlers.ybAprHandler, chain));
+    // Mainnet specific handlers
+    if (chain === Chain.MAINNET) {
+        handlerList.push(new handlers.VeBalProtocolAprHandler());
+        handlerList.push(new handlers.VeBalVotingAprHandler());
     }
 
     if (config[chain].aprHandlers.maBeetsAprHandler) {
         handlerList.push(new handlers.MaBeetsAprHandler(config[chain].aprHandlers.maBeetsAprHandler.beetsAddress));
         handlerList.push(new handlers.BeetswarsGaugeVotingAprHandler());
+    }
+
+    if (config[chain].aprHandlers.ybAprHandler) {
+        handlerList.push(new handlers.YbTokensAprHandler(config[chain].aprHandlers.ybAprHandler, chain));
     }
 
     if (config[chain].aprHandlers.morphoRewardsAprHandler) {
