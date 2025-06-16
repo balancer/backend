@@ -88,11 +88,10 @@ export class LiquidityGaugeAprHandler implements AprHandler {
                     chain: pool.chain,
                     poolId: pool.id,
                     title: `${symbol} reward APR`,
-                    group: null,
                     apr: 0,
                     rewardTokenAddress: address,
                     rewardTokenSymbol: symbol,
-                    type: isVeBalemissions ? PrismaPoolAprType.VEBAL_EMISSIONS : PrismaPoolAprType.THIRD_PARTY_REWARD,
+                    type: isVeBalemissions ? PrismaPoolAprType.VEBAL_EMISSIONS : PrismaPoolAprType.STAKING,
                 };
 
                 // veBAL rewards have a min and max, we create two items for them
@@ -114,7 +113,6 @@ export class LiquidityGaugeAprHandler implements AprHandler {
                         chain: pool.chain,
                         poolId: pool.id,
                         title: `${symbol} reward APR`,
-                        group: null,
                         apr: minApr * this.MAX_VEBAL_BOOST,
                         rewardTokenAddress: address,
                         rewardTokenSymbol: symbol,

@@ -109,7 +109,6 @@ export class YbTokensAprHandler implements AprHandler {
                     poolId: pool.id,
                     title: `${token.token.symbol} APR`,
                     apr: userApr,
-                    group: token.group as PrismaPoolAprItemGroup,
                     type: yieldType,
                     rewardTokenAddress: token.address,
                     rewardTokenSymbol: token.token.symbol,

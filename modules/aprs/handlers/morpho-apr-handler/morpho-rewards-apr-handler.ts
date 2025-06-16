@@ -40,7 +40,6 @@ export class MorphoRewardsAprHandler implements AprHandler {
                     type: PrismaPoolAprType.MERKL,
                     rewardTokenAddress: null,
                     rewardTokenSymbol: null,
-                    group: null,
                 };
             });
 

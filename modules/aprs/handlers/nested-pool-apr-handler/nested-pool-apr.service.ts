@@ -69,7 +69,6 @@ export class NestedPoolAprHandler implements AprHandler {
                         apr: userApr,
                         title: title,
                         type: aprItem.type,
-                        group: aprItem.group,
                         rewardTokenAddress: aprItem.rewardTokenAddress,
                         rewardTokenSymbol: aprItem.rewardTokenSymbol,
                     });

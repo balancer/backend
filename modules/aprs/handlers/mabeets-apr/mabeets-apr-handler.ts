@@ -102,7 +102,6 @@ export class MaBeetsAprHandler implements AprHandler {
                 title: 'BEETS reward APR',
                 apr: minApr,
                 type: PrismaPoolAprType.MABEETS_EMISSIONS,
-                group: null,
                 rewardTokenAddress: this.beetsAddress,
                 rewardTokenSymbol: 'BEETS',
             });
@@ -114,7 +113,6 @@ export class MaBeetsAprHandler implements AprHandler {
                 title: 'BEETS reward APR',
                 apr: maxApr,
                 type: PrismaPoolAprType.STAKING_BOOST,
-                group: null,
                 rewardTokenAddress: this.beetsAddress,
                 rewardTokenSymbol: 'BEETS',
             });

@@ -75,7 +75,6 @@ export class AaveApiAprHandler implements AprHandler {
                             type: 'MERKL',
                             rewardTokenAddress: incentive.rewardToken.address,
                             rewardTokenSymbol: incentive.rewardToken.symbol,
-                            group: null,
                         });
                     }
                 }

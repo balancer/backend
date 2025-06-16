@@ -137,7 +137,6 @@ export class VeBalProtocolAprHandler implements AprHandler {
                 type: PrismaPoolAprType.LOCKING,
                 rewardTokenAddress: balAddress,
                 rewardTokenSymbol: 'BAL',
-                group: null,
             },
         ];
     }

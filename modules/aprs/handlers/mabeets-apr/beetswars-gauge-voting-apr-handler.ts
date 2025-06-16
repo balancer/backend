@@ -39,7 +39,6 @@ export class BeetswarsGaugeVotingAprHandler implements AprHandler {
                 title: 'Voting APR*',
                 apr: minApr,
                 type: PrismaPoolAprType.VOTING,
-                group: null,
                 rewardTokenAddress: null,
                 rewardTokenSymbol: null,
             });

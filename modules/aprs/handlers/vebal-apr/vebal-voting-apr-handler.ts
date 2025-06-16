@@ -138,7 +138,6 @@ export class VeBalVotingAprHandler implements AprHandler {
                 type: PrismaPoolAprType.VOTING,
                 rewardTokenAddress: null,
                 rewardTokenSymbol: null,
-                group: null,
             },
         ];
     }

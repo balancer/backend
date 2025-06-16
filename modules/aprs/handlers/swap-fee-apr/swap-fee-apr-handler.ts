@@ -48,7 +48,6 @@ export class SwapFeeAprHandler implements AprHandler {
                     type: 'SWAP_FEE_24H',
                     rewardTokenAddress: null,
                     rewardTokenSymbol: null,
-                    group: null,
                 });
             }
         }

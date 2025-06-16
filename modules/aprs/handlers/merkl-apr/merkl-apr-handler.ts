@@ -121,7 +121,6 @@ export class MerklAprHandler implements AprHandler {
             apr: apr.apr,
             rewardTokenAddress: null,
             rewardTokenSymbol: null,
-            group: null,
         }));
     }
 
