@@ -7,9 +7,6 @@ export { BeetswarsGaugeVotingAprHandler, MaBeetsAprHandler } from './mabeets-apr
 export { MorphoRewardsAprHandler } from './morpho-apr-handler/morpho-rewards-apr-handler';
 export { NestedPoolAprHandler } from './nested-pool-apr-handler';
 export { QuantAmmAprHandler } from './quant-amm-apr';
-
-// Add more handler exports as they are implemented
-// Example:
-// export { GaugeAprHandler } from './gauge-apr-handler';
+export { LiquidityGaugeAprHandler } from './liquidity-gauge-apr';
 
 export { createHandlers } from './create-handlers';
