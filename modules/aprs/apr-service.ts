@@ -44,7 +44,7 @@ export class AprService {
      */
     async reloadAprs(chain: Chain): Promise<string[]> {
         const manager = this.getManagerForChain(chain);
-        const changedIds = manager.reloadAllPoolAprs(chain);
+        const changedIds = await manager.reloadAllPoolAprs(chain);
         await syncIncentivizedCategory(chain);
         return changedIds;
     }
