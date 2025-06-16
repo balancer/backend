@@ -14,6 +14,7 @@ export function createHandlers(chain: Chain): AprHandler[] {
     handlerList.push(new handlers.SwapFeeAprHandler());
     handlerList.push(new handlers.DynamicSwapFeeAprHandler());
     handlerList.push(new handlers.NestedPoolAprHandler());
+    handlerList.push(new handlers.QuantAmmAprHandler());
 
     if (config[chain].aprHandlers.ybAprHandler) {
         handlerList.push(new handlers.YbTokensAprHandler(config[chain].aprHandlers.ybAprHandler, chain));
