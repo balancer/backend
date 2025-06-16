@@ -19,22 +19,22 @@ export class AprManager {
             return [];
         }
 
-        // Get all APR items from all calculators
+        // Get all APR items from all handlers
         const allAprItems: Omit<PrismaPoolAprItem, 'createdAt' | 'updatedAt'>[] = [];
-        const failedCalculators: string[] = [];
+        const failedHandlers: string[] = [];
 
-        for (const calculator of this.aprHandlers) {
+        for (const handler of this.aprHandlers) {
             try {
-                const items = await calculator.calculateAprForPools(pools);
+                const items = await handler.calculateAprForPools(pools);
                 allAprItems.push(...items);
             } catch (e) {
-                console.error(`Error during APR calculation in ${calculator.getAprServiceName()}:`, e);
-                failedCalculators.push(calculator.getAprServiceName());
+                console.error(`Error during APR calculation in ${handler.getAprServiceName()}:`, e);
+                failedHandlers.push(handler.getAprServiceName());
             }
         }
 
-        if (failedCalculators.length > 0) {
-            console.warn(`The following APR calculators failed: ${failedCalculators.join(', ')}`);
+        if (failedHandlers.length > 0) {
+            console.warn(`The following APR handlers failed: ${failedHandlers.join(', ')}`);
         }
 
         return allAprItems;

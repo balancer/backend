@@ -17,8 +17,8 @@ The module follows a layered architecture:
 
 1. **Repository Layer** - Handles data access (`PoolAprRepository`)
 2. **Handlers Layer** - Contains pure calculation logic (`AprHandler` implementations)
-3. **Configuration Layer** - Defines which calculators to use for each chain
-4. **Manager Layer** - Coordinates calculators and persistence (`AprManager`)
+3. **Configuration Layer** - Defines which handlers to use for each chain
+4. **Manager Layer** - Coordinates handlers and persistence (`AprManager`)
 5. **Service Layer** - Provides the public API (`AprService`)
 
 ## Usage
@@ -67,12 +67,12 @@ bun run modules/examples/integration.ts MAINNET 0x1234...
 The module uses a declarative approach to configure which handlers are used for each chain:
 
 1. **Configuration Definition**: Each chain has a object with handlers configuration
-2. **Calculator Factories**: Factory functions create calculator instances with the right parameters
+2. **Handler Factories**: Factory functions create handlers instances with the right parameters
 
 This approach makes it easy to:
 
--   Add or remove calculators for specific chains
--   Configure calculator parameters
+-   Add or remove handlers for specific chains
+-   Configure handlers parameters
 -   Understand at a glance which chains use which handlers
 
 ### Adding New Handlers
