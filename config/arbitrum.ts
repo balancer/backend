@@ -191,8 +191,8 @@ export default <NetworkData>{
                 },
                 yUSD2: {
                     tokenAddress: '0x4772d2e014f9fc3a820c444e3313968e9a5c8121',
-                    sourceUrl: 'https://api.yield.fi/t/7Dapy',
-                    path: '7d-apy[0].weighted_apy_7d_avg',
+                    sourceUrl: 'https://api.yield.fi/t/yusd/apy',
+                    path: 'apy',
                     isIbYield: true,
                 },
                 usdm: {
