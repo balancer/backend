@@ -17,6 +17,7 @@ export function createHandlers(chain: Chain): AprHandler[] {
     handlerList.push(new handlers.QuantAmmAprHandler());
     handlerList.push(new handlers.LiquidityGaugeAprHandler());
     handlerList.push(new handlers.MerklAprHandler());
+    handlerList.push(new handlers.SurplusSwapFeeAprHandler());
 
     // Mainnet specific handlers
     if (chain === Chain.MAINNET) {
