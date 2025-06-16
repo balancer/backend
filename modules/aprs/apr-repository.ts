@@ -38,30 +38,40 @@ export class AprRepository {
      */
     async savePoolAprItems(
         chain: Chain,
-        aprItems: Omit<PrismaPoolAprItem, 'createdAt' | 'updatedAt'>[],
+        newAprItems: Omit<PrismaPoolAprItem, 'createdAt' | 'updatedAt'>[],
     ): Promise<string[]> {
-        if (aprItems.length === 0) return [];
+        if (newAprItems.length === 0) return [];
 
         // Get unique pool IDs from the items
-        const poolIds = [...new Set(aprItems.map((item) => item.poolId))];
+        const poolIds = [...new Set(newAprItems.map((item) => item.poolId))];
 
-        // Fetch existing APR items
+        // Fetch all existing APR items
         const existingItems = await prisma.prismaPoolAprItem.findMany({
             where: {
                 chain: chain,
-                poolId: { in: poolIds },
-                id: { in: aprItems.map((item) => item.id) },
+                id: { in: newAprItems.map((item) => item.id) },
             },
         });
 
-        //TODO also remove items that are not in aprItems anymore
+        // Remove items that are not in newAprItems anymore
+        const itemsToRemove = existingItems.filter(
+            (existingItem) => !newAprItems.find((newAprItem) => newAprItem.id === existingItem.id),
+        );
+        if (itemsToRemove.length > 0) {
+            await prisma.prismaPoolAprItem.deleteMany({
+                where: {
+                    id: { in: itemsToRemove.map((item) => item.id) },
+                    chain: chain,
+                },
+            });
+        }
 
         // Create a lookup map for quick access
         const existingItemsMap = new Map(existingItems.map((item) => [item.id, item]));
 
         // Only create operations for items that don't exist or have changed
         const changedPoolIds = new Set<string>();
-        const operations = aprItems
+        const operations = newAprItems
             .filter((item) => {
                 const existingItem = existingItemsMap.get(item.id);
                 const changed = !existingItem || existingItem.apr !== item.apr;
