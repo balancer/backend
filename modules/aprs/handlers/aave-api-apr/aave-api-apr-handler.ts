@@ -1,8 +1,8 @@
 import _ from 'lodash';
 import { Chain, PrismaPoolAprItem } from '@prisma/client';
 import { AprHandler, PoolAPRData } from '../../types';
-import { AaveRewardsAprConfig } from '../types';
 import { AaveChanClientInterface, AaveChanResponse, AaveChanClient } from './aave-chan-client';
+import { AaveRewardsAprConfig } from '../types';
 
 /**
  * Implementation of AprHandler for Aave API

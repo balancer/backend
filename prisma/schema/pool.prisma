@@ -205,6 +205,9 @@ enum PrismaPoolAprType {
     SURPLUS_24H
     SURPLUS_7D
     SURPLUS_30D
+    STAKING_BOOST
+    MABEETS_EMISSIONS
+    VEBAL_EMISSIONS
 }
 
 enum PrismaPoolAprItemGroup {

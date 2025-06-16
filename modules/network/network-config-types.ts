@@ -3,9 +3,9 @@ import type { PoolAprService } from '../pool/pool-types';
 import type { UserStakedBalanceService } from '../user/user-types';
 import type { BaseProvider } from '@ethersproject/providers';
 import type { GqlChain, GqlHookType } from '../../apps/api/gql/generated-schema';
-import type { AprHandlerConfigs, YbAprConfig } from './apr-config-types';
 import type { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import { SftmxSubgraphService } from '../sources/subgraphs/sftmx-subgraph/sftmx.service';
+import { AprHandlerConfigs } from '../aprs/handlers/types';
 
 export interface NetworkConfig {
     data: NetworkData;

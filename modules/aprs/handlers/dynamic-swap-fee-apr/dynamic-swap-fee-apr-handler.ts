@@ -55,8 +55,6 @@ export class DynamicSwapFeeAprHandler implements AprHandler {
             return acc;
         }, {} as Record<string, PoolSwapFeeData>);
 
-        // const aprItems: Omit<PrismaPoolAprItem, 'createdAt' | 'updatedAt'>[] = [];
-
         const aprItems: Omit<PrismaPoolAprItem, 'createdAt' | 'updatedAt'>[] = ([] = dynamicData
             .map((pool) => {
                 let apr_24h = 0;
