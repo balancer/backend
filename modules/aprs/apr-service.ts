@@ -33,7 +33,7 @@ export class AprService {
      */
     async updateAprs(chain: Chain): Promise<string[]> {
         const manager = this.getManagerForChain(chain);
-        const changedIds = manager.updateAprs(chain);
+        const changedIds = await manager.updateAprs(chain);
         await syncIncentivizedCategory(chain);
         return changedIds;
     }

@@ -44,7 +44,7 @@ export class MerklAprHandler implements AprHandler {
 
     private async fetchForwardedMerklOpportunities(chainId: string) {
         const response = await fetch(
-            `https://api.merkl.xyz/v4/opportunities/?test=false&status=LIVE&campaigns=true&items=2000&chainId=${chainId}`,
+            `https://api.merkl.xyz/v4/opportunities/?test=false&status=LIVE&campaigns=true&items=100&chainId=${chainId}`,
         );
         const data = (await response.json()) as MerklOpportunity[];
 
