@@ -1,5 +1,16 @@
 # backend
 
+## 1.45.0
+
+### Minor Changes
+
+-   7e1ddc0: Add LBPs to SOR
+
+### Patch Changes
+
+-   275366a: lido stMatic sunsetted
+-   f82daa5: fix LBP price chart interpolation
+
 ## 1.44.2
 
 ### Patch Changes
