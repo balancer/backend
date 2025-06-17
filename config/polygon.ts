@@ -162,12 +162,6 @@ export default <NetworkData>{
                 path: 'data.smaApr',
                 isIbYield: true,
             },
-            stMATIC: {
-                tokenAddress: '0x3a58a54c066fdc0f2d55fc9c89f0415c92ebf3c4',
-                sourceUrl: 'https://polygon.lido.fi/api/stats',
-                path: 'apr',
-                isIbYield: true,
-            },
             MATICX: {
                 tokenAddress: '0xfa68fb4628dff1028cfec22b4162fccd0d45efb6',
                 sourceUrl: 'https://universe.staderlabs.com/polygon/apy',

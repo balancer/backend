@@ -40,6 +40,7 @@ export async function getBasePoolsFromDb(
             'GYROE',
             'QUANT_AMM_WEIGHTED',
             'RECLAMM',
+            'LIQUIDITY_BOOTSTRAPPING',
         ] as PrismaPoolType[],
     };
 

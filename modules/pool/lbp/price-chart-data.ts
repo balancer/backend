@@ -17,13 +17,16 @@ interface PriceChartLPB {
 
 export const priceChartData = async (
     pool: PriceChartLPB,
-    interval = 3600,
+    dataPoints = 30,
     repo: TokenFlowsRepository = eventsRepository,
 ) => {
     const { chain, id, projectToken, reserveToken } = pool;
 
+    // Calculate interval based on number of data points
+    const interval = dataPoints > 1 ? (pool.endTime - pool.startTime) / (dataPoints - 1) : 0;
+
     // Get the token flows
-    const flows = await repo.getTokenFlows(chain, id, projectToken, reserveToken, interval);
+    const flows = await repo.getTokenFlows(chain, id, projectToken, reserveToken, Math.floor(interval));
 
     if (flows.length === 0) return [];
 
@@ -40,8 +43,8 @@ export const priceChartData = async (
 
     const sortedPrices = prices.sort((a, b) => a.timestamp - b.timestamp);
 
-    // Generate complete timeline from startTime to endTime
-    const completeTimeline = generateCompleteTimeline(pool.startTime, pool.endTime, interval);
+    // Generate complete timeline from startTime to endTime with specified number of data points
+    const completeTimeline = generateCompleteTimeline(pool.startTime, pool.endTime, dataPoints);
 
     // Calculate running balances for the intervals
     let balanceProject = 0;
@@ -49,6 +52,7 @@ export const priceChartData = async (
 
     // Check if there are any join/exit events before the start time
     const flowsBeforeStart = flows.filter((flow) => flow.intervalTimestamp < pool.startTime);
+
     for (const flow of flowsBeforeStart) {
         balanceProject += flow[projectToken] || 0;
         balanceReserve += flow[reserveToken] || 0;
@@ -71,6 +75,7 @@ export const priceChartData = async (
 
         // Calculate current weights and price
         const weights = calculateWeightsAtTime(pool, timestamp);
+
         const projectTokenPrice = calculatePrice(
             balanceProject,
             balanceReserve,
@@ -89,22 +94,23 @@ export const priceChartData = async (
 };
 
 /**
- * Generate complete timeline from startTime to endTime with given interval
+ * Generate complete timeline from startTime to endTime with specified number of data points
  */
-const generateCompleteTimeline = (startTime: number, endTime: number, interval: number): number[] => {
+const generateCompleteTimeline = (startTime: number, endTime: number, dataPoints: number): number[] => {
+    if (dataPoints <= 0) {
+        return [];
+    }
+
+    if (dataPoints === 1) {
+        return [startTime];
+    }
+
     const timeline: number[] = [];
+    const interval = (endTime - startTime) / (dataPoints - 1);
 
-    // Round startTime down to the nearest interval boundary
-    const roundedStartTime = Math.floor(startTime / interval) * interval;
-
-    // Round endTime up to the nearest interval boundary
-    const roundedEndTime = Math.ceil(endTime / interval) * interval;
-
-    let currentTime = roundedStartTime;
-
-    while (currentTime <= roundedEndTime) {
-        timeline.push(currentTime);
-        currentTime += interval;
+    for (let i = 0; i < dataPoints; i++) {
+        const timestamp = startTime + interval * i;
+        timeline.push(Math.round(timestamp));
     }
 
     return timeline;
@@ -129,7 +135,8 @@ const calculateWeightsAtTime = (config: PriceChartLPB, timestamp: number) => {
     }
 
     // Linear interpolation
-    const progress = (timestamp - config.startTime) / (config.endTime - config.startTime);
+    const duration = config.endTime - config.startTime;
+    const progress = (timestamp - config.startTime) / duration;
 
     const projectWeight =
         config.projectTokenStartWeight + (config.projectTokenEndWeight - config.projectTokenStartWeight) * progress;
