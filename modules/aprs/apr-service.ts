@@ -3,7 +3,6 @@ import { AprHandler } from './types';
 import { AprRepository } from './apr-repository';
 import { AprManager } from './apr-manager';
 import { createHandlers } from './handlers';
-import { syncIncentivizedCategory } from '../actions/pool/sync-incentivized-category';
 
 export class AprService {
     private readonly aprRepository: AprRepository;
@@ -33,9 +32,7 @@ export class AprService {
      */
     async updateAprs(chain: Chain): Promise<string[]> {
         const manager = this.getManagerForChain(chain);
-        const changedIds = await manager.updateAprs(chain);
-        await syncIncentivizedCategory(chain);
-        return changedIds;
+        return await manager.updateAprs(chain);
     }
 
     /**
@@ -44,9 +41,7 @@ export class AprService {
      */
     async reloadAprs(chain: Chain): Promise<string[]> {
         const manager = this.getManagerForChain(chain);
-        const changedIds = await manager.reloadAllPoolAprs(chain);
-        await syncIncentivizedCategory(chain);
-        return changedIds;
+        return manager.reloadAllPoolAprs(chain);
     }
 
     /**

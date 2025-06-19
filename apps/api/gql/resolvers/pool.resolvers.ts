@@ -16,7 +16,7 @@ import { GraphQLError } from 'graphql';
 import { upsertLastSyncedBlock } from '../../../../modules/actions/last-synced-block';
 import { PrismaLastBlockSyncedCategory } from '@prisma/client';
 import graphqlFields from 'graphql-fields';
-import { AprService } from '../../../../modules/aprs';
+import { AprsController } from '../../../../modules/controllers/aprs-controller';
 
 const balancerResolvers: Resolvers = {
     Query: {
@@ -121,7 +121,7 @@ const balancerResolvers: Resolvers = {
         poolReloadAllPoolAprs: async (parent, { chain }, context) => {
             isAdminRoute(context);
 
-            await new AprService().reloadAprs(chain);
+            await AprsController().reloadAprsAndIncentivizedCategory(chain);
 
             return 'success';
         },

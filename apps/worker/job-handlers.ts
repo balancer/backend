@@ -32,7 +32,7 @@ import { TokenController } from '../../modules/controllers/token-controller';
 import { SubgraphMonitorController } from '../../modules/controllers/subgraph-monitor-controller';
 import config from '../../config';
 import { LBPController } from '../../modules/controllers/lbp-controller';
-import { AprService } from '../../modules/aprs';
+import { AprsController } from '../../modules/controllers/aprs-controller';
 
 const runningJobs: Set<string> = new Set();
 
@@ -318,7 +318,7 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
                 chainId,
                 () => {
                     const chain = chainIdToChain[chainId];
-                    return new AprService().updateAprs(chain);
+                    return AprsController().updateAprsAndIncentivizedCategory(chain);
                 },
                 res,
                 next,
