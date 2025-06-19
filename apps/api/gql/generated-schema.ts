@@ -2740,9 +2740,14 @@ export interface LbpMetadataInput {
 
 export interface LbpPriceChartData {
     __typename?: 'LBPPriceChartData';
+    buyVolume: Scalars['Float'];
+    /** @deprecated Field no longer supported */
     intervalTimestamp: Scalars['Int'];
     projectTokenPrice: Scalars['Float'];
     reservePrice: Scalars['Float'];
+    sellVolume: Scalars['Float'];
+    timestamp: Scalars['Int'];
+    volume: Scalars['Float'];
 }
 
 export interface LbPoolInput {
@@ -3052,6 +3057,7 @@ export interface QueryBeetsPoolGetReliquaryFarmSnapshotsArgs {
 
 export interface QueryLbpPriceChartArgs {
     chain: GqlChain;
+    dataPoints?: InputMaybe<Scalars['Int']>;
     id: Scalars['String'];
     interval?: InputMaybe<Scalars['Int']>;
 }
@@ -5928,9 +5934,13 @@ export type LbpPriceChartDataResolvers<
     ContextType = ResolverContext,
     ParentType extends ResolversParentTypes['LBPPriceChartData'] = ResolversParentTypes['LBPPriceChartData'],
 > = ResolversObject<{
+    buyVolume?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
     intervalTimestamp?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     projectTokenPrice?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
     reservePrice?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+    sellVolume?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+    timestamp?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+    volume?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
     __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 

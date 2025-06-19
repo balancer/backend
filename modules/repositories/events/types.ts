@@ -37,7 +37,16 @@ export interface TokenFlowsRepository {
         tokenA: string,
         tokenB: string,
         interval?: number,
-    ) => Promise<{ intervalTimestamp: number; swapCount: number; volume: number; [token: string]: number }[]>;
+    ) => Promise<
+        {
+            timestamp: number;
+            swapCount: number;
+            volume: number;
+            [token: string]: number;
+            buyVolume: number;
+            sellVolume: number;
+        }[]
+    >;
 }
 
 export interface EventStoreRepository {

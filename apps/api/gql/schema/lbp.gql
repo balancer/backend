@@ -21,13 +21,17 @@ input CreateLBPInput {
 }
 
 type LBPPriceChartData {
-    intervalTimestamp: Int!
+    timestamp: Int!
+    intervalTimestamp: Int! @deprecated
     projectTokenPrice: Float!
     reservePrice: Float!
+    volume: Float!
+    buyVolume: Float!
+    sellVolume: Float!
 }
 
 type Query {
-    lbpPriceChart(id: String!, chain: GqlChain!, interval: Int): [LBPPriceChartData!]
+    lbpPriceChart(id: String!, chain: GqlChain!, interval: Int @deprecated, dataPoints: Int): [LBPPriceChartData!]
 }
 
 type Mutation {
