@@ -8,13 +8,13 @@
 import { secondsPerYear } from '../../../common/time';
 import { PrismaPoolAprItem, PrismaPoolAprType } from '@prisma/client';
 import { prisma } from '../../../../prisma/prisma-client';
-import { tokenService } from '../../../token/token.service';
+import { TokenService, tokenService } from '../../../token/token.service';
 import { AprHandler, PoolAPRData } from '../../types';
 
 export class LiquidityGaugeAprHandler implements AprHandler {
     private readonly MAX_VEBAL_BOOST = 2.5;
 
-    constructor() {}
+    constructor(private readonly tokenService: TokenService) {}
 
     public getAprServiceName(): string {
         return 'LiquidityGaugeAprHandler';
@@ -26,7 +26,7 @@ export class LiquidityGaugeAprHandler implements AprHandler {
         const chain = pools[0].chain;
 
         // Get the data
-        const tokenPrices = await tokenService.getTokenPrices(chain);
+        const tokenPrices = await this.tokenService.getTokenPrices(chain);
 
         const aprItems: Omit<PrismaPoolAprItem, 'createdAt' | 'updatedAt'>[] = [];
 

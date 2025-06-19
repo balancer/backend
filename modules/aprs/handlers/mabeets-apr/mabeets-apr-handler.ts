@@ -3,13 +3,13 @@ import { PrismaPoolAprItem, PrismaPoolAprType } from '@prisma/client';
 import { prisma } from '../../../../prisma/prisma-client';
 import { prismaBulkExecuteOperations } from '../../../../prisma/prisma-util';
 import { secondsPerYear } from '../../../common/time';
-import { tokenService } from '../../../token/token.service';
+import { TokenService } from '../../../token/token.service';
 import { ReliquarySubgraphService } from '../../../subgraphs/reliquary-subgraph/reliquary.service';
 import { AprHandler, PoolAPRData } from '../../types';
 import config from '../../../../config';
 
 export class MaBeetsAprHandler implements AprHandler {
-    constructor(private readonly beetsAddress: string) {}
+    constructor(private readonly beetsAddress: string, private readonly tokenService: TokenService) {}
 
     public getAprServiceName(): string {
         return 'MaBeetsAprHandler';
@@ -30,7 +30,7 @@ export class MaBeetsAprHandler implements AprHandler {
 
         const filteredFarms = allSubgraphFarms.filter((farm) => !excludedFarmIds.includes(farm.pid.toString()));
 
-        const tokenPrices = await tokenService.getTokenPrices(chain);
+        const tokenPrices = await this.tokenService.getTokenPrices(chain);
         const operations: any[] = [];
 
         const aprItems: Omit<PrismaPoolAprItem, 'createdAt' | 'updatedAt'>[] = [];
@@ -50,7 +50,7 @@ export class MaBeetsAprHandler implements AprHandler {
             const totalLiquidity = pool.dynamicData?.totalLiquidity || 0;
             const pricePerShare = totalLiquidity / totalShares;
 
-            const beetsPrice = tokenService.getPriceForToken(tokenPrices, this.beetsAddress, chain);
+            const beetsPrice = this.tokenService.getPriceForToken(tokenPrices, this.beetsAddress, chain);
             const farmBeetsPerYear = parseFloat(farm.beetsPerSecond) * secondsPerYear;
             const beetsValuePerYear = beetsPrice * farmBeetsPerYear;
 

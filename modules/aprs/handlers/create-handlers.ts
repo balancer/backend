@@ -3,6 +3,7 @@ import { AprHandler } from '../types';
 import * as handlers from '.';
 import config from '../../../config';
 import { chainToChainId } from '../../network/chain-id-to-chain';
+import { tokenService } from '../../token/token.service';
 
 /**
  * Creates handler instances for a specific chain
@@ -15,7 +16,7 @@ export function createHandlers(chain: Chain): AprHandler[] {
     handlerList.push(new handlers.DynamicSwapFeeAprHandler());
     handlerList.push(new handlers.NestedPoolAprHandler());
     // handlerList.push(new handlers.QuantAmmAprHandler());
-    handlerList.push(new handlers.LiquidityGaugeAprHandler());
+    handlerList.push(new handlers.LiquidityGaugeAprHandler(tokenService));
     handlerList.push(new handlers.MerklAprHandler());
     handlerList.push(new handlers.SurplusSwapFeeAprHandler());
 
@@ -26,7 +27,9 @@ export function createHandlers(chain: Chain): AprHandler[] {
     }
 
     if (config[chain].aprHandlers.maBeetsAprHandler) {
-        handlerList.push(new handlers.MaBeetsAprHandler(config[chain].aprHandlers.maBeetsAprHandler.beetsAddress));
+        handlerList.push(
+            new handlers.MaBeetsAprHandler(config[chain].aprHandlers.maBeetsAprHandler.beetsAddress, tokenService),
+        );
         handlerList.push(new handlers.BeetswarsGaugeVotingAprHandler());
     }
 

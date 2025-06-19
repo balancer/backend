@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { networkContext } from '../../../network/network-context.service';
 import { PrismaPoolAprItem, PrismaPoolAprType } from '@prisma/client';
 import { AprHandler, PoolAPRData } from '../../types';
 
