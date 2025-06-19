@@ -207,7 +207,7 @@ export default <NetworkData>{
                     isIbYield: true,
                 },
                 wmetaSCUSD: {
-                    tokenAddress: '0xeeeeeee6d95e55a468d32feb5d6648754d10a967',
+                    tokenAddress: '0xcccccccca9fc69a2b32408730011edb3205a93a1',
                     sourceUrl: 'https://api.stability.farm/',
                     path: 'metaVaults.146.0x33333333c480194b5b651987b7d00b20ddcbd287.APR',
                     scale: 100,
