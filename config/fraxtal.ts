@@ -60,28 +60,30 @@ export default <NetworkData>{
             defaultYieldFeePercentage: '0.5',
         },
     },
-    ybAprConfig: {
-        maker: {
-            sdai: '0x09eadcbaa812a4c076c3a6cde765dc4a22e0d775',
-        },
-        defaultHandlers: {
-            sfrxETH: {
-                tokenAddress: '0xfc00000000000000000000000000000000000005',
-                sourceUrl: 'https://api.frax.finance/v2/frxeth/summary/latest',
-                path: 'sfrxethApr',
-                isIbYield: true,
+    aprHandlers: {
+        ybAprHandler: {
+            maker: {
+                sdai: '0x09eadcbaa812a4c076c3a6cde765dc4a22e0d775',
             },
-            sFRAX: {
-                tokenAddress: '0xfc00000000000000000000000000000000000008',
-                sourceUrl: 'https://api.frax.finance/v2/frax/sfrax/summary/history?range=1d',
-                path: 'items.0.sfraxApr',
-                isIbYield: true,
-            },
-            sUSDe: {
-                tokenAddress: '0x211cc4dd073734da055fbf44a2b4667d5e5fe5d2',
-                sourceUrl: 'https://ethena.fi/api/yields/protocol-and-staking-yield',
-                path: 'stakingYield.value',
-                isIbYield: true,
+            defaultHandlers: {
+                sfrxETH: {
+                    tokenAddress: '0xfc00000000000000000000000000000000000005',
+                    sourceUrl: 'https://api.frax.finance/v2/frxeth/summary/latest',
+                    path: 'sfrxethApr',
+                    isIbYield: true,
+                },
+                sFRAX: {
+                    tokenAddress: '0xfc00000000000000000000000000000000000008',
+                    sourceUrl: 'https://api.frax.finance/v2/frax/sfrax/summary/history?range=1d',
+                    path: 'items.0.sfraxApr',
+                    isIbYield: true,
+                },
+                sUSDe: {
+                    tokenAddress: '0x211cc4dd073734da055fbf44a2b4667d5e5fe5d2',
+                    sourceUrl: 'https://ethena.fi/api/yields/protocol-and-staking-yield',
+                    path: 'stakingYield.value',
+                    isIbYield: true,
+                },
             },
         },
     },

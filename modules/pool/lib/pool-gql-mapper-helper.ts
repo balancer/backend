@@ -1,20 +1,64 @@
-import { Chain } from '@prisma/client';
+import { Chain, PrismaPoolAprType } from '@prisma/client';
 import {
     GqlPoolTokenDetail,
     GqlNestedPool,
     GqlHook,
     LiquidityManagement,
+    GqlPoolAprItemType,
+    GqlPoolAprItem,
 } from '../../../apps/api/gql/generated-schema';
 import {
     PrismaPoolTokenWithExpandedNesting,
     PrismaNestedPoolWithSingleLayerNesting,
     HookData,
+    PrismaPoolMinimal,
 } from '../../../prisma/prisma-types';
 import { floatToExactString } from '../../common/numbers';
 import { chainToChainId } from '../../network/chain-id-to-chain';
 import { StableData } from '../subgraph-mapper';
 import { prisma } from '../../../prisma/prisma-client';
 import { tokenService } from '../../token/token.service';
+
+export function mapAprItems(pool: PrismaPoolMinimal): GqlPoolAprItem[] {
+    const aprItems: GqlPoolAprItem[] = [];
+
+    for (const aprItem of pool.aprItems) {
+        // Skip items with APR of 0
+        if (aprItem.apr === 0) {
+            continue;
+        }
+
+        let type: GqlPoolAprItemType;
+        switch (aprItem.type) {
+            case PrismaPoolAprType.NATIVE_REWARD:
+                if (pool.chain === 'FANTOM' || pool.chain === 'SONIC') {
+                    type = 'MABEETS_EMISSIONS';
+                } else {
+                    type = 'VEBAL_EMISSIONS';
+                }
+                break;
+            case PrismaPoolAprType.THIRD_PARTY_REWARD:
+                type = 'STAKING';
+                break;
+            case null:
+                type = 'NESTED';
+                break;
+            default:
+                type = aprItem.type;
+                break;
+        }
+
+        aprItems.push({
+            id: aprItem.id,
+            title: aprItem.title,
+            apr: aprItem.apr,
+            type: type,
+            rewardTokenAddress: aprItem.rewardTokenAddress,
+            rewardTokenSymbol: aprItem.rewardTokenSymbol,
+        });
+    }
+    return aprItems;
+}
 
 export function mapPoolToken(poolToken: PrismaPoolTokenWithExpandedNesting, nestedPercentage = 1): GqlPoolTokenDetail {
     const { nestedPool } = poolToken;

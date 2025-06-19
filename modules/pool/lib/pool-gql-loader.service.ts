@@ -51,7 +51,7 @@ import { isWeightedPoolV2 } from './pool-utils';
 import { addressesMatch } from '../../web3/addresses';
 import { networkContext } from '../../network/network-context.service';
 import { getWeightSnapshots } from '../../actions/quant-amm/get-weight-snapshots';
-import { mapPoolToken, enrichWithErc4626Data } from './pool-gql-mapper-helper';
+import { mapPoolToken, enrichWithErc4626Data, mapAprItems } from './pool-gql-mapper-helper';
 
 const isToken = (text: string) => text.match(/^0x[0-9a-fA-F]{40}$/);
 const isPoolId = (text: string) => isToken(text) || text.match(/^0x[0-9a-fA-F]{64}$/);
@@ -299,8 +299,8 @@ export class PoolGqlLoaderService {
             const query =
                 Prisma.raw(`SELECT p.id, p.chain FROM "PrismaPool" p LEFT JOIN "PrismaPoolDynamicData" d on (p.id = d."poolId") WHERE p.search_vector @@ websearch_to_tsquery('simple', '${searchQuery}') AND d."totalSharesNum" > 0.000000000001 AND NOT ('BLACK_LISTED' = ANY(p.categories)) AND ${filters}
             ORDER BY d."${orderColumn}" ${
-                args.orderDirection && args.orderDirection === 'asc' ? 'ASC' : 'DESC'
-            } LIMIT ${limit} OFFSET ${offset}`);
+                    args.orderDirection && args.orderDirection === 'asc' ? 'ASC' : 'DESC'
+                } LIMIT ${limit} OFFSET ${offset}`);
 
             const searchResults = await prisma.$queryRaw<{ id: string }[]>(query);
 
@@ -556,8 +556,8 @@ export class PoolGqlLoaderService {
             ...(where?.hasHook !== undefined && where.hasHook
                 ? { hook: { path: ['address'], string_starts_with: '0x' } }
                 : where?.hasHook !== undefined && !where.hasHook
-                  ? { hook: { equals: Prisma.DbNull } }
-                  : {}),
+                ? { hook: { equals: Prisma.DbNull } }
+                : {}),
         };
 
         if (!textSearch) {
@@ -1121,103 +1121,7 @@ export class PoolGqlLoaderService {
             protocolYieldCapture48h,
         } = pool.dynamicData!;
 
-        const newAprItemsSchema = this.buildAprItems(pool);
-
-        const allAprItems = pool.aprItems?.filter((item) => item.apr > 0 || (item.range?.max ?? 0 > 0)) || [];
-        const aprItems = allAprItems.filter(
-            (item) => item.type !== 'SWAP_FEE' && item.type !== 'SWAP_FEE_7D' && item.type !== 'SWAP_FEE_30D',
-        );
-        const swapAprItems = aprItems.filter((item) => item.type === 'SWAP_FEE_24H');
-
-        // swap apr cannot have a range, so we can already sum it up
-        const aprItemsWithNoGroup = aprItems.filter((item) => !item.group);
-
-        const hasAprRange = !!aprItems.find((item) => item.range);
-        let aprTotal = `${pool.dynamicData?.apr || 0}`;
-        let swapAprTotal = `0`;
-        let nativeRewardAprTotal = `0`;
-        let thirdPartyAprTotal = `0`;
-
-        let aprRangeMin: string | undefined;
-        let aprRangeMax: string | undefined;
-
-        let nativeAprRangeMin: string | undefined;
-        let nativeAprRangeMax: string | undefined;
-
-        let thirdPartyAprRangeMin: string | undefined;
-        let thirdPartyAprRangeMax: string | undefined;
-
-        let hasRewardApr = false;
-
-        // It is likely that if either native or third party APR has a range, that both of them have a range
-        // therefore if there is a least one item with a range, we show both rewards in a range, although min and max might be identical
-        if (hasAprRange) {
-            let swapFeeApr = 0;
-            let currentAprRangeMinTotal = 0;
-            let currentAprRangeMaxTotal = 0;
-            let currentNativeAprRangeMin = 0;
-            let currentNativeAprRangeMax = 0;
-            let currentThirdPartyAprRangeMin = 0;
-            let currentThirdPartyAprRangeMax = 0;
-
-            for (let aprItem of aprItems) {
-                let minApr: number;
-                let maxApr: number;
-
-                if (aprItem.range) {
-                    minApr = aprItem.range.min;
-                    maxApr = aprItem.range.max;
-                } else {
-                    minApr = aprItem.apr;
-                    maxApr = aprItem.apr;
-                }
-
-                currentAprRangeMinTotal += minApr;
-                currentAprRangeMaxTotal += maxApr;
-
-                switch (aprItem.type) {
-                    case PrismaPoolAprType.NATIVE_REWARD: {
-                        currentNativeAprRangeMin += minApr;
-                        currentNativeAprRangeMax += maxApr;
-                        break;
-                    }
-                    case PrismaPoolAprType.THIRD_PARTY_REWARD: {
-                        currentThirdPartyAprRangeMin += minApr;
-                        currentThirdPartyAprRangeMax += maxApr;
-                        break;
-                    }
-                    case PrismaPoolAprType.VOTING: {
-                        currentThirdPartyAprRangeMin += minApr;
-                        currentThirdPartyAprRangeMax += maxApr;
-                        break;
-                    }
-                    case 'SWAP_FEE_24H': {
-                        swapFeeApr += maxApr;
-                        break;
-                    }
-                }
-            }
-            swapAprTotal = `${swapFeeApr}`;
-            aprRangeMin = `${currentAprRangeMinTotal}`;
-            aprRangeMax = `${currentAprRangeMaxTotal}`;
-            nativeAprRangeMin = `${currentNativeAprRangeMin}`;
-            nativeAprRangeMax = `${currentNativeAprRangeMax}`;
-            thirdPartyAprRangeMin = `${currentThirdPartyAprRangeMin}`;
-            thirdPartyAprRangeMax = `${currentThirdPartyAprRangeMax}`;
-            hasRewardApr = currentNativeAprRangeMax > 0 || currentThirdPartyAprRangeMax > 0;
-        } else {
-            const nativeRewardAprItems = aprItems.filter((item) => item.type === 'NATIVE_REWARD');
-            const thirdPartyRewardAprItems = aprItems.filter((item) => item.type === 'THIRD_PARTY_REWARD');
-            swapAprTotal = `${_.sumBy(swapAprItems, 'apr')}`;
-            nativeRewardAprTotal = `${_.sumBy(nativeRewardAprItems, 'apr')}`;
-            thirdPartyAprTotal = `${_.sumBy(thirdPartyRewardAprItems, 'apr')}`;
-            hasRewardApr = nativeRewardAprItems.length > 0 || thirdPartyRewardAprItems.length > 0;
-        }
-
-        const grouped = _.groupBy(
-            aprItems.filter((item) => item.group),
-            (item) => item.group,
-        );
+        const aprItems = mapAprItems(pool);
 
         return {
             ...pool.dynamicData!,
@@ -1257,178 +1161,16 @@ export class PoolGqlLoaderService {
             protocolYieldCapture48h: `${fixedNumber(protocolYieldCapture48h || 0, 2)}`,
             protocolFees24h: `${fixedNumber(protocolFees24h || 0, 2)}`,
             protocolFees48h: `${fixedNumber(protocolFees48h || 0, 2)}`,
-            aprItems: newAprItemsSchema,
+            aprItems: aprItems,
             apr: {
-                apr:
-                    typeof aprRangeMin !== 'undefined' && typeof aprRangeMax !== 'undefined'
-                        ? {
-                              __typename: 'GqlPoolAprRange',
-                              min: aprRangeMin,
-                              max: aprRangeMax,
-                          }
-                        : { __typename: 'GqlPoolAprTotal', total: aprTotal },
-                swapApr: swapAprTotal,
-                nativeRewardApr:
-                    typeof nativeAprRangeMin !== 'undefined' && typeof nativeAprRangeMax !== 'undefined'
-                        ? {
-                              __typename: 'GqlPoolAprRange',
-                              min: nativeAprRangeMin,
-                              max: nativeAprRangeMax,
-                          }
-                        : { __typename: 'GqlPoolAprTotal', total: nativeRewardAprTotal },
-                thirdPartyApr:
-                    typeof thirdPartyAprRangeMin !== 'undefined' && typeof thirdPartyAprRangeMax !== 'undefined'
-                        ? {
-                              __typename: 'GqlPoolAprRange',
-                              min: thirdPartyAprRangeMin,
-                              max: thirdPartyAprRangeMax,
-                          }
-                        : { __typename: 'GqlPoolAprTotal', total: thirdPartyAprTotal },
-                items: [
-                    ...aprItemsWithNoGroup.flatMap((item): GqlBalancePoolAprItem[] => {
-                        if (item.range) {
-                            return [
-                                {
-                                    id: item.id,
-                                    apr: {
-                                        __typename: 'GqlPoolAprRange',
-                                        min: item.range.min.toString(),
-                                        max: item.range.max.toString(),
-                                    },
-                                    title: item.title,
-                                    subItems: [],
-                                },
-                            ];
-                        } else {
-                            return [
-                                {
-                                    ...item,
-                                    apr: { __typename: 'GqlPoolAprTotal', total: `${item.apr}` },
-                                    subItems: [],
-                                },
-                            ];
-                        }
-                    }),
-                    ..._.map(grouped, (items, group): GqlBalancePoolAprItem => {
-                        // todo: might need to support apr ranges as well at some point
-                        const subItems = items.map(
-                            (item): GqlBalancePoolAprSubItem => ({
-                                ...item,
-                                apr: { __typename: 'GqlPoolAprTotal', total: `${item.apr}` },
-                            }),
-                        );
-                        let apr = 0;
-                        for (const item of items) {
-                            if (
-                                item.type === 'SWAP_FEE' ||
-                                item.type === 'SWAP_FEE_7D' ||
-                                item.type === 'SWAP_FEE_30D' ||
-                                item.type === 'SURPLUS_24H' ||
-                                item.type === 'SURPLUS_7D' ||
-                                item.type === 'SURPLUS_30D'
-                            ) {
-                            } else {
-                                apr += item.apr;
-                            }
-                        }
-                        const title = `${group.charAt(0) + group.slice(1).toLowerCase()} boosted APR`;
-
-                        return {
-                            id: `${pool.id}-${group}`,
-                            title,
-                            apr: { __typename: 'GqlPoolAprTotal', total: `${apr}` },
-                            subItems,
-                        };
-                    }),
-                ],
-                hasRewardApr,
+                apr: { total: '0' },
+                swapApr: '0',
+                nativeRewardApr: { total: '0' },
+                thirdPartyApr: { total: '0' },
+                items: [],
+                hasRewardApr: false,
             },
         };
-    }
-
-    private buildAprItems(pool: PrismaPoolMinimal): GqlPoolAprItem[] {
-        const aprItems: GqlPoolAprItem[] = [];
-
-        for (const aprItem of pool.aprItems) {
-            // Skipping SWAP_FEE as the DB state is not updated, safe to remove after deployment of the patch, because all instances of SWAP_FEE_24H will be replaced with SWAP_FEE should be removed from the DB already
-            if (aprItem.type === 'SWAP_FEE') {
-                continue;
-            }
-
-            // Skip 7D, 30D swap APRs - they aren't updated anymore, because noone was using them
-            if (['SWAP_FEE_7D', 'SWAP_FEE_30D'].includes(String(aprItem.type))) {
-                continue;
-            }
-
-            if (aprItem.apr === 0 || (aprItem.range && aprItem.range.max === 0)) {
-                continue;
-            }
-
-            let type: GqlPoolAprItemType;
-            switch (aprItem.type) {
-                case PrismaPoolAprType.NATIVE_REWARD:
-                    if (pool.chain === 'FANTOM' || pool.chain === 'SONIC') {
-                        type = 'MABEETS_EMISSIONS';
-                    } else {
-                        type = 'VEBAL_EMISSIONS';
-                    }
-                    break;
-                case PrismaPoolAprType.THIRD_PARTY_REWARD:
-                    type = 'STAKING';
-                    break;
-                case null:
-                    type = 'NESTED';
-                    break;
-                default:
-                    type = aprItem.type;
-                    break;
-            }
-
-            if (aprItem.range) {
-                aprItems.push({
-                    id: aprItem.id,
-                    title: aprItem.title,
-                    apr: aprItem.range.min,
-                    type: type,
-                    rewardTokenAddress: aprItem.rewardTokenAddress,
-                    rewardTokenSymbol: aprItem.rewardTokenSymbol,
-                });
-                aprItems.push({
-                    id: `${aprItem.id}-boost`,
-                    title: aprItem.title,
-                    apr: aprItem.range.max - aprItem.range.min,
-                    type: 'STAKING_BOOST',
-                    rewardTokenAddress: aprItem.rewardTokenAddress,
-                    rewardTokenSymbol: aprItem.rewardTokenSymbol,
-                });
-            } else {
-                aprItems.push({
-                    id: aprItem.id,
-                    title: aprItem.title,
-                    apr: aprItem.apr,
-                    type: type,
-                    rewardTokenAddress: aprItem.rewardTokenAddress,
-                    rewardTokenSymbol: aprItem.rewardTokenSymbol,
-                });
-            }
-
-            // Adding deprecated SWAP_FEE for backwards compatibility
-            if (aprItem.type === 'SWAP_FEE_24H') {
-                aprItems.push({
-                    ...aprItem,
-                    id: `${aprItem.id.replace('-24h', '')}`,
-                    title: aprItem.title.replace(' (24h)', ''),
-                    type: 'SWAP_FEE',
-                });
-            }
-        }
-
-        let filteredItems = aprItems;
-        if (pool.type === 'QUANT_AMM_WEIGHTED') {
-            filteredItems = aprItems.filter((item) => item.type !== 'QUANT_AMM_UPLIFT');
-        }
-
-        return filteredItems;
     }
 
     private getPoolInvestConfig(pool: PrismaPoolWithExpandedNesting): GqlPoolInvestConfig {

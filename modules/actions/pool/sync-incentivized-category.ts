@@ -1,10 +1,11 @@
 import { Chain, Prisma } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
 
-export const syncIncentivizedCategory = async () => {
+export const syncIncentivizedCategory = async (chain: Chain) => {
     const poolsWithReward = await prisma.prismaPoolAprItem.findMany({
         select: { poolId: true },
         where: {
+            chain,
             type: {
                 in: ['NATIVE_REWARD', 'THIRD_PARTY_REWARD', 'MERKL', 'VOTING', 'LOCKING'],
             },
@@ -17,6 +18,7 @@ export const syncIncentivizedCategory = async () => {
     const incentivizedPoolIds = await prisma.prismaPool.findMany({
         select: { id: true },
         where: {
+            chain,
             categories: {
                 has: 'INCENTIVIZED',
             },

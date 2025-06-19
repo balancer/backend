@@ -166,26 +166,13 @@ model PrismaPoolAprItem {
     rewardTokenAddress  String?
     rewardTokenSymbol   String?
     apr                 Float
-    range               PrismaPoolAprRange?
 
     type                PrismaPoolAprType?
-    group               PrismaPoolAprItemGroup?
 
     @@index([poolId, chain])
     @@index([chain, type])
 }
 
-model PrismaPoolAprRange {
-    @@id([id, chain])
-    @@unique([aprItemId, chain])
-
-    id                  String
-    chain               Chain
-    aprItemId           String
-    aprItem             PrismaPoolAprItem   @relation(fields:[aprItemId, chain], references: [id, chain], onDelete: Cascade)
-    min                 Float
-    max                 Float
-}
 
 enum PrismaPoolAprType {
     SWAP_FEE
@@ -205,26 +192,12 @@ enum PrismaPoolAprType {
     SURPLUS_24H
     SURPLUS_7D
     SURPLUS_30D
+    STAKING
+    STAKING_BOOST
+    MABEETS_EMISSIONS
+    VEBAL_EMISSIONS
 }
 
-enum PrismaPoolAprItemGroup {
-    BEEFY
-    OVERNIGHT
-    REAPER
-    YEARN
-    IDLE
-    TRANCHESS
-    GEARBOX
-    AAVE
-    ANKR
-    TESSERA
-    TETU
-    OVIX
-    EULER
-    MAKER
-    DEFAULT
-    MORPHO
-}
 
 model PrismaPoolExpandedTokens {
     @@id([tokenAddress, poolId, chain])
@@ -240,7 +213,6 @@ model PrismaPoolExpandedTokens {
 
     @@index([tokenAddress, chain])
 }
-
 
 model PrismaPoolFilter {
     @@id([id, chain])

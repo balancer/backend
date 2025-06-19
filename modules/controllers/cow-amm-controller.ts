@@ -2,7 +2,7 @@ import config from '../../config';
 import { prisma } from '../../prisma/prisma-client';
 import { getViemClient } from '../sources/viem-client';
 import { getCowAmmSubgraphClient } from '../sources/subgraphs';
-import { fetchChangedPools, upsertPools, syncSwaps, syncJoinExits, updateSurplusAPRs } from '../actions/cow-amm';
+import { fetchChangedPools, upsertPools, syncSwaps, syncJoinExits } from '../actions/cow-amm';
 import { syncSnapshots } from '../actions/snapshots/sync-snapshots';
 import { Chain, PrismaLastBlockSyncedCategory } from '@prisma/client';
 import { syncBptBalancesFromSubgraph } from '../actions/user/bpt-balances/helpers/sync-bpt-balances-from-subgraph';
@@ -103,7 +103,6 @@ export function CowAmmController(tracer?: any) {
 
             await upsertPools(ids, viemClient, subgraphClient, chain, latestBlock);
             await syncTokenPairs(ids, viemClient, routerAddress, chain);
-            await updateSurplusAPRs(chain, ids);
             // Sync balances for the pools
             const newIds = ids.filter((id) => !existingIds.includes(id));
             await syncBptBalancesFromSubgraph(newIds, subgraphClient, chain);
@@ -140,10 +139,6 @@ export function CowAmmController(tracer?: any) {
                 .map((event) => event.poolId)
                 .filter((value, index, self) => self.indexOf(value) === index);
             return poolIds;
-        },
-        async updateSurplusAprs() {
-            const aprs = await updateSurplusAPRs();
-            return aprs;
         },
         async syncBalances(chain: Chain) {
             let subgraphClient: ReturnType<typeof getSubgraphClient>;
