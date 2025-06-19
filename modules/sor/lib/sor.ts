@@ -25,6 +25,7 @@ import {
     StablePoolV3,
     WeightedPoolV3,
 } from './poolsV3';
+import { LiquidityBootstrappingPoolV3 } from './poolsV3/liquidityBootstrapping/liquidityBootstrapping';
 import { BufferPoolData } from '../utils/data';
 
 export class SOR {
@@ -66,6 +67,14 @@ export class SOR {
                             }
                         }
                         break;
+                    case 'LIQUIDITY_BOOTSTRAPPING': {
+                        if (prismaPool.protocolVersion === 2) {
+                            basePools.push(WeightedPool.fromPrismaPool(prismaPool));
+                        } else {
+                            basePools.push(LiquidityBootstrappingPoolV3.fromPrismaPool(prismaPool, currentTimestamp));
+                        }
+                        break;
+                    }
                     case 'COMPOSABLE_STABLE':
                     case 'PHANTOM_STABLE':
                         basePools.push(ComposableStablePool.fromPrismaPool(prismaPool));

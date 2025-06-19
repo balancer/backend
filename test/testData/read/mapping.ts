@@ -5,7 +5,15 @@ import { PoolTokenWithRate } from '../../../modules/sor/lib/utils';
 import { PrismaPoolAndHookWithDynamic } from '../../../prisma/prisma-types';
 import { prismaPoolFactory, prismaPoolTokenFactory } from '../../factories';
 import { getDecimalsFromScalingFactor } from '../../utils';
-import { BufferPool, GyroEPool, QuantAmmPool, ReClammPool, StablePool, WeightedPool } from './readTestData';
+import {
+    BufferPool,
+    GyroEPool,
+    QuantAmmPool,
+    ReClammPool,
+    StablePool,
+    WeightedPool,
+    LiquidityBootstrappingPool,
+} from './readTestData';
 import { chainIdToChain } from '../../../modules/network/chain-id-to-chain';
 
 export function mapGyroPoolStateToPrismaPool(
@@ -239,6 +247,85 @@ export function mapWeightedPoolStateToPrismaPool(
         },
         chain: chainIdToChain[chainId],
     });
+    return prismaPool;
+}
+
+export function mapLiquidityBootstrappingPoolStateToPrismaPool(
+    poolState: LiquidityBootstrappingPool,
+    chainId: number,
+    protocolVersion: number,
+): PrismaPoolAndHookWithDynamic {
+    const decimals = poolState.scalingFactors.map((scalingFactor: bigint) =>
+        getDecimalsFromScalingFactor(scalingFactor),
+    );
+
+    const poolTokens = poolState.tokens.map(
+        (token: string, i: number) => new Token(chainId, token as Address, decimals[i]),
+    );
+
+    const tokenAmounts = poolTokens.map((token: Token, i: number) =>
+        PoolTokenWithRate.fromScale18AmountWithRate(
+            token,
+            poolState.balancesLiveScaled18[i],
+            poolState.tokenRates[i],
+            i,
+        ),
+    );
+
+    // map tokenIn and tokenOut to prisma tokens using prisma token factory
+    const tokens = poolState.tokens.map((token, i) =>
+        prismaPoolTokenFactory.build({
+            address: token as Address,
+            balance: formatUnits(tokenAmounts[i].amount, decimals[i]),
+            index: i,
+            priceRate: formatEther(poolState.tokenRates[i]),
+            token: { decimals: decimals[i] },
+            weight: formatUnits(poolState.weights[i], 18),
+        }),
+    );
+
+    // transform hook dynamicData values to bigInt and then apply formatEther to them
+    const _hookDynamicData = poolState.hook?.dynamicData;
+    const hookDynamicData = _hookDynamicData
+        ? Object.fromEntries(Object.entries(_hookDynamicData).map(([key, value]) => [key, formatEther(BigInt(value))]))
+        : undefined;
+
+    // map pool state to prisma pool using prisma pool factory
+    // calculate the not included parameters for the LBP
+
+    const reserveTokenIndex = 1 - poolState.projectTokenIndex;
+
+    const prismaPool = prismaPoolFactory
+        .lbp({
+            projectTokenIndex: poolState.projectTokenIndex,
+            isProjectTokenSwapInBlocked: poolState.isProjectTokenSwapInBlocked,
+            startWeights: poolState.startWeights,
+            endWeights: poolState.endWeights,
+            startTime: Number(poolState.startTime),
+            endTime: Number(poolState.endTime),
+            lbpOwner: '',
+            projectToken: '',
+            projectTokenStartWeight: Number(formatEther(poolState.startWeights[poolState.projectTokenIndex])),
+            projectTokenEndWeight: Number(formatEther(poolState.endWeights[poolState.projectTokenIndex])),
+            reserveToken: '',
+            reserveTokenIndex: reserveTokenIndex,
+            reserveTokenStartWeight: Number(formatEther(poolState.startWeights[reserveTokenIndex])),
+            reserveTokenEndWeight: Number(formatEther(poolState.endWeights[reserveTokenIndex])),
+        })
+        .build({
+            address: poolState.poolAddress,
+            protocolVersion,
+            tokens: tokens,
+            hook: {
+                ...poolState.hook,
+                dynamicData: hookDynamicData,
+            },
+            dynamicData: {
+                swapFee: formatEther(poolState.swapFee),
+                aggregateSwapFee: formatEther(poolState.aggregateSwapFee),
+                totalShares: formatEther(poolState.totalSupply),
+            },
+        });
     return prismaPool;
 }
 

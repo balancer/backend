@@ -7,6 +7,7 @@ import { WeightedPool } from './weightedPool';
 import { StablePool } from './stablePool';
 import { BufferPool } from './buffer';
 import { GyroECLPPool } from './gyroECLP';
+import { LiquidityBootstrappingPool } from './liquidityBootstrappingPool';
 import { ReClammPool } from './reClamm';
 import { QuantAmmPool } from './quantAmm';
 
@@ -18,15 +19,18 @@ export async function getPool(
     poolAddress: Address,
 ): Promise<PoolBase & TestBase> {
     // Find onchain data fetching via pool type
-    const poolData: Record<string, WeightedPool | StablePool | BufferPool | GyroECLPPool | ReClammPool | QuantAmmPool> =
-        {
-            WEIGHTED: new WeightedPool(rpcUrl, chainId),
-            STABLE: new StablePool(rpcUrl, chainId),
-            Buffer: new BufferPool(rpcUrl, chainId),
-            GYROE: new GyroECLPPool(rpcUrl, chainId),
-            RECLAMM: new ReClammPool(rpcUrl, chainId),
-            QUANT_AMM_WEIGHTED: new QuantAmmPool(rpcUrl, chainId),
-        };
+    const poolData: Record<
+        string,
+        WeightedPool | StablePool | BufferPool | GyroECLPPool | LiquidityBootstrappingPool | ReClammPool | QuantAmmPool
+    > = {
+        WEIGHTED: new WeightedPool(rpcUrl, chainId),
+        STABLE: new StablePool(rpcUrl, chainId),
+        Buffer: new BufferPool(rpcUrl, chainId),
+        GYROE: new GyroECLPPool(rpcUrl, chainId),
+        LIQUIDITY_BOOTSTRAPPING: new LiquidityBootstrappingPool(rpcUrl, chainId),
+        RECLAMM: new ReClammPool(rpcUrl, chainId),
+        QUANT_AMM_WEIGHTED: new QuantAmmPool(rpcUrl, chainId),
+    };
     if (!poolData[poolType]) throw new Error(`getPool: Unsupported pool type: ${poolType}`);
 
     console.log('Fetching pool data...');

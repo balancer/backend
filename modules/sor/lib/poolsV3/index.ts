@@ -5,3 +5,4 @@ export * from './gyroECLP/gyroECLPPool';
 export * from './reClamm/reClammPool';
 export * from './buffer/bufferPool';
 export * from './quantAmm/quantAmmPool';
+export * from './liquidityBootstrapping/liquidityBootstrapping';
