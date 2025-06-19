@@ -28,7 +28,6 @@ export class BeefyAprHandler implements YbAprHandler {
                         [address]: {
                             apr,
                             isIbYield: isIbYield ?? false,
-                            group: this.group,
                         },
                     };
                 })

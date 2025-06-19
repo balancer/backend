@@ -74,7 +74,6 @@ export class YbTokensAprHandler implements AprHandler {
                 return {
                     ...token,
                     apr,
-                    group: tokenApr?.group,
                     share: token.balanceUSD / totalLiquidity,
                 };
             });

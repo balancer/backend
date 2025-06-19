@@ -34,7 +34,6 @@ export class Handler implements AprHandler {
             [config[chain].sdaiAddress]: {
                 apr,
                 isIbYield: true,
-                group: 'MAKER',
             },
         };
     }

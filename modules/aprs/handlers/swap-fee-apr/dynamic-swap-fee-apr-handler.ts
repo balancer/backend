@@ -83,7 +83,6 @@ export class DynamicSwapFeeAprHandler implements AprHandler {
                         type: PrismaPoolAprType.DYNAMIC_SWAP_FEE_24H,
                         rewardTokenAddress: null,
                         rewardTokenSymbol: null,
-                        group: null,
                     };
                 } else {
                     return null;

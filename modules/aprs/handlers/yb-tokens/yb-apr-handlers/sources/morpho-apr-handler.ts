@@ -61,7 +61,6 @@ export class MorphoAprHandler implements YbAprHandler {
                         vault.address.toLowerCase(),
                         {
                             apr: vault.state.apy * (1 - vault.state.fee),
-                            group: this.group,
                             isIbYield: true,
                         },
                     ]),

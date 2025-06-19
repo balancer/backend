@@ -137,7 +137,6 @@ export class SwapFeeApr7d30dHandler implements AprHandler {
                               type: PrismaPoolAprType.SWAP_FEE_7D,
                               rewardTokenAddress: null,
                               rewardTokenSymbol: null,
-                              group: null,
                           },
                       ]
                     : []),
@@ -152,7 +151,6 @@ export class SwapFeeApr7d30dHandler implements AprHandler {
                               type: PrismaPoolAprType.SWAP_FEE_30D,
                               rewardTokenAddress: null,
                               rewardTokenSymbol: null,
-                              group: null,
                           },
                       ]
                     : []),

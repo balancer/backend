@@ -51,7 +51,6 @@ export class DefaultAprHandler implements YbAprHandler {
                 [this.tokenAddress]: {
                     apr: scaledValue,
                     isIbYield: this.isIbYield ?? false,
-                    group: this.group,
                 },
             };
         } catch (error) {

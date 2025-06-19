@@ -11,7 +11,6 @@ export interface YbAprHandler {
             /** Defined as float, eg: 0.01 is 1% */
             apr: number;
             isIbYield: boolean;
-            group?: string;
         };
     }>;
 }

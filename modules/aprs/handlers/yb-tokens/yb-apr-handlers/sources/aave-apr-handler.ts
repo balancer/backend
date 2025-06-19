@@ -82,7 +82,6 @@ export class AaveAprHandler implements YbAprHandler {
                         [wrappedTokenAddress]: {
                             apr,
                             isIbYield: isIbYield ?? false,
-                            group: this.group,
                         },
                     }));
                 })

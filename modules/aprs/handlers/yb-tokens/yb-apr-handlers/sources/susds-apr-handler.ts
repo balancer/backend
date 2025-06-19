@@ -21,7 +21,7 @@ export class SUSDSAprHandler implements YbAprHandler {
     }
 
     async getAprs() {
-        const aprs: { [p: string]: { apr: number; isIbYield: boolean; group: string } } = {};
+        const aprs: { [p: string]: { apr: number; isIbYield: boolean } } = {};
         try {
             const apr = await client.readContract({
                 abi: [parseAbiItem('function getAPR() view returns (uint256)')],
@@ -34,7 +34,6 @@ export class SUSDSAprHandler implements YbAprHandler {
             aprs[this.token] = {
                 apr: tokenApr,
                 isIbYield: false,
-                group: this.group,
             };
         } catch (error) {
             console.error(`sUSDS APR Failed for token ${this.token}: `, error);

@@ -21,7 +21,7 @@ export class MakerAprHandler implements YbAprHandler {
     }
 
     async getAprs() {
-        const aprs: { [p: string]: { apr: number; isIbYield: boolean; group: string } } = {};
+        const aprs: { [p: string]: { apr: number; isIbYield: boolean } } = {};
         try {
             const dsr = await client.readContract({
                 abi: makerPotAbi,
@@ -34,7 +34,6 @@ export class MakerAprHandler implements YbAprHandler {
             aprs[this.sdai] = {
                 apr: tokenApr,
                 isIbYield: false,
-                group: this.group,
             };
         } catch (error) {
             console.error(`Maker APR Failed for token ${this.sdai}: `, error);

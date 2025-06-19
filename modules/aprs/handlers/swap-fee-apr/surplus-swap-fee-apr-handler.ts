@@ -112,7 +112,6 @@ export class SurplusSwapFeeAprHandler implements AprHandler {
             apr: surplus24h <= 0 || totalLiquidity === 0 ? 0 : (surplus24h * 365) / totalLiquidity,
             rewardTokenAddress: null,
             rewardTokenSymbol: null,
-            group: null,
         }));
 
         return data24h;
