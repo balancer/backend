@@ -107,7 +107,8 @@ export type GqlChain =
     | 'POLYGON'
     | 'SEPOLIA'
     | 'SONIC'
-    | 'ZKEVM';
+    | 'ZKEVM'
+    | 'MOKSHA';
 
 export interface GqlFeaturePoolGroupItemExternalLink {
     __typename?: 'GqlFeaturePoolGroupItemExternalLink';

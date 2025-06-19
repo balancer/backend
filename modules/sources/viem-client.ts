@@ -13,6 +13,7 @@ import {
     fraxtal,
     mode,
     sonic,
+    moksha,
 } from 'viem/chains';
 import { Chain } from '@prisma/client';
 import config from '../../config';
@@ -39,6 +40,7 @@ const chain2ViemChain = {
     [Chain.FRAXTAL]: fraxtal,
     [Chain.MODE]: mode,
     [Chain.SONIC]: sonic,
+    [Chain.MOKSHA]: moksha,
 };
 
 export const getViemClient = (chain: Chain) => {

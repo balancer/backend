@@ -114,6 +114,7 @@ export const schema = gql`
         SEPOLIA
         SONIC
         ZKEVM
+        MOKSHA
     }
 
     type GqlFeaturePoolGroupItemExternalLink {

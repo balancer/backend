@@ -15,4 +15,5 @@ enum GqlChain {
     FRAXTAL
     MODE
     SONIC
+    MOKSHA
 }

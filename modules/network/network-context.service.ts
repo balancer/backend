@@ -46,6 +46,10 @@ export class NetworkContextService {
         return this.data.chain.id === 1;
     }
 
+    public get isMokshaNetwork() {
+        return this.data.chain.id === 14800;
+    }
+
     public get isBalancerChain(): boolean {
         return BalancerChainIds.includes(this.chainId);
     }
@@ -57,6 +61,7 @@ export class NetworkContextService {
     public get protocolSupportedChainIds(): string[] {
         return this.isBalancerChain ? BalancerChainIds : BeethovenChainIds;
     }
+    
 
     public get services() {
         return this.config.services;

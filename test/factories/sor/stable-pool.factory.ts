@@ -11,7 +11,7 @@ import { LiquidityManagement } from '../../../modules/sor/types';
 import { HookState } from '@balancer-labs/balancer-maths';
 
 export const StablePoolFactory = Factory.define<StablePoolV3>(({ params }) => {
-    const chain: Chain = params.chain || faker.helpers.arrayElement<Chain>(['MAINNET', 'SEPOLIA']);
+    const chain: Chain = params.chain || faker.helpers.arrayElement<Chain>(['MAINNET', 'SEPOLIA', 'MOKSHA']);
     const id = params.id || (faker.finance.ethereumAddress() as Address);
     const address = params.address || id;
     const amp = params.amp || parseUnits(faker.number.int({ min: 1, max: 500 }).toString(), 3);

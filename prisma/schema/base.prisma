@@ -16,6 +16,7 @@ enum Chain {
     ARBITRUM
     AVALANCHE
     BASE
+    MOKSHA
     FANTOM
     GNOSIS
     MAINNET

@@ -29,6 +29,7 @@ CREATE TABLE events_zkevm PARTITION OF "PartitionedPoolEvent" FOR VALUES IN ('ZK
 CREATE TABLE events_avalanche PARTITION OF "PartitionedPoolEvent" FOR VALUES IN ('AVALANCHE');
 CREATE TABLE events_gnosis PARTITION OF "PartitionedPoolEvent" FOR VALUES IN ('GNOSIS');
 CREATE TABLE events_sepolia PARTITION OF "PartitionedPoolEvent" FOR VALUES IN ('SEPOLIA');
+CREATE TABLE events_moksha PARTITION OF "PartitionedPoolEvent" FOR VALUES IN ('MOKSHA');
 
 -- CreateIndex
 CREATE INDEX "PartitionedPoolEvent_chain_idx" ON "PartitionedPoolEvent"("chain");
