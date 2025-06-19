@@ -85,11 +85,10 @@ export class YbAprHandlers {
         for (const result of results) {
             if (result.status === 'fulfilled') {
                 aprs = aprs.concat(
-                    Object.entries(result.value).map(([address, { apr, isIbYield, group }]) => ({
+                    Object.entries(result.value).map(([address, { apr, isIbYield }]) => ({
                         apr,
                         address,
                         isIbYield,
-                        group,
                     })),
                 );
             } else {
