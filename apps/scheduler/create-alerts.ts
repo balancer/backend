@@ -76,19 +76,20 @@ async function createCronAlertsIfNotExist(chainId: string, jobs: WorkerJob[]): P
             periodInSeconds = 60;
         }
 
-        let evaluationPeriods = cronJob.alarmEvaluationPeriod ? cronJob.alarmEvaluationPeriod : 3;
-        let datapointsToAlarm = cronJob.alarmDatapointsToAlarm ? cronJob.alarmDatapointsToAlarm : 3;
+        let evaluationPeriods = periodInSeconds < 60 ? 3 : 5;
+        let datapointsToAlarm = periodInSeconds < 60 ? 3 : 5;
 
         // AWS Metrics cannot be checked across more than a day (EvaluationPeriods * Period must be <= 86400)
         if (evaluationPeriods * periodInSeconds > secondsPerDay) {
             // if the crons runs in bigger intervalls that once a day, we can't create an alarm
-            if (periodInSeconds > 86400) {
+            if (periodInSeconds > secondsPerDay) {
                 console.error(
                     `Cant create alert for ${cronJob.name} because interval is too big: ${cronJob.interval}ms`,
                 );
                 continue;
             }
-            // if the crons runs once a day or more often, we can set the evaluatioPeriod and dataPointsToAlarm to the highest number possible (2 or 1)
+
+            // if the crons runs once or twice a day, we can set the evaluatioPeriod and dataPointsToAlarm to the highest number possible (2 or 1)
             evaluationPeriods = Math.floor(secondsPerDay / periodInSeconds);
             datapointsToAlarm = Math.floor(secondsPerDay / periodInSeconds);
         }

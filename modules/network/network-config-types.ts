@@ -23,8 +23,6 @@ interface NetworkServices {
 export interface WorkerJob {
     name: string;
     interval: number;
-    alarmEvaluationPeriod?: number;
-    alarmDatapointsToAlarm?: number;
 }
 
 export type DeploymentEnv = 'canary' | 'main';
