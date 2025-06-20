@@ -57,8 +57,6 @@ export class SOR {
             try {
                 switch (prismaPool.type) {
                     case 'WEIGHTED':
-                    /// LBPs can be handled like weighted pools
-                    case 'LIQUIDITY_BOOTSTRAPPING':
                         {
                             if (prismaPool.protocolVersion === 2) {
                                 basePools.push(WeightedPool.fromPrismaPool(prismaPool));
@@ -68,6 +66,7 @@ export class SOR {
                         }
                         break;
                     case 'LIQUIDITY_BOOTSTRAPPING': {
+                        /// LBPs use weighted math
                         if (prismaPool.protocolVersion === 2) {
                             basePools.push(WeightedPool.fromPrismaPool(prismaPool));
                         } else {
