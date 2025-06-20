@@ -255,6 +255,14 @@ export default <NetworkData>{
                     defillamaPoolId: '46f3828a-cbf6-419e-8399-a83b905bf556',
                     tokenAddress: '0xf073bac22dab7faf4a3dd6c6189a70d54110525c',
                 },
+                {
+                    defillamaPoolId: '0aedb3f6-9298-49de-8bb0-2f611a4df784',
+                    tokenAddress: '0x1202f5c7b4b9e47a1a484e8b270be34dbbc75055',
+                },
+                {
+                    defillamaPoolId: '2ad8497d-c855-4840-85ad-cdc536b92ced',
+                    tokenAddress: '0x4956b52ae2ff65d74ca2d61207523288e4528f96',
+                },
             ],
             maker: {
                 sdai: '0x83f20f44975d03b1b09e64809b757c47f942beea',
