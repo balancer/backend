@@ -80,6 +80,8 @@ export function mapPoolToken(poolToken: PrismaPoolTokenWithExpandedNesting, nest
             (type) => type.type === 'WHITE_LISTED' || type.type === 'PHANTOM_BPT' || type.type === 'BPT',
         ),
         isErc4626: poolToken.token.types.some((type) => type.type === 'ERC4626'),
+        maxDeposit: poolToken.token.maxDeposit === '0' ? undefined : poolToken.token.maxDeposit,
+        maxWithdraw: poolToken.token.maxWithdraw === '0' ? undefined : poolToken.token.maxWithdraw,
         isExemptFromProtocolYieldFee: poolToken.exemptFromProtocolYieldFee,
         scalingFactor: poolToken.scalingFactor,
         tradable: !poolToken.token.types.find((type) => type.type === 'PHANTOM_BPT' || type.type === 'BPT'),

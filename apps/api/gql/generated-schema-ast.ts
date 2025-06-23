@@ -2596,6 +2596,16 @@ export const schema = gql`
         logoURI: String
 
         """
+        If it is an ERC4626 token, this  defines how much can be deposited into the ERC4626 vault.
+        """
+        maxDeposit: String
+
+        """
+        If it is an ERC4626 token, this  defines how much can be withdrawn from the ERC4626 vault.
+        """
+        maxWithdraw: String
+
+        """
         Name of the pool token.
         """
         name: String!

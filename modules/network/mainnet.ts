@@ -175,7 +175,7 @@ export const mainnetNetworkConfig: NetworkConfig = {
             interval: every(1, 'hours'),
         },
         {
-            name: 'sync-erc4626-unwrap-rate',
+            name: 'sync-erc4626-onchain-data',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(60, 'minutes') : every(20, 'minutes'),
         },
         {

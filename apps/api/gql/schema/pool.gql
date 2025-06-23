@@ -1627,6 +1627,14 @@ type GqlPoolTokenDetail {
     """
     canUseBufferForSwaps: Boolean
     """
+    If it is an ERC4626 token, this  defines how much can be deposited into the ERC4626 vault.
+    """
+    maxDeposit: String
+    """
+    If it is an ERC4626 token, this  defines how much can be withdrawn from the ERC4626 vault.
+    """
+    maxWithdraw: String
+    """
     The ERC4626 review data for the token
     """
     erc4626ReviewData: Erc4626ReviewData

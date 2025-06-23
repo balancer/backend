@@ -82,7 +82,7 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         console.log('Syncing Erc4626');
         await tokenService.syncTokenContentData(chain);
         await ContentController().syncErc4626Data();
-        await TokenController().syncErc4626UnwrapRates(chain);
+        await TokenController().syncErc4626OnChainData(chain);
 
         console.log('Syncing token prices');
         await EventController().syncLastSwaps(chain);

@@ -1853,6 +1853,10 @@ export interface GqlPoolTokenDetail {
     isExemptFromProtocolYieldFee: Scalars['Boolean'];
     /** Token logo */
     logoURI?: Maybe<Scalars['String']>;
+    /** If it is an ERC4626 token, this  defines how much can be deposited into the ERC4626 vault. */
+    maxDeposit?: Maybe<Scalars['String']>;
+    /** If it is an ERC4626 token, this  defines how much can be withdrawn from the ERC4626 vault. */
+    maxWithdraw?: Maybe<Scalars['String']>;
     /** Name of the pool token. */
     name: Scalars['String'];
     /** Additional data for the nested pool if the token is a BPT. Null otherwise. */
@@ -5210,6 +5214,8 @@ export type GqlPoolTokenDetailResolvers<
     isErc4626?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
     isExemptFromProtocolYieldFee?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
     logoURI?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    maxDeposit?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    maxWithdraw?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     nestedPool?: Resolver<Maybe<ResolversTypes['GqlNestedPool']>, ParentType, ContextType>;
     priceRate?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
