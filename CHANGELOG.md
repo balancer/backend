@@ -1,5 +1,11 @@
 # backend
 
+## 1.47.0
+
+### Minor Changes
+
+-   ee669f2: add maxDeposit and maxWithdraw to erc4626 data
+
 ## 1.46.0
 
 ### Minor Changes
