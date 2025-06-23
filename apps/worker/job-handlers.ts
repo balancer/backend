@@ -389,11 +389,11 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
         case 'sync-erc4626-data':
             await runIfNotAlreadyRunning(name, chainId, () => ContentController().syncErc4626Data(), res, next);
             break;
-        case 'sync-erc4626-unwrap-rate':
+        case 'sync-erc4626-onchain-data':
             await runIfNotAlreadyRunning(
                 name,
                 chainId,
-                () => TokenController().syncErc4626UnwrapRates(chain),
+                () => TokenController().syncErc4626OnChainData(chain),
                 res,
                 next,
             );
