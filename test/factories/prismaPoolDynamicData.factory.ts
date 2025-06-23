@@ -16,7 +16,7 @@ export const prismaPoolDynamicDataFactory = PrismaPoolDynamicDataFactory.define(
         swapFee: '0.01',
         aggregateSwapFee: '0',
         aggregateYieldFee: '0',
-        swapEnabled: true,
+        swapEnabled: params?.swapEnabled !== undefined ? params.swapEnabled : true,
         totalShares: '10000.000000000000000000',
         totalLiquidity: 10000,
         volume24h: 0,
