@@ -1794,7 +1794,7 @@ type GqlPoolTokenComposableStable implements GqlPoolTokenBase @deprecated(reason
     pool: GqlPoolComposableStableNested!
 }
 
-type GqlPoolApr @deprecated(reason: "Use GqlPoolApr instead") {
+type GqlPoolApr @deprecated(reason: "Use GqlPoolAprItem instead") {
     apr: GqlPoolAprValue!
     swapApr: BigDecimal! # we make the assumption swap apr will never have a range
     nativeRewardApr: GqlPoolAprValue!
@@ -1803,14 +1803,14 @@ type GqlPoolApr @deprecated(reason: "Use GqlPoolApr instead") {
     hasRewardApr: Boolean!
 }
 
-union GqlPoolAprValue @deprecated(reason: "Use GqlPoolApr instead") = GqlPoolAprRange | GqlPoolAprTotal
+union GqlPoolAprValue @deprecated(reason: "Use GqlPoolAprItem instead") = GqlPoolAprRange | GqlPoolAprTotal
 
-type GqlPoolAprRange @deprecated(reason: "Use GqlPoolApr instead") {
+type GqlPoolAprRange @deprecated(reason: "Use GqlPoolAprItem instead") {
     min: BigDecimal!
     max: BigDecimal!
 }
 
-type GqlPoolAprTotal @deprecated(reason: "Use GqlPoolApr instead") {
+type GqlPoolAprTotal @deprecated(reason: "Use GqlPoolAprItem instead") {
     total: BigDecimal!
 }
 

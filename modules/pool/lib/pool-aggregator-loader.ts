@@ -351,10 +351,10 @@ export class PoolAggregatorLoader {
             protocolFees48h: `${fixedNumber(protocolFees48h || 0, 2)}`,
             aprItems: newAprItemsSchema,
             apr: {
-                apr: { total: '0' },
+                apr: { __typename: 'GqlPoolAprTotal', total: '0' },
                 swapApr: '0',
-                nativeRewardApr: { total: '0' },
-                thirdPartyApr: { total: '0' },
+                nativeRewardApr: { __typename: 'GqlPoolAprTotal', total: '0' },
+                thirdPartyApr: { __typename: 'GqlPoolAprTotal', total: '0' },
                 items: [],
                 hasRewardApr: false,
             },
