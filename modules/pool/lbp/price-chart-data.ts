@@ -23,10 +23,10 @@ export const priceChartData = async (
     const { chain, id, projectToken, reserveToken } = pool;
 
     // Calculate interval based on number of data points
-    const interval = dataPoints > 1 ? (pool.endTime - pool.startTime) / (dataPoints - 1) : 0;
+    const interval = Math.floor(dataPoints > 1 ? (pool.endTime - pool.startTime) / (dataPoints - 1) : 0);
 
     // Get the token flows
-    const flows = await repo.getTokenFlows(chain, id, projectToken, reserveToken, Math.floor(interval));
+    const flows = await repo.getTokenFlows(chain, id, projectToken, reserveToken, interval);
 
     if (flows.length === 0) return [];
 
@@ -36,7 +36,7 @@ export const priceChartData = async (
             chain,
             tokenAddress: reserveToken,
             timestamp: {
-                gte: flows[0].intervalTimestamp,
+                gte: flows[0].timestamp,
             },
         },
     });
@@ -44,14 +44,14 @@ export const priceChartData = async (
     const sortedPrices = prices.sort((a, b) => a.timestamp - b.timestamp);
 
     // Generate complete timeline from startTime to endTime with specified number of data points
-    const completeTimeline = generateCompleteTimeline(pool.startTime, pool.endTime, dataPoints);
+    const completeTimeline = generateCompleteTimeline(pool.startTime, pool.endTime, dataPoints, interval);
 
     // Calculate running balances for the intervals
     let balanceProject = 0;
     let balanceReserve = 0;
 
     // Check if there are any join/exit events before the start time
-    const flowsBeforeStart = flows.filter((flow) => flow.intervalTimestamp < pool.startTime);
+    const flowsBeforeStart = flows.filter((flow) => flow.timestamp < pool.startTime);
 
     for (const flow of flowsBeforeStart) {
         balanceProject += flow[projectToken] || 0;
@@ -59,7 +59,7 @@ export const priceChartData = async (
     }
 
     // Create a map of existing flows for quick lookup
-    const flowsMap = new Map(flows.map((flow) => [flow.intervalTimestamp, flow]));
+    const flowsMap = new Map(flows.map((flow) => [flow.timestamp, flow]));
 
     const balances = completeTimeline.map((timestamp) => {
         const existingFlow = flowsMap.get(timestamp);
@@ -83,10 +83,19 @@ export const priceChartData = async (
             weights.reserveWeight,
         );
 
+        const buyVolume = existingFlow?.buyVolume || 0;
+        const sellVolume = existingFlow?.sellVolume || 0;
+        const volume = existingFlow?.volume || 0;
+        const swapCount = existingFlow?.swapCount || 0;
+
         return {
-            intervalTimestamp: timestamp,
+            timestamp,
             projectTokenPrice: projectTokenPrice,
             reservePrice: reservePrice,
+            buyVolume,
+            sellVolume,
+            volume,
+            swapCount,
         };
     });
 
@@ -95,25 +104,36 @@ export const priceChartData = async (
 
 /**
  * Generate complete timeline from startTime to endTime with specified number of data points
+ * Timestamps are snapped to intervals using the same logic as the SQL query: FLOOR(timestamp / interval) * interval
  */
-const generateCompleteTimeline = (startTime: number, endTime: number, dataPoints: number): number[] => {
+const generateCompleteTimeline = (
+    startTime: number,
+    endTime: number,
+    dataPoints: number,
+    interval: number,
+): number[] => {
     if (dataPoints <= 0) {
         return [];
     }
 
     if (dataPoints === 1) {
-        return [startTime];
+        // Snap single timestamp to interval boundary
+        return [Math.floor(startTime / interval) * interval];
     }
 
     const timeline: number[] = [];
-    const interval = (endTime - startTime) / (dataPoints - 1);
+    const timeRange = endTime - startTime;
+    const step = timeRange / (dataPoints - 1);
 
     for (let i = 0; i < dataPoints; i++) {
-        const timestamp = startTime + interval * i;
-        timeline.push(Math.round(timestamp));
+        const rawTimestamp = startTime + step * i;
+        // Snap to interval boundary using same logic as SQL query
+        const snappedTimestamp = Math.floor(rawTimestamp / interval) * interval;
+        timeline.push(snappedTimestamp);
     }
 
-    return timeline;
+    // Remove duplicates that might occur due to snapping and sort
+    return [...new Set(timeline)].sort((a, b) => a - b);
 };
 
 /**

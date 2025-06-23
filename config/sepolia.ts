@@ -79,7 +79,7 @@ export default <NetworkData>{
     multicall: '0x25eef291876194aefad0d60dff89e268b90754bb',
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',
     avgBlockSpeed: 1,
-    ybAprConfig: {},
+    aprHandlers: {},
     datastudio: {
         main: {
             user: 'datafeed-service@datastudio-366113.iam.gserviceaccount.com',

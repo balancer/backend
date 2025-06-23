@@ -1076,6 +1076,178 @@ export type QueryUsersArgs = {
     where?: InputMaybe<User_Filter>;
 };
 
+export type Subscription = {
+    __typename?: 'Subscription';
+    /** Access to subgraph metadata */
+    _meta?: Maybe<_Meta_>;
+    addRemove?: Maybe<AddRemove>;
+    addRemoves: Array<AddRemove>;
+    factories: Array<Factory>;
+    factory?: Maybe<Factory>;
+    pool?: Maybe<Pool>;
+    poolShare?: Maybe<PoolShare>;
+    poolShares: Array<PoolShare>;
+    poolSnapshot?: Maybe<PoolSnapshot>;
+    poolSnapshots: Array<PoolSnapshot>;
+    poolToken?: Maybe<PoolToken>;
+    poolTokens: Array<PoolToken>;
+    pools: Array<Pool>;
+    swap?: Maybe<Swap>;
+    swaps: Array<Swap>;
+    token?: Maybe<Token>;
+    tokens: Array<Token>;
+    user?: Maybe<User>;
+    users: Array<User>;
+};
+
+export type Subscription_MetaArgs = {
+    block?: InputMaybe<Block_Height>;
+};
+
+export type SubscriptionAddRemoveArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type SubscriptionAddRemovesArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<AddRemove_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<AddRemove_Filter>;
+};
+
+export type SubscriptionFactoriesArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<Factory_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<Factory_Filter>;
+};
+
+export type SubscriptionFactoryArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type SubscriptionPoolArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type SubscriptionPoolShareArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type SubscriptionPoolSharesArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<PoolShare_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<PoolShare_Filter>;
+};
+
+export type SubscriptionPoolSnapshotArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type SubscriptionPoolSnapshotsArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<PoolSnapshot_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<PoolSnapshot_Filter>;
+};
+
+export type SubscriptionPoolTokenArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type SubscriptionPoolTokensArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<PoolToken_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<PoolToken_Filter>;
+};
+
+export type SubscriptionPoolsArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<Pool_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<Pool_Filter>;
+};
+
+export type SubscriptionSwapArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type SubscriptionSwapsArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<Swap_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<Swap_Filter>;
+};
+
+export type SubscriptionTokenArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type SubscriptionTokensArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<Token_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<Token_Filter>;
+};
+
+export type SubscriptionUserArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type SubscriptionUsersArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<User_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<User_Filter>;
+};
+
 export type Swap = {
     __typename?: 'Swap';
     blockNumber: Scalars['BigInt'];

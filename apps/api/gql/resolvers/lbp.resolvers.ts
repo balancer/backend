@@ -12,7 +12,7 @@ export default {
         /**
          * Get LB Pool price chart data
          */
-        lbpPriceChart: async (parent: any, { id, chain, interval }) => {
+        lbpPriceChart: async (parent: any, { id, chain, interval, dataPoints }) => {
             try {
                 const pool = await prisma.prismaPool.findFirst({
                     where: {
@@ -30,7 +30,10 @@ export default {
                     chain: pool.chain,
                     ...(pool.typeData as LBPoolData),
                 };
-                return await priceChartData(input);
+
+                const chartData = await priceChartData(input, dataPoints || undefined);
+
+                return chartData.map((d) => ({ ...d, intervalTimestamp: d.timestamp }));
             } catch (error) {
                 console.error('Error fetching LB Pool chart:', error);
                 return null;

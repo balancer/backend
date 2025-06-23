@@ -1,6 +1,5 @@
 import { ethers } from 'ethers';
 import { DeploymentEnv, NetworkConfig, NetworkData } from './network-config-types';
-import { SwapFeeAprService } from '../pool/lib/apr-data-sources/';
 import { UserSyncMasterchefFarmBalanceService } from '../user/lib/user-sync-masterchef-farm-balance.service';
 import { UserSyncReliquaryFarmBalanceService } from '../user/lib/user-sync-reliquary-farm-balance.service';
 import { every } from '../../apps/scheduler/intervals';
@@ -13,7 +12,6 @@ const fantomNetworkData: NetworkData = config.FANTOM;
 export const fantomNetworkConfig: NetworkConfig = {
     data: fantomNetworkData,
     provider: new ethers.providers.JsonRpcProvider({ url: fantomNetworkData.rpcUrl, timeout: 60000 }),
-    poolAprServices: [new SwapFeeAprService()],
     userStakedBalanceServices: [
         new UserSyncMasterchefFarmBalanceService(
             fantomNetworkData.fbeets!.address,
@@ -68,20 +66,14 @@ export const fantomNetworkConfig: NetworkConfig = {
         {
             name: 'sync-changed-pools',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(2, 'minutes') : every(30, 'seconds'),
-            alarmEvaluationPeriod: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
-            alarmDatapointsToAlarm: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
         },
         {
             name: 'user-sync-wallet-balances-for-all-pools',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(20, 'seconds'),
-            alarmEvaluationPeriod: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
-            alarmDatapointsToAlarm: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
         },
         {
             name: 'user-sync-staked-balances',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(20, 'seconds'),
-            alarmEvaluationPeriod: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
-            alarmDatapointsToAlarm: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
         },
         {
             name: 'update-fee-volume-yield-all-pools',

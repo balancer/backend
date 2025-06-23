@@ -1,32 +1,17 @@
 import { ethers } from 'ethers';
 import { DeploymentEnv, NetworkConfig, NetworkData } from './network-config-types';
-import { BoostedPoolAprService } from '../pool/lib/apr-data-sources/nested-pool-apr.service';
-import { DynamicSwapFeeFromEventsAprService, SwapFeeAprService } from '../pool/lib/apr-data-sources';
-import { GaugeAprService } from '../pool/lib/apr-data-sources/ve-bal-gauge-apr.service';
 import { UserSyncGaugeBalanceService } from '../user/lib/user-sync-gauge-balance.service';
 import { every } from '../../apps/scheduler/intervals';
-import { YbTokensAprService } from '../pool/lib/apr-data-sources/yb-tokens-apr.service';
 import { env } from '../../apps/env';
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import config from '../../config';
-import { ReliquaryFarmAprService } from '../pool/lib/apr-data-sources/reliquary-farm-apr.service';
 import { UserSyncReliquaryFarmBalanceService } from '../user/lib/user-sync-reliquary-farm-balance.service';
-import { BeetswarsGaugeVotingAprService } from '../pool/lib/apr-data-sources/beetswars-gauge-voting-apr';
 
 const sonicNetworkData: NetworkData = config.SONIC;
 
 export const sonicNetworkConfig: NetworkConfig = {
     data: sonicNetworkData,
     provider: new ethers.providers.JsonRpcProvider({ url: sonicNetworkData.rpcUrl, timeout: 60000 }),
-    poolAprServices: [
-        new YbTokensAprService(sonicNetworkData.ybAprConfig, sonicNetworkData.chain.prismaId),
-        new BoostedPoolAprService(),
-        new SwapFeeAprService(),
-        new DynamicSwapFeeFromEventsAprService(),
-        new GaugeAprService(),
-        new ReliquaryFarmAprService(sonicNetworkData.beets!.address),
-        new BeetswarsGaugeVotingAprService(),
-    ],
     userStakedBalanceServices: [
         new UserSyncGaugeBalanceService(),
         new UserSyncReliquaryFarmBalanceService(sonicNetworkData.reliquary!.address),
@@ -76,20 +61,14 @@ export const sonicNetworkConfig: NetworkConfig = {
         {
             name: 'sync-changed-pools',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(2, 'minutes') : every(30, 'seconds'),
-            alarmEvaluationPeriod: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
-            alarmDatapointsToAlarm: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
         },
         {
             name: 'user-sync-wallet-balances-for-all-pools',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(20, 'seconds'),
-            alarmEvaluationPeriod: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
-            alarmDatapointsToAlarm: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
         },
         {
             name: 'user-sync-staked-balances',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(20, 'seconds'),
-            alarmEvaluationPeriod: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
-            alarmDatapointsToAlarm: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
         },
         {
             name: 'sync-latest-reliquary-snapshots',

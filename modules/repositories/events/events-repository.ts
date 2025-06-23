@@ -162,7 +162,7 @@ export const eventsRepository = {
 
         const query = `
           SELECT
-              FLOOR("blockTimestamp" / $3) * $3 as "intervalTimestamp",
+              FLOOR("blockTimestamp" / $3) * $3 as timestamp,
 
               -- token A flows
               SUM(CASE
@@ -189,6 +189,17 @@ export const eventsRepository = {
                     THEN -(exited_tokens.token_amount)::float
                   ELSE 0
               END) as "tokenBFlow",
+
+              SUM(CASE
+                  WHEN type = 'SWAP' AND LOWER(payload->'tokenOut'->>'address') = $${params.length + 1}
+                    THEN (payload->'tokenOut'->>'amount')::float
+                  ELSE 0
+              END) as "tokenABuy",
+              SUM(CASE
+                WHEN type = 'SWAP' AND LOWER(payload->'tokenIn'->>'address') = $${params.length + 1}
+                  THEN (payload->'tokenIn'->>'amount')::float
+                  ELSE 0
+              END) as "tokenASell",
 
               COUNT(CASE WHEN type = 'SWAP' THEN 1 END) AS "swapCount",
               SUM("valueUSD") as volume
@@ -222,13 +233,15 @@ export const eventsRepository = {
 
         return results
             .map((row) => ({
-                intervalTimestamp: Number(row.intervalTimestamp),
+                timestamp: Number(row.timestamp),
                 [tokenA]: Number(row.tokenAFlow || 0),
                 [tokenB]: Number(row.tokenBFlow || 0),
                 swapCount: Number(row.swapCount),
                 volume: Number(row.volume),
+                buyVolume: Number(row.tokenABuy),
+                sellVolume: Number(row.tokenASell),
             }))
-            .sort((a, b) => a.intervalTimestamp - b.intervalTimestamp);
+            .sort((a, b) => a.timestamp - b.timestamp);
     },
     storeEvents: async (events: (SwapEvent | JoinExitEvent)[]) => {
         await prisma.prismaPoolEvent.createMany({

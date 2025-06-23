@@ -57,14 +57,10 @@ export const validateLBPoolInput = async (input: CreateLbpInput) => {
     const metadataSchema = z.object({
         lbpName: z.string().min(1, 'Name must be at least 1 character long'),
         description: z.string().min(1, 'Description must be at least 1 character long'),
-        tokenLogo: z
-            .string()
-            .min(1)
-            .refine((url) => validateUrl(url), { message: 'Logo URL is not accessible (404)' }),
-        website: z
-            .string()
-            .min(1)
-            .refine((url) => validateUrl(url), { message: 'Website URL is not accessible (404)' }),
+        tokenLogo: z.string().min(1).url(),
+        // .refine((url) => validateUrl(url), { message: 'Logo URL is not accessible (404)' }),
+        website: z.string().min(1).url(),
+        // .refine((url) => validateUrl(url), { message: 'Website URL is not accessible (404)' }),
         x: z.string().optional(),
         discord: z.string().optional(),
         telegram: z.string().optional(),

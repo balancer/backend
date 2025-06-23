@@ -1,15 +1,5 @@
 import { ethers } from 'ethers';
 import { DeploymentEnv, NetworkConfig, NetworkData } from './network-config-types';
-import {
-    BoostedPoolAprService,
-    SwapFeeAprService,
-    GaugeAprService,
-    YbTokensAprService,
-    VeBalProtocolAprService,
-    VeBalVotingAprService,
-    MorphoRewardsAprService,
-    DynamicSwapFeeFromEventsAprService,
-} from '../pool/lib/apr-data-sources';
 import { UserSyncGaugeBalanceService } from '../user/lib/user-sync-gauge-balance.service';
 import { every } from '../../apps/scheduler/intervals';
 import { env } from '../../apps/env';
@@ -17,26 +7,13 @@ import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer
 import config from '../../config';
 import { UserSyncAuraBalanceService } from '../user/lib/user-sync-aura-balance.service';
 import { UserSyncVebalLockBalanceService } from '../user/lib/user-sync-vebal-lock-balance.service';
-import { AaveApiAprService } from '../pool/lib/apr-data-sources/aave-api-apr-handler';
-import { QuantAmmAprService } from '../pool/lib/apr-data-sources/quant-amm-apr-handler';
 
 export const data: NetworkData = config.MAINNET;
 
 export const mainnetNetworkConfig: NetworkConfig = {
     data,
     provider: new ethers.providers.JsonRpcProvider({ url: data.rpcUrl, timeout: 60000 }),
-    poolAprServices: [
-        new YbTokensAprService(data.ybAprConfig, data.chain.prismaId),
-        new BoostedPoolAprService(),
-        new SwapFeeAprService(),
-        new DynamicSwapFeeFromEventsAprService(),
-        new GaugeAprService(),
-        new VeBalProtocolAprService(data.rpcUrl),
-        new VeBalVotingAprService(),
-        new MorphoRewardsAprService(),
-        new AaveApiAprService(),
-        new QuantAmmAprService(),
-    ],
+
     userStakedBalanceServices: [
         new UserSyncGaugeBalanceService(),
         new UserSyncAuraBalanceService(),
@@ -88,20 +65,14 @@ export const mainnetNetworkConfig: NetworkConfig = {
         {
             name: 'sync-changed-pools',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(2, 'minutes') : every(30, 'seconds'),
-            alarmEvaluationPeriod: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
-            alarmDatapointsToAlarm: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
         },
         {
             name: 'user-sync-wallet-balances-for-all-pools',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(20, 'seconds'),
-            alarmEvaluationPeriod: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
-            alarmDatapointsToAlarm: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
         },
         {
             name: 'user-sync-staked-balances',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(20, 'seconds'),
-            alarmEvaluationPeriod: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
-            alarmDatapointsToAlarm: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
         },
         {
             name: 'update-fee-volume-yield-all-pools',
@@ -130,12 +101,6 @@ export const mainnetNetworkConfig: NetworkConfig = {
         {
             name: 'global-purge-old-tokenprices',
             interval: every(1, 'days'),
-            alarmEvaluationPeriod: 1,
-            alarmDatapointsToAlarm: 1,
-        },
-        {
-            name: 'sync-merkl',
-            interval: every(15, 'minutes'),
         },
         {
             name: 'sync-rate-provider-reviews',
@@ -155,10 +120,6 @@ export const mainnetNetworkConfig: NetworkConfig = {
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(6, 'minutes') : every(2, 'minutes'),
         },
         {
-            name: 'update-surplus-aprs',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(1, 'minutes'),
-        },
-        {
             name: 'sync-join-exits-v2',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(1, 'minutes'),
         },
@@ -174,8 +135,6 @@ export const mainnetNetworkConfig: NetworkConfig = {
         {
             name: 'sync-cow-amm-pools',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(2, 'minutes') : every(30, 'seconds'),
-            alarmEvaluationPeriod: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
-            alarmDatapointsToAlarm: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? 3 : 1,
         },
         {
             name: 'sync-cow-amm-swaps',

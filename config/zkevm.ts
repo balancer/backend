@@ -66,43 +66,33 @@ export default <NetworkData>{
         excludedFarmIds: [],
     },
     avgBlockSpeed: 1,
-    ybAprConfig: {
-        ovix: {
-            tokens: {
-                USDT: {
-                    yieldAddress: '0xad41c77d99e282267c1492cdefe528d7d5044253',
-                    wrappedAddress: '0x550d3bb1f77f97e4debb45d4f817d7b9f9a1affb',
+    aprHandlers: {
+        ybAprHandler: {
+            defaultHandlers: {
+                wstETH: {
+                    tokenAddress: '0x5d8cff95d7a57c0bf50b30b43c7cc0d52825d4a9',
+                    sourceUrl: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
+                    path: 'data.smaApr',
+                    isIbYield: true,
                 },
-                USDC: {
-                    yieldAddress: '0x68d9baa40394da2e2c1ca05d30bf33f52823ee7b',
-                    wrappedAddress: '0x3a6789fc7c05a83cfdff5d2f9428ad9868b4ff85',
+                rETH: {
+                    tokenAddress: '0xb23c20efce6e24acca0cef9b7b7aa196b84ec942',
+                    sourceUrl: 'https://api.rocketpool.net/mainnet/reth/apr',
+                    path: 'yearlyAPR',
+                    isIbYield: true,
                 },
-            },
-        },
-        defaultHandlers: {
-            wstETH: {
-                tokenAddress: '0x5d8cff95d7a57c0bf50b30b43c7cc0d52825d4a9',
-                sourceUrl: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
-                path: 'data.smaApr',
-                isIbYield: true,
-            },
-            rETH: {
-                tokenAddress: '0xb23c20efce6e24acca0cef9b7b7aa196b84ec942',
-                sourceUrl: 'https://api.rocketpool.net/mainnet/reth/apr',
-                path: 'yearlyAPR',
-                isIbYield: true,
-            },
-            ankrETH: {
-                tokenAddress: '0x12d8ce035c5de3ce39b1fdd4c1d5a745eaba3b8c',
-                sourceUrl: 'https://api.staking.ankr.com/v1alpha/metrics',
-                path: 'services.{serviceName == "eth"}.apy',
-                isIbYield: true,
-            },
-            rsETH: {
-                tokenAddress: '0x8c7d118b5c47a5bcbd47cc51789558b98dad17c5',
-                sourceUrl: 'https://universe.kelpdao.xyz/rseth/apy',
-                path: 'value',
-                isIbYield: true,
+                ankrETH: {
+                    tokenAddress: '0x12d8ce035c5de3ce39b1fdd4c1d5a745eaba3b8c',
+                    sourceUrl: 'https://api.staking.ankr.com/v1alpha/metrics',
+                    path: 'services.{serviceName == "eth"}.apy',
+                    isIbYield: true,
+                },
+                rsETH: {
+                    tokenAddress: '0x8c7d118b5c47a5bcbd47cc51789558b98dad17c5',
+                    sourceUrl: 'https://universe.kelpdao.xyz/rseth/apy',
+                    path: 'value',
+                    isIbYield: true,
+                },
             },
         },
     },

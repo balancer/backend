@@ -80,178 +80,123 @@ export default <NetworkData>{
         excludedFarmIds: [],
     },
     avgBlockSpeed: 1,
-    ybAprConfig: {
-        aave: {
-            v3: {
-                subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/DSfLz8oQBUeU5atALgUFQKMTSYV9mZAVYp4noLSXAfvb`,
-                tokens: {
-                    USDCe: {
-                        underlyingAssetAddress: '0x7f5c764cbc14f9669b88837ca1490cca17c31607',
-                        aTokenAddress: '0x625e7708f30ca75bfd92586e17077590c60eb4cd',
-                        wrappedTokens: {
-                            stataOptUSDC: '0x9f281eb58fd98ad98ede0fc4c553ad4d73e7ca2c',
+    aprHandlers: {
+        ybAprHandler: {
+            aave: {
+                v3: {
+                    subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/DSfLz8oQBUeU5atALgUFQKMTSYV9mZAVYp4noLSXAfvb`,
+                    tokens: {
+                        USDCe: {
+                            underlyingAssetAddress: '0x7f5c764cbc14f9669b88837ca1490cca17c31607',
+                            aTokenAddress: '0x625e7708f30ca75bfd92586e17077590c60eb4cd',
+                            wrappedTokens: {
+                                stataOptUSDC: '0x9f281eb58fd98ad98ede0fc4c553ad4d73e7ca2c',
+                            },
+                        },
+                        USDCn: {
+                            underlyingAssetAddress: '0x0b2c639c533813f4aa9d7837caf62653d097ff85',
+                            aTokenAddress: '0x38d693ce1df5aadf7bc62595a37d667ad57922e5',
+                            wrappedTokens: {
+                                stataOptUSDCn: '0x4dd03dfd36548c840b563745e3fbec320f37ba7e',
+                            },
+                        },
+                        USDT: {
+                            underlyingAssetAddress: '0x94b008aa00579c1307b0ef2c499ad98a8ce58e58',
+                            aTokenAddress: '0x6ab707aca953edaefbc4fd23ba73294241490620',
+                            wrappedTokens: {
+                                stataOptUSDT: '0x035c93db04e5aaea54e6cd0261c492a3e0638b37',
+                            },
                         },
                     },
-                    USDCn: {
-                        underlyingAssetAddress: '0x0b2c639c533813f4aa9d7837caf62653d097ff85',
-                        aTokenAddress: '0x38d693ce1df5aadf7bc62595a37d667ad57922e5',
-                        wrappedTokens: {
-                            stataOptUSDCn: '0x4dd03dfd36548c840b563745e3fbec320f37ba7e',
-                        },
-                    },
-                    USDT: {
-                        underlyingAssetAddress: '0x94b008aa00579c1307b0ef2c499ad98a8ce58e58',
-                        aTokenAddress: '0x6ab707aca953edaefbc4fd23ba73294241490620',
-                        wrappedTokens: {
-                            stataOptUSDT: '0x035c93db04e5aaea54e6cd0261c492a3e0638b37',
-                        },
-                    },
                 },
             },
-        },
-        beefy: {
-            sourceUrl: 'https://api.beefy.finance/apy/',
-            tokens: {
-                wmooExactlySupplyUSDC: {
-                    address: '0xe5e9168b45a90c1e5730da6184cc5901c6e4353f',
-                    vaultId: 'exactly-supply-usdc',
-                },
-                wmooExactlySupplyETH: {
-                    address: '0x44b1cea4f597f493e2fd0833a9c04dfb1e479ef0',
-                    vaultId: 'exactly-supply-eth',
-                },
-                // To get the vaultId, get the vault address from the token contract(token.vault()),
-                // and search for the vault address in the link: https://api.beefy.finance/vaults
-            },
-        },
-        defillama: [
-            {
-                defillamaPoolId: '46f3828a-cbf6-419e-8399-a83b905bf556',
-                tokenAddress: '0x5a7a183b6b44dc4ec2e3d2ef43f98c5152b1d76d',
-            },
-        ],
-        reaper: {
-            subgraphSource: {
-                subgraphUrl: 'https://api.thegraph.com/subgraphs/name/byte-masons/multi-strategy-vaults-optimism',
+            beefy: {
+                sourceUrl: 'https://api.beefy.finance/apy/',
                 tokens: {
-                    rfUSDT: {
-                        address: '0x51868bb8b71fb423b87129908fa039b880c8612d',
+                    wmooExactlySupplyUSDC: {
+                        address: '0xe5e9168b45a90c1e5730da6184cc5901c6e4353f',
+                        vaultId: 'exactly-supply-usdc',
                     },
-                    rfWETH: {
-                        address: '0x1bad45e92dce078cf68c2141cd34f54a02c92806',
+                    wmooExactlySupplyETH: {
+                        address: '0x44b1cea4f597f493e2fd0833a9c04dfb1e479ef0',
+                        vaultId: 'exactly-supply-eth',
                     },
-                    rfOP: {
-                        address: '0xcecd29559a84e4d4f6467b36bbd4b9c3e6b89771',
-                    },
-                    rfwstETH: {
-                        address: '0xb19f4d65882f6c103c332f0bc012354548e9ce0e',
-                        isWstETH: true,
-                    },
-                    rfWBTC: {
-                        address: '0xf6533b6fcb3f42d2fc91da7c379858ae6ebc7448',
-                    },
-                    rfDAI: {
-                        address: '0xc0f5da4fb484ce6d8a6832819299f7cd0d15726e',
-                    },
-                    rfUSDC: {
-                        address: '0x508734b52ba7e04ba068a2d4f67720ac1f63df47',
-                    },
+                    // To get the vaultId, get the vault address from the token contract(token.vault()),
+                    // and search for the vault address in the link: https://api.beefy.finance/vaults
                 },
             },
-            onchainSource: {
-                averageAPRAcrossLastNHarvests: 2,
-                tokens: {
-                    rfsoUSDC: {
-                        address: '0x875456b73cbc58aa1be98dfe3b0459e0c0bf7b0e',
-                    },
-                    rfsoUSDT: {
-                        address: '0x1e1bf73db9b278a95c9fe9205759956edea8b6ae',
-                    },
-                    rfsoDAI: {
-                        address: '0x19ca00d242e96a30a1cad12f08c375caa989628f',
-                    },
-                    rfsoWBTC: {
-                        address: '0x73e51b0368ef8bd0070b12dd992c54aa53bcb5f4',
-                    },
-                    rfsoWSTETH: {
-                        address: '0x3573de618ae4a740fb24215d93f4483436fbb2b6',
-                    },
+            defillama: [
+                {
+                    defillamaPoolId: '46f3828a-cbf6-419e-8399-a83b905bf556',
+                    tokenAddress: '0x5a7a183b6b44dc4ec2e3d2ef43f98c5152b1d76d',
                 },
+            ],
+            maker: {
+                sdai: '0x2218a117083f5b482b0bb821d27056ba9c04b1d3',
             },
-        },
-        maker: {
-            sdai: '0x2218a117083f5b482b0bb821d27056ba9c04b1d3',
-        },
-        etherfi: '0x5a7facb970d094b6c7ff1df0ea68d99e6e73cbff',
-        defaultHandlers: {
-            yUSD: {
-                tokenAddress: '0x895e15020c3f52ddd4d8e9514eb83c39f53b1579',
-                sourceUrl: 'https://ctrl.yield.fi/t/apy',
-                path: 'apy',
-                isIbYield: true,
-            },
-            wstEth: {
-                tokenAddress: '0x1f32b1c2345538c0c6f582fcb022739c4a194ebb',
-                sourceUrl: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
-                path: 'data.smaApr',
-                isIbYield: true,
-            },
-            rETH: {
-                tokenAddress: '0x9bcef72be871e61ed4fbbc7630889bee758eb81d',
-                sourceUrl: 'https://api.rocketpool.net/mainnet/reth/apr',
-                path: 'yearlyAPR',
-                isIbYield: true,
-            },
-            sfrxETH: {
-                tokenAddress: '0x484c2d6e3cdd945a8b2df735e079178c1036578c',
-                sourceUrl: 'https://api.frax.finance/v2/frxeth/summary/latest',
-                path: 'sfrxethApr',
-                isIbYield: true,
-            },
-            sfrxETHOft: {
-                tokenAddress: '0x3ec3849c33291a9ef4c5db86de593eb4a37fde45',
-                sourceUrl: 'https://api.frax.finance/v2/frxeth/summary/latest',
-                path: 'sfrxethApr',
-                isIbYield: true,
-            },
-            sFRAX: {
-                tokenAddress: '0x5bff88ca1442c2496f7e475e9e7786383bc070c0',
-                sourceUrl: 'https://api.frax.finance/v2/frax/sfrax/summary/history?range=1d',
-                path: 'items.0.sfraxApr',
-                isIbYield: true,
-            },
-            sfrxUSD: {
-                tokenAddress: '0x2dd1b4d4548accea497050619965f91f78b3b532',
-                sourceUrl: 'https://api.frax.finance/v2/frax/sfrax/summary/history?range=1d',
-                path: 'items.0.sfraxApr',
-                isIbYield: true,
-            },
-            stERN: {
-                tokenAddress: '0x3ee6107d9c93955acbb3f39871d32b02f82b78ab',
-                sourceUrl:
-                    'https://2ch9hbg8hh.execute-api.us-east-1.amazonaws.com/dev/api/vault/0x3eE6107d9C93955acBb3f39871D32B02F82B78AB:0xa',
-                path: 'data.yields.apy',
-                scale: 1,
-                isIbYield: true,
-            },
-            ankrETH: {
-                tokenAddress: '0xe05a08226c49b636acf99c40da8dc6af83ce5bb3',
-                sourceUrl: 'https://api.staking.ankr.com/v1alpha/metrics',
-                path: 'services.{serviceName == "eth"}.apy',
-                isIbYield: true,
-            },
-            wrsETH: {
-                tokenAddress: '0x87eee96d50fb761ad85b1c982d28a042169d61b1',
-                sourceUrl: 'https://universe.kelpdao.xyz/rseth/apy',
-                path: 'value',
-                isIbYield: true,
-            },
-            wusdm: {
-                tokenAddress: '0x57f5e098cad7a3d1eed53991d4d66c45c9af7812',
-                sourceUrl: 'https://apy.prod.mountainprotocol.com',
-                path: 'value',
-                isIbYield: true,
-                scale: 1,
+            etherfi: '0x5a7facb970d094b6c7ff1df0ea68d99e6e73cbff',
+            defaultHandlers: {
+                yUSD: {
+                    tokenAddress: '0x895e15020c3f52ddd4d8e9514eb83c39f53b1579',
+                    sourceUrl: 'https://ctrl.yield.fi/t/apy',
+                    path: 'apy',
+                    isIbYield: true,
+                },
+                wstEth: {
+                    tokenAddress: '0x1f32b1c2345538c0c6f582fcb022739c4a194ebb',
+                    sourceUrl: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
+                    path: 'data.smaApr',
+                    isIbYield: true,
+                },
+                rETH: {
+                    tokenAddress: '0x9bcef72be871e61ed4fbbc7630889bee758eb81d',
+                    sourceUrl: 'https://api.rocketpool.net/mainnet/reth/apr',
+                    path: 'yearlyAPR',
+                    isIbYield: true,
+                },
+                sfrxETH: {
+                    tokenAddress: '0x484c2d6e3cdd945a8b2df735e079178c1036578c',
+                    sourceUrl: 'https://api.frax.finance/v2/frxeth/summary/latest',
+                    path: 'sfrxethApr',
+                    isIbYield: true,
+                },
+                sfrxETHOft: {
+                    tokenAddress: '0x3ec3849c33291a9ef4c5db86de593eb4a37fde45',
+                    sourceUrl: 'https://api.frax.finance/v2/frxeth/summary/latest',
+                    path: 'sfrxethApr',
+                    isIbYield: true,
+                },
+                sFRAX: {
+                    tokenAddress: '0x5bff88ca1442c2496f7e475e9e7786383bc070c0',
+                    sourceUrl: 'https://api.frax.finance/v2/frax/sfrax/summary/history?range=1d',
+                    path: 'items.0.sfraxApr',
+                    isIbYield: true,
+                },
+                sfrxUSD: {
+                    tokenAddress: '0x2dd1b4d4548accea497050619965f91f78b3b532',
+                    sourceUrl: 'https://api.frax.finance/v2/frax/sfrax/summary/history?range=1d',
+                    path: 'items.0.sfraxApr',
+                    isIbYield: true,
+                },
+                ankrETH: {
+                    tokenAddress: '0xe05a08226c49b636acf99c40da8dc6af83ce5bb3',
+                    sourceUrl: 'https://api.staking.ankr.com/v1alpha/metrics',
+                    path: 'services.{serviceName == "eth"}.apy',
+                    isIbYield: true,
+                },
+                wrsETH: {
+                    tokenAddress: '0x87eee96d50fb761ad85b1c982d28a042169d61b1',
+                    sourceUrl: 'https://universe.kelpdao.xyz/rseth/apy',
+                    path: 'value',
+                    isIbYield: true,
+                },
+                wusdm: {
+                    tokenAddress: '0x57f5e098cad7a3d1eed53991d4d66c45c9af7812',
+                    sourceUrl: 'https://apy.prod.mountainprotocol.com',
+                    path: 'value',
+                    isIbYield: true,
+                    scale: 1,
+                },
             },
         },
     },

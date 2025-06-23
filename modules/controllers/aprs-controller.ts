@@ -1,25 +1,20 @@
 import { Chain } from '@prisma/client';
-import { syncMerklRewards } from '../actions/aprs/merkl';
-import { SwapFeeFromSnapshotsAprService } from '../pool/lib/apr-data-sources/swap-fee-apr-from-snapshots.service';
-import { prisma } from '../../prisma/prisma-client';
-import { poolsIncludeForAprs } from '../../prisma/prisma-types';
+import { AprService } from '../aprs';
+import { syncIncentivizedCategory } from '../actions/pool/sync-incentivized-category';
 
 export function AprsController(tracer?: any) {
     // Setup tracing
     // ...
     return {
-        async syncMerkl() {
-            return await syncMerklRewards();
+        async updateAprsAndIncentivizedCategory(chain: Chain) {
+            const aprService = new AprService();
+            await aprService.updateAprs(chain);
+            await syncIncentivizedCategory(chain);
         },
-        async update7And30DaysSwapAprs(chain: Chain) {
-            const service = new SwapFeeFromSnapshotsAprService();
-            const pools = await prisma.prismaPool.findMany({
-                ...poolsIncludeForAprs,
-                where: { chain },
-                take: 1,
-            });
-            await service.updateAprForPools(pools);
-            return 'Done';
+        async reloadAprsAndIncentivizedCategory(chain: Chain) {
+            const aprService = new AprService();
+            await aprService.reloadAprs(chain);
+            await syncIncentivizedCategory(chain);
         },
     };
 }
