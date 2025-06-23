@@ -1,5 +1,22 @@
 # backend
 
+## 1.46.0
+
+### Minor Changes
+
+-   5dba053: extract all APRs into APR-module
+
+### Patch Changes
+
+-   4a3f41b: more LBP price chart data
+-   8c0d6bf: sync LBP V3 swapEnabled
+-   3501ae6: relax LBP Metadata validation for URLs
+-   0da0124: lower alerting thresholds for less noise
+-   58c9431: add apr for stusr and rlp from defillama
+-   20a53b7: fix duplicate lbp entry in switch statement
+-   2dd9ba4: setting logoURI on LBP creation
+-   7f508d5: adding volume to LBP price chart data
+
 ## 1.45.0
 
 ### Minor Changes
