@@ -23,7 +23,7 @@ export const lbpCalls = (id: string): ViemMulticallCall[] => [
         functionName: 'getLBPoolImmutableData',
     },
     {
-        path: `${id}.poolToken`,
+        path: `${id}`,
         address: id as `0x${string}`,
         abi,
         functionName: 'getLBPoolDynamicData',
@@ -31,10 +31,16 @@ export const lbpCalls = (id: string): ViemMulticallCall[] => [
             const immutableData = results[index - 1].result as ImmutableData;
             const tokens = immutableData.tokens;
 
-            return tokens.map((token, index) => ({
+            const poolToken = tokens.map((token, index) => ({
                 id: `${id}-${token}`.toLowerCase(),
                 weight: formatEther(result.normalizedWeights[index]),
             }));
+
+            const poolDynamicData = {
+                swapEnabled: result.isSwapEnabled,
+            };
+
+            return { poolToken, poolDynamicData };
         },
     },
 ];
