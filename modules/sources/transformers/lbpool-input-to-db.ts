@@ -30,6 +30,7 @@ export const lbPoolInputToDB = async (input: CreateLbpInput) => {
             chain: input.poolContract.chain as Chain,
             symbol: rpcData.pool.symbol,
             name: rpcData.pool.name,
+            logoURI: input.metadata.tokenLogo,
             decimals: 18,
         },
         ...rpcData.tokens.map((token) => ({
