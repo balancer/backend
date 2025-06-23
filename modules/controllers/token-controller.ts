@@ -1,8 +1,8 @@
 import { Chain } from '@prisma/client';
 import { syncErc4626Tokens } from '../actions/token/sync-erc4626-tokens';
-import { syncErc4626UnwrapRates } from '../actions/token/sync-erc4626-onchain-datas';
 import { getViemClient } from '../sources/viem-client';
 import { syncErc4626MaxValues } from '../actions/token/sync-erc4626-max-values';
+import { syncErc4626UnwrapRates } from '../actions/token/sync-erc4626-unwrap-rates';
 
 export function TokenController(tracer?: any) {
     // Setup tracing
