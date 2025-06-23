@@ -2746,6 +2746,7 @@ export interface LbpPriceChartData {
     projectTokenPrice: Scalars['Float'];
     reservePrice: Scalars['Float'];
     sellVolume: Scalars['Float'];
+    swapCount: Scalars['Int'];
     timestamp: Scalars['Int'];
     volume: Scalars['Float'];
 }
@@ -5939,6 +5940,7 @@ export type LbpPriceChartDataResolvers<
     projectTokenPrice?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
     reservePrice?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
     sellVolume?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+    swapCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     timestamp?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     volume?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
     __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;

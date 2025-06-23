@@ -28,6 +28,7 @@ type LBPPriceChartData {
     volume: Float!
     buyVolume: Float!
     sellVolume: Float!
+    swapCount: Int!
 }
 
 type Query {

@@ -85,6 +85,8 @@ export const priceChartData = async (
 
         const buyVolume = existingFlow?.buyVolume || 0;
         const sellVolume = existingFlow?.sellVolume || 0;
+        const volume = existingFlow?.volume || 0;
+        const swapCount = existingFlow?.swapCount || 0;
 
         return {
             timestamp,
@@ -92,6 +94,8 @@ export const priceChartData = async (
             reservePrice: reservePrice,
             buyVolume,
             sellVolume,
+            volume,
+            swapCount,
         };
     });
 

@@ -4035,6 +4035,7 @@ export const schema = gql`
         projectTokenPrice: Float!
         reservePrice: Float!
         sellVolume: Float!
+        swapCount: Int!
         timestamp: Int!
         volume: Float!
     }
