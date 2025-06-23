@@ -32,6 +32,8 @@ model PrismaToken {
     underlyingTokenAddress   String?
     isBufferAllowed          Boolean        @default(true)
     unwrapRate          String              @default("1")
+    maxDeposit          String              @default("0")
+    maxWithdraw         String              @default("0")
 
     walletBalances  PrismaUserWalletBalance[]
     stakedBalances  PrismaUserStakedBalance[]
