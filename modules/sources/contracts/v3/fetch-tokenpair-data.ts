@@ -97,7 +97,7 @@ export async function fetchTokenPairData(
                 (parseFloat(tokenPair.tokenA.balance) / tokenPair.tokenA.balanceUsd) *
                 100
             ).toFixed(18);
-            tokenPair.effectivePriceAmountIn = parseUnits(`${oneHundredUsdOfTokenA}`, tokenPair.tokenA.decimals);
+            tokenPair.effectivePriceAmountIn = parseUnits(oneHundredUsdOfTokenA, tokenPair.tokenA.decimals);
 
             addEffectivePriceCallsToMulticaller(tokenPair, routerAddress, multicallerRouter);
             addAToBPriceCallsToMulticaller(tokenPair, routerAddress, multicallerRouter);
@@ -228,7 +228,7 @@ function addEffectivePriceCallsToMulticaller(
             address: balancerRouterAddress as `0x${string}`,
             functionName: 'queryRemoveLiquiditySingleTokenExactIn',
             abi: BalancerRouterAbi,
-            args: [tokenPair.poolId, tokenPair.effectivePriceAmountIn, tokenPair.tokenB.address, ZERO_ADDRESS],
+            args: [tokenPair.poolId, tokenPair.effectivePriceAmountIn, tokenPair.tokenB.address, ZERO_ADDRESS, '0x'],
         });
     } else {
         multicaller.push({
@@ -242,6 +242,7 @@ function addEffectivePriceCallsToMulticaller(
                 tokenPair.tokenB.address,
                 tokenPair.effectivePriceAmountIn,
                 ZERO_ADDRESS,
+                '0x',
             ],
         });
     }
@@ -259,7 +260,7 @@ function addAToBPriceCallsToMulticaller(
             address: balancerRouterAddress as `0x${string}`,
             functionName: 'queryRemoveLiquiditySingleTokenExactIn',
             abi: BalancerRouterAbi,
-            args: [tokenPair.poolId, tokenPair.aToBAmountIn, tokenPair.tokenB.address, ZERO_ADDRESS],
+            args: [tokenPair.poolId, tokenPair.aToBAmountIn, tokenPair.tokenB.address, ZERO_ADDRESS, '0x'],
         });
     } else {
         multicaller.push({
@@ -273,6 +274,7 @@ function addAToBPriceCallsToMulticaller(
                 tokenPair.tokenB.address,
                 tokenPair.aToBAmountIn,
                 ZERO_ADDRESS,
+                '0x',
             ],
         });
     }
@@ -292,7 +294,7 @@ function addBToAPriceCallsToMulticaller(
             address: balancerRouterAddress as `0x${string}`,
             functionName: 'queryAddLiquidityUnbalanced',
             abi: BalancerRouterAbi,
-            args: [tokenPair.poolId, amountsIn, ZERO_ADDRESS],
+            args: [tokenPair.poolId, amountsIn, ZERO_ADDRESS, `0x`],
         });
     } else {
         multicaller.push({
@@ -306,6 +308,7 @@ function addBToAPriceCallsToMulticaller(
                 tokenPair.tokenA.address,
                 `${tokenPair.aToBAmountOut}`,
                 ZERO_ADDRESS,
+                `0x`,
             ],
         });
     }
@@ -354,6 +357,11 @@ function calculateSpotPrice(tokenPair: TokenPair) {
 }
 
 function calculateNormalizedLiquidity(tokenPair: TokenPair) {
+    if (tokenPair.effectivePrice === 0n || tokenPair.spotPrice === 0n) {
+        // if effectivePrice or spotPrice is 0, normalized liquidity should be 0 as well.
+        tokenPair.normalizedLiqudity = 0n;
+        return;
+    }
     // spotPrice and effective price are already scaled to 18 decimals by the MathSol output
     let priceRatio = MathSol.divDownFixed(tokenPair.spotPrice, tokenPair.effectivePrice);
     // if priceRatio is = 1, normalizedLiquidity becomes infinity, if it is >1, normalized liqudity becomes negative. Need to cap it.
