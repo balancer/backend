@@ -3,7 +3,7 @@ import { PathGraphEdgeData, PathGraphTraversalConfig } from './pathGraphTypes';
 import { BasePool } from '../poolsV2/basePool';
 import { PathLocal } from '../path';
 
-const DEFAULT_MAX_PATHS_PER_TOKEN_PAIR = 2;
+const DEFAULT_MAX_PATHS_PER_TOKEN_PAIR = 4;
 
 export class PathGraph {
     private nodes: Map<string, { isPhantomBpt: boolean }>;
@@ -278,7 +278,7 @@ export class PathGraph {
         // pools have their BPT artificially added so we consider them for add/remove liquidity steps)
         tokenInNode.set(
             edgeProps.tokenOut.wrapped,
-            sorted.length > maxPathsPerTokenPair && !hasPhantomBpt ? sorted.slice(0, 2) : sorted,
+            sorted.length > maxPathsPerTokenPair && !hasPhantomBpt ? sorted.slice(0, maxPathsPerTokenPair) : sorted,
         );
     }
 
