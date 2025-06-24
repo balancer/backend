@@ -1,11 +1,10 @@
 import { SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { PathGraph } from './pathGraph/pathGraph';
 import { PathGraphTraversalConfig } from './pathGraph/pathGraphTypes';
-import { MathSol, WAD, max, min } from './utils/math';
+import { max, min } from './utils/math';
 import { BasePool } from './poolsV2/basePool';
 import { PathLocal, PathWithAmount } from './path';
-import { formatEther, formatUnits, parseEther } from 'viem';
-import { BasePoolV3 } from './poolsV3/basePoolV3';
+import { parseEther } from 'viem';
 
 export class Router {
     private readonly pathGraph: PathGraph;
@@ -73,7 +72,7 @@ export class Router {
                     //     ' ' +
                     //     path.pools.map((pool, index) => `[${pool.id}] ${path.tokens[index + 1].address}`).join(' ');
                     // console.log('Invalid path: ' + pathString);
-                    console.log(error);
+                    // console.log(error);
                     return;
                 }
             });
