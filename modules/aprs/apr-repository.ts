@@ -18,11 +18,10 @@ export class AprRepository {
      * Get pools with data needed for APR calculations
      */
     async getPoolsForAprCalculation(chain: Chain, poolIds?: string[]): Promise<PoolAPRData[]> {
-        const [dbPools, dynamicData] = await Promise.all([
+        const [dbPools, dynamicData, pts] = await Promise.all([
             prisma.prismaPool.findMany({
                 where: { chain, ...(poolIds ? { id: { in: poolIds } } : {}) },
                 include: {
-                    tokens: { include: { token: true, nestedPool: true } },
                     staking: {
                         include: { gauge: { include: { rewards: true } }, reliquary: { include: { levels: true } } },
                     },
@@ -31,12 +30,25 @@ export class AprRepository {
             prisma.prismaPoolDynamicData
                 .findMany({ where: { chain, ...(poolIds ? { id: { in: poolIds } } : {}) } })
                 .then((records) => _.keyBy(records, 'id') as Record<string, (typeof records)[0]>),
+            prisma.prismaPoolToken
+                .findMany({
+                    where: {
+                        chain,
+                        ...(poolIds ? { poolId: { in: poolIds } } : {}),
+                    },
+                    include: {
+                        token: true,
+                        nestedPool: true,
+                    },
+                })
+                .then((records) => _.groupBy(records, 'poolId') as Record<string, typeof records>),
         ]);
 
         const pools = dbPools
             .map((pool) => ({
                 ...pool,
                 dynamicData: dynamicData[pool.id],
+                tokens: pts[pool.id],
             }))
             // Filter needed for test pools on Sepolia
             .filter((pool) => pool.dynamicData);
