@@ -1,5 +1,17 @@
 # backend
 
+## 1.47.2
+
+### Patch Changes
+
+-   4063eae: split pool token fetching in the APR repository
+-   a13ddb2: split pool/dd fetching in the apr repository
+-   927027c: Refactor APR update logic and clean up task jobs
+-   fc91621: less error messages in apr handlers
+-   cddeef5: removing db fetching from APR handlers
+-   cc30cae: Update APR only if it changes by more than 0.01%.
+-   dbd957e: allow set swap enabled/disabled in factory
+
 ## 1.47.1
 
 ### Patch Changes

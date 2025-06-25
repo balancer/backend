@@ -88,8 +88,7 @@ export class AvalonAprHandler implements YbAprHandler {
                 .reduce((acc, curr) => ({ ...acc, ...curr }), {});
             return aprEntries;
         } catch (e) {
-            console.error(`Failed to fetch Avalon APR in subgraph ${this.subgraphUrl}:`, e);
-            return {};
+            throw Error(`Failed to fetch Aave APR in subgraph ${this.subgraphUrl}: ${(e as Error).message}`);
         }
     }
 }

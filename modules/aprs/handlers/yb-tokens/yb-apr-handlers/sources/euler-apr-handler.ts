@@ -143,8 +143,7 @@ and return the result as apr
 
             return aprs;
         } catch (error) {
-            console.error(`Euler IB APR handler failed: `, error);
-            return {};
+            throw Error(`Eulers IB APR hanlder failed: ${(error as Error).message}`);
         }
     }
 }

@@ -69,48 +69,37 @@ export class SwapFeeApr7d30dHandler implements AprHandler {
         // It will receive one pool only, because data is refetched in the body later
         const chain = pools[0].chain;
 
-        // Get pool type map
-        const [typeMap, dynamicData, currentAprs] = await Promise.all([
-            prisma.prismaPool.findMany({ select: { id: true, type: true }, where: { chain } }).then((records) =>
-                records.reduce((acc, pool) => {
-                    acc[pool.id] = pool.type;
-                    return acc;
-                }, {} as Record<string, PrismaPoolType>),
-            ),
-            prisma.prismaPoolDynamicData.findMany({ where: { chain } }),
-            prisma.prismaPoolAprItem
-                .findMany({
-                    select: { id: true, apr: true },
-                    where: { chain, type: { in: ['SWAP_FEE_7D', 'SWAP_FEE_30D'] } },
-                })
-                .then((records) => Object.fromEntries(records.map((item) => [item.id, item.apr]))),
-        ]);
-
         // Fetch the swap fees for the last 30 days
         const swapFeeData = await fetchSwapFeeData(chain);
 
         // Map the swap fee data to the pool id
-        const swapFeeDataMap = swapFeeData.reduce((acc, data) => {
-            acc[data.poolId] = data;
-            return acc;
-        }, {} as Record<string, PoolSwapFeeData>);
+        const swapFeeDataMap = swapFeeData.reduce(
+            (acc, data) => {
+                acc[data.poolId] = data;
+                return acc;
+            },
+            {} as Record<string, PoolSwapFeeData>,
+        );
 
-        const aprItems = dynamicData.flatMap((pool) => {
+        const typeMap = Object.fromEntries(pools.map((pool) => [pool.id, pool.type]));
+
+        const aprItems = pools.flatMap((pool) => {
+            if (!pool.dynamicData) return [];
             let apr_7d = 0;
             let apr_30d = 0;
 
-            if (pool.totalLiquidity > 0 && swapFeeDataMap[pool.poolId]) {
-                apr_7d = (swapFeeDataMap[pool.poolId].fees_7d * 365) / 7 / pool.totalLiquidity;
-                apr_30d = (swapFeeDataMap[pool.poolId].fees_30d * 365) / 30 / pool.totalLiquidity;
+            if (pool.dynamicData.totalLiquidity > 0 && swapFeeDataMap[pool.id]) {
+                apr_7d = (swapFeeDataMap[pool.id].fees_7d * 365) / 7 / pool.dynamicData.totalLiquidity;
+                apr_30d = (swapFeeDataMap[pool.id].fees_30d * 365) / 30 / pool.dynamicData.totalLiquidity;
             }
 
-            let protocolFee = parseFloat(pool.protocolSwapFee);
+            let protocolFee = parseFloat(pool.dynamicData.protocolSwapFee);
 
-            if (typeMap[pool.poolId] === 'GYROE') {
+            if (typeMap[pool.id] === 'GYROE') {
                 // Gyro has custom protocol fee structure
-                protocolFee = parseFloat(pool.protocolYieldFee || '0');
+                protocolFee = parseFloat(pool.dynamicData.protocolYieldFee || '0');
             }
-            if (pool.isInRecoveryMode || typeMap[pool.poolId] === 'LIQUIDITY_BOOTSTRAPPING') {
+            if (pool.dynamicData.isInRecoveryMode || typeMap[pool.id] === 'LIQUIDITY_BOOTSTRAPPING') {
                 // pool does not collect any protocol fees
                 protocolFee = 0;
             }
@@ -126,34 +115,26 @@ export class SwapFeeApr7d30dHandler implements AprHandler {
             }
 
             return [
-                ...(Math.abs((currentAprs[`${pool.poolId}-swap-apr-7d`] || 0) - apr_7d) > 0.0001
-                    ? [
-                          {
-                              id: `${pool.poolId}-swap-apr-7d`,
-                              chain,
-                              poolId: pool.poolId,
-                              title: 'Swap fees APR (7d)',
-                              apr: apr_7d,
-                              type: PrismaPoolAprType.SWAP_FEE_7D,
-                              rewardTokenAddress: null,
-                              rewardTokenSymbol: null,
-                          },
-                      ]
-                    : []),
-                ...(Math.abs((currentAprs[`${pool.poolId}-swap-apr-30d`] || 0) - apr_30d) > 0.0001
-                    ? [
-                          {
-                              id: `${pool.poolId}-swap-apr-30d`,
-                              chain,
-                              poolId: pool.poolId,
-                              title: 'Swap fees APR (30d)',
-                              apr: apr_30d,
-                              type: PrismaPoolAprType.SWAP_FEE_30D,
-                              rewardTokenAddress: null,
-                              rewardTokenSymbol: null,
-                          },
-                      ]
-                    : []),
+                {
+                    id: `${pool.id}-swap-apr-7d`,
+                    chain,
+                    poolId: pool.id,
+                    title: 'Swap fees APR (7d)',
+                    apr: apr_7d,
+                    type: PrismaPoolAprType.SWAP_FEE_7D,
+                    rewardTokenAddress: null,
+                    rewardTokenSymbol: null,
+                },
+                {
+                    id: `${pool.id}-swap-apr-30d`,
+                    chain,
+                    poolId: pool.id,
+                    title: 'Swap fees APR (30d)',
+                    apr: apr_30d,
+                    type: PrismaPoolAprType.SWAP_FEE_30D,
+                    rewardTokenAddress: null,
+                    rewardTokenSymbol: null,
+                },
             ];
         });
 

@@ -324,6 +324,7 @@ export function mapLiquidityBootstrappingPoolStateToPrismaPool(
                 swapFee: formatEther(poolState.swapFee),
                 aggregateSwapFee: formatEther(poolState.aggregateSwapFee),
                 totalShares: formatEther(poolState.totalSupply),
+                swapEnabled: poolState.isSwapEnabled,
             },
         });
     return prismaPool;

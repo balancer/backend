@@ -33,8 +33,7 @@ export class SiloAprHandler implements AprHandler {
 
                 aprs[marketAddress] = { apr: parseFloat(formatEther(result)), isIbYield: true };
             } catch (error) {
-                console.error(`Silo APR handler failed: `, error);
-                return {};
+                throw Error(`Silo IB APR hanlder failed: ${(error as Error).message}`);
             }
         }
 

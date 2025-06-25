@@ -75,8 +75,9 @@ export class AaveChanClient implements AaveChanClientInterface {
             )) as AaveChanResponse;
             return response;
         } catch (error) {
-            console.error(`Error fetching Aave incentives for chain ${chainId}:`, error);
-            return {};
+            throw Error(
+                `Error fetching Aave incentives from URL ${this.baseUrl}${chainId}: ${(error as Error).message}`,
+            );
         }
     }
 
@@ -96,8 +97,11 @@ export class AaveChanClient implements AaveChanClientInterface {
             )) as AaveChanResponse;
             return response;
         } catch (error) {
-            console.error('Error fetching Aave prime incentives:', error);
-            return {};
+            throw Error(
+                `Error fetching Aave prime incentives from URL ${this.baseUrl}1&instance=prime: ${
+                    (error as Error).message
+                }`,
+            );
         }
     }
 }

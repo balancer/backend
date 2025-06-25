@@ -18,19 +18,42 @@ export class AprRepository {
      * Get pools with data needed for APR calculations
      */
     async getPoolsForAprCalculation(chain: Chain, poolIds?: string[]): Promise<PoolAPRData[]> {
-        return prisma.prismaPool.findMany({
-            include: {
-                dynamicData: true,
-                tokens: { include: { token: true, nestedPool: true } },
-                staking: {
-                    include: { gauge: { include: { rewards: true } }, reliquary: { include: { levels: true } } },
+        const [dbPools, dynamicData, pts] = await Promise.all([
+            prisma.prismaPool.findMany({
+                where: { chain, ...(poolIds ? { id: { in: poolIds } } : {}) },
+                include: {
+                    staking: {
+                        include: { gauge: { include: { rewards: true } }, reliquary: { include: { levels: true } } },
+                    },
                 },
-            },
-            where: {
-                chain,
-                ...(poolIds?.length ? { id: { in: poolIds } } : {}),
-            },
-        });
+            }),
+            prisma.prismaPoolDynamicData
+                .findMany({ where: { chain, ...(poolIds ? { id: { in: poolIds } } : {}) } })
+                .then((records) => _.keyBy(records, 'id') as Record<string, (typeof records)[0]>),
+            prisma.prismaPoolToken
+                .findMany({
+                    where: {
+                        chain,
+                        ...(poolIds ? { poolId: { in: poolIds } } : {}),
+                    },
+                    include: {
+                        token: true,
+                        nestedPool: true,
+                    },
+                })
+                .then((records) => _.groupBy(records, 'poolId') as Record<string, typeof records>),
+        ]);
+
+        const pools = dbPools
+            .map((pool) => ({
+                ...pool,
+                dynamicData: dynamicData[pool.id],
+                tokens: pts[pool.id],
+            }))
+            // Filter needed for test pools on Sepolia
+            .filter((pool) => pool.dynamicData);
+
+        return pools;
     }
 
     /**
@@ -41,14 +64,17 @@ export class AprRepository {
     async savePoolAprItems(
         chain: Chain,
         newAprItems: Omit<PrismaPoolAprItem, 'createdAt' | 'updatedAt'>[],
+        poolIds?: string[],
     ): Promise<string[]> {
         if (newAprItems.length === 0) return [];
 
-        // Fetch all existing APR items
+        const changedPoolIds = new Set<string>();
+
+        // Fetch all existing APR items by poolId
         const existingItems = await prisma.prismaPoolAprItem.findMany({
             where: {
                 chain: chain,
-                id: { in: newAprItems.map((item) => item.id) },
+                ...(poolIds ? { poolId: { in: poolIds } } : {}),
             },
         });
 
@@ -56,6 +82,7 @@ export class AprRepository {
         const itemsToRemove = existingItems.filter(
             (existingItem) => !newAprItems.find((newAprItem) => newAprItem.id === existingItem.id),
         );
+
         if (itemsToRemove.length > 0) {
             await prisma.prismaPoolAprItem.deleteMany({
                 where: {
@@ -63,17 +90,17 @@ export class AprRepository {
                     chain: chain,
                 },
             });
+            [...new Set(itemsToRemove.map((i) => i.poolId))].forEach((poolId) => changedPoolIds.add(poolId));
         }
 
         // Create a lookup map for quick access
         const existingItemsMap = new Map(existingItems.map((item) => [item.id, item]));
 
         // Only create operations for items that don't exist or have changed
-        const changedPoolIds = new Set<string>();
         const operations = newAprItems
             .filter((item) => {
                 const existingItem = existingItemsMap.get(item.id);
-                const changed = !existingItem || existingItem.apr !== item.apr;
+                const changed = !existingItem || Math.abs(existingItem.apr - item.apr) > 0.0001;
                 if (changed) {
                     changedPoolIds.add(item.poolId);
                 }

@@ -36,7 +36,7 @@ export class MakerAprHandler implements YbAprHandler {
                 isIbYield: false,
             };
         } catch (error) {
-            console.error(`Maker APR Failed for token ${this.sdai}: `, error);
+            throw Error(`Maker IB APR hanlder failed: ${(error as Error).message}`);
         }
         return aprs;
     }

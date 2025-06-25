@@ -28,13 +28,12 @@ export class AprManager {
                 const items = await handler.calculateAprForPools(pools);
                 allAprItems.push(...items);
             } catch (e) {
-                console.error(`Error during APR calculation in ${handler.getAprServiceName()}:`, e);
                 failedHandlers.push(handler.getAprServiceName());
             }
         }
 
         if (failedHandlers.length > 0) {
-            console.warn(`The following APR handlers failed: ${failedHandlers.join(', ')}`);
+            console.error(`The following APR handlers failed: ${failedHandlers.join(', ')}`);
         }
 
         return allAprItems;
@@ -45,7 +44,7 @@ export class AprManager {
      */
     async updateAprs(chain: Chain, poolIds?: string[]): Promise<string[]> {
         const aprItems = await this.calculateAprs(chain, poolIds);
-        const changedPoolIds = await this.aprRepository.savePoolAprItems(chain, aprItems);
+        const changedPoolIds = await this.aprRepository.savePoolAprItems(chain, aprItems, poolIds);
 
         if (changedPoolIds.length > 0) {
             await this.aprRepository.updatePoolTotalApr(chain, changedPoolIds);

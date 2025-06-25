@@ -39,8 +39,7 @@ export class UsdlAprHandler implements YbAprHandler {
                 },
             };
         } catch (e) {
-            console.error(`Failed to fetch Morpho APRs`, e);
-            return {} as {};
+            throw Error(`USDL IB APR hanlder failed: ${(e as Error).message}`);
         }
     }
 }

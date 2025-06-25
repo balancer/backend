@@ -37,13 +37,7 @@ export class DForce implements YbAprHandler {
                 },
             };
         } catch (error) {
-            console.error('Error fetching APY:', error);
-            return {
-                [this.config!.token.toLowerCase()]: {
-                    apr: 0,
-                    isIbYield,
-                },
-            };
+            throw Error(`dforce IB APR hanlder failed: ${(error as Error).message}`);
         }
     }
 }

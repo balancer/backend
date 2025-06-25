@@ -36,7 +36,7 @@ export class SUSDSAprHandler implements YbAprHandler {
                 isIbYield: false,
             };
         } catch (error) {
-            console.error(`sUSDS APR Failed for token ${this.token}: `, error);
+            throw Error(`SUSDS IB APR hanlder failed: ${(error as Error).message}`);
         }
         return aprs;
     }

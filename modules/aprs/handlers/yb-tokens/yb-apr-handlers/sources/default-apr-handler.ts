@@ -54,8 +54,7 @@ export class DefaultAprHandler implements YbAprHandler {
                 },
             };
         } catch (error) {
-            console.error(`Failed to fetch APRs in url ${this.url}:`, error);
-            return {};
+            throw Error(`Failed to fetch APRs in url ${this.url}: ${(error as Error).message}`);
         }
     }
 
