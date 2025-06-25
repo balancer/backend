@@ -61,7 +61,7 @@ export const getPoolMetadataTags = async (
     // fetch pools with tokens from db
     const sonicPools = await prisma.prismaPool.findMany({
         where: { id: { in: allSonicPoolIdsWithSonicPoints } },
-        select: { id: true, chain: true, allTokens: true },
+        select: { id: true, address: true, chain: true, allTokens: true },
     });
 
     // from the tag list, find all tags that start with points_sonic
@@ -76,7 +76,9 @@ export const getPoolMetadataTags = async (
 
     // find pools that have only sonic point bearing tokens
     const sonicPointBearingPools = sonicPools.filter((pool) => {
-        const tokenAddresses = pool.allTokens.map((token) => token.tokenAddress.toLowerCase());
+        const tokenAddresses = pool.allTokens
+            .map((token) => token.tokenAddress.toLowerCase())
+            .filter((address) => address !== pool.address.toLowerCase());
         return tokenAddresses.every((address) => sonicPointBearingTokens.includes(address));
     });
 
