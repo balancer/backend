@@ -192,6 +192,22 @@ export default <NetworkData>{
                     scale: 1000000000000000000,
                     isIbYield: true,
                 },
+                varlamoredUSD: {
+                    tokenAddress: '0x9a1bf5365edbb99c2c61ca6d9ffad0b705acfc6f',
+                    sourceUrl:
+                        'https://v2.silo.finance/api/detailed-vault/sonic-0x9a1bf5365edbb99c2c61ca6d9ffad0b705acfc6f',
+                    path: 'supplyApr',
+                    scale: 1000000000000000000,
+                    isIbYield: true,
+                },
+                silore7scUSD: {
+                    tokenAddress: '0x592d1e187729c76efacc6dffb9355bd7bf47b2a7',
+                    sourceUrl:
+                        'https://v2.silo.finance/api/detailed-vault/sonic-0x592d1e187729c76efacc6dffb9355bd7bf47b2a7',
+                    path: 'supplyApr',
+                    scale: 1000000000000000000,
+                    isIbYield: true,
+                },
                 xUSD: {
                     tokenAddress: '0x6202b9f02e30e5e1c62cc01e4305450e5d83b926',
                     sourceUrl: 'https://api-v2.streamprotocol.money/vaults/xUSD/apy',
