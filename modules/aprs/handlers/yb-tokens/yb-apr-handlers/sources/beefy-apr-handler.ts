@@ -36,8 +36,7 @@ export class BeefyAprHandler implements YbAprHandler {
 
             return aprs;
         } catch (error) {
-            console.error(`Beefy IB APR hanlder failed: `, error);
-            return {};
+            throw Error(`Beefy IB APR hanlder failed: ${(error as Error).message}`);
         }
     }
 }

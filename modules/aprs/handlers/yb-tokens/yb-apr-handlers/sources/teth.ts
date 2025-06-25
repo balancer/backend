@@ -30,8 +30,7 @@ export class TreehouseAprHandler implements YbAprHandler {
 
             return aprs;
         } catch (error) {
-            console.error(`Treehouse IB APR handler failed: `, error);
-            return {};
+            throw Error(`Treehouse tETH IB APR hanlder failed: ${(error as Error).message}`);
         }
     }
 }

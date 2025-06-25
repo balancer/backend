@@ -82,6 +82,8 @@ export class YbAprHandlers {
 
         const results = await Promise.allSettled(this.handlers.map((handler) => handler.getAprs(this.chain)));
 
+        const failedYbHandlerReasons: string[] = [];
+
         for (const result of results) {
             if (result.status === 'fulfilled') {
                 aprs = aprs.concat(
@@ -92,8 +94,12 @@ export class YbAprHandlers {
                     })),
                 );
             } else {
-                console.error('Failed to fetch APRs from handler', result.reason);
+                failedYbHandlerReasons.push(result.reason);
             }
+        }
+
+        if (failedYbHandlerReasons.length > 0) {
+            console.error(`Failed to fetch APRs from some YB handlers: ${failedYbHandlerReasons.join(', ')}`);
         }
 
         return aprs;

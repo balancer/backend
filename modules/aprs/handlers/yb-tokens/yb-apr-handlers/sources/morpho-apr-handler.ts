@@ -68,8 +68,7 @@ export class MorphoAprHandler implements YbAprHandler {
 
             return aprs;
         } catch (e) {
-            console.error(`Failed to fetch Morpho APRs`, e);
-            return {};
+            throw Error(`Morpho IB APR hanlder failed: ${(e as Error).message}`);
         }
     }
 }
