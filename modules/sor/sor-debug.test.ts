@@ -7,7 +7,7 @@ import { Address, Swap, SwapInput, SwapKind } from '@balancer/sdk';
 import { formatUnits } from 'viem';
 
 describe('sor debugging', () => {
-    it.only('sor v2', async () => {
+    it('sor v2', async () => {
         const useProtocolVersion = 2;
         const chain = Chain.SONIC;
 
@@ -71,7 +71,7 @@ describe('sor debugging', () => {
         expect(queryResultFloat).toBeCloseTo(sorResultFloat, 4);
     }, 5000000);
 
-    it('sor v3', async () => {
+    it.only('sor v3', async () => {
         const useProtocolVersion = 3;
         const chain = Chain.MAINNET;
 
@@ -81,17 +81,17 @@ describe('sor debugging', () => {
         // only do once before starting to debug
         // bun task sor-sync-v3 {chainId}
 
-        const swapType = 'EXACT_OUT';
-        const swapKind: SwapKind = SwapKind.GivenOut;
+        const swapType = 'EXACT_IN';
+        const swapKind: SwapKind = SwapKind.GivenIn;
 
         const swaps = await sorService.getSorSwapPaths({
             chain,
-            tokenIn: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee', // ETH
+            tokenIn: '0x80ac24aa929eaf5013f6436cda2a7ba190f5cc0b', // ETH
             tokenOut: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', // USDC
             swapType,
             swapAmount: '170',
             useProtocolVersion,
-            // poolIds: ['0x035d7213cbc08483aa78ced076dbdc8ac5a509c1'],
+            poolIds: ['0x917d0464dd2e335bf14000c63d65def3c8bb1025'],
         });
 
         console.log(swaps.returnAmount);

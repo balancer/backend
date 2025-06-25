@@ -49,8 +49,7 @@ export async function getBasePoolsFromDb(
         const typeWithLBP = { in: [...type.in, 'LIQUIDITY_BOOTSTRAPPING'] as PrismaPoolType[] };
         const pools = await getPoolsByIds(chain, protocolVersion, typeWithLBP, poolIds);
         if (protocolVersion === 3) {
-            const underlyingTokens = await getUnderlyingTokensFromDBPools(pools, chain);
-            bufferPools = getBufferPoolsFromDBPools(pools, underlyingTokens, chain);
+            bufferPools = await getBufferPoolsFromDBPools(pools, chain);
         }
         return { pools, bufferPools };
     }
@@ -61,8 +60,7 @@ export async function getBasePoolsFromDb(
 
     const pools = await getFilteredPools(chain, protocolVersion, considerPoolsWithHooks, type);
     if (protocolVersion === 3) {
-        const underlyingTokens = await getUnderlyingTokensFromDBPools(pools, chain);
-        bufferPools = getBufferPoolsFromDBPools(pools, underlyingTokens, chain);
+        bufferPools = await getBufferPoolsFromDBPools(pools, chain);
     }
 
     // cache for 10s
@@ -180,10 +178,10 @@ async function getLiquidityBootstrappingPools(
     });
 }
 
-export async function getUnderlyingTokensFromDBPools(
+export async function getBufferPoolsFromDBPools(
     pools: PrismaPoolAndHookWithDynamic[],
     chain: Chain,
-): Promise<{ address: string; decimals: number; unwrapRate: string }[]> {
+): Promise<BufferPoolData[]> {
     const tokensWithUnderlying = pools.flatMap((pool) =>
         pool.tokens.filter((token) => token.token.underlyingTokenAddress !== null),
     );
@@ -196,6 +194,7 @@ export async function getUnderlyingTokensFromDBPools(
         },
     });
 
+    const wrappedTokenAddresses = erc4626ThatCanBeUsedForSwaps.map((data) => data.erc4626Address);
     const underlyingTokenAddresses = erc4626ThatCanBeUsedForSwaps.map((data) => data.assetAddress);
 
     const underlyingTokens = await prisma.prismaToken.findMany({
@@ -203,19 +202,14 @@ export async function getUnderlyingTokensFromDBPools(
     });
 
     logMissingTokens(underlyingTokens, underlyingTokenAddresses);
-    return underlyingTokens;
-}
 
-export function getBufferPoolsFromDBPools(
-    pools: PrismaPoolAndHookWithDynamic[],
-    underlyingTokens: { address: string; decimals: number }[],
-    chain: Chain,
-): BufferPoolData[] {
     // instead of an actual buffer pool, I'd like to return an object that can be used to build a buffer pool
     const bufferPools: BufferPoolData[] = [];
     for (const pool of pools) {
         for (const poolToken of pool.tokens) {
-            if (poolToken.token.underlyingTokenAddress) {
+            // check if token can be used for swaps through buffer pools
+            if (poolToken.token.underlyingTokenAddress && wrappedTokenAddresses.includes(poolToken.address)) {
+                // check if underlying token exists in the database
                 const underlyingToken = underlyingTokens.find((t) =>
                     isSameAddress(t.address as Address, poolToken.token.underlyingTokenAddress as Address),
                 );
