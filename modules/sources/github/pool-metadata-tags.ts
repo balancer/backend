@@ -30,6 +30,10 @@ export const getPoolMetadataTags = async (
         }
 
         if (tag.tokens) {
+            // skip sonic points token tags, handled later
+            if (tag.id.toLowerCase().startsWith('points_sonic')) {
+                continue;
+            }
             for (const chainId in tag.tokens) {
                 for (const tokenAddress of tag.tokens[chainId]) {
                     const chain = chainIdToChain[chainId];
@@ -52,7 +56,7 @@ export const getPoolMetadataTags = async (
 
     // Sonic points are added via the tokens object in the metadata repo but should only show for pools that consist of only sonic point bearing tokens.
     // So we need to handle them separately.
-    // for sonic points, we need to remove the points tag from pools that have non-sonic point bearing tokens
+    // for sonic points, we will add tags to pools that have only sonic point bearing tokens.
     // find all pools that have a points_sonic tag prefix
     const allSonicPoolIdsWithSonicPoints = Object.keys(existingTags).filter((poolId) =>
         Array.from(existingTags[poolId]).some((tag) => tag.toLowerCase().startsWith('points_sonic')),
@@ -68,7 +72,7 @@ export const getPoolMetadataTags = async (
     const sonicPointBearingTags = tagsList.filter((tag) => tag.id.toLowerCase().startsWith('points_sonic'));
     // get the token addresses for sonic point bearing tags in lowercase
     // this is to ensure we can compare them with the pool token addresses
-    const sonicPointBearingTokens = sonicPointBearingTags
+    const sonicPointBearingTokenAddresses = sonicPointBearingTags
         .flatMap((tag) => {
             return Object.values(tag.tokens || {}).flat();
         })
@@ -79,20 +83,23 @@ export const getPoolMetadataTags = async (
         const tokenAddresses = pool.allTokens
             .map((token) => token.tokenAddress.toLowerCase())
             .filter((address) => address !== pool.address.toLowerCase());
-        return tokenAddresses.every((address) => sonicPointBearingTokens.includes(address));
+        return tokenAddresses.every((address) => sonicPointBearingTokenAddresses.includes(address));
     });
 
-    // remove points_sonic prefixed tags from existingTags for all pools that do not have only sonic point bearing tokens
-    allSonicPoolIdsWithSonicPoints.forEach((poolId) => {
-        if (!sonicPointBearingPools.some((pool) => pool.id === poolId)) {
-            existingTags[poolId] = new Set(
-                Array.from(existingTags[poolId]).filter((tag) => !tag.toLowerCase().startsWith('points_sonic')),
-            );
-            // remove all tags if only POINTS tag is left
-            if (existingTags[poolId].size === 1 && existingTags[poolId].has('POINTS')) {
-                delete existingTags[poolId];
-            }
+    // add points_sonic tags to pools that have only sonic point bearing tokens
+    sonicPointBearingPools.forEach((pool) => {
+        if (!existingTags[pool.id]) {
+            existingTags[pool.id] = new Set();
+            existingTags[pool.id].add(`POINTS`);
         }
+        // add a tag for each of the sonic point bearing token in the pool
+        sonicPointBearingTags.forEach((tag) => {
+            pool.allTokens.forEach((token) => {
+                if (tag.tokens?.[token.chain] && tag.tokens[token.chain].includes(token.tokenAddress.toLowerCase())) {
+                    existingTags[pool.id].add(tag.id.toUpperCase());
+                }
+            });
+        });
     });
 
     return existingTags;

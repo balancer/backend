@@ -1,5 +1,12 @@
 # backend
 
+## 1.47.3
+
+### Patch Changes
+
+-   e7b021e: handle sonic points specifically for metadata
+-   6a15455: SOR - Fix logic to create buffer pools
+
 ## 1.47.2
 
 ### Patch Changes
