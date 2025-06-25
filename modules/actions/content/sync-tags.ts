@@ -1,6 +1,6 @@
 import { Chain } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
-import { getPoolMetadataTags as getPoolMetadataTags } from '../../sources/github/pool-metadata-tags';
+import { getPoolMetadataTags } from '../../sources/github/pool-metadata-tags';
 import { getErc4626Tags } from '../../sources/github/pool-erc4626-tags';
 import { getPoolHookTags } from '../../sources/github/pool-hook-tags';
 import _ from 'lodash';
