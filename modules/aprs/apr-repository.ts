@@ -100,7 +100,7 @@ export class AprRepository {
         const operations = newAprItems
             .filter((item) => {
                 const existingItem = existingItemsMap.get(item.id);
-                const changed = !existingItem || existingItem.apr !== item.apr;
+                const changed = !existingItem || Math.abs(existingItem.apr - item.apr) > 0.0001;
                 if (changed) {
                     changedPoolIds.add(item.poolId);
                 }
