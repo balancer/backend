@@ -146,30 +146,12 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         return CowAmmController().syncSwaps(chain);
     } else if (job === 'sync-cow-amm-join-exits') {
         return CowAmmController().syncJoinExits(chain);
-    } else if (job === 'update-surplus-aprs') {
-        const aprRepository = new AprRepository();
-        const surplusSwapFeeAprHandler = new SurplusSwapFeeAprHandler();
-        const pools = await aprRepository.getPoolsForAprCalculation(chain);
-        const aprs = await surplusSwapFeeAprHandler.calculateAprForPools(pools);
-        return await aprRepository.savePoolAprItems(chain, aprs);
     } else if (job === 'sync-cow-amm-balances') {
         return CowAmmController().syncBalances(chain);
     } else if (job === 'sync-categories') {
         return ContentController().syncCategories();
     } else if (job === 'sync-latest-fx-prices') {
         return FXPoolsController().syncLatestPrices(chain);
-    } else if (job === 'sync-merkl') {
-        const aprRepository = new AprRepository();
-        const merklAprHandler = new MerklAprHandler();
-        const pools = await aprRepository.getPoolsForAprCalculation(chain);
-        const aprs = await merklAprHandler.calculateAprForPools(pools);
-        return await aprRepository.savePoolAprItems(chain, aprs);
-    } else if (job === 'update-7-30-days-swap-apr') {
-        const aprRepository = new AprRepository();
-        const swapFee7d30dHandler = new SwapFeeApr7d30dHandler();
-        const pools = await aprRepository.getPoolsForAprCalculation(chain);
-        const aprs = await swapFee7d30dHandler.calculateAprForPools(pools);
-        return await aprRepository.savePoolAprItems(chain, aprs);
     } else if (job === 'sync-rate-provider-reviews') {
         return ContentController().syncRateProviderReviews();
     } else if (job === 'sync-hook-reviews') {

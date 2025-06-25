@@ -1,14 +1,10 @@
 import { AprService } from '../';
 import { Chain } from '@prisma/client';
 
-/**
- * This example demonstrates how to integrate the new APR module with the existing code.
- * It shows how to:
- * - Run the new implementation for testing/debugging
- * - Gradually migrate specific APR update calls
- * - Compare results between old and new implementations
- */
-async function integrationExample(chain: Chain = 'MAINNET', poolId = '0x85b2b559bc2d21104c4defdd6efca8a20343361d') {
+async function calculationExample(
+    chain: Chain = 'MAINNET',
+    poolId = '0x3de27efa2f1aa663ae5d458857e731c129069f29000200000000000000000588',
+) {
     const service = new AprService();
 
     if (poolId) {
@@ -22,5 +18,6 @@ async function integrationExample(chain: Chain = 'MAINNET', poolId = '0x85b2b559
 }
 
 // Run the example
-// Uncomment to run:
-integrationExample(process.argv[2] as Chain, process.argv[3]).catch(console.error);
+calculationExample(process.argv[2] as Chain, process.argv[3])
+    .catch(console.error)
+    .finally(() => process.exit(0));

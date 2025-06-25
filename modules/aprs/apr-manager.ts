@@ -4,7 +4,10 @@ import { AprRepository } from './apr-repository';
 import _ from 'lodash';
 
 export class AprManager {
-    constructor(private readonly aprRepository: AprRepository, private readonly aprHandlers: AprHandler[]) {}
+    constructor(
+        private readonly aprRepository: AprRepository,
+        private readonly aprHandlers: AprHandler[],
+    ) {}
 
     /**
      * Calculate APRs without writing to the database
@@ -45,7 +48,7 @@ export class AprManager {
      */
     async updateAprs(chain: Chain, poolIds?: string[]): Promise<string[]> {
         const aprItems = await this.calculateAprs(chain, poolIds);
-        const changedPoolIds = await this.aprRepository.savePoolAprItems(chain, aprItems);
+        const changedPoolIds = await this.aprRepository.savePoolAprItems(chain, aprItems, poolIds);
 
         if (changedPoolIds.length > 0) {
             await this.aprRepository.updatePoolTotalApr(chain, changedPoolIds);

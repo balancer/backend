@@ -41,14 +41,17 @@ export class AprRepository {
     async savePoolAprItems(
         chain: Chain,
         newAprItems: Omit<PrismaPoolAprItem, 'createdAt' | 'updatedAt'>[],
+        poolIds?: string[],
     ): Promise<string[]> {
         if (newAprItems.length === 0) return [];
 
-        // Fetch all existing APR items
+        const changedPoolIds = new Set<string>();
+
+        // Fetch all existing APR items by poolId
         const existingItems = await prisma.prismaPoolAprItem.findMany({
             where: {
                 chain: chain,
-                id: { in: newAprItems.map((item) => item.id) },
+                ...(poolIds ? { poolId: { in: poolIds } } : {}),
             },
         });
 
@@ -56,6 +59,7 @@ export class AprRepository {
         const itemsToRemove = existingItems.filter(
             (existingItem) => !newAprItems.find((newAprItem) => newAprItem.id === existingItem.id),
         );
+
         if (itemsToRemove.length > 0) {
             await prisma.prismaPoolAprItem.deleteMany({
                 where: {
@@ -63,13 +67,13 @@ export class AprRepository {
                     chain: chain,
                 },
             });
+            [...new Set(itemsToRemove.map((i) => i.poolId))].forEach((poolId) => changedPoolIds.add(poolId));
         }
 
         // Create a lookup map for quick access
         const existingItemsMap = new Map(existingItems.map((item) => [item.id, item]));
 
         // Only create operations for items that don't exist or have changed
-        const changedPoolIds = new Set<string>();
         const operations = newAprItems
             .filter((item) => {
                 const existingItem = existingItemsMap.get(item.id);
