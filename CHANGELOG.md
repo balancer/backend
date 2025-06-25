@@ -1,5 +1,13 @@
 # backend
 
+## 1.47.1
+
+### Patch Changes
+
+-   736a1c8: add silo vdusd and re7scusd vault aprs
+-   fb7d51c: fix v3 normalized liquidity calc
+-   9310741: SOR - Increase max paths per token pair
+
 ## 1.47.0
 
 ### Minor Changes
