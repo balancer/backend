@@ -131,6 +131,7 @@ export default <NetworkData>{
                     'https://raw.githubusercontent.com/euler-xyz/euler-labels/refs/heads/master/43114/vaults.json',
                 lensContractAddress: '0xc820c24905c210aefe21dae40723ec28d62c1544',
             },
+            etherfi: '0xa3d68b74bf0528fdd07263c60d6488749044914b',
             defaultHandlers: {
                 yUTY: {
                     tokenAddress: '0x580d5e1399157fd0d58218b7a514b60974f2ab01',
