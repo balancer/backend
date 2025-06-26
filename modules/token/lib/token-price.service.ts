@@ -20,6 +20,7 @@ import { RektTokensHandlerService } from './token-price-handlers/rekt-tokens-han
 import config from '../../../config';
 import { BeetsPriceHandlerService } from './token-price-handlers/beets-price-handler.service';
 import { ERC4626PriceHandlerService } from './token-price-handlers/erc4626-price-handler.service';
+import { LbpPriceHandlerService } from './token-price-handlers/lbp-price-handler.service';
 
 export class TokenPriceService {
     cache: CacheClass<string, any> = new Cache<string, any>();
@@ -34,6 +35,7 @@ export class TokenPriceService {
         new CoingeckoPriceHandlerService(),
         new BptPriceHandlerService(),
         new SwapsPriceHandlerService(),
+        new LbpPriceHandlerService(),
         new FallbackHandlerService(),
     ];
 
