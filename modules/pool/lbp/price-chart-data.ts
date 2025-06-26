@@ -1,10 +1,12 @@
 import { Chain } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
 import { eventsRepository, TokenFlowsRepository } from '../../repositories/events';
+import { SwapEvent, JoinExitEvent } from '../../../prisma/prisma-types';
 
 interface PriceChartLPB {
     id: string;
     chain: Chain;
+    createTime: number;
     startTime: number;
     endTime: number;
     projectToken: string;
@@ -15,6 +17,15 @@ interface PriceChartLPB {
     reserveTokenEndWeight: number;
 }
 
+interface TokenFlowData {
+    timestamp: number;
+    [key: string]: number; // Dynamic token addresses as keys
+    swapCount: number;
+    volume: number;
+    buyVolume: number;
+    sellVolume: number;
+}
+
 export const priceChartData = async (
     pool: PriceChartLPB,
     dataPoints = 30,
@@ -22,11 +33,14 @@ export const priceChartData = async (
 ) => {
     const { chain, id, projectToken, reserveToken } = pool;
 
-    // Calculate interval based on number of data points
-    const interval = Math.floor(dataPoints > 1 ? (pool.endTime - pool.startTime) / (dataPoints - 1) : 0);
+    // Generate precise timeline
+    const timeline = generatePreciseTimeline(pool.startTime, pool.endTime, dataPoints);
 
-    // Get the token flows
-    const flows = await repo.getTokenFlows(chain, id, projectToken, reserveToken, interval);
+    // Get all events for the time range
+    const allEvents = await repo.getAllEventsForTimeRange(chain, id, pool.createTime, pool.endTime);
+
+    // Aggregate events by timeline points
+    const flows = aggregateEventsByTimeline(allEvents, timeline, projectToken, reserveToken);
 
     if (flows.length === 0) return [];
 
@@ -36,45 +50,28 @@ export const priceChartData = async (
             chain,
             tokenAddress: reserveToken,
             timestamp: {
-                gte: flows[0].timestamp,
+                gte: pool.startTime,
+                lte: pool.endTime,
             },
         },
     });
 
     const sortedPrices = prices.sort((a, b) => a.timestamp - b.timestamp);
 
-    // Generate complete timeline from startTime to endTime with specified number of data points
-    const completeTimeline = generateCompleteTimeline(pool.startTime, pool.endTime, dataPoints, interval);
-
-    // Calculate running balances for the intervals
+    // Calculate running balances for the timeline points
     let balanceProject = 0;
     let balanceReserve = 0;
 
-    // Check if there are any join/exit events before the start time
-    const flowsBeforeStart = flows.filter((flow) => flow.timestamp < pool.startTime);
-
-    for (const flow of flowsBeforeStart) {
+    const balances = flows.map((flow) => {
+        // Update balances with this flow
         balanceProject += flow[projectToken] || 0;
         balanceReserve += flow[reserveToken] || 0;
-    }
 
-    // Create a map of existing flows for quick lookup
-    const flowsMap = new Map(flows.map((flow) => [flow.timestamp, flow]));
-
-    const balances = completeTimeline.map((timestamp) => {
-        const existingFlow = flowsMap.get(timestamp);
-
-        // Update balances if there's an existing flow
-        if (existingFlow) {
-            balanceProject += existingFlow[projectToken] || 0;
-            balanceReserve += existingFlow[reserveToken] || 0;
-        }
-
-        // Find closest price by timestamp (for future timestamps, use last available price)
-        const reservePrice = findReservePriceForTimestamp(sortedPrices, timestamp);
+        // Find closest price by timestamp
+        const reservePrice = findReservePriceForTimestamp(sortedPrices, flow.timestamp);
 
         // Calculate current weights and price
-        const weights = calculateWeightsAtTime(pool, timestamp);
+        const weights = calculateWeightsAtTime(pool, flow.timestamp);
 
         const projectTokenPrice = calculatePrice(
             balanceProject,
@@ -83,19 +80,14 @@ export const priceChartData = async (
             weights.reserveWeight,
         );
 
-        const buyVolume = existingFlow?.buyVolume || 0;
-        const sellVolume = existingFlow?.sellVolume || 0;
-        const volume = existingFlow?.volume || 0;
-        const swapCount = existingFlow?.swapCount || 0;
-
         return {
-            timestamp,
+            timestamp: flow.timestamp,
             projectTokenPrice: projectTokenPrice,
             reservePrice: reservePrice,
-            buyVolume,
-            sellVolume,
-            volume,
-            swapCount,
+            buyVolume: flow.buyVolume,
+            sellVolume: flow.sellVolume,
+            volume: flow.volume,
+            swapCount: flow.swapCount,
         };
     });
 
@@ -103,37 +95,128 @@ export const priceChartData = async (
 };
 
 /**
- * Generate complete timeline from startTime to endTime with specified number of data points
- * Timestamps are snapped to intervals using the same logic as the SQL query: FLOOR(timestamp / interval) * interval
+ * Generate precise timeline from startTime to endTime with specified number of data points
  */
-const generateCompleteTimeline = (
-    startTime: number,
-    endTime: number,
-    dataPoints: number,
-    interval: number,
-): number[] => {
-    if (dataPoints <= 0) {
-        return [];
-    }
-
-    if (dataPoints === 1) {
-        // Snap single timestamp to interval boundary
-        return [Math.floor(startTime / interval) * interval];
-    }
+const generatePreciseTimeline = (startTime: number, endTime: number, dataPoints: number): number[] => {
+    if (dataPoints <= 0) return [];
+    if (dataPoints === 1) return [startTime];
+    if (dataPoints === 2) return [startTime, endTime];
 
     const timeline: number[] = [];
+    timeline.push(startTime);
+
     const timeRange = endTime - startTime;
     const step = timeRange / (dataPoints - 1);
 
-    for (let i = 0; i < dataPoints; i++) {
-        const rawTimestamp = startTime + step * i;
-        // Snap to interval boundary using same logic as SQL query
-        const snappedTimestamp = Math.floor(rawTimestamp / interval) * interval;
-        timeline.push(snappedTimestamp);
+    for (let i = 1; i < dataPoints - 1; i++) {
+        timeline.push(Math.round(startTime + step * i));
     }
 
-    // Remove duplicates that might occur due to snapping and sort
-    return [...new Set(timeline)].sort((a, b) => a - b);
+    timeline.push(endTime);
+    return timeline;
+};
+
+/**
+ * Aggregate events by timeline points - token flows are cumulative, other metrics are per bucket
+ */
+const aggregateEventsByTimeline = (
+    events: (SwapEvent | JoinExitEvent)[],
+    timeline: number[],
+    tokenA: string,
+    tokenB: string,
+): TokenFlowData[] => {
+    // Reverse events in-place to get ascending order for cumulative calculations
+    // (events come from DB in descending order due to index optimization)
+    events.reverse();
+
+    return timeline.map((timestamp, index) => {
+        // Get all events up to this timestamp for cumulative token flows
+        const eventsUpToTimestamp = events.filter((event) => event.blockTimestamp <= timestamp);
+
+        // Get events for this bucket only (for non-cumulative metrics)
+        const previousTimestamp = index === 0 ? 0 : timeline[index - 1];
+        const eventsInBucket = events.filter(
+            (event) => event.blockTimestamp > previousTimestamp && event.blockTimestamp <= timestamp,
+        );
+
+        // Calculate cumulative token flows
+        let tokenAFlow = 0;
+        let tokenBFlow = 0;
+
+        eventsUpToTimestamp.forEach((event) => {
+            if (event.type === 'SWAP') {
+                const swapEvent = event as SwapEvent;
+                const tokenIn = swapEvent.payload.tokenIn;
+                const tokenOut = swapEvent.payload.tokenOut;
+
+                // Handle token A flows (cumulative)
+                if (tokenIn.address.toLowerCase() === tokenA.toLowerCase()) {
+                    tokenAFlow += parseFloat(tokenIn.amount);
+                }
+                if (tokenOut.address.toLowerCase() === tokenA.toLowerCase()) {
+                    tokenAFlow -= parseFloat(tokenOut.amount);
+                }
+
+                // Handle token B flows (cumulative)
+                if (tokenIn.address.toLowerCase() === tokenB.toLowerCase()) {
+                    tokenBFlow += parseFloat(tokenIn.amount);
+                }
+                if (tokenOut.address.toLowerCase() === tokenB.toLowerCase()) {
+                    tokenBFlow -= parseFloat(tokenOut.amount);
+                }
+            } else if (event.type === 'JOIN' || event.type === 'EXIT') {
+                const joinExitEvent = event as JoinExitEvent;
+                const tokens = joinExitEvent.payload.tokens;
+
+                tokens.forEach((token) => {
+                    const tokenAddress = token.address.toLowerCase();
+                    const tokenAmount = parseFloat(token.amount);
+
+                    if (tokenAddress === tokenA.toLowerCase()) {
+                        tokenAFlow += event.type === 'JOIN' ? tokenAmount : -tokenAmount;
+                    }
+                    if (tokenAddress === tokenB.toLowerCase()) {
+                        tokenBFlow += event.type === 'JOIN' ? tokenAmount : -tokenAmount;
+                    }
+                });
+            }
+        });
+
+        // Calculate per-bucket metrics
+        let swapCount = 0;
+        let volume = 0;
+        let buyVolume = 0;
+        let sellVolume = 0;
+
+        eventsInBucket.forEach((event) => {
+            if (event.type === 'SWAP') {
+                const swapEvent = event as SwapEvent;
+                const tokenIn = swapEvent.payload.tokenIn;
+                const tokenOut = swapEvent.payload.tokenOut;
+
+                // Handle buy/sell volumes for this bucket only
+                if (tokenIn.address.toLowerCase() === tokenA.toLowerCase()) {
+                    sellVolume += parseFloat(tokenIn.amount);
+                }
+                if (tokenOut.address.toLowerCase() === tokenA.toLowerCase()) {
+                    buyVolume += parseFloat(tokenOut.amount);
+                }
+
+                swapCount++;
+                volume += swapEvent.valueUSD || 0;
+            }
+        });
+
+        return {
+            timestamp,
+            [tokenA]: tokenAFlow,
+            [tokenB]: tokenBFlow,
+            swapCount,
+            volume,
+            buyVolume,
+            sellVolume,
+        };
+    });
 };
 
 /**
@@ -176,6 +259,8 @@ const calculatePrice = (
     projectWeight: number,
     reserveWeight: number,
 ): number => {
+    if (projectBalance <= 0 || reserveBalance <= 0) return 0;
+
     // Weighted pool formula: price = (reserveBalance / reserveWeight) / (projectBalance / projectWeight)
     const reserveRatio = reserveBalance / reserveWeight;
     const projectRatio = projectBalance / projectWeight;
@@ -195,12 +280,20 @@ const findReservePriceForTimestamp = (sortedPrices: any[], targetTimestamp: numb
         return lastPrice.price || 0;
     }
 
+    // If timestamp is before first price, use first price
+    const firstPrice = sortedPrices[0];
+    if (targetTimestamp <= firstPrice.timestamp) {
+        return firstPrice.price || 0;
+    }
+
     // Otherwise, find the closest price
     const closestPrice = findClosestPrice(sortedPrices, targetTimestamp);
     return closestPrice?.price || 0;
 };
 
-// Helper function to find closest price
+/**
+ * Helper function to find closest price using binary search
+ */
 function findClosestPrice(sortedPrices: any[], targetTimestamp: number) {
     if (sortedPrices.length === 0) return null;
 
