@@ -1,5 +1,13 @@
 # backend
 
+## 1.47.5
+
+### Patch Changes
+
+-   6194d5d: SOR - Remove unnecessary sentry logs
+-   2f336a3: refactor EulerAprHandler
+-   34dcd81: superform APR source update
+
 ## 1.47.4
 
 ### Patch Changes

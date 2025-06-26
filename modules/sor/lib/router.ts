@@ -122,7 +122,11 @@ export class Router {
                 (path) => !quotePaths75[0].pools.some((pool) => path.pools.includes(pool)),
             );
             if (bestPath25) {
-                splitPaths.push(this.splitPaths(swapAmount, bestPath25, quotePaths75[0])); // 25/75
+                try {
+                    splitPaths.push(this.splitPaths(swapAmount, bestPath25, quotePaths75[0])); // 25/75
+                } catch (error) {
+                    console.log('Error splitting paths 25/75: ', error);
+                }
             }
         }
 
@@ -131,7 +135,11 @@ export class Router {
                 (path) => !quotePaths50[0].pools.some((pool) => path.pools.includes(pool)),
             );
             if (secondBestPath50) {
-                splitPaths.push(this.splitPaths(swapAmount, quotePaths50[0], secondBestPath50)); // 50/50
+                try {
+                    splitPaths.push(this.splitPaths(swapAmount, quotePaths50[0], secondBestPath50)); // 50/50
+                } catch (error) {
+                    console.log('Error splitting paths 50/50: ', error);
+                }
             }
         }
 

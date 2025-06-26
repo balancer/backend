@@ -58,6 +58,10 @@ export const schema = {
         type: String,
     },
     DATABASE_URL: String,
+    SUPERFORM_API_KEY: {
+        optional: true,
+        type: String,
+    },
 };
 
 export const env: Env = load(schema, {

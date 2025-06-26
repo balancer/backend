@@ -30,7 +30,7 @@ you need to pass:
 - the result of vault.totalBorrows() as borrows
 - the result of vault.interestFee() as interestFee
 
-you can find the addresses here, depending on the chain you're interested in: 
+you can find the addresses here, depending on the chain you're interested in:
 https://github.com/euler-xyz/euler-interfaces/tree/master/addresses
 
 We should get all deployed vaults for chains of interest via vaultsBaseUrl
@@ -54,33 +54,20 @@ and return the result as apr
             const vaults = await axios.get<VaultsResponse>(this.vaultsBaseUrl).then((response) => response.data);
 
             const vaultsAddresses = Object.keys(vaults).map((address) => address.toLowerCase());
-            const pools = await prisma.prismaPool.findMany({
-                where: {
-                    chain,
-                    tokens: {
-                        some: {
-                            token: {
-                                address: { in: vaultsAddresses },
-                            },
-                        },
-                    },
-                },
-                include: {
-                    tokens: {
-                        include: {
-                            token: true,
-                        },
-                    },
-                },
-            });
 
-            const vaultsInPools = vaultsAddresses.filter((address) =>
-                pools.some((pool) => pool.tokens.some((token) => token.token.address.toLowerCase() === address)),
-            );
+            const poolTokens = await prisma.prismaPoolToken
+                .findMany({
+                    where: {
+                        chain,
+                        address: { in: vaultsAddresses },
+                    },
+                    select: { address: true },
+                })
+                .then((pts) => pts.map((pt) => pt.address));
 
             // query the required data for each vault on chain
             const calls: Multicaller3Call[] = [];
-            for (const vault of vaultsInPools) {
+            for (const vault of poolTokens) {
                 calls.push({
                     path: `${vault}.interestRate`,
                     address: vault as `0x${string}`,
@@ -113,7 +100,7 @@ and return the result as apr
 
             // compute APY on chain for each vault
             const apyCalls: Multicaller3Call[] = [];
-            for (const vault of vaultsInPools) {
+            for (const vault of poolTokens) {
                 apyCalls.push({
                     path: `${vault}.computeAPYs`,
                     address: this.lensContractAddress as `0x${string}`,
@@ -134,7 +121,7 @@ and return the result as apr
             const aprs: { [tokenAddress: string]: { apr: number; isIbYield: boolean } } = {};
 
             // get the APY for each vault and return it
-            for (const vault of vaultsInPools) {
+            for (const vault of poolTokens) {
                 const apy = apyResponse[vault].computeAPYs;
                 if (apy) {
                     aprs[vault] = { apr: parseFloat(apy), isIbYield: true };
@@ -146,15 +133,4 @@ and return the result as apr
             throw Error(`Eulers IB APR hanlder failed: ${(error as Error).message}`);
         }
     }
-}
-
-interface EulerResponse {
-    data: {
-        assets: [
-            {
-                eTokenAddress: string;
-                supplyAPY: string;
-            },
-        ];
-    };
 }
