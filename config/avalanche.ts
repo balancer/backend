@@ -75,7 +75,7 @@ export default <NetworkData>{
     avgBlockSpeed: 2,
     aprHandlers: {
         aaveRewardsAprHandler: true,
-        ybAprConfig: {
+        ybAprHandler: {
             aave: {
                 v3: {
                     subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/2h9woxy8RTjHu1HJsCEnmzpPHFArU33avmUh4f71JpVn`,
