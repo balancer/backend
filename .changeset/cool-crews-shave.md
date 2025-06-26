@@ -1,0 +1,5 @@
+---
+'backend': patch
+---
+
+refactor EulerAprHandler
