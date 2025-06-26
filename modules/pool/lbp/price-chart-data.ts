@@ -22,6 +22,7 @@ interface TokenFlowData {
     [key: string]: number; // Dynamic token addresses as keys
     swapCount: number;
     volume: number;
+    fees: number;
     buyVolume: number;
     sellVolume: number;
 }
@@ -64,8 +65,8 @@ export const priceChartData = async (
 
     const balances = flows.map((flow) => {
         // Update balances with this flow
-        balanceProject += flow[projectToken] || 0;
-        balanceReserve += flow[reserveToken] || 0;
+        balanceProject = flow[projectToken] || 0;
+        balanceReserve = flow[reserveToken] || 0;
 
         // Find closest price by timestamp
         const reservePrice = findReservePriceForTimestamp(sortedPrices, flow.timestamp);
@@ -80,6 +81,11 @@ export const priceChartData = async (
             weights.reserveWeight,
         );
 
+        // Calculate TVL (Total Value Locked) in USD
+        const projectTokenValueUSD = balanceProject * projectTokenPrice;
+        const reserveTokenValueUSD = balanceReserve * reservePrice;
+        const tvl = projectTokenValueUSD + reserveTokenValueUSD;
+
         return {
             timestamp: flow.timestamp,
             projectTokenPrice: projectTokenPrice,
@@ -88,6 +94,8 @@ export const priceChartData = async (
             sellVolume: flow.sellVolume,
             volume: flow.volume,
             swapCount: flow.swapCount,
+            tvl: tvl,
+            fees: flow.fees,
         };
     });
 
@@ -122,8 +130,8 @@ const generatePreciseTimeline = (startTime: number, endTime: number, dataPoints:
 const aggregateEventsByTimeline = (
     events: (SwapEvent | JoinExitEvent)[],
     timeline: number[],
-    tokenA: string,
-    tokenB: string,
+    projectToken: string,
+    reserveToken: string,
 ): TokenFlowData[] => {
     // Reverse events in-place to get ascending order for cumulative calculations
     // (events come from DB in descending order due to index optimization)
@@ -135,13 +143,11 @@ const aggregateEventsByTimeline = (
 
         // Get events for this bucket only (for non-cumulative metrics)
         const previousTimestamp = index === 0 ? 0 : timeline[index - 1];
-        const eventsInBucket = events.filter(
-            (event) => event.blockTimestamp > previousTimestamp && event.blockTimestamp <= timestamp,
-        );
+        const eventsInBucket = eventsUpToTimestamp.filter((event) => event.blockTimestamp > previousTimestamp);
 
         // Calculate cumulative token flows
-        let tokenAFlow = 0;
-        let tokenBFlow = 0;
+        let projectTokenFlow = 0;
+        let reserveTokenFlow = 0;
 
         eventsUpToTimestamp.forEach((event) => {
             if (event.type === 'SWAP') {
@@ -149,22 +155,22 @@ const aggregateEventsByTimeline = (
                 const tokenIn = swapEvent.payload.tokenIn;
                 const tokenOut = swapEvent.payload.tokenOut;
 
-                // Handle token A flows (cumulative)
-                if (tokenIn.address.toLowerCase() === tokenA.toLowerCase()) {
-                    tokenAFlow += parseFloat(tokenIn.amount);
+                // Handle project token flows (cumulative)
+                if (tokenIn.address.toLowerCase() === projectToken.toLowerCase()) {
+                    projectTokenFlow += parseFloat(tokenIn.amount);
                 }
-                if (tokenOut.address.toLowerCase() === tokenA.toLowerCase()) {
-                    tokenAFlow -= parseFloat(tokenOut.amount);
+                if (tokenOut.address.toLowerCase() === projectToken.toLowerCase()) {
+                    projectTokenFlow -= parseFloat(tokenOut.amount);
                 }
 
                 // Handle token B flows (cumulative)
-                if (tokenIn.address.toLowerCase() === tokenB.toLowerCase()) {
-                    tokenBFlow += parseFloat(tokenIn.amount);
+                if (tokenIn.address.toLowerCase() === reserveToken.toLowerCase()) {
+                    reserveTokenFlow += parseFloat(tokenIn.amount);
                 }
-                if (tokenOut.address.toLowerCase() === tokenB.toLowerCase()) {
-                    tokenBFlow -= parseFloat(tokenOut.amount);
+                if (tokenOut.address.toLowerCase() === reserveToken.toLowerCase()) {
+                    reserveTokenFlow -= parseFloat(tokenOut.amount);
                 }
-            } else if (event.type === 'JOIN' || event.type === 'EXIT') {
+            } else {
                 const joinExitEvent = event as JoinExitEvent;
                 const tokens = joinExitEvent.payload.tokens;
 
@@ -172,11 +178,11 @@ const aggregateEventsByTimeline = (
                     const tokenAddress = token.address.toLowerCase();
                     const tokenAmount = parseFloat(token.amount);
 
-                    if (tokenAddress === tokenA.toLowerCase()) {
-                        tokenAFlow += event.type === 'JOIN' ? tokenAmount : -tokenAmount;
+                    if (tokenAddress === reserveToken.toLowerCase()) {
+                        reserveTokenFlow += event.type === 'JOIN' ? tokenAmount : -tokenAmount;
                     }
-                    if (tokenAddress === tokenB.toLowerCase()) {
-                        tokenBFlow += event.type === 'JOIN' ? tokenAmount : -tokenAmount;
+                    if (tokenAddress === projectToken.toLowerCase()) {
+                        projectTokenFlow += event.type === 'JOIN' ? tokenAmount : -tokenAmount;
                     }
                 });
             }
@@ -187,32 +193,36 @@ const aggregateEventsByTimeline = (
         let volume = 0;
         let buyVolume = 0;
         let sellVolume = 0;
+        let fees = 0;
 
         eventsInBucket.forEach((event) => {
             if (event.type === 'SWAP') {
                 const swapEvent = event as SwapEvent;
                 const tokenIn = swapEvent.payload.tokenIn;
                 const tokenOut = swapEvent.payload.tokenOut;
+                const fee = swapEvent.payload.fee;
 
                 // Handle buy/sell volumes for this bucket only
-                if (tokenIn.address.toLowerCase() === tokenA.toLowerCase()) {
+                if (tokenIn.address.toLowerCase() === projectToken.toLowerCase()) {
                     sellVolume += parseFloat(tokenIn.amount);
                 }
-                if (tokenOut.address.toLowerCase() === tokenA.toLowerCase()) {
+                if (tokenOut.address.toLowerCase() === projectToken.toLowerCase()) {
                     buyVolume += parseFloat(tokenOut.amount);
                 }
 
                 swapCount++;
-                volume += swapEvent.valueUSD || 0;
+                volume += parseFloat(`${swapEvent.valueUSD}`) || 0;
+                fees += parseFloat(fee.valueUSD) || 0;
             }
         });
 
         return {
             timestamp,
-            [tokenA]: tokenAFlow,
-            [tokenB]: tokenBFlow,
+            [projectToken]: projectTokenFlow,
+            [reserveToken]: reserveTokenFlow,
             swapCount,
             volume,
+            fees,
             buyVolume,
             sellVolume,
         };
