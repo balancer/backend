@@ -38,7 +38,7 @@ export const priceChartData = async (
     const timeline = generatePreciseTimeline(pool.startTime, pool.endTime, dataPoints);
 
     // Get all events for the time range
-    const allEvents = await repo.getAllEventsForTimeRange(chain, id, pool.createTime, pool.endTime);
+    const allEvents = await repo.getAllEventsForTimeRange(chain, id, undefined, pool.endTime);
 
     // Aggregate events by timeline points
     const flows = aggregateEventsByTimeline(allEvents, timeline, projectToken, reserveToken);

@@ -34,8 +34,8 @@ export interface TokenFlowsRepository {
     getAllEventsForTimeRange: (
         chain: Chain,
         poolId: string,
-        startTime: number,
-        endTime: number,
+        startTime?: number,
+        endTime?: number,
     ) => Promise<(SwapEvent | JoinExitEvent)[]>;
 }
 

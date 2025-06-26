@@ -156,14 +156,14 @@ export const eventsRepository = {
 
         return swaps as SwapEvent[];
     },
-    getAllEventsForTimeRange: async (chain: Chain, poolId: string, startTime: number, endTime: number) => {
+    getAllEventsForTimeRange: async (chain: Chain, poolId: string, startTime?: number, endTime?: number) => {
         const events = await prisma.prismaPoolEvent.findMany({
             where: {
                 chain,
                 poolId,
                 blockTimestamp: {
-                    gte: startTime,
-                    lte: endTime,
+                    ...(startTime ? { gte: startTime } : {}),
+                    ...(endTime ? { lte: endTime } : {}),
                 },
             },
             orderBy,
