@@ -7,7 +7,7 @@ import { Address, Swap, SwapInput, SwapKind } from '@balancer/sdk';
 import { formatUnits } from 'viem';
 
 describe('sor debugging', () => {
-    it('sor v2', async () => {
+    it.only('sor v2', async () => {
         const useProtocolVersion = 2;
         const chain = Chain.SONIC;
 
@@ -23,8 +23,8 @@ describe('sor debugging', () => {
 
         const swaps = await sorService.getSorSwapPaths({
             chain,
-            tokenIn: '0x039e2fb66102314ce7b64ce5ce3e5183bc94ad38', // wS
-            tokenOut: '0xe5da20f15420ad15de0fa650600afc998bbe3955', // stS
+            tokenIn: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee', // ETH
+            tokenOut: '0x2d0e0814e62d80056181f5cd932274405966e4f0', // BEETS
             swapType,
             swapAmount: '100000',
             useProtocolVersion,
@@ -71,7 +71,7 @@ describe('sor debugging', () => {
         expect(queryResultFloat).toBeCloseTo(sorResultFloat, 4);
     }, 5000000);
 
-    it.only('sor v3', async () => {
+    it('sor v3', async () => {
         const useProtocolVersion = 3;
         const chain = Chain.MAINNET;
 
