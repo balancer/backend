@@ -54,22 +54,16 @@ export const getPoolMetadataTags = async (
         }
     }
 
-    // Sonic points are added via the tokens object in the metadata repo but should only show for pools that consist of only sonic point bearing tokens.
-    // So we need to handle them separately.
-    // for sonic points, we will add tags to pools that have only sonic point bearing tokens.
-    // find all pools that have a points_sonic tag prefix
-    const allSonicPoolIdsWithSonicPoints = Object.keys(existingTags).filter((poolId) =>
-        Array.from(existingTags[poolId]).some((tag) => tag.toLowerCase().startsWith('points_sonic')),
-    );
-
+    // Sonic points should only show for pools that consist of only sonic point bearing tokens.
     // fetch pools with tokens from db
     const sonicPools = await prisma.prismaPool.findMany({
-        where: { id: { in: allSonicPoolIdsWithSonicPoints } },
+        where: { chain: 'SONIC' },
         select: { id: true, address: true, chain: true, allTokens: true },
     });
 
     // from the tag list, find all tags that start with points_sonic
     const sonicPointBearingTags = tagsList.filter((tag) => tag.id.toLowerCase().startsWith('points_sonic'));
+
     // get the token addresses for sonic point bearing tags in lowercase
     // this is to ensure we can compare them with the pool token addresses
     const sonicPointBearingTokenAddresses = sonicPointBearingTags
@@ -95,7 +89,7 @@ export const getPoolMetadataTags = async (
         // add a tag for each of the sonic point bearing token in the pool
         sonicPointBearingTags.forEach((tag) => {
             pool.allTokens.forEach((token) => {
-                if (tag.tokens?.[token.chain] && tag.tokens[token.chain].includes(token.tokenAddress.toLowerCase())) {
+                if (tag.tokens && tag.tokens['146']?.includes(token.tokenAddress.toLowerCase())) {
                     existingTags[pool.id].add(tag.id.toUpperCase());
                 }
             });
