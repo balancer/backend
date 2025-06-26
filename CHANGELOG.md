@@ -1,5 +1,11 @@
 # backend
 
+## 1.47.4
+
+### Patch Changes
+
+-   6d76006: fix avax APR config
+
 ## 1.47.3
 
 ### Patch Changes
