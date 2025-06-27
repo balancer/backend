@@ -3,7 +3,7 @@ import { PathGraphEdgeData, PathGraphTraversalConfig } from './pathGraphTypes';
 import { BasePool } from '../poolsV2/basePool';
 import { PathLocal } from '../path';
 
-const DEFAULT_MAX_PATHS_PER_TOKEN_PAIR = 4;
+const DEFAULT_MAX_PATHS_PER_TOKEN_PAIR = 3;
 
 export class PathGraph {
     private nodes: Map<string, { isPhantomBpt: boolean }>;
@@ -86,25 +86,47 @@ export class PathGraph {
         const paths: PathGraphEdgeData[][] = [];
         const selectedPathIds: string[] = [];
 
-        // the tokenPairIndex refers to the nth most liquid path for a token
-        // pair x -> y. maxPathsPerTokenPair is provided as a config on graph init
-        for (let idx = 0; idx < this.maxPathsPerTokenPair; idx++) {
-            for (let i = 0; i < tokenPaths.length; i++) {
-                const path = this.expandTokenPath({
-                    tokenPath: tokenPaths[i],
-                    tokenPairIndex: idx,
-                });
+        // For each token path, explore all possible combinations of liquidity ranks
+        for (let i = 0; i < tokenPaths.length; i++) {
+            const tokenPath = tokenPaths[i];
+            const pathLength = tokenPath.length - 1; // number of segments in the path
 
-                if (
-                    this.isValidPath({
-                        path,
-                        seenPoolAddresses: [],
-                        selectedPathIds,
-                        config,
-                    })
-                ) {
-                    selectedPathIds.push(this.getIdForPath(path));
-                    paths.push(path);
+            // Generate all possible combinations of liquidity ranks for this path
+            // Each element is an array of ranks, one for each segment in the path
+            // For example: [[0,0], [0,1], [1,0], [1,1]] for a 2-segment path with maxPathsPerTokenPair=2
+            let rankCombinations: number[][] = [[]];
+            for (let segment = 0; segment < pathLength; segment++) {
+                const newCombinations: number[][] = [];
+                for (const combo of rankCombinations) {
+                    for (let rank = 0; rank < this.maxPathsPerTokenPair; rank++) {
+                        newCombinations.push([...combo, rank]);
+                    }
+                }
+                rankCombinations = newCombinations;
+            }
+
+            // Now iterate through all combinations and expand paths
+            for (const ranks of rankCombinations) {
+                try {
+                    const path = this.expandTokenPathWithRanks({
+                        tokenPath: tokenPath,
+                        ranks: ranks,
+                    });
+
+                    if (
+                        this.isValidPath({
+                            path,
+                            seenPoolAddresses: [],
+                            selectedPathIds,
+                            config,
+                        })
+                    ) {
+                        selectedPathIds.push(this.getIdForPath(path));
+                        paths.push(path);
+                    }
+                } catch (error) {
+                    // Skip invalid combinations
+                    continue;
                 }
             }
 
@@ -237,7 +259,7 @@ export class PathGraph {
     /**
      * Returns the vertices connected to a given vertex
      */
-    public getConnectedVertices(tokenAddress: string): string[] {
+    private getConnectedVertices(tokenAddress: string): string[] {
         const result: string[] = [];
         const edges = this.edges.get(tokenAddress) || [];
 
@@ -282,7 +304,7 @@ export class PathGraph {
         );
     }
 
-    public findAllValidTokenPaths(args: {
+    private findAllValidTokenPaths(args: {
         token: string;
         tokenIn: string;
         tokenOut: string;
@@ -301,7 +323,13 @@ export class PathGraph {
         return tokenPaths;
     }
 
-    public expandTokenPath({ tokenPath, tokenPairIndex }: { tokenPath: string[]; tokenPairIndex: number }) {
+    /**
+     * Expands a token path using different liquidity ranks for each segment.
+     * This allows exploring all combinations of pool liquidity ranks for different token pairs in a path.
+     * @param tokenPath - Array of token addresses representing the path
+     * @param ranks - Array of liquidity ranks to use for each segment (must match path length - 1)
+     */
+    private expandTokenPathWithRanks({ tokenPath, ranks }: { tokenPath: string[]; ranks: number[] }) {
         const segments: PathGraphEdgeData[] = [];
 
         for (let i = 0; i < tokenPath.length - 1; i++) {
@@ -311,7 +339,13 @@ export class PathGraph {
                 throw new Error(`Missing edge for pair ${tokenPath[i]} -> ${tokenPath[i + 1]}`);
             }
 
-            segments.push(edge[tokenPairIndex] || edge[0]);
+            const rank = ranks[i];
+
+            if (!edge[rank]) {
+                throw new Error(`Missing rank ${rank} on edge for pair ${tokenPath[i]} -> ${tokenPath[i + 1]}`);
+            }
+
+            segments.push(edge[rank]);
         }
 
         return segments;

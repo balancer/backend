@@ -291,7 +291,7 @@ export default <NetworkData>{
                     tokenAddress: '0xdbdc1ef57537e34680b898e1febd3d68c7389bcb',
                     sourceUrl: 'https://api.infinifi.xyz/api/protocol/data',
                     path: 'data.stats.siusd.lastWeekAPY',
-                    scale: 100,
+                    scale: 1,
                 },
                 cUSDO: {
                     tokenAddress: '0xad55aebc9b8c03fc43cd9f62260391c13c23e7c0',

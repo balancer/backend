@@ -31,22 +31,12 @@ export interface BlockNumbersRepository extends LatestEventRepository {
 }
 
 export interface TokenFlowsRepository {
-    getTokenFlows: (
+    getAllEventsForTimeRange: (
         chain: Chain,
         poolId: string,
-        tokenA: string,
-        tokenB: string,
-        interval?: number,
-    ) => Promise<
-        {
-            timestamp: number;
-            swapCount: number;
-            volume: number;
-            [token: string]: number;
-            buyVolume: number;
-            sellVolume: number;
-        }[]
-    >;
+        startTime?: number,
+        endTime?: number,
+    ) => Promise<(SwapEvent | JoinExitEvent)[]>;
 }
 
 export interface EventStoreRepository {

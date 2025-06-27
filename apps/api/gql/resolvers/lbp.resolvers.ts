@@ -28,6 +28,7 @@ export default {
                 const input = {
                     id: pool.id,
                     chain: pool.chain,
+                    createTime: pool.createTime,
                     ...(pool.typeData as LBPoolData),
                 };
 

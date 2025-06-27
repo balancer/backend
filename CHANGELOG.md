@@ -1,5 +1,16 @@
 # backend
 
+## 1.47.6
+
+### Patch Changes
+
+-   0d50931: SOR - Fix missing path combinations
+-   7f8132f: LBP tvl and fees
+-   7775032: lbp pricing based on weighted math
+-   06ce0d7: include all the LBP events before startTime
+-   654dd11: LBP price chart function refactored to aggregate events in JS
+-   26e73e0: fix infinifi USD APR
+
 ## 1.47.5
 
 ### Patch Changes

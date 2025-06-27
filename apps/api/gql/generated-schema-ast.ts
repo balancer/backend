@@ -4041,12 +4041,14 @@ export const schema = gql`
 
     type LBPPriceChartData {
         buyVolume: Float!
+        fees: Float!
         intervalTimestamp: Int! @deprecated
         projectTokenPrice: Float!
         reservePrice: Float!
         sellVolume: Float!
         swapCount: Int!
         timestamp: Int!
+        tvl: Float!
         volume: Float!
     }
 
