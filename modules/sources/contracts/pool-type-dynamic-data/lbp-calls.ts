@@ -10,6 +10,10 @@ type ImmutableData = AbiParametersToPrimitiveTypes<
 type DynamicData = AbiParametersToPrimitiveTypes<ExtractAbiFunction<typeof abi, 'getLBPoolDynamicData'>['outputs']>[0];
 
 export type LBPCallsOutput = {
+    poolDynamicData: {
+        id: string;
+        swapEnabled: boolean;
+    };
     poolToken: {
         id: string;
         weight: string;
@@ -37,6 +41,7 @@ export const lbpCalls = (id: string): ViemMulticallCall[] => [
             }));
 
             const poolDynamicData = {
+                id: id,
                 swapEnabled: result.isSwapEnabled,
             };
 

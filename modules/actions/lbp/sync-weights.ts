@@ -15,16 +15,22 @@ export const syncWeights = async (client: ViemClient, chain: Chain): Promise<voi
             protocolVersion: 3,
         },
         include: {
+            dynamicData: true,
             tokens: true,
         },
     });
 
     const tokens = pools
         .flatMap((pool) => pool.tokens.map((token) => token))
-        .reduce((acc, token) => {
-            acc[token.id] = token;
-            return acc;
-        }, {} as Record<string, (typeof pools)[0]['tokens'][0]>);
+        .reduce(
+            (acc, token) => {
+                acc[token.id] = token;
+                return acc;
+            },
+            {} as Record<string, (typeof pools)[0]['tokens'][0]>,
+        );
+
+    const dynamicDataMap = Object.fromEntries(pools.map((pool) => [pool.id, pool.dynamicData]));
 
     const calls = pools.flatMap(({ id }) => lbpCalls(id));
     const onchainData = (await multicallViem(client, calls)) as Record<string, LBPCallsOutput>;
@@ -46,7 +52,20 @@ export const syncWeights = async (client: ViemClient, chain: Chain): Promise<voi
             }),
         );
 
-    await prisma.$transaction(operations);
+    // Update swapEnabled as well
+    const swapEnabledUpdates = Object.keys(onchainData)
+        .map((id) => onchainData[id].poolDynamicData)
+        .filter((update) => update.swapEnabled !== dynamicDataMap[update.id]!.swapEnabled)
+        .map((update) =>
+            prisma.prismaPoolDynamicData.update({
+                where: { id_chain: { id: update.id, chain } },
+                data: {
+                    swapEnabled: update.swapEnabled,
+                },
+            }),
+        );
+
+    await prisma.$transaction([...operations, ...swapEnabledUpdates]);
 
     return;
 };
