@@ -27,7 +27,6 @@ import {
 } from './poolsV3';
 import { LiquidityBootstrappingPoolV3 } from './poolsV3/liquidityBootstrapping/liquidityBootstrapping';
 import { BufferPoolData } from '../utils/data';
-import { prisma } from '../../../prisma/prisma-client';
 
 export class SOR {
     static async getPathsWithPools(
