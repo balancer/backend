@@ -1,5 +1,15 @@
 # backend
 
+## 1.47.7
+
+### Patch Changes
+
+-   a9065a3: reloadOnChainData also syncs v3 pools
+-   a0aa0f6: SOR: ignore liquidity management for LBPs
+-   12b4222: SOR - Bump max paths per token pair
+-   cd9002e: sync LBP swapEnabled
+-   73553ec: adapt merkl apr service for newest api changes
+
 ## 1.47.6
 
 ### Patch Changes
