@@ -49,7 +49,10 @@ export class SOR {
         for (const prismaPool of prismaPools) {
             // typeguard
             if (prismaPool.protocolVersion === 3) {
-                if (!isLiquidityManagement(prismaPool.liquidityManagement)) {
+                if (
+                    !isLiquidityManagement(prismaPool.liquidityManagement) &&
+                    prismaPool.type !== 'LIQUIDITY_BOOTSTRAPPING'
+                ) {
                     console.log('LiquidityManagement incorrect for pool', prismaPool.id);
                     continue;
                 }

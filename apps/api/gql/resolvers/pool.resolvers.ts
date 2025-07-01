@@ -162,6 +162,14 @@ const balancerResolvers: Resolvers = {
                     result.push({ type: 'v2', chain, success: false, error: `${e}` });
                     console.log(`Could not sync v2 pools for chain ${chain}: ${e}`);
                 }
+                try {
+                    await upsertLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.POOLS_V3, 0);
+                    await PoolController().syncPoolsV3(chain);
+                    result.push({ type: 'v3', chain, success: true, error: undefined });
+                } catch (e) {
+                    result.push({ type: 'v3', chain, success: false, error: `${e}` });
+                    console.log(`Could not sync v3 pools for chain ${chain}: ${e}`);
+                }
             }
             return result;
         },

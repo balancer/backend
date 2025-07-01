@@ -75,6 +75,8 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         console.log('Syncing V3 pools');
         await upsertLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.ADD_POOLS_V3, 0);
         await PoolController().addPoolsV3(chain, false);
+        await upsertLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.POOLS_V3, 0);
+        await PoolController().syncPoolsV3(chain);
 
         console.log('Syncing pools metadata');
         await ContentController().syncCategories();
