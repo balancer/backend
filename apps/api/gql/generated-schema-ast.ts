@@ -107,6 +107,7 @@ export const schema = gql`
         FANTOM
         FRAXTAL
         GNOSIS
+        HYPEREVM
         MAINNET
         MODE
         OPTIMISM
