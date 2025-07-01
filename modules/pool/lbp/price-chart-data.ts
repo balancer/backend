@@ -22,6 +22,7 @@ interface TokenFlowData {
     [key: string]: number; // Dynamic token addresses as keys
     swapCount: number;
     volume: number;
+    cumulativeVolume: number;
     fees: number;
     buyVolume: number;
     sellVolume: number;
@@ -96,6 +97,8 @@ export const priceChartData = async (
             swapCount: flow.swapCount,
             tvl: tvl,
             fees: flow.fees,
+            cumulativeFees: flow.cumulativeFees,
+            cumulativeVolume: flow.cumulativeVolume,
         };
     });
 
@@ -136,6 +139,9 @@ const aggregateEventsByTimeline = (
     // Reverse events in-place to get ascending order for cumulative calculations
     // (events come from DB in descending order due to index optimization)
     events.reverse();
+
+    let cumulativeVolume = 0;
+    let cumulativeFees = 0;
 
     return timeline.map((timestamp, index) => {
         // Get all events up to this timestamp for cumulative token flows
@@ -216,6 +222,9 @@ const aggregateEventsByTimeline = (
             }
         });
 
+        cumulativeVolume += volume;
+        cumulativeFees += fees;
+
         return {
             timestamp,
             [projectToken]: projectTokenFlow,
@@ -225,6 +234,8 @@ const aggregateEventsByTimeline = (
             fees,
             buyVolume,
             sellVolume,
+            cumulativeVolume,
+            cumulativeFees,
         };
     });
 };

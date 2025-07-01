@@ -26,11 +26,13 @@ type LBPPriceChartData {
     projectTokenPrice: Float!
     reservePrice: Float!
     volume: Float!
+    cumulativeVolume: Float!
     buyVolume: Float!
     sellVolume: Float!
     swapCount: Int!
     tvl: Float!
     fees: Float!
+    cumulativeFees: Float!
 }
 
 type Query {

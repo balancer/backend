@@ -2745,6 +2745,8 @@ export interface LbpMetadataInput {
 export interface LbpPriceChartData {
     __typename?: 'LBPPriceChartData';
     buyVolume: Scalars['Float'];
+    cumulativeFees: Scalars['Float'];
+    cumulativeVolume: Scalars['Float'];
     fees: Scalars['Float'];
     /** @deprecated Field no longer supported */
     intervalTimestamp: Scalars['Int'];
@@ -5944,6 +5946,8 @@ export type LbpPriceChartDataResolvers<
     ParentType extends ResolversParentTypes['LBPPriceChartData'] = ResolversParentTypes['LBPPriceChartData'],
 > = ResolversObject<{
     buyVolume?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+    cumulativeFees?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+    cumulativeVolume?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
     fees?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
     intervalTimestamp?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     projectTokenPrice?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;

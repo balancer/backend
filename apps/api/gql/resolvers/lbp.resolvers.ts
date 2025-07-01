@@ -12,7 +12,7 @@ export default {
         /**
          * Get LB Pool price chart data
          */
-        lbpPriceChart: async (parent: any, { id, chain, interval, dataPoints }) => {
+        lbpPriceChart: async (parent: any, { id, chain, dataPoints }) => {
             try {
                 const pool = await prisma.prismaPool.findFirst({
                     where: {
