@@ -101,6 +101,7 @@ export type GqlChain =
     | 'FANTOM'
     | 'FRAXTAL'
     | 'GNOSIS'
+    | 'HYPEREVM'
     | 'MAINNET'
     | 'MODE'
     | 'OPTIMISM'

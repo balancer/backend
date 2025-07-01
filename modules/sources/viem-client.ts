@@ -1,4 +1,4 @@
-import { createPublicClient, http, PublicClient } from 'viem';
+import { createPublicClient, defineChain, http, PublicClient } from 'viem';
 import {
     arbitrum,
     avalanche,
@@ -39,6 +39,26 @@ const chain2ViemChain = {
     [Chain.FRAXTAL]: fraxtal,
     [Chain.MODE]: mode,
     [Chain.SONIC]: sonic,
+    [Chain.HYPEREVM]: defineChain({
+        id: 999,
+        name: 'hyperevm',
+        nativeCurrency: {
+            decimals: 18,
+            name: 'Hyperliquid',
+            symbol: 'HYPER',
+        },
+        rpcUrls: {
+            default: {
+                http: [config[Chain.HYPEREVM].rpcUrl],
+            },
+        },
+        blockExplorers: {
+            default: {
+                name: 'Hyper Block Explorer',
+                url: 'https://www.hyperscan.com',
+            },
+        },
+    }),
 };
 
 export const getViemClient = (chain: Chain) => {
