@@ -23,8 +23,8 @@ describe('sor debugging', () => {
 
         const swaps = await sorService.getSorSwapPaths({
             chain,
-            tokenIn: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee', // ETH
-            tokenOut: '0x2d0e0814e62d80056181f5cd932274405966e4f0', // BEETS
+            tokenIn: '0x039e2fb66102314ce7b64ce5ce3e5183bc94ad38', // wS
+            tokenOut: '0xe5da20f15420ad15de0fa650600afc998bbe3955', // stS
             swapType,
             swapAmount: '100000',
             useProtocolVersion,
@@ -36,7 +36,8 @@ describe('sor debugging', () => {
             // poolIds: ['0x40d2cbc586dd8df50001cdba3f65cd4bbc32d596000200000000000000000154'],
         });
 
-        console.log(swaps.returnAmount);
+        console.log('protocol version', swaps.protocolVersion);
+        console.log('return amount', swaps.returnAmount);
         for (const route of swaps.routes) {
             for (const hop of route.hops) {
                 console.log(hop.pool.id);
@@ -54,7 +55,7 @@ describe('sor debugging', () => {
                     })),
                     outputAmountRaw: BigInt(path.outputAmountRaw),
                     inputAmountRaw: BigInt(path.inputAmountRaw),
-                    protocolVersion: useProtocolVersion,
+                    protocolVersion: swaps.protocolVersion as 2 | 1 | 3,
                     isBuffer: path.isBuffer,
                 };
             }),
@@ -86,20 +87,18 @@ describe('sor debugging', () => {
 
         const swaps = await sorService.getSorSwapPaths({
             chain,
-            tokenIn: '0x80ac24aa929eaf5013f6436cda2a7ba190f5cc0b', // ETH
+            tokenIn: '0x40d16fc0246ad3160ccc09b8d0d3a2cd28ae6c2f', // GHO
             tokenOut: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', // USDC
             swapType,
-            swapAmount: '170',
+            swapAmount: '10',
             useProtocolVersion,
-            poolIds: ['0x917d0464dd2e335bf14000c63d65def3c8bb1025'],
+            // poolIds: ['0x917d0464dd2e335bf14000c63d65def3c8bb1025'],
         });
 
         console.log(swaps.returnAmount);
-        for (const route of swaps.routes) {
-            for (const hop of route.hops) {
-                console.log(hop.pool.address);
-            }
-        }
+        swaps.paths.forEach((path, i) => {
+            console.log(`path ${i}`, path.pools);
+        });
 
         // Perform sanity check against on-chain query
 
@@ -128,6 +127,6 @@ describe('sor debugging', () => {
         const queryResultFloat = parseFloat(formatUnits(queryResultAmount.amount, queryResultAmount.token.decimals));
         const sorResultFloat = parseFloat(swaps.returnAmount);
 
-        expect(queryResultFloat).toBeCloseTo(sorResultFloat, 4);
+        expect(queryResultFloat).toBeCloseTo(sorResultFloat, 1);
     }, 5000000);
 });

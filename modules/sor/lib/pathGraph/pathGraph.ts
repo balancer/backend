@@ -3,7 +3,7 @@ import { PathGraphEdgeData, PathGraphTraversalConfig } from './pathGraphTypes';
 import { BasePool } from '../poolsV2/basePool';
 import { PathLocal } from '../path';
 
-const DEFAULT_MAX_PATHS_PER_TOKEN_PAIR = 4;
+const DEFAULT_MAX_PATHS_PER_TOKEN_PAIR = 10;
 
 export class PathGraph {
     private nodes: Map<string, { isPhantomBpt: boolean }>;
@@ -60,10 +60,12 @@ export class PathGraph {
     public getCandidatePaths({
         tokenIn,
         tokenOut,
+        swapAmount,
         graphTraversalConfig,
     }: {
         tokenIn: Token;
         tokenOut: Token;
+        swapAmount: TokenAmount;
         graphTraversalConfig?: Partial<PathGraphTraversalConfig>;
     }): PathLocal[] {
         // apply defaults, allowing caller override whatever they'd like
@@ -71,9 +73,14 @@ export class PathGraph {
             maxDepth: 6,
             maxNonBoostedPathDepth: 3,
             maxNonBoostedHopTokensInBoostedPath: 2,
-            approxPathsToReturn: 5,
+            approxPathsToReturn: 20, // Default to 20 - likely won't be reached, but acts as a bound to the computation if needed
+            maxRanksPerSegment: 2, // Default 2 for diversity
+            minSwapAmountRatio: 0.5, // Default to 50% so we're sure selected paths support splitPath logic
             ...graphTraversalConfig,
         };
+
+        // Calculate minimum limit threshold based on swap amount and ratio
+        const minLimitThreshold = (swapAmount.amount * BigInt(Math.floor(config.minSwapAmountRatio * 100))) / 100n;
 
         const tokenPaths = this.findAllValidTokenPaths({
             token: tokenIn.wrapped,
@@ -86,55 +93,21 @@ export class PathGraph {
         const paths: PathGraphEdgeData[][] = [];
         const selectedPathIds: string[] = [];
 
-        // For each token path, explore all possible combinations of liquidity ranks
-        for (let i = 0; i < tokenPaths.length; i++) {
-            const tokenPath = tokenPaths[i];
-            const pathLength = tokenPath.length - 1; // number of segments in the path
+        // Use the new greedy best-first approach for each token path
+        for (const tokenPath of tokenPaths) {
+            const expandedPaths = this.expandTokenPathWithBestRanks({
+                tokenPath,
+                minLimitThreshold,
+                maxRanksPerSegment: config.maxRanksPerSegment,
+                approxPathsToReturn: config.approxPathsToReturn,
+            });
 
-            // Generate all possible combinations of liquidity ranks for this path
-            // Each element is an array of ranks, one for each segment in the path
-            // For example: [[0,0], [0,1], [1,0], [1,1]] for a 2-segment path with maxPathsPerTokenPair=2
-            let rankCombinations: number[][] = [[]];
-            for (let segment = 0; segment < pathLength; segment++) {
-                const newCombinations: number[][] = [];
-                for (const combo of rankCombinations) {
-                    for (let rank = 0; rank < this.maxPathsPerTokenPair; rank++) {
-                        newCombinations.push([...combo, rank]);
-                    }
-                }
-                rankCombinations = newCombinations;
-            }
-
-            // Now iterate through all combinations and expand paths
-            for (const ranks of rankCombinations) {
-                try {
-                    const path = this.expandTokenPathWithRanks({
-                        tokenPath: tokenPath,
-                        ranks: ranks,
-                    });
-
-                    if (
-                        this.isValidPath({
-                            path,
-                            seenPoolAddresses: [],
-                            selectedPathIds,
-                            config,
-                        })
-                    ) {
-                        selectedPathIds.push(this.getIdForPath(path));
-                        paths.push(path);
-                    }
-                } catch (error) {
-                    // Skip invalid combinations
-                    continue;
+            for (const path of expandedPaths) {
+                if (this.isValidPath({ path, seenPoolAddresses: [], selectedPathIds, config })) {
+                    selectedPathIds.push(this.getIdForPath(path));
+                    paths.push(path);
                 }
             }
-
-            // we've found enough paths, there's no need to go deeper into the token pair options.
-            // TODO this breaks the SOR when there is a tilted GYRO pool. Titled gyro pools have a wrong normalized liquidity. This is just a workaround and the normalized liquidity should be fixed.
-            // if (paths.length >= config.approxPathsToReturn) {
-            //     break;
-            // }
         }
 
         return this.sortAndFilterPaths(paths).map((path) => {
@@ -323,34 +296,6 @@ export class PathGraph {
         return tokenPaths;
     }
 
-    /**
-     * Expands a token path using different liquidity ranks for each segment.
-     * This allows exploring all combinations of pool liquidity ranks for different token pairs in a path.
-     * @param tokenPath - Array of token addresses representing the path
-     * @param ranks - Array of liquidity ranks to use for each segment (must match path length - 1)
-     */
-    private expandTokenPathWithRanks({ tokenPath, ranks }: { tokenPath: string[]; ranks: number[] }) {
-        const segments: PathGraphEdgeData[] = [];
-
-        for (let i = 0; i < tokenPath.length - 1; i++) {
-            const edge = this.edges.get(tokenPath[i])?.get(tokenPath[i + 1]);
-
-            if (!edge || edge.length === 0) {
-                throw new Error(`Missing edge for pair ${tokenPath[i]} -> ${tokenPath[i + 1]}`);
-            }
-
-            const rank = ranks[i];
-
-            if (!edge[rank]) {
-                throw new Error(`Missing rank ${rank} on edge for pair ${tokenPath[i]} -> ${tokenPath[i + 1]}`);
-            }
-
-            segments.push(edge[rank]);
-        }
-
-        return segments;
-    }
-
     private traverseBfs({
         token,
         tokenIn,
@@ -488,18 +433,6 @@ export class PathGraph {
         return id;
     }
 
-    private filterVolatilePools(poolAddresses: string[]): string[] {
-        const filtered: string[] = [];
-
-        for (const poolAddress of poolAddresses) {
-            if (this.poolAddressMap.get(poolAddress)?.poolType === 'WEIGHTED') {
-                filtered.push(poolAddress);
-            }
-        }
-
-        return filtered;
-    }
-
     private getLimitAmountSwapForPath(path: PathGraphEdgeData[], swapKind: SwapKind): bigint {
         let limit = path[path.length - 1].pool.getLimitAmountSwap(
             path[path.length - 1].tokenIn,
@@ -533,5 +466,133 @@ export class PathGraph {
         }
 
         return limit;
+    }
+
+    /**
+     * Expands a token path using a greedy best-first approach with early limit checking.
+     * Instead of exploring all rank combinations, this prioritizes highest liquidity options
+     * and stops when paths meet the minimum limit threshold.
+     */
+    private expandTokenPathWithBestRanks({
+        tokenPath,
+        minLimitThreshold,
+        maxRanksPerSegment,
+        approxPathsToReturn,
+    }: {
+        tokenPath: string[];
+        minLimitThreshold: bigint;
+        maxRanksPerSegment: number;
+        approxPathsToReturn: number;
+    }): PathGraphEdgeData[][] {
+        const paths: PathGraphEdgeData[][] = [];
+        // Ranks respective to each valid path
+        const pathsRanks: number[][] = [];
+
+        // Start with highest liquidity rank for each segment
+        const initialRanks = new Array(tokenPath.length - 1).fill(0);
+        // Array that will be used to identify when to stop exploring ranks for a segment
+        const finalRanks: number[] = [];
+
+        // Use a queue to explore rank combinations
+        let rankQueue: number[][] = [initialRanks];
+        const exploredCombinations = new Set<string>();
+
+        while (rankQueue.length > 0 && paths.length < approxPathsToReturn) {
+            const ranks = rankQueue.shift()!;
+            const combinationKey = ranks.join(',');
+
+            if (exploredCombinations.has(combinationKey)) continue;
+            exploredCombinations.add(combinationKey);
+
+            try {
+                const path = this.expandTokenPathWithRanks({ tokenPath, ranks });
+                const limit = this.getLimitAmountSwapForPath(path, SwapKind.GivenIn);
+
+                if (limit >= minLimitThreshold) {
+                    paths.push(path);
+                    pathsRanks.push(ranks);
+
+                    // if reached limit of maxRanksPerSegment, set final rank for current segment
+                    const currentFinalRankIndex = finalRanks.length;
+                    const uniqueRanksForCurrentSegment = new Set(pathsRanks.map((rank) => rank[currentFinalRankIndex]));
+                    if (uniqueRanksForCurrentSegment.size >= maxRanksPerSegment) {
+                        finalRanks.push(ranks[currentFinalRankIndex]);
+                        // remove ranks from rankQueue that are greater than the final rank for this segment
+                        rankQueue = rankQueue.filter(
+                            (rank) => rank[currentFinalRankIndex] <= finalRanks[currentFinalRankIndex],
+                        );
+                    }
+                }
+            } catch (error) {
+                // this error means the code reached a rank that does not exist for a pathSegment
+                // we can add it to finalRanks array to stop exploring ranks for this segment
+                const currentFinalRankIndex = finalRanks.length;
+                const currentFinalRank = ranks[currentFinalRankIndex] - 1;
+                if (currentFinalRank !== undefined) {
+                    finalRanks.push(currentFinalRank);
+                    // remove ranks from rankQueue that are greater than the final rank for this segment
+                    rankQueue = rankQueue.filter(
+                        (rank) => rank[currentFinalRankIndex] <= finalRanks[currentFinalRankIndex],
+                    );
+                }
+            }
+            this.addAlternativeRanks(rankQueue, ranks, finalRanks, maxRanksPerSegment);
+        }
+
+        return paths;
+    }
+
+    /**
+     * Expands a token path using different liquidity ranks for each segment.
+     * This allows exploring all combinations of pool liquidity ranks for different token pairs in a path.
+     * @param tokenPath - Array of token addresses representing the path
+     * @param ranks - Array of liquidity ranks to use for each segment (must match path length - 1)
+     */
+    private expandTokenPathWithRanks({ tokenPath, ranks }: { tokenPath: string[]; ranks: number[] }) {
+        const segments: PathGraphEdgeData[] = [];
+
+        for (let i = 0; i < tokenPath.length - 1; i++) {
+            const edge = this.edges.get(tokenPath[i])?.get(tokenPath[i + 1]);
+
+            if (!edge || edge.length === 0) {
+                throw new Error(`Missing edge for pair ${tokenPath[i]} -> ${tokenPath[i + 1]}`);
+            }
+
+            const rank = ranks[i];
+
+            if (!edge[rank]) {
+                throw new Error(`Missing rank ${rank} on edge for pair ${tokenPath[i]} -> ${tokenPath[i + 1]}`);
+            }
+
+            segments.push(edge[rank]);
+        }
+
+        return segments;
+    }
+
+    /**
+     * Adds alternative rank combinations to the queue for path diversity.
+     * For each segment, tries the next highest rank if available.
+     */
+    private addAlternativeRanks(
+        rankQueue: number[][],
+        currentRanks: number[],
+        finalRanks: number[],
+        maxRanksPerSegment: number,
+    ): void {
+        // For each segment, try the next highest rank if available
+        for (let segmentIndex = 0; segmentIndex < currentRanks.length; segmentIndex++) {
+            // if already reached the final rank for this segment, skip
+            if (finalRanks[segmentIndex] !== undefined) {
+                continue;
+            }
+
+            const currentRank = currentRanks[segmentIndex];
+            if (currentRank + 1 < this.maxPathsPerTokenPair) {
+                const newRanks = [...currentRanks];
+                newRanks[segmentIndex] = currentRank + 1;
+                rankQueue.push(newRanks);
+            }
+        }
     }
 }

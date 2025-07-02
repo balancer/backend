@@ -150,6 +150,7 @@ export class SOR {
             tokenIn,
             tokenOut,
             basePools,
+            checkedSwapAmount,
             protocolVersion === 3,
             swapOptions?.graphTraversalConfig,
         );
