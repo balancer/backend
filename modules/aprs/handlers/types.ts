@@ -1,15 +1,8 @@
 export interface AprHandlerConfigs {
-    // nestedPoolAprHandler: boolean;
-    // swapFeeAprHandler: boolean;
-    // dynamicSwapFeeAprHandler: boolean;
-    // gaugeAprHandler: boolean;
     ybAprHandler?: YbAprConfig;
     aaveRewardsAprHandler?: boolean;
     maBeetsAprHandler?: MaBeetsAprConfig;
-    // veBalProtocolAprHandler?:  VeBalProtocolAprConfig;
-    // veBalVotingAprHandler?: VeBalVotingAprConfig;
     morphoRewardsAprHandler?: boolean;
-    // quantAmmAprHandler?: QuantAmmAprConfig;
 }
 
 export interface MaBeetsAprConfig {

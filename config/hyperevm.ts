@@ -57,7 +57,18 @@ export default <NetworkData>{
             defaultYieldFeePercentage: '0.1',
         },
     },
-    aprHandlers: {},
+    aprHandlers: {
+        ybAprHandler: {
+            defaultHandlers: {
+                siUSD: {
+                    tokenAddress: '0xdbdc1ef57537e34680b898e1febd3d68c7389bcb',
+                    sourceUrl: 'https://api.infinifi.xyz/api/protocol/data',
+                    path: 'data.stats.siusd.lastWeekAPY',
+                    scale: 1,
+                },
+            },
+        },
+    },
     multicall: '0xca11bde05977b3631167028862be2a173976ca11',
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',
     avgBlockSpeed: 1,
