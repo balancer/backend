@@ -26,12 +26,33 @@ export async function updateVolumeAndFees(
 ) {
     const yesterday = moment().subtract(1, 'day').unix();
     const twoDaysAgo = moment().subtract(2, 'day').unix();
-    const pools = await prisma.prismaPool.findMany({
-        where: poolIds ? { id: { in: poolIds }, chain: chain } : { chain: chain },
-        include: {
-            dynamicData: true,
-        },
-    });
+
+    const [dbPools, dynamicData, aprItems] = await Promise.all([
+        prisma.prismaPool.findMany({
+            where: { chain, ...(poolIds ? { id: { in: poolIds } } : {}) },
+        }),
+        prisma.prismaPoolDynamicData
+            .findMany({ where: { chain, ...(poolIds ? { id: { in: poolIds } } : {}) } })
+            .then((records) => _.keyBy(records, 'id') as Record<string, (typeof records)[0]>),
+        prisma.prismaPoolAprItem
+            .findMany({
+                where: {
+                    chain,
+                    ...(poolIds ? { poolId: { in: poolIds } } : {}),
+                    OR: [{ type: 'IB_YIELD' }, { type: null }],
+                },
+            })
+            .then((records) => _.groupBy(records, 'poolId') as Record<string, typeof records>),
+    ]);
+
+    const pools = dbPools
+        .map((pool) => ({
+            ...pool,
+            dynamicData: dynamicData[pool.id],
+            aprItems: aprItems[pool.id],
+        }))
+        // Filter needed for test pools on Sepolia
+        .filter((pool) => pool.aprItems && pool.dynamicData);
 
     // Fetch the stats
     const stats24h = await eventRepo.getSwapStats({ chain, poolIds, since: yesterday });
@@ -65,75 +86,12 @@ export async function updateVolumeAndFees(
             protocolFees48h = 0;
         }
 
-        if (
-            pool.dynamicData &&
-            (Math.abs(pool.dynamicData.volume24h - volume24h) > 1 ||
-                Math.abs(pool.dynamicData.fees24h - fees24h) > 1 ||
-                Math.abs(pool.dynamicData.surplus24h - surplus24h) > 1 ||
-                Math.abs(pool.dynamicData.volume48h - volume48h) > 1 ||
-                Math.abs(pool.dynamicData.fees48h - fees48h) > 1 ||
-                Math.abs(pool.dynamicData.surplus48h - surplus48h) > 1 ||
-                Math.abs(pool.dynamicData.protocolFees24h - protocolFees24h) > 1 ||
-                Math.abs(pool.dynamicData.protocolFees48h - protocolFees48h) > 1)
-        ) {
-            operations.push(
-                prisma.prismaPoolDynamicData.update({
-                    where: { id_chain: { id: pool.id, chain: pool.chain } },
-                    data: {
-                        volume24h,
-                        fees24h,
-                        volume48h,
-                        fees48h,
-                        surplus24h,
-                        surplus48h,
-                        protocolFees24h,
-                        protocolFees48h,
-                    },
-                }),
-            );
-        }
-    }
+        let yieldCapture24h = 0;
+        let yieldCapture48h = 0;
+        let protocolYieldCapture24h = 0;
+        let protocolYieldCapture48h = 0;
 
-    await prismaBulkExecuteOperations(operations);
-    await updateYieldCaptureForAllPools(chain);
-}
-
-/*
-    We approximate the yield fee capture of the last 24h by taking the current total yield APR and apply it to the average totalLiquidity from now and 24 hours ago.
-    We approximate the yield fee capture of the last 48h by taking the current total yield APR and apply it to the totalLiquidity from 24 hours ago.
-*/
-export async function updateYieldCaptureForAllPools(chain: Chain, poolIds?: string[]) {
-    // Loading pools, their dynamic data, and tokens separately, then manually assembling them into `PoolForAPRs` objects to avoid the performance overhead of Prisma's nested includes.
-    const [dbPools, dynamicData, aprItems] = await Promise.all([
-        prisma.prismaPool.findMany({
-            where: { chain, ...(poolIds ? { id: { in: poolIds } } : {}) },
-        }),
-        prisma.prismaPoolDynamicData
-            .findMany({ where: { chain, ...(poolIds ? { id: { in: poolIds } } : {}) } })
-            .then((records) => _.keyBy(records, 'id') as Record<string, (typeof records)[0]>),
-        prisma.prismaPoolAprItem
-            .findMany({
-                where: {
-                    chain,
-                    ...(poolIds ? { poolId: { in: poolIds } } : {}),
-                    OR: [{ type: 'IB_YIELD' }, { type: null }],
-                },
-            })
-            .then((records) => _.groupBy(records, 'poolId') as Record<string, typeof records>),
-    ]);
-
-    const pools = dbPools
-        .map((pool) => ({
-            ...pool,
-            dynamicData: dynamicData[pool.id],
-            aprItems: aprItems[pool.id],
-        }))
-        // Filter needed for test pools on Sepolia
-        .filter((pool) => pool.aprItems && pool.dynamicData);
-
-    const operations: any[] = [];
-
-    for (const pool of pools) {
+        // Update the yield params
         if (pool.dynamicData && pool.dynamicData.totalLiquidity && capturesYield(pool)) {
             const totalLiquidity = pool.dynamicData.totalLiquidity;
             const totalLiquidity24hAgo = pool.dynamicData.totalLiquidity24hAgo;
@@ -155,12 +113,12 @@ export async function updateYieldCaptureForAllPools(chain: Chain, poolIds?: stri
             const protocolYieldFeePercentage = parseFloat(pool.dynamicData.protocolYieldFee || '0');
             const protocolSwapFeePercentage = parseFloat(pool.dynamicData.protocolSwapFee || '0');
 
-            let yieldCapture24h =
+            yieldCapture24h =
                 pool.type === 'META_STABLE'
                     ? yieldForUser24h / (1 - protocolSwapFeePercentage)
                     : yieldForUser24h / (1 - protocolYieldFeePercentage);
 
-            let yieldCapture48h =
+            yieldCapture48h =
                 pool.type === 'META_STABLE'
                     ? yieldForUser48h / (1 - protocolSwapFeePercentage)
                     : yieldForUser48h / (1 - protocolYieldFeePercentage);
@@ -172,22 +130,44 @@ export async function updateYieldCaptureForAllPools(chain: Chain, poolIds?: stri
                 yieldCapture48h = yieldForUser48h;
             }
 
-            let protocolYieldCapture24h = yieldCapture24h - yieldForUser24h;
-            let protocolYieldCapture48h = yieldCapture48h - yieldForUser48h;
+            protocolYieldCapture24h = yieldCapture24h - yieldForUser24h;
+            protocolYieldCapture48h = yieldCapture48h - yieldForUser48h;
+        }
 
-            if (
-                pool.dynamicData.yieldCapture24h !== yieldCapture24h ||
-                pool.dynamicData.yieldCapture48h !== yieldCapture48h ||
-                pool.dynamicData.protocolYieldCapture24h !== protocolYieldCapture24h ||
-                pool.dynamicData.protocolYieldCapture48h !== protocolYieldCapture48h
-            ) {
-                operations.push(
-                    prisma.prismaPoolDynamicData.update({
-                        where: { id_chain: { id: pool.id, chain: pool.chain } },
-                        data: { yieldCapture24h, yieldCapture48h, protocolYieldCapture24h, protocolYieldCapture48h },
-                    }),
-                );
-            }
+        if (
+            pool.dynamicData &&
+            (Math.abs(pool.dynamicData.volume24h - volume24h) > 1 ||
+                Math.abs(pool.dynamicData.fees24h - fees24h) > 1 ||
+                Math.abs(pool.dynamicData.surplus24h - surplus24h) > 1 ||
+                Math.abs(pool.dynamicData.volume48h - volume48h) > 1 ||
+                Math.abs(pool.dynamicData.fees48h - fees48h) > 1 ||
+                Math.abs(pool.dynamicData.surplus48h - surplus48h) > 1 ||
+                Math.abs(pool.dynamicData.protocolFees24h - protocolFees24h) > 1 ||
+                Math.abs(pool.dynamicData.protocolFees48h - protocolFees48h) > 1 ||
+                Math.abs(pool.dynamicData.yieldCapture24h - yieldCapture24h) > 1 ||
+                Math.abs(pool.dynamicData.yieldCapture48h - yieldCapture48h) > 1 ||
+                Math.abs(pool.dynamicData.protocolYieldCapture24h - protocolYieldCapture24h) > 1 ||
+                Math.abs(pool.dynamicData.protocolYieldCapture48h - protocolYieldCapture48h) > 1)
+        ) {
+            operations.push(
+                prisma.prismaPoolDynamicData.update({
+                    where: { id_chain: { id: pool.id, chain: pool.chain } },
+                    data: {
+                        volume24h,
+                        fees24h,
+                        volume48h,
+                        fees48h,
+                        surplus24h,
+                        surplus48h,
+                        protocolFees24h,
+                        protocolFees48h,
+                        yieldCapture24h,
+                        yieldCapture48h,
+                        protocolYieldCapture24h,
+                        protocolYieldCapture48h,
+                    },
+                }),
+            );
         }
     }
 

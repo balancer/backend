@@ -1,5 +1,12 @@
 # backend
 
+## 1.48.2
+
+### Patch Changes
+
+-   2e721a2: enable sentry profiling on the API service
+-   dbe5efd: batch volume/fees/yield updates
+
 ## 1.48.1
 
 ### Patch Changes
