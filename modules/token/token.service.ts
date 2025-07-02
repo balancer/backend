@@ -59,6 +59,17 @@ export class TokenService {
         });
     }
 
+    /**
+     * Use cached tokens to get decimals from memory to enable fast SOR lookups without hitting the database.
+     * @param chain
+     */
+    async getTokenDecimals(address: string, chain: Chain): Promise<number | undefined> {
+        const tokens = await this.getTokens(chain, [address]);
+        if (tokens.length === 0) return;
+
+        return tokens[0].decimals;
+    }
+
     public async getTokens(chain: Chain, addresses?: string[]): Promise<PrismaToken[]> {
         let tokens: PrismaToken[] | null = this.cache.get(`${ALL_TOKENS_CACHE_KEY}:${chain}`);
         if (!tokens) {

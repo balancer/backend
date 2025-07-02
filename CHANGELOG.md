@@ -1,5 +1,16 @@
 # backend
 
+## 1.48.0
+
+### Minor Changes
+
+-   50a9ea3: add hyperevm
+
+### Patch Changes
+
+-   4967a8d: LBPs cumulative volume and fees
+-   cfb6c9d: SOR fast token decimal lookups without hitting the database
+
 ## 1.47.7
 
 ### Patch Changes

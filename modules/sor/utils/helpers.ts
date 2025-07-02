@@ -25,11 +25,11 @@ export async function getTokenAmountRaw(tokenAddr: string, rawAmount: string, ch
  */
 export const getToken = async (tokenAddr: string, chain: Chain): Promise<Token> => {
     if (tokenAddr === config[chain].eth.address) {
-        return new Token(parseFloat(chainToIdMap[chain]), config[chain].weth.address as Address, 18);
+        return new Token(parseInt(chainToIdMap[chain]), config[chain].weth.address as Address, 18);
     } else {
-        const prismaToken = await tokenService.getToken(tokenAddr, chain);
-        if (!prismaToken) throw Error(`Missing token from tokenService ${tokenAddr}`);
-        return new Token(parseFloat(chainToIdMap[chain]), prismaToken.address as Address, prismaToken.decimals);
+        const decimals = await tokenService.getTokenDecimals(tokenAddr, chain);
+        if (!decimals) throw Error(`Missing token from tokenService ${tokenAddr}`);
+        return new Token(parseInt(chainToIdMap[chain]), tokenAddr as Address, decimals);
     }
 };
 

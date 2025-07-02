@@ -13,6 +13,7 @@ import { Chain } from '@prisma/client';
 import { sepoliaNetworkConfig } from './sepolia';
 import { modeNetworkConfig } from './mode';
 import { sonicNetworkConfig } from './sonic';
+import { hyperevmNetworkConfig } from './hyperevm';
 
 export const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
     '250': fantomNetworkConfig,
@@ -28,6 +29,7 @@ export const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
     '252': fraxtalNetworkConfig,
     '34443': modeNetworkConfig,
     '146': sonicNetworkConfig,
+    '999': hyperevmNetworkConfig,
 };
 
 export const AllNetworkConfigsKeyedOnChain: { [chain in Chain]: NetworkConfig } = {
@@ -44,7 +46,20 @@ export const AllNetworkConfigsKeyedOnChain: { [chain in Chain]: NetworkConfig } 
     FRAXTAL: fraxtalNetworkConfig,
     MODE: modeNetworkConfig,
     SONIC: sonicNetworkConfig,
+    HYPEREVM: hyperevmNetworkConfig,
 };
 
-export const BalancerChainIds = ['1', '137', '42161', '100', '1101', '43114', '8453', '11155111', '252', '34443'];
+export const BalancerChainIds = [
+    '1',
+    '137',
+    '42161',
+    '100',
+    '1101',
+    '43114',
+    '8453',
+    '11155111',
+    '252',
+    '34443',
+    '999',
+];
 export const BeethovenChainIds = ['250', '10', '146'];

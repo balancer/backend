@@ -93,10 +93,6 @@ export const arbitrumNetworkConfig: NetworkConfig = {
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(1, 'minutes'),
         },
         { name: 'sync-cow-amm-snapshots', interval: every(90, 'minutes') },
-        {
-            name: 'sync-erc4626-onchain-data',
-            interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(60, 'minutes') : every(20, 'minutes'),
-        },
         // V3 Jobs
         {
             name: 'add-pools-v3',

@@ -107,6 +107,7 @@ export const schema = gql`
         FANTOM
         FRAXTAL
         GNOSIS
+        HYPEREVM
         MAINNET
         MODE
         OPTIMISM
@@ -4041,6 +4042,8 @@ export const schema = gql`
 
     type LBPPriceChartData {
         buyVolume: Float!
+        cumulativeFees: Float!
+        cumulativeVolume: Float!
         fees: Float!
         intervalTimestamp: Int! @deprecated
         projectTokenPrice: Float!
