@@ -408,13 +408,10 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
             );
             break;
         case 'sync-weights':
-            await runIfNotAlreadyRunning(
-                name,
-                chainId,
-                () => Promise.all([QuantAmmController.syncWeights(chain), LBPController.syncWeights(chain)]),
-                res,
-                next,
-            );
+            await runIfNotAlreadyRunning(name, chainId, () => QuantAmmController.syncWeights(chain), res, next);
+            break;
+        case 'sync-lbps':
+            await runIfNotAlreadyRunning(name, chainId, () => LBPController.syncWeights(chain), res, next);
             break;
         default:
             res.sendStatus(400);

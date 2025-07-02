@@ -1,5 +1,12 @@
 # backend
 
+## 1.48.1
+
+### Patch Changes
+
+-   5fefe16: optimised db reads in LBP weight syncing
+-   ae2f6ff: sync LBP weights and swapsEnabled every minute
+
 ## 1.48.0
 
 ### Minor Changes
