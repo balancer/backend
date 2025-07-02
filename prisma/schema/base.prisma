@@ -55,4 +55,8 @@ enum PrismaLastBlockSyncedCategory {
     BPT_BALANCES_FBEETS
     BPT_BALANCES_COW_AMM
     GAUGE_BALANCES
+    JOIN_EXITS_V2
+    SWAPS_V2
+    JOIN_EXITS_V3
+    SWAPS_V3
 }

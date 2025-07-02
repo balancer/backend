@@ -3,9 +3,9 @@ import { prisma } from '../../../../prisma/prisma-client';
 import { V2SubgraphClient } from '../../../subgraphs/balancer-subgraph';
 import _ from 'lodash';
 import { swapV2Transformer } from '../../../sources/transformers/swap-v2-transformer';
-import { OrderDirection, Swap_OrderBy } from '../../../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
 import { swapsUsd } from '../../../sources/enrichers/swaps-usd';
 import { eventsRepository, LatestEventRepository, EventStoreRepository } from '../../../repositories/events';
+import { getLastSyncedBlock, upsertLastSyncedBlock } from '../../last-synced-block';
 
 /**
  * Adds all swaps since daysToSync to the database. Checks for latest synced swap to avoid duplicate work.
@@ -19,14 +19,9 @@ export async function syncSwaps(
     chain: Chain,
     eventRepo: LatestEventRepository & EventStoreRepository = eventsRepository,
 ): Promise<string[]> {
-    const protocolVersion = 2;
+    const lastSyncedBlock = await getLastSyncedBlock(chain, 'SWAPS_V2');
 
-    // Get latest event from the DB
-    const latestEvent = await eventRepo.getLatestEvent({
-        types: ['SWAP'],
-        chain,
-        protocolVersion,
-    });
+    if (lastSyncedBlock === 0) return [];
 
     // Get list of FX pool addresses for the fee calculation
     const fxPools = (await prisma.prismaPool.findMany({
@@ -40,21 +35,9 @@ export async function syncSwaps(
         },
     })) as { id: string; typeData: { quoteToken: string } }[];
 
-    // Querying by timestamp of Fantom, because it has events without a block number in the DB
-    const where = latestEvent
-        ? chain === Chain.FANTOM
-            ? { timestamp_gte: Number(latestEvent.blockTimestamp) }
-            : { block_gte: String(latestEvent.blockNumber) }
-        : {};
-
     // Get events
     console.time('BalancerSwaps');
-    const { swaps } = await subgraphClient.BalancerSwaps({
-        first: 1000,
-        where: where,
-        orderBy: chain === Chain.FANTOM ? Swap_OrderBy.Timestamp : Swap_OrderBy.Block,
-        orderDirection: OrderDirection.Asc,
-    });
+    const swaps = await subgraphClient.getSwapsFromBlock(lastSyncedBlock);
     console.timeEnd('BalancerSwaps');
 
     console.time('swapV2Transformer');
@@ -71,6 +54,11 @@ export async function syncSwaps(
     console.time('prismaPoolEvent.createMany');
     await eventRepo.storeEvents(dbEntries);
     console.timeEnd('prismaPoolEvent.createMany');
+
+    // Store last block
+    const lastEvent = dbEntries.sort((a, b) => a.blockNumber - b.blockNumber).pop();
+    if (!lastEvent) return [];
+    await upsertLastSyncedBlock(chain, 'SWAPS_V2', lastEvent.blockNumber);
 
     return [...new Set(dbEntries.map((entry) => entry.poolId))];
 }
