@@ -1,5 +1,11 @@
 # backend
 
+## 1.48.3
+
+### Patch Changes
+
+-   ba4dfbd: sync events based on last synced block
+
 ## 1.48.2
 
 ### Patch Changes
