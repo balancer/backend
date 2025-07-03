@@ -254,7 +254,21 @@ export function PoolController(tracer?: any) {
             if (useSubgraph) {
                 changedIds = await subgraphClient.getChangedPools(fromBlock);
             } else {
-                changedIds = await getChangedPoolsV3(vaultAddress, viemClient, BigInt(fromBlock), BigInt(latestBlock));
+                const rpcMaxBlockRange = config[chain].rpcMaxBlockRange;
+                const range = Number(latestBlock) - fromBlock;
+                const numBatches = Math.ceil(range / rpcMaxBlockRange);
+
+                const allChangedPools = new Set<string>();
+
+                for (let i = 0; i < numBatches; i++) {
+                    const from = fromBlock + (i > 0 ? 1 : 0) + i * rpcMaxBlockRange;
+                    const to = Math.min(fromBlock + (i + 1) * rpcMaxBlockRange, Number(latestBlock));
+
+                    const changedPools = await getChangedPoolsV3(vaultAddress, viemClient, BigInt(from), BigInt(to));
+                    changedPools.forEach((pool) => allChangedPools.add(pool));
+                }
+
+                changedIds = Array.from(allChangedPools).map((pool) => pool.toLowerCase());
             }
 
             if (changedIds.length === 0) {
