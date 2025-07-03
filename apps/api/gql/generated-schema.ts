@@ -2355,8 +2355,6 @@ export interface GqlSorSwapRoute {
 /** A hop of a route. A route can have many hops meaning it traverses more than one pool. */
 export interface GqlSorSwapRouteHop {
     __typename?: 'GqlSorSwapRouteHop';
-    /** The pool entity of this hop. */
-    pool: GqlPoolMinimal;
     /** The pool id of this hop. */
     poolId: Scalars['String'];
     /** Address of the tokenIn */
@@ -5640,7 +5638,6 @@ export type GqlSorSwapRouteHopResolvers<
     ContextType = ResolverContext,
     ParentType extends ResolversParentTypes['GqlSorSwapRouteHop'] = ResolversParentTypes['GqlSorSwapRouteHop'],
 > = ResolversObject<{
-    pool?: Resolver<ResolversTypes['GqlPoolMinimal'], ParentType, ContextType>;
     poolId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     tokenIn?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     tokenInAmount?: Resolver<ResolversTypes['AmountHumanReadable'], ParentType, ContextType>;

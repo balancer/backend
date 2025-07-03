@@ -39,7 +39,7 @@ describe('sor debugging', () => {
         console.log(swaps.returnAmount);
         for (const route of swaps.routes) {
             for (const hop of route.hops) {
-                console.log(hop.pool.id);
+                console.log(hop.poolId);
             }
         }
 

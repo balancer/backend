@@ -3376,11 +3376,6 @@ export const schema = gql`
     """
     type GqlSorSwapRouteHop {
         """
-        The pool entity of this hop.
-        """
-        pool: GqlPoolMinimal!
-
-        """
         The pool id of this hop.
         """
         poolId: String!

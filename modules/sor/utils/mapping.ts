@@ -1,7 +1,6 @@
 import {
     GqlSorSwapType,
     GqlSorPath,
-    GqlPoolMinimal,
     GqlSorSwapRoute,
     GqlSorSwapRouteHop,
     GqlSorGetSwapPaths,
@@ -14,7 +13,6 @@ import { PathWithAmount } from '../lib/path';
 import { Chain } from '@prisma/client';
 import { replaceZeroAddressWithEth } from '../../web3/addresses';
 import { GqlSorSwap } from '../../../apps/api/gql/generated-schema';
-import { poolService } from '../../pool/pool.service';
 import { getInputAmount, getOutputAmount } from '../lib/utils/helpers';
 import { GetSwapPathsInput } from '../types';
 import { getTokenAmountHuman } from './helpers';
@@ -66,15 +64,6 @@ export async function mapToSorSwapPaths(
     const priceImpactError =
         'Price impact could not be calculated for this path. The swap path is still valid and can be executed.';
 
-    // get all affected pools
-    let poolIds: string[] = [];
-    for (const path of paths) {
-        poolIds.push(...path.pools.map((pool) => pool.id));
-    }
-    const pools = await poolService.getGqlPools({
-        where: { idIn: poolIds },
-    });
-
     const sorPaths: GqlSorPath[] = paths.map((path) => ({
         protocolVersion,
         vaultVersion: protocolVersion,
@@ -114,7 +103,7 @@ export async function mapToSorSwapPaths(
                 ? 'Infinity'
                 : formatUnits((effectivePrice as TokenAmount).amount, (effectivePrice as TokenAmount).token.decimals),
         effectivePriceReversed: formatUnits(effectivePriceReversed.amount, effectivePriceReversed.token.decimals),
-        routes: mapRoutes(paths, pools),
+        routes: mapRoutes(paths),
         priceImpact: {
             priceImpact: priceImpact,
             error: priceImpactError,
@@ -127,23 +116,16 @@ export function mapSwapKind(swapType: GqlSorSwapType): SwapKind {
     return swapType === 'EXACT_IN' ? SwapKind.GivenIn : SwapKind.GivenOut;
 }
 
-export function mapRoutes(paths: PathWithAmount[], pools: GqlPoolMinimal[]): GqlSorSwapRoute[] {
+export function mapRoutes(paths: PathWithAmount[]): GqlSorSwapRoute[] {
     const isBatchSwap = paths.length > 1 || paths[0].pools.length > 1;
 
     if (!isBatchSwap) {
-        if (pools.length === 0) {
-            const bufferPool = paths[0].pools.find((p) => p.poolType === 'Buffer');
-            if (!bufferPool) return [];
-            return [mapSingleSwap(paths[0], { id: bufferPool.id, address: bufferPool.address } as GqlPoolMinimal)];
-        }
-        const pool = pools.find((p) => p.id === paths[0].pools[0].id);
-        if (!pool) throw new Error('Pool not found while mapping route');
-        return [mapSingleSwap(paths[0], pool)];
+        return [mapSingleSwap(paths[0])];
     }
-    return paths.map((path) => mapBatchSwap(path, pools));
+    return paths.map((path) => mapBatchSwap(path));
 }
 
-function mapBatchSwap(path: PathWithAmount, pools: GqlPoolMinimal[]): GqlSorSwapRoute {
+function mapBatchSwap(path: PathWithAmount): GqlSorSwapRoute {
     const tokenIn = path.tokens[0].address;
     const tokenOut = path.tokens[path.tokens.length - 1].address;
     const tokenInAmount = formatUnits(path.inputAmount.amount, path.tokens[0].decimals);
@@ -157,9 +139,8 @@ function mapBatchSwap(path: PathWithAmount, pools: GqlPoolMinimal[]): GqlSorSwap
                 tokenIn: `${path.tokens[i].address}`,
                 tokenOut: `${path.tokens[i + 1].address}`,
                 tokenInAmount: i === 0 ? tokenInAmount : '0',
-                tokenOutAmount: i === pools.length - 1 ? tokenOutAmount : '0',
+                tokenOutAmount: i === path.pools.length - 1 ? tokenOutAmount : '0',
                 poolId: pool.id,
-                pool: pools.find((p) => p.id === pool.id) as GqlPoolMinimal,
             });
         }
         i++;
@@ -175,15 +156,14 @@ function mapBatchSwap(path: PathWithAmount, pools: GqlPoolMinimal[]): GqlSorSwap
     };
 }
 
-function mapSingleSwap(path: PathWithAmount, pool: GqlPoolMinimal): GqlSorSwapRoute {
+function mapSingleSwap(path: PathWithAmount): GqlSorSwapRoute {
     const tokenIn = path.tokens[0].address;
     const tokenInAmount = formatUnits(path.inputAmount.amount, path.tokens[0].decimals);
     const tokenOut = path.tokens[1].address;
     const tokenOutAmount = formatUnits(path.inputAmount.amount, path.tokens[1].decimals);
 
     const hop: GqlSorSwapRouteHop = {
-        pool,
-        poolId: pool.id,
+        poolId: path.pools[0].id,
         tokenIn,
         tokenInAmount,
         tokenOut,
