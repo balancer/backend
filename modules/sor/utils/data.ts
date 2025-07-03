@@ -1,15 +1,16 @@
 import { Cache } from 'memory-cache';
 import { Address, parseUnits } from 'viem';
-import { isSameAddress } from '@balancer/sdk';
 import { Chain, PrismaPoolType, PrismaToken } from '@prisma/client';
 
-import config from '../../../config';
 import { prisma } from '../../../prisma/prisma-client';
 import { PrismaPoolAndHookWithDynamic, HookData } from '../../../prisma/prisma-types';
 import { chainToChainId } from '../../network/chain-id-to-chain';
 import { poolsToIgnore } from './constants';
+import _ from 'lodash';
+import { tokenService } from '../../token/token.service';
 
 export type BufferPoolData = {
+    poolId: string;
     address: Address;
     chainId: number;
     mainToken: { address: Address; decimals: number };
@@ -18,7 +19,9 @@ export type BufferPoolData = {
     unwrapRate: bigint;
 };
 
-const cache = new Cache<string, { pools: PrismaPoolAndHookWithDynamic[]; bufferPools: BufferPoolData[] }>();
+export type SORDbPool = PrismaPoolAndHookWithDynamic;
+
+const cache = new Cache<string, { pools: SORDbPool[]; bufferPools: BufferPoolData[] }>();
 const SOR_POOLS_CACHE_KEY = `sor:pools`;
 
 export async function getBasePoolsFromDb(
@@ -26,7 +29,46 @@ export async function getBasePoolsFromDb(
     protocolVersion: number,
     considerPoolsWithHooks: boolean,
     poolIds?: string[],
-): Promise<{ pools: PrismaPoolAndHookWithDynamic[]; bufferPools: BufferPoolData[] }> {
+): Promise<{ pools: SORDbPool[]; bufferPools: BufferPoolData[] }> {
+    const cacheKey = `${SOR_POOLS_CACHE_KEY}:${chain}`;
+
+    let cached = cache.get(cacheKey);
+
+    if (!cached) {
+        // get pools
+        console.time('SOR:getpools');
+        const pools = await getPools(chain);
+        console.timeEnd('SOR:getpools');
+        const bufferPools = await getBufferPoolsFromDBPools(pools, chain);
+        cached = cache.put(cacheKey, { pools, bufferPools }, 10 * 1000); // cache for 10s
+    }
+
+    // Filter
+    const pools = cached.pools
+        .filter((pool) => poolIds === undefined || poolIds.length === 0 || poolIds.includes(pool.id))
+        .filter((pool) => pool.protocolVersion === protocolVersion)
+        .filter((pool) => {
+            if (!pool.hook || Object.keys(pool.hook).length === 0) return true;
+
+            const hook = pool.hook as HookData;
+            if (hook.type === 'MEV_TAX') return true;
+            if (!considerPoolsWithHooks) return false;
+
+            const isSupportedHookType = hook.type !== undefined && hook.type !== 'UNKNOWN';
+            if (!isSupportedHookType) {
+                console.log('Pool has unsupported hook type', pool.id, hook.type);
+            }
+            return isSupportedHookType;
+        });
+
+    const requestedPoolIds = pools.map((pool) => pool.id);
+
+    const bufferPools = cached.bufferPools.filter((bufferPool) => requestedPoolIds.includes(bufferPool.poolId));
+
+    return { pools, bufferPools };
+}
+
+async function getPools(chain: Chain): Promise<SORDbPool[]> {
     const type = {
         in: [
             'WEIGHTED',
@@ -40,182 +82,109 @@ export async function getBasePoolsFromDb(
             'GYROE',
             'QUANT_AMM_WEIGHTED',
             'RECLAMM',
+            'LIQUIDITY_BOOTSTRAPPING',
         ] as PrismaPoolType[],
     };
 
-    let bufferPools: BufferPoolData[] = [];
-
-    if (poolIds?.length) {
-        const typeWithLBP = { in: [...type.in, 'LIQUIDITY_BOOTSTRAPPING'] as PrismaPoolType[] };
-        const pools = await getPoolsByIds(chain, protocolVersion, typeWithLBP, poolIds);
-        if (protocolVersion === 3) {
-            bufferPools = await getBufferPoolsFromDBPools(pools, chain);
-        }
-        return { pools, bufferPools };
-    }
-
-    const cacheKey = `${SOR_POOLS_CACHE_KEY}:${chain}:${protocolVersion}:${considerPoolsWithHooks}`;
-    const cached = cache.get(cacheKey);
-    if (cached) return cached;
-
-    const pools = await getFilteredPools(chain, protocolVersion, considerPoolsWithHooks, type);
-    if (protocolVersion === 3) {
-        bufferPools = await getBufferPoolsFromDBPools(pools, chain);
-    }
-
-    // cache for 10s
-    cache.put(cacheKey, { pools, bufferPools }, 10 * 1000);
-    return { pools, bufferPools };
-}
-
-async function getPoolsByIds(
-    chain: Chain,
-    protocolVersion: number,
-    type: { in: PrismaPoolType[] },
-    poolIds: string[],
-): Promise<PrismaPoolAndHookWithDynamic[]> {
-    const pools = await prisma.prismaPool.findMany({
-        where: {
-            id: { in: poolIds },
-            chain,
-            protocolVersion,
-            type,
-            dynamicData: {
-                swapEnabled: true,
-                isPaused: false,
-            },
-        },
-        include: {
-            dynamicData: true,
-            tokens: { include: { token: true } },
-        },
-    });
-
-    return pools;
-}
-
-async function getFilteredPools(
-    chain: Chain,
-    protocolVersion: number,
-    considerPoolsWithHooks: boolean,
-    type: { in: PrismaPoolType[] },
-): Promise<PrismaPoolAndHookWithDynamic[]> {
-    const poolIdsToExclude = config[chain].sor?.poolIdsToExclude ?? [];
-
-    const [pools, lbps] = await Promise.all([
-        getPrimaryPools(chain, protocolVersion, type, poolIdsToExclude),
-        getLiquidityBootstrappingPools(chain, protocolVersion, poolIdsToExclude),
+    const [pools, dynamicData, poolTokens, tokens] = await Promise.all([
+        prisma.prismaPool
+            .findMany({
+                where: { chain, type, id: { notIn: [...poolsToIgnore] } },
+            })
+            .then((records) => Object.fromEntries(records.map((record) => [record.id, record]))),
+        prisma.prismaPoolDynamicData
+            .findMany({
+                // TODO: Narrow down the select, but need to change the return type to SOR internal one first
+                // select: { id: true, isPaused: true, swapEnabled: true },
+                where: {
+                    chain,
+                    totalSharesNum: { gt: 0.000000000001 },
+                    swapEnabled: true,
+                    isPaused: false,
+                    id: { notIn: [...poolsToIgnore] },
+                    OR: [
+                        {
+                            totalLiquidity: { gte: 100 },
+                        },
+                        {
+                            chain: 'SEPOLIA',
+                        },
+                        {
+                            pool: {
+                                type: 'LIQUIDITY_BOOTSTRAPPING',
+                            },
+                        },
+                    ],
+                },
+            })
+            .then((records) => Object.fromEntries(records.map((record) => [record.id, record]))),
+        prisma.prismaPoolToken
+            .findMany({
+                where: {
+                    pool: {
+                        chain,
+                        type,
+                        id: { notIn: [...poolsToIgnore] },
+                    },
+                },
+            })
+            .then((records) => _.groupBy(records, 'poolId') as Record<string, typeof records>),
+        tokenService
+            .getTokens(chain)
+            .then((tokens) => Object.fromEntries(tokens.map((token) => [token.address, token]))),
     ]);
 
-    const filteredPools = [...filterPoolsByHooks(pools, considerPoolsWithHooks), ...lbps];
+    const setB = new Set(Object.keys(dynamicData));
+    const intersection = [...new Set(Object.keys(pools))].filter((value) => setB.has(value));
 
-    return filteredPools;
+    return intersection.map((id) => ({
+        ...pools[id],
+        dynamicData: dynamicData[id],
+        tokens: poolTokens[id].map((pt) => ({
+            ...pt,
+            token: tokens[pt.address],
+        })),
+    }));
 }
 
-function filterPoolsByHooks(
-    pools: PrismaPoolAndHookWithDynamic[],
-    considerPoolsWithHooks: boolean,
-): PrismaPoolAndHookWithDynamic[] {
-    return pools.filter((pool) => {
-        if (!pool.hook || Object.keys(pool.hook).length === 0) return true;
+export async function getBufferPoolsFromDBPools(pools: SORDbPool[], chain: Chain): Promise<BufferPoolData[]> {
+    const v3Pools = pools.filter((pool) => pool.protocolVersion === 3);
 
-        const hook = pool.hook as HookData;
-        if (hook.type === 'MEV_TAX') return true;
-        if (!considerPoolsWithHooks) return false;
-
-        const isSupportedHookType = hook.type !== undefined && hook.type !== 'UNKNOWN';
-        if (!isSupportedHookType) {
-            console.log('Pool has unsupported hook type', pool.id, hook.type);
-        }
-        return isSupportedHookType;
-    });
-}
-
-async function getPrimaryPools(
-    chain: Chain,
-    protocolVersion: number,
-    type: { in: PrismaPoolType[] },
-    poolIdsToExclude: string[],
-): Promise<PrismaPoolAndHookWithDynamic[]> {
-    return prisma.prismaPool.findMany({
-        where: {
-            chain,
-            protocolVersion,
-            dynamicData: {
-                totalSharesNum: { gt: 0.000000000001 },
-                swapEnabled: true,
-                isPaused: false,
-                totalLiquidity: { gte: chain === 'SEPOLIA' ? 0 : 100 },
-            },
-            id: { notIn: [...poolIdsToExclude, ...poolsToIgnore] },
-            type,
-        },
-        include: {
-            dynamicData: true,
-            tokens: { include: { token: true } },
-        },
-    });
-}
-
-async function getLiquidityBootstrappingPools(
-    chain: Chain,
-    protocolVersion: number,
-    poolIdsToExclude: string[],
-): Promise<PrismaPoolAndHookWithDynamic[]> {
-    return prisma.prismaPool.findMany({
-        where: {
-            chain,
-            protocolVersion,
-            dynamicData: {
-                totalSharesNum: { gt: 0.000000000001 },
-                swapEnabled: true,
-                isPaused: false,
-            },
-            id: { notIn: [...poolIdsToExclude, ...poolsToIgnore] },
-            type: { in: ['LIQUIDITY_BOOTSTRAPPING'] },
-        },
-        include: { dynamicData: true, tokens: { include: { token: true } } },
-    });
-}
-
-export async function getBufferPoolsFromDBPools(
-    pools: PrismaPoolAndHookWithDynamic[],
-    chain: Chain,
-): Promise<BufferPoolData[]> {
-    const tokensWithUnderlying = pools.flatMap((pool) =>
-        pool.tokens.filter((token) => token.token.underlyingTokenAddress !== null),
+    const tokensWithUnderlying = v3Pools.flatMap((pool) =>
+        pool.tokens.filter((token) => token.token.underlyingTokenAddress !== null).map((token) => token.address),
     );
 
-    const erc4626ThatCanBeUsedForSwaps = await prisma.prismaErc4626ReviewData.findMany({
-        where: {
-            chain,
-            erc4626Address: { in: tokensWithUnderlying.map((token) => token.address) },
-            canUseBufferForSwaps: true,
-        },
-    });
+    const erc4626Reviews = await tokenService.getErc4626Data();
+
+    const erc4626ThatCanBeUsedForSwaps = Object.values(erc4626Reviews)
+        .filter(
+            (review): review is NonNullable<typeof review> =>
+                review?.chain === chain &&
+                review?.canUseBufferForSwaps === true &&
+                tokensWithUnderlying.includes(review?.erc4626Address),
+        )
+        .map((review) => review);
 
     const wrappedTokenAddresses = erc4626ThatCanBeUsedForSwaps.map((data) => data.erc4626Address);
     const underlyingTokenAddresses = erc4626ThatCanBeUsedForSwaps.map((data) => data.assetAddress);
 
-    const underlyingTokens = await prisma.prismaToken.findMany({
-        where: { chain, address: { in: underlyingTokenAddresses } },
-    });
+    const tokens = await tokenService.getTokens(chain);
+    const tokensMap = Object.fromEntries(tokens.map((token) => [token.address.toLowerCase(), token]));
 
-    logMissingTokens(underlyingTokens, underlyingTokenAddresses);
+    logMissingTokens(tokens, underlyingTokenAddresses);
 
     // instead of an actual buffer pool, I'd like to return an object that can be used to build a buffer pool
     const bufferPools: BufferPoolData[] = [];
-    for (const pool of pools) {
+    for (const pool of v3Pools) {
         for (const poolToken of pool.tokens) {
             // check if token can be used for swaps through buffer pools
             if (poolToken.token.underlyingTokenAddress && wrappedTokenAddresses.includes(poolToken.address)) {
                 // check if underlying token exists in the database
-                const underlyingToken = underlyingTokens.find((t) =>
-                    isSameAddress(t.address as Address, poolToken.token.underlyingTokenAddress as Address),
-                );
+                const underlyingToken = tokensMap[poolToken.token.underlyingTokenAddress];
                 if (underlyingToken) {
                     const unwrapRateDecimals = 18 - poolToken.token.decimals + underlyingToken.decimals;
                     bufferPools.push({
+                        poolId: pool.id,
                         address: poolToken.address.toLowerCase() as Address,
                         chainId: Number(chainToChainId[chain]),
                         mainToken: {
