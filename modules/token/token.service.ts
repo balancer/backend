@@ -4,6 +4,7 @@ import { TokenPriceService } from './lib/token-price.service';
 import {
     Chain,
     Prisma,
+    PrismaErc4626ReviewData,
     PrismaPriceRateProviderData,
     PrismaToken,
     PrismaTokenCurrentPrice,
@@ -100,7 +101,7 @@ export class TokenService {
                 rateProviderData: rateProviderData[token.address],
                 coingeckoId: token.coingeckoTokenId,
                 isErc4626: token.types.some((type) => type.type === 'ERC4626'),
-                erc4626ReviewData: erc4626Data[token.address],
+                erc4626ReviewData: erc4626Data[`${token.address}-${token.chain}`],
             };
         }
 
@@ -174,7 +175,7 @@ export class TokenService {
             coingeckoId: token.coingeckoTokenId,
             isErc4626: token.types.some((type) => type.type === 'ERC4626'),
             underlyingTokenAddress: token.underlyingTokenAddress,
-            erc4626ReviewData: erc4626Data[token.address],
+            erc4626ReviewData: erc4626Data[`${token.address}-${token.chain}`],
         }));
     }
 
@@ -222,31 +223,60 @@ export class TokenService {
         return priceRateProviderDataResult;
     }
 
-    private async getErc4626Data(tokens: PrismaToken[]): Promise<Record<string, Erc4626ReviewData | undefined>> {
-        const erc4626Data = await prisma.prismaErc4626ReviewData.findMany({
-            where: {
-                erc4626Address: {
-                    in: tokens.map((t) => t.address),
-                },
-            },
-        });
+    async getErc4626Data(
+        tokens?: PrismaToken[],
+    ): Promise<
+        Record<string, (Erc4626ReviewData & { erc4626Address: string; assetAddress: string; chain: Chain }) | undefined>
+    > {
+        const cacheKey = 'ERC4626REVIEWDATA';
 
-        const erc4626DataResult: Record<string, Erc4626ReviewData | undefined> = {};
+        let erc4626Data: Record<
+            string,
+            Erc4626ReviewData & { erc4626Address: string; assetAddress: string; chain: Chain }
+        > = this.cache.get(cacheKey);
+
+        if (!erc4626Data) {
+            erc4626Data = await prisma.prismaErc4626ReviewData
+                .findMany()
+                .then((reviews) => {
+                    // Remove all duplicates, keeping only items that appear exactly once
+                    const addressChainCounts = new Map<string, number>();
+
+                    reviews.forEach((review) => {
+                        const key = `${review.erc4626Address}-${review.chain}`;
+                        addressChainCounts.set(key, (addressChainCounts.get(key) || 0) + 1);
+                    });
+
+                    const noDuplicatesReviews = reviews.filter((review) => {
+                        const key = `${review.erc4626Address}-${review.chain}`;
+                        return addressChainCounts.get(key) === 1;
+                    });
+
+                    return noDuplicatesReviews;
+                })
+                .then((reviews) =>
+                    reviews.map((review) => ({
+                        ...review,
+                        warnings: review.warnings?.split(',') || [],
+                    })),
+                )
+                .then((reviews) =>
+                    Object.fromEntries(reviews.map((review) => [`${review.erc4626Address}-${review.chain}`, review])),
+                );
+            this.cache.put(cacheKey, erc4626Data, 60 * 60 * 1000); // cache for 1h
+        }
+
+        if (!tokens) return erc4626Data;
+
+        const erc4626DataResult: Record<
+            string,
+            (Erc4626ReviewData & { erc4626Address: string; assetAddress: string; chain: Chain }) | undefined
+        > = {};
 
         for (const token of tokens) {
-            const erc4626DataForToken = erc4626Data.filter(
-                (erc4626Data) => erc4626Data.erc4626Address === token.address && erc4626Data.chain === token.chain,
-            );
-
-            if (erc4626DataForToken.length === 1) {
-                erc4626DataResult[token.address] = {
-                    ...erc4626DataForToken[0],
-                    warnings: erc4626DataForToken[0].warnings?.split(',') || [],
-                };
-            } else {
-                erc4626DataResult[token.address] = undefined;
-            }
+            erc4626DataResult[token.address] = erc4626Data[`${token.address}-${token.chain}`];
         }
+
         return erc4626DataResult;
     }
 
