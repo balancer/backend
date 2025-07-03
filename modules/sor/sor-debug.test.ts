@@ -18,8 +18,8 @@ describe('sor debugging', () => {
         // only do once before starting to debug
         // bun task sor-sync-v2 {chainId}
 
-        const swapType = 'EXACT_IN';
-        const swapKind: SwapKind = SwapKind.GivenIn;
+        const swapType = 'EXACT_OUT';
+        const swapKind: SwapKind = SwapKind.GivenOut;
 
         const swaps = await sorService.getSorSwapPaths({
             chain,
@@ -68,8 +68,9 @@ describe('sor debugging', () => {
 
         const queryResultFloat = parseFloat(formatUnits(queryResultAmount.amount, queryResultAmount.token.decimals));
         const sorResultFloat = parseFloat(swaps.returnAmount);
+        const ratio = queryResultFloat / sorResultFloat;
 
-        expect(queryResultFloat).toBeCloseTo(sorResultFloat, 4);
+        expect(ratio).toBeCloseTo(1, 3);
     }, 5000000);
 
     it('sor v3', async () => {
@@ -127,6 +128,8 @@ describe('sor debugging', () => {
         const queryResultFloat = parseFloat(formatUnits(queryResultAmount.amount, queryResultAmount.token.decimals));
         const sorResultFloat = parseFloat(swaps.returnAmount);
 
-        expect(queryResultFloat).toBeCloseTo(sorResultFloat, 1);
+        const ratio = queryResultFloat / sorResultFloat;
+
+        expect(ratio).toBeCloseTo(1, 3);
     }, 5000000);
 });
