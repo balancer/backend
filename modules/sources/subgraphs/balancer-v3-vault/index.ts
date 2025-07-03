@@ -15,6 +15,8 @@ import {
     PoolSnapshotFragment,
     PoolSnapshot_Filter,
     SwapsQueryVariables,
+    AddRemoveFragment,
+    AddRemove_OrderBy,
 } from './generated/types';
 import { Chain, Prisma } from '@prisma/client';
 import { snapshotToDb } from './transformers/snapshotToDb';
@@ -288,6 +290,70 @@ export function getVaultSubgraphClient(url: string, chain: Chain) {
             }
 
             return pools;
+        },
+        async getAddRemovesFromBlock(fromBlockNumber: number): Promise<AddRemoveFragment[]> {
+            // Guard against missing syncs
+            if (fromBlockNumber === 0) return [];
+
+            const limit = 1000;
+            let hasMore = true;
+            let events: AddRemoveFragment[] = [];
+            let where = {
+                id_gt: '0x',
+            };
+
+            while (hasMore) {
+                const { addRemoves } = await sdk.AddRemove({
+                    where: { ...where, blockNumber_gt: `${fromBlockNumber}` },
+                    orderBy: AddRemove_OrderBy.Id,
+                    orderDirection: OrderDirection.Asc,
+                    first: limit,
+                });
+
+                events = [...events, ...addRemoves];
+
+                if (addRemoves.length < limit) {
+                    hasMore = false;
+                } else {
+                    where = {
+                        id_gt: addRemoves[addRemoves.length - 1].id,
+                    };
+                }
+            }
+
+            return events;
+        },
+        async getSwapsFromBlock(fromBlockNumber: number): Promise<SwapFragment[]> {
+            // Guard against missing syncs
+            if (fromBlockNumber === 0) return [];
+
+            const limit = 1000;
+            let hasMore = true;
+            let events: SwapFragment[] = [];
+            let where = {
+                id_gt: '0x',
+            };
+
+            while (hasMore) {
+                const { swaps } = await sdk.Swaps({
+                    where: { ...where, blockNumber_gt: `${fromBlockNumber}` },
+                    orderBy: Swap_OrderBy.Id,
+                    orderDirection: OrderDirection.Asc,
+                    first: limit,
+                });
+
+                events = [...events, ...swaps];
+
+                if (swaps.length < limit) {
+                    hasMore = false;
+                } else {
+                    where = {
+                        id_gt: swaps[swaps.length - 1].id,
+                    };
+                }
+            }
+
+            return events;
         },
     };
 }

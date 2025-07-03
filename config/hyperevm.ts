@@ -39,7 +39,7 @@ export default <NetworkData>{
     rpcUrl: env.DRPC_API_KEY
         ? `https://lb.drpc.org/ogrpc?network=hyperliquid&dkey=${env.DRPC_API_KEY}`
         : 'https://rpc.hyperliquid.xyz/evm',
-    rpcMaxBlockRange: 25000,
+    rpcMaxBlockRange: 1000,
     acceptableSGLag: 30, // ~1min
     protocolToken: 'bal',
     balancer: {

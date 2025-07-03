@@ -1,12 +1,9 @@
 import { Chain } from '@prisma/client';
 import { V3VaultSubgraphClient } from '../../../sources/subgraphs';
-import { AddRemove_OrderBy, OrderDirection } from '../../../sources/subgraphs/balancer-v3-vault/generated/types';
 import { joinExitsUsd } from '../../../sources/enrichers/join-exits-usd';
-import { daysAgo } from '../../../common/time';
 import { joinExitV3Transformer } from '../../../sources/transformers/join-exit-v3-transformer';
 import { eventsRepository, EventStoreRepository, LatestEventRepository } from '../../../repositories/events';
-
-export const JOIN_EXIT_HISTORY_DAYS = 90;
+import { getLastSyncedBlock, upsertLastSyncedBlock } from '../../last-synced-block';
 
 /**
  * Get the join and exit events from the subgraph and store them in the database
@@ -17,30 +14,13 @@ export const syncJoinExits = async (
     vaultSubgraphClient: V3VaultSubgraphClient,
     chain: Chain,
     eventRepo: LatestEventRepository & EventStoreRepository = eventsRepository,
-    daysToSync = JOIN_EXIT_HISTORY_DAYS,
 ): Promise<string[]> => {
-    const protocolVersion = 3;
+    const lastSyncedBlock = await getLastSyncedBlock(chain, 'JOIN_EXITS_V3');
 
-    // Get latest event from the DB
-    const latestEvent = await eventRepo.getLatestEvent({
-        types: ['JOIN', 'EXIT'],
-        chain,
-        protocolVersion,
-    });
-
-    const syncSince = daysAgo(daysToSync);
-    const where =
-        latestEvent?.blockTimestamp && latestEvent?.blockTimestamp > syncSince
-            ? { blockNumber_gt: String(latestEvent.blockNumber || 0) }
-            : { blockTimestamp_gte: String(syncSince) };
+    if (lastSyncedBlock === 0) return [];
 
     // Get events
-    const { addRemoves } = await vaultSubgraphClient.AddRemove({
-        first: 1000,
-        where,
-        orderBy: AddRemove_OrderBy.BlockNumber,
-        orderDirection: OrderDirection.Asc,
-    });
+    const addRemoves = await vaultSubgraphClient.getAddRemovesFromBlock(lastSyncedBlock);
 
     // Prepare DB entries
     const dbEntries = await joinExitV3Transformer(addRemoves, chain);
@@ -51,6 +31,11 @@ export const syncJoinExits = async (
     const dbEntriesWithUsd = await joinExitsUsd(dbEntries, chain);
 
     await eventRepo.storeEvents(dbEntriesWithUsd);
+
+    // Store last block
+    const lastEvent = dbEntriesWithUsd.sort((a, b) => a.blockNumber - b.blockNumber).pop();
+    if (!lastEvent) return [];
+    await upsertLastSyncedBlock(chain, 'JOIN_EXITS_V3', lastEvent.blockNumber);
 
     return dbEntries.map((entry) => entry.id);
 };

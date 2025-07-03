@@ -1,6 +1,5 @@
 import config from '../../config';
 
-import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import { getV2SubgraphClient } from '../subgraphs/balancer-subgraph';
 import { syncJoinExits as syncJoinExitsV2 } from '../actions/pool/v2/sync-join-exits';
 import { syncJoinExits as syncJoinExitsV3 } from '../actions/pool/v3/sync-join-exits';
@@ -23,7 +22,7 @@ export function EventController() {
                 throw new Error(`Chain not configured: ${chain}`);
             }
 
-            const subgraphClient = new BalancerSubgraphService(balancer, chain);
+            const subgraphClient = getV2SubgraphClient(balancer, chain);
             const entries = await syncJoinExitsV2(subgraphClient, chain);
             return entries;
         },
