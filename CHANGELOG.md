@@ -1,5 +1,13 @@
 # backend
 
+## 1.48.4
+
+### Patch Changes
+
+-   3e8a4fb: respect maxblockrange for changed pools query
+-   e350f52: LBP balances on chart data
+-   c365c70: add new subgraphs for reclammv2
+
 ## 1.48.3
 
 ### Patch Changes
