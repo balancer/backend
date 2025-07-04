@@ -263,7 +263,7 @@ export class TokenService {
                 .then((reviews) =>
                     Object.fromEntries(reviews.map((review) => [`${review.erc4626Address}-${review.chain}`, review])),
                 );
-            this.cache.put(cacheKey, erc4626Data, 60 * 60 * 1000); // cache for 1h
+            this.cache.put(cacheKey, erc4626Data, 10 * 60 * 1000); // cache for 10 min
         }
 
         if (!tokens) return erc4626Data;
