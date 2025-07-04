@@ -288,6 +288,10 @@ type GqlSorSwapRoute {
     The hops this route takes
     """
     hops: [GqlSorSwapRouteHop!]!
+    """
+    The pool entity of this hop.
+    """
+    pool: GqlPoolMinimal! @deprecated
 }
 
 """

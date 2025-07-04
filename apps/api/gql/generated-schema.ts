@@ -2340,6 +2340,11 @@ export interface GqlSorSwapRoute {
     __typename?: 'GqlSorSwapRoute';
     /** The hops this route takes */
     hops: Array<GqlSorSwapRouteHop>;
+    /**
+     * The pool entity of this hop.
+     * @deprecated Field no longer supported
+     */
+    pool: GqlPoolMinimal;
     /** Share of this route of the total swap */
     share: Scalars['Float'];
     /** Address of the tokenIn */
@@ -5626,6 +5631,7 @@ export type GqlSorSwapRouteResolvers<
     ParentType extends ResolversParentTypes['GqlSorSwapRoute'] = ResolversParentTypes['GqlSorSwapRoute'],
 > = ResolversObject<{
     hops?: Resolver<Array<ResolversTypes['GqlSorSwapRouteHop']>, ParentType, ContextType>;
+    pool?: Resolver<ResolversTypes['GqlPoolMinimal'], ParentType, ContextType>;
     share?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
     tokenIn?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     tokenInAmount?: Resolver<ResolversTypes['AmountHumanReadable'], ParentType, ContextType>;

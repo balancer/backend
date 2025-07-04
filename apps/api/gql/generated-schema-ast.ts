@@ -3346,6 +3346,11 @@ export const schema = gql`
         hops: [GqlSorSwapRouteHop!]!
 
         """
+        The pool entity of this hop.
+        """
+        pool: GqlPoolMinimal! @deprecated
+
+        """
         Share of this route of the total swap
         """
         share: Float!
