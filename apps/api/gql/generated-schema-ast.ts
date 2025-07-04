@@ -4046,8 +4046,10 @@ export const schema = gql`
         cumulativeVolume: Float!
         fees: Float!
         intervalTimestamp: Int! @deprecated
+        projectTokenBalance: Float!
         projectTokenPrice: Float!
         reservePrice: Float!
+        reserveTokenBalance: Float!
         sellVolume: Float!
         swapCount: Int!
         timestamp: Int!

@@ -22,6 +22,8 @@ input CreateLBPInput {
 
 type LBPPriceChartData {
     timestamp: Int!
+    projectTokenBalance: Float!
+    reserveTokenBalance: Float!
     intervalTimestamp: Int! @deprecated
     projectTokenPrice: Float!
     reservePrice: Float!

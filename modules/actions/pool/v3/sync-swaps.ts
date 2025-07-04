@@ -2,9 +2,9 @@ import { Chain } from '@prisma/client';
 import { V3VaultSubgraphClient } from '../../../sources/subgraphs';
 import _ from 'lodash';
 import { swapV3Transformer } from '../../../sources/transformers/swap-v3-transformer';
-import { OrderDirection, Swap_OrderBy } from '../../../sources/subgraphs/balancer-v3-vault/generated/types';
 import { swapsUsd } from '../../../sources/enrichers/swaps-usd';
 import { eventsRepository, EventStoreRepository, LatestEventRepository } from '../../../repositories/events';
+import { getLastSyncedBlock, upsertLastSyncedBlock } from '../../last-synced-block';
 
 /**
  * Adds all swaps since daysToSync to the database. Checks for latest synced swap to avoid duplicate work.
@@ -18,24 +18,12 @@ export async function syncSwaps(
     chain = 'SEPOLIA' as Chain,
     eventRepo: LatestEventRepository & EventStoreRepository = eventsRepository,
 ): Promise<string[]> {
-    const protocolVersion = 3;
+    const lastSyncedBlock = await getLastSyncedBlock(chain, 'SWAPS_V2');
 
-    // Get latest event from the DB
-    const latestEvent = await eventRepo.getLatestEvent({
-        types: ['SWAP'],
-        chain,
-        protocolVersion,
-    });
-
-    const where = latestEvent?.blockNumber ? { blockNumber_gte: String(latestEvent.blockNumber) } : {};
+    if (lastSyncedBlock === 0) return [];
 
     // Get events
-    const { swaps } = await vaultSubgraphClient.Swaps({
-        first: 1000,
-        where,
-        orderBy: Swap_OrderBy.BlockNumber,
-        orderDirection: OrderDirection.Asc,
-    });
+    const swaps = await vaultSubgraphClient.getSwapsFromBlock(lastSyncedBlock);
 
     const dbSwaps = swapV3Transformer(swaps, chain);
 
@@ -44,6 +32,11 @@ export async function syncSwaps(
     // Enrich with USD values
     const dbEntries = await swapsUsd(dbSwaps, chain);
     await eventRepo.storeEvents(dbEntries);
+
+    // Store last block
+    const lastEvent = dbEntries.sort((a, b) => a.blockNumber - b.blockNumber).pop();
+    if (!lastEvent) return [];
+    await upsertLastSyncedBlock(chain, 'SWAPS_V3', lastEvent.blockNumber);
 
     return [...new Set(dbEntries.map((entry) => entry.poolId))];
 }
