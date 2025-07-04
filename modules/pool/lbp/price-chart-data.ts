@@ -89,6 +89,8 @@ export const priceChartData = async (
 
         return {
             timestamp: flow.timestamp,
+            projectTokenBalance: balanceProject,
+            reserveTokenBalance: balanceReserve,
             projectTokenPrice: projectTokenPrice,
             reservePrice: reservePrice,
             buyVolume: flow.buyVolume,

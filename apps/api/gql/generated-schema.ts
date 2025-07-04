@@ -2751,8 +2751,10 @@ export interface LbpPriceChartData {
     fees: Scalars['Float'];
     /** @deprecated Field no longer supported */
     intervalTimestamp: Scalars['Int'];
+    projectTokenBalance: Scalars['Float'];
     projectTokenPrice: Scalars['Float'];
     reservePrice: Scalars['Float'];
+    reserveTokenBalance: Scalars['Float'];
     sellVolume: Scalars['Float'];
     swapCount: Scalars['Int'];
     timestamp: Scalars['Int'];
@@ -5951,8 +5953,10 @@ export type LbpPriceChartDataResolvers<
     cumulativeVolume?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
     fees?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
     intervalTimestamp?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+    projectTokenBalance?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
     projectTokenPrice?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
     reservePrice?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+    reserveTokenBalance?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
     sellVolume?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
     swapCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     timestamp?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
