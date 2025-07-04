@@ -134,8 +134,8 @@ async function getPools(chain: Chain): Promise<SORDbPool[]> {
             .then((tokens) => Object.fromEntries(tokens.map((token) => [token.address, token]))),
     ]);
 
-    const setB = new Set(Object.keys(dynamicData));
-    const intersection = [...new Set(Object.keys(pools))].filter((value) => setB.has(value));
+    const setWithDynamicDataIds = new Set(Object.keys(dynamicData));
+    const intersection = [...new Set(Object.keys(pools))].filter((id) => setWithDynamicDataIds.has(id));
 
     return intersection.map((id) => ({
         ...pools[id],
