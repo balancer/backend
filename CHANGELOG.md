@@ -1,5 +1,11 @@
 # backend
 
+## 1.48.5
+
+### Patch Changes
+
+-   cc9b408: volume update fix
+
 ## 1.48.4
 
 ### Patch Changes
