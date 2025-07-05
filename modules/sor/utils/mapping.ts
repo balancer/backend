@@ -8,6 +8,7 @@ import {
     QuerySorGetSwapPathsArgs,
     GqlPoolMinimal,
 } from '../../../apps/api/gql/generated-schema';
+import { aGqlPoolMinimal } from '../../../apps/api/gql/schema/__mocks__/graphql';
 import { SwapKind, TokenAmount, BatchSwapStep, DEFAULT_USERDATA, SingleSwap } from '@balancer/sdk';
 import { formatUnits } from 'viem';
 import { PathWithAmount } from '../lib/path';
@@ -142,6 +143,12 @@ function mapBatchSwap(path: PathWithAmount): GqlSorSwapRoute {
                 tokenInAmount: i === 0 ? tokenInAmount : '0',
                 tokenOutAmount: i === path.pools.length - 1 ? tokenOutAmount : '0',
                 poolId: pool.id,
+                pool: aGqlPoolMinimal({
+                    symbol: '',
+                    address: pool.address,
+                    displayTokens: [],
+                    poolTokens: [],
+                }),
             });
         }
         i++;
@@ -154,7 +161,6 @@ function mapBatchSwap(path: PathWithAmount): GqlSorSwapRoute {
         tokenOutAmount,
         share: 0.5,
         hops,
-        pool: {} as GqlPoolMinimal,
     };
 }
 
@@ -170,6 +176,12 @@ function mapSingleSwap(path: PathWithAmount): GqlSorSwapRoute {
         tokenInAmount,
         tokenOut,
         tokenOutAmount,
+        pool: aGqlPoolMinimal({
+            symbol: '',
+            address: path.pools[0].address,
+            displayTokens: [],
+            poolTokens: [],
+        }),
     };
 
     return {
@@ -179,7 +191,6 @@ function mapSingleSwap(path: PathWithAmount): GqlSorSwapRoute {
         tokenInAmount,
         tokenOutAmount,
         hops: [hop],
-        pool: {} as GqlPoolMinimal,
     };
 }
 

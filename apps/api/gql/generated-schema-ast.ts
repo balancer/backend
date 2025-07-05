@@ -3346,11 +3346,6 @@ export const schema = gql`
         hops: [GqlSorSwapRouteHop!]!
 
         """
-        The pool entity of this hop.
-        """
-        pool: GqlPoolMinimal! @deprecated
-
-        """
         Share of this route of the total swap
         """
         share: Float!
@@ -3380,6 +3375,11 @@ export const schema = gql`
     A hop of a route. A route can have many hops meaning it traverses more than one pool.
     """
     type GqlSorSwapRouteHop {
+        """
+        The pool entity of this hop.
+        """
+        pool: GqlPoolMinimal! @deprecated
+
         """
         The pool id of this hop.
         """
