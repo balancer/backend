@@ -52,7 +52,7 @@ export async function updateVolumeAndFees(
             aprItems: aprItems[pool.id],
         }))
         // Filter needed for test pools on Sepolia
-        .filter((pool) => pool.aprItems && pool.dynamicData);
+        .filter((pool) => pool.dynamicData);
 
     // Fetch the stats
     const stats24h = await eventRepo.getSwapStats({ chain, poolIds, since: yesterday });
@@ -100,11 +100,13 @@ export async function updateVolumeAndFees(
             // we approximate total APR by summing it up, as APRs are usually small, this is good enough
             // we need IB yield APR (such as sFTMx) as well as phantom stable APR, which is set for phantom stable pools
             // we need any phantom stable pool or weighted pool that has either a phantom stable nested, which has no apr type set (done by boosted-pool-apr.service.ts)
-            pool.aprItems.forEach((aprItem) => {
-                if (aprItem.type === 'IB_YIELD' || aprItem.type === null) {
-                    userYieldApr += aprItem.apr;
-                }
-            });
+            if (pool.aprItems && pool.aprItems.length > 0) {
+                pool.aprItems.forEach((aprItem) => {
+                    if (aprItem.type === 'IB_YIELD' || aprItem.type === null) {
+                        userYieldApr += aprItem.apr;
+                    }
+                });
+            }
 
             const liquidityAverage24h = (totalLiquidity + totalLiquidity24hAgo) / 2;
             const yieldForUser48h = ((totalLiquidity24hAgo * userYieldApr) / 365) * 2;
