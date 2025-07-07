@@ -37,6 +37,8 @@ export interface PathGraphTraversalConfig {
     maxNonBoostedPathDepth: number;
     maxNonBoostedHopTokensInBoostedPath: number;
     approxPathsToReturn: number;
+    minSwapAmountRatio: number;
+    maxRanksPerSegment: number;
     poolIdsToInclude?: string[];
 }
 
