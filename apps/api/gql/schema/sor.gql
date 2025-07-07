@@ -317,5 +317,5 @@ type GqlSorSwapRouteHop {
     """
     The pool entity of this hop.
     """
-    pool: GqlPoolMinimal!
+    pool: GqlPoolMinimal! @deprecated
 }

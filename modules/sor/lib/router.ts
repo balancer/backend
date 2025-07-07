@@ -17,6 +17,7 @@ export class Router {
         tokenIn: Token,
         tokenOut: Token,
         pools: BasePool[],
+        swapAmount: TokenAmount,
         enableAddRemoveLiquidityPaths: boolean,
         graphTraversalConfig?: Partial<PathGraphTraversalConfig>,
     ): PathLocal[] {
@@ -25,6 +26,7 @@ export class Router {
         const candidatePaths = this.pathGraph.getCandidatePaths({
             tokenIn,
             tokenOut,
+            swapAmount,
             graphTraversalConfig,
         });
 

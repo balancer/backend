@@ -2355,7 +2355,10 @@ export interface GqlSorSwapRoute {
 /** A hop of a route. A route can have many hops meaning it traverses more than one pool. */
 export interface GqlSorSwapRouteHop {
     __typename?: 'GqlSorSwapRouteHop';
-    /** The pool entity of this hop. */
+    /**
+     * The pool entity of this hop.
+     * @deprecated Field no longer supported
+     */
     pool: GqlPoolMinimal;
     /** The pool id of this hop. */
     poolId: Scalars['String'];

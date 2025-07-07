@@ -3378,7 +3378,7 @@ export const schema = gql`
         """
         The pool entity of this hop.
         """
-        pool: GqlPoolMinimal!
+        pool: GqlPoolMinimal! @deprecated
 
         """
         The pool id of this hop.

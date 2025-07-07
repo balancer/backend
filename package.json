@@ -1,6 +1,6 @@
 {
     "name": "backend",
-    "version": "1.48.5",
+    "version": "1.48.6",
     "description": "Backend service for Beethoven X and Balancer",
     "repository": "https://github.com/balancer/backend",
     "author": "Beethoven X",
@@ -80,6 +80,7 @@
         "@viem/anvil": "^0.0.10",
         "execa": "7.1.1",
         "fishery": "^2.2.2",
+        "graphql-codegen-typescript-mock-data": "^5.0.0",
         "msw": "^0.47.4",
         "prettier": "^2.8.8",
         "testcontainers": "^8.16.0",

@@ -1,5 +1,12 @@
 # backend
 
+## 1.48.6
+
+### Patch Changes
+
+-   1bca72b: SOR - Improve algorithm
+-   1c79993: simple prisma based SOR DB query
+
 ## 1.48.5
 
 ### Patch Changes

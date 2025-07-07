@@ -159,10 +159,33 @@ const files = {
     },
 };
 
+const mocks = {
+    ['./apps/api/gql/schema/__mocks__/types.ts']: {
+        schema: './apps/api/gql/schema/*.gql',
+        plugins: ['typescript'],
+        config: {
+            enumsAsTypes: false,
+            namingConvention: {
+                enumValues: 'keep', // 👈 preserve enum names exactly
+            },
+        },
+    },
+
+    ['./apps/api/gql/schema/__mocks__/graphql.ts']: {
+        schema: './apps/api/gql/schema/*.gql',
+        plugins: ['typescript-mock-data'],
+        config: {
+            enumValues: 'keep',
+            enumsAsValues: false,
+            typesFile: './types',
+        },
+    },
+};
+
 export default {
     overwrite: true,
     hooks: {
         afterAllFileWrite: ['prettier --write'],
     },
-    generates: files,
+    generates: { ...files, ...mocks },
 } as LoadCodegenConfigResult['config'];
