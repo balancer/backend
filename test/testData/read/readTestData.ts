@@ -270,6 +270,7 @@ function mapBufferPools(pools: TransformBigintToString<SupportedPools>[]): Buffe
 
     const bufferPoolData: BufferPoolData[] = bufferPools.map((pool) => ({
         ...pool,
+        poolId: pool.poolAddress,
         address: pool.poolAddress as Address,
         mainToken: { address: pool.tokens[0] as Address, decimals: pool.decimals[0] },
         underlyingToken: { address: pool.tokens[1] as Address, decimals: pool.decimals[1] },

@@ -129,9 +129,6 @@ export interface NetworkData {
         excludedFarmIds: string[];
     };
     avgBlockSpeed: number;
-    sor?: {
-        poolIdsToExclude?: string[];
-    };
     datastudio?: {
         [key in DeploymentEnv]: {
             user: string;
