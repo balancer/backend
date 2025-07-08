@@ -111,12 +111,15 @@ export class TokenService {
         const chains = args.chains!;
         const types = (args.where?.typeIn || []) as PrismaTokenTypeOption[];
         const where: Prisma.PrismaTokenWhereInput = {
-            types: { some: { type: 'WHITE_LISTED' } },
             chain: { in: chains },
         };
 
         if (args.where?.tokensIn) {
             where.address = { in: args.where.tokensIn };
+        }
+
+        if (args.where?.typeIn) {
+            where.types = { some: { type: { in: args.where.typeIn } } };
         }
 
         const tokens = (

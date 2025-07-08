@@ -3827,10 +3827,12 @@ export const schema = gql`
     }
 
     enum GqlTokenType {
+        BLOCKED_V2
+        BLOCKED_V3
         BPT
         ERC4626
         PHANTOM_BPT
-        WHITE_LISTED
+        WHITE_LISTED @deprecated(reason: "Use BLOCKED instead")
     }
 
     type GqlUserFbeetsBalance {

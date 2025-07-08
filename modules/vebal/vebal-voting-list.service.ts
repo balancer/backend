@@ -53,7 +53,7 @@ export class VeBalVotingListService {
                     logoURI: token.token.logoURI || '',
                     underlyingTokenAddress: token.token.underlyingTokenAddress,
                 })),
-                poolTokens: pool.tokens.map((token) => mapPoolToken(token)),
+                poolTokens: pool.tokens.map((token) => mapPoolToken(token, pool.protocolVersion)),
                 gauge: {
                     address: votingGauge.id,
                     relativeWeightCap: votingGauge.relativeWeightCap,

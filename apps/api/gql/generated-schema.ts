@@ -2607,7 +2607,7 @@ export interface GqlTokenPriceChartDataItem {
     timestamp: Scalars['Int'];
 }
 
-export type GqlTokenType = 'BPT' | 'ERC4626' | 'PHANTOM_BPT' | 'WHITE_LISTED';
+export type GqlTokenType = 'BLOCKED_V2' | 'BLOCKED_V3' | 'BPT' | 'ERC4626' | 'PHANTOM_BPT' | 'WHITE_LISTED';
 
 export interface GqlUserFbeetsBalance {
     __typename?: 'GqlUserFbeetsBalance';
