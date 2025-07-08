@@ -36,6 +36,7 @@ import {
     LiquidityManagement,
     QueryAggregatorPoolsArgs,
     QuantAmmWeightSnapshot,
+    LiquidityBootstrappingPoolV3Params,
 } from '../../../apps/api/gql/generated-schema';
 import _ from 'lodash';
 import { prisma } from '../../../prisma/prisma-client';
@@ -299,8 +300,8 @@ export class PoolGqlLoaderService {
             const query =
                 Prisma.raw(`SELECT p.id, p.chain FROM "PrismaPool" p LEFT JOIN "PrismaPoolDynamicData" d on (p.id = d."poolId") WHERE p.search_vector @@ websearch_to_tsquery('simple', '${searchQuery}') AND d."totalSharesNum" > 0.000000000001 AND NOT ('BLACK_LISTED' = ANY(p.categories)) AND ${filters}
             ORDER BY d."${orderColumn}" ${
-                    args.orderDirection && args.orderDirection === 'asc' ? 'ASC' : 'DESC'
-                } LIMIT ${limit} OFFSET ${offset}`);
+                args.orderDirection && args.orderDirection === 'asc' ? 'ASC' : 'DESC'
+            } LIMIT ${limit} OFFSET ${offset}`);
 
             const searchResults = await prisma.$queryRaw<{ id: string }[]>(query);
 
@@ -337,6 +338,9 @@ export class PoolGqlLoaderService {
     ): GqlPoolMinimal {
         return {
             ...pool,
+            ...(pool.protocolVersion === 3 && pool.type === 'LIQUIDITY_BOOTSTRAPPING'
+                ? { lbpParams: pool.typeData as unknown as LiquidityBootstrappingPoolV3Params }
+                : {}),
             liquidityManagement: (pool.liquidityManagement as LiquidityManagement) || undefined,
             hook: mapHookToGqlHook(pool.hook as HookData),
             incentivized: pool.categories.some((category) => category === 'INCENTIVIZED'),
@@ -556,8 +560,8 @@ export class PoolGqlLoaderService {
             ...(where?.hasHook !== undefined && where.hasHook
                 ? { hook: { path: ['address'], string_starts_with: '0x' } }
                 : where?.hasHook !== undefined && !where.hasHook
-                ? { hook: { equals: Prisma.DbNull } }
-                : {}),
+                  ? { hook: { equals: Prisma.DbNull } }
+                  : {}),
         };
 
         if (!textSearch) {

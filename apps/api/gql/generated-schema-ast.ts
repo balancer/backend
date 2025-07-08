@@ -1822,6 +1822,11 @@ export const schema = gql`
         incentivized: Boolean!
 
         """
+        LBP specific params for v3 pools only.
+        """
+        lbpParams: LiquidityBootstrappingPoolV3Params
+
+        """
         Liquidity management settings for v3 pools.
         """
         liquidityManagement: LiquidityManagement
@@ -4060,6 +4065,31 @@ export const schema = gql`
     input LBPoolInput {
         address: String!
         chain: GqlChain!
+    }
+
+    """
+    LBP specific params for v3 pools only.
+    """
+    type LiquidityBootstrappingPoolV3Params {
+        description: String
+        discord: String
+        endTime: Int!
+        farcaster: String
+        isProjectTokenSwapInBlocked: Boolean!
+        lbpName: String
+        lbpOwner: String!
+        projectToken: String!
+        projectTokenEndWeight: Float!
+        projectTokenIndex: Int!
+        projectTokenStartWeight: Float!
+        reserveToken: String!
+        reserveTokenEndWeight: Float!
+        reserveTokenIndex: Int!
+        reserveTokenStartWeight: Float!
+        startTime: Int!
+        telegram: String
+        website: String
+        x: String
     }
 
     """

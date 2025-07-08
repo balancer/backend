@@ -122,6 +122,7 @@ import {
     LbpMetadataInput,
     LbpPriceChartData,
     LbPoolInput,
+    LiquidityBootstrappingPoolV3Params,
     LiquidityManagement,
     MevTaxHookParams,
     Mutation,
@@ -1387,6 +1388,10 @@ export const aGqlPoolMinimal = (overrides?: Partial<GqlPoolMinimal>): GqlPoolMin
         hook: overrides && overrides.hasOwnProperty('hook') ? overrides.hook! : aGqlHook(),
         id: overrides && overrides.hasOwnProperty('id') ? overrides.id! : '55063821-2313-4ba6-92ce-8d0f9817605c',
         incentivized: overrides && overrides.hasOwnProperty('incentivized') ? overrides.incentivized! : false,
+        lbpParams:
+            overrides && overrides.hasOwnProperty('lbpParams')
+                ? overrides.lbpParams!
+                : aLiquidityBootstrappingPoolV3Params(),
         liquidityManagement:
             overrides && overrides.hasOwnProperty('liquidityManagement')
                 ? overrides.liquidityManagement!
@@ -2734,9 +2739,13 @@ export const aLbpPriceChartData = (overrides?: Partial<LbpPriceChartData>): LbpP
         fees: overrides && overrides.hasOwnProperty('fees') ? overrides.fees! : 9.3,
         intervalTimestamp:
             overrides && overrides.hasOwnProperty('intervalTimestamp') ? overrides.intervalTimestamp! : 7321,
+        projectTokenBalance:
+            overrides && overrides.hasOwnProperty('projectTokenBalance') ? overrides.projectTokenBalance! : 9.7,
         projectTokenPrice:
             overrides && overrides.hasOwnProperty('projectTokenPrice') ? overrides.projectTokenPrice! : 5.9,
         reservePrice: overrides && overrides.hasOwnProperty('reservePrice') ? overrides.reservePrice! : 6.5,
+        reserveTokenBalance:
+            overrides && overrides.hasOwnProperty('reserveTokenBalance') ? overrides.reserveTokenBalance! : 6.3,
         sellVolume: overrides && overrides.hasOwnProperty('sellVolume') ? overrides.sellVolume! : 7.4,
         swapCount: overrides && overrides.hasOwnProperty('swapCount') ? overrides.swapCount! : 1390,
         timestamp: overrides && overrides.hasOwnProperty('timestamp') ? overrides.timestamp! : 8936,
@@ -2749,6 +2758,41 @@ export const aLbPoolInput = (overrides?: Partial<LbPoolInput>): LbPoolInput => {
     return {
         address: overrides && overrides.hasOwnProperty('address') ? overrides.address! : 'sursum',
         chain: overrides && overrides.hasOwnProperty('chain') ? overrides.chain! : GqlChain.ARBITRUM,
+    };
+};
+
+export const aLiquidityBootstrappingPoolV3Params = (
+    overrides?: Partial<LiquidityBootstrappingPoolV3Params>,
+): LiquidityBootstrappingPoolV3Params => {
+    return {
+        description: overrides && overrides.hasOwnProperty('description') ? overrides.description! : 'creator',
+        discord: overrides && overrides.hasOwnProperty('discord') ? overrides.discord! : 'cursus',
+        endTime: overrides && overrides.hasOwnProperty('endTime') ? overrides.endTime! : 4758,
+        farcaster: overrides && overrides.hasOwnProperty('farcaster') ? overrides.farcaster! : 'quidem',
+        isProjectTokenSwapInBlocked:
+            overrides && overrides.hasOwnProperty('isProjectTokenSwapInBlocked')
+                ? overrides.isProjectTokenSwapInBlocked!
+                : false,
+        lbpName: overrides && overrides.hasOwnProperty('lbpName') ? overrides.lbpName! : 'consequatur',
+        lbpOwner: overrides && overrides.hasOwnProperty('lbpOwner') ? overrides.lbpOwner! : 'culpa',
+        projectToken: overrides && overrides.hasOwnProperty('projectToken') ? overrides.projectToken! : 'paulatim',
+        projectTokenEndWeight:
+            overrides && overrides.hasOwnProperty('projectTokenEndWeight') ? overrides.projectTokenEndWeight! : 0,
+        projectTokenIndex:
+            overrides && overrides.hasOwnProperty('projectTokenIndex') ? overrides.projectTokenIndex! : 9663,
+        projectTokenStartWeight:
+            overrides && overrides.hasOwnProperty('projectTokenStartWeight') ? overrides.projectTokenStartWeight! : 0.2,
+        reserveToken: overrides && overrides.hasOwnProperty('reserveToken') ? overrides.reserveToken! : 'accommodo',
+        reserveTokenEndWeight:
+            overrides && overrides.hasOwnProperty('reserveTokenEndWeight') ? overrides.reserveTokenEndWeight! : 1.3,
+        reserveTokenIndex:
+            overrides && overrides.hasOwnProperty('reserveTokenIndex') ? overrides.reserveTokenIndex! : 432,
+        reserveTokenStartWeight:
+            overrides && overrides.hasOwnProperty('reserveTokenStartWeight') ? overrides.reserveTokenStartWeight! : 1.2,
+        startTime: overrides && overrides.hasOwnProperty('startTime') ? overrides.startTime! : 1614,
+        telegram: overrides && overrides.hasOwnProperty('telegram') ? overrides.telegram! : 'tego',
+        website: overrides && overrides.hasOwnProperty('website') ? overrides.website! : 'ad',
+        x: overrides && overrides.hasOwnProperty('x') ? overrides.x! : 'id',
     };
 };
 

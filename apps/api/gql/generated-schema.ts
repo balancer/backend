@@ -1309,6 +1309,8 @@ export interface GqlPoolMinimal {
     id: Scalars['ID'];
     /** Pool is receiving rewards when liquidity tokens are staked */
     incentivized: Scalars['Boolean'];
+    /** LBP specific params for v3 pools only. */
+    lbpParams?: Maybe<LiquidityBootstrappingPoolV3Params>;
     /** Liquidity management settings for v3 pools. */
     liquidityManagement?: Maybe<LiquidityManagement>;
     /** The name of the pool as per contract */
@@ -2770,6 +2772,30 @@ export interface LbPoolInput {
     chain: GqlChain;
 }
 
+/** LBP specific params for v3 pools only. */
+export interface LiquidityBootstrappingPoolV3Params {
+    __typename?: 'LiquidityBootstrappingPoolV3Params';
+    description?: Maybe<Scalars['String']>;
+    discord?: Maybe<Scalars['String']>;
+    endTime: Scalars['Int'];
+    farcaster?: Maybe<Scalars['String']>;
+    isProjectTokenSwapInBlocked: Scalars['Boolean'];
+    lbpName?: Maybe<Scalars['String']>;
+    lbpOwner: Scalars['String'];
+    projectToken: Scalars['String'];
+    projectTokenEndWeight: Scalars['Float'];
+    projectTokenIndex: Scalars['Int'];
+    projectTokenStartWeight: Scalars['Float'];
+    reserveToken: Scalars['String'];
+    reserveTokenEndWeight: Scalars['Float'];
+    reserveTokenIndex: Scalars['Int'];
+    reserveTokenStartWeight: Scalars['Float'];
+    startTime: Scalars['Int'];
+    telegram?: Maybe<Scalars['String']>;
+    website?: Maybe<Scalars['String']>;
+    x?: Maybe<Scalars['String']>;
+}
+
 /** Liquidity management settings for v3 pools. */
 export interface LiquidityManagement {
     __typename?: 'LiquidityManagement';
@@ -3605,6 +3631,7 @@ export type ResolversTypes = ResolversObject<{
     LBPMetadataInput: LbpMetadataInput;
     LBPPriceChartData: ResolverTypeWrapper<LbpPriceChartData>;
     LBPoolInput: LbPoolInput;
+    LiquidityBootstrappingPoolV3Params: ResolverTypeWrapper<LiquidityBootstrappingPoolV3Params>;
     LiquidityManagement: ResolverTypeWrapper<LiquidityManagement>;
     MevTaxHookParams: ResolverTypeWrapper<MevTaxHookParams>;
     Mutation: ResolverTypeWrapper<{}>;
@@ -3807,6 +3834,7 @@ export type ResolversParentTypes = ResolversObject<{
     LBPMetadataInput: LbpMetadataInput;
     LBPPriceChartData: LbpPriceChartData;
     LBPoolInput: LbPoolInput;
+    LiquidityBootstrappingPoolV3Params: LiquidityBootstrappingPoolV3Params;
     LiquidityManagement: LiquidityManagement;
     MevTaxHookParams: MevTaxHookParams;
     Mutation: {};
@@ -4768,6 +4796,7 @@ export type GqlPoolMinimalResolvers<
     hook?: Resolver<Maybe<ResolversTypes['GqlHook']>, ParentType, ContextType>;
     id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
     incentivized?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+    lbpParams?: Resolver<Maybe<ResolversTypes['LiquidityBootstrappingPoolV3Params']>, ParentType, ContextType>;
     liquidityManagement?: Resolver<Maybe<ResolversTypes['LiquidityManagement']>, ParentType, ContextType>;
     name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     owner?: Resolver<Maybe<ResolversTypes['Bytes']>, ParentType, ContextType>;
@@ -5968,6 +5997,32 @@ export type LbpPriceChartDataResolvers<
     __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
+export type LiquidityBootstrappingPoolV3ParamsResolvers<
+    ContextType = ResolverContext,
+    ParentType extends ResolversParentTypes['LiquidityBootstrappingPoolV3Params'] = ResolversParentTypes['LiquidityBootstrappingPoolV3Params'],
+> = ResolversObject<{
+    description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    discord?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    endTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+    farcaster?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    isProjectTokenSwapInBlocked?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+    lbpName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    lbpOwner?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+    projectToken?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+    projectTokenEndWeight?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+    projectTokenIndex?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+    projectTokenStartWeight?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+    reserveToken?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+    reserveTokenEndWeight?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+    reserveTokenIndex?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+    reserveTokenStartWeight?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+    startTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+    telegram?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    website?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    x?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export type LiquidityManagementResolvers<
     ContextType = ResolverContext,
     ParentType extends ResolversParentTypes['LiquidityManagement'] = ResolversParentTypes['LiquidityManagement'],
@@ -6570,6 +6625,7 @@ export type Resolvers<ContextType = ResolverContext> = ResolversObject<{
     HookParams?: HookParamsResolvers<ContextType>;
     JSON?: GraphQLScalarType;
     LBPPriceChartData?: LbpPriceChartDataResolvers<ContextType>;
+    LiquidityBootstrappingPoolV3Params?: LiquidityBootstrappingPoolV3ParamsResolvers<ContextType>;
     LiquidityManagement?: LiquidityManagementResolvers<ContextType>;
     MevTaxHookParams?: MevTaxHookParamsResolvers<ContextType>;
     Mutation?: MutationResolvers<ContextType>;
