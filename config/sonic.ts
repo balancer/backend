@@ -141,6 +141,12 @@ export default <NetworkData>{
                     },
                 },
             },
+            defillama: [
+                {
+                    defillamaPoolId: '104b3467-bba3-4923-851d-aa9e6ff47611',
+                    tokenAddress: '0x67a298e5b65db2b4616e05c3b455e017275f53cb',
+                },
+            ],
             defaultHandlers: {
                 wOS: {
                     tokenAddress: '0x9f0df7799f6fdad409300080cff680f5a23df4b1',

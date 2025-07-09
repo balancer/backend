@@ -1315,6 +1315,8 @@ export type GqlPoolMinimal = {
     id: Scalars['ID'];
     /** Pool is receiving rewards when liquidity tokens are staked */
     incentivized: Scalars['Boolean'];
+    /** LBP specific params for v3 pools only. */
+    lbpParams?: Maybe<LiquidityBootstrappingPoolV3Params>;
     /** Liquidity management settings for v3 pools. */
     liquidityManagement?: Maybe<LiquidityManagement>;
     /** The name of the pool as per contract */
@@ -2798,8 +2800,10 @@ export type LbpPriceChartData = {
     fees: Scalars['Float'];
     /** @deprecated Field no longer supported */
     intervalTimestamp: Scalars['Int'];
+    projectTokenBalance: Scalars['Float'];
     projectTokenPrice: Scalars['Float'];
     reservePrice: Scalars['Float'];
+    reserveTokenBalance: Scalars['Float'];
     sellVolume: Scalars['Float'];
     swapCount: Scalars['Int'];
     timestamp: Scalars['Int'];
@@ -2810,6 +2814,30 @@ export type LbpPriceChartData = {
 export type LbPoolInput = {
     address: Scalars['String'];
     chain: GqlChain;
+};
+
+/** LBP specific params for v3 pools only. */
+export type LiquidityBootstrappingPoolV3Params = {
+    __typename?: 'LiquidityBootstrappingPoolV3Params';
+    description?: Maybe<Scalars['String']>;
+    discord?: Maybe<Scalars['String']>;
+    endTime: Scalars['Int'];
+    farcaster?: Maybe<Scalars['String']>;
+    isProjectTokenSwapInBlocked: Scalars['Boolean'];
+    lbpName?: Maybe<Scalars['String']>;
+    lbpOwner: Scalars['String'];
+    projectToken: Scalars['String'];
+    projectTokenEndWeight: Scalars['Float'];
+    projectTokenIndex: Scalars['Int'];
+    projectTokenStartWeight: Scalars['Float'];
+    reserveToken: Scalars['String'];
+    reserveTokenEndWeight: Scalars['Float'];
+    reserveTokenIndex: Scalars['Int'];
+    reserveTokenStartWeight: Scalars['Float'];
+    startTime: Scalars['Int'];
+    telegram?: Maybe<Scalars['String']>;
+    website?: Maybe<Scalars['String']>;
+    x?: Maybe<Scalars['String']>;
 };
 
 /** Liquidity management settings for v3 pools. */
