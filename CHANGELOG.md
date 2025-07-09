@@ -1,5 +1,12 @@
 # backend
 
+## 1.48.7
+
+### Patch Changes
+
+-   785deef: add rzr lst apr
+-   358ee25: add lbp params to the pools listing
+
 ## 1.48.6
 
 ### Patch Changes
