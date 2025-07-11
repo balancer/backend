@@ -64,7 +64,7 @@ export const schema = {
     },
     SOR_POOLS_CACHE_TTL_SECONDS: {
         type: String,
-        default: 10,
+        default: '10',
     },
 };
 

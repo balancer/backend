@@ -41,7 +41,7 @@ export async function getBasePoolsFromDb(
         const pools = await getPools(chain);
         console.timeEnd('SOR:getpools');
         const bufferPools = await getBufferPoolsFromDBPools(pools, chain);
-        cached = cache.put(cacheKey, { pools, bufferPools }, env.SOR_POOLS_CACHE_TTL_SECONDS * 1000);
+        cached = cache.put(cacheKey, { pools, bufferPools }, parseInt(env.SOR_POOLS_CACHE_TTL_SECONDS) * 1000);
     }
 
     // Filter
