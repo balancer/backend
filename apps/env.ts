@@ -62,6 +62,10 @@ export const schema = {
         optional: true,
         type: String,
     },
+    SOR_POOLS_CACHE_TTL_SECONDS: {
+        type: String,
+        default: 10,
+    },
 };
 
 export const env: Env = load(schema, {
