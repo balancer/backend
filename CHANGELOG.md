@@ -1,5 +1,11 @@
 # backend
 
+## 1.48.8
+
+### Patch Changes
+
+-   86e6e1a: updated token flows query
+
 ## 1.48.7
 
 ### Patch Changes
