@@ -171,75 +171,110 @@ export const eventsRepository = {
 
         return events as (SwapEvent | JoinExitEvent)[];
     },
-    getTokenFlows: async (chain: Chain, poolId: string, tokenA: string, tokenB: string, interval = 3600) => {
+    getTokenFlows: async (
+        chain: Chain,
+        poolId: string,
+        tokenA: string,
+        tokenB: string,
+        interval = 3600,
+        from?: number,
+    ) => {
         const whereClause = ['chain = $1::"Chain"', '"poolId" = $2'];
         const params = [chain, poolId, interval];
+        if (from) {
+            whereClause.push('"blockTimestamp" >= $3');
+            params.push(from);
+        }
 
         const query = `
+          -- 1) Aggregate SWAPs
+          WITH swaps AS (
+            SELECT
+              FLOOR("blockTimestamp"/3600)*3600 AS timestamp,
+              SUM(
+                CASE
+                  WHEN LOWER("payload"->'tokenIn'->>'address') = $${params.length + 1}
+                    THEN ("payload"->'tokenIn'->>'amount')::float
+                  WHEN LOWER("payload"->'tokenOut'->>'address') = $${params.length + 1}
+                    THEN -("payload"->'tokenOut'->>'amount')::float
+                  ELSE 0
+                END
+              ) AS "tokenAFlow",
+              SUM(
+                CASE
+                  WHEN LOWER("payload"->'tokenIn'->>'address') = $${params.length + 2}
+                    THEN ("payload"->'tokenIn'->>'amount')::float
+                  WHEN LOWER("payload"->'tokenOut'->>'address') = $${params.length + 2}
+                    THEN -("payload"->'tokenOut'->>'amount')::float
+                  ELSE 0
+                END
+              ) AS "tokenBFlow",
+              SUM(
+                CASE
+                  WHEN LOWER("payload"->'tokenOut'->>'address') = $${params.length + 1}
+                    THEN ("payload"->'tokenOut'->>'amount')::float
+                  ELSE 0
+                END
+              ) AS "tokenABuy",
+              SUM(
+                CASE
+                  WHEN LOWER("payload"->'tokenIn'->>'address') = $${params.length + 1}
+                    THEN ("payload"->'tokenIn'->>'amount')::float
+                  ELSE 0
+                END
+              ) AS "tokenASell",
+              COUNT(*) AS "swapCount",
+              SUM("valueUSD") AS volume
+            FROM "PartitionedPoolEvent"
+            WHERE
+              "type" = 'SWAP'
+              AND
+              ${whereClause.join(' AND ')}
+            GROUP BY 1
+          ),
+
+          -- 2) Unnest & aggregate JOIN/EXIT tokens
+          joinexits AS (
+            SELECT
+              FLOOR(pe."blockTimestamp"/3600)*3600 AS timestamp,
+              SUM(
+                CASE
+                  WHEN LOWER(token->>'address') = $${params.length + 1}
+                    THEN (token->>'amount')::float
+                         * (CASE WHEN pe."type" = 'EXIT' THEN -1 ELSE 1 END)
+                  ELSE 0
+                END
+              ) AS "tokenAFlow",
+              SUM(
+                CASE
+                  WHEN LOWER(token->>'address') = $${params.length + 2}
+                    THEN (token->>'amount')::float
+                         * (CASE WHEN pe."type" = 'EXIT' THEN -1 ELSE 1 END)
+                  ELSE 0
+                END
+              ) AS "tokenBFlow"
+            FROM "PartitionedPoolEvent" pe
+            CROSS JOIN LATERAL
+              jsonb_array_elements(pe."payload"->'tokens') AS token
+            WHERE
+              pe."type"  IN ('JOIN','EXIT')
+              AND ${whereClause.join(' AND ')}
+            GROUP BY 1
+          )
+
+          -- 3) Glue them back together
           SELECT
-              FLOOR("blockTimestamp" / $3) * $3 as timestamp,
-
-              -- token A flows
-              SUM(CASE
-                  WHEN type = 'SWAP' AND LOWER(payload->'tokenIn'->>'address') = $${params.length + 1}
-                    THEN (payload->'tokenIn'->>'amount')::float
-                  WHEN type = 'SWAP' AND LOWER(payload->'tokenOut'->>'address') = $${params.length + 1}
-                    THEN -(payload->'tokenOut'->>'amount')::float
-                  WHEN type = 'JOIN' AND joined_tokens.token_address = $${params.length + 1}
-                    THEN (joined_tokens.token_amount)::float
-                  WHEN type = 'EXIT' AND exited_tokens.token_address = $${params.length + 1}
-                    THEN -(exited_tokens.token_amount)::float
-                  ELSE 0
-              END) as "tokenAFlow",
-
-              -- token B flows
-              SUM(CASE
-                  WHEN type = 'SWAP' AND LOWER(payload->'tokenIn'->>'address') = $${params.length + 2}
-                    THEN (payload->'tokenIn'->>'amount')::float
-                  WHEN type = 'SWAP' AND LOWER(payload->'tokenOut'->>'address') = $${params.length + 2}
-                    THEN -(payload->'tokenOut'->>'amount')::float
-                  WHEN type = 'JOIN' AND joined_tokens.token_address = $${params.length + 2}
-                    THEN (joined_tokens.token_amount)::float
-                  WHEN type = 'EXIT' AND exited_tokens.token_address = $${params.length + 2}
-                    THEN -(exited_tokens.token_amount)::float
-                  ELSE 0
-              END) as "tokenBFlow",
-
-              SUM(CASE
-                  WHEN type = 'SWAP' AND LOWER(payload->'tokenOut'->>'address') = $${params.length + 1}
-                    THEN (payload->'tokenOut'->>'amount')::float
-                  ELSE 0
-              END) as "tokenABuy",
-              SUM(CASE
-                WHEN type = 'SWAP' AND LOWER(payload->'tokenIn'->>'address') = $${params.length + 1}
-                  THEN (payload->'tokenIn'->>'amount')::float
-                  ELSE 0
-              END) as "tokenASell",
-
-              COUNT(CASE WHEN type = 'SWAP' THEN 1 END) AS "swapCount",
-              SUM("valueUSD") as volume
-
-          FROM "PartitionedPoolEvent"
-
-          -- join tokens for JOIN
-          LEFT JOIN LATERAL (
-            SELECT
-              LOWER(token->>'address') AS token_address,
-              token->>'amount' AS token_amount
-            FROM jsonb_array_elements(payload->'tokens') AS token
-          ) AS joined_tokens ON type = 'JOIN'
-
-          -- join tokens for EXIT
-          LEFT JOIN LATERAL (
-            SELECT
-              LOWER(token->>'address') AS token_address,
-              token->>'amount' AS token_amount
-            FROM jsonb_array_elements(payload->'tokens') AS token
-          ) AS exited_tokens ON type = 'EXIT'
-
-          WHERE ${whereClause.join(' AND ')}
-          GROUP BY 1
-      `;
+            COALESCE(s.timestamp, j.timestamp) AS timestamp,
+            COALESCE(s."tokenAFlow", 0) + COALESCE(j."tokenAFlow", 0) AS "tokenAFlow",
+            COALESCE(s."tokenBFlow", 0) + COALESCE(j."tokenBFlow", 0) AS "tokenBFlow",
+            COALESCE(s."tokenABuy", 0) AS "tokenABuy",
+            COALESCE(s."tokenASell", 0) AS "tokenASell",
+            COALESCE(s."swapCount", 0) AS "swapCount",
+            COALESCE(s.volume, 0) AS volume
+          FROM swaps s
+          FULL OUTER JOIN joinexits j
+            ON s.timestamp = j.timestamp
+          ORDER BY timestamp`;
 
         params.push(tokenA.toLowerCase());
         params.push(tokenB.toLowerCase());
