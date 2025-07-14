@@ -116,8 +116,6 @@ export class GithubContentService {
             })
             .filter((token) => token.tokenAddress && token.chain);
 
-        console.log('Github blocked tokens:', githubBlockedTokens);
-
         // add blocked tokens to db
         const blockedV2TokensToAddToDB = githubBlockedTokens
             .filter(
