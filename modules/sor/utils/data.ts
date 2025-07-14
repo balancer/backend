@@ -31,14 +31,14 @@ export async function getBasePoolsFromDb(
     considerPoolsWithHooks: boolean,
     poolIds?: string[],
 ): Promise<{ pools: SORDbPool[]; bufferPools: BufferPoolData[] }> {
-    const cacheKey = `${SOR_POOLS_CACHE_KEY}:${chain}`;
+    const cacheKey = `${SOR_POOLS_CACHE_KEY}:${chain}:${poolIds}`;
 
     let cached = cache.get(cacheKey);
 
     if (!cached) {
         // get pools
         console.time('SOR:getpools');
-        const pools = await getPools(chain);
+        const pools = await getPools(chain, poolIds);
         console.timeEnd('SOR:getpools');
         const bufferPools = await getBufferPoolsFromDBPools(pools, chain);
         cached = cache.put(cacheKey, { pools, bufferPools }, parseInt(env.SOR_POOLS_CACHE_TTL_SECONDS) * 1000);
@@ -46,7 +46,6 @@ export async function getBasePoolsFromDb(
 
     // Filter
     const pools = cached.pools
-        .filter((pool) => poolIds === undefined || poolIds.length === 0 || poolIds.includes(pool.id))
         .filter((pool) => pool.protocolVersion === protocolVersion)
         .filter((pool) => {
             if (!pool.hook || Object.keys(pool.hook).length === 0) return true;
@@ -69,7 +68,7 @@ export async function getBasePoolsFromDb(
     return { pools, bufferPools };
 }
 
-async function getPools(chain: Chain): Promise<SORDbPool[]> {
+async function getPools(chain: Chain, poolIds?: string[]): Promise<SORDbPool[]> {
     const type = {
         in: [
             'WEIGHTED',
@@ -87,39 +86,64 @@ async function getPools(chain: Chain): Promise<SORDbPool[]> {
         ] as PrismaPoolType[],
     };
 
-    const pools = await prisma.prismaPool.findMany({
-        where: {
-            id: { notIn: [...poolsToIgnore] },
-            chain,
-            type,
-            dynamicData: {
-                OR: [
-                    {
-                        totalLiquidity: { gte: 100 },
-                    },
-                    {
-                        chain: 'SEPOLIA',
-                    },
-                    {
-                        pool: {
-                            type: 'LIQUIDITY_BOOTSTRAPPING',
-                        },
-                    },
-                ],
-                totalSharesNum: { gt: 0.000000000001 },
-                swapEnabled: true,
-                isPaused: false,
-            },
-        },
-        include: {
-            tokens: {
-                include: {
-                    token: true,
+    let pools = [] as SORDbPool[];
+
+    if (poolIds && poolIds.length > 0) {
+        pools = await prisma.prismaPool.findMany({
+            where: {
+                id: { in: poolIds },
+                chain,
+                type,
+                dynamicData: {
+                    totalSharesNum: { gt: 0.000000000001 },
+                    swapEnabled: true,
+                    isPaused: false,
                 },
             },
-            dynamicData: true,
-        },
-    });
+            include: {
+                tokens: {
+                    include: {
+                        token: true,
+                    },
+                },
+                dynamicData: true,
+            },
+        });
+    } else {
+        pools = await prisma.prismaPool.findMany({
+            where: {
+                id: { notIn: [...poolsToIgnore] },
+                chain,
+                type,
+                dynamicData: {
+                    OR: [
+                        {
+                            totalLiquidity: { gte: 100 },
+                        },
+                        {
+                            chain: 'SEPOLIA',
+                        },
+                        {
+                            pool: {
+                                type: 'LIQUIDITY_BOOTSTRAPPING',
+                            },
+                        },
+                    ],
+                    totalSharesNum: { gt: 0.000000000001 },
+                    swapEnabled: true,
+                    isPaused: false,
+                },
+            },
+            include: {
+                tokens: {
+                    include: {
+                        token: true,
+                    },
+                },
+                dynamicData: true,
+            },
+        });
+    }
 
     return pools;
 
