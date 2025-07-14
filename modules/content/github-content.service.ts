@@ -108,10 +108,15 @@ export class GithubContentService {
 
         // fetch blocked tokens from github
         const { data: blockedTokensCsv } = await axios.get<string>(BLOCKED_TOKENS_URL);
-        const githubBlockedTokens = blockedTokensCsv.split('\n').map((line) => {
-            const [chainId, tokenAddress, version] = line.split(',');
-            return { tokenAddress, chain: chainIdToChain[chainId], version };
-        });
+        const githubBlockedTokens = blockedTokensCsv
+            .split('\n')
+            .map((line) => {
+                const [chainId, tokenAddress, version] = line.split(',');
+                return { tokenAddress, chain: chainIdToChain[chainId], version };
+            })
+            .filter((token) => token.tokenAddress && token.chain);
+
+        console.log('Github blocked tokens:', githubBlockedTokens);
 
         // add blocked tokens to db
         const blockedV2TokensToAddToDB = githubBlockedTokens
