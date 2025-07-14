@@ -1,5 +1,13 @@
 # backend
 
+## 1.48.9
+
+### Patch Changes
+
+-   6da9224: mainstreet smsUSD apr
+-   a1f6426: patch to exclude a currently out of range gyro pool.
+-   68363d8: env default fix
+
 ## 1.48.8
 
 ### Patch Changes
