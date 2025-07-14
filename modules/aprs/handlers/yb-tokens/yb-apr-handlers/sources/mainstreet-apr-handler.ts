@@ -1,3 +1,5 @@
+import { YbAprHandler } from '../types';
+
 const url = 'https://api.goldsky.com/api/public/project_cmcccb4vz1nhh01x888di8lgk/subgraphs/mainstreet/0.0.1/gn';
 
 const query = `
@@ -20,7 +22,7 @@ interface Response {
     };
 }
 
-export class Mainstreet {
+export class Mainstreet implements YbAprHandler {
     constructor(private tokenAddress: string) {}
 
     async getAprs() {
@@ -39,6 +41,7 @@ export class Mainstreet {
         } = (await response.json()) as Response;
 
         const apr = Number(apy);
+        console.log('Mainstreet APR:', apr);
 
         return {
             [this.tokenAddress]: {
