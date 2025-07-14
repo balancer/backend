@@ -283,6 +283,12 @@ export default <NetworkData>{
                     scale: 1,
                     isIbYield: true,
                 },
+                rsETH: {
+                    tokenAddress: '0x4186bfc76e2e237523cbc30fd220fe055156b41f',
+                    sourceUrl: 'https://universe.kelpdao.xyz/rseth/apy',
+                    path: 'value',
+                    isIbYield: true,
+                },
             },
         },
     },
