@@ -147,7 +147,7 @@ export default <NetworkData>{
                     tokenAddress: '0x67a298e5b65db2b4616e05c3b455e017275f53cb',
                 },
             ],
-            mainstreet: '0xc7990369da608c2f4903715e3bd22f2970536c29',
+            smsusd: '0xc7990369da608c2f4903715e3bd22f2970536c29',
             defaultHandlers: {
                 wOS: {
                     tokenAddress: '0x9f0df7799f6fdad409300080cff680f5a23df4b1',

@@ -260,7 +260,7 @@ export default <NetworkData>{
                 sdai: '0x83f20f44975d03b1b09e64809b757c47f942beea',
             },
             stakewise: {
-                url: 'https://mainnet-graph.stakewise.io/subgraphs/name/stakewise/stakewise',
+                url: 'https://graphs.stakewise.io/mainnet/subgraphs/name/stakewise/prod/',
                 token: '0xf1c9acdc66974dfb6decb12aa385b9cd01190e38',
             },
             etherfi: '0xcd5fe23c85820f7b72d0926fc9b05b43e359b7ee',
@@ -445,12 +445,6 @@ export default <NetworkData>{
                     tokenAddress: '0x9d39a5de30e57443bff2a8307a4256c8797a3497',
                     sourceUrl: 'https://ethena.fi/api/yields/protocol-and-staking-yield',
                     path: 'stakingYield.value',
-                    isIbYield: true,
-                },
-                saETH: {
-                    tokenAddress: '0xf1617882a71467534d14eee865922de1395c9e89',
-                    sourceUrl: 'https://api.aspidanet.com/page_data/?chainId=1',
-                    path: 'apr',
                     isIbYield: true,
                 },
                 cdcETH: {

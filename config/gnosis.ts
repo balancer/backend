@@ -75,7 +75,7 @@ export default <NetworkData>{
         aaveRewardsAprHandler: true,
         ybAprHandler: {
             stakewise: {
-                url: 'https://gnosis-graph.stakewise.io/subgraphs/name/stakewise/stakewise',
+                url: 'https://graphs.stakewise.io/mainnet/subgraphs/name/stakewise/prod/',
                 token: '0xf490c80aae5f2616d3e3bda2483e30c4cb21d1a0',
             },
             defaultHandlers: {
