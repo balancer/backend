@@ -8,6 +8,7 @@ import { chainToChainId } from '../../network/chain-id-to-chain';
 import { poolsToIgnore } from './constants';
 import _ from 'lodash';
 import { tokenService } from '../../token/token.service';
+import { env } from '../../../apps/env';
 
 export type BufferPoolData = {
     poolId: string;
@@ -40,7 +41,7 @@ export async function getBasePoolsFromDb(
         const pools = await getPools(chain);
         console.timeEnd('SOR:getpools');
         const bufferPools = await getBufferPoolsFromDBPools(pools, chain);
-        cached = cache.put(cacheKey, { pools, bufferPools }, 10 * 1000); // cache for 10s
+        cached = cache.put(cacheKey, { pools, bufferPools }, parseInt(env.SOR_POOLS_CACHE_TTL_SECONDS) * 1000);
     }
 
     // Filter

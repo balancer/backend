@@ -16,7 +16,7 @@ export default <NetworkData>{
         balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmPXaLKDvMMZdjD1ZuMpMSkRjKf8ALLVRtjUpTwWdKSvpQ`,
         balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmUgRWkb5JUocGkVidpKtZFMHjexJzkBiSbjufURsXwn9X`,
         balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/Qmf6QJoTbJ19gmNk3T61PcTR2ufzV8mDxPP5iuVLFcXBft`,
-        gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmSRNzwTmLu55ZxxyxYULS5T1Kar7upz1jzL5FsMzLpB2e`,
+        gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmPvzExEGhqUYBB1oVLdQDXoHWUxuBJ8Sb3Dowx5qt5xze`,
         reliquary: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmUM8aU6H3gFx6JL65GQV5baPPjczU9hUb6VRiDQ1jEp3B`,
         sts: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmYmPEGqVZPyJKRah4NVbCYtxkHrXq3QzqBrnVQYBt15MU`,
     },
@@ -147,6 +147,7 @@ export default <NetworkData>{
                     tokenAddress: '0x67a298e5b65db2b4616e05c3b455e017275f53cb',
                 },
             ],
+            mainstreet: '0xc7990369da608c2f4903715e3bd22f2970536c29',
             defaultHandlers: {
                 wOS: {
                     tokenAddress: '0x9f0df7799f6fdad409300080cff680f5a23df4b1',

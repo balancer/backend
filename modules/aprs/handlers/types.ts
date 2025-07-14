@@ -50,6 +50,7 @@ export interface YbAprConfig {
         token: string;
     };
     etherfi?: string;
+    mainstreet?: string;
     sveth?: boolean;
     defillama?: {
         defillamaPoolId: string;
