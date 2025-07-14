@@ -163,7 +163,7 @@ export default <NetworkData>{
                 },
             ],
             stakewise: {
-                url: 'https://mainnet-graph.stakewise.io/subgraphs/name/stakewise/stakewise',
+                url: 'https://graphs.stakewise.io/mainnet/subgraphs/name/stakewise/prod/',
                 token: '0xf7d4e7273e5015c96728a6b02f31c505ee184603',
             },
             etherfi: '0x35751007a407ca6feffe80b3cb397736d2cf4dbe',
