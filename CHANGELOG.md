@@ -1,5 +1,11 @@
 # backend
 
+## 1.48.10
+
+### Patch Changes
+
+-   ffe3b1c: fix swap through pool
+
 ## 1.48.9
 
 ### Patch Changes
