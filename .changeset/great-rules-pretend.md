@@ -1,0 +1,5 @@
+---
+'backend': minor
+---
+
+pricing refactoring
