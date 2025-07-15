@@ -4,8 +4,6 @@ import { TokenPriceService } from './lib/token-price.service';
 import {
     Chain,
     Prisma,
-    PrismaErc4626ReviewData,
-    PrismaPriceRateProviderData,
     PrismaToken,
     PrismaTokenCurrentPrice,
     PrismaTokenDynamicData,
@@ -25,6 +23,7 @@ import {
 import { Dictionary } from 'lodash';
 import { GithubContentService } from '../content/github-content.service';
 import config from '../../config';
+import murmurhash from 'murmurhash';
 
 const TOKEN_PRICES_CACHE_KEY = `token:prices:current`;
 const TOKEN_PRICES_24H_AGO_CACHE_KEY = `token:prices:24h-ago`;
@@ -228,33 +227,43 @@ export class TokenService {
     ): Promise<
         Record<string, (Erc4626ReviewData & { erc4626Address: string; assetAddress: string; chain: Chain }) | undefined>
     > {
-        const erc4626Data = await prisma.prismaErc4626ReviewData
-            .findMany()
-            .then((reviews) => {
-                // Remove all duplicates, keeping only items that appear exactly once
-                const addressChainCounts = new Map<string, number>();
+        const cacheKey = `ERC4626REVIEWDATA-${murmurhash.v3(`${tokens}`).toString(36)}`;
 
-                reviews.forEach((review) => {
-                    const key = `${review.erc4626Address}-${review.chain}`;
-                    addressChainCounts.set(key, (addressChainCounts.get(key) || 0) + 1);
-                });
+        let erc4626Data: Record<
+            string,
+            Erc4626ReviewData & { erc4626Address: string; assetAddress: string; chain: Chain }
+        > = this.cache.get(cacheKey);
 
-                const noDuplicatesReviews = reviews.filter((review) => {
-                    const key = `${review.erc4626Address}-${review.chain}`;
-                    return addressChainCounts.get(key) === 1;
-                });
+        if (!erc4626Data) {
+            erc4626Data = await prisma.prismaErc4626ReviewData
+                .findMany()
+                .then((reviews) => {
+                    // Remove all duplicates, keeping only items that appear exactly once
+                    const addressChainCounts = new Map<string, number>();
 
-                return noDuplicatesReviews;
-            })
-            .then((reviews) =>
-                reviews.map((review) => ({
-                    ...review,
-                    warnings: review.warnings?.split(',') || [],
-                })),
-            )
-            .then((reviews) =>
-                Object.fromEntries(reviews.map((review) => [`${review.erc4626Address}-${review.chain}`, review])),
-            );
+                    reviews.forEach((review) => {
+                        const key = `${review.erc4626Address}-${review.chain}`;
+                        addressChainCounts.set(key, (addressChainCounts.get(key) || 0) + 1);
+                    });
+
+                    const noDuplicatesReviews = reviews.filter((review) => {
+                        const key = `${review.erc4626Address}-${review.chain}`;
+                        return addressChainCounts.get(key) === 1;
+                    });
+
+                    return noDuplicatesReviews;
+                })
+                .then((reviews) =>
+                    reviews.map((review) => ({
+                        ...review,
+                        warnings: review.warnings?.split(',') || [],
+                    })),
+                )
+                .then((reviews) =>
+                    Object.fromEntries(reviews.map((review) => [`${review.erc4626Address}-${review.chain}`, review])),
+                );
+            this.cache.put(cacheKey, erc4626Data, 10 * 60 * 1000); // cache for 10 min
+        }
 
         if (!tokens) return erc4626Data;
 
