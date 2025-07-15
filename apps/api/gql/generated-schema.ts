@@ -203,6 +203,13 @@ export type GqlHookType =
     | 'UNKNOWN'
     | 'VEBAL_DISCOUNT';
 
+export interface GqlLbpTopTrade {
+    __typename?: 'GqlLBPTopTrade';
+    address: Scalars['String'];
+    timestamp: Scalars['String'];
+    value: Scalars['String'];
+}
+
 export interface GqlLatestSyncedBlocks {
     __typename?: 'GqlLatestSyncedBlocks';
     poolSyncBlock: Scalars['BigInt'];
@@ -1209,6 +1216,7 @@ export interface GqlPoolLiquidityBootstrappingV3 extends GqlPoolBase {
     symbol: Scalars['String'];
     tags?: Maybe<Array<Maybe<Scalars['String']>>>;
     telegram?: Maybe<Scalars['String']>;
+    topTrades?: Maybe<Array<Maybe<GqlLbpTopTrade>>>;
     type: GqlPoolType;
     userBalance?: Maybe<GqlPoolUserBalance>;
     /** @deprecated use protocolVersion instead */
@@ -2794,6 +2802,7 @@ export interface LiquidityBootstrappingPoolV3Params {
     reserveTokenStartWeight: Scalars['Float'];
     startTime: Scalars['Int'];
     telegram?: Maybe<Scalars['String']>;
+    topTrades?: Maybe<Array<Maybe<GqlLbpTopTrade>>>;
     website?: Maybe<Scalars['String']>;
     x?: Maybe<Scalars['String']>;
 }
@@ -3441,6 +3450,7 @@ export type ResolversTypes = ResolversObject<{
     GqlHookData: ResolverTypeWrapper<GqlHookData>;
     GqlHookReviewData: ResolverTypeWrapper<GqlHookReviewData>;
     GqlHookType: GqlHookType;
+    GqlLBPTopTrade: ResolverTypeWrapper<GqlLbpTopTrade>;
     GqlLatestSyncedBlocks: ResolverTypeWrapper<GqlLatestSyncedBlocks>;
     GqlNestedPool: ResolverTypeWrapper<GqlNestedPool>;
     GqlPoolAddRemoveEventV3: ResolverTypeWrapper<GqlPoolAddRemoveEventV3>;
@@ -3671,6 +3681,7 @@ export type ResolversParentTypes = ResolversObject<{
     GqlHook: Omit<GqlHook, 'params'> & { params?: Maybe<ResolversParentTypes['HookParams']> };
     GqlHookData: GqlHookData;
     GqlHookReviewData: GqlHookReviewData;
+    GqlLBPTopTrade: GqlLbpTopTrade;
     GqlLatestSyncedBlocks: GqlLatestSyncedBlocks;
     GqlNestedPool: GqlNestedPool;
     GqlPoolAddRemoveEventV3: GqlPoolAddRemoveEventV3;
@@ -4003,6 +4014,16 @@ export type GqlHookReviewDataResolvers<
     reviewFile?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     summary?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     warnings?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
+    __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type GqlLbpTopTradeResolvers<
+    ContextType = ResolverContext,
+    ParentType extends ResolversParentTypes['GqlLBPTopTrade'] = ResolversParentTypes['GqlLBPTopTrade'],
+> = ResolversObject<{
+    address?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+    timestamp?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+    value?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -4729,6 +4750,7 @@ export type GqlPoolLiquidityBootstrappingV3Resolvers<
     symbol?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     tags?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>;
     telegram?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    topTrades?: Resolver<Maybe<Array<Maybe<ResolversTypes['GqlLBPTopTrade']>>>, ParentType, ContextType>;
     type?: Resolver<ResolversTypes['GqlPoolType'], ParentType, ContextType>;
     userBalance?: Resolver<Maybe<ResolversTypes['GqlPoolUserBalance']>, ParentType, ContextType>;
     vaultVersion?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
@@ -6021,6 +6043,7 @@ export type LiquidityBootstrappingPoolV3ParamsResolvers<
     reserveTokenStartWeight?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
     startTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     telegram?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    topTrades?: Resolver<Maybe<Array<Maybe<ResolversTypes['GqlLBPTopTrade']>>>, ParentType, ContextType>;
     website?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     x?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -6521,6 +6544,7 @@ export type Resolvers<ContextType = ResolverContext> = ResolversObject<{
     GqlHook?: GqlHookResolvers<ContextType>;
     GqlHookData?: GqlHookDataResolvers<ContextType>;
     GqlHookReviewData?: GqlHookReviewDataResolvers<ContextType>;
+    GqlLBPTopTrade?: GqlLbpTopTradeResolvers<ContextType>;
     GqlLatestSyncedBlocks?: GqlLatestSyncedBlocksResolvers<ContextType>;
     GqlNestedPool?: GqlNestedPoolResolvers<ContextType>;
     GqlPoolAddRemoveEventV3?: GqlPoolAddRemoveEventV3Resolvers<ContextType>;

@@ -196,6 +196,13 @@ export enum GqlHookType {
     VEBAL_DISCOUNT = 'VEBAL_DISCOUNT',
 }
 
+export type GqlLbpTopTrade = {
+    __typename?: 'GqlLBPTopTrade';
+    address: Scalars['String'];
+    timestamp: Scalars['String'];
+    value: Scalars['String'];
+};
+
 export type GqlLatestSyncedBlocks = {
     __typename?: 'GqlLatestSyncedBlocks';
     poolSyncBlock: Scalars['BigInt'];
@@ -1215,6 +1222,7 @@ export type GqlPoolLiquidityBootstrappingV3 = GqlPoolBase & {
     symbol: Scalars['String'];
     tags?: Maybe<Array<Maybe<Scalars['String']>>>;
     telegram?: Maybe<Scalars['String']>;
+    topTrades?: Maybe<Array<Maybe<GqlLbpTopTrade>>>;
     type: GqlPoolType;
     userBalance?: Maybe<GqlPoolUserBalance>;
     /** @deprecated use protocolVersion instead */
@@ -2838,6 +2846,7 @@ export type LiquidityBootstrappingPoolV3Params = {
     reserveTokenStartWeight: Scalars['Float'];
     startTime: Scalars['Int'];
     telegram?: Maybe<Scalars['String']>;
+    topTrades?: Maybe<Array<Maybe<GqlLbpTopTrade>>>;
     website?: Maybe<Scalars['String']>;
     x?: Maybe<Scalars['String']>;
 };

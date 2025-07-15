@@ -211,6 +211,12 @@ export const schema = gql`
         VEBAL_DISCOUNT
     }
 
+    type GqlLBPTopTrade {
+        address: String!
+        timestamp: String!
+        value: String!
+    }
+
     type GqlLatestSyncedBlocks {
         poolSyncBlock: BigInt!
         userStakeSyncBlock: BigInt!
@@ -1681,6 +1687,7 @@ export const schema = gql`
         symbol: String!
         tags: [String]
         telegram: String
+        topTrades: [GqlLBPTopTrade]
         type: GqlPoolType!
         userBalance: GqlPoolUserBalance
         vaultVersion: Int! @deprecated(reason: "use protocolVersion instead")
@@ -4093,6 +4100,7 @@ export const schema = gql`
         reserveTokenStartWeight: Float!
         startTime: Int!
         telegram: String
+        topTrades: [GqlLBPTopTrade]
         website: String
         x: String
     }
