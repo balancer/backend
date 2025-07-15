@@ -1,5 +1,13 @@
 # backend
 
+## 1.48.11
+
+### Patch Changes
+
+-   4e81637: exposing lbp top trades in the queries
+-   507b98d: fix: align maxBalances1 helper with contract logic
+-   e166739: adding trades list to synced LBP data
+
 ## 1.48.10
 
 ### Patch Changes
