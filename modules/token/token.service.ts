@@ -4,8 +4,6 @@ import { TokenPriceService } from './lib/token-price.service';
 import {
     Chain,
     Prisma,
-    PrismaErc4626ReviewData,
-    PrismaPriceRateProviderData,
     PrismaToken,
     PrismaTokenCurrentPrice,
     PrismaTokenDynamicData,
@@ -25,6 +23,7 @@ import {
 import { Dictionary } from 'lodash';
 import { GithubContentService } from '../content/github-content.service';
 import config from '../../config';
+import murmurhash from 'murmurhash';
 
 const TOKEN_PRICES_CACHE_KEY = `token:prices:current`;
 const TOKEN_PRICES_24H_AGO_CACHE_KEY = `token:prices:24h-ago`;
@@ -228,7 +227,7 @@ export class TokenService {
     ): Promise<
         Record<string, (Erc4626ReviewData & { erc4626Address: string; assetAddress: string; chain: Chain }) | undefined>
     > {
-        const cacheKey = 'ERC4626REVIEWDATA';
+        const cacheKey = `ERC4626REVIEWDATA-${murmurhash.v3(`${tokens}`).toString(36)}`;
 
         let erc4626Data: Record<
             string,
