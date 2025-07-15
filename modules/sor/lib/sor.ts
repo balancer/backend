@@ -119,13 +119,6 @@ export class SOR {
                         if (protocolVersion === 3) {
                             basePools.push(GyroECLPPool.fromPrismaPool(prismaPool));
                         } else {
-                            // one of the Gyro2 pools has no eth left and is out of balance. Temp fix to get SOR working again
-                            // while investigation is ongoing
-                            if (
-                                prismaPool.id === '0x63fc054159094583a27632361bd11c94c30e48c70002000000000000000006f7'
-                            ) {
-                                break;
-                            }
                             basePools.push(GyroEPool.fromPrismaPool(prismaPool));
                         }
                         break;
