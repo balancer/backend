@@ -2467,6 +2467,8 @@ export interface GqlToken {
     isErc4626: Scalars['Boolean'];
     /** The logo URI of the token */
     logoURI?: Maybe<Scalars['String']>;
+    /** If it is an ERC4626 token, this  defines how much can be deposited into the ERC4626 vault. */
+    maxDeposit?: Maybe<Scalars['String']>;
     /** The name of the token */
     name: Scalars['String'];
     /** The rate provider data for the token */
@@ -5737,6 +5739,7 @@ export type GqlTokenResolvers<
     isBufferAllowed?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
     isErc4626?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
     logoURI?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    maxDeposit?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     priceRateProviderData?: Resolver<Maybe<ResolversTypes['GqlPriceRateProviderData']>, ParentType, ContextType>;
     priority?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;

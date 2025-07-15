@@ -200,6 +200,10 @@ type GqlToken {
     """
     erc4626ReviewData: Erc4626ReviewData
     types: [GqlTokenType!]
+    """
+    If it is an ERC4626 token, this  defines how much can be deposited into the ERC4626 vault.
+    """
+    maxDeposit: String
 }
 
 """
