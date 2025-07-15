@@ -19,6 +19,7 @@ export interface LatestEventRepository {
         protocolVersion?: number;
         types?: PoolEventType[];
         timestamp?: number;
+        poolId?: string;
     }) => Promise<SwapEvent | JoinExitEvent | null>;
 }
 

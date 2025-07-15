@@ -12,6 +12,7 @@ import {
     GqlHook,
     GqlHookData,
     GqlHookReviewData,
+    GqlLbpTopTrade,
     GqlLatestSyncedBlocks,
     GqlNestedPool,
     GqlPoolAddRemoveEventV3,
@@ -347,6 +348,14 @@ export const aGqlHookReviewData = (overrides?: Partial<GqlHookReviewData>): GqlH
         reviewFile: overrides && overrides.hasOwnProperty('reviewFile') ? overrides.reviewFile! : 'curvo',
         summary: overrides && overrides.hasOwnProperty('summary') ? overrides.summary! : 'coniecto',
         warnings: overrides && overrides.hasOwnProperty('warnings') ? overrides.warnings! : ['pecto'],
+    };
+};
+
+export const aGqlLbpTopTrade = (overrides?: Partial<GqlLbpTopTrade>): GqlLbpTopTrade => {
+    return {
+        address: overrides && overrides.hasOwnProperty('address') ? overrides.address! : 'denique',
+        timestamp: overrides && overrides.hasOwnProperty('timestamp') ? overrides.timestamp! : 'centum',
+        value: overrides && overrides.hasOwnProperty('value') ? overrides.value! : 'stips',
     };
 };
 
@@ -1290,6 +1299,7 @@ export const aGqlPoolLiquidityBootstrappingV3 = (
         symbol: overrides && overrides.hasOwnProperty('symbol') ? overrides.symbol! : 'clamo',
         tags: overrides && overrides.hasOwnProperty('tags') ? overrides.tags! : ['attollo'],
         telegram: overrides && overrides.hasOwnProperty('telegram') ? overrides.telegram! : 'cohibeo',
+        topTrades: overrides && overrides.hasOwnProperty('topTrades') ? overrides.topTrades! : [aGqlLbpTopTrade()],
         type: overrides && overrides.hasOwnProperty('type') ? overrides.type! : GqlPoolType.COMPOSABLE_STABLE,
         userBalance:
             overrides && overrides.hasOwnProperty('userBalance') ? overrides.userBalance! : aGqlPoolUserBalance(),
@@ -2792,6 +2802,7 @@ export const aLiquidityBootstrappingPoolV3Params = (
             overrides && overrides.hasOwnProperty('reserveTokenStartWeight') ? overrides.reserveTokenStartWeight! : 1.2,
         startTime: overrides && overrides.hasOwnProperty('startTime') ? overrides.startTime! : 1614,
         telegram: overrides && overrides.hasOwnProperty('telegram') ? overrides.telegram! : 'tego',
+        topTrades: overrides && overrides.hasOwnProperty('topTrades') ? overrides.topTrades! : [aGqlLbpTopTrade()],
         website: overrides && overrides.hasOwnProperty('website') ? overrides.website! : 'ad',
         x: overrides && overrides.hasOwnProperty('x') ? overrides.x! : 'id',
     };

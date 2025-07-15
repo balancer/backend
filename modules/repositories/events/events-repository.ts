@@ -60,11 +60,13 @@ export const eventsRepository = {
         protocolVersion,
         types,
         timestamp,
+        poolId,
     }: {
         chain: Chain;
         protocolVersion?: number;
         types?: PoolEventType[];
         timestamp?: number;
+        poolId?: string;
     }) => {
         if (timestamp && (timestamp < 0 || timestamp > now() || timestamp < now() - 3 * 365 * 24 * 60 * 60)) {
             throw new Error(`Invalid timestamp ${timestamp}`);
@@ -74,6 +76,7 @@ export const eventsRepository = {
             chain,
             ...(protocolVersion ? { protocolVersion } : {}),
             ...(timestamp ? { blockTimestamp: { lte: timestamp } } : {}),
+            ...(poolId ? { poolId } : {}),
         };
 
         if (!types) {
@@ -292,6 +295,19 @@ export const eventsRepository = {
                 sellVolume: Number(row.tokenASell),
             }))
             .sort((a, b) => a.timestamp - b.timestamp);
+    },
+    getTopTrades: async (poolId: string, chain: Chain, take = 10) => {
+        const events = await prisma.prismaPoolEvent.findMany({
+            where: {
+                poolId,
+                chain,
+                type: 'SWAP',
+            },
+            orderBy: { valueUSD: 'desc' },
+            take,
+        });
+
+        return events;
     },
     storeEvents: async (events: (SwapEvent | JoinExitEvent)[]) => {
         await prisma.prismaPoolEvent.createMany({
