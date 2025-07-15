@@ -1,11 +1,16 @@
 import { Chain } from '@prisma/client';
 import { getViemClient } from '../sources/viem-client';
-import { syncWeights } from '../actions/lbp/sync-weights';
+import { syncData } from '../actions/lbp/sync-data';
+import config from '../../config';
+import { getVaultSubgraphClient } from '../sources/subgraphs';
 
 export const LBPController = {
-    async syncWeights(chain: Chain) {
+    async syncData(chain: Chain) {
         const client = getViemClient(chain);
+        const subgraphUrl = config[chain].subgraphs.balancerV3;
+        if (!subgraphUrl) return;
+        const subgraphClient = getVaultSubgraphClient(subgraphUrl, chain);
 
-        await syncWeights(client, chain);
+        await syncData(chain, client, subgraphClient);
     },
 };
