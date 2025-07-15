@@ -228,43 +228,33 @@ export class TokenService {
     ): Promise<
         Record<string, (Erc4626ReviewData & { erc4626Address: string; assetAddress: string; chain: Chain }) | undefined>
     > {
-        const cacheKey = 'ERC4626REVIEWDATA';
+        const erc4626Data = await prisma.prismaErc4626ReviewData
+            .findMany()
+            .then((reviews) => {
+                // Remove all duplicates, keeping only items that appear exactly once
+                const addressChainCounts = new Map<string, number>();
 
-        let erc4626Data: Record<
-            string,
-            Erc4626ReviewData & { erc4626Address: string; assetAddress: string; chain: Chain }
-        > = this.cache.get(cacheKey);
+                reviews.forEach((review) => {
+                    const key = `${review.erc4626Address}-${review.chain}`;
+                    addressChainCounts.set(key, (addressChainCounts.get(key) || 0) + 1);
+                });
 
-        if (!erc4626Data) {
-            erc4626Data = await prisma.prismaErc4626ReviewData
-                .findMany()
-                .then((reviews) => {
-                    // Remove all duplicates, keeping only items that appear exactly once
-                    const addressChainCounts = new Map<string, number>();
+                const noDuplicatesReviews = reviews.filter((review) => {
+                    const key = `${review.erc4626Address}-${review.chain}`;
+                    return addressChainCounts.get(key) === 1;
+                });
 
-                    reviews.forEach((review) => {
-                        const key = `${review.erc4626Address}-${review.chain}`;
-                        addressChainCounts.set(key, (addressChainCounts.get(key) || 0) + 1);
-                    });
-
-                    const noDuplicatesReviews = reviews.filter((review) => {
-                        const key = `${review.erc4626Address}-${review.chain}`;
-                        return addressChainCounts.get(key) === 1;
-                    });
-
-                    return noDuplicatesReviews;
-                })
-                .then((reviews) =>
-                    reviews.map((review) => ({
-                        ...review,
-                        warnings: review.warnings?.split(',') || [],
-                    })),
-                )
-                .then((reviews) =>
-                    Object.fromEntries(reviews.map((review) => [`${review.erc4626Address}-${review.chain}`, review])),
-                );
-            this.cache.put(cacheKey, erc4626Data, 10 * 60 * 1000); // cache for 10 min
-        }
+                return noDuplicatesReviews;
+            })
+            .then((reviews) =>
+                reviews.map((review) => ({
+                    ...review,
+                    warnings: review.warnings?.split(',') || [],
+                })),
+            )
+            .then((reviews) =>
+                Object.fromEntries(reviews.map((review) => [`${review.erc4626Address}-${review.chain}`, review])),
+            );
 
         if (!tokens) return erc4626Data;
 
