@@ -2446,6 +2446,7 @@ export const aGqlToken = (overrides?: Partial<GqlToken>): GqlToken => {
         isBufferAllowed: overrides && overrides.hasOwnProperty('isBufferAllowed') ? overrides.isBufferAllowed! : true,
         isErc4626: overrides && overrides.hasOwnProperty('isErc4626') ? overrides.isErc4626! : true,
         logoURI: overrides && overrides.hasOwnProperty('logoURI') ? overrides.logoURI! : 'calco',
+        maxDeposit: overrides && overrides.hasOwnProperty('maxDeposit') ? overrides.maxDeposit! : 'ultra',
         name: overrides && overrides.hasOwnProperty('name') ? overrides.name! : 'bos',
         priceRateProviderData:
             overrides && overrides.hasOwnProperty('priceRateProviderData')
