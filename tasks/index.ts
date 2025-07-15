@@ -185,7 +185,9 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         return new VeBalVotingListService().syncVotingGauges();
     } else if (job === 'sync-weights') {
         await QuantAmmController.syncWeights(chain);
-        await LBPController.syncWeights(chain);
+        return 'OK';
+    } else if (job === 'sync-lbps') {
+        await LBPController.syncData(chain);
         return 'OK';
     }
     // Maintenance
