@@ -265,18 +265,7 @@ export class TokenService {
             this.cache.put(cacheKey, erc4626Data, 10 * 60 * 1000); // cache for 10 min
         }
 
-        if (!tokens) return erc4626Data;
-
-        const erc4626DataResult: Record<
-            string,
-            (Erc4626ReviewData & { erc4626Address: string; assetAddress: string; chain: Chain }) | undefined
-        > = {};
-
-        for (const token of tokens) {
-            erc4626DataResult[token.address] = erc4626Data[`${token.address}-${token.chain}`];
-        }
-
-        return erc4626DataResult;
+        return erc4626Data;
     }
 
     public async updateTokenPrices(chains: Chain[]): Promise<void> {
