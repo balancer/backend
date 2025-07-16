@@ -12,6 +12,7 @@ import {
     MorphoPriceHandler,
     BptPriceHandler,
     LbpPriceHandler,
+    FallbackPriceHandler,
 } from './handlers';
 import { getViemClient } from '../sources/viem-client';
 import { prisma } from '../../prisma/prisma-client';
@@ -40,6 +41,7 @@ export function createHandlers(chains: Chain[]): PriceHandler[] {
         new LbpPriceHandler({
             prismaPool: prisma.prismaPool,
         }),
+        new FallbackPriceHandler(),
     ];
 
     return handlers;

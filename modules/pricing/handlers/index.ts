@@ -10,3 +10,4 @@ export { ClqdrPriceHandler } from './clqdr-price-handler';
 export { MorphoPriceHandler } from './morpho-price-handler';
 export { BptPriceHandler } from './bpt-price-handler';
 export { LbpPriceHandler } from './lbp-price-handler';
+export { FallbackPriceHandler } from './fallback-price-handler';
