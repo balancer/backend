@@ -11,6 +11,7 @@ import {
     ClqdrPriceHandler,
     MorphoPriceHandler,
     BptPriceHandler,
+    LbpPriceHandler,
 } from './handlers';
 import { getViemClient } from '../sources/viem-client';
 import { prisma } from '../../prisma/prisma-client';
@@ -31,11 +32,14 @@ export function createHandlers(chains: Chain[]): PriceHandler[] {
         new ClqdrPriceHandler(getViemClient),
         new AavePriceHandler(getViemClient),
         new MorphoPriceHandler(),
+        new CoingeckoPriceHandler(coingeckoConfig),
         new BptPriceHandler({
             prismaPool: prisma.prismaPool,
         }),
-        new CoingeckoPriceHandler(coingeckoConfig),
         new SwapsPriceHandler(),
+        new LbpPriceHandler({
+            prismaPool: prisma.prismaPool,
+        }),
     ];
 
     return handlers;
