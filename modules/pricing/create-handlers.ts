@@ -1,6 +1,13 @@
 import { Chain } from '@prisma/client';
 import { PriceHandler } from './types';
-import { RektTokensHandler, ERC4626PriceHandler, AavePriceHandler, CoingeckoPriceHandler, SwapsPriceHandler } from './handlers';
+import {
+    RektTokensHandler,
+    ERC4626PriceHandler,
+    AavePriceHandler,
+    CoingeckoPriceHandler,
+    SwapsPriceHandler,
+    BeetsPriceHandler,
+} from './handlers';
 import { getViemClient } from '../sources/viem-client';
 import config from '../../config';
 
@@ -11,6 +18,7 @@ export function createHandlers(chains: Chain[]): PriceHandler[] {
     const handlers: PriceHandler[] = [
         new RektTokensHandler(),
         new ERC4626PriceHandler(),
+        new BeetsPriceHandler(getViemClient),
         new AavePriceHandler(getViemClient),
         new CoingeckoPriceHandler(coingeckoConfig),
         new SwapsPriceHandler(),
