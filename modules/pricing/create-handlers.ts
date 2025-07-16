@@ -7,8 +7,10 @@ import {
     CoingeckoPriceHandler,
     SwapsPriceHandler,
     BeetsPriceHandler,
+    FbeetsPriceHandler,
 } from './handlers';
 import { getViemClient } from '../sources/viem-client';
+import { prisma } from '../../prisma/prisma-client';
 import config from '../../config';
 
 export function createHandlers(chains: Chain[]): PriceHandler[] {
@@ -18,6 +20,10 @@ export function createHandlers(chains: Chain[]): PriceHandler[] {
     const handlers: PriceHandler[] = [
         new RektTokensHandler(),
         new ERC4626PriceHandler(),
+        new FbeetsPriceHandler({
+            prismaFbeets: prisma.prismaFbeets,
+            prismaPool: prisma.prismaPool,
+        }),
         new BeetsPriceHandler(getViemClient),
         new AavePriceHandler(getViemClient),
         new CoingeckoPriceHandler(coingeckoConfig),
