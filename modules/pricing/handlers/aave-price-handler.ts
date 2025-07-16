@@ -26,7 +26,7 @@ export class AavePriceHandler implements PriceHandler {
         this.aaveTokensByChain = this.fetchAaveTokensFromConfig();
     }
 
-    async calculatePricesForTokens(tokens: TokenPriceData[], allPrices: Map<string, number>): Promise<PriceItem[]> {
+    async calculatePricesForTokens(tokens: TokenPriceData[]): Promise<PriceItem[]> {
         const acceptedTokens = this.getAcceptedTokens(tokens);
 
         if (acceptedTokens.length === 0) {

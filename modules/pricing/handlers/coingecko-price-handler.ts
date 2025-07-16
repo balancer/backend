@@ -13,7 +13,7 @@ export class CoingeckoPriceHandler implements PriceHandler {
 
     constructor(private readonly config: CoingeckoConfig) {}
 
-    async calculatePricesForTokens(tokens: TokenPriceData[], allPrices: Map<string, number>): Promise<PriceItem[]> {
+    async calculatePricesForTokens(tokens: TokenPriceData[]): Promise<PriceItem[]> {
         const acceptedTokens = this.getAcceptedTokens(tokens);
 
         if (acceptedTokens.length === 0) {

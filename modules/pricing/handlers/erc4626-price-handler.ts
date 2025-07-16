@@ -5,7 +5,7 @@ export class ERC4626PriceHandler implements PriceHandler {
     public readonly exitIfFails = false;
     public readonly id = 'ERC4626PriceHandlerService';
 
-    async calculatePricesForTokens(tokens: TokenPriceData[], allPrices: Map<string, number>): Promise<PriceItem[]> {
+    async calculatePricesForTokens(tokens: TokenPriceData[]): Promise<PriceItem[]> {
         const acceptedTokens = this.getAcceptedTokens(tokens);
 
         if (acceptedTokens.length === 0) {
