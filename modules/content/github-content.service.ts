@@ -101,103 +101,83 @@ export class GithubContentService {
     }
 
     private async syncBlockedTokens() {
-        const dbBlockedTokens = await prisma.prismaTokenType.findMany({
-            select: { id: true, tokenAddress: true, chain: true, type: true },
-            where: { type: { in: [PrismaTokenTypeOption.BLOCKED_V2, PrismaTokenTypeOption.BLOCKED_V3] } },
+        const [existingBlockedTypes, blockedTokensCsv] = await Promise.all([
+            prisma.prismaTokenType.findMany({
+                select: { id: true, tokenAddress: true, chain: true, type: true },
+                where: { type: { in: [PrismaTokenTypeOption.BLOCKED_V2, PrismaTokenTypeOption.BLOCKED_V3] } },
+            }),
+            axios.get<string>(BLOCKED_TOKENS_URL),
+        ]);
+
+        const githubBlockedTokens = blockedTokensCsv.data
+            .split('\n')
+            .filter((line) => line.trim())
+            .map((line) => {
+                const [chainId, tokenAddress, protocolVersion] = line.split(',');
+                return {
+                    tokenAddress: tokenAddress?.toLowerCase(),
+                    chain: chainIdToChain[parseInt(chainId)],
+                    protocolVersion: parseInt(protocolVersion),
+                };
+            })
+            .filter(
+                (token) =>
+                    token.tokenAddress && token.chain && (token.protocolVersion === 2 || token.protocolVersion === 3),
+            );
+
+        const existingTokensInDB = await prisma.prismaToken.findMany({
+            where: {
+                OR: githubBlockedTokens.map((token) => ({
+                    address: token.tokenAddress,
+                    chain: token.chain,
+                })),
+            },
+            select: { address: true, chain: true },
         });
 
-        // fetch blocked tokens from github
-        const { data: blockedTokensCsv } = await axios.get<string>(BLOCKED_TOKENS_URL);
-        const githubBlockedTokens = blockedTokensCsv
-            .split('\n')
-            .map((line) => {
-                const [chainId, tokenAddress, version] = line.split(',');
-                return { tokenAddress, chain: chainIdToChain[chainId], version };
-            })
-            .filter((token) => token.tokenAddress && token.chain);
+        const tokenExistsInDB = new Set(existingTokensInDB.map((token) => `${token.address}-${token.chain}`));
 
-        // add blocked tokens to db
-        const blockedV2TokensToAddToDB = githubBlockedTokens
-            .filter(
-                (token) =>
-                    !dbBlockedTokens.some(
-                        (dbToken) =>
-                            dbToken.tokenAddress === token.tokenAddress &&
-                            dbToken.chain === token.chain &&
-                            dbToken.type === PrismaTokenTypeOption.BLOCKED_V2,
-                    ),
-            )
-            .map((token) => ({
-                id: `${token.tokenAddress}-${token.chain}-${PrismaTokenTypeOption.BLOCKED_V2}`,
-                type: PrismaTokenTypeOption.BLOCKED_V2,
-                tokenAddress: token.tokenAddress,
-                chain: token.chain,
-            }));
+        const { tokensToAdd: v2TokensToAdd, tokensToRemove: v2TokensToRemove } = this.getTokensToSync(
+            2,
+            PrismaTokenTypeOption.BLOCKED_V2,
+            githubBlockedTokens,
+            existingBlockedTypes,
+            tokenExistsInDB,
+        );
+        const { tokensToAdd: v3TokensToAdd, tokensToRemove: v3TokensToRemove } = this.getTokensToSync(
+            3,
+            PrismaTokenTypeOption.BLOCKED_V3,
+            githubBlockedTokens,
+            existingBlockedTypes,
+            tokenExistsInDB,
+        );
 
-        if (blockedV2TokensToAddToDB.length > 0) {
-            await prisma.prismaTokenType.createMany({ skipDuplicates: true, data: blockedV2TokensToAddToDB });
+        const operations = [];
+
+        const allTokensToAdd = [...v2TokensToAdd, ...v3TokensToAdd];
+        const allTokensToRemove = [...v2TokensToRemove, ...v3TokensToRemove];
+
+        console.log(`Syncing blocked tokens: ${allTokensToAdd.length} to add, ${allTokensToRemove.length} to remove`);
+
+        if (allTokensToAdd.length > 0) {
+            operations.push(
+                prisma.prismaTokenType.createMany({
+                    skipDuplicates: true,
+                    data: allTokensToAdd,
+                }),
+            );
         }
 
-        const blockedV3TokensToAddToDB = githubBlockedTokens
-            .filter(
-                (token) =>
-                    !dbBlockedTokens.some(
-                        (dbToken) =>
-                            dbToken.tokenAddress === token.tokenAddress &&
-                            dbToken.chain === token.chain &&
-                            dbToken.type === PrismaTokenTypeOption.BLOCKED_V3,
-                    ),
-            )
-            .map((token) => ({
-                id: `${token.tokenAddress}-${token.chain}-${PrismaTokenTypeOption.BLOCKED_V3}`,
-                type: PrismaTokenTypeOption.BLOCKED_V3,
-                tokenAddress: token.tokenAddress,
-                chain: token.chain,
-            }));
-
-        if (blockedV3TokensToAddToDB.length > 0) {
-            await prisma.prismaTokenType.createMany({ skipDuplicates: true, data: blockedV3TokensToAddToDB });
+        if (allTokensToRemove.length > 0) {
+            operations.push(
+                prisma.prismaTokenType.deleteMany({
+                    where: { id: { in: allTokensToRemove } },
+                }),
+            );
         }
 
-        // remove tokens from db that are not in github blocked tokens
-        const blockedV2TokensToRemoveFromDB = dbBlockedTokens
-            .filter(
-                (dbToken) =>
-                    !githubBlockedTokens.some(
-                        (token) =>
-                            token.tokenAddress === dbToken.tokenAddress &&
-                            token.chain === dbToken.chain &&
-                            dbToken.type === PrismaTokenTypeOption.BLOCKED_V2,
-                    ),
-            )
-            .map((dbToken) => ({
-                id: `${dbToken.tokenAddress}-${dbToken.chain}-${PrismaTokenTypeOption.BLOCKED_V2}`,
-            }));
-
-        if (blockedV2TokensToRemoveFromDB.length > 0) {
-            await prisma.prismaTokenType.deleteMany({
-                where: { id: { in: blockedV2TokensToRemoveFromDB.map((token) => token.id) } },
-            });
-        }
-
-        const blockedV3TokensToRemoveFromDB = dbBlockedTokens
-            .filter(
-                (dbToken) =>
-                    !githubBlockedTokens.some(
-                        (token) =>
-                            token.tokenAddress === dbToken.tokenAddress &&
-                            token.chain === dbToken.chain &&
-                            dbToken.type === PrismaTokenTypeOption.BLOCKED_V3,
-                    ),
-            )
-            .map((dbToken) => ({
-                id: `${dbToken.tokenAddress}-${dbToken.chain}-${PrismaTokenTypeOption.BLOCKED_V3}`,
-            }));
-
-        if (blockedV3TokensToRemoveFromDB.length > 0) {
-            await prisma.prismaTokenType.deleteMany({
-                where: { id: { in: blockedV3TokensToRemoveFromDB.map((token) => token.id) } },
-            });
+        if (operations.length > 0) {
+            await prisma.$transaction(operations);
         }
     }
 
@@ -223,6 +203,57 @@ export class GithubContentService {
             }));
 
         await prisma.prismaTokenType.createMany({ skipDuplicates: true, data: [...bptTypes, ...phantomBptTypes] });
+    }
+
+    private getTokensToSync(
+        protocolVersion: number,
+        blockType: PrismaTokenTypeOption,
+        githubBlockedTokens: {
+            tokenAddress: string;
+            chain: Chain;
+            protocolVersion: number;
+        }[],
+        existingBlockedTypes: {
+            id: string;
+            tokenAddress: string;
+            chain: Chain;
+            type: PrismaTokenTypeOption;
+        }[],
+        tokenExistsInDB: Set<string>,
+    ) {
+        const tokensToAdd = githubBlockedTokens
+            .filter(
+                (token) =>
+                    token.protocolVersion === protocolVersion &&
+                    tokenExistsInDB.has(`${token.tokenAddress}-${token.chain}`) &&
+                    !existingBlockedTypes.some(
+                        (dbToken) =>
+                            dbToken.tokenAddress === token.tokenAddress &&
+                            dbToken.chain === token.chain &&
+                            dbToken.type === blockType,
+                    ),
+            )
+            .map((token) => ({
+                id: `${token.tokenAddress}-${token.chain}-${blockType}`,
+                type: blockType,
+                tokenAddress: token.tokenAddress,
+                chain: token.chain,
+            }));
+
+        const tokensToRemove = existingBlockedTypes
+            .filter(
+                (dbToken) =>
+                    dbToken.type === blockType &&
+                    !githubBlockedTokens.some(
+                        (githubToken) =>
+                            githubToken.tokenAddress === dbToken.tokenAddress &&
+                            githubToken.chain === dbToken.chain &&
+                            githubToken.protocolVersion === protocolVersion,
+                    ),
+            )
+            .map((dbToken) => dbToken.id);
+
+        return { tokensToAdd, tokensToRemove };
     }
 
     async getFeaturedPools(chains: Chain[]): Promise<FeaturedPool[]> {
