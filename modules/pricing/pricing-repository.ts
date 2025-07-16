@@ -3,9 +3,13 @@ import { prisma } from '../../prisma/prisma-client';
 import { prismaBulkExecuteOperations } from '../../prisma/prisma-util';
 import { timestampRoundedUpToNearestHour } from '../common/time';
 import { TokenPriceData, PriceItem } from './types';
+import { SwapRepository } from '../repositories/events/types';
+import { SwapEvent } from '../../prisma/prisma-types';
 import _ from 'lodash';
 
 export class PricingRepository {
+    constructor(private swapRepository: SwapRepository) {}
+
     async getTokensForPricing(chain: Chain, tokenAddresses?: string[]): Promise<TokenPriceData[]> {
         const tokens = await prisma.prismaToken.findMany({
             where: {
@@ -27,28 +31,14 @@ export class PricingRepository {
             },
         });
 
-        // Get all unique underlying token addresses
-        const underlyingAddresses = _.uniq(
-            tokens.map((token) => token.underlyingTokenAddress).filter((address) => address !== null),
-        ) as string[];
+        // Fetch swap data for pricing
+        const swaps = await this.swapRepository.getSwapsForPricing(chain);
 
-        // Fetch underlying token prices
-        const underlyingPriceMap = new Map<string, number>();
-        if (underlyingAddresses.length > 0) {
-            const prices = await prisma.prismaTokenCurrentPrice.findMany({
-                where: {
-                    tokenAddress: { in: underlyingAddresses },
-                    chain: chain,
-                },
-                select: {
-                    tokenAddress: true,
-                    price: true,
-                },
-            });
-            prices.forEach((p) => {
-                underlyingPriceMap.set(p.tokenAddress, p.price);
-            });
-        }
+        // Collect all token addresses that need prices
+        const allTokenAddresses = this.collectAllTokenAddresses(tokens, swaps);
+
+        // Fetch all prices in a single query
+        const allPrices = await this.fetchAllPrices(chain, allTokenAddresses);
 
         return tokens.map((token) => ({
             address: token.address,
@@ -59,8 +49,10 @@ export class PricingRepository {
             underlyingTokenAddress: token.underlyingTokenAddress || undefined,
             unwrapRate: token.unwrapRate || undefined,
             underlyingTokenPrice: token.underlyingTokenAddress
-                ? underlyingPriceMap.get(token.underlyingTokenAddress)
+                ? allPrices.get(token.underlyingTokenAddress)
                 : undefined,
+            currentPrice: allPrices.get(token.address),
+            latestSwaps: this.filterSwapsForToken(swaps, token.address),
         }));
     }
 
@@ -135,5 +127,59 @@ export class PricingRepository {
         await prismaBulkExecuteOperations(operations);
 
         return priceItems.map((item) => item.address);
+    }
+
+    private collectAllTokenAddresses(
+        tokens: { address: string; underlyingTokenAddress?: string | null }[],
+        swaps: SwapEvent[],
+    ): string[] {
+        const addresses = new Set<string>();
+
+        // Add all target token addresses
+        tokens.forEach((token) => {
+            addresses.add(token.address);
+            // Add underlying token addresses for ERC4626/Aave tokens
+            if (token.underlyingTokenAddress) {
+                addresses.add(token.underlyingTokenAddress);
+            }
+        });
+
+        // Add all swap token addresses (for other tokens in swaps)
+        swaps.forEach((swap) => {
+            addresses.add(swap.payload.tokenIn.address);
+            addresses.add(swap.payload.tokenOut.address);
+        });
+
+        return Array.from(addresses);
+    }
+
+    private async fetchAllPrices(chain: Chain, tokenAddresses: string[]): Promise<Map<string, number>> {
+        if (tokenAddresses.length === 0) {
+            return new Map();
+        }
+
+        const tokenPrices = await prisma.prismaTokenCurrentPrice.findMany({
+            where: {
+                chain: chain,
+                ...(tokenAddresses && tokenAddresses.length < 20 ? { tokenAddress: { in: tokenAddresses } } : {}), // Just fetch all when more tokens is requested
+            },
+            select: {
+                tokenAddress: true,
+                price: true,
+            },
+        });
+
+        const priceMap = new Map<string, number>();
+        tokenPrices.forEach((tokenPrice) => {
+            priceMap.set(tokenPrice.tokenAddress, tokenPrice.price);
+        });
+
+        return priceMap;
+    }
+
+    private filterSwapsForToken(swaps: SwapEvent[], tokenAddress: string): SwapEvent[] {
+        return swaps.filter(
+            (swap) => swap.payload.tokenIn.address === tokenAddress || swap.payload.tokenOut.address === tokenAddress,
+        );
     }
 }

@@ -1,4 +1,5 @@
 import { Chain } from '@prisma/client';
+import { SwapEvent } from '../../prisma/prisma-types';
 
 export interface TokenPriceData {
     address: string;
@@ -9,6 +10,8 @@ export interface TokenPriceData {
     underlyingTokenAddress?: string;
     unwrapRate?: string;
     underlyingTokenPrice?: number;
+    currentPrice?: number;
+    latestSwaps?: SwapEvent[];
 }
 
 export interface PriceItem {
