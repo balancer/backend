@@ -5,7 +5,7 @@ import { fp } from '../../big-number/big-number';
 import { zeroAddress as AddressZero } from 'viem';
 import { formatFixed } from '@ethersproject/bignumber';
 import { IViemClient } from '../../sources/viem-client';
-import VaultAbi from '../../pool/abi/Vault.json';
+import * as VaultAbi from '../../pool/abi/Vault.json';
 
 type FundManagement = {
     sender: string;
@@ -95,16 +95,16 @@ export class BeetsPriceHandler implements PriceHandler {
             };
 
             const viemClient = this.getViemClient(Chain.SONIC);
-            const deltas = await viemClient.readContract({
+            const deltas = (await viemClient.readContract({
                 address: this.VaultSonicAddress as `0x${string}`,
                 abi: VaultAbi,
                 functionName: 'queryBatchSwap',
                 args: [SwapKind.GivenIn, swaps, assets, funds],
-            });
+            })) as bigint[];
 
-            const tokenOutAmountScaled = deltas[assets.indexOf(this.stSAddress)] ?? '0';
+            const tokenOutAmountScaled = deltas[assets.indexOf(this.stSAddress)] ?? 0n;
 
-            if (tokenOutAmountScaled === '0') {
+            if (tokenOutAmountScaled === 0n) {
                 return null;
             }
 

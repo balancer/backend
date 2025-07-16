@@ -62,11 +62,11 @@ export class ClqdrPriceHandler implements PriceHandler {
     private async getClqdrRate(): Promise<number | null> {
         try {
             const viemClient = this.getViemClient(Chain.FANTOM);
-            const rate = await viemClient.readContract({
+            const rate = (await viemClient.readContract({
                 address: this.clqdrPriceRateProviderAddress as `0x${string}`,
                 abi: CLQDRPerpetualEscrowTokenRateProviderAbi,
                 functionName: 'getRate',
-            });
+            })) as bigint;
 
             // Convert from 18 decimal rate to float
             const rateFloat = parseFloat(formatUnits(rate, 18));
