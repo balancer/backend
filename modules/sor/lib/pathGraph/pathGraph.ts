@@ -61,11 +61,13 @@ export class PathGraph {
         tokenIn,
         tokenOut,
         swapAmount,
+        swapKind,
         graphTraversalConfig,
     }: {
         tokenIn: Token;
         tokenOut: Token;
         swapAmount: TokenAmount;
+        swapKind: SwapKind;
         graphTraversalConfig?: Partial<PathGraphTraversalConfig>;
     }): PathLocal[] {
         // apply defaults, allowing caller override whatever they'd like
@@ -80,6 +82,7 @@ export class PathGraph {
         };
 
         // Calculate minimum limit threshold based on swap amount and ratio
+        // (5 COW * 0.5 * 100) / 100 = 2.5 COW
         const minLimitThreshold = (swapAmount.amount * BigInt(Math.floor(config.minSwapAmountRatio * 100))) / 100n;
 
         const tokenPaths = this.findAllValidTokenPaths({
@@ -97,6 +100,7 @@ export class PathGraph {
         for (const tokenPath of tokenPaths) {
             const expandedPaths = this.expandTokenPathWithBestRanks({
                 tokenPath,
+                swapKind,
                 minLimitThreshold,
                 maxRanksPerSegment: config.maxRanksPerSegment,
                 approxPathsToReturn: config.approxPathsToReturn,
@@ -475,11 +479,13 @@ export class PathGraph {
      */
     private expandTokenPathWithBestRanks({
         tokenPath,
+        swapKind,
         minLimitThreshold,
         maxRanksPerSegment,
         approxPathsToReturn,
     }: {
         tokenPath: string[];
+        swapKind: SwapKind;
         minLimitThreshold: bigint;
         maxRanksPerSegment: number;
         approxPathsToReturn: number;
@@ -506,8 +512,10 @@ export class PathGraph {
 
             try {
                 const path = this.expandTokenPathWithRanks({ tokenPath, ranks });
-                const limit = this.getLimitAmountSwapForPath(path, SwapKind.GivenIn);
+                const limit = this.getLimitAmountSwapForPath(path, SwapKind.GivenOut);
 
+                // limit 223212239396808561n
+                //       2500000000000000000n
                 if (limit >= minLimitThreshold) {
                     paths.push(path);
                     pathsRanks.push(ranks);
