@@ -1687,7 +1687,7 @@ export const schema = gql`
         symbol: String!
         tags: [String]
         telegram: String
-        topTrades: [GqlLBPTopTrade]
+        topTrades: [GqlLBPTopTrade!]
         type: GqlPoolType!
         userBalance: GqlPoolUserBalance
         vaultVersion: Int! @deprecated(reason: "use protocolVersion instead")
@@ -4100,7 +4100,7 @@ export const schema = gql`
         reserveTokenStartWeight: Float!
         startTime: Int!
         telegram: String
-        topTrades: [GqlLBPTopTrade]
+        topTrades: [GqlLBPTopTrade!]
         website: String
         x: String
     }

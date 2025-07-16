@@ -1216,7 +1216,7 @@ export interface GqlPoolLiquidityBootstrappingV3 extends GqlPoolBase {
     symbol: Scalars['String'];
     tags?: Maybe<Array<Maybe<Scalars['String']>>>;
     telegram?: Maybe<Scalars['String']>;
-    topTrades?: Maybe<Array<Maybe<GqlLbpTopTrade>>>;
+    topTrades?: Maybe<Array<GqlLbpTopTrade>>;
     type: GqlPoolType;
     userBalance?: Maybe<GqlPoolUserBalance>;
     /** @deprecated use protocolVersion instead */
@@ -2802,7 +2802,7 @@ export interface LiquidityBootstrappingPoolV3Params {
     reserveTokenStartWeight: Scalars['Float'];
     startTime: Scalars['Int'];
     telegram?: Maybe<Scalars['String']>;
-    topTrades?: Maybe<Array<Maybe<GqlLbpTopTrade>>>;
+    topTrades?: Maybe<Array<GqlLbpTopTrade>>;
     website?: Maybe<Scalars['String']>;
     x?: Maybe<Scalars['String']>;
 }
@@ -4750,7 +4750,7 @@ export type GqlPoolLiquidityBootstrappingV3Resolvers<
     symbol?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     tags?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>;
     telegram?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-    topTrades?: Resolver<Maybe<Array<Maybe<ResolversTypes['GqlLBPTopTrade']>>>, ParentType, ContextType>;
+    topTrades?: Resolver<Maybe<Array<ResolversTypes['GqlLBPTopTrade']>>, ParentType, ContextType>;
     type?: Resolver<ResolversTypes['GqlPoolType'], ParentType, ContextType>;
     userBalance?: Resolver<Maybe<ResolversTypes['GqlPoolUserBalance']>, ParentType, ContextType>;
     vaultVersion?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
@@ -6043,7 +6043,7 @@ export type LiquidityBootstrappingPoolV3ParamsResolvers<
     reserveTokenStartWeight?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
     startTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     telegram?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-    topTrades?: Resolver<Maybe<Array<Maybe<ResolversTypes['GqlLBPTopTrade']>>>, ParentType, ContextType>;
+    topTrades?: Resolver<Maybe<Array<ResolversTypes['GqlLBPTopTrade']>>, ParentType, ContextType>;
     website?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     x?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
