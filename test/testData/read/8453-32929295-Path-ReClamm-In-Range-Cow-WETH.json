@@ -1,0 +1,64 @@
+{
+    "test": {
+        "chainId": "8453",
+        "blockNumber": "32929295"
+    },
+    "swapPath": {
+        "swapKind": 1,
+        "paths": [
+            {
+                "amountRaw": "5000000000000000000",
+                "tokens": [
+                    "0x4200000000000000000000000000000000000006",
+                    "0xc694a91e6b071bf030a18bd3053a7fe09b6dae69"
+                ],
+                "pools": [
+                    {
+                        "poolAddress": "0xff028c1ec4559d3aa2b0859aa582925b5cc28069",
+                        "poolType": "RECLAMM"
+                    }
+                ],
+                "calculatedAmountRaw": "708793406598661"
+            }
+        ]
+    },
+    "pools": [
+        {
+            "chainId": "8453",
+            "blockNumber": "32929295",
+            "poolType": "RECLAMM",
+            "poolAddress": "0xff028c1ec4559d3aa2b0859aa582925b5cc28069",
+            "tokens": [
+                "0x4200000000000000000000000000000000000006",
+                "0xc694a91e6b071bF030A18BD3053A7fE09B6DaE69"
+            ],
+            "scalingFactors": [
+                "1",
+                "1"
+            ],
+            "aggregateSwapFee": "500000000000000000",
+            "swapFee": "3000000000000000",
+            "totalSupply": "7777617334025436808",
+            "balancesLiveScaled18": [
+                "236826758525922389",
+                "1007417842444821029312"
+            ],
+            "tokenRates": [
+                "1000000000000000000",
+                "1000000000000000000"
+            ],
+            "lastTimestamp": "1752641825",
+            "lastVirtualBalances": [
+                "505530820430926044",
+                "4250109523667556437684"
+            ],
+            "dailyPriceShiftBase": "999999197747274347",
+            "centerednessMargin": "500000000000000000",
+            "startFourthRootPriceRatio": "1347575479745574070",
+            "endFourthRootPriceRatio": "1347575479745574070",
+            "priceRatioUpdateStartTime": "1752160515",
+            "priceRatioUpdateEndTime": "1752160515",
+            "currentTimestamp": "1752647937"
+        }
+    ]
+}

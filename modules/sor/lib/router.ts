@@ -18,6 +18,7 @@ export class Router {
         tokenOut: Token,
         pools: BasePool[],
         swapAmount: TokenAmount,
+        swapKind: SwapKind,
         enableAddRemoveLiquidityPaths: boolean,
         graphTraversalConfig?: Partial<PathGraphTraversalConfig>,
     ): PathLocal[] {
@@ -27,6 +28,7 @@ export class Router {
             tokenIn,
             tokenOut,
             swapAmount,
+            swapKind,
             graphTraversalConfig,
         });
 

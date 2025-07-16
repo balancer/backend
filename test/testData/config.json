@@ -366,6 +366,29 @@
             }
         },
         {
+            "testName": "Path-ReClamm-In-Range-Cow-WETH",
+            "chainId": "8453",
+            "blockNumber": "32929295",
+            "swapPathInput": {
+                "swapKind": 1,
+                "paths": [
+                    {
+                        "amountRaw": "5000000000000000000",
+                        "tokens": [
+                            "0x4200000000000000000000000000000000000006",
+                            "0xc694a91e6b071bf030a18bd3053a7fe09b6dae69"
+                        ],
+                        "pools": [
+                            {
+                                "poolAddress": "0xff028c1ec4559d3aa2b0859aa582925b5cc28069",
+                                "poolType": "RECLAMM"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
             "testName": "Path-Buffer",
             "chainId": "1",
             "blockNumber": "21671845",
