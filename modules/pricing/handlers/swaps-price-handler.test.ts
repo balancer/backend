@@ -43,7 +43,7 @@ describe('SwapsPriceHandler', () => {
         const mockSwapEvent = {
             ...baseMockSwapEvent,
             payload: {
-                ...baseMockSwapEvent.payload,
+                ...(baseMockSwapEvent.payload as any),
                 tokenIn: {
                     address: '0xtoken-unknown', // Token we want to price
                     amount: '100', // 100 unknown tokens
@@ -92,7 +92,7 @@ describe('SwapsPriceHandler', () => {
             ...baseMockSwapEvent,
             id: 'swap-2',
             payload: {
-                ...baseMockSwapEvent.payload,
+                ...(baseMockSwapEvent.payload as any),
                 tokenIn: {
                     address: '0xtoken-usdc', // Token with known price
                     amount: '50', // 50 USDC
@@ -138,7 +138,7 @@ describe('SwapsPriceHandler', () => {
             ...baseMockSwapEvent,
             id: 'swap-3',
             payload: {
-                ...baseMockSwapEvent.payload,
+                ...(baseMockSwapEvent.payload as any),
                 tokenIn: {
                     address: '0xtoken-unknown',
                     amount: '100',
@@ -204,7 +204,7 @@ describe('SwapsPriceHandler', () => {
             ...baseMockSwapEvent,
             id: 'swap-4',
             payload: {
-                ...baseMockSwapEvent.payload,
+                ...(baseMockSwapEvent.payload as any),
                 tokenIn: {
                     address: '0xbpt-token',
                     amount: '100',
@@ -248,7 +248,7 @@ describe('SwapsPriceHandler', () => {
             ...baseMockSwapEvent,
             id: 'swap-5',
             payload: {
-                ...baseMockSwapEvent.payload,
+                ...(baseMockSwapEvent.payload as any),
                 tokenIn: {
                     address: '0xtoken-unknown',
                     amount: '100',
@@ -300,7 +300,7 @@ describe('SwapsPriceHandler', () => {
             ...baseMockSwapEvent,
             id: 'swap-6',
             payload: {
-                ...baseMockSwapEvent.payload,
+                ...(baseMockSwapEvent.payload as any),
                 tokenIn: {
                     address: '0xtoken-unknown',
                     amount: '50',
