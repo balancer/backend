@@ -6,3 +6,4 @@ export { AavePriceHandler } from './aave-price-handler';
 export { SwapsPriceHandler } from './swaps-price-handler';
 export { BeetsPriceHandler } from './beets-price-handler';
 export { FbeetsPriceHandler } from './fbeets-price-handler';
+export { ClqdrPriceHandler } from './clqdr-price-handler';

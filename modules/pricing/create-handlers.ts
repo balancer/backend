@@ -8,6 +8,7 @@ import {
     SwapsPriceHandler,
     BeetsPriceHandler,
     FbeetsPriceHandler,
+    ClqdrPriceHandler,
 } from './handlers';
 import { getViemClient } from '../sources/viem-client';
 import { prisma } from '../../prisma/prisma-client';
@@ -25,6 +26,7 @@ export function createHandlers(chains: Chain[]): PriceHandler[] {
             prismaPool: prisma.prismaPool,
         }),
         new BeetsPriceHandler(getViemClient),
+        new ClqdrPriceHandler(getViemClient),
         new AavePriceHandler(getViemClient),
         new CoingeckoPriceHandler(coingeckoConfig),
         new SwapsPriceHandler(),
