@@ -7,9 +7,9 @@ import { Address, Swap, SwapInput, SwapKind } from '@balancer/sdk';
 import { formatUnits } from 'viem';
 
 describe('sor debugging', () => {
-    it('sor v2', async () => {
+    it.only('sor v2', async () => {
         const useProtocolVersion = 2;
-        const chain = Chain.MAINNET;
+        const chain = Chain.SONIC;
 
         const chainId = Object.keys(chainIdToChain).find((key) => chainIdToChain[key] === chain) as string;
         initRequestScopedContext();
@@ -18,43 +18,22 @@ describe('sor debugging', () => {
         // only do once before starting to debug
         // bun task sor-sync-v2 {chainId}
 
-        const swapType = 'EXACT_IN';
-        const swapKind: SwapKind = SwapKind.GivenIn;
-
-        /* const swaps = await sorService.getSorSwapPaths({
-            chain,
-            tokenIn: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', // USDC
-            tokenOut: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', // USDC
-            swapType,
-            swapAmount: '100',
-            useProtocolVersion,
-            // callDataInput: {
-            //     receiver: '0xb5e6b895734409Df411a052195eb4EE7e40d8696',
-            //     sender: '0xb5e6b895734409Df411a052195eb4EE7e40d8696',
-            //     slippagePercentage: '0.1',
-            // },
-            poolIds: [
-                '0x79c58f70905f734641735bc61e45c19dd9ad60bc0000000000000000000004e7',
-                '0x63fc054159094583a27632361bd11c94c30e48c70002000000000000000006f7',
-            ],
-        }); */
+        const swapType = 'EXACT_OUT';
+        const swapKind: SwapKind = SwapKind.GivenOut;
 
         const swaps = await sorService.getSorSwapPaths({
             chain,
-            tokenIn: '0xdac17f958d2ee523a2206206994597c13d831ec7', // USDT
-            tokenOut: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', // WETH
+            tokenIn: '0x039e2fb66102314ce7b64ce5ce3e5183bc94ad38', // wS
+            tokenOut: '0xe5da20f15420ad15de0fa650600afc998bbe3955', // stS
             swapType,
-            swapAmount: '100',
+            swapAmount: '100000',
             useProtocolVersion,
             // callDataInput: {
             //     receiver: '0xb5e6b895734409Df411a052195eb4EE7e40d8696',
             //     sender: '0xb5e6b895734409Df411a052195eb4EE7e40d8696',
             //     slippagePercentage: '0.1',
             // },
-            // poolIds: [
-            //     '0x79c58f70905f734641735bc61e45c19dd9ad60bc0000000000000000000004e7',
-            //     '0x63fc054159094583a27632361bd11c94c30e48c70002000000000000000006f7',
-            // ],
+            // poolIds: ['0x40d2cbc586dd8df50001cdba3f65cd4bbc32d596000200000000000000000154'],
         });
 
         console.log('protocol version', swaps.protocolVersion);
@@ -94,9 +73,9 @@ describe('sor debugging', () => {
         expect(ratio).toBeCloseTo(1, 3);
     }, 5000000);
 
-    it.only('sor v3', async () => {
+    it('sor v3', async () => {
         const useProtocolVersion = 3;
-        const chain = Chain.BASE;
+        const chain = Chain.MAINNET;
 
         const chainId = Object.keys(chainIdToChain).find((key) => chainIdToChain[key] === chain) as string;
         initRequestScopedContext();
@@ -104,17 +83,17 @@ describe('sor debugging', () => {
         // only do once before starting to debug
         // bun task sor-sync-v3 {chainId}
 
-        const swapType = 'EXACT_OUT';
-        const swapKind: SwapKind = SwapKind.GivenOut;
+        const swapType = 'EXACT_IN';
+        const swapKind: SwapKind = SwapKind.GivenIn;
 
         const swaps = await sorService.getSorSwapPaths({
             chain,
-            tokenIn: '0x4200000000000000000000000000000000000006', // WETH
-            tokenOut: '0xc694a91e6b071bf030a18bd3053a7fe09b6dae69', // COW
+            tokenIn: '0x40d16fc0246ad3160ccc09b8d0d3a2cd28ae6c2f', // GHO
+            tokenOut: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', // USDC
             swapType,
-            swapAmount: '5',
+            swapAmount: '10',
             useProtocolVersion,
-            poolIds: ['0xff028c1ec4559d3aa2b0859aa582925b5cc28069'],
+            // poolIds: ['0x917d0464dd2e335bf14000c63d65def3c8bb1025'],
         });
 
         console.log(swaps.returnAmount);
@@ -122,7 +101,7 @@ describe('sor debugging', () => {
             console.log(`path ${i}`, path.pools);
         });
 
-        // Perform sanity check agaist on-chain query
+        // Perform sanity check against on-chain query
 
         const swapInput: SwapInput = {
             chainId: Number(chainId),
