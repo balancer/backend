@@ -308,10 +308,10 @@ describe('FbeetsPriceHandler', () => {
             
             // Price calculation:
             // Token1: (500/2000) * 2.0 * 4.0 = 2.0
-            // Token2: (1000/2000) * 2.0 * 2.0 = 4.0
+            // Token2: (1000/2000) * 2.0 * 2.0 = 2.0
             // Token3: (500/2000) * 2.0 * 1.0 = 0.5
-            // Total: 2.0 + 4.0 + 0.5 = 6.5
-            expect(priceItems[0].price).toBe(6.5);
+            // Total: 2.0 + 2.0 + 0.5 = 4.5
+            expect(priceItems[0].price).toBe(4.5);
         });
     });
 
