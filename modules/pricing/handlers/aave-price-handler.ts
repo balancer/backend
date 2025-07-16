@@ -3,6 +3,7 @@ import { PriceHandler, TokenPriceData, PriceItem } from '../types';
 import { parseAbiItem } from 'abitype';
 import config from '../../../config';
 import _ from 'lodash';
+import { IViemClient } from '../../sources/viem-client';
 
 interface AaveTokenConfig {
     wrappedToken: string;
@@ -16,16 +17,12 @@ interface ContractRate {
     rate: bigint;
 }
 
-interface ViemClient {
-    multicall(params: { contracts: any[]; allowFailure: boolean }): Promise<any[]>;
-}
-
 export class AavePriceHandler implements PriceHandler {
     public readonly exitIfFails = false;
     public readonly id = 'AavePriceHandlerService';
     private aaveTokensByChain: Record<string, AaveTokenConfig[]>;
 
-    constructor(private getViemClient: (chain: Chain) => ViemClient) {
+    constructor(private getViemClient: (chain: Chain) => IViemClient) {
         this.aaveTokensByChain = this.fetchAaveTokensFromConfig();
     }
 
