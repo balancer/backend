@@ -4,6 +4,7 @@ import { SwapKind, BatchSwapStep } from '@balancer/sdk';
 import { fp } from '../../big-number/big-number';
 import { zeroAddress as AddressZero } from 'viem';
 import { formatFixed } from '@ethersproject/bignumber';
+import { IViemClient } from '../../sources/viem-client';
 import VaultAbi from '../../pool/abi/Vault.json';
 
 type FundManagement = {
@@ -12,15 +13,6 @@ type FundManagement = {
     fromInternalBalance: boolean;
     toInternalBalance: boolean;
 };
-
-interface ViemClient {
-    readContract(params: {
-        address: `0x${string}`;
-        abi: any[];
-        functionName: string;
-        args: any[];
-    }): Promise<any>;
-}
 
 export class BeetsPriceHandler implements PriceHandler {
     public readonly exitIfFails = false;
@@ -33,7 +25,7 @@ export class BeetsPriceHandler implements PriceHandler {
     private readonly freshBeetsPoolId = '0x10ac2f9dae6539e77e372adb14b1bf8fbd16b3e8000200000000000000000005';
     private readonly VaultSonicAddress = '0xba12222222228d8ba445958a75a0704d566bf2c8';
 
-    constructor(private getViemClient: (chain: Chain) => ViemClient) {}
+    constructor(private getViemClient: (chain: Chain) => IViemClient) {}
 
     async calculatePricesForTokens(tokens: TokenPriceData[], allPrices: Map<string, number>): Promise<PriceItem[]> {
         const acceptedTokens = this.getAcceptedTokens(tokens);
