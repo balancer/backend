@@ -26,9 +26,10 @@ export interface PriceHandler {
     /**
      * Calculate prices for the given tokens
      * @param tokens Array of tokens to calculate prices for
+     * @param allPrices Complete map of all available token prices (address -> price)
      * @returns Array of price items ready to be saved
      */
-    calculatePricesForTokens(tokens: TokenPriceData[]): Promise<PriceItem[]>;
+    calculatePricesForTokens(tokens: TokenPriceData[], allPrices: Map<string, number>): Promise<PriceItem[]>;
 
     /**
      * Get the name of this price handler

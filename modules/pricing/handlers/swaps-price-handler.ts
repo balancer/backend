@@ -4,20 +4,12 @@ export class SwapsPriceHandler implements PriceHandler {
     public readonly exitIfFails = false;
     public readonly id = 'SwapsPriceHandlerService';
 
-    async calculatePricesForTokens(tokens: TokenPriceData[]): Promise<PriceItem[]> {
+    async calculatePricesForTokens(tokens: TokenPriceData[], allPrices: Map<string, number>): Promise<PriceItem[]> {
         const acceptedTokens = this.getAcceptedTokens(tokens);
 
         if (acceptedTokens.length === 0) {
             return [];
         }
-
-        // Create lookup map for O(1) token price access
-        const tokenPriceMap = new Map<string, number>();
-        tokens.forEach((token) => {
-            if (token.currentPrice) {
-                tokenPriceMap.set(token.address, token.currentPrice);
-            }
-        });
 
         const priceItems: PriceItem[] = [];
 
@@ -41,7 +33,8 @@ export class SwapsPriceHandler implements PriceHandler {
                     tokenSide === 'token-in' ? tokenSwap.payload.tokenOut.amount : tokenSwap.payload.tokenIn.amount,
                 );
 
-                const otherTokenPrice = tokenPriceMap.get(otherTokenAddress);
+                // Use allPrices map to find other token price (from existing prices OR previous handler results)
+                const otherTokenPrice = allPrices.get(otherTokenAddress);
 
                 if (otherTokenPrice) {
                     const otherTokenValue = otherTokenPrice * otherTokenAmount;

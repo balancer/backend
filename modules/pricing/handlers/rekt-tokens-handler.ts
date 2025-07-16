@@ -6,7 +6,7 @@ export class RektTokensHandler implements PriceHandler {
     public readonly exitIfFails = false;
     public readonly id = 'RektTokensHandlerService';
 
-    async calculatePricesForTokens(tokens: TokenPriceData[]): Promise<PriceItem[]> {
+    async calculatePricesForTokens(tokens: TokenPriceData[], allPrices: Map<string, number>): Promise<PriceItem[]> {
         const acceptedTokens = this.getAcceptedTokens(tokens);
 
         return acceptedTokens.map((token) => ({
