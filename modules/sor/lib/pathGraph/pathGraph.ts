@@ -512,7 +512,7 @@ export class PathGraph {
 
             try {
                 const path = this.expandTokenPathWithRanks({ tokenPath, ranks });
-                const limit = this.getLimitAmountSwapForPath(path, SwapKind.GivenOut);
+                const limit = this.getLimitAmountSwapForPath(path, swapKind);
 
                 // limit 223212239396808561n
                 //       2500000000000000000n
