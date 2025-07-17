@@ -60,7 +60,11 @@ export function mapAprItems(pool: PrismaPoolMinimal): GqlPoolAprItem[] {
     return aprItems;
 }
 
-export function mapPoolToken(poolToken: PrismaPoolTokenWithExpandedNesting, nestedPercentage = 1): GqlPoolTokenDetail {
+export function mapPoolToken(
+    poolToken: PrismaPoolTokenWithExpandedNesting,
+    protocolVersion: number,
+    nestedPercentage = 1,
+): GqlPoolTokenDetail {
     const { nestedPool } = poolToken;
 
     const hasNestedPool = nestedPool !== null && nestedPool.id !== poolToken.poolId;
@@ -76,9 +80,9 @@ export function mapPoolToken(poolToken: PrismaPoolTokenWithExpandedNesting, nest
         weight: poolToken.weight,
         hasNestedPool: hasNestedPool,
         nestedPool: hasNestedPool ? mapNestedPool(nestedPool, poolToken.balance || '0') : undefined,
-        isAllowed: poolToken.token.types.some(
-            (type) => type.type === 'WHITE_LISTED' || type.type === 'PHANTOM_BPT' || type.type === 'BPT',
-        ),
+        isAllowed:
+            (protocolVersion === 2 && poolToken.token.types.every((type) => type.type !== 'BLOCKED_V2')) ||
+            (protocolVersion === 3 && poolToken.token.types.every((type) => type.type !== 'BLOCKED_V3')),
         isErc4626: poolToken.token.types.some((type) => type.type === 'ERC4626'),
         maxDeposit: poolToken.token.maxDeposit === '0' ? undefined : poolToken.token.maxDeposit,
         maxWithdraw: poolToken.token.maxWithdraw === '0' ? undefined : poolToken.token.maxWithdraw,
@@ -112,6 +116,7 @@ function mapNestedPool(nestedPool: PrismaNestedPoolWithSingleLayerNesting, token
                     ...token,
                     nestedPool: null,
                 },
+                nestedPool.protocolVersion,
                 percentOfSupplyNested,
             ),
         ),

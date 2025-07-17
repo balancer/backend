@@ -2472,7 +2472,7 @@ export const aGqlToken = (overrides?: Partial<GqlToken>): GqlToken => {
         tradable: overrides && overrides.hasOwnProperty('tradable') ? overrides.tradable! : false,
         twitterUsername:
             overrides && overrides.hasOwnProperty('twitterUsername') ? overrides.twitterUsername! : 'antepono',
-        types: overrides && overrides.hasOwnProperty('types') ? overrides.types! : [GqlTokenType.BPT],
+        types: overrides && overrides.hasOwnProperty('types') ? overrides.types! : [GqlTokenType.BLOCKED_V2],
         underlyingTokenAddress:
             overrides && overrides.hasOwnProperty('underlyingTokenAddress')
                 ? overrides.underlyingTokenAddress!
@@ -2543,7 +2543,7 @@ export const aGqlTokenDynamicData = (overrides?: Partial<GqlTokenDynamicData>): 
 export const aGqlTokenFilter = (overrides?: Partial<GqlTokenFilter>): GqlTokenFilter => {
     return {
         tokensIn: overrides && overrides.hasOwnProperty('tokensIn') ? overrides.tokensIn! : ['talus'],
-        typeIn: overrides && overrides.hasOwnProperty('typeIn') ? overrides.typeIn! : [GqlTokenType.BPT],
+        typeIn: overrides && overrides.hasOwnProperty('typeIn') ? overrides.typeIn! : [GqlTokenType.BLOCKED_V2],
     };
 };
 

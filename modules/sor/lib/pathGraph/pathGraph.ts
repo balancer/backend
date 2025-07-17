@@ -61,11 +61,13 @@ export class PathGraph {
         tokenIn,
         tokenOut,
         swapAmount,
+        swapKind,
         graphTraversalConfig,
     }: {
         tokenIn: Token;
         tokenOut: Token;
         swapAmount: TokenAmount;
+        swapKind: SwapKind;
         graphTraversalConfig?: Partial<PathGraphTraversalConfig>;
     }): PathLocal[] {
         // apply defaults, allowing caller override whatever they'd like
@@ -97,6 +99,7 @@ export class PathGraph {
         for (const tokenPath of tokenPaths) {
             const expandedPaths = this.expandTokenPathWithBestRanks({
                 tokenPath,
+                swapKind,
                 minLimitThreshold,
                 maxRanksPerSegment: config.maxRanksPerSegment,
                 approxPathsToReturn: config.approxPathsToReturn,
@@ -475,11 +478,13 @@ export class PathGraph {
      */
     private expandTokenPathWithBestRanks({
         tokenPath,
+        swapKind,
         minLimitThreshold,
         maxRanksPerSegment,
         approxPathsToReturn,
     }: {
         tokenPath: string[];
+        swapKind: SwapKind;
         minLimitThreshold: bigint;
         maxRanksPerSegment: number;
         approxPathsToReturn: number;
@@ -506,8 +511,7 @@ export class PathGraph {
 
             try {
                 const path = this.expandTokenPathWithRanks({ tokenPath, ranks });
-                const limit = this.getLimitAmountSwapForPath(path, SwapKind.GivenIn);
-
+                const limit = this.getLimitAmountSwapForPath(path, swapKind);
                 if (limit >= minLimitThreshold) {
                     paths.push(path);
                     pathsRanks.push(ranks);

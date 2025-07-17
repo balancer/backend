@@ -117,6 +117,8 @@ model PrismaTokenType {
 
 enum PrismaTokenTypeOption {
     WHITE_LISTED
+    BLOCKED_V2
+    BLOCKED_V3
     BPT
     PHANTOM_BPT
     ERC4626

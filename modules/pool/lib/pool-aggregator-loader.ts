@@ -216,7 +216,7 @@ export class PoolAggregatorLoader {
         const mappedData = {
             decimals: 18,
             dynamicData: this.getPoolDynamicData(pool),
-            poolTokens: pool.tokens.map((token) => mapPoolToken(token)),
+            poolTokens: pool.tokens.map((token) => mapPoolToken(token, pool.protocolVersion)),
             vaultVersion: poolWithoutTypeData.protocolVersion,
             liquidityManagement: (pool.liquidityManagement as LiquidityManagement) || undefined,
             hook: mapHookToGqlHook(hook as HookData),

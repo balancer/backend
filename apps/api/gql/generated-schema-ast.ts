@@ -1687,7 +1687,7 @@ export const schema = gql`
         symbol: String!
         tags: [String]
         telegram: String
-        topTrades: [GqlLBPTopTrade]
+        topTrades: [GqlLBPTopTrade!]
         type: GqlPoolType!
         userBalance: GqlPoolUserBalance
         vaultVersion: Int! @deprecated(reason: "use protocolVersion instead")
@@ -3827,10 +3827,12 @@ export const schema = gql`
     }
 
     enum GqlTokenType {
+        BLOCKED_V2
+        BLOCKED_V3
         BPT
         ERC4626
         PHANTOM_BPT
-        WHITE_LISTED
+        WHITE_LISTED @deprecated(reason: "Use BLOCKED instead")
     }
 
     type GqlUserFbeetsBalance {
@@ -4100,7 +4102,7 @@ export const schema = gql`
         reserveTokenStartWeight: Float!
         startTime: Int!
         telegram: String
-        topTrades: [GqlLBPTopTrade]
+        topTrades: [GqlLBPTopTrade!]
         website: String
         x: String
     }
