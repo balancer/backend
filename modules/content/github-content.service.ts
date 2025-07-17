@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { prisma } from '../../prisma/prisma-client';
 import { chainIdToChain, chainToChainId as chainToIdMap } from '../network/chain-id-to-chain';
 import { Chain, Prisma, PrismaTokenTypeOption } from '@prisma/client';
@@ -44,9 +43,11 @@ export interface FeaturedPool {
 
 export class GithubContentService {
     async syncTokenContentData(chains: Chain[]): Promise<void> {
-        const {
-            data: { tokens },
-        } = await axios.get<WhitelistedTokenList>(TOKEN_LIST_URL);
+        const response = await fetch(TOKEN_LIST_URL);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch token list: ${response.statusText}`);
+        }
+        const { tokens }: WhitelistedTokenList = await response.json();
 
         // Validate results
         const requiredKeys = ['chainId', 'address', 'name', 'symbol', 'decimals'];
@@ -106,7 +107,12 @@ export class GithubContentService {
                 select: { id: true, tokenAddress: true, chain: true, type: true },
                 where: { type: { in: [PrismaTokenTypeOption.BLOCKED_V2, PrismaTokenTypeOption.BLOCKED_V3] } },
             }),
-            axios.get<string>(BLOCKED_TOKENS_URL),
+            fetch(BLOCKED_TOKENS_URL).then(async (response) => {
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch blocked tokens: ${response.statusText}`);
+                }
+                return { data: await response.text() };
+            }),
         ]);
 
         const githubBlockedTokens = blockedTokensCsv.data
@@ -156,8 +162,6 @@ export class GithubContentService {
 
         const allTokensToAdd = [...v2TokensToAdd, ...v3TokensToAdd];
         const allTokensToRemove = [...v2TokensToRemove, ...v3TokensToRemove];
-
-        console.log(`Syncing blocked tokens: ${allTokensToAdd.length} to add, ${allTokensToRemove.length} to remove`);
 
         if (allTokensToAdd.length > 0) {
             operations.push(
@@ -257,7 +261,11 @@ export class GithubContentService {
     }
 
     async getFeaturedPools(chains: Chain[]): Promise<FeaturedPool[]> {
-        const { data } = await axios.get<FeaturedPoolMetadata[]>(POOLS_METADATA_URL);
+        const response = await fetch(POOLS_METADATA_URL);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch featured pools: ${response.statusText}`);
+        }
+        const data: FeaturedPoolMetadata[] = await response.json();
         const pools = data.filter((pool) => chains.includes(chainIdToChain[pool.chainId]));
         return pools.map(({ id, primary, chainId, description }) => ({
             poolId: id,
