@@ -47,7 +47,7 @@ export class GithubContentService {
         if (!response.ok) {
             throw new Error(`Failed to fetch token list: ${response.statusText}`);
         }
-        const { tokens }: WhitelistedTokenList = await response.json();
+        const { tokens } = (await response.json()) as WhitelistedTokenList;
 
         // Validate results
         const requiredKeys = ['chainId', 'address', 'name', 'symbol', 'decimals'];
@@ -265,7 +265,7 @@ export class GithubContentService {
         if (!response.ok) {
             throw new Error(`Failed to fetch featured pools: ${response.statusText}`);
         }
-        const data: FeaturedPoolMetadata[] = await response.json();
+        const data = (await response.json()) as FeaturedPoolMetadata[];
         const pools = data.filter((pool) => chains.includes(chainIdToChain[pool.chainId]));
         return pools.map(({ id, primary, chainId, description }) => ({
             poolId: id,
