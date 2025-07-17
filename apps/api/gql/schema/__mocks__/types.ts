@@ -2647,6 +2647,8 @@ export type GqlTokenPriceChartDataItem = {
 };
 
 export enum GqlTokenType {
+    BLOCKED_V2 = 'BLOCKED_V2',
+    BLOCKED_V3 = 'BLOCKED_V3',
     BPT = 'BPT',
     ERC4626 = 'ERC4626',
     PHANTOM_BPT = 'PHANTOM_BPT',

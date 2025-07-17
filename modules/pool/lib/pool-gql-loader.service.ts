@@ -349,7 +349,7 @@ export class PoolGqlLoaderService {
             dynamicData: this.getPoolDynamicData(pool),
             allTokens: this.mapAllTokens(pool),
             displayTokens: this.mapDisplayTokens(pool),
-            poolTokens: pool.tokens.map((token) => mapPoolToken(token)),
+            poolTokens: pool.tokens.map((token) => mapPoolToken(token, pool.protocolVersion)),
             staking: this.getStakingData(pool),
             userBalance: this.getUserBalance(pool, userWalletbalances, userStakedBalances),
             categories: pool.categories as GqlPoolFilterCategory[],
@@ -712,7 +712,7 @@ export class PoolGqlLoaderService {
         const mappedData = {
             decimals: 18,
             dynamicData: this.getPoolDynamicData(pool),
-            poolTokens: pool.tokens.map((token) => mapPoolToken(token)),
+            poolTokens: pool.tokens.map((token) => mapPoolToken(token, pool.protocolVersion)),
             vaultVersion: poolWithoutTypeData.protocolVersion,
             liquidityManagement: (pool.liquidityManagement as LiquidityManagement) || undefined,
             hook: mapHookToGqlHook(hook as HookData),
@@ -802,7 +802,7 @@ export class PoolGqlLoaderService {
             tokens: pool.tokens.map((token) => this.mapPoolTokenToGqlUnion(token)), // TODO DEPRECATE
             allTokens: this.mapAllTokens(pool),
             displayTokens: this.mapDisplayTokens(pool),
-            poolTokens: pool.tokens.map((token) => mapPoolToken(token)),
+            poolTokens: pool.tokens.map((token) => mapPoolToken(token, pool.protocolVersion)),
             userBalance: this.getUserBalance(pool, userWalletbalances, userStakedBalances),
             vaultVersion: poolWithoutTypeData.protocolVersion,
             categories: pool.categories as GqlPoolFilterCategory[],

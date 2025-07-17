@@ -39,29 +39,6 @@ export class TokenPriceService {
         new FallbackHandlerService(),
     ];
 
-    public async getWhiteListedCurrentTokenPrices(chains: Chain[]): Promise<PrismaTokenCurrentPrice[]> {
-        const tokenPrices = await prisma.prismaTokenCurrentPrice.findMany({
-            orderBy: { timestamp: 'desc' },
-            where: {
-                chain: { in: chains },
-                token: { types: { some: { type: 'WHITE_LISTED' } } },
-            },
-        });
-
-        for (const chain of chains) {
-            const wethPrice = tokenPrices.find((tokenPrice) => tokenPrice.tokenAddress === config[chain].weth.address);
-
-            if (wethPrice) {
-                tokenPrices.push({
-                    ...wethPrice,
-                    tokenAddress: config[chain].eth.address,
-                });
-            }
-        }
-
-        return tokenPrices;
-    }
-
     public async getCurrentTokenPrices(chains: Chain[]): Promise<PrismaTokenCurrentPrice[]> {
         const tokenPrices = await prisma.prismaTokenCurrentPrice.findMany({
             where: { chain: { in: chains } },

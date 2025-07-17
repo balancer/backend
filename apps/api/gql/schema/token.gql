@@ -378,7 +378,9 @@ type GqlTokenData {
 }
 
 enum GqlTokenType {
-    WHITE_LISTED
+    WHITE_LISTED @deprecated(reason: "Use BLOCKED instead")
+    BLOCKED_V2
+    BLOCKED_V3
     BPT
     PHANTOM_BPT
     ERC4626
