@@ -1,5 +1,13 @@
 # backend
 
+## 1.48.12
+
+### Patch Changes
+
+-   0c9f06e: fix: forward swapKind so limits can be calced accurately
+-   5ec1fec: introduce token block list
+-   7c570bb: make GqlLBPTopTrade type not a maybe
+
 ## 1.48.11
 
 ### Patch Changes
