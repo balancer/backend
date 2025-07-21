@@ -69,7 +69,7 @@ export class AavePriceHandler implements PriceHandler {
                     const tokenData = tokensForChain.find((t) => t.address === aaveToken.wrappedToken);
                     if (!tokenData?.underlyingTokenPrice) {
                         console.error(
-                            `AavePriceHandler: Underlying price for ${aaveToken.wrappedToken} on ${chain} not found`,
+                            `AavePriceHandler: Underlying (${aaveToken.underlying}) price for ${aaveToken.wrappedToken} on ${chain} not found`,
                         );
                         continue;
                     }

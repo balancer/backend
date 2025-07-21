@@ -1,6 +1,7 @@
 import { Chain } from '@prisma/client';
 import { PricingManager } from './pricing-manager';
-import { TokenPriceData } from './types';
+import { PricingRepository } from './pricing-repository';
+import { eventsRepository } from '../repositories/events';
 import { createHandlers } from './create-handlers';
 
 /**
@@ -14,44 +15,15 @@ async function exampleUsage() {
     // Create manager
     const manager = new PricingManager(handlers);
 
-    // Mock token data based on actual database entries
-    const tokens: TokenPriceData[] = [
-        // Aave token - will be handled by AavePriceHandler
-        {
-            address: '0x57d20c946a7a3812a7225b881cdcd8431d23431c',
-            chain: Chain.MAINNET,
-            coingeckoTokenId: undefined, // No coingecko ID
-            excludedFromCoingecko: false,
-            types: ['WHITE_LISTED'],
-            underlyingTokenAddress: undefined,
-            unwrapRate: undefined,
-            underlyingTokenPrice: 1.01,
-        },
-
-        // WETH token - will be handled by CoingeckoPriceHandler
-        {
-            address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
-            chain: Chain.MAINNET,
-            coingeckoTokenId: 'weth',
-            excludedFromCoingecko: false,
-            types: ['WHITE_LISTED'],
-            underlyingTokenAddress: undefined,
-            unwrapRate: undefined,
-            underlyingTokenPrice: undefined,
-        },
-
-        // ERC4626 token - will be handled by ERC4626PriceHandler
-        {
-            address: '0x1202f5c7b4b9e47a1a484e8b270be34dbbc75055',
-            chain: Chain.MAINNET,
-            coingeckoTokenId: 'resolv-wstusr', // Has coingecko ID but ERC4626 handler will process it first
-            excludedFromCoingecko: false,
-            types: ['ERC4626', 'WHITE_LISTED'],
-            underlyingTokenAddress: '0x66a1e37c9b0eaddca17d3662d6c05f4decf3e110',
-            unwrapRate: '1.092541737468752984', // Current unwrap rate from database
-            underlyingTokenPrice: 0.999787, // Current price from database
-        },
-    ];
+    // Fetch tokens for pricing
+    const repo = new PricingRepository(eventsRepository);
+    const tokens = await repo.getTokensForPricing(Chain.MAINNET, [
+        '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', // Underlying
+        '0xd4fa2d31b7968e448877f69a96de69f5de8cd23e', // Aave token
+        '0x7204b7dbf9412567835633b6f00c3edc3a8d6330', // Morpho token
+        '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // WETH
+        '0x1202f5c7b4b9e47a1a484e8b270be34dbbc75055', // wstusr - ERC4626
+    ]);
 
     console.log('Starting price calculation for tokens:');
     tokens.forEach((token) => {

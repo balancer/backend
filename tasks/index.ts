@@ -28,6 +28,7 @@ import { AprRepository } from '../modules/aprs/apr-repository';
 import { MerklAprHandler } from '../modules/aprs/handlers';
 import { SurplusSwapFeeAprHandler, SwapFeeApr7d30dHandler } from '../modules/aprs/handlers/swap-fee-apr';
 import { AprService } from '../modules/aprs';
+import { PricingService } from '../modules/pricing';
 
 // TODO needed?
 const sftmxController = SftmxController();
@@ -180,7 +181,10 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         }
     } else if (job === 'update-prices') {
         await tokenService.syncTokenContentData(chain);
-        return tokenService.updateTokenPrices([chain]);
+        await TokenController().syncErc4626Tokens(chain);
+        await TokenController().syncErc4626OnChainData(chain);
+        const service = new PricingService([chain]);
+        return service.updatePrices(chain);
     } else if (job === 'sync-vebal') {
         return new VeBalVotingListService().syncVotingGauges();
     } else if (job === 'sync-weights') {

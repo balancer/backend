@@ -1,6 +1,7 @@
 import * as Sentry from '@sentry/node';
 import { Express, NextFunction } from 'express';
 import { tokenService } from '../../modules/token/token.service';
+import { PricingService } from '../../modules/pricing/pricing-service';
 import { poolService } from '../../modules/pool/pool.service';
 import { userService } from '../../modules/user/user.service';
 import { protocolService } from '../../modules/protocol/protocol.service';
@@ -126,7 +127,14 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
             await runIfNotAlreadyRunning(
                 name,
                 chainId,
-                () => tokenService.updateTokenPrices(Object.keys(config) as Chain[]),
+                async () => {
+                    const chains = Object.keys(config) as Chain[];
+                    const service = new PricingService(chains);
+                    for (const chain of chains) {
+                        await service.updatePrices(chain);
+                    }
+                    return 'OK';
+                },
                 res,
                 next,
             );
