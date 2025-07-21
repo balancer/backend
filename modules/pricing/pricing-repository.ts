@@ -35,7 +35,7 @@ export class PricingRepository {
         const swaps = await this.swapRepository.getSwapsForPricing(chain);
 
         // Collect all token addresses that need prices
-        const allTokenAddresses = this.collectAllTokenAddresses(tokens, swaps);
+        const allTokenAddresses = this.collectAllTokenAddresses(tokens);
 
         // Fetch all prices in a single query
         const allPrices = await this.fetchAllPrices(chain, allTokenAddresses);
@@ -56,16 +56,19 @@ export class PricingRepository {
         }));
     }
 
-    async updatePrices(priceItems: PriceItem[]): Promise<string[]> {
+    async updatePrices(priceItems: PriceItem[], tokensForPricing: TokenPriceData[]): Promise<string[]> {
         if (priceItems.length === 0) {
             return [];
         }
 
+        // Create latest price map
+        const latestPrices = Object.fromEntries(tokensForPricing.map((token) => [token.address, token.currentPrice]));
+
+        const hourlyTimestamp = timestampRoundedUpToNearestHour();
+
         const operations: any[] = [];
 
         for (const item of priceItems) {
-            const hourlyTimestamp = timestampRoundedUpToNearestHour();
-
             // Update or create hourly price in TokenPrice table
             operations.push(
                 prisma.prismaTokenPrice.upsert({
@@ -96,6 +99,10 @@ export class PricingRepository {
                     },
                 }),
             );
+
+            // Skip current price update if price didn't change
+            const latestPrice = latestPrices[item.address];
+            if (latestPrice === item.price) continue;
 
             // Update or create current price in TokenCurrentPrice table
             operations.push(
@@ -129,10 +136,7 @@ export class PricingRepository {
         return priceItems.map((item) => item.address);
     }
 
-    private collectAllTokenAddresses(
-        tokens: { address: string; underlyingTokenAddress?: string | null }[],
-        swaps: SwapEvent[],
-    ): string[] {
+    private collectAllTokenAddresses(tokens: { address: string; underlyingTokenAddress?: string | null }[]): string[] {
         const addresses = new Set<string>();
 
         // Add all target token addresses
@@ -142,12 +146,6 @@ export class PricingRepository {
             if (token.underlyingTokenAddress) {
                 addresses.add(token.underlyingTokenAddress);
             }
-        });
-
-        // Add all swap token addresses (for other tokens in swaps)
-        swaps.forEach((swap) => {
-            addresses.add(swap.payload.tokenIn.address);
-            addresses.add(swap.payload.tokenOut.address);
         });
 
         return Array.from(addresses);

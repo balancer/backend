@@ -34,7 +34,7 @@ export class PricingService {
         let updatedTokenAddresses: string[] = [];
 
         if (!calculateOnly && priceItems.length > 0) {
-            updatedTokenAddresses = await this.repository.updatePrices(priceItems);
+            updatedTokenAddresses = await this.repository.updatePrices(priceItems, tokens);
         }
 
         return {
