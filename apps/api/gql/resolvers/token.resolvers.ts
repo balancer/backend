@@ -8,6 +8,7 @@ import moment from 'moment';
 import { TokenController } from '../../../../modules/controllers/token-controller';
 import config from '../../../../config';
 import { GraphQLError } from 'graphql';
+import { PricingService } from '../../../../modules/pricing';
 
 const resolvers: Resolvers = {
     Query: {
@@ -195,7 +196,10 @@ const resolvers: Resolvers = {
         tokenReloadTokenPrices: async (parent, { chains }, context) => {
             isAdminRoute(context);
 
-            await tokenService.updateTokenPrices(chains);
+            const service = new PricingService(chains);
+            for (const chain of chains) {
+                await service.updatePrices(chain);
+            }
 
             return true;
         },
