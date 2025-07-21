@@ -7,8 +7,6 @@ import {
     CoingeckoPriceHandler,
     SwapsPriceHandler,
     BeetsPriceHandler,
-    FbeetsPriceHandler,
-    ClqdrPriceHandler,
     MorphoPriceHandler,
     BptPriceHandler,
     LbpPriceHandler,
@@ -25,12 +23,7 @@ export function createHandlers(chains: Chain[]): PriceHandler[] {
     const handlers: PriceHandler[] = [
         new RektTokensHandler(),
         new ERC4626PriceHandler(),
-        new FbeetsPriceHandler({
-            prismaFbeets: prisma.prismaFbeets,
-            prismaPool: prisma.prismaPool,
-        }),
         new BeetsPriceHandler(getViemClient),
-        new ClqdrPriceHandler(getViemClient),
         new AavePriceHandler(getViemClient),
         new MorphoPriceHandler(),
         new CoingeckoPriceHandler(coingeckoConfig),
