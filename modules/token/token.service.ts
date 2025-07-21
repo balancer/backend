@@ -271,10 +271,6 @@ export class TokenService {
         return erc4626Data;
     }
 
-    public async updateTokenPrices(chains: Chain[]): Promise<void> {
-        return this.tokenPriceService.updateAllTokenPrices(chains);
-    }
-
     public async getTokenPrices(chain: Chain): Promise<PrismaTokenCurrentPrice[]> {
         let tokenPrices = this.cache.get(`${TOKEN_PRICES_CACHE_KEY}:${chain}`);
         if (!tokenPrices) {
