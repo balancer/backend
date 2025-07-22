@@ -65,8 +65,8 @@ const getMultichainEvents = async (chainIn: Chain[], limit: number = 100) => {
                 event.type === 'SWAP' && (event as SwapEvent).payload?.surplus
                     ? parseCowAmmSwap(event as SwapEvent)
                     : event.type === 'SWAP'
-                      ? parseSwap(event as SwapEvent)
-                      : parseJoinExit(event as JoinExitEvent),
+                    ? parseSwap(event as SwapEvent)
+                    : parseJoinExit(event as JoinExitEvent),
             );
         }),
     );
@@ -83,8 +83,6 @@ const getMultichainEvents = async (chainIn: Chain[], limit: number = 100) => {
 };
 
 export function EventsQueryController(env = process.env) {
-    const eventsEnabled = env.ENABLE_EVENTS === 'true';
-
     return {
         /**
          * Getting pool events, with pagination and filtering. This is for all vault versions.
@@ -99,10 +97,6 @@ export function EventsQueryController(env = process.env) {
             skip,
             where,
         }: QueryPoolEventsArgs): Promise<(GqlPoolSwapEventV3 | GqlPoolSwapEventCowAmm | GqlPoolAddRemoveEventV3)[]> => {
-            if (!eventsEnabled) {
-                return [];
-            }
-
             // Setting default values
             first = Math.min(1000, first ?? 1000); // Limiting to 1000 items
             skip = skip ?? 0;
@@ -133,8 +127,8 @@ export function EventsQueryController(env = process.env) {
                 event.type === 'SWAP' && (event as SwapEvent).payload?.surplus
                     ? parseCowAmmSwap(event as SwapEvent)
                     : event.type === 'SWAP'
-                      ? parseSwap(event as SwapEvent)
-                      : parseJoinExit(event as JoinExitEvent),
+                    ? parseSwap(event as SwapEvent)
+                    : parseJoinExit(event as JoinExitEvent),
             );
 
             return results;
