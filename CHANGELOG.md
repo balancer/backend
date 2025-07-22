@@ -1,5 +1,15 @@
 # backend
 
+## 1.49.0
+
+### Minor Changes
+
+-   709738d: update to node 22 runtime
+
+### Patch Changes
+
+-   e510252: update subgraph for sonic, reclamm
+
 ## 1.48.12
 
 ### Patch Changes
