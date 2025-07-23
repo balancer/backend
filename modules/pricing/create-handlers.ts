@@ -7,7 +7,6 @@ import {
     CoingeckoPriceHandler,
     SwapsPriceHandler,
     BeetsPriceHandler,
-    MorphoPriceHandler,
     BptPriceHandler,
     LbpPriceHandler,
     FallbackPriceHandler,
@@ -25,7 +24,6 @@ export function createHandlers(chains: Chain[]): PriceHandler[] {
         new ERC4626PriceHandler(),
         new BeetsPriceHandler(getViemClient),
         new AavePriceHandler(getViemClient),
-        new MorphoPriceHandler(),
         new CoingeckoPriceHandler(coingeckoConfig),
         new BptPriceHandler({
             prismaPool: prisma.prismaPool,
