@@ -214,6 +214,14 @@ export default <NetworkData>{
                     scale: 1000000000000000000,
                     isIbYield: true,
                 },
+                silogamiscUSD: {
+                    tokenAddress: '0x92ebf5a1fb4061b45222a6d76accf4698bde4b95',
+                    sourceUrl:
+                        'https://v2.silo.finance/api/detailed-vault/sonic-0x92ebf5a1fb4061b45222a6d76accf4698bde4b95',
+                    path: 'supplyApr',
+                    scale: 1000000000000000000,
+                    isIbYield: true,
+                },
                 xUSD: {
                     tokenAddress: '0x6202b9f02e30e5e1c62cc01e4305450e5d83b926',
                     sourceUrl: 'https://api-v2.streamprotocol.money/vaults/xUSD/apy',
