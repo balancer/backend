@@ -58,6 +58,11 @@ const chain2ViemChain = {
                 url: 'https://www.hyperscan.com',
             },
         },
+        contracts: {
+            multicall3: {
+                address: config[Chain.HYPEREVM].multicall3 as `0x${string}`,
+            },
+        },
     }),
 };
 
