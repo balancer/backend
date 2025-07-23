@@ -3,7 +3,6 @@ import { PriceHandler } from './types';
 import {
     RektTokensHandler,
     ERC4626PriceHandler,
-    AavePriceHandler,
     CoingeckoPriceHandler,
     SwapsPriceHandler,
     BeetsPriceHandler,
@@ -23,7 +22,6 @@ export function createHandlers(chains: Chain[]): PriceHandler[] {
         new RektTokensHandler(),
         new ERC4626PriceHandler(),
         new BeetsPriceHandler(getViemClient),
-        new AavePriceHandler(getViemClient),
         new CoingeckoPriceHandler(coingeckoConfig),
         new BptPriceHandler({
             prismaPool: prisma.prismaPool,

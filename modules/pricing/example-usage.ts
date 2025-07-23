@@ -19,7 +19,7 @@ async function exampleUsage() {
     const repo = new PricingRepository(eventsRepository);
     const tokens = await repo.getTokensForPricing(Chain.MAINNET, [
         '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', // Underlying
-        '0xd4fa2d31b7968e448877f69a96de69f5de8cd23e', // Aave token
+        '0xd4fa2d31b7968e448877f69a96de69f5de8cd23e', // ERC4626 aave token
         '0x7204b7dbf9412567835633b6f00c3edc3a8d6330', // Morpho token
         '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // WETH
         '0x1202f5c7b4b9e47a1a484e8b270be34dbbc75055', // wstusr - ERC4626
