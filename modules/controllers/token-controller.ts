@@ -1,5 +1,6 @@
 import { Chain } from '@prisma/client';
 import { syncErc4626Tokens } from '../actions/token/sync-erc4626-tokens';
+import { syncTvl } from '../actions/token/sync-tvl';
 import { getViemClient } from '../sources/viem-client';
 import { syncErc4626MaxValues } from '../actions/token/sync-erc4626-max-values';
 import { syncErc4626UnwrapRates } from '../actions/token/sync-erc4626-unwrap-rates';
@@ -16,5 +17,6 @@ export function TokenController(tracer?: any) {
             await syncErc4626UnwrapRates(chain);
             await syncErc4626MaxValues(chain);
         },
+        syncTvl: syncTvl,
     };
 }

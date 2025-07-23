@@ -406,6 +406,9 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
         case 'sync-lbps':
             await runIfNotAlreadyRunning(name, chainId, () => LBPController.syncData(chain), res, next);
             break;
+        case 'sync-token-tvl':
+            await runIfNotAlreadyRunning(name, chainId, () => TokenController().syncTvl(), res, next);
+            break;
         default:
             res.sendStatus(400);
             // throw new Error(`Unhandled job type ${name}`);

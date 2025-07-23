@@ -125,8 +125,8 @@ export class TokenService {
         const tokens = (
             await prisma.prismaToken.findMany({
                 where,
-                include: { types: true, dynamicData: true },
-                orderBy: { priority: 'desc' },
+                include: { types: true },
+                orderBy: { tvl: 'desc' },
             })
         ).filter((token) => {
             const tokenTypes = token.types.map((t) => t.type);
@@ -146,22 +146,6 @@ export class TokenService {
                 });
             }
         }
-
-        tokens.sort((a, b) => {
-            if (!a.dynamicData?.marketCap) {
-                return 1;
-            }
-            if (!b.dynamicData?.marketCap) {
-                return -1;
-            }
-            if (a.dynamicData.marketCap > b.dynamicData.marketCap) {
-                return -1;
-            }
-            if (a.dynamicData.marketCap < b.dynamicData.marketCap) {
-                return 1;
-            }
-            return 0;
-        });
 
         const rateProviderData = await this.getPriceRateProviderData(tokens);
 

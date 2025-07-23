@@ -187,6 +187,8 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         return service.updatePrices(chain);
     } else if (job === 'sync-vebal') {
         return new VeBalVotingListService().syncVotingGauges();
+    } else if (job === 'sync-token-tvl') {
+        return TokenController().syncTvl();
     } else if (job === 'sync-weights') {
         await QuantAmmController.syncWeights(chain);
         return 'OK';

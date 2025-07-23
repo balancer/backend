@@ -186,5 +186,9 @@ export const mainnetNetworkConfig: NetworkConfig = {
             name: 'sync-weights',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(60, 'minutes') : every(10, 'minutes'),
         },
+        {
+            name: 'sync-token-tvl',
+            interval: every(30, 'minutes'),
+        },
     ],
 };
