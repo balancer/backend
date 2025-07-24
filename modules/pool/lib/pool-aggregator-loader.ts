@@ -5,21 +5,17 @@ import {
     HookData,
 } from '../../../prisma/prisma-types';
 import {
-    GqlBalancePoolAprItem,
-    GqlBalancePoolAprSubItem,
     GqlPoolDynamicData,
     GqlPoolMinimal,
     GqlPoolUnion,
     QueryPoolGetPoolsArgs,
-    GqlPoolAprItem,
-    GqlPoolAprItemType,
     GqlPoolAggregator,
     LiquidityManagement,
     QueryAggregatorPoolsArgs,
 } from '../../../apps/api/gql/generated-schema';
 import _ from 'lodash';
 import { prisma } from '../../../prisma/prisma-client';
-import { Prisma, PrismaPoolAprType } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { fixedNumber } from '../../view-helpers/fixed-number';
 import { ElementData, FxData, GyroData, StableData, QuantAmmWeightedData, ReclammData } from '../subgraph-mapper';
 import { ZERO_ADDRESS } from '@balancer/sdk';

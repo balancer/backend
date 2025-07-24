@@ -9,8 +9,6 @@ import {
     HookData,
 } from '../../../prisma/prisma-types';
 import {
-    GqlBalancePoolAprItem,
-    GqlBalancePoolAprSubItem,
     GqlPoolDynamicData,
     GqlPoolFeaturedPool,
     GqlPoolInvestConfig,
@@ -28,19 +26,16 @@ import {
     GqlPoolWithdrawConfig,
     GqlPoolWithdrawOption,
     QueryPoolGetPoolsArgs,
-    GqlPoolAprItem,
-    GqlPoolAprItemType,
     GqlUserStakedBalance,
     GqlPoolFilterCategory,
     GqlPoolAggregator,
     LiquidityManagement,
-    QueryAggregatorPoolsArgs,
     QuantAmmWeightSnapshot,
     LiquidityBootstrappingPoolV3Params,
 } from '../../../apps/api/gql/generated-schema';
 import _ from 'lodash';
 import { prisma } from '../../../prisma/prisma-client';
-import { Chain, Prisma, PrismaPoolAprType, PrismaUserStakedBalance, PrismaUserWalletBalance } from '@prisma/client';
+import { Chain, Prisma, PrismaUserStakedBalance, PrismaUserWalletBalance } from '@prisma/client';
 import { fixedNumber } from '../../view-helpers/fixed-number';
 import { GithubContentService } from '../../content/github-content.service';
 import { ElementData, FxData, GyroData, StableData, QuantAmmWeightedData, ReclammData } from '../subgraph-mapper';
@@ -148,86 +143,6 @@ export class PoolGqlLoaderService {
                 }
             }
         }
-    }
-
-    public async getAggregatorPools(args: QueryPoolGetPoolsArgs): Promise<GqlPoolAggregator[]> {
-        // add limits per default
-        args.first = args.first || 1000;
-        args.skip = args.skip || 0;
-
-        const pools = await prisma.prismaPool.findMany({
-            ...this.mapQueryArgsToPoolQuery(args),
-            where: {
-                ...this.mapQueryArgsToPoolQuery(args).where,
-                dynamicData: {
-                    swapEnabled: true,
-                    isPaused: false,
-                    isInRecoveryMode: false,
-                },
-            },
-            include: {
-                ...this.getPoolInclude(),
-            },
-        });
-        const gqlPools = pools.map((pool) => this.mapPoolToAggregatorPool(pool));
-
-        for (const mappedPool of gqlPools) {
-            // load rate provider data into PoolTokenDetail model
-            await this.enrichWithRateproviderData(mappedPool);
-
-            // load underlying token info into PoolTokenDetail
-            await enrichWithErc4626Data(mappedPool.poolTokens, mappedPool.chain);
-        }
-
-        return gqlPools;
-    }
-
-    public async aggregatorPools(args: QueryAggregatorPoolsArgs): Promise<GqlPoolAggregator[]> {
-        // add limits per default
-        args.first = args.first || 1000;
-        args.skip = args.skip || 0;
-
-        const defaultFilter = {
-            dynamicData: {
-                swapEnabled: true,
-                isPaused: false,
-                isInRecoveryMode: false,
-            },
-        };
-
-        const aggregatorQueryArgs = this.mapAggregatorArgsToPoolQuery(args);
-
-        const pools = await prisma.prismaPool.findMany({
-            ...aggregatorQueryArgs,
-            where: {
-                ...aggregatorQueryArgs.where,
-                ...defaultFilter,
-            },
-            include: {
-                ...this.getPoolInclude(),
-            },
-        });
-        const gqlPools = pools.map((pool) => this.mapPoolToAggregatorPool(pool));
-        const filteredPools = [];
-
-        for (const mappedPool of gqlPools) {
-            // if a pool has a hook, we skip it if either there are no included hooks, or its type does not match an included hook
-            if (mappedPool.hook) {
-                if (!args.where?.includeHooks || !args.where.includeHooks.includes(mappedPool.hook.type)) {
-                    continue;
-                }
-            }
-
-            // load rate provider data into PoolTokenDetail model
-            await this.enrichWithRateproviderData(mappedPool);
-
-            // load underlying token info into PoolTokenDetail
-            await enrichWithErc4626Data(mappedPool.poolTokens, mappedPool.chain);
-
-            filteredPools.push(mappedPool);
-        }
-
-        return filteredPools;
     }
 
     public async getPools(args: QueryPoolGetPoolsArgs): Promise<GqlPoolMinimal[]> {
@@ -597,189 +512,6 @@ export class PoolGqlLoaderService {
                     },
                 ],
             },
-        };
-    }
-
-    private mapAggregatorArgsToPoolQuery(args: QueryAggregatorPoolsArgs): Prisma.PrismaPoolFindManyArgs {
-        const orderBy = getOrderBy(args);
-
-        const baseQuery: Prisma.PrismaPoolFindManyArgs = {
-            take: args.first || undefined,
-            skip: args.skip || undefined,
-            orderBy,
-        };
-
-        if (!args.where) {
-            return {
-                ...baseQuery,
-                where: {
-                    NOT: {
-                        categories: {
-                            has: 'BLACK_LISTED',
-                        },
-                    },
-                    dynamicData: {
-                        totalSharesNum: {
-                            gt: 0.000000000001,
-                        },
-                    },
-                },
-            };
-        }
-
-        const where = args.where || {};
-
-        const allTokensFilter = [];
-        where?.tokensIn?.forEach((token) => {
-            allTokensFilter.push({
-                allTokens: {
-                    some: {
-                        token: {
-                            address: {
-                                equals: token.toLowerCase(),
-                            },
-                        },
-                    },
-                },
-            });
-        });
-
-        if (where?.tokensNotIn) {
-            allTokensFilter.push({
-                allTokens: {
-                    every: {
-                        token: {
-                            address: {
-                                notIn: where.tokensNotIn.map((t) => t.toLowerCase()) || undefined,
-                            },
-                        },
-                    },
-                },
-            });
-        }
-
-        const filterArgs: Prisma.PrismaPoolWhereInput = {
-            dynamicData: {
-                totalSharesNum: {
-                    gt: 0.000000000001,
-                },
-                totalLiquidity: {
-                    gt: where?.minTvl || undefined,
-                },
-            },
-            chain: {
-                in: where?.chainIn || undefined,
-                notIn: where?.chainNotIn || undefined,
-            },
-            protocolVersion: {
-                in: where?.protocolVersionIn || undefined,
-            },
-            type: {
-                in: where?.poolTypeIn || undefined,
-                notIn: where?.poolTypeNotIn || undefined,
-            },
-            createTime: {
-                gt: where?.createTime?.gt || undefined,
-                lt: where?.createTime?.lt || undefined,
-            },
-            AND: allTokensFilter,
-            id: {
-                in: where?.idIn?.map((id) => id.toLowerCase()) || undefined,
-                notIn: where?.idNotIn?.map((id) => id.toLowerCase()) || undefined,
-            },
-        };
-
-        return {
-            ...baseQuery,
-            where: {
-                ...filterArgs,
-                allTokens: {
-                    some: {
-                        token: {
-                            address: filterArgs.allTokens?.some?.token?.address,
-                        },
-                    },
-                },
-            },
-        };
-    }
-
-    private mapPoolToAggregatorPool(pool: PrismaPoolWithExpandedNesting): GqlPoolAggregator {
-        const { typeData, ...poolWithoutTypeData } = pool;
-
-        const hook = (pool.hook as HookData)?.address ? (pool.hook as HookData) : null;
-
-        const mappedData = {
-            decimals: 18,
-            dynamicData: this.getPoolDynamicData(pool),
-            poolTokens: pool.tokens.map((token) => mapPoolToken(token, pool.protocolVersion)),
-            vaultVersion: poolWithoutTypeData.protocolVersion,
-            liquidityManagement: (pool.liquidityManagement as LiquidityManagement) || undefined,
-            hook: mapHookToGqlHook(hook as HookData),
-        };
-
-        switch (pool.type) {
-            case 'STABLE':
-                return {
-                    ...poolWithoutTypeData,
-                    ...(typeData as StableData),
-                    ...mappedData,
-                };
-            case 'META_STABLE':
-                return {
-                    ...poolWithoutTypeData,
-                    ...(typeData as StableData),
-                    ...mappedData,
-                };
-            case 'COMPOSABLE_STABLE':
-                return {
-                    ...poolWithoutTypeData,
-                    ...(typeData as StableData),
-                    ...mappedData,
-                    // bptPriceRate: bpt?.priceRate || '1.0',
-                };
-            case 'ELEMENT':
-                return {
-                    ...poolWithoutTypeData,
-                    ...(typeData as ElementData),
-                    ...mappedData,
-                };
-            case 'LIQUIDITY_BOOTSTRAPPING':
-                return {
-                    ...poolWithoutTypeData,
-                    ...mappedData,
-                };
-            case 'GYRO':
-            case 'GYRO3':
-            case 'GYROE':
-                return {
-                    ...poolWithoutTypeData,
-                    ...(typeData as GyroData),
-                    ...mappedData,
-                };
-            case 'FX':
-                return {
-                    ...poolWithoutTypeData,
-                    ...mappedData,
-                    ...(typeData as FxData),
-                };
-            case 'QUANT_AMM_WEIGHTED':
-                return {
-                    ...poolWithoutTypeData,
-                    ...mappedData,
-                    quantAmmWeightedParams: typeData as QuantAmmWeightedData,
-                };
-            case 'RECLAMM':
-                return {
-                    ...poolWithoutTypeData,
-                    ...(typeData as ReclammData),
-                    ...mappedData,
-                };
-        }
-
-        return {
-            ...poolWithoutTypeData,
-            ...mappedData,
         };
     }
 

@@ -72,17 +72,17 @@ export const schema = gql`
 
     input GqlAggregatorPoolFilter {
         chainIn: [GqlChain!]
-        chainNotIn: [GqlChain!]
-        createTime: GqlPoolTimePeriod
-        idIn: [String!]
-        idNotIn: [String!]
+        chainNotIn: [GqlChain!] @deprecated
+        createTime: GqlPoolTimePeriod @deprecated
+        idIn: [String!] @deprecated
+        idNotIn: [String!] @deprecated
         includeHooks: [GqlHookType!]
         minTvl: Float
         poolTypeIn: [GqlPoolType!]
-        poolTypeNotIn: [GqlPoolType!]
+        poolTypeNotIn: [GqlPoolType!] @deprecated
         protocolVersionIn: [Int!]
         tokensIn: [String!]
-        tokensNotIn: [String!]
+        tokensNotIn: [String!] @deprecated
     }
 
     type GqlBalancePoolAprItem {
@@ -4237,17 +4237,6 @@ export const schema = gql`
         Getting swap, add and remove events with paging
         """
         poolEvents(first: Int, skip: Int, where: GqlPoolEventsFilter): [GqlPoolEvent!]!
-
-        """
-        Returns all pools for a given filter, specific for aggregators
-        """
-        poolGetAggregatorPools(
-            first: Int
-            orderBy: GqlPoolOrderBy
-            orderDirection: GqlPoolOrderDirection
-            skip: Int
-            where: GqlPoolFilter
-        ): [GqlPoolAggregator!]! @deprecated(reason: "Use aggregatorPools instead")
 
         """
         Will de deprecated in favor of poolEvents

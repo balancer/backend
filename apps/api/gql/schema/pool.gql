@@ -18,17 +18,6 @@ extend type Query {
     """
     Returns all pools for a given filter, specific for aggregators
     """
-    poolGetAggregatorPools(
-        first: Int
-        skip: Int
-        orderBy: GqlPoolOrderBy
-        orderDirection: GqlPoolOrderDirection
-        where: GqlPoolFilter
-    ): [GqlPoolAggregator!]! @deprecated(reason: "Use aggregatorPools instead")
-
-    """
-    Returns all pools for a given filter, specific for aggregators
-    """
     aggregatorPools(
         first: Int
         skip: Int
@@ -1924,14 +1913,14 @@ input GqlPoolFilter {
 
 input GqlAggregatorPoolFilter {
     tokensIn: [String!]
-    tokensNotIn: [String!]
+    tokensNotIn: [String!] @deprecated
     poolTypeIn: [GqlPoolType!]
-    poolTypeNotIn: [GqlPoolType!]
-    idIn: [String!]
-    idNotIn: [String!]
+    poolTypeNotIn: [GqlPoolType!] @deprecated
+    idIn: [String!] @deprecated
+    idNotIn: [String!] @deprecated
     chainIn: [GqlChain!]
-    chainNotIn: [GqlChain!]
-    createTime: GqlPoolTimePeriod
+    chainNotIn: [GqlChain!] @deprecated
+    createTime: GqlPoolTimePeriod @deprecated
     protocolVersionIn: [Int!]
     includeHooks: [GqlHookType!]
     minTvl: Float

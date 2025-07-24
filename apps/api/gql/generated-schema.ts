@@ -2990,11 +2990,6 @@ export interface Query {
     /** Getting swap, add and remove events with paging */
     poolEvents: Array<GqlPoolEvent>;
     /**
-     * Returns all pools for a given filter, specific for aggregators
-     * @deprecated Use aggregatorPools instead
-     */
-    poolGetAggregatorPools: Array<GqlPoolAggregator>;
-    /**
      * Will de deprecated in favor of poolEvents
      * @deprecated Use poolEvents instead
      */
@@ -3118,14 +3113,6 @@ export interface QueryPoolEventsArgs {
     first?: InputMaybe<Scalars['Int']>;
     skip?: InputMaybe<Scalars['Int']>;
     where?: InputMaybe<GqlPoolEventsFilter>;
-}
-
-export interface QueryPoolGetAggregatorPoolsArgs {
-    first?: InputMaybe<Scalars['Int']>;
-    orderBy?: InputMaybe<GqlPoolOrderBy>;
-    orderDirection?: InputMaybe<GqlPoolOrderDirection>;
-    skip?: InputMaybe<Scalars['Int']>;
-    where?: InputMaybe<GqlPoolFilter>;
 }
 
 export interface QueryPoolGetBatchSwapsArgs {
@@ -6275,12 +6262,6 @@ export type QueryResolvers<
         ParentType,
         ContextType,
         RequireFields<QueryPoolEventsArgs, never>
-    >;
-    poolGetAggregatorPools?: Resolver<
-        Array<ResolversTypes['GqlPoolAggregator']>,
-        ParentType,
-        ContextType,
-        RequireFields<QueryPoolGetAggregatorPoolsArgs, never>
     >;
     poolGetBatchSwaps?: Resolver<
         Array<ResolversTypes['GqlPoolBatchSwap']>,

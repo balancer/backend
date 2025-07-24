@@ -3045,10 +3045,6 @@ export const aQuery = (overrides?: Partial<Query>): Query => {
         lbpPriceChart:
             overrides && overrides.hasOwnProperty('lbpPriceChart') ? overrides.lbpPriceChart! : [aLbpPriceChartData()],
         poolEvents: overrides && overrides.hasOwnProperty('poolEvents') ? overrides.poolEvents! : [aGqlPoolEvent()],
-        poolGetAggregatorPools:
-            overrides && overrides.hasOwnProperty('poolGetAggregatorPools')
-                ? overrides.poolGetAggregatorPools!
-                : [aGqlPoolAggregator()],
         poolGetBatchSwaps:
             overrides && overrides.hasOwnProperty('poolGetBatchSwaps')
                 ? overrides.poolGetBatchSwaps!
