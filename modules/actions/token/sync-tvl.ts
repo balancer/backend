@@ -2,7 +2,7 @@ import { prisma } from '../../../prisma/prisma-client';
 
 export const syncTvl = async () => {
     await prisma.$executeRaw`UPDATE "PrismaToken"
-  SET tvl = COALESCE(tvl_data.tvl, '0')
+  SET tvl = COALESCE(tvl_data.tvl, 0)
   FROM (
       SELECT
           address,
