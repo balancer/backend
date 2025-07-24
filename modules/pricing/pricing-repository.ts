@@ -7,32 +7,62 @@ import { SwapRepository } from '../repositories/events/types';
 import { SwapEvent } from '../../prisma/prisma-types';
 import _ from 'lodash';
 
+// Depdendency of Beets pricing handler - it needs cross chain sts price
+const stSaddress = '0xe5da20f15420ad15de0fa650600afc998bbe3955';
+
 export class PricingRepository {
     constructor(private swapRepository: SwapRepository) {}
 
     async getTokensForPricing(chain: Chain, tokenAddresses?: string[]): Promise<TokenPriceData[]> {
-        const tokens = await prisma.prismaToken.findMany({
-            where: {
-                chain: chain,
-                ...(tokenAddresses && tokenAddresses.length > 0 && { address: { in: tokenAddresses } }),
-            },
-            select: {
-                address: true,
-                chain: true,
-                coingeckoTokenId: true,
-                excludedFromCoingecko: true,
-                underlyingTokenAddress: true,
-                unwrapRate: true,
-                types: {
-                    select: {
-                        type: true,
+        const [tokens, swaps] = await Promise.all([
+            prisma.prismaToken.findMany({
+                where: {
+                    chain: chain,
+                    ...(tokenAddresses && tokenAddresses.length > 0 && { address: { in: tokenAddresses } }),
+                },
+                select: {
+                    address: true,
+                    chain: true,
+                    coingeckoTokenId: true,
+                    excludedFromCoingecko: true,
+                    underlyingTokenAddress: true,
+                    unwrapRate: true,
+                    types: {
+                        select: {
+                            type: true,
+                        },
                     },
                 },
-            },
-        });
+            }),
+            this.swapRepository.getSwapsForPricing(chain),
+        ]);
 
-        // Fetch swap data for pricing
-        const swaps = await this.swapRepository.getSwapsForPricing(chain);
+        // Include stSonic for OP, FTM
+        if (['OPTIMISM', 'FANTOM'].includes(chain)) {
+            const sts = await prisma.prismaToken.findFirst({
+                where: {
+                    address: stSaddress,
+                    chain: Chain.SONIC,
+                },
+                select: {
+                    address: true,
+                    chain: true,
+                    coingeckoTokenId: true,
+                    excludedFromCoingecko: true,
+                    underlyingTokenAddress: true,
+                    unwrapRate: true,
+                    types: {
+                        select: {
+                            type: true,
+                        },
+                    },
+                },
+            });
+
+            if (sts) {
+                tokens.push(sts);
+            }
+        }
 
         // Collect all token addresses that need prices
         const allTokenAddresses = this.collectAllTokenAddresses(tokens);
@@ -171,6 +201,21 @@ export class PricingRepository {
         tokenPrices.forEach((tokenPrice) => {
             priceMap.set(tokenPrice.tokenAddress, tokenPrice.price);
         });
+
+        // Include stSonic for OP, FTM
+        if (['OPTIMISM', 'FANTOM'].includes(chain)) {
+            const sts = await prisma.prismaTokenCurrentPrice.findFirst({
+                where: { tokenAddress: stSaddress, chain: Chain.SONIC },
+                select: {
+                    tokenAddress: true,
+                    price: true,
+                },
+            });
+
+            if (sts) {
+                priceMap.set(stSaddress, sts.price);
+            }
+        }
 
         return priceMap;
     }
