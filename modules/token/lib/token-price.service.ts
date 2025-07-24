@@ -86,51 +86,6 @@ export class TokenPriceService {
         return tokenPrice?.price || 0;
     }
 
-    // should this be called for all chains in general?
-    // thinking about coingecko requests as we should update those prices once for all chains
-    public async updateAllTokenPrices(chains: Chain[]): Promise<void> {
-        const tokens = await prisma.prismaToken.findMany({
-            where: { chain: { in: chains } },
-        });
-
-        const tokenTypes = await prisma.prismaTokenType.findMany({
-            where: { chain: { in: chains } },
-        });
-
-        let tokensWithTypes = tokens.map((token) => ({
-            ...token,
-            types: tokenTypes.filter((type) => type.tokenAddress === token.address).map((type) => type.type),
-        }));
-
-        for (const handler of this.priceHandlers) {
-            let updated: PrismaTokenWithTypes[] = [];
-
-            try {
-                updated = await handler.updatePricesForTokens(tokensWithTypes, chains);
-            } catch (e) {
-                console.error(`TokenPriceHanlder failed. ID: ${handler.id}, Error: ${e}`);
-                Sentry.captureException(e, (scope) => {
-                    scope.setTag('handler.exitIfFails', handler.exitIfFails);
-                    return scope;
-                });
-                if (handler.exitIfFails) {
-                    throw e;
-                }
-            }
-
-            //remove any updated tokens from the list for the next handler
-            tokensWithTypes = tokensWithTypes.filter((token) => {
-                return !updated.some((updatedToken) => {
-                    return token.address === updatedToken.address && token.chain === updatedToken.chain;
-                });
-            });
-        }
-
-        for (const chain of chains) {
-            await this.updateCandleStickData(chain);
-        }
-    }
-
     public async getTokenPricesForRange(
         tokenAddresses: string[],
         range: GqlTokenChartDataRange,

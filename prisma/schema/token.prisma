@@ -34,11 +34,13 @@ model PrismaToken {
     unwrapRate          String              @default("1")
     maxDeposit          String              @default("0")
     maxWithdraw         String              @default("0")
+    tvl                 String              @default("0")
 
     walletBalances  PrismaUserWalletBalance[]
     stakedBalances  PrismaUserStakedBalance[]
 
     @@index([address, chain])
+    @@index(tvl(sort: Desc))
 }
 
 
