@@ -5,7 +5,7 @@ import { fp } from '../../big-number/big-number';
 import { zeroAddress as AddressZero } from 'viem';
 import { formatFixed } from '@ethersproject/bignumber';
 import { IViemClient } from '../../sources/viem-client';
-import * as VaultAbi from '../../pool/abi/Vault.json';
+import VaultAbi from '../../pool/abi/Vault.json';
 
 type FundManagement = {
     sender: string;
