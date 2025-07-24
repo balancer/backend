@@ -40,6 +40,11 @@ const balancerResolvers: Resolvers = {
             const pools = loader.aggregatorPools(args);
             return pools;
         },
+        poolGetAggregatorPools: async (parent, args, context) => {
+            const loader = new PoolAggregatorLoader();
+            const pools = loader.aggregatorPools(args);
+            return pools;
+        },
         poolGetPoolsCount: async (parent, args, context) => {
             return poolService.getPoolsCount(args);
         },

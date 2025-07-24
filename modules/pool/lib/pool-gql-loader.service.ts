@@ -28,7 +28,6 @@ import {
     QueryPoolGetPoolsArgs,
     GqlUserStakedBalance,
     GqlPoolFilterCategory,
-    GqlPoolAggregator,
     LiquidityManagement,
     QuantAmmWeightSnapshot,
     LiquidityBootstrappingPoolV3Params,
@@ -91,7 +90,7 @@ export class PoolGqlLoaderService {
         return mappedPool;
     }
 
-    private async enrichWithRateproviderData(mappedPool: GqlPoolMinimal | GqlPoolAggregator | GqlPoolUnion) {
+    private async enrichWithRateproviderData(mappedPool: GqlPoolMinimal | GqlPoolUnion) {
         for (const token of mappedPool.poolTokens) {
             if (token.priceRateProvider && token.priceRateProvider !== ZERO_ADDRESS) {
                 const rateproviderData = await prisma.prismaPriceRateProviderData.findUnique({

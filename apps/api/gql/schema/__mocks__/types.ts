@@ -55,6 +55,242 @@ export type FeeTakingHookParams = {
     swapFeePercentage?: Maybe<Scalars['String']>;
 };
 
+export type GqlAggregatorElementParams = {
+    __typename?: 'GqlAggregatorElementParams';
+    baseToken?: Maybe<Scalars['String']>;
+    principalToken?: Maybe<Scalars['String']>;
+    unitSeconds?: Maybe<Scalars['String']>;
+};
+
+export type GqlAggregatorFxParams = {
+    __typename?: 'GqlAggregatorFxParams';
+    alpha?: Maybe<Scalars['String']>;
+    beta?: Maybe<Scalars['String']>;
+    delta?: Maybe<Scalars['String']>;
+    epsilon?: Maybe<Scalars['String']>;
+    lambda?: Maybe<Scalars['String']>;
+};
+
+export type GqlAggregatorGyroParams = {
+    __typename?: 'GqlAggregatorGyroParams';
+    alpha?: Maybe<Scalars['String']>;
+    beta?: Maybe<Scalars['String']>;
+    c?: Maybe<Scalars['String']>;
+    dSq?: Maybe<Scalars['String']>;
+    lambda?: Maybe<Scalars['String']>;
+    root3Alpha?: Maybe<Scalars['String']>;
+    s?: Maybe<Scalars['String']>;
+    sqrtAlpha?: Maybe<Scalars['String']>;
+    sqrtBeta?: Maybe<Scalars['String']>;
+    tauAlphaX?: Maybe<Scalars['String']>;
+    tauAlphaY?: Maybe<Scalars['String']>;
+    tauBetaX?: Maybe<Scalars['String']>;
+    tauBetaY?: Maybe<Scalars['String']>;
+    u?: Maybe<Scalars['String']>;
+    v?: Maybe<Scalars['String']>;
+    w?: Maybe<Scalars['String']>;
+    z?: Maybe<Scalars['String']>;
+};
+
+export type GqlAggregatorPool = {
+    __typename?: 'GqlAggregatorPool';
+    /** The contract address of the pool. */
+    address: Scalars['Bytes'];
+    /**
+     * Data specific to gyro/fx pools
+     * @deprecated use fxParams or gyroParams instead
+     */
+    alpha?: Maybe<Scalars['String']>;
+    /** Data specific to stable pools */
+    amp?: Maybe<Scalars['BigInt']>;
+    /**
+     * Data specific to gyro/fx pools
+     * @deprecated use fxParams or gyroParams instead
+     */
+    beta?: Maybe<Scalars['String']>;
+    /**
+     * Data specific to gyro pools
+     * @deprecated use gyroParams instead
+     */
+    c?: Maybe<Scalars['String']>;
+    /**
+     * ReClamm: The centeredness margin of the pool
+     * @deprecated Field no longer supported
+     */
+    centerednessMargin?: Maybe<Scalars['BigDecimal']>;
+    /** The chain on which the pool is deployed */
+    chain: GqlChain;
+    /** The timestamp the pool was created. */
+    createTime: Scalars['Int'];
+    /**
+     * ReClamm: The current fourth root price ratio, an interpolation of the price ratio state
+     * @deprecated Field no longer supported
+     */
+    currentFourthRootPriceRatio?: Maybe<Scalars['BigDecimal']>;
+    /**
+     * Data specific to gyro pools
+     * @deprecated use gyroParams instead
+     */
+    dSq?: Maybe<Scalars['String']>;
+    /**
+     * ReClamm: Represents how fast the pool can move the virtual balances per day
+     * @deprecated Field no longer supported
+     */
+    dailyPriceShiftBase?: Maybe<Scalars['BigDecimal']>;
+    /** The decimals of the BPT, usually 18 */
+    decimals: Scalars['Int'];
+    /**
+     * Data specific to fx pools
+     * @deprecated Use fxParams instead
+     */
+    delta?: Maybe<Scalars['String']>;
+    /**
+     * Dynamic data such as token balances, swap fees or volume
+     * @deprecated Use swapFee directly instead
+     */
+    dynamicData: GqlAggregatorPoolDynamicData;
+    /** Element type specific params */
+    elementParams?: Maybe<GqlAggregatorElementParams>;
+    /**
+     * ReClamm: The fourth root price ratio at the end of an update
+     * @deprecated Field no longer supported
+     */
+    endFourthRootPriceRatio?: Maybe<Scalars['BigDecimal']>;
+    /**
+     * Data specific to fx pools
+     * @deprecated Use fxParams instead
+     */
+    epsilon?: Maybe<Scalars['String']>;
+    /** The factory contract address from which the pool was created. */
+    factory?: Maybe<Scalars['Bytes']>;
+    /** FX specific params */
+    fxParams?: Maybe<GqlAggregatorFxParams>;
+    /** Gyro specific params */
+    gyroParams?: Maybe<GqlAggregatorGyroParams>;
+    /** Hook assigned to a pool */
+    hook?: Maybe<GqlHook>;
+    /** The pool id. This is equal to the address for protocolVersion 3 pools */
+    id: Scalars['ID'];
+    /**
+     * Data specific to gyro/fx pools
+     * @deprecated use fxParams or gyroParams instead
+     */
+    lambda?: Maybe<Scalars['String']>;
+    /**
+     * The timestamp of the last user interaction
+     * @deprecated Field no longer supported
+     */
+    lastTimestamp?: Maybe<Scalars['Int']>;
+    /**
+     * ReClamm: The last virtual balances of the pool
+     * @deprecated Field no longer supported
+     */
+    lastVirtualBalances?: Maybe<Array<Scalars['BigDecimal']>>;
+    /**
+     * Liquidity management settings for v3 pools.
+     * @deprecated Field no longer supported
+     */
+    liquidityManagement?: Maybe<LiquidityManagement>;
+    /** The name of the pool as per contract */
+    name: Scalars['String'];
+    /** Returns all pool tokens, including BPTs and nested pools if there are any. Only one nested level deep. */
+    poolTokens: Array<GqlAggregatorPoolToken>;
+    /**
+     * ReClamm: The timestamp when the update ends
+     * @deprecated Field no longer supported
+     */
+    priceRatioUpdateEndTime?: Maybe<Scalars['Int']>;
+    /**
+     * ReClamm: The timestamp when the update begins
+     * @deprecated Field no longer supported
+     */
+    priceRatioUpdateStartTime?: Maybe<Scalars['Int']>;
+    /** The protocol version on which the pool is deployed, 1, 2 or 3 */
+    protocolVersion: Scalars['Int'];
+    /** QuantAmmWeighted specific params */
+    quantAmmWeightedParams?: Maybe<QuantAmmWeightedParams>;
+    /** Reclamm specific params */
+    reclammParams?: Maybe<GqlAggregatorReclammParams>;
+    /**
+     * Data specific to gyro pools
+     * @deprecated use gyroParams instead
+     */
+    root3Alpha?: Maybe<Scalars['String']>;
+    /**
+     * Data specific to gyro pools
+     * @deprecated use gyroParams instead
+     */
+    s?: Maybe<Scalars['String']>;
+    /**
+     * Data specific to gyro pools
+     * @deprecated use gyroParams instead
+     */
+    sqrtAlpha?: Maybe<Scalars['String']>;
+    /**
+     * Data specific to gyro pools
+     * @deprecated use gyroParams instead
+     */
+    sqrtBeta?: Maybe<Scalars['String']>;
+    /**
+     * ReClamm: The fourth root price ratio at the start of an update
+     * @deprecated Field no longer supported
+     */
+    startFourthRootPriceRatio?: Maybe<Scalars['BigDecimal']>;
+    /** Pool's swap fee */
+    swapFee: Scalars['BigDecimal'];
+    /** The token symbol of the pool as per contract */
+    symbol: Scalars['String'];
+    /**
+     * Data specific to gyro pools
+     * @deprecated use gyroParams instead
+     */
+    tauAlphaX?: Maybe<Scalars['String']>;
+    /**
+     * Data specific to gyro pools
+     * @deprecated use gyroParams instead
+     */
+    tauAlphaY?: Maybe<Scalars['String']>;
+    /**
+     * Data specific to gyro pools
+     * @deprecated use gyroParams instead
+     */
+    tauBetaX?: Maybe<Scalars['String']>;
+    /**
+     * Data specific to gyro pools
+     * @deprecated use gyroParams instead
+     */
+    tauBetaY?: Maybe<Scalars['String']>;
+    /** The pool type, such as weighted, stable, etc. */
+    type: GqlPoolType;
+    /**
+     * Data specific to gyro pools
+     * @deprecated use gyroParams instead
+     */
+    u?: Maybe<Scalars['String']>;
+    /**
+     * Data specific to gyro pools
+     * @deprecated use gyroParams instead
+     */
+    v?: Maybe<Scalars['String']>;
+    /** The version of the pool type. */
+    version: Scalars['Int'];
+    /**
+     * Data specific to gyro pools
+     * @deprecated use gyroParams instead
+     */
+    w?: Maybe<Scalars['String']>;
+    /**
+     * Data specific to gyro pools
+     * @deprecated use gyroParams instead
+     */
+    z?: Maybe<Scalars['String']>;
+};
+
+export type GqlAggregatorPoolDynamicData = {
+    __typename?: 'GqlAggregatorPoolDynamicData';
+    swapFee: Scalars['BigDecimal'];
+};
+
 export type GqlAggregatorPoolFilter = {
     chainIn?: InputMaybe<Array<GqlChain>>;
     chainNotIn?: InputMaybe<Array<GqlChain>>;
@@ -68,6 +304,47 @@ export type GqlAggregatorPoolFilter = {
     protocolVersionIn?: InputMaybe<Array<Scalars['Int']>>;
     tokensIn?: InputMaybe<Array<Scalars['String']>>;
     tokensNotIn?: InputMaybe<Array<Scalars['String']>>;
+};
+
+export type GqlAggregatorPoolToken = {
+    __typename?: 'GqlAggregatorPoolToken';
+    address: Scalars['String'];
+    balance: Scalars['String'];
+    decimals: Scalars['Int'];
+    isErc4626: Scalars['Boolean'];
+    priceRate?: Maybe<Scalars['String']>;
+    priceRateProvider?: Maybe<Scalars['String']>;
+    symbol: Scalars['String'];
+    underlyingToken?: Maybe<GqlAggregatorUnderlyingToken>;
+    weight?: Maybe<Scalars['String']>;
+};
+
+export type GqlAggregatorReclammParams = {
+    __typename?: 'GqlAggregatorReclammParams';
+    /** ReClamm: The centeredness margin of the pool */
+    centerednessMargin?: Maybe<Scalars['BigDecimal']>;
+    /** ReClamm: The current fourth root price ratio, an interpolation of the price ratio state */
+    currentFourthRootPriceRatio?: Maybe<Scalars['BigDecimal']>;
+    /** ReClamm: Represents how fast the pool can move the virtual balances per day */
+    dailyPriceShiftBase?: Maybe<Scalars['BigDecimal']>;
+    /** ReClamm: The fourth root price ratio at the end of an update */
+    endFourthRootPriceRatio?: Maybe<Scalars['BigDecimal']>;
+    /** ReClamm: The last virtual balances of the pool */
+    lastVirtualBalances?: Maybe<Array<Scalars['BigDecimal']>>;
+    /** ReClamm: The timestamp when the update ends */
+    priceRatioUpdateEndTime?: Maybe<Scalars['Int']>;
+    /** ReClamm: The timestamp when the update begins */
+    priceRatioUpdateStartTime?: Maybe<Scalars['Int']>;
+    /** ReClamm: The fourth root price ratio at the start of an update */
+    startFourthRootPriceRatio?: Maybe<Scalars['BigDecimal']>;
+};
+
+export type GqlAggregatorUnderlyingToken = {
+    __typename?: 'GqlAggregatorUnderlyingToken';
+    address: Scalars['String'];
+    decimals: Scalars['Int'];
+    name: Scalars['String'];
+    symbol: Scalars['String'];
 };
 
 export type GqlBalancePoolAprItem = {
@@ -291,111 +568,6 @@ export type GqlPoolAddRemoveEventV3 = GqlPoolEvent & {
     userAddress: Scalars['String'];
     /** The value of the event in USD. */
     valueUSD: Scalars['Float'];
-};
-
-export type GqlPoolAggregator = {
-    __typename?: 'GqlPoolAggregator';
-    /** The contract address of the pool. */
-    address: Scalars['Bytes'];
-    /** Data specific to gyro/fx pools */
-    alpha?: Maybe<Scalars['String']>;
-    /** Data specific to stable pools */
-    amp?: Maybe<Scalars['BigInt']>;
-    /** Data specific to gyro/fx pools */
-    beta?: Maybe<Scalars['String']>;
-    /** Data specific to gyro pools */
-    c?: Maybe<Scalars['String']>;
-    /** ReClamm: The centeredness margin of the pool */
-    centerednessMargin?: Maybe<Scalars['BigDecimal']>;
-    /** The chain on which the pool is deployed */
-    chain: GqlChain;
-    /** The timestamp the pool was created. */
-    createTime: Scalars['Int'];
-    /** ReClamm: The current fourth root price ratio, an interpolation of the price ratio state */
-    currentFourthRootPriceRatio?: Maybe<Scalars['BigDecimal']>;
-    /** Data specific to gyro pools */
-    dSq?: Maybe<Scalars['String']>;
-    /** ReClamm: Represents how fast the pool can move the virtual balances per day */
-    dailyPriceShiftBase?: Maybe<Scalars['BigDecimal']>;
-    /** The decimals of the BPT, usually 18 */
-    decimals: Scalars['Int'];
-    /** Data specific to fx pools */
-    delta?: Maybe<Scalars['String']>;
-    /** Dynamic data such as token balances, swap fees or volume */
-    dynamicData: GqlPoolDynamicData;
-    /** ReClamm: The fourth root price ratio at the end of an update */
-    endFourthRootPriceRatio?: Maybe<Scalars['BigDecimal']>;
-    /** Data specific to fx pools */
-    epsilon?: Maybe<Scalars['String']>;
-    /** The factory contract address from which the pool was created. */
-    factory?: Maybe<Scalars['Bytes']>;
-    /** Hook assigned to a pool */
-    hook?: Maybe<GqlHook>;
-    /** The pool id. This is equal to the address for protocolVersion 3 pools */
-    id: Scalars['ID'];
-    /** Data specific to gyro/fx pools */
-    lambda?: Maybe<Scalars['String']>;
-    /** The timestamp of the last user interaction */
-    lastTimestamp?: Maybe<Scalars['Int']>;
-    /** ReClamm: The last virtual balances of the pool */
-    lastVirtualBalances?: Maybe<Array<Scalars['BigDecimal']>>;
-    /** Liquidity management settings for v3 pools. */
-    liquidityManagement?: Maybe<LiquidityManagement>;
-    /** The name of the pool as per contract */
-    name: Scalars['String'];
-    /**
-     * The wallet address of the owner of the pool. Pool owners can set certain properties like swapFees or AMP.
-     * @deprecated Use swapFeeManager instead
-     */
-    owner?: Maybe<Scalars['Bytes']>;
-    /** Account empowered to pause/unpause the pool (or 0 to delegate to governance) */
-    pauseManager?: Maybe<Scalars['Bytes']>;
-    /** Account empowered to set the pool creator fee percentage */
-    poolCreator?: Maybe<Scalars['Bytes']>;
-    /** Returns all pool tokens, including BPTs and nested pools if there are any. Only one nested level deep. */
-    poolTokens: Array<GqlPoolTokenDetail>;
-    /** ReClamm: The timestamp when the update ends */
-    priceRatioUpdateEndTime?: Maybe<Scalars['Int']>;
-    /** ReClamm: The timestamp when the update begins */
-    priceRatioUpdateStartTime?: Maybe<Scalars['Int']>;
-    /** The protocol version on which the pool is deployed, 1, 2 or 3 */
-    protocolVersion: Scalars['Int'];
-    /** QuantAmmWeighted specific fields */
-    quantAmmWeightedParams?: Maybe<QuantAmmWeightedParams>;
-    /** Data specific to gyro pools */
-    root3Alpha?: Maybe<Scalars['String']>;
-    /** Data specific to gyro pools */
-    s?: Maybe<Scalars['String']>;
-    /** Data specific to gyro pools */
-    sqrtAlpha?: Maybe<Scalars['String']>;
-    /** Data specific to gyro pools */
-    sqrtBeta?: Maybe<Scalars['String']>;
-    /** ReClamm: The fourth root price ratio at the start of an update */
-    startFourthRootPriceRatio?: Maybe<Scalars['BigDecimal']>;
-    /** Account empowered to set static swap fees for a pool (when 0 on V2 swap fees are immutable, on V3 delegate to governance) */
-    swapFeeManager?: Maybe<Scalars['Bytes']>;
-    /** The token symbol of the pool as per contract */
-    symbol: Scalars['String'];
-    /** Data specific to gyro pools */
-    tauAlphaX?: Maybe<Scalars['String']>;
-    /** Data specific to gyro pools */
-    tauAlphaY?: Maybe<Scalars['String']>;
-    /** Data specific to gyro pools */
-    tauBetaX?: Maybe<Scalars['String']>;
-    /** Data specific to gyro pools */
-    tauBetaY?: Maybe<Scalars['String']>;
-    /** The pool type, such as weighted, stable, etc. */
-    type: GqlPoolType;
-    /** Data specific to gyro pools */
-    u?: Maybe<Scalars['String']>;
-    /** Data specific to gyro pools */
-    v?: Maybe<Scalars['String']>;
-    /** The version of the pool type. */
-    version: Scalars['Int'];
-    /** Data specific to gyro pools */
-    w?: Maybe<Scalars['String']>;
-    /** Data specific to gyro pools */
-    z?: Maybe<Scalars['String']>;
 };
 
 export type GqlPoolApr = {
@@ -3020,7 +3192,7 @@ export type QuantAmmWeightedParams = {
 export type Query = {
     __typename?: 'Query';
     /** Returns all pools for a given filter, specific for aggregators */
-    aggregatorPools: Array<GqlPoolAggregator>;
+    aggregatorPools: Array<GqlAggregatorPool>;
     beetsGetFbeetsRatio: Scalars['String'];
     beetsPoolGetReliquaryFarmSnapshots: Array<GqlReliquaryFarmSnapshot>;
     /** @deprecated Field no longer supported */
@@ -3035,6 +3207,11 @@ export type Query = {
     lbpPriceChart?: Maybe<Array<LbpPriceChartData>>;
     /** Getting swap, add and remove events with paging */
     poolEvents: Array<GqlPoolEvent>;
+    /**
+     * Returns all pools for a given filter, specific for aggregators
+     * @deprecated Use aggregatorPools instead
+     */
+    poolGetAggregatorPools: Array<GqlAggregatorPool>;
     /**
      * Will de deprecated in favor of poolEvents
      * @deprecated Use poolEvents instead
@@ -3159,6 +3336,14 @@ export type QueryPoolEventsArgs = {
     first?: InputMaybe<Scalars['Int']>;
     skip?: InputMaybe<Scalars['Int']>;
     where?: InputMaybe<GqlPoolEventsFilter>;
+};
+
+export type QueryPoolGetAggregatorPoolsArgs = {
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<GqlPoolOrderBy>;
+    orderDirection?: InputMaybe<GqlPoolOrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    where?: InputMaybe<GqlPoolFilter>;
 };
 
 export type QueryPoolGetBatchSwapsArgs = {

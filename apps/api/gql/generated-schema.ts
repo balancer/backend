@@ -64,6 +64,242 @@ export interface FeeTakingHookParams {
     swapFeePercentage?: Maybe<Scalars['String']>;
 }
 
+export interface GqlAggregatorElementParams {
+    __typename?: 'GqlAggregatorElementParams';
+    baseToken?: Maybe<Scalars['String']>;
+    principalToken?: Maybe<Scalars['String']>;
+    unitSeconds?: Maybe<Scalars['String']>;
+}
+
+export interface GqlAggregatorFxParams {
+    __typename?: 'GqlAggregatorFxParams';
+    alpha?: Maybe<Scalars['String']>;
+    beta?: Maybe<Scalars['String']>;
+    delta?: Maybe<Scalars['String']>;
+    epsilon?: Maybe<Scalars['String']>;
+    lambda?: Maybe<Scalars['String']>;
+}
+
+export interface GqlAggregatorGyroParams {
+    __typename?: 'GqlAggregatorGyroParams';
+    alpha?: Maybe<Scalars['String']>;
+    beta?: Maybe<Scalars['String']>;
+    c?: Maybe<Scalars['String']>;
+    dSq?: Maybe<Scalars['String']>;
+    lambda?: Maybe<Scalars['String']>;
+    root3Alpha?: Maybe<Scalars['String']>;
+    s?: Maybe<Scalars['String']>;
+    sqrtAlpha?: Maybe<Scalars['String']>;
+    sqrtBeta?: Maybe<Scalars['String']>;
+    tauAlphaX?: Maybe<Scalars['String']>;
+    tauAlphaY?: Maybe<Scalars['String']>;
+    tauBetaX?: Maybe<Scalars['String']>;
+    tauBetaY?: Maybe<Scalars['String']>;
+    u?: Maybe<Scalars['String']>;
+    v?: Maybe<Scalars['String']>;
+    w?: Maybe<Scalars['String']>;
+    z?: Maybe<Scalars['String']>;
+}
+
+export interface GqlAggregatorPool {
+    __typename?: 'GqlAggregatorPool';
+    /** The contract address of the pool. */
+    address: Scalars['Bytes'];
+    /**
+     * Data specific to gyro/fx pools
+     * @deprecated use fxParams or gyroParams instead
+     */
+    alpha?: Maybe<Scalars['String']>;
+    /** Data specific to stable pools */
+    amp?: Maybe<Scalars['BigInt']>;
+    /**
+     * Data specific to gyro/fx pools
+     * @deprecated use fxParams or gyroParams instead
+     */
+    beta?: Maybe<Scalars['String']>;
+    /**
+     * Data specific to gyro pools
+     * @deprecated use gyroParams instead
+     */
+    c?: Maybe<Scalars['String']>;
+    /**
+     * ReClamm: The centeredness margin of the pool
+     * @deprecated Field no longer supported
+     */
+    centerednessMargin?: Maybe<Scalars['BigDecimal']>;
+    /** The chain on which the pool is deployed */
+    chain: GqlChain;
+    /** The timestamp the pool was created. */
+    createTime: Scalars['Int'];
+    /**
+     * ReClamm: The current fourth root price ratio, an interpolation of the price ratio state
+     * @deprecated Field no longer supported
+     */
+    currentFourthRootPriceRatio?: Maybe<Scalars['BigDecimal']>;
+    /**
+     * Data specific to gyro pools
+     * @deprecated use gyroParams instead
+     */
+    dSq?: Maybe<Scalars['String']>;
+    /**
+     * ReClamm: Represents how fast the pool can move the virtual balances per day
+     * @deprecated Field no longer supported
+     */
+    dailyPriceShiftBase?: Maybe<Scalars['BigDecimal']>;
+    /** The decimals of the BPT, usually 18 */
+    decimals: Scalars['Int'];
+    /**
+     * Data specific to fx pools
+     * @deprecated Use fxParams instead
+     */
+    delta?: Maybe<Scalars['String']>;
+    /**
+     * Dynamic data such as token balances, swap fees or volume
+     * @deprecated Use swapFee directly instead
+     */
+    dynamicData: GqlAggregatorPoolDynamicData;
+    /** Element type specific params */
+    elementParams?: Maybe<GqlAggregatorElementParams>;
+    /**
+     * ReClamm: The fourth root price ratio at the end of an update
+     * @deprecated Field no longer supported
+     */
+    endFourthRootPriceRatio?: Maybe<Scalars['BigDecimal']>;
+    /**
+     * Data specific to fx pools
+     * @deprecated Use fxParams instead
+     */
+    epsilon?: Maybe<Scalars['String']>;
+    /** The factory contract address from which the pool was created. */
+    factory?: Maybe<Scalars['Bytes']>;
+    /** FX specific params */
+    fxParams?: Maybe<GqlAggregatorFxParams>;
+    /** Gyro specific params */
+    gyroParams?: Maybe<GqlAggregatorGyroParams>;
+    /** Hook assigned to a pool */
+    hook?: Maybe<GqlHook>;
+    /** The pool id. This is equal to the address for protocolVersion 3 pools */
+    id: Scalars['ID'];
+    /**
+     * Data specific to gyro/fx pools
+     * @deprecated use fxParams or gyroParams instead
+     */
+    lambda?: Maybe<Scalars['String']>;
+    /**
+     * The timestamp of the last user interaction
+     * @deprecated Field no longer supported
+     */
+    lastTimestamp?: Maybe<Scalars['Int']>;
+    /**
+     * ReClamm: The last virtual balances of the pool
+     * @deprecated Field no longer supported
+     */
+    lastVirtualBalances?: Maybe<Array<Scalars['BigDecimal']>>;
+    /**
+     * Liquidity management settings for v3 pools.
+     * @deprecated Field no longer supported
+     */
+    liquidityManagement?: Maybe<LiquidityManagement>;
+    /** The name of the pool as per contract */
+    name: Scalars['String'];
+    /** Returns all pool tokens, including BPTs and nested pools if there are any. Only one nested level deep. */
+    poolTokens: Array<GqlAggregatorPoolToken>;
+    /**
+     * ReClamm: The timestamp when the update ends
+     * @deprecated Field no longer supported
+     */
+    priceRatioUpdateEndTime?: Maybe<Scalars['Int']>;
+    /**
+     * ReClamm: The timestamp when the update begins
+     * @deprecated Field no longer supported
+     */
+    priceRatioUpdateStartTime?: Maybe<Scalars['Int']>;
+    /** The protocol version on which the pool is deployed, 1, 2 or 3 */
+    protocolVersion: Scalars['Int'];
+    /** QuantAmmWeighted specific params */
+    quantAmmWeightedParams?: Maybe<QuantAmmWeightedParams>;
+    /** Reclamm specific params */
+    reclammParams?: Maybe<GqlAggregatorReclammParams>;
+    /**
+     * Data specific to gyro pools
+     * @deprecated use gyroParams instead
+     */
+    root3Alpha?: Maybe<Scalars['String']>;
+    /**
+     * Data specific to gyro pools
+     * @deprecated use gyroParams instead
+     */
+    s?: Maybe<Scalars['String']>;
+    /**
+     * Data specific to gyro pools
+     * @deprecated use gyroParams instead
+     */
+    sqrtAlpha?: Maybe<Scalars['String']>;
+    /**
+     * Data specific to gyro pools
+     * @deprecated use gyroParams instead
+     */
+    sqrtBeta?: Maybe<Scalars['String']>;
+    /**
+     * ReClamm: The fourth root price ratio at the start of an update
+     * @deprecated Field no longer supported
+     */
+    startFourthRootPriceRatio?: Maybe<Scalars['BigDecimal']>;
+    /** Pool's swap fee */
+    swapFee: Scalars['BigDecimal'];
+    /** The token symbol of the pool as per contract */
+    symbol: Scalars['String'];
+    /**
+     * Data specific to gyro pools
+     * @deprecated use gyroParams instead
+     */
+    tauAlphaX?: Maybe<Scalars['String']>;
+    /**
+     * Data specific to gyro pools
+     * @deprecated use gyroParams instead
+     */
+    tauAlphaY?: Maybe<Scalars['String']>;
+    /**
+     * Data specific to gyro pools
+     * @deprecated use gyroParams instead
+     */
+    tauBetaX?: Maybe<Scalars['String']>;
+    /**
+     * Data specific to gyro pools
+     * @deprecated use gyroParams instead
+     */
+    tauBetaY?: Maybe<Scalars['String']>;
+    /** The pool type, such as weighted, stable, etc. */
+    type: GqlPoolType;
+    /**
+     * Data specific to gyro pools
+     * @deprecated use gyroParams instead
+     */
+    u?: Maybe<Scalars['String']>;
+    /**
+     * Data specific to gyro pools
+     * @deprecated use gyroParams instead
+     */
+    v?: Maybe<Scalars['String']>;
+    /** The version of the pool type. */
+    version: Scalars['Int'];
+    /**
+     * Data specific to gyro pools
+     * @deprecated use gyroParams instead
+     */
+    w?: Maybe<Scalars['String']>;
+    /**
+     * Data specific to gyro pools
+     * @deprecated use gyroParams instead
+     */
+    z?: Maybe<Scalars['String']>;
+}
+
+export interface GqlAggregatorPoolDynamicData {
+    __typename?: 'GqlAggregatorPoolDynamicData';
+    swapFee: Scalars['BigDecimal'];
+}
+
 export interface GqlAggregatorPoolFilter {
     chainIn?: InputMaybe<Array<GqlChain>>;
     chainNotIn?: InputMaybe<Array<GqlChain>>;
@@ -77,6 +313,47 @@ export interface GqlAggregatorPoolFilter {
     protocolVersionIn?: InputMaybe<Array<Scalars['Int']>>;
     tokensIn?: InputMaybe<Array<Scalars['String']>>;
     tokensNotIn?: InputMaybe<Array<Scalars['String']>>;
+}
+
+export interface GqlAggregatorPoolToken {
+    __typename?: 'GqlAggregatorPoolToken';
+    address: Scalars['String'];
+    balance: Scalars['String'];
+    decimals: Scalars['Int'];
+    isErc4626: Scalars['Boolean'];
+    priceRate?: Maybe<Scalars['String']>;
+    priceRateProvider?: Maybe<Scalars['String']>;
+    symbol: Scalars['String'];
+    underlyingToken?: Maybe<GqlAggregatorUnderlyingToken>;
+    weight?: Maybe<Scalars['String']>;
+}
+
+export interface GqlAggregatorReclammParams {
+    __typename?: 'GqlAggregatorReclammParams';
+    /** ReClamm: The centeredness margin of the pool */
+    centerednessMargin?: Maybe<Scalars['BigDecimal']>;
+    /** ReClamm: The current fourth root price ratio, an interpolation of the price ratio state */
+    currentFourthRootPriceRatio?: Maybe<Scalars['BigDecimal']>;
+    /** ReClamm: Represents how fast the pool can move the virtual balances per day */
+    dailyPriceShiftBase?: Maybe<Scalars['BigDecimal']>;
+    /** ReClamm: The fourth root price ratio at the end of an update */
+    endFourthRootPriceRatio?: Maybe<Scalars['BigDecimal']>;
+    /** ReClamm: The last virtual balances of the pool */
+    lastVirtualBalances?: Maybe<Array<Scalars['BigDecimal']>>;
+    /** ReClamm: The timestamp when the update ends */
+    priceRatioUpdateEndTime?: Maybe<Scalars['Int']>;
+    /** ReClamm: The timestamp when the update begins */
+    priceRatioUpdateStartTime?: Maybe<Scalars['Int']>;
+    /** ReClamm: The fourth root price ratio at the start of an update */
+    startFourthRootPriceRatio?: Maybe<Scalars['BigDecimal']>;
+}
+
+export interface GqlAggregatorUnderlyingToken {
+    __typename?: 'GqlAggregatorUnderlyingToken';
+    address: Scalars['String'];
+    decimals: Scalars['Int'];
+    name: Scalars['String'];
+    symbol: Scalars['String'];
 }
 
 export interface GqlBalancePoolAprItem {
@@ -298,111 +575,6 @@ export interface GqlPoolAddRemoveEventV3 extends GqlPoolEvent {
     userAddress: Scalars['String'];
     /** The value of the event in USD. */
     valueUSD: Scalars['Float'];
-}
-
-export interface GqlPoolAggregator {
-    __typename?: 'GqlPoolAggregator';
-    /** The contract address of the pool. */
-    address: Scalars['Bytes'];
-    /** Data specific to gyro/fx pools */
-    alpha?: Maybe<Scalars['String']>;
-    /** Data specific to stable pools */
-    amp?: Maybe<Scalars['BigInt']>;
-    /** Data specific to gyro/fx pools */
-    beta?: Maybe<Scalars['String']>;
-    /** Data specific to gyro pools */
-    c?: Maybe<Scalars['String']>;
-    /** ReClamm: The centeredness margin of the pool */
-    centerednessMargin?: Maybe<Scalars['BigDecimal']>;
-    /** The chain on which the pool is deployed */
-    chain: GqlChain;
-    /** The timestamp the pool was created. */
-    createTime: Scalars['Int'];
-    /** ReClamm: The current fourth root price ratio, an interpolation of the price ratio state */
-    currentFourthRootPriceRatio?: Maybe<Scalars['BigDecimal']>;
-    /** Data specific to gyro pools */
-    dSq?: Maybe<Scalars['String']>;
-    /** ReClamm: Represents how fast the pool can move the virtual balances per day */
-    dailyPriceShiftBase?: Maybe<Scalars['BigDecimal']>;
-    /** The decimals of the BPT, usually 18 */
-    decimals: Scalars['Int'];
-    /** Data specific to fx pools */
-    delta?: Maybe<Scalars['String']>;
-    /** Dynamic data such as token balances, swap fees or volume */
-    dynamicData: GqlPoolDynamicData;
-    /** ReClamm: The fourth root price ratio at the end of an update */
-    endFourthRootPriceRatio?: Maybe<Scalars['BigDecimal']>;
-    /** Data specific to fx pools */
-    epsilon?: Maybe<Scalars['String']>;
-    /** The factory contract address from which the pool was created. */
-    factory?: Maybe<Scalars['Bytes']>;
-    /** Hook assigned to a pool */
-    hook?: Maybe<GqlHook>;
-    /** The pool id. This is equal to the address for protocolVersion 3 pools */
-    id: Scalars['ID'];
-    /** Data specific to gyro/fx pools */
-    lambda?: Maybe<Scalars['String']>;
-    /** The timestamp of the last user interaction */
-    lastTimestamp?: Maybe<Scalars['Int']>;
-    /** ReClamm: The last virtual balances of the pool */
-    lastVirtualBalances?: Maybe<Array<Scalars['BigDecimal']>>;
-    /** Liquidity management settings for v3 pools. */
-    liquidityManagement?: Maybe<LiquidityManagement>;
-    /** The name of the pool as per contract */
-    name: Scalars['String'];
-    /**
-     * The wallet address of the owner of the pool. Pool owners can set certain properties like swapFees or AMP.
-     * @deprecated Use swapFeeManager instead
-     */
-    owner?: Maybe<Scalars['Bytes']>;
-    /** Account empowered to pause/unpause the pool (or 0 to delegate to governance) */
-    pauseManager?: Maybe<Scalars['Bytes']>;
-    /** Account empowered to set the pool creator fee percentage */
-    poolCreator?: Maybe<Scalars['Bytes']>;
-    /** Returns all pool tokens, including BPTs and nested pools if there are any. Only one nested level deep. */
-    poolTokens: Array<GqlPoolTokenDetail>;
-    /** ReClamm: The timestamp when the update ends */
-    priceRatioUpdateEndTime?: Maybe<Scalars['Int']>;
-    /** ReClamm: The timestamp when the update begins */
-    priceRatioUpdateStartTime?: Maybe<Scalars['Int']>;
-    /** The protocol version on which the pool is deployed, 1, 2 or 3 */
-    protocolVersion: Scalars['Int'];
-    /** QuantAmmWeighted specific fields */
-    quantAmmWeightedParams?: Maybe<QuantAmmWeightedParams>;
-    /** Data specific to gyro pools */
-    root3Alpha?: Maybe<Scalars['String']>;
-    /** Data specific to gyro pools */
-    s?: Maybe<Scalars['String']>;
-    /** Data specific to gyro pools */
-    sqrtAlpha?: Maybe<Scalars['String']>;
-    /** Data specific to gyro pools */
-    sqrtBeta?: Maybe<Scalars['String']>;
-    /** ReClamm: The fourth root price ratio at the start of an update */
-    startFourthRootPriceRatio?: Maybe<Scalars['BigDecimal']>;
-    /** Account empowered to set static swap fees for a pool (when 0 on V2 swap fees are immutable, on V3 delegate to governance) */
-    swapFeeManager?: Maybe<Scalars['Bytes']>;
-    /** The token symbol of the pool as per contract */
-    symbol: Scalars['String'];
-    /** Data specific to gyro pools */
-    tauAlphaX?: Maybe<Scalars['String']>;
-    /** Data specific to gyro pools */
-    tauAlphaY?: Maybe<Scalars['String']>;
-    /** Data specific to gyro pools */
-    tauBetaX?: Maybe<Scalars['String']>;
-    /** Data specific to gyro pools */
-    tauBetaY?: Maybe<Scalars['String']>;
-    /** The pool type, such as weighted, stable, etc. */
-    type: GqlPoolType;
-    /** Data specific to gyro pools */
-    u?: Maybe<Scalars['String']>;
-    /** Data specific to gyro pools */
-    v?: Maybe<Scalars['String']>;
-    /** The version of the pool type. */
-    version: Scalars['Int'];
-    /** Data specific to gyro pools */
-    w?: Maybe<Scalars['String']>;
-    /** Data specific to gyro pools */
-    z?: Maybe<Scalars['String']>;
 }
 
 export interface GqlPoolApr {
@@ -2974,7 +3146,7 @@ export interface QuantAmmWeightedParams {
 export interface Query {
     __typename?: 'Query';
     /** Returns all pools for a given filter, specific for aggregators */
-    aggregatorPools: Array<GqlPoolAggregator>;
+    aggregatorPools: Array<GqlAggregatorPool>;
     beetsGetFbeetsRatio: Scalars['String'];
     beetsPoolGetReliquaryFarmSnapshots: Array<GqlReliquaryFarmSnapshot>;
     /** @deprecated Field no longer supported */
@@ -2989,6 +3161,11 @@ export interface Query {
     lbpPriceChart?: Maybe<Array<LbpPriceChartData>>;
     /** Getting swap, add and remove events with paging */
     poolEvents: Array<GqlPoolEvent>;
+    /**
+     * Returns all pools for a given filter, specific for aggregators
+     * @deprecated Use aggregatorPools instead
+     */
+    poolGetAggregatorPools: Array<GqlAggregatorPool>;
     /**
      * Will de deprecated in favor of poolEvents
      * @deprecated Use poolEvents instead
@@ -3113,6 +3290,14 @@ export interface QueryPoolEventsArgs {
     first?: InputMaybe<Scalars['Int']>;
     skip?: InputMaybe<Scalars['Int']>;
     where?: InputMaybe<GqlPoolEventsFilter>;
+}
+
+export interface QueryPoolGetAggregatorPoolsArgs {
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<GqlPoolOrderBy>;
+    orderDirection?: InputMaybe<GqlPoolOrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    where?: InputMaybe<GqlPoolFilter>;
 }
 
 export interface QueryPoolGetBatchSwapsArgs {
@@ -3421,7 +3606,15 @@ export type ResolversTypes = ResolversObject<{
     ExitFeeHookParams: ResolverTypeWrapper<ExitFeeHookParams>;
     FeeTakingHookParams: ResolverTypeWrapper<FeeTakingHookParams>;
     Float: ResolverTypeWrapper<Scalars['Float']>;
+    GqlAggregatorElementParams: ResolverTypeWrapper<GqlAggregatorElementParams>;
+    GqlAggregatorFxParams: ResolverTypeWrapper<GqlAggregatorFxParams>;
+    GqlAggregatorGyroParams: ResolverTypeWrapper<GqlAggregatorGyroParams>;
+    GqlAggregatorPool: ResolverTypeWrapper<GqlAggregatorPool>;
+    GqlAggregatorPoolDynamicData: ResolverTypeWrapper<GqlAggregatorPoolDynamicData>;
     GqlAggregatorPoolFilter: GqlAggregatorPoolFilter;
+    GqlAggregatorPoolToken: ResolverTypeWrapper<GqlAggregatorPoolToken>;
+    GqlAggregatorReclammParams: ResolverTypeWrapper<GqlAggregatorReclammParams>;
+    GqlAggregatorUnderlyingToken: ResolverTypeWrapper<GqlAggregatorUnderlyingToken>;
     GqlBalancePoolAprItem: ResolverTypeWrapper<
         Omit<GqlBalancePoolAprItem, 'apr'> & { apr: ResolversTypes['GqlPoolAprValue'] }
     >;
@@ -3441,7 +3634,6 @@ export type ResolversTypes = ResolversObject<{
     GqlLatestSyncedBlocks: ResolverTypeWrapper<GqlLatestSyncedBlocks>;
     GqlNestedPool: ResolverTypeWrapper<GqlNestedPool>;
     GqlPoolAddRemoveEventV3: ResolverTypeWrapper<GqlPoolAddRemoveEventV3>;
-    GqlPoolAggregator: ResolverTypeWrapper<GqlPoolAggregator>;
     GqlPoolApr: ResolverTypeWrapper<
         Omit<GqlPoolApr, 'apr' | 'nativeRewardApr' | 'thirdPartyApr'> & {
             apr: ResolversTypes['GqlPoolAprValue'];
@@ -3658,7 +3850,15 @@ export type ResolversParentTypes = ResolversObject<{
     ExitFeeHookParams: ExitFeeHookParams;
     FeeTakingHookParams: FeeTakingHookParams;
     Float: Scalars['Float'];
+    GqlAggregatorElementParams: GqlAggregatorElementParams;
+    GqlAggregatorFxParams: GqlAggregatorFxParams;
+    GqlAggregatorGyroParams: GqlAggregatorGyroParams;
+    GqlAggregatorPool: GqlAggregatorPool;
+    GqlAggregatorPoolDynamicData: GqlAggregatorPoolDynamicData;
     GqlAggregatorPoolFilter: GqlAggregatorPoolFilter;
+    GqlAggregatorPoolToken: GqlAggregatorPoolToken;
+    GqlAggregatorReclammParams: GqlAggregatorReclammParams;
+    GqlAggregatorUnderlyingToken: GqlAggregatorUnderlyingToken;
     GqlBalancePoolAprItem: Omit<GqlBalancePoolAprItem, 'apr'> & { apr: ResolversParentTypes['GqlPoolAprValue'] };
     GqlBalancePoolAprSubItem: Omit<GqlBalancePoolAprSubItem, 'apr'> & { apr: ResolversParentTypes['GqlPoolAprValue'] };
     GqlBigNumber: Scalars['GqlBigNumber'];
@@ -3672,7 +3872,6 @@ export type ResolversParentTypes = ResolversObject<{
     GqlLatestSyncedBlocks: GqlLatestSyncedBlocks;
     GqlNestedPool: GqlNestedPool;
     GqlPoolAddRemoveEventV3: GqlPoolAddRemoveEventV3;
-    GqlPoolAggregator: GqlPoolAggregator;
     GqlPoolApr: Omit<GqlPoolApr, 'apr' | 'nativeRewardApr' | 'thirdPartyApr'> & {
         apr: ResolversParentTypes['GqlPoolAprValue'];
         nativeRewardApr: ResolversParentTypes['GqlPoolAprValue'];
@@ -3901,6 +4100,159 @@ export type FeeTakingHookParamsResolvers<
     __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
+export type GqlAggregatorElementParamsResolvers<
+    ContextType = ResolverContext,
+    ParentType extends ResolversParentTypes['GqlAggregatorElementParams'] = ResolversParentTypes['GqlAggregatorElementParams'],
+> = ResolversObject<{
+    baseToken?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    principalToken?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    unitSeconds?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type GqlAggregatorFxParamsResolvers<
+    ContextType = ResolverContext,
+    ParentType extends ResolversParentTypes['GqlAggregatorFxParams'] = ResolversParentTypes['GqlAggregatorFxParams'],
+> = ResolversObject<{
+    alpha?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    beta?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    delta?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    epsilon?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    lambda?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type GqlAggregatorGyroParamsResolvers<
+    ContextType = ResolverContext,
+    ParentType extends ResolversParentTypes['GqlAggregatorGyroParams'] = ResolversParentTypes['GqlAggregatorGyroParams'],
+> = ResolversObject<{
+    alpha?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    beta?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    c?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    dSq?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    lambda?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    root3Alpha?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    s?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    sqrtAlpha?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    sqrtBeta?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    tauAlphaX?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    tauAlphaY?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    tauBetaX?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    tauBetaY?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    u?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    v?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    w?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    z?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type GqlAggregatorPoolResolvers<
+    ContextType = ResolverContext,
+    ParentType extends ResolversParentTypes['GqlAggregatorPool'] = ResolversParentTypes['GqlAggregatorPool'],
+> = ResolversObject<{
+    address?: Resolver<ResolversTypes['Bytes'], ParentType, ContextType>;
+    alpha?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    amp?: Resolver<Maybe<ResolversTypes['BigInt']>, ParentType, ContextType>;
+    beta?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    c?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    centerednessMargin?: Resolver<Maybe<ResolversTypes['BigDecimal']>, ParentType, ContextType>;
+    chain?: Resolver<ResolversTypes['GqlChain'], ParentType, ContextType>;
+    createTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+    currentFourthRootPriceRatio?: Resolver<Maybe<ResolversTypes['BigDecimal']>, ParentType, ContextType>;
+    dSq?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    dailyPriceShiftBase?: Resolver<Maybe<ResolversTypes['BigDecimal']>, ParentType, ContextType>;
+    decimals?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+    delta?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    dynamicData?: Resolver<ResolversTypes['GqlAggregatorPoolDynamicData'], ParentType, ContextType>;
+    elementParams?: Resolver<Maybe<ResolversTypes['GqlAggregatorElementParams']>, ParentType, ContextType>;
+    endFourthRootPriceRatio?: Resolver<Maybe<ResolversTypes['BigDecimal']>, ParentType, ContextType>;
+    epsilon?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    factory?: Resolver<Maybe<ResolversTypes['Bytes']>, ParentType, ContextType>;
+    fxParams?: Resolver<Maybe<ResolversTypes['GqlAggregatorFxParams']>, ParentType, ContextType>;
+    gyroParams?: Resolver<Maybe<ResolversTypes['GqlAggregatorGyroParams']>, ParentType, ContextType>;
+    hook?: Resolver<Maybe<ResolversTypes['GqlHook']>, ParentType, ContextType>;
+    id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+    lambda?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    lastTimestamp?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+    lastVirtualBalances?: Resolver<Maybe<Array<ResolversTypes['BigDecimal']>>, ParentType, ContextType>;
+    liquidityManagement?: Resolver<Maybe<ResolversTypes['LiquidityManagement']>, ParentType, ContextType>;
+    name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+    poolTokens?: Resolver<Array<ResolversTypes['GqlAggregatorPoolToken']>, ParentType, ContextType>;
+    priceRatioUpdateEndTime?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+    priceRatioUpdateStartTime?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+    protocolVersion?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+    quantAmmWeightedParams?: Resolver<Maybe<ResolversTypes['QuantAmmWeightedParams']>, ParentType, ContextType>;
+    reclammParams?: Resolver<Maybe<ResolversTypes['GqlAggregatorReclammParams']>, ParentType, ContextType>;
+    root3Alpha?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    s?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    sqrtAlpha?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    sqrtBeta?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    startFourthRootPriceRatio?: Resolver<Maybe<ResolversTypes['BigDecimal']>, ParentType, ContextType>;
+    swapFee?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
+    symbol?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+    tauAlphaX?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    tauAlphaY?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    tauBetaX?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    tauBetaY?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    type?: Resolver<ResolversTypes['GqlPoolType'], ParentType, ContextType>;
+    u?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    v?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    version?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+    w?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    z?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type GqlAggregatorPoolDynamicDataResolvers<
+    ContextType = ResolverContext,
+    ParentType extends ResolversParentTypes['GqlAggregatorPoolDynamicData'] = ResolversParentTypes['GqlAggregatorPoolDynamicData'],
+> = ResolversObject<{
+    swapFee?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
+    __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type GqlAggregatorPoolTokenResolvers<
+    ContextType = ResolverContext,
+    ParentType extends ResolversParentTypes['GqlAggregatorPoolToken'] = ResolversParentTypes['GqlAggregatorPoolToken'],
+> = ResolversObject<{
+    address?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+    balance?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+    decimals?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+    isErc4626?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+    priceRate?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    priceRateProvider?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    symbol?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+    underlyingToken?: Resolver<Maybe<ResolversTypes['GqlAggregatorUnderlyingToken']>, ParentType, ContextType>;
+    weight?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type GqlAggregatorReclammParamsResolvers<
+    ContextType = ResolverContext,
+    ParentType extends ResolversParentTypes['GqlAggregatorReclammParams'] = ResolversParentTypes['GqlAggregatorReclammParams'],
+> = ResolversObject<{
+    centerednessMargin?: Resolver<Maybe<ResolversTypes['BigDecimal']>, ParentType, ContextType>;
+    currentFourthRootPriceRatio?: Resolver<Maybe<ResolversTypes['BigDecimal']>, ParentType, ContextType>;
+    dailyPriceShiftBase?: Resolver<Maybe<ResolversTypes['BigDecimal']>, ParentType, ContextType>;
+    endFourthRootPriceRatio?: Resolver<Maybe<ResolversTypes['BigDecimal']>, ParentType, ContextType>;
+    lastVirtualBalances?: Resolver<Maybe<Array<ResolversTypes['BigDecimal']>>, ParentType, ContextType>;
+    priceRatioUpdateEndTime?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+    priceRatioUpdateStartTime?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+    startFourthRootPriceRatio?: Resolver<Maybe<ResolversTypes['BigDecimal']>, ParentType, ContextType>;
+    __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type GqlAggregatorUnderlyingTokenResolvers<
+    ContextType = ResolverContext,
+    ParentType extends ResolversParentTypes['GqlAggregatorUnderlyingToken'] = ResolversParentTypes['GqlAggregatorUnderlyingToken'],
+> = ResolversObject<{
+    address?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+    decimals?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+    name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+    symbol?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+    __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export type GqlBalancePoolAprItemResolvers<
     ContextType = ResolverContext,
     ParentType extends ResolversParentTypes['GqlBalancePoolAprItem'] = ResolversParentTypes['GqlBalancePoolAprItem'],
@@ -4070,62 +4422,6 @@ export type GqlPoolAddRemoveEventV3Resolvers<
     type?: Resolver<ResolversTypes['GqlPoolEventType'], ParentType, ContextType>;
     userAddress?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     valueUSD?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
-    __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-}>;
-
-export type GqlPoolAggregatorResolvers<
-    ContextType = ResolverContext,
-    ParentType extends ResolversParentTypes['GqlPoolAggregator'] = ResolversParentTypes['GqlPoolAggregator'],
-> = ResolversObject<{
-    address?: Resolver<ResolversTypes['Bytes'], ParentType, ContextType>;
-    alpha?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-    amp?: Resolver<Maybe<ResolversTypes['BigInt']>, ParentType, ContextType>;
-    beta?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-    c?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-    centerednessMargin?: Resolver<Maybe<ResolversTypes['BigDecimal']>, ParentType, ContextType>;
-    chain?: Resolver<ResolversTypes['GqlChain'], ParentType, ContextType>;
-    createTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-    currentFourthRootPriceRatio?: Resolver<Maybe<ResolversTypes['BigDecimal']>, ParentType, ContextType>;
-    dSq?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-    dailyPriceShiftBase?: Resolver<Maybe<ResolversTypes['BigDecimal']>, ParentType, ContextType>;
-    decimals?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-    delta?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-    dynamicData?: Resolver<ResolversTypes['GqlPoolDynamicData'], ParentType, ContextType>;
-    endFourthRootPriceRatio?: Resolver<Maybe<ResolversTypes['BigDecimal']>, ParentType, ContextType>;
-    epsilon?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-    factory?: Resolver<Maybe<ResolversTypes['Bytes']>, ParentType, ContextType>;
-    hook?: Resolver<Maybe<ResolversTypes['GqlHook']>, ParentType, ContextType>;
-    id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-    lambda?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-    lastTimestamp?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-    lastVirtualBalances?: Resolver<Maybe<Array<ResolversTypes['BigDecimal']>>, ParentType, ContextType>;
-    liquidityManagement?: Resolver<Maybe<ResolversTypes['LiquidityManagement']>, ParentType, ContextType>;
-    name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    owner?: Resolver<Maybe<ResolversTypes['Bytes']>, ParentType, ContextType>;
-    pauseManager?: Resolver<Maybe<ResolversTypes['Bytes']>, ParentType, ContextType>;
-    poolCreator?: Resolver<Maybe<ResolversTypes['Bytes']>, ParentType, ContextType>;
-    poolTokens?: Resolver<Array<ResolversTypes['GqlPoolTokenDetail']>, ParentType, ContextType>;
-    priceRatioUpdateEndTime?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-    priceRatioUpdateStartTime?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-    protocolVersion?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-    quantAmmWeightedParams?: Resolver<Maybe<ResolversTypes['QuantAmmWeightedParams']>, ParentType, ContextType>;
-    root3Alpha?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-    s?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-    sqrtAlpha?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-    sqrtBeta?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-    startFourthRootPriceRatio?: Resolver<Maybe<ResolversTypes['BigDecimal']>, ParentType, ContextType>;
-    swapFeeManager?: Resolver<Maybe<ResolversTypes['Bytes']>, ParentType, ContextType>;
-    symbol?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    tauAlphaX?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-    tauAlphaY?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-    tauBetaX?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-    tauBetaY?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-    type?: Resolver<ResolversTypes['GqlPoolType'], ParentType, ContextType>;
-    u?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-    v?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-    version?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-    w?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-    z?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -6234,7 +6530,7 @@ export type QueryResolvers<
     ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query'],
 > = ResolversObject<{
     aggregatorPools?: Resolver<
-        Array<ResolversTypes['GqlPoolAggregator']>,
+        Array<ResolversTypes['GqlAggregatorPool']>,
         ParentType,
         ContextType,
         RequireFields<QueryAggregatorPoolsArgs, never>
@@ -6262,6 +6558,12 @@ export type QueryResolvers<
         ParentType,
         ContextType,
         RequireFields<QueryPoolEventsArgs, never>
+    >;
+    poolGetAggregatorPools?: Resolver<
+        Array<ResolversTypes['GqlAggregatorPool']>,
+        ParentType,
+        ContextType,
+        RequireFields<QueryPoolGetAggregatorPoolsArgs, never>
     >;
     poolGetBatchSwaps?: Resolver<
         Array<ResolversTypes['GqlPoolBatchSwap']>,
@@ -6516,6 +6818,14 @@ export type Resolvers<ContextType = ResolverContext> = ResolversObject<{
     Erc4626ReviewData?: Erc4626ReviewDataResolvers<ContextType>;
     ExitFeeHookParams?: ExitFeeHookParamsResolvers<ContextType>;
     FeeTakingHookParams?: FeeTakingHookParamsResolvers<ContextType>;
+    GqlAggregatorElementParams?: GqlAggregatorElementParamsResolvers<ContextType>;
+    GqlAggregatorFxParams?: GqlAggregatorFxParamsResolvers<ContextType>;
+    GqlAggregatorGyroParams?: GqlAggregatorGyroParamsResolvers<ContextType>;
+    GqlAggregatorPool?: GqlAggregatorPoolResolvers<ContextType>;
+    GqlAggregatorPoolDynamicData?: GqlAggregatorPoolDynamicDataResolvers<ContextType>;
+    GqlAggregatorPoolToken?: GqlAggregatorPoolTokenResolvers<ContextType>;
+    GqlAggregatorReclammParams?: GqlAggregatorReclammParamsResolvers<ContextType>;
+    GqlAggregatorUnderlyingToken?: GqlAggregatorUnderlyingTokenResolvers<ContextType>;
     GqlBalancePoolAprItem?: GqlBalancePoolAprItemResolvers<ContextType>;
     GqlBalancePoolAprSubItem?: GqlBalancePoolAprSubItemResolvers<ContextType>;
     GqlBigNumber?: GraphQLScalarType;
@@ -6529,7 +6839,6 @@ export type Resolvers<ContextType = ResolverContext> = ResolversObject<{
     GqlLatestSyncedBlocks?: GqlLatestSyncedBlocksResolvers<ContextType>;
     GqlNestedPool?: GqlNestedPoolResolvers<ContextType>;
     GqlPoolAddRemoveEventV3?: GqlPoolAddRemoveEventV3Resolvers<ContextType>;
-    GqlPoolAggregator?: GqlPoolAggregatorResolvers<ContextType>;
     GqlPoolApr?: GqlPoolAprResolvers<ContextType>;
     GqlPoolAprItem?: GqlPoolAprItemResolvers<ContextType>;
     GqlPoolAprRange?: GqlPoolAprRangeResolvers<ContextType>;

@@ -70,11 +70,301 @@ export const schema = gql`
         swapFeePercentage: String
     }
 
+    type GqlAggregatorElementParams {
+        baseToken: String
+        principalToken: String
+        unitSeconds: String
+    }
+
+    type GqlAggregatorFxParams {
+        alpha: String
+        beta: String
+        delta: String
+        epsilon: String
+        lambda: String
+    }
+
+    type GqlAggregatorGyroParams {
+        alpha: String
+        beta: String
+        c: String
+        dSq: String
+        lambda: String
+        root3Alpha: String
+        s: String
+        sqrtAlpha: String
+        sqrtBeta: String
+        tauAlphaX: String
+        tauAlphaY: String
+        tauBetaX: String
+        tauBetaY: String
+        u: String
+        v: String
+        w: String
+        z: String
+    }
+
+    type GqlAggregatorPool {
+        """
+        The contract address of the pool.
+        """
+        address: Bytes!
+
+        """
+        Data specific to gyro/fx pools
+        """
+        alpha: String @deprecated(reason: "use fxParams or gyroParams instead")
+
+        """
+        Data specific to stable pools
+        """
+        amp: BigInt
+
+        """
+        Data specific to gyro/fx pools
+        """
+        beta: String @deprecated(reason: "use fxParams or gyroParams instead")
+
+        """
+        Data specific to gyro pools
+        """
+        c: String @deprecated(reason: "use gyroParams instead")
+
+        """
+        ReClamm: The centeredness margin of the pool
+        """
+        centerednessMargin: BigDecimal @deprecated
+
+        """
+        The chain on which the pool is deployed
+        """
+        chain: GqlChain!
+
+        """
+        The timestamp the pool was created.
+        """
+        createTime: Int!
+
+        """
+        ReClamm: The current fourth root price ratio, an interpolation of the price ratio state
+        """
+        currentFourthRootPriceRatio: BigDecimal @deprecated
+
+        """
+        Data specific to gyro pools
+        """
+        dSq: String @deprecated(reason: "use gyroParams instead")
+
+        """
+        ReClamm: Represents how fast the pool can move the virtual balances per day
+        """
+        dailyPriceShiftBase: BigDecimal @deprecated
+
+        """
+        The decimals of the BPT, usually 18
+        """
+        decimals: Int!
+
+        """
+        Data specific to fx pools
+        """
+        delta: String @deprecated(reason: "Use fxParams instead")
+
+        """
+        Dynamic data such as token balances, swap fees or volume
+        """
+        dynamicData: GqlAggregatorPoolDynamicData! @deprecated(reason: "Use swapFee directly instead")
+
+        """
+        Element type specific params
+        """
+        elementParams: GqlAggregatorElementParams
+
+        """
+        ReClamm: The fourth root price ratio at the end of an update
+        """
+        endFourthRootPriceRatio: BigDecimal @deprecated
+
+        """
+        Data specific to fx pools
+        """
+        epsilon: String @deprecated(reason: "Use fxParams instead")
+
+        """
+        The factory contract address from which the pool was created.
+        """
+        factory: Bytes
+
+        """
+        FX specific params
+        """
+        fxParams: GqlAggregatorFxParams
+
+        """
+        Gyro specific params
+        """
+        gyroParams: GqlAggregatorGyroParams
+
+        """
+        Hook assigned to a pool
+        """
+        hook: GqlHook
+
+        """
+        The pool id. This is equal to the address for protocolVersion 3 pools
+        """
+        id: ID!
+
+        """
+        Data specific to gyro/fx pools
+        """
+        lambda: String @deprecated(reason: "use fxParams or gyroParams instead")
+
+        """
+        The timestamp of the last user interaction
+        """
+        lastTimestamp: Int @deprecated
+
+        """
+        ReClamm: The last virtual balances of the pool
+        """
+        lastVirtualBalances: [BigDecimal!] @deprecated
+
+        """
+        Liquidity management settings for v3 pools.
+        """
+        liquidityManagement: LiquidityManagement @deprecated
+
+        """
+        The name of the pool as per contract
+        """
+        name: String!
+
+        """
+        Returns all pool tokens, including BPTs and nested pools if there are any. Only one nested level deep.
+        """
+        poolTokens: [GqlAggregatorPoolToken!]!
+
+        """
+        ReClamm: The timestamp when the update ends
+        """
+        priceRatioUpdateEndTime: Int @deprecated
+
+        """
+        ReClamm: The timestamp when the update begins
+        """
+        priceRatioUpdateStartTime: Int @deprecated
+
+        """
+        The protocol version on which the pool is deployed, 1, 2 or 3
+        """
+        protocolVersion: Int!
+
+        """
+        QuantAmmWeighted specific params
+        """
+        quantAmmWeightedParams: QuantAmmWeightedParams
+
+        """
+        Reclamm specific params
+        """
+        reclammParams: GqlAggregatorReclammParams
+
+        """
+        Data specific to gyro pools
+        """
+        root3Alpha: String @deprecated(reason: "use gyroParams instead")
+
+        """
+        Data specific to gyro pools
+        """
+        s: String @deprecated(reason: "use gyroParams instead")
+
+        """
+        Data specific to gyro pools
+        """
+        sqrtAlpha: String @deprecated(reason: "use gyroParams instead")
+
+        """
+        Data specific to gyro pools
+        """
+        sqrtBeta: String @deprecated(reason: "use gyroParams instead")
+
+        """
+        ReClamm: The fourth root price ratio at the start of an update
+        """
+        startFourthRootPriceRatio: BigDecimal @deprecated
+
+        """
+        Pool's swap fee
+        """
+        swapFee: BigDecimal!
+
+        """
+        The token symbol of the pool as per contract
+        """
+        symbol: String!
+
+        """
+        Data specific to gyro pools
+        """
+        tauAlphaX: String @deprecated(reason: "use gyroParams instead")
+
+        """
+        Data specific to gyro pools
+        """
+        tauAlphaY: String @deprecated(reason: "use gyroParams instead")
+
+        """
+        Data specific to gyro pools
+        """
+        tauBetaX: String @deprecated(reason: "use gyroParams instead")
+
+        """
+        Data specific to gyro pools
+        """
+        tauBetaY: String @deprecated(reason: "use gyroParams instead")
+
+        """
+        The pool type, such as weighted, stable, etc.
+        """
+        type: GqlPoolType!
+
+        """
+        Data specific to gyro pools
+        """
+        u: String @deprecated(reason: "use gyroParams instead")
+
+        """
+        Data specific to gyro pools
+        """
+        v: String @deprecated(reason: "use gyroParams instead")
+
+        """
+        The version of the pool type.
+        """
+        version: Int!
+
+        """
+        Data specific to gyro pools
+        """
+        w: String @deprecated(reason: "use gyroParams instead")
+
+        """
+        Data specific to gyro pools
+        """
+        z: String @deprecated(reason: "use gyroParams instead")
+    }
+
+    type GqlAggregatorPoolDynamicData {
+        swapFee: BigDecimal!
+    }
+
     input GqlAggregatorPoolFilter {
         chainIn: [GqlChain!]
         chainNotIn: [GqlChain!] @deprecated
         createTime: GqlPoolTimePeriod @deprecated
-        idIn: [String!] @deprecated
+        idIn: [String!]
         idNotIn: [String!] @deprecated
         includeHooks: [GqlHookType!]
         minTvl: Float
@@ -83,6 +373,67 @@ export const schema = gql`
         protocolVersionIn: [Int!]
         tokensIn: [String!]
         tokensNotIn: [String!] @deprecated
+    }
+
+    type GqlAggregatorPoolToken {
+        address: String!
+        balance: String!
+        decimals: Int!
+        isErc4626: Boolean!
+        priceRate: String
+        priceRateProvider: String
+        symbol: String!
+        underlyingToken: GqlAggregatorUnderlyingToken
+        weight: String
+    }
+
+    type GqlAggregatorReclammParams {
+        """
+        ReClamm: The centeredness margin of the pool
+        """
+        centerednessMargin: BigDecimal
+
+        """
+        ReClamm: The current fourth root price ratio, an interpolation of the price ratio state
+        """
+        currentFourthRootPriceRatio: BigDecimal
+
+        """
+        ReClamm: Represents how fast the pool can move the virtual balances per day
+        """
+        dailyPriceShiftBase: BigDecimal
+
+        """
+        ReClamm: The fourth root price ratio at the end of an update
+        """
+        endFourthRootPriceRatio: BigDecimal
+
+        """
+        ReClamm: The last virtual balances of the pool
+        """
+        lastVirtualBalances: [BigDecimal!]
+
+        """
+        ReClamm: The timestamp when the update ends
+        """
+        priceRatioUpdateEndTime: Int
+
+        """
+        ReClamm: The timestamp when the update begins
+        """
+        priceRatioUpdateStartTime: Int
+
+        """
+        ReClamm: The fourth root price ratio at the start of an update
+        """
+        startFourthRootPriceRatio: BigDecimal
+    }
+
+    type GqlAggregatorUnderlyingToken {
+        address: String!
+        decimals: Int!
+        name: String!
+        symbol: String!
     }
 
     type GqlBalancePoolAprItem {
@@ -406,253 +757,6 @@ export const schema = gql`
         The value of the event in USD.
         """
         valueUSD: Float!
-    }
-
-    type GqlPoolAggregator {
-        """
-        The contract address of the pool.
-        """
-        address: Bytes!
-
-        """
-        Data specific to gyro/fx pools
-        """
-        alpha: String
-
-        """
-        Data specific to stable pools
-        """
-        amp: BigInt
-
-        """
-        Data specific to gyro/fx pools
-        """
-        beta: String
-
-        """
-        Data specific to gyro pools
-        """
-        c: String
-
-        """
-        ReClamm: The centeredness margin of the pool
-        """
-        centerednessMargin: BigDecimal
-
-        """
-        The chain on which the pool is deployed
-        """
-        chain: GqlChain!
-
-        """
-        The timestamp the pool was created.
-        """
-        createTime: Int!
-
-        """
-        ReClamm: The current fourth root price ratio, an interpolation of the price ratio state
-        """
-        currentFourthRootPriceRatio: BigDecimal
-
-        """
-        Data specific to gyro pools
-        """
-        dSq: String
-
-        """
-        ReClamm: Represents how fast the pool can move the virtual balances per day
-        """
-        dailyPriceShiftBase: BigDecimal
-
-        """
-        The decimals of the BPT, usually 18
-        """
-        decimals: Int!
-
-        """
-        Data specific to fx pools
-        """
-        delta: String
-
-        """
-        Dynamic data such as token balances, swap fees or volume
-        """
-        dynamicData: GqlPoolDynamicData!
-
-        """
-        ReClamm: The fourth root price ratio at the end of an update
-        """
-        endFourthRootPriceRatio: BigDecimal
-
-        """
-        Data specific to fx pools
-        """
-        epsilon: String
-
-        """
-        The factory contract address from which the pool was created.
-        """
-        factory: Bytes
-
-        """
-        Hook assigned to a pool
-        """
-        hook: GqlHook
-
-        """
-        The pool id. This is equal to the address for protocolVersion 3 pools
-        """
-        id: ID!
-
-        """
-        Data specific to gyro/fx pools
-        """
-        lambda: String
-
-        """
-        The timestamp of the last user interaction
-        """
-        lastTimestamp: Int
-
-        """
-        ReClamm: The last virtual balances of the pool
-        """
-        lastVirtualBalances: [BigDecimal!]
-
-        """
-        Liquidity management settings for v3 pools.
-        """
-        liquidityManagement: LiquidityManagement
-
-        """
-        The name of the pool as per contract
-        """
-        name: String!
-
-        """
-        The wallet address of the owner of the pool. Pool owners can set certain properties like swapFees or AMP.
-        """
-        owner: Bytes @deprecated(reason: "Use swapFeeManager instead")
-
-        """
-        Account empowered to pause/unpause the pool (or 0 to delegate to governance)
-        """
-        pauseManager: Bytes
-
-        """
-        Account empowered to set the pool creator fee percentage
-        """
-        poolCreator: Bytes
-
-        """
-        Returns all pool tokens, including BPTs and nested pools if there are any. Only one nested level deep.
-        """
-        poolTokens: [GqlPoolTokenDetail!]!
-
-        """
-        ReClamm: The timestamp when the update ends
-        """
-        priceRatioUpdateEndTime: Int
-
-        """
-        ReClamm: The timestamp when the update begins
-        """
-        priceRatioUpdateStartTime: Int
-
-        """
-        The protocol version on which the pool is deployed, 1, 2 or 3
-        """
-        protocolVersion: Int!
-
-        """
-        QuantAmmWeighted specific fields
-        """
-        quantAmmWeightedParams: QuantAmmWeightedParams
-
-        """
-        Data specific to gyro pools
-        """
-        root3Alpha: String
-
-        """
-        Data specific to gyro pools
-        """
-        s: String
-
-        """
-        Data specific to gyro pools
-        """
-        sqrtAlpha: String
-
-        """
-        Data specific to gyro pools
-        """
-        sqrtBeta: String
-
-        """
-        ReClamm: The fourth root price ratio at the start of an update
-        """
-        startFourthRootPriceRatio: BigDecimal
-
-        """
-        Account empowered to set static swap fees for a pool (when 0 on V2 swap fees are immutable, on V3 delegate to governance)
-        """
-        swapFeeManager: Bytes
-
-        """
-        The token symbol of the pool as per contract
-        """
-        symbol: String!
-
-        """
-        Data specific to gyro pools
-        """
-        tauAlphaX: String
-
-        """
-        Data specific to gyro pools
-        """
-        tauAlphaY: String
-
-        """
-        Data specific to gyro pools
-        """
-        tauBetaX: String
-
-        """
-        Data specific to gyro pools
-        """
-        tauBetaY: String
-
-        """
-        The pool type, such as weighted, stable, etc.
-        """
-        type: GqlPoolType!
-
-        """
-        Data specific to gyro pools
-        """
-        u: String
-
-        """
-        Data specific to gyro pools
-        """
-        v: String
-
-        """
-        The version of the pool type.
-        """
-        version: Int!
-
-        """
-        Data specific to gyro pools
-        """
-        w: String
-
-        """
-        Data specific to gyro pools
-        """
-        z: String
     }
 
     type GqlPoolApr {
@@ -4219,7 +4323,7 @@ export const schema = gql`
             orderDirection: GqlPoolOrderDirection
             skip: Int
             where: GqlAggregatorPoolFilter
-        ): [GqlPoolAggregator!]!
+        ): [GqlAggregatorPool!]!
         beetsGetFbeetsRatio: String!
         beetsPoolGetReliquaryFarmSnapshots(
             chain: GqlChain
@@ -4237,6 +4341,17 @@ export const schema = gql`
         Getting swap, add and remove events with paging
         """
         poolEvents(first: Int, skip: Int, where: GqlPoolEventsFilter): [GqlPoolEvent!]!
+
+        """
+        Returns all pools for a given filter, specific for aggregators
+        """
+        poolGetAggregatorPools(
+            first: Int
+            orderBy: GqlPoolOrderBy
+            orderDirection: GqlPoolOrderDirection
+            skip: Int
+            where: GqlPoolFilter
+        ): [GqlAggregatorPool!]! @deprecated(reason: "Use aggregatorPools instead")
 
         """
         Will de deprecated in favor of poolEvents
