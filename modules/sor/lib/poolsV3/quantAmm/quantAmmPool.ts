@@ -20,7 +20,6 @@ import { QuantAmmWeightedParams } from './types';
 type QuantAmmPoolToken = WeightedPoolTokenWithRate;
 
 export class QuantAmmPool extends BasePoolV3 implements BasePoolMethodsV3 {
-    public readonly poolType = 'QUANT_AMM_WEIGHTED';
     public readonly quantAmmParams: QuantAmmWeightedParams;
 
     public readonly tokens: QuantAmmPoolToken[];
@@ -107,7 +106,18 @@ export class QuantAmmPool extends BasePoolV3 implements BasePoolMethodsV3 {
         liquidityManagement: LiquidityManagement,
         hookState: HookState | undefined = undefined,
     ) {
-        super(id, address, chain, swapFee, aggregateSwapFee, totalShares, tokenPairs, liquidityManagement, hookState);
+        super(
+            id,
+            address,
+            'QUANT_AMM_WEIGHTED',
+            chain,
+            swapFee,
+            aggregateSwapFee,
+            totalShares,
+            tokenPairs,
+            liquidityManagement,
+            hookState,
+        );
         this.quantAmmParams = quantAmmParams;
 
         this.tokens = tokens;

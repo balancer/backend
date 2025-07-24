@@ -20,7 +20,6 @@ import { BasePoolV3 } from '../basePoolV3';
 type StablePoolToken = PoolTokenWithRate;
 
 export class StablePoolV3 extends BasePoolV3 implements BasePoolMethodsV3 {
-    public readonly poolType: PoolType = PoolType.Stable;
     public readonly amp: bigint;
 
     public tokens: StablePoolToken[];
@@ -80,7 +79,18 @@ export class StablePoolV3 extends BasePoolV3 implements BasePoolMethodsV3 {
         liquidityManagement: LiquidityManagement,
         hookState: HookState | undefined = undefined,
     ) {
-        super(id, address, chain, swapFee, aggregateSwapFee, totalShares, tokenPairs, liquidityManagement, hookState);
+        super(
+            id,
+            address,
+            PoolType.Stable,
+            chain,
+            swapFee,
+            aggregateSwapFee,
+            totalShares,
+            tokenPairs,
+            liquidityManagement,
+            hookState,
+        );
         this.amp = amp;
 
         this.tokens = tokens.sort((a, b) => a.index - b.index);
