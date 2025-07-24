@@ -30,6 +30,7 @@ export async function getPool(
         LIQUIDITY_BOOTSTRAPPING: new LiquidityBootstrappingPool(rpcUrl, chainId),
         RECLAMM: new ReClammPool(rpcUrl, chainId),
         QUANT_AMM_WEIGHTED: new QuantAmmPool(rpcUrl, chainId),
+        RECLAMM_V2: new ReClammPool(rpcUrl, chainId),
     };
     if (!poolData[poolType]) throw new Error(`getPool: Unsupported pool type: ${poolType}`);
 
