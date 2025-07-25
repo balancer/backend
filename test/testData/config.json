@@ -479,6 +479,52 @@
                     }
                 ]
             }
+        },
+        {
+            "testName": "Path-ReClammV2-In-Range",
+            "chainId": "8453",
+            "blockNumber": "32632378",
+            "swapPathInput": {
+                "swapKind": 0,
+                "paths": [
+                    {
+                        "amountRaw": "20000000",
+                        "tokens": [
+                            "0x60a3E35Cc302bFA44Cb288Bc5a4F316Fdb1adb42",
+                            "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+                        ],
+                        "pools": [
+                            {
+                                "poolAddress": "0x12c2de9522f377b86828f6af01f58c046f814d3c",
+                                "poolType": "RECLAMM_V2"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "testName": "Path-ReClammV2-Out-Of-Range",
+            "chainId": "8453",
+            "blockNumber": "32641745",
+            "swapPathInput": {
+                "swapKind": 0,
+                "paths": [
+                    {
+                        "amountRaw": "100000",
+                        "tokens": [
+                            "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                            "0x4200000000000000000000000000000000000006"
+                        ],
+                        "pools": [
+                            {
+                                "poolAddress": "0x3De1E230193F39DF0c122A345a928d909034c1a1",
+                                "poolType": "RECLAMM_V2"
+                            }
+                        ]
+                    }
+                ]
+            }
         }
     ]
 }

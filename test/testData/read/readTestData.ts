@@ -3,10 +3,9 @@ import {
     GyroECLPState,
     QuantAmmState,
     ReClammState,
+    ReClammV2State,
     StableState,
     WeightedState,
-    BasePoolState,
-    WeightedImmutable,
     LiquidityBootstrappingState,
 } from '@balancer-labs/balancer-maths';
 import { Address } from '@balancer/sdk';
@@ -44,6 +43,8 @@ export type LiquidityBootstrappingPool = PoolBase & LiquidityBootstrappingState;
 
 export type ReClammPool = PoolBase & ReClammState;
 
+export type ReClammV2Pool = PoolBase & ReClammV2State;
+
 export type QuantAmmPool = PoolBase & QuantAmmState;
 
 export type SupportedPools =
@@ -53,6 +54,7 @@ export type SupportedPools =
     | GyroEPool
     | LiquidityBootstrappingPool
     | ReClammPool
+    | ReClammV2Pool
     | QuantAmmPool;
 
 type SwapPathData = SwapPathInput & {
@@ -214,7 +216,7 @@ function mapPools(pools: TransformBigintToString<SupportedPools>[]): PrismaPoolA
                 endTime: BigInt(pool.endTime),
             };
             prismaPools.push(mapLiquidityBootstrappingPoolStateToPrismaPool(lbpPool, Number(pool.chainId), 3));
-        } else if (pool.poolType === 'RECLAMM') {
+        } else if (pool.poolType === 'RECLAMM' || pool.poolType === 'RECLAMM_V2') {
             const reClammPool = {
                 ...pool,
                 scalingFactors: pool.scalingFactors.map((sf) => BigInt(sf)),

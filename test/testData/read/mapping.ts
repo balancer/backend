@@ -13,6 +13,7 @@ import {
     StablePool,
     WeightedPool,
     LiquidityBootstrappingPool,
+    ReClammV2Pool,
 } from './readTestData';
 import { chainIdToChain } from '../../../modules/network/chain-id-to-chain';
 
@@ -331,7 +332,7 @@ export function mapLiquidityBootstrappingPoolStateToPrismaPool(
 }
 
 export function mapReClammPoolStateToPrismaPool(
-    poolState: ReClammPool,
+    poolState: ReClammPool | ReClammV2Pool,
     chainId: number,
     protocolVersion: number,
     bufferPools: BufferPool[],
@@ -398,6 +399,7 @@ export function mapReClammPoolStateToPrismaPool(
         })
         .build({
             address: poolState.poolAddress,
+            version: poolState.poolType === 'RECLAMM' ? 1 : 2,
             protocolVersion,
             tokens,
             dynamicData: {

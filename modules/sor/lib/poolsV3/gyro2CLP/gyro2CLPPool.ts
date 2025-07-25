@@ -19,8 +19,6 @@ import { BasePoolV3 } from '../basePoolV3';
 type GyroPoolToken = PoolTokenWithRate;
 
 export class Gyro2CLPPool extends BasePoolV3 implements BasePoolMethodsV3 {
-    public readonly poolType: PoolType = PoolType.Gyro2;
-
     public sqrtAlpha: bigint;
     public sqrtBeta: bigint;
     public tokens: GyroPoolToken[];
@@ -87,7 +85,18 @@ export class Gyro2CLPPool extends BasePoolV3 implements BasePoolMethodsV3 {
         liquidityManagement: LiquidityManagement,
         hookState: HookState | undefined = undefined,
     ) {
-        super(id, address, chain, swapFee, aggregateSwapFee, totalShares, tokenPairs, liquidityManagement, hookState);
+        super(
+            id,
+            address,
+            PoolType.Gyro2,
+            chain,
+            swapFee,
+            aggregateSwapFee,
+            totalShares,
+            tokenPairs,
+            liquidityManagement,
+            hookState,
+        );
         this.sqrtAlpha = sqrtAlpha;
         this.sqrtBeta = sqrtBeta;
 

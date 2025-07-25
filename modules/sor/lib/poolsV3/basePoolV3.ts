@@ -31,6 +31,7 @@ export class BasePoolV3 {
     constructor(
         id: Hex,
         address: string,
+        poolType: PoolType | string,
         chain: Chain,
         swapFee: bigint,
         aggregateSwapFee: bigint,
@@ -42,6 +43,7 @@ export class BasePoolV3 {
         this.chain = chain;
         this.id = id;
         this.address = address;
+        this.poolType = poolType;
         this.swapFee = swapFee;
         this.aggregateSwapFee = aggregateSwapFee;
         this.totalShares = totalShares;

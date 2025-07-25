@@ -33,8 +33,6 @@ export interface LBPParams {
 }
 
 export class LiquidityBootstrappingPoolV3 extends BasePoolV3 implements BasePoolMethodsV3 {
-    public readonly poolType: string = 'LIQUIDITY_BOOTSTRAPPING';
-
     // LBP is also a weighted pool
     public readonly MAX_IN_RATIO = 300000000000000000n; // 0.3
     public readonly MAX_OUT_RATIO = 300000000000000000n; // 0.3
@@ -160,7 +158,18 @@ export class LiquidityBootstrappingPoolV3 extends BasePoolV3 implements BasePool
         hookState: HookState | undefined = undefined,
         lbpParams: LBPParams,
     ) {
-        super(id, address, chain, swapFee, aggregateSwapFee, totalShares, tokenPairs, liquidityManagement, hookState);
+        super(
+            id,
+            address,
+            'LIQUIDITY_BOOTSTRAPPING',
+            chain,
+            swapFee,
+            aggregateSwapFee,
+            totalShares,
+            tokenPairs,
+            liquidityManagement,
+            hookState,
+        );
         this.tokens = tokens;
         this.tokenMap = new Map(tokens.map((token) => [token.token.address, token]));
 

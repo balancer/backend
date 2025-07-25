@@ -19,8 +19,6 @@ import { BasePoolV3 } from '../basePoolV3';
 type GyroPoolToken = PoolTokenWithRate;
 
 export class GyroECLPPool extends BasePoolV3 implements BasePoolMethodsV3 {
-    public readonly poolType: PoolType = PoolType.GyroE;
-
     // pool type specific params
     public gyroEParams: GyroEParams;
     public derivedGyroEParams: DerivedGyroEParams;
@@ -112,7 +110,18 @@ export class GyroECLPPool extends BasePoolV3 implements BasePoolMethodsV3 {
         liquidityManagement: LiquidityManagement,
         hookState: HookState | undefined = undefined,
     ) {
-        super(id, address, chain, swapFee, aggregateSwapFee, totalShares, tokenPairs, liquidityManagement, hookState);
+        super(
+            id,
+            address,
+            PoolType.GyroE,
+            chain,
+            swapFee,
+            aggregateSwapFee,
+            totalShares,
+            tokenPairs,
+            liquidityManagement,
+            hookState,
+        );
         this.gyroEParams = gyroEParams;
         this.derivedGyroEParams = derivedGyroEParams;
 
