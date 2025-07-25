@@ -42,6 +42,7 @@ type GqlAggregatorUnderlyingToken {
     name: String!
     symbol: String!
     decimals: Int!
+    isBufferAllowed: Boolean!
 }
 
 type GqlAggregatorPoolToken {
@@ -51,6 +52,11 @@ type GqlAggregatorPoolToken {
     balance: String!
     weight: String
     isErc4626: Boolean!
+    canUseBufferForSwaps: Boolean!
+    useUnderlyingForAddRemove: Boolean!
+    useWrappedForAddRemove: Boolean!
+    maxDeposit: String
+    maxWithdraw: String
     priceRate: String
     priceRateProvider: String
     underlyingToken: GqlAggregatorUnderlyingToken

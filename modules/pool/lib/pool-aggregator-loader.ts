@@ -1,4 +1,4 @@
-import { Prisma, PrismaToken } from '@prisma/client';
+import { Prisma, PrismaErc4626ReviewData, PrismaToken } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
 import { HookData } from '../../../prisma/prisma-types';
 import {
@@ -113,7 +113,19 @@ export class PoolAggregatorLoader {
 
         const underlyingTokensMap = Object.fromEntries(underlyingTokens.map((token) => [token.address, token]));
 
-        const gqlPools = pools.map((pool) => this.mapPoolToAggregatorPool(pool, underlyingTokensMap));
+        // Get review data
+        const erc4626ReviewData = await prisma.prismaErc4626ReviewData.findMany({
+            where: {
+                chain: {
+                    in: args.where?.chainIn || undefined,
+                },
+            },
+        });
+        const erc4626ReviewDataMap = Object.fromEntries(erc4626ReviewData.map((data) => [data.erc4626Address, data]));
+
+        const gqlPools = pools.map((pool) =>
+            this.mapPoolToAggregatorPool(pool, underlyingTokensMap, erc4626ReviewDataMap),
+        );
         const filteredPools = [];
 
         for (const mappedPool of gqlPools) {
@@ -133,6 +145,7 @@ export class PoolAggregatorLoader {
     private mapPoolToAggregatorPool(
         pool: AggregatorPrismaSchema,
         underlyingMap: Record<string, PrismaToken>,
+        reviewMap: Record<string, PrismaErc4626ReviewData>,
     ): GqlAggregatorPool {
         const { typeData, ...poolWithoutTypeData } = pool;
 
@@ -149,6 +162,7 @@ export class PoolAggregatorLoader {
                 const underlying = token.token.underlyingTokenAddress
                     ? underlyingMap[token.token.underlyingTokenAddress]
                     : null;
+                const review = reviewMap[token.address] || {};
                 return {
                     address: token.address,
                     name: token.token.name,
@@ -157,6 +171,9 @@ export class PoolAggregatorLoader {
                     balance: token.balance,
                     weight: token.weight,
                     isErc4626: token.token.types ? token.token.types.some((type) => type.type === 'ERC4626') : false,
+                    canUseBufferForSwaps: review.canUseBufferForSwaps,
+                    useUnderlyingForAddRemove: review.useUnderlyingForAddRemove,
+                    useWrappedForAddRemove: review.useWrappedForAddRemove,
                     priceRate: token.priceRate,
                     priceRateProvider: token.priceRateProvider,
                     underlyingToken: underlying
@@ -165,6 +182,7 @@ export class PoolAggregatorLoader {
                               symbol: underlying.symbol,
                               name: underlying.name,
                               decimals: underlying.decimals,
+                              isBufferAllowed: underlying.isBufferAllowed,
                           }
                         : undefined,
                 };

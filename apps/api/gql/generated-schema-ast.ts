@@ -378,12 +378,17 @@ export const schema = gql`
     type GqlAggregatorPoolToken {
         address: String!
         balance: String!
+        canUseBufferForSwaps: Boolean!
         decimals: Int!
         isErc4626: Boolean!
+        maxDeposit: String
+        maxWithdraw: String
         priceRate: String
         priceRateProvider: String
         symbol: String!
         underlyingToken: GqlAggregatorUnderlyingToken
+        useUnderlyingForAddRemove: Boolean!
+        useWrappedForAddRemove: Boolean!
         weight: String
     }
 
@@ -432,6 +437,7 @@ export const schema = gql`
     type GqlAggregatorUnderlyingToken {
         address: String!
         decimals: Int!
+        isBufferAllowed: Boolean!
         name: String!
         symbol: String!
     }

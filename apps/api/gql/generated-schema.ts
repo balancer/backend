@@ -319,12 +319,17 @@ export interface GqlAggregatorPoolToken {
     __typename?: 'GqlAggregatorPoolToken';
     address: Scalars['String'];
     balance: Scalars['String'];
+    canUseBufferForSwaps: Scalars['Boolean'];
     decimals: Scalars['Int'];
     isErc4626: Scalars['Boolean'];
+    maxDeposit?: Maybe<Scalars['String']>;
+    maxWithdraw?: Maybe<Scalars['String']>;
     priceRate?: Maybe<Scalars['String']>;
     priceRateProvider?: Maybe<Scalars['String']>;
     symbol: Scalars['String'];
     underlyingToken?: Maybe<GqlAggregatorUnderlyingToken>;
+    useUnderlyingForAddRemove: Scalars['Boolean'];
+    useWrappedForAddRemove: Scalars['Boolean'];
     weight?: Maybe<Scalars['String']>;
 }
 
@@ -352,6 +357,7 @@ export interface GqlAggregatorUnderlyingToken {
     __typename?: 'GqlAggregatorUnderlyingToken';
     address: Scalars['String'];
     decimals: Scalars['Int'];
+    isBufferAllowed: Scalars['Boolean'];
     name: Scalars['String'];
     symbol: Scalars['String'];
 }
@@ -4217,12 +4223,17 @@ export type GqlAggregatorPoolTokenResolvers<
 > = ResolversObject<{
     address?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     balance?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+    canUseBufferForSwaps?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
     decimals?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     isErc4626?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+    maxDeposit?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    maxWithdraw?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     priceRate?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     priceRateProvider?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     symbol?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     underlyingToken?: Resolver<Maybe<ResolversTypes['GqlAggregatorUnderlyingToken']>, ParentType, ContextType>;
+    useUnderlyingForAddRemove?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+    useWrappedForAddRemove?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
     weight?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
@@ -4248,6 +4259,7 @@ export type GqlAggregatorUnderlyingTokenResolvers<
 > = ResolversObject<{
     address?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     decimals?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+    isBufferAllowed?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
     name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     symbol?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;

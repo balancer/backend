@@ -310,12 +310,17 @@ export type GqlAggregatorPoolToken = {
     __typename?: 'GqlAggregatorPoolToken';
     address: Scalars['String'];
     balance: Scalars['String'];
+    canUseBufferForSwaps: Scalars['Boolean'];
     decimals: Scalars['Int'];
     isErc4626: Scalars['Boolean'];
+    maxDeposit?: Maybe<Scalars['String']>;
+    maxWithdraw?: Maybe<Scalars['String']>;
     priceRate?: Maybe<Scalars['String']>;
     priceRateProvider?: Maybe<Scalars['String']>;
     symbol: Scalars['String'];
     underlyingToken?: Maybe<GqlAggregatorUnderlyingToken>;
+    useUnderlyingForAddRemove: Scalars['Boolean'];
+    useWrappedForAddRemove: Scalars['Boolean'];
     weight?: Maybe<Scalars['String']>;
 };
 
@@ -343,6 +348,7 @@ export type GqlAggregatorUnderlyingToken = {
     __typename?: 'GqlAggregatorUnderlyingToken';
     address: Scalars['String'];
     decimals: Scalars['Int'];
+    isBufferAllowed: Scalars['Boolean'];
     name: Scalars['String'];
     symbol: Scalars['String'];
 };

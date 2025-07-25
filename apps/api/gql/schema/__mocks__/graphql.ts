@@ -377,8 +377,12 @@ export const aGqlAggregatorPoolToken = (overrides?: Partial<GqlAggregatorPoolTok
     return {
         address: overrides && overrides.hasOwnProperty('address') ? overrides.address! : 'uxor',
         balance: overrides && overrides.hasOwnProperty('balance') ? overrides.balance! : 'crur',
+        canUseBufferForSwaps:
+            overrides && overrides.hasOwnProperty('canUseBufferForSwaps') ? overrides.canUseBufferForSwaps! : false,
         decimals: overrides && overrides.hasOwnProperty('decimals') ? overrides.decimals! : 2896,
         isErc4626: overrides && overrides.hasOwnProperty('isErc4626') ? overrides.isErc4626! : true,
+        maxDeposit: overrides && overrides.hasOwnProperty('maxDeposit') ? overrides.maxDeposit! : 'concido',
+        maxWithdraw: overrides && overrides.hasOwnProperty('maxWithdraw') ? overrides.maxWithdraw! : 'amissio',
         priceRate: overrides && overrides.hasOwnProperty('priceRate') ? overrides.priceRate! : 'benevolentia',
         priceRateProvider:
             overrides && overrides.hasOwnProperty('priceRateProvider') ? overrides.priceRateProvider! : 'speciosus',
@@ -387,6 +391,12 @@ export const aGqlAggregatorPoolToken = (overrides?: Partial<GqlAggregatorPoolTok
             overrides && overrides.hasOwnProperty('underlyingToken')
                 ? overrides.underlyingToken!
                 : aGqlAggregatorUnderlyingToken(),
+        useUnderlyingForAddRemove:
+            overrides && overrides.hasOwnProperty('useUnderlyingForAddRemove')
+                ? overrides.useUnderlyingForAddRemove!
+                : true,
+        useWrappedForAddRemove:
+            overrides && overrides.hasOwnProperty('useWrappedForAddRemove') ? overrides.useWrappedForAddRemove! : false,
         weight: overrides && overrides.hasOwnProperty('weight') ? overrides.weight! : 'deporto',
     };
 };
@@ -430,6 +440,7 @@ export const aGqlAggregatorUnderlyingToken = (
     return {
         address: overrides && overrides.hasOwnProperty('address') ? overrides.address! : 'animi',
         decimals: overrides && overrides.hasOwnProperty('decimals') ? overrides.decimals! : 5070,
+        isBufferAllowed: overrides && overrides.hasOwnProperty('isBufferAllowed') ? overrides.isBufferAllowed! : false,
         name: overrides && overrides.hasOwnProperty('name') ? overrides.name! : 'terga',
         symbol: overrides && overrides.hasOwnProperty('symbol') ? overrides.symbol! : 'autus',
     };
