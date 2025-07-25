@@ -4,7 +4,6 @@ import moment from 'moment-timezone';
 import { prisma } from '../../prisma/prisma-client';
 import {
     GqlChain,
-    GqlPoolAggregator,
     GqlPoolFeaturedPool,
     GqlPoolMinimal,
     GqlPoolSnapshotDataRange,
