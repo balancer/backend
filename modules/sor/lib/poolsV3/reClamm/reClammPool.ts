@@ -1,6 +1,6 @@
 import { Address, Hex, parseEther, parseUnits } from 'viem';
 import { Token } from '@balancer/sdk';
-import { HookState, ReClammState } from '@balancer-labs/balancer-maths';
+import { HookState, ReClammState, ReClammV2State } from '@balancer-labs/balancer-maths';
 import { Chain } from '@prisma/client';
 
 import { PrismaPoolAndHookWithDynamic } from '../../../../../prisma/prisma-types';
@@ -21,7 +21,6 @@ import { ReClammParams } from './types';
 type ReClammPoolToken = PoolTokenWithRate;
 
 export class ReClammPool extends BasePoolV3 implements BasePoolMethodsV3 {
-    public readonly poolType = 'RECLAMM';
     public readonly reClammParams: ReClammParams;
 
     public tokens: ReClammPoolToken[];
@@ -69,6 +68,7 @@ export class ReClammPool extends BasePoolV3 implements BasePoolMethodsV3 {
         return new ReClammPool(
             pool.id as Hex,
             pool.address,
+            pool.version === 1 ? 'RECLAMM' : 'RECLAMM_V2',
             pool.chain,
             reClammParams,
             parseEther(pool.dynamicData.swapFee),
@@ -84,6 +84,7 @@ export class ReClammPool extends BasePoolV3 implements BasePoolMethodsV3 {
     constructor(
         id: Hex,
         address: string,
+        poolType: 'RECLAMM' | 'RECLAMM_V2',
         chain: Chain,
         reClammParams: ReClammParams,
         swapFee: bigint,
@@ -94,7 +95,19 @@ export class ReClammPool extends BasePoolV3 implements BasePoolMethodsV3 {
         liquidityManagement: LiquidityManagement,
         hookState: HookState | undefined = undefined,
     ) {
-        super(id, address, chain, swapFee, aggregateSwapFee, totalShares, tokenPairs, liquidityManagement, hookState);
+        super(
+            id,
+            address,
+            poolType,
+            chain,
+            swapFee,
+            aggregateSwapFee,
+            totalShares,
+            tokenPairs,
+            liquidityManagement,
+            hookState,
+        );
+
         this.reClammParams = reClammParams;
 
         this.tokens = tokens.sort((a, b) => a.index - b.index);
@@ -107,9 +120,9 @@ export class ReClammPool extends BasePoolV3 implements BasePoolMethodsV3 {
         this.poolState = this.getPoolState(hookState?.hookType);
     }
 
-    public getPoolState(hookName?: string): ReClammState {
-        const poolState: ReClammState = {
-            poolType: this.poolType,
+    public getPoolState(hookName?: string): ReClammState | ReClammV2State {
+        const poolState: ReClammState | ReClammV2State = {
+            poolType: this.poolType as 'RECLAMM' | 'RECLAMM_V2',
             poolAddress: this.address,
             swapFee: this.swapFee,
             balancesLiveScaled18: this.tokens.map((t) => t.scale18),
@@ -150,6 +163,7 @@ export class ReClammPool extends BasePoolV3 implements BasePoolMethodsV3 {
         return new ReClammPool(
             this.id,
             this.address,
+            this.poolType as 'RECLAMM' | 'RECLAMM_V2',
             this.chain,
             this.reClammParams,
             this.swapFee,

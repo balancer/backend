@@ -1,4 +1,4 @@
-import { Address, Hex, parseEther, parseUnits } from 'viem';
+import { Address, Hex, parseEther } from 'viem';
 import { PoolType, Token, TokenAmount, WAD } from '@balancer/sdk';
 import { WeightedState, HookState } from '@balancer-labs/balancer-maths';
 import { Chain } from '@prisma/client';
@@ -18,8 +18,6 @@ import { BasePoolV3 } from '../basePoolV3';
 type WeightedPoolToken = WeightedPoolTokenWithRate;
 
 export class WeightedPoolV3 extends BasePoolV3 implements BasePoolMethodsV3 {
-    public readonly poolType: PoolType = PoolType.Weighted;
-
     public readonly MAX_IN_RATIO = 300000000000000000n; // 0.3
     public readonly MAX_OUT_RATIO = 300000000000000000n; // 0.3
 
@@ -87,7 +85,18 @@ export class WeightedPoolV3 extends BasePoolV3 implements BasePoolMethodsV3 {
         liquidityManagement: LiquidityManagement,
         hookState: HookState | undefined = undefined,
     ) {
-        super(id, address, chain, swapFee, aggregateSwapFee, totalShares, tokenPairs, liquidityManagement, hookState);
+        super(
+            id,
+            address,
+            PoolType.Weighted,
+            chain,
+            swapFee,
+            aggregateSwapFee,
+            totalShares,
+            tokenPairs,
+            liquidityManagement,
+            hookState,
+        );
         this.tokens = tokens;
         this.tokenMap = new Map(tokens.map((token) => [token.token.address, token]));
 

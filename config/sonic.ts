@@ -66,6 +66,7 @@ export default <NetworkData>{
     },
     hooks: {
         ['0x8a83aa9bb7c4cff14ae0aecec0fb9ef234901c0c']: 'STABLE_SURGE',
+        ['0x049919ae32e50aee5ea1a0998a841d175ec6f1b3']: 'STABLE_SURGE',
     },
     multicall: '0xca11bde05977b3631167028862be2a173976ca11',
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',

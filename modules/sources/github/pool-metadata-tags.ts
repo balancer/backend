@@ -64,6 +64,16 @@ export const getPoolMetadataTags = async (
     // from the tag list, find all tags that start with points_sonic
     const sonicPointBearingTags = tagsList.filter((tag) => tag.id.toLowerCase().startsWith('points_sonic'));
 
+    // make all token addresses in the tags lowercase
+    sonicPointBearingTags.forEach((tag) => {
+        tag.tokens = Object.fromEntries(
+            Object.entries(tag.tokens || {}).map(([chainId, addresses]) => [
+                chainId,
+                addresses.map((address) => address.toLowerCase()),
+            ]),
+        );
+    });
+
     // get the token addresses for sonic point bearing tags in lowercase
     // this is to ensure we can compare them with the pool token addresses
     const sonicPointBearingTokenAddresses = sonicPointBearingTags
