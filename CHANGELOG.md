@@ -1,5 +1,20 @@
 # backend
 
+## 1.50.0
+
+### Minor Changes
+
+-   f86460f: pricing refactoring
+-   2a9854d: SOR - Add support for ReClammV2
+
+### Patch Changes
+
+-   a82681f: sync swaps v3 fix
+-   92d7875: fix sonic points tags
+-   bedae86: fix beets pricing on OP and FTM
+-   88766ba: token sorting index fix
+-   adcabd5: beets pricing fix
+
 ## 1.49.0
 
 ### Minor Changes
