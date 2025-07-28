@@ -72,6 +72,20 @@ export default <NetworkData>{
                     path: '0x5555555555555555555555555555555555555555.supplyAPR',
                     scale: 100,
                 },
+                whlp: {
+                    tokenAddress: '0x1359b05241ca5076c9f59605214f4f84114c0de8',
+                    sourceUrl:
+                        'https://backend.nucleusearn.io/v1/vaults/apy?token_address=0x1359b05241cA5076c9F59605214f4F84114c0dE8&lookback_days=14',
+                    path: 'apy',
+                    scale: 100,
+                },
+                lhype: {
+                    tokenAddress: '0x5748ae796ae46a4f1348a1693de4b50560485562',
+                    sourceUrl:
+                        'https://backend.nucleusearn.io/v1/vaults/apy?token_address=0x5748ae796AE46A4F1348a1693de4b50560485562&lookback_days=14',
+                    path: 'apy',
+                    scale: 100,
+                },
             },
         },
     },
