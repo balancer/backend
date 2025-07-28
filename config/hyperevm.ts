@@ -66,6 +66,12 @@ export default <NetworkData>{
                     path: 'data.stats.siusd.lastWeekAPY',
                     scale: 1,
                 },
+                wawhype: {
+                    tokenAddress: '0xd704254eb350e0d3baecd194d095862267897ae0',
+                    sourceUrl: 'https://api.hyperlend.finance/data/markets/rates',
+                    path: '0x5555555555555555555555555555555555555555.supplyAPR',
+                    scale: 100,
+                },
             },
         },
     },
