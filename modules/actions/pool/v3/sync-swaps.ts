@@ -18,7 +18,7 @@ export async function syncSwaps(
     chain = 'SEPOLIA' as Chain,
     eventRepo: LatestEventRepository & EventStoreRepository = eventsRepository,
 ): Promise<string[]> {
-    const lastSyncedBlock = await getLastSyncedBlock(chain, 'SWAPS_V2');
+    const lastSyncedBlock = await getLastSyncedBlock(chain, 'SWAPS_V3');
 
     if (lastSyncedBlock === 0) return [];
 
