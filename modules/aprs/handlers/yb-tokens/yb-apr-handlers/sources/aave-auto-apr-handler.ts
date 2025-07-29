@@ -113,11 +113,14 @@ export class Handler implements AprHandler {
                 functionName: 'aToken',
             }));
         const aTokens = await client.multicall({ contracts, allowFailure: false });
-        const wrappersToATokens = wrapperToUnderlying.map(([wrapper, underlying], index) => [
-            wrapper,
-            aTokens[index].toLowerCase(),
-            underlying,
-        ]);
+        const aTokenToWrappers = wrapperToUnderlying.reduce(
+            (agg, [wrapper], index) => {
+                agg[aTokens[index].toLowerCase()] ||= [];
+                agg[aTokens[index].toLowerCase()].push(wrapper);
+                return agg;
+            },
+            {} as Record<string, string[]>,
+        );
 
         const requestQuery = {
             operationName: 'getReserves',
@@ -142,11 +145,13 @@ export class Handler implements AprHandler {
         // For each reserve, match the wrapper by aToken address
         const aprsByUnderlyingAddress = Object.fromEntries(
             reserves
-                .map((r) => [
-                    wrappersToATokens.find(([_, aToken]) => aToken === r.aToken.id)?.[0].toLowerCase(),
-                    // Converting from aave ray number (27 digits) to float
-                    { apr: Number(r.liquidityRate.slice(0, 27)) / 1e27, isIbYield: true },
-                ])
+                .flatMap((r) =>
+                    aTokenToWrappers[r.aToken.id].map((wrapper) => [
+                        wrapper,
+                        // Converting from aave ray number (27 digits) to float
+                        { apr: Number(r.liquidityRate.slice(0, 27)) / 1e27, isIbYield: true },
+                    ]),
+                )
                 .filter((r) => r[0]),
         );
 
