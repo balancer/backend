@@ -105,6 +105,7 @@ export default <NetworkData>{
                             aTokenAddress: '0x6ab707aca953edaefbc4fd23ba73294241490620',
                             wrappedTokens: {
                                 waUSDT: '0x3c7680dfe7f732ca0279c39ff30fe2eafdae49db',
+                                waArbUSDT: '0xa6d12574efb239fc1d2099732bd8b5dc6306897f',
                                 stataArbUSDT: '0x8b5541b773dd781852940490b0c3dc1a8cdb6a87',
                                 stataArbUSDT2: '0xb165a74407fe1e519d6bcbdec1ed3202b35a4140',
                             },
@@ -137,6 +138,7 @@ export default <NetworkData>{
                             aTokenAddress: '0xebe517846d0f36eced99c735cbf6131e1feb775d',
                             wrappedTokens: {
                                 stataArbGHO: '0xd9fba68d89178e3538e708939332c79efc540179',
+                                waArbGHO: '0xd089b4cb88dacf4e27be869a00e9f7e2e3c18193',
                             },
                         },
                         EZETH: {
