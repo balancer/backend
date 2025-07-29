@@ -1,5 +1,11 @@
 # backend
 
+## 1.50.3
+
+### Patch Changes
+
+-   dd33026: fix auto aave apr handler
+
 ## 1.50.2
 
 ### Patch Changes
