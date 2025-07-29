@@ -3,15 +3,7 @@ import {
     Erc4626ReviewData,
     ExitFeeHookParams,
     FeeTakingHookParams,
-    GqlAggregatorElementParams,
-    GqlAggregatorFxParams,
-    GqlAggregatorGyroParams,
-    GqlAggregatorPool,
-    GqlAggregatorPoolDynamicData,
     GqlAggregatorPoolFilter,
-    GqlAggregatorPoolToken,
-    GqlAggregatorReclammParams,
-    GqlAggregatorUnderlyingToken,
     GqlBalancePoolAprItem,
     GqlBalancePoolAprSubItem,
     GqlFeaturePoolGroupItemExternalLink,
@@ -24,6 +16,7 @@ import {
     GqlLatestSyncedBlocks,
     GqlNestedPool,
     GqlPoolAddRemoveEventV3,
+    GqlPoolAggregator,
     GqlPoolApr,
     GqlPoolAprItem,
     GqlPoolAprRange,
@@ -208,146 +201,6 @@ export const aFeeTakingHookParams = (overrides?: Partial<FeeTakingHookParams>): 
     };
 };
 
-export const aGqlAggregatorElementParams = (
-    overrides?: Partial<GqlAggregatorElementParams>,
-): GqlAggregatorElementParams => {
-    return {
-        baseToken: overrides && overrides.hasOwnProperty('baseToken') ? overrides.baseToken! : 'vivo',
-        principalToken: overrides && overrides.hasOwnProperty('principalToken') ? overrides.principalToken! : 'dolor',
-        unitSeconds: overrides && overrides.hasOwnProperty('unitSeconds') ? overrides.unitSeconds! : 'verbum',
-    };
-};
-
-export const aGqlAggregatorFxParams = (overrides?: Partial<GqlAggregatorFxParams>): GqlAggregatorFxParams => {
-    return {
-        alpha: overrides && overrides.hasOwnProperty('alpha') ? overrides.alpha! : 'arma',
-        beta: overrides && overrides.hasOwnProperty('beta') ? overrides.beta! : 'deprecator',
-        delta: overrides && overrides.hasOwnProperty('delta') ? overrides.delta! : 'cras',
-        epsilon: overrides && overrides.hasOwnProperty('epsilon') ? overrides.epsilon! : 'depraedor',
-        lambda: overrides && overrides.hasOwnProperty('lambda') ? overrides.lambda! : 'denuncio',
-    };
-};
-
-export const aGqlAggregatorGyroParams = (overrides?: Partial<GqlAggregatorGyroParams>): GqlAggregatorGyroParams => {
-    return {
-        alpha: overrides && overrides.hasOwnProperty('alpha') ? overrides.alpha! : 'surculus',
-        beta: overrides && overrides.hasOwnProperty('beta') ? overrides.beta! : 'accendo',
-        c: overrides && overrides.hasOwnProperty('c') ? overrides.c! : 'vulticulus',
-        dSq: overrides && overrides.hasOwnProperty('dSq') ? overrides.dSq! : 'candidus',
-        lambda: overrides && overrides.hasOwnProperty('lambda') ? overrides.lambda! : 'tracto',
-        root3Alpha: overrides && overrides.hasOwnProperty('root3Alpha') ? overrides.root3Alpha! : 'ullus',
-        s: overrides && overrides.hasOwnProperty('s') ? overrides.s! : 'bonus',
-        sqrtAlpha: overrides && overrides.hasOwnProperty('sqrtAlpha') ? overrides.sqrtAlpha! : 'cogo',
-        sqrtBeta: overrides && overrides.hasOwnProperty('sqrtBeta') ? overrides.sqrtBeta! : 'cuius',
-        tauAlphaX: overrides && overrides.hasOwnProperty('tauAlphaX') ? overrides.tauAlphaX! : 'vinculum',
-        tauAlphaY: overrides && overrides.hasOwnProperty('tauAlphaY') ? overrides.tauAlphaY! : 'pectus',
-        tauBetaX: overrides && overrides.hasOwnProperty('tauBetaX') ? overrides.tauBetaX! : 'caritas',
-        tauBetaY: overrides && overrides.hasOwnProperty('tauBetaY') ? overrides.tauBetaY! : 'cimentarius',
-        u: overrides && overrides.hasOwnProperty('u') ? overrides.u! : 'ante',
-        v: overrides && overrides.hasOwnProperty('v') ? overrides.v! : 'quod',
-        w: overrides && overrides.hasOwnProperty('w') ? overrides.w! : 'combibo',
-        z: overrides && overrides.hasOwnProperty('z') ? overrides.z! : 'carcer',
-    };
-};
-
-export const aGqlAggregatorPool = (overrides?: Partial<GqlAggregatorPool>): GqlAggregatorPool => {
-    return {
-        address: overrides && overrides.hasOwnProperty('address') ? overrides.address! : 'cubitum',
-        alpha: overrides && overrides.hasOwnProperty('alpha') ? overrides.alpha! : 'colligo',
-        amp: overrides && overrides.hasOwnProperty('amp') ? overrides.amp! : 'aiunt',
-        beta: overrides && overrides.hasOwnProperty('beta') ? overrides.beta! : 'temperantia',
-        c: overrides && overrides.hasOwnProperty('c') ? overrides.c! : 'verecundia',
-        centerednessMargin:
-            overrides && overrides.hasOwnProperty('centerednessMargin') ? overrides.centerednessMargin! : 'carmen',
-        chain: overrides && overrides.hasOwnProperty('chain') ? overrides.chain! : GqlChain.ARBITRUM,
-        createTime: overrides && overrides.hasOwnProperty('createTime') ? overrides.createTime! : 1231,
-        currentFourthRootPriceRatio:
-            overrides && overrides.hasOwnProperty('currentFourthRootPriceRatio')
-                ? overrides.currentFourthRootPriceRatio!
-                : 'adulatio',
-        dSq: overrides && overrides.hasOwnProperty('dSq') ? overrides.dSq! : 'utrimque',
-        dailyPriceShiftBase:
-            overrides && overrides.hasOwnProperty('dailyPriceShiftBase') ? overrides.dailyPriceShiftBase! : 'sol',
-        decimals: overrides && overrides.hasOwnProperty('decimals') ? overrides.decimals! : 1064,
-        delta: overrides && overrides.hasOwnProperty('delta') ? overrides.delta! : 'quod',
-        dynamicData:
-            overrides && overrides.hasOwnProperty('dynamicData')
-                ? overrides.dynamicData!
-                : aGqlAggregatorPoolDynamicData(),
-        elementParams:
-            overrides && overrides.hasOwnProperty('elementParams')
-                ? overrides.elementParams!
-                : aGqlAggregatorElementParams(),
-        endFourthRootPriceRatio:
-            overrides && overrides.hasOwnProperty('endFourthRootPriceRatio')
-                ? overrides.endFourthRootPriceRatio!
-                : 'arbustum',
-        epsilon: overrides && overrides.hasOwnProperty('epsilon') ? overrides.epsilon! : 'defessus',
-        factory: overrides && overrides.hasOwnProperty('factory') ? overrides.factory! : 'tersus',
-        fxParams: overrides && overrides.hasOwnProperty('fxParams') ? overrides.fxParams! : aGqlAggregatorFxParams(),
-        gyroParams:
-            overrides && overrides.hasOwnProperty('gyroParams') ? overrides.gyroParams! : aGqlAggregatorGyroParams(),
-        hook: overrides && overrides.hasOwnProperty('hook') ? overrides.hook! : aGqlHook(),
-        id: overrides && overrides.hasOwnProperty('id') ? overrides.id! : '43ea2c68-f7bd-4295-b632-15dac3211cb5',
-        lambda: overrides && overrides.hasOwnProperty('lambda') ? overrides.lambda! : 'distinctio',
-        lastTimestamp: overrides && overrides.hasOwnProperty('lastTimestamp') ? overrides.lastTimestamp! : 5439,
-        lastVirtualBalances:
-            overrides && overrides.hasOwnProperty('lastVirtualBalances') ? overrides.lastVirtualBalances! : ['ubi'],
-        liquidityManagement:
-            overrides && overrides.hasOwnProperty('liquidityManagement')
-                ? overrides.liquidityManagement!
-                : aLiquidityManagement(),
-        name: overrides && overrides.hasOwnProperty('name') ? overrides.name! : 'aureus',
-        poolTokens:
-            overrides && overrides.hasOwnProperty('poolTokens') ? overrides.poolTokens! : [aGqlAggregatorPoolToken()],
-        priceRatioUpdateEndTime:
-            overrides && overrides.hasOwnProperty('priceRatioUpdateEndTime')
-                ? overrides.priceRatioUpdateEndTime!
-                : 7901,
-        priceRatioUpdateStartTime:
-            overrides && overrides.hasOwnProperty('priceRatioUpdateStartTime')
-                ? overrides.priceRatioUpdateStartTime!
-                : 9540,
-        protocolVersion: overrides && overrides.hasOwnProperty('protocolVersion') ? overrides.protocolVersion! : 6631,
-        quantAmmWeightedParams:
-            overrides && overrides.hasOwnProperty('quantAmmWeightedParams')
-                ? overrides.quantAmmWeightedParams!
-                : aQuantAmmWeightedParams(),
-        reclammParams:
-            overrides && overrides.hasOwnProperty('reclammParams')
-                ? overrides.reclammParams!
-                : aGqlAggregatorReclammParams(),
-        root3Alpha: overrides && overrides.hasOwnProperty('root3Alpha') ? overrides.root3Alpha! : 'admoveo',
-        s: overrides && overrides.hasOwnProperty('s') ? overrides.s! : 'cruentus',
-        sqrtAlpha: overrides && overrides.hasOwnProperty('sqrtAlpha') ? overrides.sqrtAlpha! : 'tutamen',
-        sqrtBeta: overrides && overrides.hasOwnProperty('sqrtBeta') ? overrides.sqrtBeta! : 'accusantium',
-        startFourthRootPriceRatio:
-            overrides && overrides.hasOwnProperty('startFourthRootPriceRatio')
-                ? overrides.startFourthRootPriceRatio!
-                : 'carus',
-        swapFee: overrides && overrides.hasOwnProperty('swapFee') ? overrides.swapFee! : 'cervus',
-        symbol: overrides && overrides.hasOwnProperty('symbol') ? overrides.symbol! : 'annus',
-        tauAlphaX: overrides && overrides.hasOwnProperty('tauAlphaX') ? overrides.tauAlphaX! : 'delibero',
-        tauAlphaY: overrides && overrides.hasOwnProperty('tauAlphaY') ? overrides.tauAlphaY! : 'defluo',
-        tauBetaX: overrides && overrides.hasOwnProperty('tauBetaX') ? overrides.tauBetaX! : 'cito',
-        tauBetaY: overrides && overrides.hasOwnProperty('tauBetaY') ? overrides.tauBetaY! : 'adiuvo',
-        type: overrides && overrides.hasOwnProperty('type') ? overrides.type! : GqlPoolType.COMPOSABLE_STABLE,
-        u: overrides && overrides.hasOwnProperty('u') ? overrides.u! : 'sustineo',
-        v: overrides && overrides.hasOwnProperty('v') ? overrides.v! : 'teneo',
-        version: overrides && overrides.hasOwnProperty('version') ? overrides.version! : 9833,
-        w: overrides && overrides.hasOwnProperty('w') ? overrides.w! : 'delego',
-        z: overrides && overrides.hasOwnProperty('z') ? overrides.z! : 'thymbra',
-    };
-};
-
-export const aGqlAggregatorPoolDynamicData = (
-    overrides?: Partial<GqlAggregatorPoolDynamicData>,
-): GqlAggregatorPoolDynamicData => {
-    return {
-        swapFee: overrides && overrides.hasOwnProperty('swapFee') ? overrides.swapFee! : 'derelinquo',
-    };
-};
-
 export const aGqlAggregatorPoolFilter = (overrides?: Partial<GqlAggregatorPoolFilter>): GqlAggregatorPoolFilter => {
     return {
         chainIn: overrides && overrides.hasOwnProperty('chainIn') ? overrides.chainIn! : [GqlChain.ARBITRUM],
@@ -370,79 +223,6 @@ export const aGqlAggregatorPoolFilter = (overrides?: Partial<GqlAggregatorPoolFi
             overrides && overrides.hasOwnProperty('protocolVersionIn') ? overrides.protocolVersionIn! : [9819],
         tokensIn: overrides && overrides.hasOwnProperty('tokensIn') ? overrides.tokensIn! : ['canonicus'],
         tokensNotIn: overrides && overrides.hasOwnProperty('tokensNotIn') ? overrides.tokensNotIn! : ['tergo'],
-    };
-};
-
-export const aGqlAggregatorPoolToken = (overrides?: Partial<GqlAggregatorPoolToken>): GqlAggregatorPoolToken => {
-    return {
-        address: overrides && overrides.hasOwnProperty('address') ? overrides.address! : 'uxor',
-        balance: overrides && overrides.hasOwnProperty('balance') ? overrides.balance! : 'crur',
-        canUseBufferForSwaps:
-            overrides && overrides.hasOwnProperty('canUseBufferForSwaps') ? overrides.canUseBufferForSwaps! : false,
-        decimals: overrides && overrides.hasOwnProperty('decimals') ? overrides.decimals! : 2896,
-        isErc4626: overrides && overrides.hasOwnProperty('isErc4626') ? overrides.isErc4626! : true,
-        maxDeposit: overrides && overrides.hasOwnProperty('maxDeposit') ? overrides.maxDeposit! : 'concido',
-        maxWithdraw: overrides && overrides.hasOwnProperty('maxWithdraw') ? overrides.maxWithdraw! : 'amissio',
-        priceRate: overrides && overrides.hasOwnProperty('priceRate') ? overrides.priceRate! : 'benevolentia',
-        priceRateProvider:
-            overrides && overrides.hasOwnProperty('priceRateProvider') ? overrides.priceRateProvider! : 'speciosus',
-        symbol: overrides && overrides.hasOwnProperty('symbol') ? overrides.symbol! : 'certus',
-        underlyingToken:
-            overrides && overrides.hasOwnProperty('underlyingToken')
-                ? overrides.underlyingToken!
-                : aGqlAggregatorUnderlyingToken(),
-        useUnderlyingForAddRemove:
-            overrides && overrides.hasOwnProperty('useUnderlyingForAddRemove')
-                ? overrides.useUnderlyingForAddRemove!
-                : true,
-        useWrappedForAddRemove:
-            overrides && overrides.hasOwnProperty('useWrappedForAddRemove') ? overrides.useWrappedForAddRemove! : false,
-        weight: overrides && overrides.hasOwnProperty('weight') ? overrides.weight! : 'deporto',
-    };
-};
-
-export const aGqlAggregatorReclammParams = (
-    overrides?: Partial<GqlAggregatorReclammParams>,
-): GqlAggregatorReclammParams => {
-    return {
-        centerednessMargin:
-            overrides && overrides.hasOwnProperty('centerednessMargin') ? overrides.centerednessMargin! : 'sufficio',
-        currentFourthRootPriceRatio:
-            overrides && overrides.hasOwnProperty('currentFourthRootPriceRatio')
-                ? overrides.currentFourthRootPriceRatio!
-                : 'denuncio',
-        dailyPriceShiftBase:
-            overrides && overrides.hasOwnProperty('dailyPriceShiftBase') ? overrides.dailyPriceShiftBase! : 'dedico',
-        endFourthRootPriceRatio:
-            overrides && overrides.hasOwnProperty('endFourthRootPriceRatio')
-                ? overrides.endFourthRootPriceRatio!
-                : 'attero',
-        lastVirtualBalances:
-            overrides && overrides.hasOwnProperty('lastVirtualBalances') ? overrides.lastVirtualBalances! : ['dicta'],
-        priceRatioUpdateEndTime:
-            overrides && overrides.hasOwnProperty('priceRatioUpdateEndTime')
-                ? overrides.priceRatioUpdateEndTime!
-                : 6900,
-        priceRatioUpdateStartTime:
-            overrides && overrides.hasOwnProperty('priceRatioUpdateStartTime')
-                ? overrides.priceRatioUpdateStartTime!
-                : 3053,
-        startFourthRootPriceRatio:
-            overrides && overrides.hasOwnProperty('startFourthRootPriceRatio')
-                ? overrides.startFourthRootPriceRatio!
-                : 'uberrime',
-    };
-};
-
-export const aGqlAggregatorUnderlyingToken = (
-    overrides?: Partial<GqlAggregatorUnderlyingToken>,
-): GqlAggregatorUnderlyingToken => {
-    return {
-        address: overrides && overrides.hasOwnProperty('address') ? overrides.address! : 'animi',
-        decimals: overrides && overrides.hasOwnProperty('decimals') ? overrides.decimals! : 5070,
-        isBufferAllowed: overrides && overrides.hasOwnProperty('isBufferAllowed') ? overrides.isBufferAllowed! : false,
-        name: overrides && overrides.hasOwnProperty('name') ? overrides.name! : 'terga',
-        symbol: overrides && overrides.hasOwnProperty('symbol') ? overrides.symbol! : 'autus',
     };
 };
 
@@ -636,6 +416,87 @@ export const aGqlPoolAddRemoveEventV3 = (overrides?: Partial<GqlPoolAddRemoveEve
         type: overrides && overrides.hasOwnProperty('type') ? overrides.type! : GqlPoolEventType.ADD,
         userAddress: overrides && overrides.hasOwnProperty('userAddress') ? overrides.userAddress! : 'cui',
         valueUSD: overrides && overrides.hasOwnProperty('valueUSD') ? overrides.valueUSD! : 1,
+    };
+};
+
+export const aGqlPoolAggregator = (overrides?: Partial<GqlPoolAggregator>): GqlPoolAggregator => {
+    return {
+        address: overrides && overrides.hasOwnProperty('address') ? overrides.address! : 'venio',
+        alpha: overrides && overrides.hasOwnProperty('alpha') ? overrides.alpha! : 'qui',
+        amp: overrides && overrides.hasOwnProperty('amp') ? overrides.amp! : 'vilicus',
+        beta: overrides && overrides.hasOwnProperty('beta') ? overrides.beta! : 'tredecim',
+        c: overrides && overrides.hasOwnProperty('c') ? overrides.c! : 'cena',
+        centerednessMargin:
+            overrides && overrides.hasOwnProperty('centerednessMargin') ? overrides.centerednessMargin! : 'carmen',
+        chain: overrides && overrides.hasOwnProperty('chain') ? overrides.chain! : GqlChain.ARBITRUM,
+        createTime: overrides && overrides.hasOwnProperty('createTime') ? overrides.createTime! : 1115,
+        currentFourthRootPriceRatio:
+            overrides && overrides.hasOwnProperty('currentFourthRootPriceRatio')
+                ? overrides.currentFourthRootPriceRatio!
+                : 'turpis',
+        dSq: overrides && overrides.hasOwnProperty('dSq') ? overrides.dSq! : 'comedo',
+        dailyPriceShiftBase:
+            overrides && overrides.hasOwnProperty('dailyPriceShiftBase') ? overrides.dailyPriceShiftBase! : 'iure',
+        decimals: overrides && overrides.hasOwnProperty('decimals') ? overrides.decimals! : 1272,
+        delta: overrides && overrides.hasOwnProperty('delta') ? overrides.delta! : 'calcar',
+        dynamicData:
+            overrides && overrides.hasOwnProperty('dynamicData') ? overrides.dynamicData! : aGqlPoolDynamicData(),
+        endFourthRootPriceRatio:
+            overrides && overrides.hasOwnProperty('endFourthRootPriceRatio')
+                ? overrides.endFourthRootPriceRatio!
+                : 'vinitor',
+        epsilon: overrides && overrides.hasOwnProperty('epsilon') ? overrides.epsilon! : 'traho',
+        factory: overrides && overrides.hasOwnProperty('factory') ? overrides.factory! : 'territo',
+        hook: overrides && overrides.hasOwnProperty('hook') ? overrides.hook! : aGqlHook(),
+        id: overrides && overrides.hasOwnProperty('id') ? overrides.id! : 'a295074e-2d9d-4f2a-ae6f-884b6022963d',
+        lambda: overrides && overrides.hasOwnProperty('lambda') ? overrides.lambda! : 'fugiat',
+        lastTimestamp: overrides && overrides.hasOwnProperty('lastTimestamp') ? overrides.lastTimestamp! : 3879,
+        lastVirtualBalances:
+            overrides && overrides.hasOwnProperty('lastVirtualBalances') ? overrides.lastVirtualBalances! : ['defaeco'],
+        liquidityManagement:
+            overrides && overrides.hasOwnProperty('liquidityManagement')
+                ? overrides.liquidityManagement!
+                : aLiquidityManagement(),
+        name: overrides && overrides.hasOwnProperty('name') ? overrides.name! : 'claudeo',
+        owner: overrides && overrides.hasOwnProperty('owner') ? overrides.owner! : 'voco',
+        pauseManager: overrides && overrides.hasOwnProperty('pauseManager') ? overrides.pauseManager! : 'solutio',
+        poolCreator: overrides && overrides.hasOwnProperty('poolCreator') ? overrides.poolCreator! : 'curis',
+        poolTokens:
+            overrides && overrides.hasOwnProperty('poolTokens') ? overrides.poolTokens! : [aGqlPoolTokenDetail()],
+        priceRatioUpdateEndTime:
+            overrides && overrides.hasOwnProperty('priceRatioUpdateEndTime')
+                ? overrides.priceRatioUpdateEndTime!
+                : 9161,
+        priceRatioUpdateStartTime:
+            overrides && overrides.hasOwnProperty('priceRatioUpdateStartTime')
+                ? overrides.priceRatioUpdateStartTime!
+                : 5224,
+        protocolVersion: overrides && overrides.hasOwnProperty('protocolVersion') ? overrides.protocolVersion! : 2767,
+        quantAmmWeightedParams:
+            overrides && overrides.hasOwnProperty('quantAmmWeightedParams')
+                ? overrides.quantAmmWeightedParams!
+                : aQuantAmmWeightedParams(),
+        root3Alpha: overrides && overrides.hasOwnProperty('root3Alpha') ? overrides.root3Alpha! : 'vae',
+        s: overrides && overrides.hasOwnProperty('s') ? overrides.s! : 'vix',
+        sqrtAlpha: overrides && overrides.hasOwnProperty('sqrtAlpha') ? overrides.sqrtAlpha! : 'decet',
+        sqrtBeta: overrides && overrides.hasOwnProperty('sqrtBeta') ? overrides.sqrtBeta! : 'aiunt',
+        startFourthRootPriceRatio:
+            overrides && overrides.hasOwnProperty('startFourthRootPriceRatio')
+                ? overrides.startFourthRootPriceRatio!
+                : 'somniculosus',
+        swapFeeManager:
+            overrides && overrides.hasOwnProperty('swapFeeManager') ? overrides.swapFeeManager! : 'victoria',
+        symbol: overrides && overrides.hasOwnProperty('symbol') ? overrides.symbol! : 'verumtamen',
+        tauAlphaX: overrides && overrides.hasOwnProperty('tauAlphaX') ? overrides.tauAlphaX! : 'conscendo',
+        tauAlphaY: overrides && overrides.hasOwnProperty('tauAlphaY') ? overrides.tauAlphaY! : 'amplexus',
+        tauBetaX: overrides && overrides.hasOwnProperty('tauBetaX') ? overrides.tauBetaX! : 'cubitum',
+        tauBetaY: overrides && overrides.hasOwnProperty('tauBetaY') ? overrides.tauBetaY! : 'appono',
+        type: overrides && overrides.hasOwnProperty('type') ? overrides.type! : GqlPoolType.COMPOSABLE_STABLE,
+        u: overrides && overrides.hasOwnProperty('u') ? overrides.u! : 'conforto',
+        v: overrides && overrides.hasOwnProperty('v') ? overrides.v! : 'argumentum',
+        version: overrides && overrides.hasOwnProperty('version') ? overrides.version! : 1793,
+        w: overrides && overrides.hasOwnProperty('w') ? overrides.w! : 'clamo',
+        z: overrides && overrides.hasOwnProperty('z') ? overrides.z! : 'subnecto',
     };
 };
 
@@ -3158,7 +3019,7 @@ export const aQuery = (overrides?: Partial<Query>): Query => {
         aggregatorPools:
             overrides && overrides.hasOwnProperty('aggregatorPools')
                 ? overrides.aggregatorPools!
-                : [aGqlAggregatorPool()],
+                : [aGqlPoolAggregator()],
         beetsGetFbeetsRatio:
             overrides && overrides.hasOwnProperty('beetsGetFbeetsRatio') ? overrides.beetsGetFbeetsRatio! : 'advoco',
         beetsPoolGetReliquaryFarmSnapshots:
@@ -3187,7 +3048,7 @@ export const aQuery = (overrides?: Partial<Query>): Query => {
         poolGetAggregatorPools:
             overrides && overrides.hasOwnProperty('poolGetAggregatorPools')
                 ? overrides.poolGetAggregatorPools!
-                : [aGqlAggregatorPool()],
+                : [aGqlPoolAggregator()],
         poolGetBatchSwaps:
             overrides && overrides.hasOwnProperty('poolGetBatchSwaps')
                 ? overrides.poolGetBatchSwaps!

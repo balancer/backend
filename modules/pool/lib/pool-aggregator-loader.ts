@@ -1,15 +1,15 @@
-import { Prisma, PrismaErc4626ReviewData, PrismaToken } from '@prisma/client';
+import { Prisma, PrismaErc4626ReviewData, PrismaTokenType } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
 import { HookData } from '../../../prisma/prisma-types';
 import {
-    GqlAggregatorPool,
+    GqlPoolAggregator,
     QueryAggregatorPoolsArgs,
     LiquidityManagement,
-    GqlAggregatorReclammParams,
 } from '../../../apps/api/gql/generated-schema';
 import _ from 'lodash';
-import { ElementData, FxData, GyroData, StableData, QuantAmmWeightedData, ReclammData } from '../subgraph-mapper';
+import { FxData, GyroData, StableData, QuantAmmWeightedData, ReclammData } from '../subgraph-mapper';
 import { mapHookToGqlHook } from '../../sources/transformers';
+import { chainToChainId } from '../../network/chain-id-to-chain';
 
 const aggregatorPrismaValidator = Prisma.validator<Prisma.PrismaPoolDefaultArgs>()({
     include: {
@@ -29,8 +29,16 @@ const aggregatorPrismaValidator = Prisma.validator<Prisma.PrismaPoolDefaultArgs>
 
 type AggregatorPrismaSchema = Prisma.PrismaPoolGetPayload<typeof aggregatorPrismaValidator>;
 
+const tokenWithTypes = Prisma.validator<Prisma.PrismaTokenDefaultArgs>()({
+    include: {
+        types: true,
+    },
+});
+
+type TokenWithTypes = Prisma.PrismaTokenGetPayload<typeof tokenWithTypes>;
+
 export class PoolAggregatorLoader {
-    public async aggregatorPools(args: QueryAggregatorPoolsArgs): Promise<GqlAggregatorPool[]> {
+    public async aggregatorPools(args: QueryAggregatorPoolsArgs): Promise<GqlPoolAggregator[]> {
         const where: Prisma.PrismaPoolWhereInput = {
             id: {
                 in: args.where?.idIn?.map((id) => id.toLowerCase()) || undefined,
@@ -77,55 +85,75 @@ export class PoolAggregatorLoader {
                 : {}),
         };
 
-        const pools = await prisma.prismaPool.findMany({
-            where,
-            include: {
-                dynamicData: true,
-                tokens: {
-                    include: {
-                        token: {
-                            include: {
-                                types: true,
-                            },
-                        },
+        // Get all the tokens for the chain - most likely scenario is client is fetching the chain information
+        console.time('dbTokens');
+        const [dbTokens, dbTypes, erc4626ReviewData] = await Promise.all([
+            prisma.prismaToken.findMany({
+                where: {
+                    ...(args.where?.chainIn ? { chain: { in: args.where?.chainIn } } : {}),
+                },
+            }),
+            prisma.prismaTokenType.findMany({
+                where: {
+                    ...(args.where?.chainIn ? { chain: { in: args.where?.chainIn } } : {}),
+                },
+            }),
+            prisma.prismaErc4626ReviewData.findMany({
+                where: {
+                    chain: {
+                        in: args.where?.chainIn || undefined,
                     },
                 },
-                ...(args.where?.tokensIn
-                    ? {
-                          allTokens: true,
-                      }
-                    : {}),
+            }),
+        ]);
+
+        const typesMap = dbTypes.reduce(
+            (agg, item) => {
+                agg[`${item.chain}-${item.tokenAddress}`] ||= [];
+                agg[`${item.chain}-${item.tokenAddress}`].push(item);
+                return agg;
             },
-        });
+            {} as Record<string, PrismaTokenType[]>,
+        );
 
-        // Get underlying tokens
-        const underlyingAddresses = pools
-            .flatMap((pool) => pool.tokens.flatMap((token) => token.token.underlyingTokenAddress))
-            .filter((address): address is string => !!address);
+        const tokensMap = Object.fromEntries(
+            dbTokens.map((token) => [
+                `${token.chain}-${token.address}`,
+                { ...token, types: typesMap[`${token.chain}-${token.address}`] },
+            ]),
+        );
+        console.timeEnd('dbTokens');
 
-        const underlyingTokens = await prisma.prismaToken.findMany({
-            where: {
-                address: {
-                    in: underlyingAddresses,
+        console.time('dbPools');
+        const pools = await prisma.prismaPool
+            .findMany({
+                where,
+                include: {
+                    dynamicData: true,
+                    tokens: true,
+                    ...(args.where?.tokensIn
+                        ? {
+                              allTokens: true,
+                          }
+                        : {}),
                 },
-            },
-        });
-
-        const underlyingTokensMap = Object.fromEntries(underlyingTokens.map((token) => [token.address, token]));
+            })
+            .then((pools) =>
+                pools.map((pool) => ({
+                    ...pool,
+                    tokens: pool.tokens.map((token) => ({
+                        ...token,
+                        token: tokensMap[`${token.chain}-${token.address}`],
+                    })),
+                })),
+            );
+        console.timeEnd('dbPools');
 
         // Get review data
-        const erc4626ReviewData = await prisma.prismaErc4626ReviewData.findMany({
-            where: {
-                chain: {
-                    in: args.where?.chainIn || undefined,
-                },
-            },
-        });
         const erc4626ReviewDataMap = Object.fromEntries(erc4626ReviewData.map((data) => [data.erc4626Address, data]));
 
-        const gqlPools = pools.map((pool) =>
-            this.mapPoolToAggregatorPool(pool, underlyingTokensMap, erc4626ReviewDataMap),
-        );
+        console.time('poolsMapping');
+        const gqlPools = pools.map((pool) => this.mapPoolToAggregatorPool(pool, tokensMap, erc4626ReviewDataMap));
         const filteredPools = [];
 
         for (const mappedPool of gqlPools) {
@@ -138,15 +166,16 @@ export class PoolAggregatorLoader {
 
             filteredPools.push(mappedPool);
         }
+        console.timeEnd('poolsMapping');
 
         return filteredPools;
     }
 
     private mapPoolToAggregatorPool(
         pool: AggregatorPrismaSchema,
-        underlyingMap: Record<string, PrismaToken>,
+        underlyingMap: Record<string, TokenWithTypes>,
         reviewMap: Record<string, PrismaErc4626ReviewData>,
-    ): GqlAggregatorPool {
+    ): GqlPoolAggregator {
         const { typeData, ...poolWithoutTypeData } = pool;
 
         const hook = (pool.hook as HookData)?.address ? (pool.hook as HookData) : null;
@@ -156,13 +185,74 @@ export class PoolAggregatorLoader {
             decimals: 18,
             swapFee: pool.dynamicData!.swapFee,
             dynamicData: {
+                ...pool.dynamicData,
+                apr: {
+                    apr: {
+                        total: '0',
+                    },
+                    thirdPartyApr: {
+                        total: '0',
+                    },
+                    nativeRewardApr: {
+                        total: '0',
+                    },
+                    swapApr: '0',
+                    hasRewardApr: false,
+                    items: [],
+                },
+                poolId: pool.dynamicData!.poolId,
+                aggregateSwapFee: pool.dynamicData!.aggregateSwapFee,
+                aggregateYieldFee: pool.dynamicData!.aggregateYieldFee,
+                aprItems: [],
+                totalSupply: pool.dynamicData!.totalShares,
+                isInRecoveryMode: pool.dynamicData!.isInRecoveryMode,
+                isPaused: pool.dynamicData!.isPaused,
+                swapEnabled: pool.dynamicData!.swapEnabled,
                 swapFee: pool.dynamicData!.swapFee,
+                totalLiquidity: `${pool.dynamicData!.totalLiquidity}`,
+                totalLiquidity24hAgo: `${pool.dynamicData!.totalLiquidity24hAgo}`,
+                totalShares: pool.dynamicData!.totalShares,
+                totalShares24hAgo: pool.dynamicData!.totalShares24hAgo,
+                swapsCount: '0',
+                lifetimeSwapFees: '0',
+                lifetimeVolume: '0',
+                protocolFees24h: '0',
+                protocolFees48h: '0',
+                surplus24h: '0',
+                surplus48h: '0',
+                volume24h: '0',
+                volume48h: '0',
+                yieldCapture24h: '0',
+                yieldCapture48h: '0',
+                protocolYieldCapture24h: '0',
+                protocolYieldCapture48h: '0',
+                volume24hAth: '0',
+                volume24hAthTimestamp: 0,
+                volume24hAtl: '0',
+                volume24hAtlTimestamp: 0,
+                fees24h: '0',
+                fees48h: '0',
+                holdersCount: '0',
+                fees24hAth: '0',
+                fees24hAthTimestamp: 0,
+                fees24hAtl: '0',
+                fees24hAtlTimestamp: 0,
+                sharePriceAth: '0',
+                sharePriceAthTimestamp: 0,
+                sharePriceAtl: '0',
+                sharePriceAtlTimestamp: 0,
+                totalLiquidityAth: '0',
+                totalLiquidityAthTimestamp: 0,
+                totalLiquidityAtl: '0',
+                totalLiquidityAtlTimestamp: 0,
             },
             poolTokens: pool.tokens.map((token) => {
                 const underlying = token.token.underlyingTokenAddress
-                    ? underlyingMap[token.token.underlyingTokenAddress]
+                    ? underlyingMap[`${token.chain}-${token.token.underlyingTokenAddress}`]
                     : null;
+                const underlyingTypes = underlying?.types?.map((t) => t.type) || [];
                 const review = reviewMap[token.address] || {};
+                const types = token.token.types?.map((t) => t.type) || [];
                 return {
                     address: token.address,
                     name: token.token.name,
@@ -170,7 +260,14 @@ export class PoolAggregatorLoader {
                     decimals: token.token.decimals,
                     balance: token.balance,
                     weight: token.weight,
-                    isErc4626: token.token.types ? token.token.types.some((type) => type.type === 'ERC4626') : false,
+                    isErc4626: token.token.types ? types.includes('ERC4626') : false,
+                    balanceUSD: `${token.balanceUSD}`,
+                    hasNestedPool: token.token.types ? token.address !== pool.address && types.includes('BPT') : false,
+                    index: token.index,
+                    id: token.id,
+                    isAllowed: types.includes('BLOCKED_V2') || types.includes('BLOCKED_V3'),
+                    isBufferAllowed: token.token.isBufferAllowed,
+                    isExemptFromProtocolYieldFee: token.exemptFromProtocolYieldFee,
                     canUseBufferForSwaps: review.canUseBufferForSwaps,
                     useUnderlyingForAddRemove: review.useUnderlyingForAddRemove,
                     useWrappedForAddRemove: review.useWrappedForAddRemove,
@@ -183,6 +280,12 @@ export class PoolAggregatorLoader {
                               name: underlying.name,
                               decimals: underlying.decimals,
                               isBufferAllowed: underlying.isBufferAllowed,
+                              chain: underlying.chain,
+                              chainId: Number(chainToChainId[underlying.chain]),
+                              isErc4626: underlyingTypes?.includes('ERC4626') || false,
+                              tradable:
+                                  underlyingTypes?.includes('BPT') || underlyingTypes?.includes('PHANTOM_BPT') || false,
+                              priority: 0,
                           }
                         : undefined,
                 };
@@ -206,13 +309,11 @@ export class PoolAggregatorLoader {
                 return {
                     ...mappedData,
                     ...(typeData as GyroData), // Deprecated
-                    gyroParams: typeData as GyroData,
                 };
             case 'FX':
                 return {
                     ...mappedData,
                     ...(typeData as FxData), // Deprecated
-                    fxParams: typeData as FxData,
                 };
             case 'QUANT_AMM_WEIGHTED':
                 return {
@@ -223,12 +324,10 @@ export class PoolAggregatorLoader {
                 return {
                     ...mappedData,
                     ...(typeData as ReclammData), // Deprecated
-                    reclammParams: typeData as GqlAggregatorReclammParams,
                 };
             case 'ELEMENT':
                 return {
                     ...mappedData,
-                    elementParams: typeData as ElementData,
                 };
             case 'LIQUIDITY_BOOTSTRAPPING':
                 return {
