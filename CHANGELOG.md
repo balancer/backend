@@ -1,5 +1,11 @@
 # backend
 
+## 1.50.2
+
+### Patch Changes
+
+-   36bdd15: adding missing aave wrapper tokens
+
 ## 1.50.1
 
 ### Patch Changes
