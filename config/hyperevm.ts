@@ -33,7 +33,7 @@ export default <NetworkData>{
     },
     coingecko: {
         nativeAssetId: 'hyperliquid',
-        platformId: 'hyperliquid',
+        platformId: 'hyperevm',
         excludedTokenAddresses: [],
     },
     rpcUrl: env.DRPC_API_KEY

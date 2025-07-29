@@ -1,5 +1,11 @@
 # backend
 
+## 1.50.1
+
+### Patch Changes
+
+-   2f90e21: add wawhype, whlp and lhype aprs
+
 ## 1.50.0
 
 ### Minor Changes
