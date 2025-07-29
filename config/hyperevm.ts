@@ -86,6 +86,12 @@ export default <NetworkData>{
                     path: 'apy',
                     scale: 100,
                 },
+                khype: {
+                    tokenAddress: '0xfd739d4e423301ce9385c1fb8850539d657c296d',
+                    sourceUrl: 'https://api.kinetiq.xyz/v1/public/protocol',
+                    path: 'apy',
+                    scale: 1,
+                },
             },
         },
     },
