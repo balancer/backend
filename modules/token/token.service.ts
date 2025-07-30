@@ -153,7 +153,7 @@ export class TokenService {
             .filter(
                 (token) =>
                     // Always include veBal
-                    token.address === config['MAINNET'].veBal?.bptAddress ||
+                    (token.chain === 'MAINNET' && token.address === config['MAINNET'].veBal?.bptAddress) ||
                     // Exclude BPT tokens
                     !(['BPT', 'PHANTOM_BPT'] as PrismaTokenTypeOption[]).some((type) => token.types.includes(type)),
             )
