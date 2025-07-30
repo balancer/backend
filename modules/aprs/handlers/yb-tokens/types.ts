@@ -68,6 +68,7 @@ export interface YbAprConfig {
     defaultHandlers?: DefaultHandlerAprConfig;
     fixedAprHandler?: FixedAprConfig;
     hypurrfi?: string[];
+    morphoVaultHyperevm?: string[];
 }
 
 export interface AvalonAprConfig {

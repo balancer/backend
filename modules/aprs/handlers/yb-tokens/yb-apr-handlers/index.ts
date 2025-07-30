@@ -27,6 +27,7 @@ const sourceToHandler = {
     susds: sources.SUSDSAprHandler,
     smsusd: sources.Mainstreet,
     hypurrfi: sources.HypurrFi,
+    morphoVaultHyperevm: sources.MorphoHyperevm,
 };
 
 export class YbAprHandlers {
