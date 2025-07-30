@@ -47,7 +47,7 @@ export class HypurrFi implements YbAprHandler {
                 const lendAPY = borrowAPY * (utilization / 100) * (1 - feeToProtocolRateNum);
 
                 allAprs[market.toLowerCase()] = {
-                    apr: lendAPY,
+                    apr: lendAPY / 100,
                     isIbYield,
                 };
             }
