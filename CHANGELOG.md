@@ -1,5 +1,11 @@
 # backend
 
+## 1.50.4
+
+### Patch Changes
+
+-   40272f1: hypurrfi and khype apr
+
 ## 1.50.3
 
 ### Patch Changes
