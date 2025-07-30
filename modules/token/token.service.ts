@@ -118,9 +118,9 @@ export class TokenService {
             where.address = { in: args.where.tokensIn };
         }
 
-        if (args.where?.typeIn) {
-            where.types = { some: { type: { in: args.where.typeIn } } };
-        }
+        // if (args.where?.typeIn) {
+        //     where.types = { some: { type: { in: args.where.typeIn } } };
+        // }
 
         console.time('prismaToken.findMany');
         const [dbTokens, typesMap] = await Promise.all([
@@ -158,6 +158,17 @@ export class TokenService {
                     !(['BPT', 'PHANTOM_BPT'] as PrismaTokenTypeOption[]).some((type) => token.types.includes(type)),
             )
             .filter((token) => types.every((type) => token.types.includes(type)));
+
+        // Use once prisma is setup with relationJoins, otherwise fails
+        // const tokens = await prisma.prismaToken
+        //     .findMany({
+        //         where,
+        //         include: {
+        //             types: true,
+        //         },
+        //         orderBy: { tvl: 'desc' },
+        //     })
+        //     .then((tokens) => tokens.map((token) => ({ ...token, types: token.types.map((type) => type.type) || [] })));
         console.timeEnd('prismaToken.findMany');
 
         for (const chain of chains) {
