@@ -22,3 +22,4 @@ export * from './silo-apr-handler';
 export * as AaveAuto from './aave-auto-apr-handler';
 export * from './mainstreet-apr-handler';
 export * from './hypurrfi-apr-handler';
+export * from './morpho-hyperevm-apr-handler';
