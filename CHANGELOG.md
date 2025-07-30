@@ -1,5 +1,12 @@
 # backend
 
+## 1.50.5
+
+### Patch Changes
+
+-   b1e2efa: morpho hyper evm aprs
+-   e4dc3f3: fix hypurrfi apr, add usdtwhlp isloated apr
+
 ## 1.50.4
 
 ### Patch Changes
