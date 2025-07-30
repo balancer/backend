@@ -1708,6 +1708,304 @@ export enum SingleRecipientGauge_OrderBy {
     relativeWeightCap = 'relativeWeightCap',
 }
 
+export type Subscription = {
+    __typename?: 'Subscription';
+    /** Access to subgraph metadata */
+    _meta?: Maybe<_Meta_>;
+    gauge?: Maybe<Gauge>;
+    gaugeFactories: Array<GaugeFactory>;
+    gaugeFactory?: Maybe<GaugeFactory>;
+    gaugeInjector?: Maybe<GaugeInjector>;
+    gaugeInjectors: Array<GaugeInjector>;
+    gaugeShare?: Maybe<GaugeShare>;
+    gaugeShares: Array<GaugeShare>;
+    gaugeType?: Maybe<GaugeType>;
+    gaugeTypes: Array<GaugeType>;
+    gaugeVote?: Maybe<GaugeVote>;
+    gaugeVotes: Array<GaugeVote>;
+    gauges: Array<Gauge>;
+    liquidityGauge?: Maybe<LiquidityGauge>;
+    liquidityGauges: Array<LiquidityGauge>;
+    lockSnapshot?: Maybe<LockSnapshot>;
+    lockSnapshots: Array<LockSnapshot>;
+    omniVotingEscrowLock?: Maybe<OmniVotingEscrowLock>;
+    omniVotingEscrowLocks: Array<OmniVotingEscrowLock>;
+    pool?: Maybe<Pool>;
+    pools: Array<Pool>;
+    rewardToken?: Maybe<RewardToken>;
+    rewardTokens: Array<RewardToken>;
+    rootGauge?: Maybe<RootGauge>;
+    rootGauges: Array<RootGauge>;
+    singleRecipientGauge?: Maybe<SingleRecipientGauge>;
+    singleRecipientGauges: Array<SingleRecipientGauge>;
+    user?: Maybe<User>;
+    users: Array<User>;
+    votingEscrow?: Maybe<VotingEscrow>;
+    votingEscrowLock?: Maybe<VotingEscrowLock>;
+    votingEscrowLocks: Array<VotingEscrowLock>;
+    votingEscrows: Array<VotingEscrow>;
+};
+
+export type Subscription_MetaArgs = {
+    block?: InputMaybe<Block_Height>;
+};
+
+export type SubscriptionGaugeArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type SubscriptionGaugeFactoriesArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<GaugeFactory_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<GaugeFactory_Filter>;
+};
+
+export type SubscriptionGaugeFactoryArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type SubscriptionGaugeInjectorArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type SubscriptionGaugeInjectorsArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<GaugeInjector_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<GaugeInjector_Filter>;
+};
+
+export type SubscriptionGaugeShareArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type SubscriptionGaugeSharesArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<GaugeShare_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<GaugeShare_Filter>;
+};
+
+export type SubscriptionGaugeTypeArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type SubscriptionGaugeTypesArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<GaugeType_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<GaugeType_Filter>;
+};
+
+export type SubscriptionGaugeVoteArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type SubscriptionGaugeVotesArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<GaugeVote_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<GaugeVote_Filter>;
+};
+
+export type SubscriptionGaugesArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<Gauge_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<Gauge_Filter>;
+};
+
+export type SubscriptionLiquidityGaugeArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type SubscriptionLiquidityGaugesArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<LiquidityGauge_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<LiquidityGauge_Filter>;
+};
+
+export type SubscriptionLockSnapshotArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type SubscriptionLockSnapshotsArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<LockSnapshot_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<LockSnapshot_Filter>;
+};
+
+export type SubscriptionOmniVotingEscrowLockArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type SubscriptionOmniVotingEscrowLocksArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<OmniVotingEscrowLock_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<OmniVotingEscrowLock_Filter>;
+};
+
+export type SubscriptionPoolArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type SubscriptionPoolsArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<Pool_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<Pool_Filter>;
+};
+
+export type SubscriptionRewardTokenArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type SubscriptionRewardTokensArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<RewardToken_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<RewardToken_Filter>;
+};
+
+export type SubscriptionRootGaugeArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type SubscriptionRootGaugesArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<RootGauge_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<RootGauge_Filter>;
+};
+
+export type SubscriptionSingleRecipientGaugeArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type SubscriptionSingleRecipientGaugesArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<SingleRecipientGauge_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<SingleRecipientGauge_Filter>;
+};
+
+export type SubscriptionUserArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type SubscriptionUsersArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<User_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<User_Filter>;
+};
+
+export type SubscriptionVotingEscrowArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type SubscriptionVotingEscrowLockArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type SubscriptionVotingEscrowLocksArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<VotingEscrowLock_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<VotingEscrowLock_Filter>;
+};
+
+export type SubscriptionVotingEscrowsArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<VotingEscrow_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<VotingEscrow_Filter>;
+};
+
 export type User = {
     __typename?: 'User';
     /**  List of gauge the user has shares  */

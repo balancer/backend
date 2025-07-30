@@ -93,6 +93,10 @@ export default <NetworkData>{
                     scale: 1,
                 },
             },
+            hypurrfi: [
+                '0x1c5164a764844356d57654ea83f9f1b72cd10db5', // hyUSD₮0-lhype
+                '0x2c910f67dbf81099e6f8e126e7265d7595dc20ad', // hyUSD₮0-hwHLP)
+            ],
         },
     },
     multicall: '0xca11bde05977b3631167028862be2a173976ca11',

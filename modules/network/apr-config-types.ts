@@ -44,6 +44,10 @@ export interface YbAprConfig {
         defillamaPoolId: string;
         tokenAddress: string;
     }[];
+    hypurrfi?: string[];
+    morphoHyperevm?: {
+        vault: string;
+    };
     defaultHandlers?: DefaultHandlerAprConfig;
     fixedAprHandler?: FixedAprConfig;
 }

@@ -26,6 +26,7 @@ const sourceToHandler = {
     silo: sources.SiloAprHandler,
     susds: sources.SUSDSAprHandler,
     smsusd: sources.Mainstreet,
+    hypurrfi: sources.HypurrFi,
 };
 
 export class YbAprHandlers {
