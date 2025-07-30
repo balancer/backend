@@ -45,9 +45,7 @@ export interface YbAprConfig {
         tokenAddress: string;
     }[];
     hypurrfi?: string[];
-    morphoHyperevm?: {
-        vault: string;
-    };
+    morphoVaultHyperevm?: string[];
     defaultHandlers?: DefaultHandlerAprConfig;
     fixedAprHandler?: FixedAprConfig;
 }

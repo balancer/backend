@@ -12,6 +12,7 @@ export class YbTokensAprHandler implements AprHandler {
     private ybTokensAprHandlers: YbAprHandlers;
 
     constructor(private aprConfig: YbAprConfig, chain: Chain) {
+        console.log('YbTokensAprHandler initialized with config:', aprConfig);
         this.ybTokensAprHandlers = new YbAprHandlers(this.aprConfig, chain);
     }
 

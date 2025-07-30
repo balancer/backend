@@ -72,6 +72,12 @@ export default <NetworkData>{
                     path: '0x5555555555555555555555555555555555555555.supplyAPR',
                     scale: 100,
                 },
+                usdtwhlp: {
+                    tokenAddress: '0x06fd9d03b3d0f18e4919919b72d30c582f0a97e5',
+                    sourceUrl: 'https://api.hyperlend.finance/data/markets/rates',
+                    path: '0x06Fd9D03b3d0F18E4919919b72D30c582f0a97E5.supplyAPR',
+                    scale: 100,
+                },
                 whlp: {
                     tokenAddress: '0x1359b05241ca5076c9f59605214f4f84114c0de8',
                     sourceUrl:
@@ -95,7 +101,17 @@ export default <NetworkData>{
             },
             hypurrfi: [
                 '0x1c5164a764844356d57654ea83f9f1b72cd10db5', // hyUSD₮0-lhype
-                '0x2c910f67dbf81099e6f8e126e7265d7595dc20ad', // hyUSD₮0-hwHLP)
+                '0x2c910f67dbf81099e6f8e126e7265d7595dc20ad', // hyUSD₮0-hwHLP
+            ],
+            morphoVaultHyperevm: [
+                '0xfc5126377f0efc0041c0969ef9ba903ce67d151e', // feUSDT0
+                '0x9c59a9389d8f72de2cdaf1126f36ea4790e2275e', // feUSDhl
+                '0x5eec795d919fa97688fb9844eeb0072e6b846f9d', // gtUSDe
+                '0xd3a9cb7312b9c29113290758f5adfe12304cd16a', // mcUSR
+                '0x3bcc0a5a66bb5bdceef5dd8a659a4ec75f3834d8', // mcUSDT
+                '0xd19e3d00f8547f7d108abfd4bbb015486437b487', // mcHYPE
+                '0x53a333e51e96fe288bc9add7cdc4b1ead2cd2ffa', // gtUSDT0
+                '0x0571362ba5ea9784a97605f57483f865a37dbeaa', // gtuETH
             ],
         },
     },
