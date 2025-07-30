@@ -56,6 +56,7 @@ export interface YbAprConfig {
         defillamaPoolId: string;
         tokenAddress: string;
     }[];
+    hypurrfi?: string[];
     defaultHandlers?: DefaultHandlerAprConfig;
     fixedAprHandler?: FixedAprConfig;
 }

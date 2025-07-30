@@ -67,6 +67,7 @@ export interface YbAprConfig {
     }[];
     defaultHandlers?: DefaultHandlerAprConfig;
     fixedAprHandler?: FixedAprConfig;
+    hypurrfi?: string[];
 }
 
 export interface AvalonAprConfig {

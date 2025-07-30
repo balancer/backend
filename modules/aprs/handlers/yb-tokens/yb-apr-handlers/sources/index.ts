@@ -21,3 +21,4 @@ export * as MakerGnosis from './maker-gnosis-apr-handler'; // Not used, not sure
 export * from './silo-apr-handler';
 export * as AaveAuto from './aave-auto-apr-handler';
 export * from './mainstreet-apr-handler';
+export * from './hypurrfi-apr-handler';
