@@ -72,6 +72,12 @@ export default <NetworkData>{
                     path: '0x5555555555555555555555555555555555555555.supplyAPR',
                     scale: 100,
                 },
+                usdtwhlp: {
+                    tokenAddress: '0x06fd9d03b3d0f18e4919919b72d30c582f0a97e5',
+                    sourceUrl: 'https://api.hyperlend.finance/data/markets/rates',
+                    path: '0x06Fd9D03b3d0F18E4919919b72D30c582f0a97E5.supplyAPR',
+                    scale: 100,
+                },
                 whlp: {
                     tokenAddress: '0x1359b05241ca5076c9f59605214f4f84114c0de8',
                     sourceUrl:
@@ -95,7 +101,7 @@ export default <NetworkData>{
             },
             hypurrfi: [
                 '0x1c5164a764844356d57654ea83f9f1b72cd10db5', // hyUSD₮0-lhype
-                '0x2c910f67dbf81099e6f8e126e7265d7595dc20ad', // hyUSD₮0-hwHLP)
+                '0x2c910f67dbf81099e6f8e126e7265d7595dc20ad', // hyUSD₮0-hwHLP
             ],
         },
     },
