@@ -13,9 +13,6 @@ import {
     QuantAmmController,
 } from '../modules/controllers';
 import { chainIdToChain } from '../modules/network/chain-id-to-chain';
-
-import { poolService } from '../modules/pool/pool.service';
-import { initRequestScopedContext, setRequestScopedContextValue } from '../modules/context/request-scoped-context';
 import { tokenService } from '../modules/token/token.service';
 import { VeBalVotingListService } from '../modules/vebal/vebal-voting-list.service';
 import { Chain, PrismaLastBlockSyncedCategory } from '@prisma/client';
@@ -24,15 +21,8 @@ import { prisma } from '../prisma/prisma-client';
 import { LBPController } from '../modules/controllers/lbp-controller';
 import { request, gql } from 'graphql-request';
 import _ from 'lodash';
-import { AprRepository } from '../modules/aprs/apr-repository';
-import { MerklAprHandler } from '../modules/aprs/handlers';
-import { SurplusSwapFeeAprHandler, SwapFeeApr7d30dHandler } from '../modules/aprs/handlers/swap-fee-apr';
 import { AprService } from '../modules/aprs';
 import { PricingService } from '../modules/pricing';
-
-// TODO needed?
-const sftmxController = SftmxController();
-const snapshotsController = SnapshotsController();
 
 /**
  * Used to run jobs or mutations locally from the command line
@@ -109,15 +99,15 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
     } else if (job === 'sync-swaps-v2') {
         return EventController().syncSwapsUpdateVolumeAndFeesV2(chain);
     } else if (job === 'sync-snapshots-v2') {
-        return snapshotsController.syncSnapshotsV2(chain);
+        return SnapshotsController().syncSnapshotsV2(chain);
     } else if (job === 'fill-missing-snapshots-v2') {
-        return snapshotsController.fillMissingSnapshotsV2(chain);
+        return SnapshotsController().fillMissingSnapshotsV2(chain);
     } else if (job === 'sync-snapshots-v3') {
-        return snapshotsController.syncSnapshotsV3(chain);
+        return SnapshotsController().syncSnapshotsV3(chain);
     } else if (job === 'sync-all-snapshots-v3') {
-        return snapshotsController.syncAllSnapshotsV3(chain);
+        return SnapshotsController().syncAllSnapshotsV3(chain);
     } else if (job === 'forward-fill-snapshots-v3') {
-        return snapshotsController.forwardFillSnapshotsForPoolsWithoutUpdatesV3(chain);
+        return SnapshotsController().forwardFillSnapshotsForPoolsWithoutUpdatesV3(chain);
     } else if (job === 'sync-swaps-v3') {
         return EventController().syncSwapsV3(chain);
     } else if (job === 'update-volume-and-fees') {
@@ -125,11 +115,11 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
     } else if (job === 'update-liquidity-24h-ago-v3') {
         return PoolController().updateLiquidity24hAgoV3(chain);
     } else if (job === 'sync-sftmx-staking') {
-        return sftmxController.syncSftmxStakingData(chain);
+        return SftmxController().syncSftmxStakingData(chain);
     } else if (job === 'sync-sftmx-withdrawal') {
-        return sftmxController.syncSftmxWithdrawalrequests(chain);
+        return SftmxController().syncSftmxWithdrawalrequests(chain);
     } else if (job === 'sync-sftmx-staking-snapshots') {
-        return sftmxController.syncSftmxStakingSnapshots(chain);
+        return SftmxController().syncSftmxStakingSnapshots(chain);
     } else if (job === 'sync-bpt-balances') {
         return UserBalancesController().syncBalances(chain);
     } else if (job === 'sync-user-balances-v2') {

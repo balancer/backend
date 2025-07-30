@@ -704,6 +704,124 @@ export enum Rewarder_OrderBy {
     Timestamp = 'timestamp',
 }
 
+export type Subscription = {
+    __typename?: 'Subscription';
+    /** Access to subgraph metadata */
+    _meta?: Maybe<_Meta_>;
+    harvestAction?: Maybe<HarvestAction>;
+    harvestActions: Array<HarvestAction>;
+    masterChef?: Maybe<MasterChef>;
+    masterChefs: Array<MasterChef>;
+    pool?: Maybe<Pool>;
+    pools: Array<Pool>;
+    rewardToken?: Maybe<RewardToken>;
+    rewardTokens: Array<RewardToken>;
+    rewarder?: Maybe<Rewarder>;
+    rewarders: Array<Rewarder>;
+    user?: Maybe<User>;
+    users: Array<User>;
+};
+
+export type Subscription_MetaArgs = {
+    block?: InputMaybe<Block_Height>;
+};
+
+export type SubscriptionHarvestActionArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type SubscriptionHarvestActionsArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<HarvestAction_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<HarvestAction_Filter>;
+};
+
+export type SubscriptionMasterChefArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type SubscriptionMasterChefsArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<MasterChef_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<MasterChef_Filter>;
+};
+
+export type SubscriptionPoolArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type SubscriptionPoolsArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<Pool_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<Pool_Filter>;
+};
+
+export type SubscriptionRewardTokenArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type SubscriptionRewardTokensArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<RewardToken_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<RewardToken_Filter>;
+};
+
+export type SubscriptionRewarderArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type SubscriptionRewardersArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<Rewarder_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<Rewarder_Filter>;
+};
+
+export type SubscriptionUserArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type SubscriptionUsersArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<User_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<User_Filter>;
+};
+
 export type User = {
     __typename?: 'User';
     address: Scalars['Bytes'];
