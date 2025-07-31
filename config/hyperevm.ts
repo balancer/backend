@@ -66,7 +66,7 @@ export default <NetworkData>{
                     path: 'data.stats.siusd.lastWeekAPY',
                     scale: 1,
                 },
-                wawhype: {
+                hlhype: {
                     tokenAddress: '0xd704254eb350e0d3baecd194d095862267897ae0',
                     sourceUrl: 'https://api.hyperlend.finance/data/markets/rates',
                     path: '0x5555555555555555555555555555555555555555.supplyAPR',
@@ -97,6 +97,13 @@ export default <NetworkData>{
                     sourceUrl: 'https://api.kinetiq.xyz/v1/public/protocol',
                     path: 'apy',
                     scale: 1,
+                },
+                hwhlp: {
+                    tokenAddress: '0x9fd7466f987fd4c45a5bbde22ed8aba5bc8d72d1',
+                    sourceUrl:
+                        'https://api.hyperwavefi.xyz/stats?asset=hwhlp_999_dash&start_date=2025-07-31&end_date=2025-07-31',
+                    path: 'data[0].apr_7d',
+                    scale: 100,
                 },
             },
             hypurrfi: [
