@@ -1,5 +1,11 @@
 # backend
 
+## 1.50.6
+
+### Patch Changes
+
+-   8daaeac: SOR - Enforce token sorting by index
+
 ## 1.50.5
 
 ### Patch Changes
