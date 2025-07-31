@@ -170,7 +170,7 @@ export class LiquidityBootstrappingPoolV3 extends BasePoolV3 implements BasePool
             liquidityManagement,
             hookState,
         );
-        this.tokens = tokens;
+        this.tokens = tokens.sort((a, b) => a.index - b.index);
         this.tokenMap = new Map(tokens.map((token) => [token.token.address, token]));
 
         // add BPT to tokenMap, so we can handle add/remove liquidity operations
