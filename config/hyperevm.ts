@@ -98,13 +98,6 @@ export default <NetworkData>{
                     path: 'apy',
                     scale: 1,
                 },
-                hwhlp: {
-                    tokenAddress: '0x9fd7466f987fd4c45a5bbde22ed8aba5bc8d72d1',
-                    sourceUrl:
-                        'https://api.hyperwavefi.xyz/stats?asset=hwhlp_999_dash&start_date=2025-07-31&end_date=2025-07-31',
-                    path: 'data[0].apr_7d',
-                    scale: 100,
-                },
             },
             hypurrfi: [
                 '0x1c5164a764844356d57654ea83f9f1b72cd10db5', // hyUSD₮0-lhype
@@ -119,6 +112,12 @@ export default <NetworkData>{
                 '0xd19e3d00f8547f7d108abfd4bbb015486437b487', // mcHYPE
                 '0x53a333e51e96fe288bc9add7cdc4b1ead2cd2ffa', // gtUSDT0
                 '0x0571362ba5ea9784a97605f57483f865a37dbeaa', // gtuETH
+            ],
+            defillama: [
+                {
+                    defillamaPoolId: 'a8a2a14b-2345-4666-adab-227c991c4837',
+                    tokenAddress: '0x9fd7466f987fd4c45a5bbde22ed8aba5bc8d72d1',
+                },
             ],
         },
     },
