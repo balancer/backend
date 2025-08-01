@@ -66,7 +66,7 @@ export default <NetworkData>{
                     path: 'data.stats.siusd.lastWeekAPY',
                     scale: 1,
                 },
-                wawhype: {
+                hlhype: {
                     tokenAddress: '0xd704254eb350e0d3baecd194d095862267897ae0',
                     sourceUrl: 'https://api.hyperlend.finance/data/markets/rates',
                     path: '0x5555555555555555555555555555555555555555.supplyAPR',
@@ -112,6 +112,12 @@ export default <NetworkData>{
                 '0xd19e3d00f8547f7d108abfd4bbb015486437b487', // mcHYPE
                 '0x53a333e51e96fe288bc9add7cdc4b1ead2cd2ffa', // gtUSDT0
                 '0x0571362ba5ea9784a97605f57483f865a37dbeaa', // gtuETH
+            ],
+            defillama: [
+                {
+                    defillamaPoolId: 'a8a2a14b-2345-4666-adab-227c991c4837',
+                    tokenAddress: '0x9fd7466f987fd4c45a5bbde22ed8aba5bc8d72d1',
+                },
             ],
         },
     },
