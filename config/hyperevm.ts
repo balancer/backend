@@ -112,6 +112,7 @@ export default <NetworkData>{
                 '0xd19e3d00f8547f7d108abfd4bbb015486437b487', // mcHYPE
                 '0x53a333e51e96fe288bc9add7cdc4b1ead2cd2ffa', // gtUSDT0
                 '0x0571362ba5ea9784a97605f57483f865a37dbeaa', // gtuETH
+                '0x81e064d0eb539de7c3170edf38c1a42cbd752a76', // lstHYPE
             ],
             defillama: [
                 {
