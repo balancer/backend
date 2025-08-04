@@ -118,20 +118,57 @@ export class TokenService {
             where.address = { in: args.where.tokensIn };
         }
 
-        if (args.where?.typeIn) {
-            where.types = { some: { type: { in: args.where.typeIn } } };
-        }
-
-        const tokens = (
-            await prisma.prismaToken.findMany({
+        console.time('prismaToken.findMany');
+        const [dbTokens, typesMap] = await Promise.all([
+            prisma.prismaToken.findMany({
                 where,
-                include: { types: true },
                 orderBy: { tvl: 'desc' },
-            })
-        ).filter((token) => {
-            const tokenTypes = token.types.map((t) => t.type);
-            return types.every((type) => tokenTypes.includes(type));
-        });
+            }),
+            prisma.prismaTokenType
+                .findMany({
+                    where: {
+                        chain: {
+                            in: chains,
+                        },
+                    },
+                })
+                .then((types) =>
+                    types.reduce(
+                        (agg, item) => {
+                            agg[`${item.chain}-${item.tokenAddress}`] ||= [];
+                            agg[`${item.chain}-${item.tokenAddress}`].push(item.type);
+                            return agg;
+                        },
+                        {} as Record<string, PrismaTokenTypeOption[]>,
+                    ),
+                ),
+        ]);
+
+        const tokens = dbTokens
+            .map((token) => ({ ...token, types: typesMap[`${token.chain}-${token.address}`] || [] }))
+            .filter(
+                (token) =>
+                    // Always include veBal
+                    (token.chain === 'MAINNET' && token.address === config['MAINNET'].veBal?.bptAddress) ||
+                    // Exclude BPT tokens
+                    !(['BPT', 'PHANTOM_BPT'] as PrismaTokenTypeOption[]).some((type) => token.types.includes(type)),
+            )
+            .filter((token) => types.every((type) => token.types.includes(type)));
+
+        // Use once prisma is setup with relationJoins, otherwise fails with too many bindings
+        // if (args.where?.typeIn) {
+        //     where.types = { some: { type: { in: args.where.typeIn } } };
+        // }
+        // const tokens = await prisma.prismaToken
+        //     .findMany({
+        //         where,
+        //         include: {
+        //             types: true,
+        //         },
+        //         orderBy: { tvl: 'desc' },
+        //     })
+        //     .then((tokens) => tokens.map((token) => ({ ...token, types: token.types.map((type) => type.type) || [] })));
+        console.timeEnd('prismaToken.findMany');
 
         for (const chain of chains) {
             const weth = tokens.find((token) => token.chain === chain && token.address === config[chain].weth.address);
@@ -147,19 +184,22 @@ export class TokenService {
             }
         }
 
-        const rateProviderData = await this.getPriceRateProviderData(tokens);
+        console.time('getPriceRateProviderData');
+        const rateProviderData = await this.getPriceRateProviderData(tokens, chains);
+        console.timeEnd('getPriceRateProviderData');
 
+        console.time('getErc4626Data');
         const erc4626Data = await this.getErc4626Data(tokens);
+        console.timeEnd('getErc4626Data');
 
         return tokens.map((token) => ({
             ...token,
-            types: token.types.map((type) => type.type),
             chainId: config[token.chain].chain.id,
-            tradable: !token.types.find((type) => type.type === 'PHANTOM_BPT' || type.type === 'BPT'),
+            tradable: !token.types.find((type) => type === 'PHANTOM_BPT' || type === 'BPT'),
             rateProviderData: rateProviderData[token.address],
             priceRateProviderData: rateProviderData[token.address],
             coingeckoId: token.coingeckoTokenId,
-            isErc4626: token.types.some((type) => type.type === 'ERC4626'),
+            isErc4626: token.types.some((type) => type === 'ERC4626'),
             underlyingTokenAddress: token.underlyingTokenAddress,
             erc4626ReviewData: erc4626Data[`${token.address}-${token.chain}`],
         }));
@@ -167,12 +207,24 @@ export class TokenService {
 
     private async getPriceRateProviderData(
         tokens: PrismaToken[],
+        chains?: Chain[],
     ): Promise<Record<string, GqlPriceRateProviderData | undefined>> {
         const priceRateProviders = await prisma.prismaPriceRateProviderData.findMany({
             where: {
-                tokenAddress: {
-                    in: tokens.map((t) => t.address),
-                },
+                ...(tokens.length < 20
+                    ? {
+                          tokenAddress: {
+                              in: tokens.map((t) => t.address),
+                          },
+                      }
+                    : {}),
+                ...(chains
+                    ? {
+                          chain: {
+                              in: chains,
+                          },
+                      }
+                    : {}),
             },
         });
 
