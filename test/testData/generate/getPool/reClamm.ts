@@ -1,5 +1,5 @@
 import { type PublicClient, createPublicClient, http, type Address, type Chain } from 'viem';
-import { CHAINS, VAULT_V3, vaultExtensionAbi_V3 } from '@balancer/sdk';
+import { CHAINS, AddressProvider, vaultExtensionAbi_V3 } from '@balancer/sdk';
 
 import { TransformBigintToString } from '../../types';
 import { vaultExplorerAbi } from '../abi/vaultExplorer';
@@ -37,7 +37,7 @@ export class ReClammPool {
             transport: http(this.rpcUrl),
             chain: CHAINS[this.chainId] as Chain,
         });
-        this.vault = VAULT_V3[this.chainId];
+        this.vault = AddressProvider.Vault(this.chainId);
     }
 
     async fetchImmutableData(

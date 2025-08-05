@@ -1,5 +1,5 @@
 import { type PublicClient, createPublicClient, http, type Address, type Chain, erc4626Abi, erc20Abi } from 'viem';
-import { CHAINS, VAULT_V3 } from '@balancer/sdk';
+import { AddressProvider, CHAINS } from '@balancer/sdk';
 
 import { TransformBigintToString } from '../../types';
 
@@ -21,7 +21,7 @@ export class BufferPool {
             transport: http(this.rpcUrl),
             chain: CHAINS[this.chainId] as Chain,
         });
-        this.vault = VAULT_V3[this.chainId];
+        this.vault = AddressProvider.Vault(this.chainId);
     }
 
     async fetchImmutableData(address: Address, blockNumber: bigint): Promise<TransformBigintToString<BufferImmutable>> {

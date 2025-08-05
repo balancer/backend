@@ -1,6 +1,6 @@
-import type { Address } from 'viem';
+import type { Address, Chain } from 'viem';
 import { createPublicClient, http, zeroAddress } from 'viem';
-import { CHAINS, isSameAddress, VAULT_V3, vaultExtensionAbi_V3 } from '@balancer/sdk';
+import { AddressProvider, CHAINS, isSameAddress, vaultExtensionAbi_V3 } from '@balancer/sdk';
 
 import type { PoolBase, TestBase } from '../../types';
 import { WeightedPool } from './weightedPool';
@@ -64,10 +64,10 @@ async function fetchHookAddress(
     if (poolType !== 'Buffer') {
         const publicClient = createPublicClient({
             transport: http(rpcUrl),
-            chain: CHAINS[chainId],
+            chain: CHAINS[chainId] as Chain,
         });
         ({ hooksContract } = await publicClient.readContract({
-            address: VAULT_V3[chainId],
+            address: AddressProvider.Vault(chainId),
             abi: vaultExtensionAbi_V3,
             functionName: 'getHooksConfig',
             args: [poolAddress],
