@@ -150,6 +150,8 @@ export class TokenService {
                 (token) =>
                     // Always include veBal
                     (token.chain === 'MAINNET' && token.address === config['MAINNET'].veBal?.bptAddress) ||
+                    // Always include WHITE_LISTED
+                    token.types.includes('WHITE_LISTED') ||
                     // Exclude BPT tokens
                     !(['BPT', 'PHANTOM_BPT'] as PrismaTokenTypeOption[]).some((type) => token.types.includes(type)),
             )
