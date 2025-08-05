@@ -1,0 +1,145 @@
+{
+    "test": {
+        "chainId": "999",
+        "blockNumber": "10336733"
+    },
+    "swapPath": {
+        "swapKind": 0,
+        "paths": [
+            {
+                "amountRaw": "1000000000000000000",
+                "tokens": [
+                    "0x0ad339d66bf4aed5ce31c64bc37b3244b6394a77",
+                    "0xd3a9cb7312b9c29113290758f5adfe12304cd16a",
+                    "0x3bcc0a5a66bb5bdceef5dd8a659a4ec75f3834d8",
+                    "0xb8ce59fc3717ada4c02eadf9682a9e934f625ebb",
+                    "0x9fd7466f987fd4c45a5bbde22ed8aba5bc8d72d1"
+                ],
+                "pools": [
+                    {
+                        "poolAddress": "0xd3a9cb7312b9c29113290758f5adfe12304cd16a",
+                        "poolType": "Buffer"
+                    },
+                    {
+                        "poolAddress": "0x8207c7541ce31b38dbd46890f2a832cf1ef7c512",
+                        "poolType": "STABLE"
+                    },
+                    {
+                        "poolAddress": "0x3bcc0a5a66bb5bdceef5dd8a659a4ec75f3834d8",
+                        "poolType": "Buffer"
+                    },
+                    {
+                        "poolAddress": "0x9eed7d6914cc0d00139e99aec0cd60b02ba8c07e",
+                        "poolType": "GYROE"
+                    }
+                ],
+                "calculatedAmountRaw": "986490"
+            }
+        ]
+    },
+    "pools": [
+        {
+            "chainId": "999",
+            "blockNumber": "10336733",
+            "poolType": "Buffer",
+            "poolAddress": "0xd3a9cb7312b9c29113290758f5adfe12304cd16a",
+            "tokens": [
+                "0xd3a9cb7312b9c29113290758f5adfe12304cd16a",
+                "0x0aD339d66BF4AeD5ce31c64Bc37B3244b6394A77"
+            ],
+            "decimals": [
+                18,
+                18
+            ],
+            "rate": "1002589541025269226"
+        },
+        {
+            "chainId": "999",
+            "blockNumber": "10336733",
+            "poolType": "STABLE",
+            "poolAddress": "0x8207c7541ce31b38dbd46890f2a832cf1ef7c512",
+            "hook": {
+                "address": "0x5dbad78818d4c8958eff2d5b95b28385a22113cd",
+                "type": "STABLE_SURGE",
+                "dynamicData": {
+                    "surgeThresholdPercentage": "600000000000000000",
+                    "maxSurgeFeePercentage": "70000000000000000"
+                }
+            },
+            "tokens": [
+                "0x3Bcc0a5a66bB5BdCEEf5dd8a659a4eC75F3834d8",
+                "0xD3A9Cb7312B9c29113290758f5ADFe12304cd16A"
+            ],
+            "scalingFactors": [
+                "1",
+                "1"
+            ],
+            "swapFee": "50000000000000",
+            "totalSupply": "946726297636819564792118",
+            "balancesLiveScaled18": [
+                "476526763084772446010982",
+                "471936443937686004309876"
+            ],
+            "tokenRates": [
+                "1001976760104743673",
+                "1002589541025269226"
+            ],
+            "amp": "500000",
+            "aggregateSwapFee": "500000000000000000"
+        },
+        {
+            "chainId": "999",
+            "blockNumber": "10336733",
+            "poolType": "Buffer",
+            "poolAddress": "0x3bcc0a5a66bb5bdceef5dd8a659a4ec75f3834d8",
+            "tokens": [
+                "0x3bcc0a5a66bb5bdceef5dd8a659a4ec75f3834d8",
+                "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb"
+            ],
+            "decimals": [
+                18,
+                6
+            ],
+            "rate": "1001976"
+        },
+        {
+            "chainId": "999",
+            "blockNumber": "10336733",
+            "poolType": "GYROE",
+            "poolAddress": "0x9eed7d6914cc0d00139e99aec0cd60b02ba8c07e",
+            "tokens": [
+                "0x9FD7466f987Fd4C45a5BBDe22ED8aba5BC8D72d1",
+                "0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb"
+            ],
+            "scalingFactors": [
+                "1000000000000",
+                "1000000000000"
+            ],
+            "paramsAlpha": "995000000000000000",
+            "paramsBeta": "1005000000000000000",
+            "paramsC": "707106781186547524",
+            "paramsS": "707106781186547524",
+            "paramsLambda": "200000000000000000000",
+            "tauAlphaX": "-44810959017656472591193947977930244027",
+            "tauAlphaY": "89397863240224662819431926215970836833",
+            "tauBetaX": "44632073132243274056784811864189405724",
+            "tauBetaY": "89487306630147764483853547787699758476",
+            "u": "44721516074949873273285955599929647501",
+            "v": "89442584935186213550236395393311118445",
+            "w": "44721694961550832160107158729024917",
+            "z": "-89442942706599267103161309635311660",
+            "dSq": "99999999999999999886624093342106115200",
+            "swapFee": "50000000000000",
+            "totalSupply": "3185867727188018526",
+            "balancesLiveScaled18": [
+                "257158665448272000000",
+                "143195759000000000000"
+            ],
+            "tokenRates": [
+                "1014909000000000000",
+                "1000000000000000000"
+            ],
+            "aggregateSwapFee": "500000000000000000"
+        }
+    ]
+}

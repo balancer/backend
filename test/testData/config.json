@@ -525,6 +525,44 @@
                     }
                 ]
             }
+        },
+        {
+            "testName": "Path-2-Buffers-In-Path",
+            "chainId": "999",
+            "blockNumber": "10336733",
+            "swapPathInput": {
+                "swapKind": 0,
+                "paths": [
+                    {
+                        "amountRaw": "1000000000000000000",
+                        "tokens": [
+                            "0x0ad339d66bf4aed5ce31c64bc37b3244b6394a77",
+                            "0xd3a9cb7312b9c29113290758f5adfe12304cd16a",
+                            "0x3bcc0a5a66bb5bdceef5dd8a659a4ec75f3834d8",
+                            "0xb8ce59fc3717ada4c02eadf9682a9e934f625ebb",
+                            "0x9fd7466f987fd4c45a5bbde22ed8aba5bc8d72d1"
+                        ],
+                        "pools": [
+                            {
+                                "poolAddress": "0xd3a9cb7312b9c29113290758f5adfe12304cd16a",
+                                "poolType": "Buffer"
+                            },
+                            {
+                                "poolAddress": "0x8207c7541ce31b38dbd46890f2a832cf1ef7c512",
+                                "poolType": "STABLE"
+                            },
+                            {
+                                "poolAddress": "0x3bcc0a5a66bb5bdceef5dd8a659a4ec75f3834d8",
+                                "poolType": "Buffer"
+                            },
+                            {
+                                "poolAddress": "0x9eed7d6914cc0d00139e99aec0cd60b02ba8c07e",
+                                "poolType": "GYROE"
+                            }
+                        ]
+                    }
+                ]
+            }
         }
     ]
 }
