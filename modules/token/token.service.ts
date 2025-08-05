@@ -153,7 +153,9 @@ export class TokenService {
                     // Always include WHITE_LISTED
                     token.types.includes('WHITE_LISTED') ||
                     // Exclude BPT tokens
-                    !(['BPT', 'PHANTOM_BPT'] as PrismaTokenTypeOption[]).some((type) => token.types.includes(type)),
+                    (!(['BPT', 'PHANTOM_BPT'] as PrismaTokenTypeOption[]).some((type) => token.types.includes(type)) &&
+                        // Exclude Circles
+                        !(token.chain === 'GNOSIS' && token.name.startsWith('Circles-'))),
             )
             .filter((token) => types.every((type) => token.types.includes(type)));
 
