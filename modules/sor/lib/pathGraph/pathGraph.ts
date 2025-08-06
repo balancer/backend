@@ -70,11 +70,14 @@ export class PathGraph {
         swapKind: SwapKind;
         graphTraversalConfig?: Partial<PathGraphTraversalConfig>;
     }): PathLocal[] {
+        const isHyperEvm = tokenIn.chainId === 999;
+
         // apply defaults, allowing caller override whatever they'd like
         const config: PathGraphTraversalConfig = {
             maxDepth: 6,
             maxNonBoostedPathDepth: 3,
             maxNonBoostedHopTokensInBoostedPath: 2,
+            maxBuffersInPath: isHyperEvm ? 2 : 5, // limited only on HyperEvm due to gas cost limits on small blocks - virtually unlimited otherwise
             approxPathsToReturn: 20, // Default to 20 - likely won't be reached, but acts as a bound to the computation if needed
             maxRanksPerSegment: 2, // Default 2 for diversity
             minSwapAmountRatio: 0.5, // Default to 50% so we're sure selected paths support splitPath logic
@@ -416,6 +419,10 @@ export class PathGraph {
 
         //this is a duplicate path
         if (selectedPathIds.includes(this.getIdForPath(path))) {
+            return false;
+        }
+
+        if (path.filter((segment) => segment.isBuffer).length > config.maxBuffersInPath) {
             return false;
         }
 
