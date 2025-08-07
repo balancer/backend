@@ -1,5 +1,11 @@
 # backend
 
+## 1.50.9
+
+### Patch Changes
+
+-   1a9ed4a: split pools db loading in aggregators query
+
 ## 1.50.8
 
 ### Patch Changes
