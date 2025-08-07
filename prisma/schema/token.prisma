@@ -35,6 +35,8 @@ model PrismaToken {
     maxDeposit          String              @default("0")
     maxWithdraw         String              @default("0")
     tvl                 Float               @default(0)
+    bufferBalanceUnderlying String          @default("0")
+    bufferBalanceWrapped    String          @default("0")
 
     walletBalances  PrismaUserWalletBalance[]
     stakedBalances  PrismaUserStakedBalance[]

@@ -12,7 +12,7 @@ export const fetchUnwrapRates = async (
     erc4626Tokens: PrismaToken[],
     underlyingTokenMap: { [address: string]: PrismaToken },
 ): Promise<{
-    [id: string]: string;
+    [id: string]: { unwrapRate: string };
 }> => {
     if (erc4626Tokens.length === 0) {
         return {};
@@ -48,7 +48,7 @@ export const fetchUnwrapRates = async (
             const token = validTokens[index];
             const underlyingToken = underlyingTokenMap[token.underlyingTokenAddress!];
             const unwrapRateDecimals = 18 - token.decimals + underlyingToken.decimals;
-            return [key, formatUnits(value, unwrapRateDecimals)];
+            return [key, { unwrapRate: formatUnits(value, unwrapRateDecimals) }];
         }),
     );
 
