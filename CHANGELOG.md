@@ -1,5 +1,11 @@
 # backend
 
+## 1.50.10
+
+### Patch Changes
+
+-   9d02720: splitting agg query
+
 ## 1.50.9
 
 ### Patch Changes
