@@ -1,5 +1,11 @@
 # backend
 
+## 1.50.11
+
+### Patch Changes
+
+-   73acd5b: revert agg changes
+
 ## 1.50.10
 
 ### Patch Changes
