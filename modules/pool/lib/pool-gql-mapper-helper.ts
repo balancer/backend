@@ -81,6 +81,7 @@ export function mapPoolToken(
         hasNestedPool: hasNestedPool,
         nestedPool: hasNestedPool ? mapNestedPool(nestedPool, poolToken.balance || '0') : undefined,
         isAllowed:
+            protocolVersion === 1 ||
             (protocolVersion === 2 && poolToken.token.types.every((type) => type.type !== 'BLOCKED_V2')) ||
             (protocolVersion === 3 && poolToken.token.types.every((type) => type.type !== 'BLOCKED_V3')),
         isErc4626: poolToken.token.types.some((type) => type.type === 'ERC4626'),
