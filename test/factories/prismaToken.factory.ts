@@ -52,6 +52,8 @@ export const prismaTokenFactory = Factory.define<PrismaToken>(() => {
         unwrapRate: '1',
         maxDeposit: '0',
         maxWithdraw: '0',
+        bufferBalanceUnderlying: '0',
+        bufferBalanceWrapped: '0',
         tvl: 0,
     };
 });
