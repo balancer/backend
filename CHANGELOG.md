@@ -1,5 +1,11 @@
 # backend
 
+## 1.50.8
+
+### Patch Changes
+
+-   c023d62: store buffer balances
+
 ## 1.50.7
 
 ### Patch Changes
