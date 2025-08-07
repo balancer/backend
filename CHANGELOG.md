@@ -1,5 +1,16 @@
 # backend
 
+## 1.50.7
+
+### Patch Changes
+
+-   e887f59: always include whitelisted tokens
+-   a6f15a0: removing deprecated aggregator query
+-   820297d: optimise getTokens query time
+-   2c488ff: SOR - Limit paths with up to 2 buffers on HyperEvm
+-   77fa618: allow tokens in balancer v1
+-   553baf1: exclude circles
+
 ## 1.50.6
 
 ### Patch Changes

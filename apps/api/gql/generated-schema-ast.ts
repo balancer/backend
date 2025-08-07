@@ -72,17 +72,17 @@ export const schema = gql`
 
     input GqlAggregatorPoolFilter {
         chainIn: [GqlChain!]
-        chainNotIn: [GqlChain!]
-        createTime: GqlPoolTimePeriod
+        chainNotIn: [GqlChain!] @deprecated
+        createTime: GqlPoolTimePeriod @deprecated
         idIn: [String!]
-        idNotIn: [String!]
+        idNotIn: [String!] @deprecated
         includeHooks: [GqlHookType!]
         minTvl: Float
         poolTypeIn: [GqlPoolType!]
-        poolTypeNotIn: [GqlPoolType!]
+        poolTypeNotIn: [GqlPoolType!] @deprecated
         protocolVersionIn: [Int!]
         tokensIn: [String!]
-        tokensNotIn: [String!]
+        tokensNotIn: [String!] @deprecated
     }
 
     type GqlBalancePoolAprItem {

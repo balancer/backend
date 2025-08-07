@@ -1,6 +1,6 @@
 import { PublicClient, createPublicClient, http, type Address, parseAbi, type Chain } from 'viem';
 import { CHAINS } from '@balancer/sdk';
-import { VAULT_V3, vaultExtensionAbi_V3 } from '@balancer/sdk';
+import { AddressProvider, vaultExtensionAbi_V3 } from '@balancer/sdk';
 
 import { liquidityBootstrappingAbi } from '../abi/liquidityBootstrapping';
 
@@ -36,7 +36,7 @@ export class LiquidityBootstrappingPool {
             transport: http(this.rpcUrl),
             chain: CHAINS[this.chainId] as Chain,
         });
-        this.vault = VAULT_V3[this.chainId];
+        this.vault = AddressProvider.Vault(this.chainId);
     }
 
     /**

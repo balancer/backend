@@ -8,7 +8,7 @@ import {
     SwapKind,
     TokenAmount,
     ZERO_ADDRESS,
-    balancerQueriesAbi,
+    balancerQueriesAbiExtended,
     vaultV2Abi,
 } from '@balancer/sdk';
 import { PathWithAmount } from './path';
@@ -71,7 +71,7 @@ export class SwapLocal {
 
         const queriesContract = getContract({
             address: config[chainIdToChain[this.chainId]].balancer.v2.balancerQueriesAddress as Address,
-            abi: balancerQueriesAbi,
+            abi: balancerQueriesAbiExtended,
             client,
         });
 
@@ -125,13 +125,13 @@ export class SwapLocal {
         let callData: string;
         if (this.isBatchSwap) {
             callData = encodeFunctionData({
-                abi: balancerQueriesAbi,
+                abi: balancerQueriesAbiExtended,
                 functionName: 'queryBatchSwap',
                 args: [this.swapKind, this.swaps as BatchSwapStep[], this.assets, DEFAULT_FUND_MANAGMENT],
             });
         } else {
             callData = encodeFunctionData({
-                abi: balancerQueriesAbi,
+                abi: balancerQueriesAbiExtended,
                 functionName: 'querySwap',
                 args: [this.swaps as SingleSwap, DEFAULT_FUND_MANAGMENT],
             });

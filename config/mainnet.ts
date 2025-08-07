@@ -505,6 +505,12 @@ export default <NetworkData>{
                     scale: 1,
                     isIbYield: true,
                 },
+                susds: {
+                    tokenAddress: '0xa3931d71877c0e7a3148cb7eb4463524fec27fbd',
+                    sourceUrl: 'https://info-sky.blockanalitica.com/api/v1/savings-rate/?format=json',
+                    path: '[0].ssr_rate',
+                    isIbYield: true,
+                },
             },
         },
     },
