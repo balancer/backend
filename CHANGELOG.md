@@ -1,5 +1,14 @@
 # backend
 
+## 1.50.11
+
+### Patch Changes
+
+-   944110a: agg query
+-   73acd5b: revert agg changes
+-   8fb8ad0: back with db loading split in agg
+-   1eeb291: add pagination to aggregators query
+
 ## 1.50.10
 
 ### Patch Changes

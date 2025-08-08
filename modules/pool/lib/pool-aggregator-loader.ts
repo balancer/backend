@@ -51,6 +51,16 @@ type TokenWithTypes = Prisma.PrismaTokenGetPayload<typeof tokenWithTypes>;
 
 export class PoolAggregatorLoader {
     public async aggregatorPools(args: QueryAggregatorPoolsArgs): Promise<GqlPoolAggregator[]> {
+        const baseQuery: Prisma.PrismaPoolFindManyArgs = {
+            take: args.first || undefined,
+            skip: args.skip || undefined,
+            orderBy: {
+                dynamicData: {
+                    totalLiquidity: 'desc',
+                },
+            },
+        };
+
         const poolsWhere = {
             id: {
                 in: args.where?.idIn?.map((id) => id.toLowerCase()) || undefined,
@@ -80,6 +90,51 @@ export class PoolAggregatorLoader {
             totalLiquidity: {
                 gt: args.where?.minTvl || undefined,
             },
+        };
+        const where: Prisma.PrismaPoolWhereInput = {
+            id: {
+                in: args.where?.idIn?.map((id) => id.toLowerCase()) || undefined,
+            },
+            chain: {
+                in: args.where?.chainIn || undefined,
+            },
+            protocolVersion: {
+                in: args.where?.protocolVersionIn || undefined,
+            },
+            type: {
+                in: args.where?.poolTypeIn || undefined,
+            },
+            dynamicData: {
+                swapEnabled: true,
+                isPaused: false,
+                isInRecoveryMode: false,
+                totalSharesNum: {
+                    gt: 0.000000000001,
+                },
+                totalLiquidity: {
+                    gt: args.where?.minTvl || undefined,
+                },
+            },
+            NOT: {
+                categories: {
+                    has: 'BLACK_LISTED',
+                },
+            },
+            ...(args.where?.tokensIn
+                ? {
+                      AND: args.where.tokensIn.map((token) => ({
+                          allTokens: {
+                              some: {
+                                  token: {
+                                      address: {
+                                          equals: token.toLowerCase(),
+                                      },
+                                  },
+                              },
+                          },
+                      })),
+                  }
+                : {}),
         };
 
         // Get all the tokens for the chain - most likely scenario is client is fetching the chain information
@@ -122,54 +177,77 @@ export class PoolAggregatorLoader {
         console.timeEnd('dbTokens');
 
         console.time('dbPools');
-        const [dbPools, dbPoolTokens, dbDynamicData] = await Promise.all([
-            prisma.prismaPool.findMany({
-                where: poolsWhere,
-            }),
-            prisma.prismaPoolToken
-                .findMany({
-                    where: {
-                        chain: poolsWhere.chain,
-                    },
-                })
-                .then((records) =>
-                    records.map((token) => ({ ...token, token: tokensMap[`${token.chain}-${token.address}`] })),
-                )
-                .then((records) =>
-                    records.reduce(
-                        (acc, token) => {
-                            const key = `${token.poolId}-${token.chain}`;
-                            if (!acc[key]) {
-                                acc[key] = [];
-                            }
-                            acc[key].push(token);
-                            return acc;
-                        },
-                        {} as Record<string, AggregatorPrismaPoolTokenSchema[]>,
-                    ),
-                ),
-            prisma.prismaPoolDynamicData
-                .findMany({
-                    where: dynamicDataWhere,
-                })
-                .then((records) => Object.fromEntries(records.map((pool) => [`${pool.id}-${pool.chain}`, pool]))),
-        ]);
-
-        // Merge pools with dynamic data, only including pools that have matching dynamic data
-        const pools = dbPools
-            .map((pool) => {
-                const dynamicData = dbDynamicData[`${pool.id}-${pool.chain}`];
-                const tokens = dbPoolTokens[`${pool.id}-${pool.chain}`];
-                if (!dynamicData) {
-                    return null;
-                }
-                return {
-                    ...pool,
-                    dynamicData,
-                    tokens,
-                };
+        const pools = await prisma.prismaPool
+            .findMany({
+                ...baseQuery,
+                where,
+                include: {
+                    dynamicData: true,
+                    tokens: true,
+                    ...(args.where?.tokensIn
+                        ? {
+                              allTokens: true,
+                          }
+                        : {}),
+                },
             })
-            .filter((pool): pool is NonNullable<typeof pool> => pool !== null);
+            .then((pools) =>
+                pools.map((pool) => ({
+                    ...pool,
+                    tokens: pool.tokens.map((token) => ({
+                        ...token,
+                        token: tokensMap[`${token.chain}-${token.address}`],
+                    })),
+                })),
+            );
+        // const [dbPools, dbPoolTokens, dbDynamicData] = await Promise.all([
+        //     prisma.prismaPool.findMany({
+        //         where: poolsWhere,
+        //     }),
+        //     prisma.prismaPoolToken
+        //         .findMany({
+        //             where: {
+        //                 chain: poolsWhere.chain,
+        //             },
+        //         })
+        //         .then((records) =>
+        //             records.map((token) => ({ ...token, token: tokensMap[`${token.chain}-${token.address}`] })),
+        //         )
+        //         .then((records) =>
+        //             records.reduce(
+        //                 (acc, token) => {
+        //                     const key = `${token.poolId}-${token.chain}`;
+        //                     if (!acc[key]) {
+        //                         acc[key] = [];
+        //                     }
+        //                     acc[key].push(token);
+        //                     return acc;
+        //                 },
+        //                 {} as Record<string, AggregatorPrismaPoolTokenSchema[]>,
+        //             ),
+        //         ),
+        //     prisma.prismaPoolDynamicData
+        //         .findMany({
+        //             where: dynamicDataWhere,
+        //         })
+        //         .then((records) => Object.fromEntries(records.map((pool) => [`${pool.id}-${pool.chain}`, pool]))),
+        // ]);
+
+        // // Merge pools with dynamic data, only including pools that have matching dynamic data
+        // const pools = dbPools
+        //     .map((pool) => {
+        //         const dynamicData = dbDynamicData[`${pool.id}-${pool.chain}`];
+        //         const tokens = dbPoolTokens[`${pool.id}-${pool.chain}`];
+        //         if (!dynamicData) {
+        //             return null;
+        //         }
+        //         return {
+        //             ...pool,
+        //             dynamicData,
+        //             tokens,
+        //         };
+        //     })
+        //     .filter((pool): pool is NonNullable<typeof pool> => pool !== null);
         console.timeEnd('dbPools');
 
         // Get review data
