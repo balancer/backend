@@ -51,6 +51,16 @@ type TokenWithTypes = Prisma.PrismaTokenGetPayload<typeof tokenWithTypes>;
 
 export class PoolAggregatorLoader {
     public async aggregatorPools(args: QueryAggregatorPoolsArgs): Promise<GqlPoolAggregator[]> {
+        const baseQuery: Prisma.PrismaPoolFindManyArgs = {
+            take: args.first || undefined,
+            skip: args.skip || undefined,
+            orderBy: {
+                dynamicData: {
+                    totalLiquidity: 'desc',
+                },
+            },
+        };
+
         const poolsWhere = {
             id: {
                 in: args.where?.idIn?.map((id) => id.toLowerCase()) || undefined,
@@ -169,6 +179,7 @@ export class PoolAggregatorLoader {
         console.time('dbPools');
         const pools = await prisma.prismaPool
             .findMany({
+                ...baseQuery,
                 where,
                 include: {
                     dynamicData: true,
