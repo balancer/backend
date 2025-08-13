@@ -1,5 +1,11 @@
 # backend
 
+## 1.50.13
+
+### Patch Changes
+
+-   fd6bb2e: swap pricing cant increase more than 10x
+
 ## 1.50.12
 
 ### Patch Changes
