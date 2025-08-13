@@ -24,6 +24,7 @@ import {
     mapLiquidityBootstrappingPoolStateToPrismaPool,
 } from './mapping';
 import { Path, SwapPathInput } from '../generate/getSwapPath';
+import { maxUint256 } from 'viem';
 
 type PoolBase = {
     poolAddress: string;
@@ -274,10 +275,12 @@ function mapBufferPools(pools: TransformBigintToString<SupportedPools>[]): Buffe
         ...pool,
         poolId: pool.poolAddress,
         address: pool.poolAddress as Address,
-        mainToken: { address: pool.tokens[0] as Address, decimals: pool.decimals[0] },
-        underlyingToken: { address: pool.tokens[1] as Address, decimals: pool.decimals[1] },
+        mainToken: { address: pool.tokens[0] as Address, decimals: pool.decimals[0], balance: maxUint256 },
+        underlyingToken: { address: pool.tokens[1] as Address, decimals: pool.decimals[1], balance: maxUint256 },
         unwrapRate: pool.rate,
         chainId: Number(pool.chainId),
+        maxWithdraw: maxUint256,
+        maxDeposit: maxUint256,
     }));
 
     return bufferPoolData;
