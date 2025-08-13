@@ -14,10 +14,12 @@ export type BufferPoolData = {
     poolId: string;
     address: Address;
     chainId: number;
-    mainToken: { address: Address; decimals: number };
-    underlyingToken: { address: Address; decimals: number };
+    mainToken: { address: Address; decimals: number; balance: bigint };
+    underlyingToken: { address: Address; decimals: number; balance: bigint };
     poolType: string;
     unwrapRate: bigint;
+    maxDeposit: bigint;
+    maxWithdraw: bigint;
 };
 
 export type SORDbPool = PrismaPoolAndHookWithDynamic;
@@ -254,13 +256,17 @@ export async function getBufferPoolsFromDBPools(pools: SORDbPool[], chain: Chain
                         mainToken: {
                             address: poolToken.address.toLowerCase() as Address,
                             decimals: poolToken.token.decimals,
+                            balance: parseUnits(poolToken.token.bufferBalanceWrapped, poolToken.token.decimals),
                         },
                         underlyingToken: {
                             address: underlyingToken.address.toLowerCase() as Address,
                             decimals: underlyingToken.decimals,
+                            balance: parseUnits(poolToken.token.bufferBalanceUnderlying, underlyingToken.decimals),
                         },
                         poolType: 'Buffer',
                         unwrapRate: parseUnits(poolToken.token.unwrapRate, unwrapRateDecimals),
+                        maxWithdraw: parseUnits(poolToken.token.maxWithdraw, poolToken.token.decimals),
+                        maxDeposit: parseUnits(poolToken.token.maxDeposit, poolToken.token.decimals),
                     });
                 }
             }

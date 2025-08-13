@@ -7,7 +7,7 @@ import { Address, Swap, SwapInput, SwapKind } from '@balancer/sdk';
 import { formatUnits } from 'viem';
 
 describe('sor debugging', () => {
-    it.only('sor v2', async () => {
+    it('sor v2', async () => {
         const useProtocolVersion = 2;
         const chain = Chain.SONIC;
 
@@ -73,7 +73,7 @@ describe('sor debugging', () => {
         expect(ratio).toBeCloseTo(1, 3);
     }, 5000000);
 
-    it('sor v3', async () => {
+    it.only('sor v3', async () => {
         const useProtocolVersion = 3;
         const chain = Chain.MAINNET;
 
@@ -88,18 +88,18 @@ describe('sor debugging', () => {
 
         const swaps = await sorService.getSorSwapPaths({
             chain,
-            tokenIn: '0x40d16fc0246ad3160ccc09b8d0d3a2cd28ae6c2f', // GHO
-            tokenOut: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', // USDC
+            tokenIn: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // ETH
+            tokenOut: '0xf1c9acdc66974dfb6decb12aa385b9cd01190e38', // LINK
             swapType,
-            swapAmount: '10',
+            swapAmount: '1',
             useProtocolVersion,
-            // poolIds: ['0x917d0464dd2e335bf14000c63d65def3c8bb1025'],
+            poolIds: ['0x57c23c58b1d8c3292c15becf07c62c5c52457a42'],
         });
 
-        console.log(swaps.returnAmount);
         swaps.paths.forEach((path, i) => {
             console.log(`path ${i}`, path.pools);
         });
+        console.log('SOR result:   ', swaps.returnAmount);
 
         // Perform sanity check against on-chain query
 
@@ -124,6 +124,7 @@ describe('sor debugging', () => {
         const queryResult = await sdkSwap.query();
         const queryResultAmount =
             queryResult.swapKind === SwapKind.GivenIn ? queryResult.expectedAmountOut : queryResult.expectedAmountIn;
+        console.log('Query result: ', formatUnits(queryResultAmount.amount, queryResultAmount.token.decimals));
 
         const queryResultFloat = parseFloat(formatUnits(queryResultAmount.amount, queryResultAmount.token.decimals));
         const sorResultFloat = parseFloat(swaps.returnAmount);
