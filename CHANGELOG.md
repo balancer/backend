@@ -1,5 +1,11 @@
 # backend
 
+## 1.50.12
+
+### Patch Changes
+
+-   4901095: sort pool tokens in SOR/Aggr
+
 ## 1.50.11
 
 ### Patch Changes

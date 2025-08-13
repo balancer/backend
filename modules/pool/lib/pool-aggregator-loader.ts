@@ -1,4 +1,4 @@
-import { Prisma, PrismaErc4626ReviewData, PrismaPoolToken, PrismaTokenType } from '@prisma/client';
+import { Prisma, PrismaErc4626ReviewData, PrismaTokenType } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
 import { HookData } from '../../../prisma/prisma-types';
 import {
@@ -61,36 +61,6 @@ export class PoolAggregatorLoader {
             },
         };
 
-        const poolsWhere = {
-            id: {
-                in: args.where?.idIn?.map((id) => id.toLowerCase()) || undefined,
-            },
-            chain: {
-                in: args.where?.chainIn || undefined,
-            },
-            protocolVersion: {
-                in: args.where?.protocolVersionIn || undefined,
-            },
-            type: {
-                in: args.where?.poolTypeIn || undefined,
-            },
-            NOT: {
-                categories: {
-                    has: 'BLACK_LISTED',
-                },
-            },
-        };
-        const dynamicDataWhere = {
-            swapEnabled: true,
-            isPaused: false,
-            isInRecoveryMode: false,
-            totalSharesNum: {
-                gt: 0.000000000001,
-            },
-            totalLiquidity: {
-                gt: args.where?.minTvl || undefined,
-            },
-        };
         const where: Prisma.PrismaPoolWhereInput = {
             id: {
                 in: args.where?.idIn?.map((id) => id.toLowerCase()) || undefined,
@@ -183,7 +153,7 @@ export class PoolAggregatorLoader {
                 where,
                 include: {
                     dynamicData: true,
-                    tokens: true,
+                    tokens: { orderBy: [{ index: 'asc' }] },
                     ...(args.where?.tokensIn
                         ? {
                               allTokens: true,
