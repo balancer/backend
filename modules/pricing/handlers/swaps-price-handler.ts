@@ -41,13 +41,16 @@ export class SwapsPriceHandler implements PriceHandler {
                     if (otherTokenValue > 1) {
                         const price = otherTokenValue / tokenAmount;
 
-                        priceItems.push({
-                            address: token.address,
-                            chain: token.chain,
-                            price: price,
-                            updatedAt: new Date(),
-                            updatedBy: this.id,
-                        });
+                        // Assume 10x increase in pricing is inflated
+                        if (token.currentPrice && price * 10 < token.currentPrice) {
+                            priceItems.push({
+                                address: token.address,
+                                chain: token.chain,
+                                price: price,
+                                updatedAt: new Date(),
+                                updatedBy: this.id,
+                            });
+                        }
                     }
                 }
             }
