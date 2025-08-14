@@ -30,9 +30,9 @@ describe('FallbackPriceHandler', () => {
                 },
             ];
 
-            const allPrices = new Map<string, number>();
-            allPrices.set('0xtoken1', 1.5);
-            allPrices.set('0xtoken2', 2.0);
+            const allPrices = new Map<string, { price: number; updatedBy: string }>();
+            allPrices.set('0xtoken1', { price: 1.5, updatedBy: 'initial' });
+            allPrices.set('0xtoken2', { price: 2.0, updatedBy: 'initial' });
             // token3 not in allPrices
 
             const priceItems = await handler.calculatePricesForTokens(tokens, allPrices);
@@ -56,8 +56,8 @@ describe('FallbackPriceHandler', () => {
 
         it('should return empty array when no tokens are provided', async () => {
             const tokens: TokenPriceData[] = [];
-            const allPrices = new Map<string, number>();
-            allPrices.set('0xtoken1', 1.5);
+            const allPrices = new Map<string, { price: number; updatedBy: string }>();
+            allPrices.set('0xtoken1', { price: 1.5, updatedBy: 'initial' });
 
             const priceItems = await handler.calculatePricesForTokens(tokens, allPrices);
 
@@ -87,7 +87,7 @@ describe('FallbackPriceHandler', () => {
                 },
             ];
 
-            const allPrices = new Map<string, number>();
+            const allPrices = new Map<string, { price: number; updatedBy: string }>();
 
             const priceItems = await handler.calculatePricesForTokens(tokens, allPrices);
 
@@ -108,8 +108,8 @@ describe('FallbackPriceHandler', () => {
                 },
             ];
 
-            const allPrices = new Map<string, number>();
-            allPrices.set('0xtoken3', 1.5); // Different token
+            const allPrices = new Map<string, { price: number; updatedBy: string }>();
+            allPrices.set('0xtoken3', { price: 1.5, updatedBy: 'initial' }); // Different token
 
             const priceItems = await handler.calculatePricesForTokens(tokens, allPrices);
 
@@ -135,17 +135,17 @@ describe('FallbackPriceHandler', () => {
                 },
             ];
 
-            const allPrices = new Map<string, number>();
-            allPrices.set('0xtoken1', 1.0);
-            allPrices.set('0xtoken2', 2.0);
-            allPrices.set('0xtoken3', 3.0);
+            const allPrices = new Map<string, { price: number; updatedBy: string }>();
+            allPrices.set('0xtoken1', { price: 1.0, updatedBy: 'initial' });
+            allPrices.set('0xtoken2', { price: 2.0, updatedBy: 'initial' });
+            allPrices.set('0xtoken3', { price: 3.0, updatedBy: 'initial' });
 
             const priceItems = await handler.calculatePricesForTokens(tokens, allPrices);
 
             expect(priceItems).toHaveLength(3);
-            expect(priceItems.find(p => p.address === '0xtoken1')?.chain).toBe(Chain.MAINNET);
-            expect(priceItems.find(p => p.address === '0xtoken2')?.chain).toBe(Chain.ARBITRUM);
-            expect(priceItems.find(p => p.address === '0xtoken3')?.chain).toBe(Chain.POLYGON);
+            expect(priceItems.find((p) => p.address === '0xtoken1')?.chain).toBe(Chain.MAINNET);
+            expect(priceItems.find((p) => p.address === '0xtoken2')?.chain).toBe(Chain.ARBITRUM);
+            expect(priceItems.find((p) => p.address === '0xtoken3')?.chain).toBe(Chain.POLYGON);
         });
 
         it('should handle high precision prices correctly', async () => {
@@ -157,8 +157,8 @@ describe('FallbackPriceHandler', () => {
                 },
             ];
 
-            const allPrices = new Map<string, number>();
-            allPrices.set('0xtoken1', 1.123456789);
+            const allPrices = new Map<string, { price: number; updatedBy: string }>();
+            allPrices.set('0xtoken1', { price: 1.123456789, updatedBy: 'initial' });
 
             const priceItems = await handler.calculatePricesForTokens(tokens, allPrices);
 
@@ -175,8 +175,8 @@ describe('FallbackPriceHandler', () => {
                 },
             ];
 
-            const allPrices = new Map<string, number>();
-            allPrices.set('0xtoken1', 0);
+            const allPrices = new Map<string, { price: number; updatedBy: string }>();
+            allPrices.set('0xtoken1', { price: 0, updatedBy: 'initial' });
 
             const priceItems = await handler.calculatePricesForTokens(tokens, allPrices);
 
@@ -203,10 +203,10 @@ describe('FallbackPriceHandler', () => {
                 },
             ];
 
-            const allPrices = new Map<string, number>();
-            allPrices.set('0xtoken1', 1.0);
-            allPrices.set('0xtoken2', 2.0);
-            allPrices.set('0xtoken3', 3.0);
+            const allPrices = new Map<string, { price: number; updatedBy: string }>();
+            allPrices.set('0xtoken1', { price: 1.0, updatedBy: 'initial' });
+            allPrices.set('0xtoken2', { price: 2.0, updatedBy: 'initial' });
+            allPrices.set('0xtoken3', { price: 3.0, updatedBy: 'initial' });
 
             const priceItems = await handler.calculatePricesForTokens(tokens, allPrices);
 

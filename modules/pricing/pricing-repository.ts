@@ -37,7 +37,7 @@ export class PricingRepository {
             this.swapRepository.getSwapsForPricing(chain),
         ]);
 
-        // Include stSonic for OP, FTM
+        // Include stSonic for OP, FTM for beets price handler
         if (['OPTIMISM', 'FANTOM'].includes(chain)) {
             const sts = await prisma.prismaToken.findFirst({
                 where: {
@@ -79,10 +79,11 @@ export class PricingRepository {
             underlyingTokenAddress: token.underlyingTokenAddress || undefined,
             unwrapRate: token.unwrapRate || undefined,
             underlyingTokenPrice: token.underlyingTokenAddress
-                ? allPrices.get(token.underlyingTokenAddress)
+                ? allPrices.get(token.underlyingTokenAddress)?.price
                 : undefined,
-            currentPrice: allPrices.get(token.address),
+            currentPrice: allPrices.get(token.address)?.price,
             latestSwaps: this.filterSwapsForToken(swaps, token.address),
+            pricedBy: allPrices.get(token.address)?.updatedBy || '',
         }));
     }
 
@@ -181,7 +182,10 @@ export class PricingRepository {
         return Array.from(addresses);
     }
 
-    private async fetchAllPrices(chain: Chain, tokenAddresses: string[]): Promise<Map<string, number>> {
+    private async fetchAllPrices(
+        chain: Chain,
+        tokenAddresses: string[],
+    ): Promise<Map<string, { price: number; updatedBy: string }>> {
         if (tokenAddresses.length === 0) {
             return new Map();
         }
@@ -194,28 +198,14 @@ export class PricingRepository {
             select: {
                 tokenAddress: true,
                 price: true,
+                updatedBy: true,
             },
         });
 
-        const priceMap = new Map<string, number>();
+        const priceMap = new Map<string, { price: number; updatedBy: string }>();
         tokenPrices.forEach((tokenPrice) => {
-            priceMap.set(tokenPrice.tokenAddress, tokenPrice.price);
+            priceMap.set(tokenPrice.tokenAddress, { price: tokenPrice.price, updatedBy: tokenPrice.updatedBy || '' });
         });
-
-        // Include stSonic for OP, FTM
-        if (['OPTIMISM', 'FANTOM'].includes(chain)) {
-            const sts = await prisma.prismaTokenCurrentPrice.findFirst({
-                where: { tokenAddress: stSaddress, chain: Chain.SONIC },
-                select: {
-                    tokenAddress: true,
-                    price: true,
-                },
-            });
-
-            if (sts) {
-                priceMap.set(stSaddress, sts.price);
-            }
-        }
 
         return priceMap;
     }

@@ -4,7 +4,10 @@ export class SwapsPriceHandler implements PriceHandler {
     public readonly exitIfFails = false;
     public readonly id = 'SwapsPriceHandlerService';
 
-    async calculatePricesForTokens(tokens: TokenPriceData[], allPrices: Map<string, number>): Promise<PriceItem[]> {
+    async calculatePricesForTokens(
+        tokens: TokenPriceData[],
+        allPrices: Map<string, { price: number; updatedBy: string }>,
+    ): Promise<PriceItem[]> {
         const acceptedTokens = this.getAcceptedTokens(tokens);
 
         if (acceptedTokens.length === 0) {
@@ -36,8 +39,8 @@ export class SwapsPriceHandler implements PriceHandler {
                 // Use allPrices map to find other token price (from existing prices OR previous handler results)
                 const otherTokenPrice = allPrices.get(otherTokenAddress);
 
-                if (otherTokenPrice) {
-                    const otherTokenValue = otherTokenPrice * otherTokenAmount;
+                if (otherTokenPrice && otherTokenPrice.updatedBy !== this.id) {
+                    const otherTokenValue = otherTokenPrice.price * otherTokenAmount;
                     if (otherTokenValue > 1) {
                         const price = otherTokenValue / tokenAmount;
                         // New price cant be more than 10x of old price. Assume 10x increase in pricing is inflated and skip.

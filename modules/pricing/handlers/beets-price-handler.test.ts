@@ -40,8 +40,8 @@ describe('BeetsPriceHandler', () => {
                 },
             ];
 
-            const allPrices = new Map<string, number>();
-            allPrices.set('0xe5da20f15420ad15de0fa650600afc998bbe3955', 1.0); // stS price
+            const allPrices = new Map<string, { price: number; updatedBy: string }>();
+            allPrices.set('0xe5da20f15420ad15de0fa650600afc998bbe3955', { price: 1.0, updatedBy: 'initial' }); // stS price
 
             const priceItems = await handler.calculatePricesForTokens(tokens, allPrices);
 
@@ -83,8 +83,8 @@ describe('BeetsPriceHandler', () => {
                 },
             ];
 
-            const allPrices = new Map<string, number>();
-            allPrices.set('0xe5da20f15420ad15de0fa650600afc998bbe3955', 1.0);
+            const allPrices = new Map<string, { price: number; updatedBy: string }>();
+            allPrices.set('0xe5da20f15420ad15de0fa650600afc998bbe3955', { price: 1.0, updatedBy: 'initial' });
 
             const priceItems = await handler.calculatePricesForTokens(tokens, allPrices);
 
@@ -101,7 +101,7 @@ describe('BeetsPriceHandler', () => {
                 },
             ];
 
-            const allPrices = new Map<string, number>(); // No stS price
+            const allPrices = new Map<string, { price: number; updatedBy: string }>(); // No stS price
 
             const priceItems = await handler.calculatePricesForTokens(tokens, allPrices);
 
@@ -120,8 +120,8 @@ describe('BeetsPriceHandler', () => {
                 },
             ];
 
-            const allPrices = new Map<string, number>();
-            allPrices.set('0xe5da20f15420ad15de0fa650600afc998bbe3955', 1.0);
+            const allPrices = new Map<string, { price: number; updatedBy: string }>();
+            allPrices.set('0xe5da20f15420ad15de0fa650600afc998bbe3955', { price: 1.0, updatedBy: 'initial' });
 
             const priceItems = await handler.calculatePricesForTokens(tokens, allPrices);
 
@@ -142,8 +142,8 @@ describe('BeetsPriceHandler', () => {
                 },
             ];
 
-            const allPrices = new Map<string, number>();
-            allPrices.set('0xe5da20f15420ad15de0fa650600afc998bbe3955', 1.0);
+            const allPrices = new Map<string, { price: number; updatedBy: string }>();
+            allPrices.set('0xe5da20f15420ad15de0fa650600afc998bbe3955', { price: 1.0, updatedBy: 'initial' });
 
             const priceItems = await handler.calculatePricesForTokens(tokens, allPrices);
 
@@ -172,8 +172,8 @@ describe('BeetsPriceHandler', () => {
                 },
             ];
 
-            const allPrices = new Map<string, number>();
-            allPrices.set('0xe5da20f15420ad15de0fa650600afc998bbe3955', 1.0);
+            const allPrices = new Map<string, { price: number; updatedBy: string }>();
+            allPrices.set('0xe5da20f15420ad15de0fa650600afc998bbe3955', { price: 1.0, updatedBy: 'initial' });
 
             const priceItems = await handler.calculatePricesForTokens(tokens, allPrices);
 
@@ -195,8 +195,8 @@ describe('BeetsPriceHandler', () => {
                 },
             ];
 
-            const allPrices = new Map<string, number>();
-            allPrices.set('0xe5da20f15420ad15de0fa650600afc998bbe3955', 2.5); // Higher stS price
+            const allPrices = new Map<string, { price: number; updatedBy: string }>();
+            allPrices.set('0xe5da20f15420ad15de0fa650600afc998bbe3955', { price: 2.5, updatedBy: 'initial' }); // Higher stS price
 
             const priceItems = await handler.calculatePricesForTokens(tokens, allPrices);
 

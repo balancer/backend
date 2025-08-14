@@ -70,10 +70,13 @@ describe('SwapsPriceHandler', () => {
             },
         ];
 
-        const allPrices = new Map<string, number>();
+        const allPrices = new Map<string, { price: number; updatedBy: string }>();
         tokens.forEach((token) => {
             if (token.currentPrice) {
-                allPrices.set(token.address, token.currentPrice);
+                allPrices.set(token.address, {
+                    price: token.currentPrice,
+                    updatedBy: token.pricedBy || 'initial',
+                });
             }
         });
 
@@ -119,10 +122,13 @@ describe('SwapsPriceHandler', () => {
             },
         ];
 
-        const allPrices = new Map<string, number>();
+        const allPrices = new Map<string, { price: number; updatedBy: string }>();
         tokens.forEach((token) => {
             if (token.currentPrice) {
-                allPrices.set(token.address, token.currentPrice);
+                allPrices.set(token.address, {
+                    price: token.currentPrice,
+                    updatedBy: token.pricedBy || 'initial',
+                });
             }
         });
 
@@ -165,10 +171,13 @@ describe('SwapsPriceHandler', () => {
             },
         ];
 
-        const allPrices = new Map<string, number>();
+        const allPrices = new Map<string, { price: number; updatedBy: string }>();
         tokens.forEach((token) => {
             if (token.currentPrice) {
-                allPrices.set(token.address, token.currentPrice);
+                allPrices.set(token.address, {
+                    price: token.currentPrice,
+                    updatedBy: token.pricedBy || 'initial',
+                });
             }
         });
 
@@ -187,10 +196,13 @@ describe('SwapsPriceHandler', () => {
             },
         ];
 
-        const allPrices = new Map<string, number>();
+        const allPrices = new Map<string, { price: number; updatedBy: string }>();
         tokens.forEach((token) => {
             if (token.currentPrice) {
-                allPrices.set(token.address, token.currentPrice);
+                allPrices.set(token.address, {
+                    price: token.currentPrice,
+                    updatedBy: token.pricedBy || 'initial',
+                });
             }
         });
 
@@ -231,10 +243,13 @@ describe('SwapsPriceHandler', () => {
             },
         ];
 
-        const allPrices = new Map<string, number>();
+        const allPrices = new Map<string, { price: number; updatedBy: string }>();
         tokens.forEach((token) => {
             if (token.currentPrice) {
-                allPrices.set(token.address, token.currentPrice);
+                allPrices.set(token.address, {
+                    price: token.currentPrice,
+                    updatedBy: token.pricedBy || 'initial',
+                });
             }
         });
 
@@ -275,10 +290,13 @@ describe('SwapsPriceHandler', () => {
             },
         ];
 
-        const allPrices = new Map<string, number>();
+        const allPrices = new Map<string, { price: number; updatedBy: string }>();
         tokens.forEach((token) => {
             if (token.currentPrice) {
-                allPrices.set(token.address, token.currentPrice);
+                allPrices.set(token.address, {
+                    price: token.currentPrice,
+                    updatedBy: token.pricedBy || 'initial',
+                });
             }
         });
 
@@ -323,8 +341,8 @@ describe('SwapsPriceHandler', () => {
         ];
 
         // Simulate allPrices map with prices from previous handlers
-        const allPrices = new Map<string, number>();
-        allPrices.set('0xtoken-dai', 1.0); // DAI price from previous handler (e.g., CoinGecko)
+        const allPrices = new Map<string, { price: number; updatedBy: string }>();
+        allPrices.set('0xtoken-dai', { price: 1.0, updatedBy: 'initial' }); // DAI price from previous handler (e.g., CoinGecko)
 
         const priceItems = await handler.calculatePricesForTokens(tokens, allPrices);
 
