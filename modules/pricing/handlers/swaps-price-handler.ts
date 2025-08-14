@@ -39,7 +39,11 @@ export class SwapsPriceHandler implements PriceHandler {
                 // Use allPrices map to find other token price (from existing prices OR previous handler results)
                 const otherTokenPrice = allPrices.get(otherTokenAddress);
 
-                if (otherTokenPrice && otherTokenPrice.updatedBy !== this.id) {
+                if (
+                    otherTokenPrice &&
+                    otherTokenPrice.updatedBy !== this.id &&
+                    otherTokenPrice.updatedBy !== 'FallbackHandlerService'
+                ) {
                     const otherTokenValue = otherTokenPrice.price * otherTokenAmount;
                     if (otherTokenValue > 1) {
                         const price = otherTokenValue / tokenAmount;
