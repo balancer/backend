@@ -5,6 +5,7 @@ import { BufferState, Vault } from '@balancer-labs/balancer-maths';
 import { BasePoolMethodsV3 } from '../basePoolMethodsV3';
 import { BasePoolToken } from '../../utils/basePoolToken';
 import { BufferPoolData } from '../../../utils/data';
+import { MathSol } from '../../utils';
 
 export class BufferPool implements BasePoolMethodsV3 {
     public readonly chainId: number;
@@ -14,6 +15,8 @@ export class BufferPool implements BasePoolMethodsV3 {
     public readonly swapFee = 0n;
     public readonly rate: bigint;
     public readonly tokens: BasePoolToken[];
+    public readonly maxDeposit: bigint;
+    public readonly maxWithdraw: bigint;
 
     private readonly tokenMap: Map<string, BasePoolToken>;
 
@@ -36,7 +39,7 @@ export class BufferPool implements BasePoolMethodsV3 {
             bufferPoolData.unwrapRate,
             new BasePoolToken(
                 new Token(bufferPoolData.chainId, bufferPoolData.mainToken.address, bufferPoolData.mainToken.decimals),
-                MAX_UINT256,
+                bufferPoolData.mainToken.balance,
                 0,
             ),
             new BasePoolToken(
@@ -45,9 +48,11 @@ export class BufferPool implements BasePoolMethodsV3 {
                     bufferPoolData.underlyingToken.address,
                     bufferPoolData.underlyingToken.decimals,
                 ),
-                MAX_UINT256,
+                bufferPoolData.underlyingToken.balance,
                 1,
             ),
+            bufferPoolData.maxDeposit,
+            bufferPoolData.maxWithdraw,
         );
     }
 
@@ -58,11 +63,15 @@ export class BufferPool implements BasePoolMethodsV3 {
         rate: bigint,
         mainToken: BasePoolToken,
         underlyingToken: BasePoolToken,
+        maxDeposit: bigint,
+        maxWithdraw: bigint,
     ) {
         this.chainId = chainId;
         this.id = id;
         this.address = address;
         this.rate = rate;
+        this.maxDeposit = maxDeposit;
+        this.maxWithdraw = maxWithdraw;
         this.tokens = [mainToken, underlyingToken];
         this.tokenMap = new Map(this.tokens.map((token) => [token.token.address, token]));
 
@@ -75,7 +84,66 @@ export class BufferPool implements BasePoolMethodsV3 {
     }
 
     public getLimitAmountSwap(tokenIn: Token, tokenOut: Token, swapKind: SwapKind): bigint {
-        return MAX_UINT256;
+        const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
+
+        const mainTokenAmount = this.tokens[0];
+        const underlyingTokenAmount = this.tokens[1];
+
+        if (swapKind === SwapKind.GivenIn) {
+            // givenIn
+            if (underlyingTokenAmount.token.isSameAddress(tIn.token.address)) {
+                // wrap - respective to amount in, which is underlying
+                const bufferWrapLimit = MathSol.mulDownFixed(mainTokenAmount.amount, this.rate); //  in terms of underlying
+                const lendingProtocolWrapLimit = this.maxDeposit;
+                const wrapRequiredToRebalance =
+                    (MathSol.mulDownFixed(mainTokenAmount.amount, this.rate) + underlyingTokenAmount.amount) / 2n -
+                    underlyingTokenAmount.amount; // in terms of underlying
+                const wrapLimit =
+                    wrapRequiredToRebalance > lendingProtocolWrapLimit
+                        ? bufferWrapLimit
+                        : lendingProtocolWrapLimit - wrapRequiredToRebalance;
+                return wrapLimit;
+            } else {
+                // unwrap - respective to amount in, which is main
+                const bufferUnwrapLimit = MathSol.divDownFixed(underlyingTokenAmount.amount, this.rate); // in terms of main
+                const lendingProtocolUnwrapLimit = this.maxWithdraw;
+                const unwrapRequiredToRebalance =
+                    (MathSol.divDownFixed(underlyingTokenAmount.amount, this.rate) + mainTokenAmount.amount) / 2n -
+                    mainTokenAmount.amount; // in terms of main
+                const unwrapLimit =
+                    unwrapRequiredToRebalance > lendingProtocolUnwrapLimit
+                        ? bufferUnwrapLimit
+                        : lendingProtocolUnwrapLimit - unwrapRequiredToRebalance;
+                return unwrapLimit;
+            }
+        } else {
+            // givenOut
+            if (underlyingTokenAmount.token.isSameAddress(tIn.token.address)) {
+                // wrap - respective to amount out, which is main
+                const bufferWrapLimit = mainTokenAmount.amount; // in terms of main
+                const lendingProtocolWrapLimit = this.maxDeposit;
+                const wrapRequiredToRebalance =
+                    mainTokenAmount.amount -
+                    (MathSol.divDownFixed(underlyingTokenAmount.amount, this.rate) + mainTokenAmount.amount) / 2n; // in terms of main
+                const wrapLimit =
+                    wrapRequiredToRebalance > lendingProtocolWrapLimit
+                        ? bufferWrapLimit
+                        : bufferWrapLimit + lendingProtocolWrapLimit - wrapRequiredToRebalance;
+                return wrapLimit;
+            } else {
+                // unwrap - respective to amount out, which is underlying
+                const bufferUnwrapLimit = underlyingTokenAmount.amount; // in terms of underlying
+                const lendingProtocolUnwrapLimit = this.maxWithdraw;
+                const unwrapRequiredToRebalance =
+                    underlyingTokenAmount.amount -
+                    (underlyingTokenAmount.amount + MathSol.mulDownFixed(mainTokenAmount.amount, this.rate)) / 2n; // in terms of underlying
+                const unwrapLimit =
+                    unwrapRequiredToRebalance > lendingProtocolUnwrapLimit
+                        ? bufferUnwrapLimit
+                        : bufferUnwrapLimit + lendingProtocolUnwrapLimit - unwrapRequiredToRebalance;
+                return unwrapLimit;
+            }
+        }
     }
 
     public swapGivenIn(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount {
@@ -140,6 +208,8 @@ export class BufferPool implements BasePoolMethodsV3 {
             this.rate,
             this.tokens[0].copy(),
             this.tokens[1].copy(),
+            this.maxDeposit,
+            this.maxWithdraw,
         );
     }
 }

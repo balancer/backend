@@ -7,7 +7,7 @@ import { Address, Swap, SwapInput, SwapKind } from '@balancer/sdk';
 import { formatUnits } from 'viem';
 
 describe('sor debugging', () => {
-    it.only('sor v2', async () => {
+    it('sor v2', async () => {
         const useProtocolVersion = 2;
         const chain = Chain.SONIC;
 
@@ -73,9 +73,9 @@ describe('sor debugging', () => {
         expect(ratio).toBeCloseTo(1, 3);
     }, 5000000);
 
-    it('sor v3', async () => {
+    it.only('sor v3', async () => {
         const useProtocolVersion = 3;
-        const chain = Chain.MAINNET;
+        const chain = Chain.SONIC;
 
         const chainId = Object.keys(chainIdToChain).find((key) => chainIdToChain[key] === chain) as string;
         initRequestScopedContext();
@@ -88,18 +88,18 @@ describe('sor debugging', () => {
 
         const swaps = await sorService.getSorSwapPaths({
             chain,
-            tokenIn: '0x40d16fc0246ad3160ccc09b8d0d3a2cd28ae6c2f', // GHO
-            tokenOut: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', // USDC
+            tokenIn: '0x29219dd400f2bf60e5a23d13be72b486d4038894', // ETH
+            tokenOut: '0xeeeeeee6d95e55a468d32feb5d6648754d10a967', // LINK
             swapType,
-            swapAmount: '10',
+            swapAmount: '1',
             useProtocolVersion,
-            // poolIds: ['0x917d0464dd2e335bf14000c63d65def3c8bb1025'],
+            poolIds: ['0x5103ea917605463fc497396ba89d6732ce4b2d70'],
         });
 
-        console.log(swaps.returnAmount);
         swaps.paths.forEach((path, i) => {
             console.log(`path ${i}`, path.pools);
         });
+        console.log('SOR result:   ', swaps.returnAmount);
 
         // Perform sanity check against on-chain query
 
@@ -124,6 +124,7 @@ describe('sor debugging', () => {
         const queryResult = await sdkSwap.query();
         const queryResultAmount =
             queryResult.swapKind === SwapKind.GivenIn ? queryResult.expectedAmountOut : queryResult.expectedAmountIn;
+        console.log('Query result: ', formatUnits(queryResultAmount.amount, queryResultAmount.token.decimals));
 
         const queryResultFloat = parseFloat(formatUnits(queryResultAmount.amount, queryResultAmount.token.decimals));
         const sorResultFloat = parseFloat(swaps.returnAmount);
