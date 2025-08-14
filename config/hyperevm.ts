@@ -118,6 +118,10 @@ export default <NetworkData>{
                     defillamaPoolId: 'a8a2a14b-2345-4666-adab-227c991c4837',
                     tokenAddress: '0x9fd7466f987fd4c45a5bbde22ed8aba5bc8d72d1',
                 },
+                {
+                    defillamaPoolId: '2ad8497d-c855-4840-85ad-cdc536b92ced',
+                    tokenAddress: '0x0a3d8466f5de586fa5f6de117301e2f90bcc5c48',
+                },
             ],
         },
     },
