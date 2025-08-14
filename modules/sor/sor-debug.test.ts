@@ -75,7 +75,7 @@ describe('sor debugging', () => {
 
     it.only('sor v3', async () => {
         const useProtocolVersion = 3;
-        const chain = Chain.MAINNET;
+        const chain = Chain.SONIC;
 
         const chainId = Object.keys(chainIdToChain).find((key) => chainIdToChain[key] === chain) as string;
         initRequestScopedContext();
@@ -88,12 +88,12 @@ describe('sor debugging', () => {
 
         const swaps = await sorService.getSorSwapPaths({
             chain,
-            tokenIn: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // ETH
-            tokenOut: '0xf1c9acdc66974dfb6decb12aa385b9cd01190e38', // LINK
+            tokenIn: '0x29219dd400f2bf60e5a23d13be72b486d4038894', // ETH
+            tokenOut: '0xeeeeeee6d95e55a468d32feb5d6648754d10a967', // LINK
             swapType,
             swapAmount: '1',
             useProtocolVersion,
-            poolIds: ['0x57c23c58b1d8c3292c15becf07c62c5c52457a42'],
+            poolIds: ['0x5103ea917605463fc497396ba89d6732ce4b2d70'],
         });
 
         swaps.paths.forEach((path, i) => {
