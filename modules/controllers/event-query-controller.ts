@@ -104,21 +104,24 @@ export function EventsQueryController(env = process.env) {
             // Setting default values
             first = Math.min(1000, first ?? 1000); // Limiting to 1000 items
             skip = skip ?? 0;
-            let { chainIn, poolIdIn, typeIn, userAddress } = where || {};
+            let { chainIn, poolIdIn, typeIn, userAddress, range, valueUSD_gt, valueUSD_gte } = where || {};
 
             if (!chainIn) {
                 return [];
             }
 
-            // Table is partitioned by chain, so querying by many chains is extermenly inefficient.
+            // Table is partitioned by chain, so querying by many chains is extremely inefficient.
             if (chainIn && chainIn.length > 1) {
                 return getMultichainEvents({ first, skip, where });
             }
 
             const conditions = {
                 chain: chainIn[0] as Chain,
-                ...(typeIn && typeIn.length > 0 ? { type: { in: typeIn } } : {}),
-                ...(poolIdIn && poolIdIn.length > 0 ? { poolId: { in: poolIdIn } } : {}),
+                ...(typeIn && typeIn.length > 0 ? typeIn : undefined),
+                ...(poolIdIn && poolIdIn.length > 0 ? poolIdIn : undefined),
+                range: range || undefined,
+                valueUSD_gt: valueUSD_gt || undefined,
+                valueUSD_gte: valueUSD_gte || undefined,
                 userAddress: userAddress || undefined,
             };
 
