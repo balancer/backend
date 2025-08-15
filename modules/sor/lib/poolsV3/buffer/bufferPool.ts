@@ -219,10 +219,10 @@ export class BufferPool implements BasePoolMethodsV3 {
         const underlyingTokenAmount = this.tokens[1];
 
         if (tIn.token.isSameAddress(underlyingTokenAmount.token.address)) {
-            const bufferWrapLimit = mainTokenAmount.amount * this.rate;
+            const bufferWrapLimit = MathSol.mulDownFixed(mainTokenAmount.amount, this.rate);
             return swapAmount.amount > bufferWrapLimit;
         } else {
-            const bufferUnwrapLimit = underlyingTokenAmount.amount / this.rate;
+            const bufferUnwrapLimit = MathSol.divDownFixed(underlyingTokenAmount.amount, this.rate);
             return swapAmount.amount > bufferUnwrapLimit;
         }
     }
