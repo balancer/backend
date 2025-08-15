@@ -13,13 +13,15 @@ const orderBy: Prisma.PrismaPoolEventOrderByWithRelationInput[] = [
 export const eventsRepository = {
     getEvents: async ({
         chain,
-        poolId,
+        poolIdIn,
+        typeIn,
         userAddress,
         limit,
         offset,
     }: {
         chain: Chain;
-        poolId?: string;
+        typeIn?: PoolEventType[];
+        poolIdIn?: string[];
         userAddress?: string;
         limit?: number;
         offset?: number;
@@ -30,14 +32,19 @@ export const eventsRepository = {
 
         const where: Prisma.PrismaPoolEventWhereInput = {
             chain,
-            ...(poolId
+            ...(poolIdIn
                 ? {
-                      poolId,
-                      ...(userAddress
-                          ? {
-                                userAddress: userAddress.toLowerCase(),
-                            }
-                          : {}),
+                      poolId: { in: poolIdIn },
+                  }
+                : {}),
+            ...(typeIn
+                ? {
+                      type: { in: typeIn },
+                  }
+                : {}),
+            ...(userAddress
+                ? {
+                      userAddress: userAddress.toLowerCase(),
                   }
                 : {}),
         };

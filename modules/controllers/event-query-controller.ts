@@ -58,15 +58,19 @@ const parseCowAmmSwap = (event: SwapEvent): GqlPoolSwapEventCowAmm => {
     };
 };
 
-const getMultichainEvents = async (chainIn: Chain[], limit: number = 100) => {
+const getMultichainEvents = async ({ first, skip, where }: QueryPoolEventsArgs) => {
+    const chainIn = where!.chainIn as Chain[];
+
+    first = Math.min(100, first ?? 100); // Limiting to 100 items
+    skip = skip ?? 0;
     const results = await Promise.all(
         chainIn.map(async (chain) => {
-            return (await eventsRepository.getEvents({ chain, limit: Math.min(100, limit) })).map((event) =>
+            return (await eventsRepository.getEvents({ chain, limit: first, offset: skip })).map((event) =>
                 event.type === 'SWAP' && (event as SwapEvent).payload?.surplus
                     ? parseCowAmmSwap(event as SwapEvent)
                     : event.type === 'SWAP'
-                      ? parseSwap(event as SwapEvent)
-                      : parseJoinExit(event as JoinExitEvent),
+                    ? parseSwap(event as SwapEvent)
+                    : parseJoinExit(event as JoinExitEvent),
             );
         }),
     );
@@ -108,13 +112,13 @@ export function EventsQueryController(env = process.env) {
 
             // Table is partitioned by chain, so querying by many chains is extermenly inefficient.
             if (chainIn && chainIn.length > 1) {
-                return getMultichainEvents(chainIn as Chain[], first);
+                return getMultichainEvents({ first, skip, where });
             }
 
             const conditions = {
                 chain: chainIn[0] as Chain,
                 ...(typeIn && typeIn.length > 0 ? { type: { in: typeIn } } : {}),
-                ...(poolIdIn && poolIdIn.length > 0 ? { poolId: poolIdIn[0] as string } : {}),
+                ...(poolIdIn && poolIdIn.length > 0 ? { poolId: { in: poolIdIn } } : {}),
                 userAddress: userAddress || undefined,
             };
 
@@ -128,8 +132,8 @@ export function EventsQueryController(env = process.env) {
                 event.type === 'SWAP' && (event as SwapEvent).payload?.surplus
                     ? parseCowAmmSwap(event as SwapEvent)
                     : event.type === 'SWAP'
-                      ? parseSwap(event as SwapEvent)
-                      : parseJoinExit(event as JoinExitEvent),
+                    ? parseSwap(event as SwapEvent)
+                    : parseJoinExit(event as JoinExitEvent),
             );
 
             return results;
