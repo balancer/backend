@@ -58,14 +58,22 @@ export const eventsRepository = {
         const where: Prisma.PrismaPoolEventWhereInput = {
             chain,
             ...(poolIdIn
-                ? {
-                      poolId: { in: poolIdIn },
-                  }
+                ? poolIdIn.length === 1
+                    ? {
+                          poolId: poolIdIn[0],
+                      }
+                    : {
+                          poolId: { in: poolIdIn },
+                      }
                 : {}),
             ...(typeIn
-                ? {
-                      type: { in: typeIn },
-                  }
+                ? typeIn.length === 1
+                    ? {
+                          type: typeIn[0],
+                      }
+                    : {
+                          type: { in: typeIn },
+                      }
                 : {}),
             ...(userAddress
                 ? {
