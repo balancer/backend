@@ -20,7 +20,7 @@ const commands: Record<string, Command> = {
 
             return eventsRepository.getEvents({
                 chain,
-                poolId,
+                poolIdIn: poolId ? [poolId] : undefined,
                 userAddress,
                 limit,
                 offset,
