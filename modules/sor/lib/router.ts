@@ -5,7 +5,10 @@ import { max, min } from './utils/math';
 import { BasePool } from './poolsV2/basePool';
 import { PathLocal, PathWithAmount } from './path';
 import { parseEther } from 'viem';
+import { Chain } from '@prisma/client';
+import { chainToChainId } from '../../network/chain-id-to-chain';
 
+const SWAPS_GREATER_THAN_BUFFER_LIMIT_THRESHOLD = 2;
 export class Router {
     private readonly pathGraph: PathGraph;
 
@@ -58,6 +61,13 @@ export class Router {
             validPaths.forEach((path) => {
                 try {
                     const pathWithAmount = new PathWithAmount(path.tokens, path.pools, path.isBuffer, amount);
+
+                    // prevent paths with high gas cost on HyperEvm due to small blocks limitation
+                    const isHyperEvm = swapAmount.token.chainId === parseInt(chainToChainId[Chain.HYPEREVM]);
+                    const gasCostTooHigh =
+                        isHyperEvm &&
+                        pathWithAmount.swapStepsGreaterThanBufferLimit > SWAPS_GREATER_THAN_BUFFER_LIMIT_THRESHOLD;
+
                     /**
                      * Remove paths that return 0 amount
                      * It usually happens when low swapAmounts are provided and return amounts rounded down to zero
@@ -66,7 +76,7 @@ export class Router {
                         pathWithAmount.swapKind === SwapKind.GivenIn
                             ? pathWithAmount.outputAmount
                             : pathWithAmount.inputAmount;
-                    if (calculatedAmount.amount > 0n) {
+                    if (calculatedAmount.amount > 0n && !gasCostTooHigh) {
                         quotePathsByRatio[i].push(pathWithAmount);
                         selectedPaths.push(path);
                     }

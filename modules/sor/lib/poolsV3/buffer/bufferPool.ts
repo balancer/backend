@@ -212,4 +212,32 @@ export class BufferPool implements BasePoolMethodsV3 {
             this.maxWithdraw,
         );
     }
+
+    public swapGivenInGreaterThanBufferLimit(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): boolean {
+        const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
+        const mainTokenAmount = this.tokens[0];
+        const underlyingTokenAmount = this.tokens[1];
+
+        if (tIn.token.isSameAddress(underlyingTokenAmount.token.address)) {
+            const bufferWrapLimit = mainTokenAmount.amount * this.rate;
+            return swapAmount.amount > bufferWrapLimit;
+        } else {
+            const bufferUnwrapLimit = underlyingTokenAmount.amount / this.rate;
+            return swapAmount.amount > bufferUnwrapLimit;
+        }
+    }
+
+    public swapGivenOutGreaterThanBufferLimit(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): boolean {
+        const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
+        const mainTokenAmount = this.tokens[0];
+        const underlyingTokenAmount = this.tokens[1];
+
+        if (tIn.token.isSameAddress(underlyingTokenAmount.token.address)) {
+            const bufferWrapLimit = mainTokenAmount.amount;
+            return swapAmount.amount > bufferWrapLimit;
+        } else {
+            const bufferUnwrapLimit = underlyingTokenAmount.amount;
+            return swapAmount.amount > bufferUnwrapLimit;
+        }
+    }
 }
