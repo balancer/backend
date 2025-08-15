@@ -96,12 +96,11 @@ export class LiquidityGaugeAprHandler implements AprHandler {
                 // veBAL rewards have a min and max, we create two items for them
                 if (isVeBalemissions && (pool.chain === 'MAINNET' || gauge.version === 2)) {
                     let minApr = 0;
-                    if (gaugeTvl > 0) {
-                        if (workingSupply > 0 && gaugeTotalShares > 0) {
-                            minApr = (((gaugeTotalShares * 0.4) / workingSupply) * rewardPerYear) / gaugeTvl;
-                        } else {
-                            minApr = rewardPerYear / gaugeTvl;
-                        }
+                    const adjustedGaugeTvl = gaugeTvl === 0 ? 1 : gaugeTvl; // Avoid division by zero
+                    if (workingSupply > 0 && gaugeTotalShares > 0) {
+                        minApr = (((gaugeTotalShares * 0.4) / workingSupply) * rewardPerYear) / adjustedGaugeTvl;
+                    } else {
+                        minApr = rewardPerYear / adjustedGaugeTvl;
                     }
 
                     itemData.apr = minApr;
