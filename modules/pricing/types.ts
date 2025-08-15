@@ -12,6 +12,7 @@ export interface TokenPriceData {
     underlyingTokenPrice?: number;
     currentPrice?: number;
     latestSwaps?: SwapEvent[];
+    pricedBy?: string;
 }
 
 export interface PriceItem {
@@ -29,7 +30,10 @@ export interface PriceHandler {
      * @param allPrices Complete map of all available token prices (address -> price)
      * @returns Array of price items ready to be saved
      */
-    calculatePricesForTokens(tokens: TokenPriceData[], allPrices?: Map<string, number>): Promise<PriceItem[]>;
+    calculatePricesForTokens(
+        tokens: TokenPriceData[],
+        allPrices?: Map<string, { price: number; updatedBy: string }>,
+    ): Promise<PriceItem[]>;
 
     /**
      * Get the name of this price handler

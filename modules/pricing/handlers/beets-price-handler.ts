@@ -27,7 +27,10 @@ export class BeetsPriceHandler implements PriceHandler {
 
     constructor(private getViemClient: (chain: Chain) => IViemClient) {}
 
-    async calculatePricesForTokens(tokens: TokenPriceData[], allPrices: Map<string, number>): Promise<PriceItem[]> {
+    async calculatePricesForTokens(
+        tokens: TokenPriceData[],
+        allPrices: Map<string, { price: number; updatedBy: string }>,
+    ): Promise<PriceItem[]> {
         const acceptedTokens = this.getAcceptedTokens(tokens);
 
         if (acceptedTokens.length === 0) {
@@ -43,7 +46,7 @@ export class BeetsPriceHandler implements PriceHandler {
             }
 
             // Perform batch swap query to get BEETS price
-            const beetsPrice = await this.getBeetsPriceFromSwap(stSPrice);
+            const beetsPrice = await this.getBeetsPriceFromSwap(stSPrice.price);
             if (!beetsPrice) {
                 console.error('BeetsPriceHandler: Could not get BEETS price from swap');
                 return [];

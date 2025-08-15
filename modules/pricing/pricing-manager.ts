@@ -1,9 +1,7 @@
 import { PriceHandler, PriceItem, TokenPriceData } from './types';
 
 export class PricingManager {
-    constructor(
-        private readonly handlers: PriceHandler[],
-    ) {}
+    constructor(private readonly handlers: PriceHandler[]) {}
 
     async calculatePricesForTokens(tokens: TokenPriceData[]): Promise<PriceItem[]> {
         if (tokens.length === 0) {
@@ -11,10 +9,13 @@ export class PricingManager {
         }
 
         // Build initial price map from tokens' currentPrice
-        const allPrices = new Map<string, number>();
-        tokens.forEach(token => {
+        const allPrices = new Map<string, { price: number; updatedBy: string }>();
+        tokens.forEach((token) => {
             if (token.currentPrice) {
-                allPrices.set(token.address, token.currentPrice);
+                allPrices.set(token.address, {
+                    price: token.currentPrice,
+                    updatedBy: token.pricedBy || '',
+                });
             }
         });
 
@@ -31,8 +32,8 @@ export class PricingManager {
                 allPriceItems.push(...priceItems);
 
                 // Update allPrices map with new prices from this handler
-                priceItems.forEach(item => {
-                    allPrices.set(item.address, item.price);
+                priceItems.forEach((item) => {
+                    allPrices.set(item.address, { price: item.price, updatedBy: item.updatedBy });
                 });
 
                 // Remove successfully priced tokens from remaining tokens

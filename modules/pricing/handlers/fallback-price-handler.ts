@@ -5,7 +5,10 @@ export class FallbackPriceHandler implements PriceHandler {
     public readonly exitIfFails = false;
     public readonly id = 'FallbackHandlerService';
 
-    async calculatePricesForTokens(tokens: TokenPriceData[], allPrices?: Map<string, number>): Promise<PriceItem[]> {
+    async calculatePricesForTokens(
+        tokens: TokenPriceData[],
+        allPrices?: Map<string, { price: number; updatedBy: string }>,
+    ): Promise<PriceItem[]> {
         const acceptedTokens = this.getAcceptedTokens(tokens);
 
         if (acceptedTokens.length === 0) {
@@ -26,7 +29,7 @@ export class FallbackPriceHandler implements PriceHandler {
                     priceItems.push({
                         address: token.address,
                         chain: token.chain,
-                        price: price,
+                        price: price.price,
                         updatedAt: new Date(),
                         updatedBy: this.id,
                     });
