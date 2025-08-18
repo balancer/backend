@@ -26,22 +26,6 @@ extend type Query {
         textSearch: String
     ): Int!
     """
-    Will de deprecated in favor of poolEvents
-    """
-    poolGetSwaps(first: Int, skip: Int, where: GqlPoolSwapFilter): [GqlPoolSwap!]!
-        @deprecated(reason: "Use poolEvents instead")
-    """
-    Will de deprecated in favor of poolEvents
-    """
-    poolGetBatchSwaps(first: Int, skip: Int, where: GqlPoolSwapFilter): [GqlPoolBatchSwap!]!
-        @deprecated(reason: "Use poolEvents instead")
-    """
-    Will de deprecated in favor of poolEvents
-    """
-    poolGetJoinExits(first: Int, skip: Int, where: GqlPoolJoinExitFilter): [GqlPoolJoinExit!]!
-        @deprecated(reason: "Use poolEvents instead")
-
-    """
     Returns the list of featured pools for chains
     """
     poolGetFeaturedPools(chains: [GqlChain!]!): [GqlPoolFeaturedPool!]!
@@ -2147,8 +2131,10 @@ enum GqlPoolEventType {
 
 input GqlPoolEventsFilter {
     chainIn: [GqlChain]
-    poolIdIn: [String]
-    typeIn: [GqlPoolEventType]
+    poolId: String
+    type: GqlPoolEventType
+    poolIdIn: [String] @deprecated
+    typeIn: [GqlPoolEventType] @deprecated
     userAddress: String
 }
 

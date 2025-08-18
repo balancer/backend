@@ -868,14 +868,11 @@ export type GqlPoolEventsDataRange = 'NINETY_DAYS' | 'SEVEN_DAYS' | 'THIRTY_DAYS
 
 export interface GqlPoolEventsFilter {
     chainIn?: InputMaybe<Array<InputMaybe<GqlChain>>>;
+    poolId?: InputMaybe<Scalars['String']>;
     poolIdIn?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
-    range?: InputMaybe<GqlPoolEventsDataRange>;
+    type?: InputMaybe<GqlPoolEventType>;
     typeIn?: InputMaybe<Array<InputMaybe<GqlPoolEventType>>>;
     userAddress?: InputMaybe<Scalars['String']>;
-    /** USD value of the event */
-    valueUSD_gt?: InputMaybe<Scalars['Float']>;
-    /** USD value of the event */
-    valueUSD_gte?: InputMaybe<Scalars['Float']>;
 }
 
 export interface GqlPoolFeaturedPool {
@@ -2994,20 +2991,8 @@ export interface Query {
      * @deprecated Use aggregatorPools instead
      */
     poolGetAggregatorPools: Array<GqlPoolAggregator>;
-    /**
-     * Will de deprecated in favor of poolEvents
-     * @deprecated Use poolEvents instead
-     */
-    poolGetBatchSwaps: Array<GqlPoolBatchSwap>;
-    /** Getting swap, add and remove events with range */
-    poolGetEvents: Array<GqlPoolEvent>;
     /** Returns the list of featured pools for chains */
     poolGetFeaturedPools: Array<GqlPoolFeaturedPool>;
-    /**
-     * Will de deprecated in favor of poolEvents
-     * @deprecated Use poolEvents instead
-     */
-    poolGetJoinExits: Array<GqlPoolJoinExit>;
     /** Returns one pool. If a user address is provided, the user balances for the given pool will also be returned. */
     poolGetPool: GqlPoolBase;
     /** Returns all pools for a given filter */
@@ -3016,11 +3001,6 @@ export interface Query {
     poolGetPoolsCount: Scalars['Int'];
     /** Gets all the snapshots for a given pool on a chain for a certain range */
     poolGetSnapshots: Array<GqlPoolSnapshot>;
-    /**
-     * Will de deprecated in favor of poolEvents
-     * @deprecated Use poolEvents instead
-     */
-    poolGetSwaps: Array<GqlPoolSwap>;
     protocolMetricsAggregated: GqlProtocolMetricsAggregated;
     protocolMetricsChain: GqlProtocolMetricsChain;
     /** Get the staking data and status for sFTMx */
@@ -3128,28 +3108,8 @@ export interface QueryPoolGetAggregatorPoolsArgs {
     where?: InputMaybe<GqlPoolFilter>;
 }
 
-export interface QueryPoolGetBatchSwapsArgs {
-    first?: InputMaybe<Scalars['Int']>;
-    skip?: InputMaybe<Scalars['Int']>;
-    where?: InputMaybe<GqlPoolSwapFilter>;
-}
-
-export interface QueryPoolGetEventsArgs {
-    chain: GqlChain;
-    poolId: Scalars['String'];
-    range: GqlPoolEventsDataRange;
-    typeIn: Array<GqlPoolEventType>;
-    userAddress?: InputMaybe<Scalars['String']>;
-}
-
 export interface QueryPoolGetFeaturedPoolsArgs {
     chains: Array<GqlChain>;
-}
-
-export interface QueryPoolGetJoinExitsArgs {
-    first?: InputMaybe<Scalars['Int']>;
-    skip?: InputMaybe<Scalars['Int']>;
-    where?: InputMaybe<GqlPoolJoinExitFilter>;
 }
 
 export interface QueryPoolGetPoolArgs {
@@ -3180,12 +3140,6 @@ export interface QueryPoolGetSnapshotsArgs {
     chain?: InputMaybe<GqlChain>;
     id: Scalars['String'];
     range: GqlPoolSnapshotDataRange;
-}
-
-export interface QueryPoolGetSwapsArgs {
-    first?: InputMaybe<Scalars['Int']>;
-    skip?: InputMaybe<Scalars['Int']>;
-    where?: InputMaybe<GqlPoolSwapFilter>;
 }
 
 export interface QueryProtocolMetricsAggregatedArgs {
@@ -6282,29 +6236,11 @@ export type QueryResolvers<
         ContextType,
         RequireFields<QueryPoolGetAggregatorPoolsArgs, never>
     >;
-    poolGetBatchSwaps?: Resolver<
-        Array<ResolversTypes['GqlPoolBatchSwap']>,
-        ParentType,
-        ContextType,
-        RequireFields<QueryPoolGetBatchSwapsArgs, never>
-    >;
-    poolGetEvents?: Resolver<
-        Array<ResolversTypes['GqlPoolEvent']>,
-        ParentType,
-        ContextType,
-        RequireFields<QueryPoolGetEventsArgs, 'chain' | 'poolId' | 'range' | 'typeIn'>
-    >;
     poolGetFeaturedPools?: Resolver<
         Array<ResolversTypes['GqlPoolFeaturedPool']>,
         ParentType,
         ContextType,
         RequireFields<QueryPoolGetFeaturedPoolsArgs, 'chains'>
-    >;
-    poolGetJoinExits?: Resolver<
-        Array<ResolversTypes['GqlPoolJoinExit']>,
-        ParentType,
-        ContextType,
-        RequireFields<QueryPoolGetJoinExitsArgs, never>
     >;
     poolGetPool?: Resolver<
         ResolversTypes['GqlPoolBase'],
@@ -6329,12 +6265,6 @@ export type QueryResolvers<
         ParentType,
         ContextType,
         RequireFields<QueryPoolGetSnapshotsArgs, 'id' | 'range'>
-    >;
-    poolGetSwaps?: Resolver<
-        Array<ResolversTypes['GqlPoolSwap']>,
-        ParentType,
-        ContextType,
-        RequireFields<QueryPoolGetSwapsArgs, never>
     >;
     protocolMetricsAggregated?: Resolver<
         ResolversTypes['GqlProtocolMetricsAggregated'],

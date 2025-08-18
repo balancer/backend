@@ -1318,20 +1318,11 @@ export const schema = gql`
 
     input GqlPoolEventsFilter {
         chainIn: [GqlChain]
-        poolIdIn: [String]
-        range: GqlPoolEventsDataRange @deprecated
-        typeIn: [GqlPoolEventType]
+        poolId: String
+        poolIdIn: [String] @deprecated
+        type: GqlPoolEventType
+        typeIn: [GqlPoolEventType] @deprecated
         userAddress: String
-
-        """
-        USD value of the event
-        """
-        valueUSD_gt: Float @deprecated
-
-        """
-        USD value of the event
-        """
-        valueUSD_gte: Float @deprecated
     }
 
     type GqlPoolFeaturedPool {
@@ -4250,32 +4241,9 @@ export const schema = gql`
         ): [GqlPoolAggregator!]! @deprecated(reason: "Use aggregatorPools instead")
 
         """
-        Will de deprecated in favor of poolEvents
-        """
-        poolGetBatchSwaps(first: Int, skip: Int, where: GqlPoolSwapFilter): [GqlPoolBatchSwap!]!
-            @deprecated(reason: "Use poolEvents instead")
-
-        """
-        Getting swap, add and remove events with range
-        """
-        poolGetEvents(
-            chain: GqlChain!
-            poolId: String!
-            range: GqlPoolEventsDataRange!
-            typeIn: [GqlPoolEventType!]!
-            userAddress: String
-        ): [GqlPoolEvent!]!
-
-        """
         Returns the list of featured pools for chains
         """
         poolGetFeaturedPools(chains: [GqlChain!]!): [GqlPoolFeaturedPool!]!
-
-        """
-        Will de deprecated in favor of poolEvents
-        """
-        poolGetJoinExits(first: Int, skip: Int, where: GqlPoolJoinExitFilter): [GqlPoolJoinExit!]!
-            @deprecated(reason: "Use poolEvents instead")
 
         """
         Returns one pool. If a user address is provided, the user balances for the given pool will also be returned.
@@ -4310,12 +4278,6 @@ export const schema = gql`
         Gets all the snapshots for a given pool on a chain for a certain range
         """
         poolGetSnapshots(chain: GqlChain, id: String!, range: GqlPoolSnapshotDataRange!): [GqlPoolSnapshot!]!
-
-        """
-        Will de deprecated in favor of poolEvents
-        """
-        poolGetSwaps(first: Int, skip: Int, where: GqlPoolSwapFilter): [GqlPoolSwap!]!
-            @deprecated(reason: "Use poolEvents instead")
         protocolMetricsAggregated(chains: [GqlChain!]): GqlProtocolMetricsAggregated!
         protocolMetricsChain(chain: GqlChain): GqlProtocolMetricsChain!
 

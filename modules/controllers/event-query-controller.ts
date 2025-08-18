@@ -107,7 +107,7 @@ export function EventsQueryController(env = process.env) {
             // Setting default values
             first = Math.min(1000, first ?? 1000); // Limiting to 1000 items
             skip = skip ?? 0;
-            let { chainIn, poolIdIn, typeIn, userAddress } = where || {};
+            let { chainIn, poolIdIn, poolId, type, typeIn, userAddress } = where || {};
 
             if (!chainIn) {
                 return [];
@@ -122,6 +122,8 @@ export function EventsQueryController(env = process.env) {
                 chain: chainIn[0] as Chain,
                 ...(typeIn && typeIn.length > 0 ? { eventType: GqlTypeToDbType[typeIn[0] as GqlPoolEventType] } : {}),
                 ...(poolIdIn && poolIdIn.length > 0 ? { poolId: poolIdIn[0] as string } : {}),
+                ...(poolId ? { poolId: poolId } : {}),
+                ...(type ? { eventType: GqlTypeToDbType[type] } : {}),
                 userAddress: userAddress || undefined,
             };
 
