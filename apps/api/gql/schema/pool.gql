@@ -50,16 +50,6 @@ extend type Query {
     """
     poolGetSnapshots(id: String!, chain: GqlChain, range: GqlPoolSnapshotDataRange!): [GqlPoolSnapshot!]!
     """
-    Getting swap, add and remove events with range
-    """
-    poolGetEvents(
-        range: GqlPoolEventsDataRange!
-        poolId: String!
-        chain: GqlChain!
-        typeIn: [GqlPoolEventType!]!
-        userAddress: String
-    ): [GqlPoolEvent!]!
-    """
     Getting swap, add and remove events with paging
     """
     poolEvents(first: Int, skip: Int, where: GqlPoolEventsFilter): [GqlPoolEvent!]!
@@ -2160,15 +2150,6 @@ input GqlPoolEventsFilter {
     poolIdIn: [String]
     typeIn: [GqlPoolEventType]
     userAddress: String
-    range: GqlPoolEventsDataRange @deprecated
-    """
-    USD value of the event
-    """
-    valueUSD_gt: Float @deprecated
-    """
-    USD value of the event
-    """
-    valueUSD_gte: Float @deprecated
 }
 
 type GqlPoolEventAmount {
