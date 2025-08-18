@@ -3,8 +3,9 @@ import {
     GqlPoolSwapEventV3,
     QueryPoolEventsArgs,
     GqlPoolSwapEventCowAmm,
+    GqlPoolEventType,
 } from '../../apps/api/gql/generated-schema';
-import { Chain } from '@prisma/client';
+import { Chain, PoolEventType } from '@prisma/client';
 import { JoinExitEvent, SwapEvent } from '../../prisma/prisma-types';
 import { eventsRepository } from '../repositories/events';
 
@@ -58,19 +59,21 @@ const parseCowAmmSwap = (event: SwapEvent): GqlPoolSwapEventCowAmm => {
     };
 };
 
-const getMultichainEvents = async ({ first, skip, where }: QueryPoolEventsArgs) => {
-    const chainIn = where!.chainIn as Chain[];
+const GqlTypeToDbType: Record<GqlPoolEventType, PoolEventType> = {
+    SWAP: 'SWAP',
+    ADD: 'JOIN',
+    REMOVE: 'EXIT',
+};
 
-    first = Math.min(100, first ?? 100); // Limiting to 100 items
-    skip = skip ?? 0;
+const getMultichainEvents = async (chainIn: Chain[], limit: number = 100) => {
     const results = await Promise.all(
         chainIn.map(async (chain) => {
-            return (await eventsRepository.getEvents({ chain, limit: first, offset: skip })).map((event) =>
+            return (await eventsRepository.getEvents({ chain, limit: Math.min(100, limit) })).map((event) =>
                 event.type === 'SWAP' && (event as SwapEvent).payload?.surplus
                     ? parseCowAmmSwap(event as SwapEvent)
                     : event.type === 'SWAP'
-                    ? parseSwap(event as SwapEvent)
-                    : parseJoinExit(event as JoinExitEvent),
+                      ? parseSwap(event as SwapEvent)
+                      : parseJoinExit(event as JoinExitEvent),
             );
         }),
     );
@@ -104,24 +107,21 @@ export function EventsQueryController(env = process.env) {
             // Setting default values
             first = Math.min(1000, first ?? 1000); // Limiting to 1000 items
             skip = skip ?? 0;
-            let { chainIn, poolIdIn, typeIn, userAddress, range, valueUSD_gt, valueUSD_gte } = where || {};
+            let { chainIn, poolIdIn, typeIn, userAddress } = where || {};
 
             if (!chainIn) {
                 return [];
             }
 
-            // Table is partitioned by chain, so querying by many chains is extremely inefficient.
+            // Table is partitioned by chain, so querying by many chains is extermenly inefficient.
             if (chainIn && chainIn.length > 1) {
-                return getMultichainEvents({ first, skip, where });
+                return getMultichainEvents(chainIn as Chain[], first);
             }
 
             const conditions = {
                 chain: chainIn[0] as Chain,
-                ...(typeIn && typeIn.length > 0 ? typeIn : undefined),
-                ...(poolIdIn && poolIdIn.length > 0 ? poolIdIn : undefined),
-                range: range || undefined,
-                valueUSD_gt: valueUSD_gt || undefined,
-                valueUSD_gte: valueUSD_gte || undefined,
+                ...(typeIn && typeIn.length > 0 ? { eventType: GqlTypeToDbType[typeIn[0] as GqlPoolEventType] } : {}),
+                ...(poolIdIn && poolIdIn.length > 0 ? { poolId: poolIdIn[0] as string } : {}),
                 userAddress: userAddress || undefined,
             };
 
@@ -135,8 +135,8 @@ export function EventsQueryController(env = process.env) {
                 event.type === 'SWAP' && (event as SwapEvent).payload?.surplus
                     ? parseCowAmmSwap(event as SwapEvent)
                     : event.type === 'SWAP'
-                    ? parseSwap(event as SwapEvent)
-                    : parseJoinExit(event as JoinExitEvent),
+                      ? parseSwap(event as SwapEvent)
+                      : parseJoinExit(event as JoinExitEvent),
             );
 
             return results;

@@ -3,9 +3,6 @@ import { prisma } from '../../../prisma/prisma-client';
 import { JoinExitEvent, SwapEvent } from '../../../prisma/prisma-types';
 import type { SwapStats } from './types';
 import { daysAgo, now } from '../../common/time';
-import { GqlPoolAddRemoveEventV3 } from '../../../apps/api/gql/schema/__mocks__/types';
-import { GqlPoolEventsDataRange } from '../../../apps/api/gql/generated-schema';
-import moment from 'moment';
 
 const orderBy: Prisma.PrismaPoolEventOrderByWithRelationInput[] = [
     { blockTimestamp: 'desc' },
@@ -16,21 +13,15 @@ const orderBy: Prisma.PrismaPoolEventOrderByWithRelationInput[] = [
 export const eventsRepository = {
     getEvents: async ({
         chain,
-        poolIdIn,
-        typeIn,
-        range,
-        valueUSD_gt,
-        valueUSD_gte,
+        poolId,
+        eventType,
         userAddress,
         limit,
         offset,
     }: {
         chain: Chain;
-        poolIdIn?: string[];
-        typeIn?: PoolEventType[];
-        range?: GqlPoolEventsDataRange;
-        valueUSD_gt?: number;
-        valueUSD_gte?: number;
+        poolId?: string;
+        eventType?: PoolEventType;
         userAddress?: string;
         limit?: number;
         offset?: number;
@@ -39,62 +30,19 @@ export const eventsRepository = {
         limit = Math.min(1000, limit ?? 1000); // Limiting to 1000 events
         offset = offset ?? 0;
 
-        // get timestamp for 30 days ago
-        let daysAgoTimestamp = undefined;
-        switch (range) {
-            case 'SEVEN_DAYS':
-                daysAgoTimestamp = moment().startOf('day').subtract(7, 'days').unix();
-                break;
-            case 'THIRTY_DAYS':
-                daysAgoTimestamp = moment().startOf('day').subtract(30, 'days').unix();
-                break;
-            case 'NINETY_DAYS':
-                daysAgoTimestamp = moment().startOf('day').subtract(30, 'days').unix();
-                break;
-            default:
-                daysAgoTimestamp = undefined;
-        }
-
         const where: Prisma.PrismaPoolEventWhereInput = {
             chain,
-            ...(poolIdIn
-                ? poolIdIn.length === 1
-                    ? {
-                          poolId: poolIdIn[0],
-                      }
-                    : {
-                          poolId: { in: poolIdIn },
-                      }
-                : {}),
-            ...(typeIn
-                ? typeIn.length === 1
-                    ? {
-                          type: typeIn[0],
-                      }
-                    : {
-                          type: { in: typeIn },
-                      }
-                : {}),
-            ...(userAddress
+            ...(poolId
                 ? {
-                      userAddress: userAddress.toLowerCase(),
+                      poolId,
+                      ...(userAddress
+                          ? {
+                                userAddress: userAddress.toLowerCase(),
+                            }
+                          : {}),
                   }
                 : {}),
-            ...(daysAgoTimestamp
-                ? {
-                      blockTimestamp: { gte: daysAgoTimestamp },
-                  }
-                : {}),
-            ...(valueUSD_gt
-                ? {
-                      valueUSD: { gt: valueUSD_gt },
-                  }
-                : {}),
-            ...(valueUSD_gte
-                ? {
-                      valueUSD: { gte: valueUSD_gte },
-                  }
-                : {}),
+            ...(eventType ? { type: eventType } : {}),
         };
 
         const dbEvents = await prisma.prismaPoolEvent.findMany({

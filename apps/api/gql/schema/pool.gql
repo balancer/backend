@@ -2160,15 +2160,15 @@ input GqlPoolEventsFilter {
     poolIdIn: [String]
     typeIn: [GqlPoolEventType]
     userAddress: String
-    range: GqlPoolEventsDataRange
+    range: GqlPoolEventsDataRange @deprecated
     """
     USD value of the event
     """
-    valueUSD_gt: Float
+    valueUSD_gt: Float @deprecated
     """
     USD value of the event
     """
-    valueUSD_gte: Float
+    valueUSD_gte: Float @deprecated
 }
 
 type GqlPoolEventAmount {

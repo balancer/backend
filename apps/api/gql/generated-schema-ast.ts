@@ -1319,19 +1319,19 @@ export const schema = gql`
     input GqlPoolEventsFilter {
         chainIn: [GqlChain]
         poolIdIn: [String]
-        range: GqlPoolEventsDataRange
+        range: GqlPoolEventsDataRange @deprecated
         typeIn: [GqlPoolEventType]
         userAddress: String
 
         """
         USD value of the event
         """
-        valueUSD_gt: Float
+        valueUSD_gt: Float @deprecated
 
         """
         USD value of the event
         """
-        valueUSD_gte: Float
+        valueUSD_gte: Float @deprecated
     }
 
     type GqlPoolFeaturedPool {
