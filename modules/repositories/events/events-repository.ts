@@ -14,12 +14,14 @@ export const eventsRepository = {
     getEvents: async ({
         chain,
         poolId,
+        eventType,
         userAddress,
         limit,
         offset,
     }: {
         chain: Chain;
         poolId?: string;
+        eventType?: PoolEventType;
         userAddress?: string;
         limit?: number;
         offset?: number;
@@ -40,6 +42,7 @@ export const eventsRepository = {
                           : {}),
                   }
                 : {}),
+            ...(eventType ? { type: eventType } : {}),
         };
 
         const dbEvents = await prisma.prismaPoolEvent.findMany({

@@ -26,22 +26,6 @@ extend type Query {
         textSearch: String
     ): Int!
     """
-    Will de deprecated in favor of poolEvents
-    """
-    poolGetSwaps(first: Int, skip: Int, where: GqlPoolSwapFilter): [GqlPoolSwap!]!
-        @deprecated(reason: "Use poolEvents instead")
-    """
-    Will de deprecated in favor of poolEvents
-    """
-    poolGetBatchSwaps(first: Int, skip: Int, where: GqlPoolSwapFilter): [GqlPoolBatchSwap!]!
-        @deprecated(reason: "Use poolEvents instead")
-    """
-    Will de deprecated in favor of poolEvents
-    """
-    poolGetJoinExits(first: Int, skip: Int, where: GqlPoolJoinExitFilter): [GqlPoolJoinExit!]!
-        @deprecated(reason: "Use poolEvents instead")
-
-    """
     Returns the list of featured pools for chains
     """
     poolGetFeaturedPools(chains: [GqlChain!]!): [GqlPoolFeaturedPool!]!
@@ -49,16 +33,6 @@ extend type Query {
     Gets all the snapshots for a given pool on a chain for a certain range
     """
     poolGetSnapshots(id: String!, chain: GqlChain, range: GqlPoolSnapshotDataRange!): [GqlPoolSnapshot!]!
-    """
-    Getting swap, add and remove events with range
-    """
-    poolGetEvents(
-        range: GqlPoolEventsDataRange!
-        poolId: String!
-        chain: GqlChain!
-        typeIn: [GqlPoolEventType!]!
-        userAddress: String
-    ): [GqlPoolEvent!]!
     """
     Getting swap, add and remove events with paging
     """
@@ -2157,18 +2131,11 @@ enum GqlPoolEventType {
 
 input GqlPoolEventsFilter {
     chainIn: [GqlChain]
-    poolIdIn: [String]
-    typeIn: [GqlPoolEventType]
+    poolId: String
+    type: GqlPoolEventType
+    poolIdIn: [String] @deprecated
+    typeIn: [GqlPoolEventType] @deprecated
     userAddress: String
-    range: GqlPoolEventsDataRange
-    """
-    USD value of the event
-    """
-    valueUSD_gt: Float
-    """
-    USD value of the event
-    """
-    valueUSD_gte: Float
 }
 
 type GqlPoolEventAmount {

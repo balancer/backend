@@ -78,9 +78,9 @@ describe('LbpPriceHandler', () => {
                 },
             ];
 
-            const allPrices = new Map<string, number>();
-            allPrices.set('0xreserve1', 1.0);
-            allPrices.set('0xreserve2', 2.0);
+            const allPrices = new Map<string, { price: number; updatedBy: string }>();
+            allPrices.set('0xreserve1', { price: 1.0, updatedBy: 'initial' });
+            allPrices.set('0xreserve2', { price: 2.0, updatedBy: 'initial' });
 
             mockPrismaPool.findMany.mockResolvedValue(mockLBPs);
 
@@ -116,8 +116,8 @@ describe('LbpPriceHandler', () => {
                 },
             ];
 
-            const allPrices = new Map<string, number>();
-            allPrices.set('0xreserve1', 1.0);
+            const allPrices = new Map<string, { price: number; updatedBy: string }>();
+            allPrices.set('0xreserve1', { price: 1.0, updatedBy: 'initial' });
 
             mockPrismaPool.findMany.mockResolvedValue([]);
 
@@ -197,8 +197,8 @@ describe('LbpPriceHandler', () => {
                 },
             ];
 
-            const allPrices = new Map<string, number>();
-            allPrices.set('0xreserve1', 1.0);
+            const allPrices = new Map<string, { price: number; updatedBy: string }>();
+            allPrices.set('0xreserve1', { price: 1.0, updatedBy: 'initial' });
             // reserve2 price missing
 
             mockPrismaPool.findMany.mockResolvedValue(mockLBPs);
@@ -262,9 +262,9 @@ describe('LbpPriceHandler', () => {
                 },
             ];
 
-            const allPrices = new Map<string, number>();
-            allPrices.set('0xreserve1', 1.0);
-            allPrices.set('0xreserve2', 2.0);
+            const allPrices = new Map<string, { price: number; updatedBy: string }>();
+            allPrices.set('0xreserve1', { price: 1.0, updatedBy: 'initial' });
+            allPrices.set('0xreserve2', { price: 2.0, updatedBy: 'initial' });
 
             mockPrismaPool.findMany.mockResolvedValue(mockLBPs);
 
@@ -302,8 +302,8 @@ describe('LbpPriceHandler', () => {
                 },
             ];
 
-            const allPrices = new Map<string, number>();
-            allPrices.set('0xreserve1', 1.0);
+            const allPrices = new Map<string, { price: number; updatedBy: string }>();
+            allPrices.set('0xreserve1', { price: 1.0, updatedBy: 'initial' });
 
             mockPrismaPool.findMany.mockResolvedValue(mockLBPs);
 
@@ -321,8 +321,8 @@ describe('LbpPriceHandler', () => {
                 },
             ];
 
-            const allPrices = new Map<string, number>();
-            allPrices.set('0xreserve1', 1.0);
+            const allPrices = new Map<string, { price: number; updatedBy: string }>();
+            allPrices.set('0xreserve1', { price: 1.0, updatedBy: 'initial' });
 
             mockPrismaPool.findMany.mockRejectedValue(new Error('Database error'));
 
@@ -388,9 +388,9 @@ describe('LbpPriceHandler', () => {
                 },
             ];
 
-            const allPrices = new Map<string, number>();
-            allPrices.set('0xreserve1', 1.0);
-            allPrices.set('0xreserve2', 2.0);
+            const allPrices = new Map<string, { price: number; updatedBy: string }>();
+            allPrices.set('0xreserve1', { price: 1.0, updatedBy: 'initial' });
+            allPrices.set('0xreserve2', { price: 2.0, updatedBy: 'initial' });
 
             mockPrismaPool.findMany.mockResolvedValue(mockLBPs);
 
@@ -439,8 +439,8 @@ describe('LbpPriceHandler', () => {
                 },
             ];
 
-            const allPrices = new Map<string, number>();
-            allPrices.set('0xreserve1', 1.5);
+            const allPrices = new Map<string, { price: number; updatedBy: string }>();
+            allPrices.set('0xreserve1', { price: 1.5, updatedBy: 'initial' });
 
             mockPrismaPool.findMany.mockResolvedValue(mockLBPs);
 

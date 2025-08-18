@@ -48,7 +48,10 @@ export class LbpPriceHandler implements PriceHandler {
 
     constructor(private db: LbpDB) {}
 
-    async calculatePricesForTokens(tokens: TokenPriceData[], allPrices: Map<string, number>): Promise<PriceItem[]> {
+    async calculatePricesForTokens(
+        tokens: TokenPriceData[],
+        allPrices: Map<string, { price: number; updatedBy: string }>,
+    ): Promise<PriceItem[]> {
         const acceptedTokens = this.getAcceptedTokens(tokens);
 
         if (acceptedTokens.length === 0) {
@@ -80,7 +83,7 @@ export class LbpPriceHandler implements PriceHandler {
             // Get prices from allPrices map
             reserveTokens.forEach((tokenAddress) => {
                 if (allPrices.has(tokenAddress)) {
-                    reservePrices[tokenAddress] = allPrices.get(tokenAddress)!;
+                    reservePrices[tokenAddress] = allPrices.get(tokenAddress)!.price;
                 }
             });
 

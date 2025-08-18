@@ -3,8 +3,9 @@ import {
     GqlPoolSwapEventV3,
     QueryPoolEventsArgs,
     GqlPoolSwapEventCowAmm,
+    GqlPoolEventType,
 } from '../../apps/api/gql/generated-schema';
-import { Chain } from '@prisma/client';
+import { Chain, PoolEventType } from '@prisma/client';
 import { JoinExitEvent, SwapEvent } from '../../prisma/prisma-types';
 import { eventsRepository } from '../repositories/events';
 
@@ -58,6 +59,12 @@ const parseCowAmmSwap = (event: SwapEvent): GqlPoolSwapEventCowAmm => {
     };
 };
 
+const GqlTypeToDbType: Record<GqlPoolEventType, PoolEventType> = {
+    SWAP: 'SWAP',
+    ADD: 'JOIN',
+    REMOVE: 'EXIT',
+};
+
 const getMultichainEvents = async (chainIn: Chain[], limit: number = 100) => {
     const results = await Promise.all(
         chainIn.map(async (chain) => {
@@ -65,8 +72,8 @@ const getMultichainEvents = async (chainIn: Chain[], limit: number = 100) => {
                 event.type === 'SWAP' && (event as SwapEvent).payload?.surplus
                     ? parseCowAmmSwap(event as SwapEvent)
                     : event.type === 'SWAP'
-                    ? parseSwap(event as SwapEvent)
-                    : parseJoinExit(event as JoinExitEvent),
+                      ? parseSwap(event as SwapEvent)
+                      : parseJoinExit(event as JoinExitEvent),
             );
         }),
     );
@@ -100,7 +107,7 @@ export function EventsQueryController(env = process.env) {
             // Setting default values
             first = Math.min(1000, first ?? 1000); // Limiting to 1000 items
             skip = skip ?? 0;
-            let { chainIn, poolIdIn, userAddress } = where || {};
+            let { chainIn, poolIdIn, poolId, type, typeIn, userAddress } = where || {};
 
             if (!chainIn) {
                 return [];
@@ -113,7 +120,10 @@ export function EventsQueryController(env = process.env) {
 
             const conditions = {
                 chain: chainIn[0] as Chain,
+                ...(typeIn && typeIn.length > 0 ? { eventType: GqlTypeToDbType[typeIn[0] as GqlPoolEventType] } : {}),
                 ...(poolIdIn && poolIdIn.length > 0 ? { poolId: poolIdIn[0] as string } : {}),
+                ...(poolId ? { poolId: poolId } : {}),
+                ...(type ? { eventType: GqlTypeToDbType[type] } : {}),
                 userAddress: userAddress || undefined,
             };
 
@@ -127,8 +137,8 @@ export function EventsQueryController(env = process.env) {
                 event.type === 'SWAP' && (event as SwapEvent).payload?.surplus
                     ? parseCowAmmSwap(event as SwapEvent)
                     : event.type === 'SWAP'
-                    ? parseSwap(event as SwapEvent)
-                    : parseJoinExit(event as JoinExitEvent),
+                      ? parseSwap(event as SwapEvent)
+                      : parseJoinExit(event as JoinExitEvent),
             );
 
             return results;

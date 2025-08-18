@@ -48,24 +48,6 @@ const balancerResolvers: Resolvers = {
         poolGetPoolsCount: async (parent, args, context) => {
             return poolService.getPoolsCount(args);
         },
-        // TODO: Deprecate in favor of poolGetEvents
-        poolGetSwaps: async (parent, args, context) => {
-            return [];
-        },
-        // TODO: Deprecate in favor of poolGetEvents
-        poolGetBatchSwaps: async (parent, args, context) => {
-            return [];
-        },
-        // TODO: Deprecate in favor of poolGetEvents
-        poolGetJoinExits: async (parent, args, context) => {
-            return [];
-        },
-        poolGetEvents: async (parent, { range, poolId, chain, typeIn, userAddress }) => {
-            return EventsQueryController().getEvents({
-                first: 1000,
-                where: { range, poolIdIn: [poolId], chainIn: [chain], typeIn, userAddress },
-            });
-        },
         poolEvents: async (parent: any, { first, skip, where }) => {
             return EventsQueryController().getEvents({
                 first,

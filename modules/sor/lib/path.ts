@@ -1,5 +1,6 @@
 import { TokenAmount, SwapKind, Token } from '@balancer/sdk';
 import { BasePool } from './poolsV2/basePool';
+import { BufferPool } from './poolsV3/buffer/bufferPool';
 
 export class PathLocal {
     public readonly pools: BasePool[];
@@ -31,6 +32,7 @@ export class PathWithAmount extends PathLocal {
     public readonly inputAmount: TokenAmount;
     private readonly mutateBalances: boolean;
     private readonly printPath: any = [];
+    public readonly swapStepsGreaterThanBufferLimit: number = 0;
 
     public constructor(
         tokens: Token[],
@@ -63,6 +65,16 @@ export class PathWithAmount extends PathLocal {
                         this.mutateBalances,
                     );
                     amounts[i + 1] = outputAmount;
+                    if (
+                        pool.poolType === 'Buffer' &&
+                        (pool as BufferPool).swapGivenInGreaterThanBufferLimit(
+                            this.tokens[i],
+                            this.tokens[i + 1],
+                            amounts[i],
+                        )
+                    ) {
+                        this.swapStepsGreaterThanBufferLimit++;
+                    }
                     this.printPath.push({
                         pool: pool.id,
                         input: `${amounts[i].amount.toString()} ${this.tokens[i].symbol}`,
@@ -82,6 +94,16 @@ export class PathWithAmount extends PathLocal {
                         amounts[i],
                         this.mutateBalances,
                     );
+                    if (
+                        pool.poolType === 'Buffer' &&
+                        (pool as BufferPool).swapGivenOutGreaterThanBufferLimit(
+                            this.tokens[i - 1],
+                            this.tokens[i],
+                            amounts[i],
+                        )
+                    ) {
+                        this.swapStepsGreaterThanBufferLimit++;
+                    }
                     amounts[i - 1] = inputAmount;
                     this.printPath.push({
                         pool: pool.id,

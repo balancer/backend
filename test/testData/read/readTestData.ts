@@ -24,6 +24,7 @@ import {
     mapLiquidityBootstrappingPoolStateToPrismaPool,
 } from './mapping';
 import { Path, SwapPathInput } from '../generate/getSwapPath';
+import { maxUint256 } from 'viem';
 
 type PoolBase = {
     poolAddress: string;
@@ -35,7 +36,14 @@ export type WeightedPool = PoolBase & WeightedState;
 
 export type StablePool = PoolBase & StableState;
 
-export type BufferPool = PoolBase & BufferState & { decimals: number[] };
+export type BufferPool = PoolBase &
+    BufferState & {
+        decimals: number[];
+        maxDeposit?: bigint;
+        maxWithdraw?: bigint;
+        mainTokenBalance?: bigint;
+        underlyingTokenBalance?: bigint;
+    };
 
 export type GyroEPool = PoolBase & GyroECLPState;
 
@@ -268,16 +276,26 @@ function mapBufferPools(pools: TransformBigintToString<SupportedPools>[]): Buffe
         .map((pool) => ({
             ...pool,
             rate: BigInt(pool.rate),
+            maxDeposit: pool.maxDeposit ? BigInt(pool.maxDeposit) : maxUint256,
+            maxWithdraw: pool.maxWithdraw ? BigInt(pool.maxWithdraw) : maxUint256,
+            mainTokenBalance: pool.mainTokenBalance ? BigInt(pool.mainTokenBalance) : maxUint256,
+            underlyingTokenBalance: pool.underlyingTokenBalance ? BigInt(pool.underlyingTokenBalance) : maxUint256,
         }));
 
     const bufferPoolData: BufferPoolData[] = bufferPools.map((pool) => ({
         ...pool,
         poolId: pool.poolAddress,
         address: pool.poolAddress as Address,
-        mainToken: { address: pool.tokens[0] as Address, decimals: pool.decimals[0] },
-        underlyingToken: { address: pool.tokens[1] as Address, decimals: pool.decimals[1] },
+        mainToken: { address: pool.tokens[0] as Address, decimals: pool.decimals[0], balance: pool.mainTokenBalance! },
+        underlyingToken: {
+            address: pool.tokens[1] as Address,
+            decimals: pool.decimals[1],
+            balance: pool.underlyingTokenBalance!,
+        },
         unwrapRate: pool.rate,
         chainId: Number(pool.chainId),
+        maxWithdraw: pool.maxWithdraw!,
+        maxDeposit: pool.maxDeposit!,
     }));
 
     return bufferPoolData;

@@ -908,12 +908,11 @@ export const aGqlPoolEventAmount = (overrides?: Partial<GqlPoolEventAmount>): Gq
 export const aGqlPoolEventsFilter = (overrides?: Partial<GqlPoolEventsFilter>): GqlPoolEventsFilter => {
     return {
         chainIn: overrides && overrides.hasOwnProperty('chainIn') ? overrides.chainIn! : [GqlChain.ARBITRUM],
+        poolId: overrides && overrides.hasOwnProperty('poolId') ? overrides.poolId! : 'censura',
         poolIdIn: overrides && overrides.hasOwnProperty('poolIdIn') ? overrides.poolIdIn! : ['caute'],
-        range: overrides && overrides.hasOwnProperty('range') ? overrides.range! : GqlPoolEventsDataRange.NINETY_DAYS,
+        type: overrides && overrides.hasOwnProperty('type') ? overrides.type! : GqlPoolEventType.ADD,
         typeIn: overrides && overrides.hasOwnProperty('typeIn') ? overrides.typeIn! : [GqlPoolEventType.ADD],
         userAddress: overrides && overrides.hasOwnProperty('userAddress') ? overrides.userAddress! : 'cruciamentum',
-        valueUSD_gt: overrides && overrides.hasOwnProperty('valueUSD_gt') ? overrides.valueUSD_gt! : 5.9,
-        valueUSD_gte: overrides && overrides.hasOwnProperty('valueUSD_gte') ? overrides.valueUSD_gte! : 9.5,
     };
 };
 
@@ -3049,20 +3048,10 @@ export const aQuery = (overrides?: Partial<Query>): Query => {
             overrides && overrides.hasOwnProperty('poolGetAggregatorPools')
                 ? overrides.poolGetAggregatorPools!
                 : [aGqlPoolAggregator()],
-        poolGetBatchSwaps:
-            overrides && overrides.hasOwnProperty('poolGetBatchSwaps')
-                ? overrides.poolGetBatchSwaps!
-                : [aGqlPoolBatchSwap()],
-        poolGetEvents:
-            overrides && overrides.hasOwnProperty('poolGetEvents') ? overrides.poolGetEvents! : [aGqlPoolEvent()],
         poolGetFeaturedPools:
             overrides && overrides.hasOwnProperty('poolGetFeaturedPools')
                 ? overrides.poolGetFeaturedPools!
                 : [aGqlPoolFeaturedPool()],
-        poolGetJoinExits:
-            overrides && overrides.hasOwnProperty('poolGetJoinExits')
-                ? overrides.poolGetJoinExits!
-                : [aGqlPoolJoinExit()],
         poolGetPool: overrides && overrides.hasOwnProperty('poolGetPool') ? overrides.poolGetPool! : aGqlPoolBase(),
         poolGetPools:
             overrides && overrides.hasOwnProperty('poolGetPools') ? overrides.poolGetPools! : [aGqlPoolMinimal()],
@@ -3072,8 +3061,6 @@ export const aQuery = (overrides?: Partial<Query>): Query => {
             overrides && overrides.hasOwnProperty('poolGetSnapshots')
                 ? overrides.poolGetSnapshots!
                 : [aGqlPoolSnapshot()],
-        poolGetSwaps:
-            overrides && overrides.hasOwnProperty('poolGetSwaps') ? overrides.poolGetSwaps! : [aGqlPoolSwap()],
         protocolMetricsAggregated:
             overrides && overrides.hasOwnProperty('protocolMetricsAggregated')
                 ? overrides.protocolMetricsAggregated!
