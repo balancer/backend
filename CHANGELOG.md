@@ -1,5 +1,21 @@
 # backend
 
+## 1.51.0
+
+### Minor Changes
+
+-   de9a96e: SOR - Limit buffer swaps by maxDeposit and maxWithdraw
+
+### Patch Changes
+
+-   5679a9d: SOR - Limit swaps paths with high gas costs on HyperEvm
+-   35a8625: swaps price handler can only use pricing from non-swaps-priced tokens
+-   2b8aa79: SOR - Fix buffer limit math
+-   cdc25f2: events query filter params
+-   2930fa5: assume $1 gauge tvl of non staked for apr calc
+-   e9ffbc8: add type filter to events query
+-   0daa44d: fix events query
+
 ## 1.50.13
 
 ### Patch Changes
