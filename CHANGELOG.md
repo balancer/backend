@@ -1,5 +1,13 @@
 # backend
 
+## 1.51.1
+
+### Patch Changes
+
+-   ba0e2b7: use vault addr to find maxwithdraw
+-   32eda26: removing poolGetEvents query
+-   3251b9e: deprecate events poolIdIn and typeIn filter params
+
 ## 1.51.0
 
 ### Minor Changes
