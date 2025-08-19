@@ -3,6 +3,7 @@ import { Multicaller3Viem } from '../../../web3/multicaller-viem';
 import MinimalErc4626Abi from '../abis/MinimalERC4626';
 import { formatUnits } from 'viem';
 import { AddressZero } from '@ethersproject/constants';
+import config from '../../../../config';
 
 /**
  * Fetches maxDeposit and maxWithdraw amounts for a list of ERC4626 tokens and returns them as strings
@@ -22,7 +23,7 @@ export const fetchMaxValues = async (
     const caller = new Multicaller3Viem(chain, MinimalErc4626Abi);
     erc4626Tokens.forEach((token) => {
         caller.call(`${token.address}-maxDeposit`, token.address, 'maxDeposit', [AddressZero]);
-        caller.call(`${token.address}-maxWithdraw`, token.address, 'maxWithdraw', [AddressZero]);
+        caller.call(`${token.address}-maxWithdraw`, token.address, 'maxWithdraw', [config[chain].balancer.v3]);
     });
     const results = await caller.execute<{ [id: string]: bigint }>();
 
