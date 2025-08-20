@@ -1,5 +1,11 @@
 # backend
 
+## 1.51.3
+
+### Patch Changes
+
+-   cdea9dd: adding missing filters to pool count query
+
 ## 1.51.2
 
 ### Patch Changes
