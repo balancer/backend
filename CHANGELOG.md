@@ -1,5 +1,11 @@
 # backend
 
+## 1.51.2
+
+### Patch Changes
+
+-   2e453bf: also use vault addr for maxdeposit
+
 ## 1.51.1
 
 ### Patch Changes
