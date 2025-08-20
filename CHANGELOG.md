@@ -1,5 +1,11 @@
 # backend
 
+## 1.51.4
+
+### Patch Changes
+
+-   358199d: SOR - Fix maxWithdraw scaling
+
 ## 1.51.3
 
 ### Patch Changes
