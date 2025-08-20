@@ -106,7 +106,7 @@ export class BufferPool implements BasePoolMethodsV3 {
             } else {
                 // unwrap - respective to amount in, which is main
                 const bufferUnwrapLimit = MathSol.divDownFixed(underlyingTokenAmount.amount, this.rate); // in terms of main
-                const lendingProtocolUnwrapLimit = this.maxWithdraw;
+                const lendingProtocolUnwrapLimit = MathSol.divDownFixed(this.maxWithdraw, this.rate); // in terms of main;
                 const unwrapRequiredToRebalance =
                     (MathSol.divDownFixed(underlyingTokenAmount.amount, this.rate) + mainTokenAmount.amount) / 2n -
                     mainTokenAmount.amount; // in terms of main
@@ -121,7 +121,7 @@ export class BufferPool implements BasePoolMethodsV3 {
             if (underlyingTokenAmount.token.isSameAddress(tIn.token.address)) {
                 // wrap - respective to amount out, which is main
                 const bufferWrapLimit = mainTokenAmount.amount; // in terms of main
-                const lendingProtocolWrapLimit = this.maxDeposit;
+                const lendingProtocolWrapLimit = MathSol.divDownFixed(this.maxDeposit, this.rate); // in terms of main;
                 const wrapRequiredToRebalance =
                     mainTokenAmount.amount -
                     (MathSol.divDownFixed(underlyingTokenAmount.amount, this.rate) + mainTokenAmount.amount) / 2n; // in terms of main
