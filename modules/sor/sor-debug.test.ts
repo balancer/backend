@@ -88,12 +88,12 @@ describe('sor debugging', () => {
 
         const swaps = await sorService.getSorSwapPaths({
             chain,
-            tokenIn: '0x29219dd400f2bf60e5a23d13be72b486d4038894', // ETH
-            tokenOut: '0xeeeeeee6d95e55a468d32feb5d6648754d10a967', // LINK
+            tokenIn: '0x0c4e186eae8acaa7f7de1315d5ad174be39ec987', // smsUSD
+            tokenOut: '0x039e2fb66102314ce7b64ce5ce3e5183bc94ad38', // USDC
             swapType,
-            swapAmount: '1',
+            swapAmount: '1000000',
             useProtocolVersion,
-            poolIds: ['0x5103ea917605463fc497396ba89d6732ce4b2d70'],
+            poolIds: ['0x944d4ae892de4bfd38742cc8295d6d5164c5593c'],
         });
 
         swaps.paths.forEach((path, i) => {
