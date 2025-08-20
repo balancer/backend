@@ -1210,5 +1210,17 @@ const searchFilters = (args: QueryPoolGetPoolsArgs) => {
         where += `AND p.type = ANY('{${args.where?.poolTypeIn.map(sanitizeInput).join(',')}}')`;
     }
 
+    if (args.where?.categoryIn) {
+        where += `AND p.categories = ANY('{${args.where?.categoryIn.map(sanitizeInput).join(',')}')`;
+    }
+
+    if (args.where?.tagIn) {
+        where += `AND p.categories = ANY('{${args.where?.tagIn.map(sanitizeInput).join(',')}}')`;
+    }
+
+    if (args.where?.minTvl) {
+        where += `AND d."totalLiquidity" >= ${args.where?.minTvl}`;
+    }
+
     return where;
 };
