@@ -37,6 +37,12 @@ export class PricingRepository {
             this.swapRepository.getSwapsForPricing(chain),
         ]);
 
+        // Collect all token addresses that need prices
+        const allTokenAddresses = this.collectAllTokenAddresses(tokens);
+
+        // Fetch all prices in a single query
+        const allPrices = await this.fetchAllPrices(chain, allTokenAddresses);
+
         // Include stSonic for OP, FTM for beets price handler
         if (['OPTIMISM', 'FANTOM'].includes(chain)) {
             const sts = await prisma.prismaToken.findFirst({
@@ -61,14 +67,14 @@ export class PricingRepository {
 
             if (sts) {
                 tokens.push(sts);
+
+                const stsPrice = (await this.fetchAllPrices(Chain.SONIC, [sts.address])).get(sts.address);
+
+                if (stsPrice) {
+                    allPrices.set(sts.address, stsPrice);
+                }
             }
         }
-
-        // Collect all token addresses that need prices
-        const allTokenAddresses = this.collectAllTokenAddresses(tokens);
-
-        // Fetch all prices in a single query
-        const allPrices = await this.fetchAllPrices(chain, allTokenAddresses);
 
         return tokens.map((token) => ({
             address: token.address,
