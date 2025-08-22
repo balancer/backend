@@ -1,5 +1,11 @@
 # backend
 
+## 1.51.5
+
+### Patch Changes
+
+-   18ee252: fix: missing sts price in the beets pricing handler
+
 ## 1.51.4
 
 ### Patch Changes
