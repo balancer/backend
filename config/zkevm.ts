@@ -68,32 +68,40 @@ export default <NetworkData>{
     avgBlockSpeed: 1,
     aprHandlers: {
         ybAprHandler: {
-            defaultHandlers: {
-                wstETH: {
-                    tokenAddress: '0x5d8cff95d7a57c0bf50b30b43c7cc0d52825d4a9',
-                    sourceUrl: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
-                    path: 'data.smaApr',
-                    isIbYield: true,
+            http: [
+                {
+                    url: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
+                    scale: 100,
+                    extractors: [
+                        { type: 'path', key: '0x5d8cff95d7a57c0bf50b30b43c7cc0d52825d4a9', path: '$.data.smaApr' }, // wstETH
+                    ],
                 },
-                rETH: {
-                    tokenAddress: '0xb23c20efce6e24acca0cef9b7b7aa196b84ec942',
-                    sourceUrl: 'https://api.rocketpool.net/mainnet/reth/apr',
-                    path: 'yearlyAPR',
-                    isIbYield: true,
+                {
+                    url: 'https://api.rocketpool.net/mainnet/reth/apr',
+                    scale: 100,
+                    extractors: [
+                        { type: 'path', key: '0xb23c20efce6e24acca0cef9b7b7aa196b84ec942', path: '$.yearlyAPR' },
+                    ],
                 },
-                ankrETH: {
-                    tokenAddress: '0x12d8ce035c5de3ce39b1fdd4c1d5a745eaba3b8c',
-                    sourceUrl: 'https://api.staking.ankr.com/v1alpha/metrics',
-                    path: 'services.{serviceName == "eth"}.apy',
-                    isIbYield: true,
+                {
+                    url: 'https://api.staking.ankr.com/v1alpha/metrics',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            key: '0x12d8ce035c5de3ce39b1fdd4c1d5a745eaba3b8c',
+                            path: '$.services[?(@.serviceName=="eth")].apy',
+                        },
+                    ],
                 },
-                rsETH: {
-                    tokenAddress: '0x8c7d118b5c47a5bcbd47cc51789558b98dad17c5',
-                    sourceUrl: 'https://universe.kelpdao.xyz/rseth/apy',
-                    path: 'value',
-                    isIbYield: true,
+                {
+                    url: 'https://universe.kelpdao.xyz/rseth/apy',
+                    scale: 100,
+                    extractors: [
+                        { type: 'path', key: '0x8c7d118b5c47a5bcbd47cc51789558b98dad17c5', path: '$.value' }, // rsETH
+                    ],
                 },
-            },
+            ],
         },
     },
     datastudio: {

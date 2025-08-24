@@ -67,8 +67,9 @@ export default <NetworkData>{
     avgBlockSpeed: 1,
     aprHandlers: {
         ybAprHandler: {
-            aave: {
-                v2: {
+            aave: [
+                {
+                    market: 'v2',
                     subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/H1Et77RZh3XEf27vkAmJyzgCME2RSFLtDS2f4PPW6CGp`,
                     tokens: {
                         USDC: {
@@ -94,7 +95,7 @@ export default <NetworkData>{
                         },
                     },
                 },
-                v3: {
+                {
                     subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/Co2URyXjnxaw8WqxKyVHdirq9Ahhm5vcTs4dMedAq211`,
                     tokens: {
                         USDCn: {
@@ -146,35 +147,53 @@ export default <NetworkData>{
                         },
                     },
                 },
-            },
-            defaultHandlers: {
-                wstETH: {
-                    tokenAddress: '0x03b54a6e9a984069379fae1a4fc4dbae93b3bccd',
-                    sourceUrl: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
-                    path: 'data.smaApr',
-                    isIbYield: true,
-                },
-                MATICX: {
-                    tokenAddress: '0xfa68fb4628dff1028cfec22b4162fccd0d45efb6',
-                    sourceUrl: 'https://universe.staderlabs.com/polygon/apy',
-                    path: 'value',
-                    isIbYield: true,
-                },
-                wbETH: {
-                    tokenAddress: '0xa2e3356610840701bdf5611a53974510ae27e2e1',
-                    sourceUrl:
-                        'https://www.binance.com/bapi/earn/v1/public/pos/cftoken/project/rewardRateList?projectId=BETH',
-                    path: 'data.0.rewardRate',
-                    isIbYield: true,
-                },
-                truMATIC: {
-                    tokenAddress: '0xf33687811f3ad0cd6b48dd4b39f9f977bd7165a2',
-                    sourceUrl: 'https://api.trufin.io/staker/apy?staker=MATIC',
-                    path: 'apy',
+            ],
+            http: [
+                {
+                    url: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
                     scale: 100,
-                    isIbYield: true,
+                    extractors: [
+                        {
+                            type: 'path',
+                            key: '0x03b54a6e9a984069379fae1a4fc4dbae93b3bccd',
+                            path: '$.data.smaApr',
+                        },
+                    ],
                 },
-            },
+                {
+                    url: 'https://universe.staderlabs.com/polygon/apy',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            key: '0xfa68fb4628dff1028cfec22b4162fccd0d45efb6',
+                            path: '$.value',
+                        },
+                    ],
+                },
+                {
+                    url: 'https://www.binance.com/bapi/earn/v1/public/pos/cftoken/project/rewardRateList?projectId=BETH',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            key: '0xa2e3356610840701bdf5611a53974510ae27e2e1',
+                            path: '$.data[0].rewardRate',
+                        },
+                    ],
+                },
+                {
+                    url: 'https://api.trufin.io/staker/apy?staker=MATIC',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            key: '0xf33687811f3ad0cd6b48dd4b39f9f977bd7165a2',
+                            path: '$.apy',
+                        },
+                    ],
+                },
+            ],
         },
     },
     datastudio: {

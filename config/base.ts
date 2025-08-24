@@ -78,105 +78,232 @@ export default <NetworkData>{
         morphoRewardsAprHandler: true,
         aaveRewardsAprHandler: true,
         ybAprHandler: {
-            fluid: {
-                url: 'https://api.fluid.instad.app/v2/lending/8453/tokens',
-            },
-            extra: {
-                url: 'https://extra-static.s3.amazonaws.com/data/xlend/pools/apr.json',
-            },
             susds: {
                 oracle: '0x65d946e533748a998b1f0e430803e39a6388f7a1',
                 token: '0x5875eee11cf8398102fdad704c9e96607675467a',
             },
-            morpho: {
-                tokens: {},
-            },
-            defaultHandlers: {
-                yoETH: {
-                    tokenAddress: '0x3a43aec53490cb9fa922847385d82fe25d0e9de7',
-                    sourceUrl: 'https://api.yo.xyz/api/v1/vault/base/0x3A43AEC53490CB9Fa922847385D82fe25d0E9De7',
-                    path: 'data.stats.yield.7d',
-                    isIbYield: true,
+            http: [
+                {
+                    url: 'https://ded76165a2fb6f7887260a3a0f626de7.thegraph.chainnodes.org/subgraphs/name/etherfi/etherfi-subgraph-v0-8-2',
+                    body: JSON.stringify({
+                        query: `{
+                    rebaseEventLinkedLists {
+                      latest_aprs
+                    }
+                  }`,
+                    }),
+                    headers: { 'Content-Type': 'application/json' },
+                    average: true,
+                    scale: 10000,
+                    extractors: [
+                        {
+                            type: 'path',
+                            key: '0x04c0599ae5a44757c0af6f9ec3b93da8976c150a',
+                            path: '$.data.rebaseEventLinkedLists[0].latest_aprs',
+                        },
+                    ],
                 },
-                yoUSD: {
-                    tokenAddress: '0x0000000f2eb9f69274678c76222b35eec7588a65',
-                    sourceUrl: 'https://api.yo.xyz/api/v1/vault/base/0x0000000f2eB9f69274678c76222B35eEc7588a65',
-                    path: 'data.stats.yield.7d',
-                    isIbYield: true,
+                {
+                    url: 'https://extra-static.s3.amazonaws.com/data/xlend/pools/apr.json',
+                    extractors: [
+                        {
+                            type: 'path',
+                            key: '0x589a7339c6d0c8777e7429f57f2f95c069c37288',
+                            path: '$.base[?(@.symbol == "USDC")].totalAPY',
+                        },
+                        {
+                            type: 'path',
+                            key: '0x98efe85735f253a0ed0be8e2915ff39f9e4aff0f',
+                            path: '$.base[?(@.symbol == "USR")].totalAPY',
+                        },
+                    ],
                 },
-                yoBTC: {
-                    tokenAddress: '0xbcbc8cb4d1e8ed048a6276a5e94a3e952660bcbc',
-                    sourceUrl: 'https://api.yo.xyz/api/v1/vault/base/0xbCbc8cb4D1e8ED048a6276a5E94A3e952660BcbC',
-                    path: 'data.stats.yield.7d',
-                    isIbYield: true,
+                {
+                    url: 'https://api.yo.xyz/api/v1/vault/base/0x3A43AEC53490CB9Fa922847385D82fe25d0E9De7',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            key: '0x3a43aec53490cb9fa922847385d82fe25d0e9de7',
+                            path: '$.data.stats.yield.7d',
+                        },
+                    ],
                 },
-                ezETH: {
-                    tokenAddress: '0x2416092f143378750bb29b79ed961ab195cceea5',
-                    sourceUrl: 'https://app.renzoprotocol.com/api/apr',
-                    path: 'apr',
-                    isIbYield: true,
+                {
+                    url: 'https://api.yo.xyz/api/v1/vault/base/0x0000000f2eB9f69274678c76222B35eEc7588a65',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            key: '0x0000000f2eb9f69274678c76222b35eec7588a65',
+                            path: '$.data.stats.yield.7d',
+                        },
+                    ],
                 },
-                sUSDz: {
-                    tokenAddress: '0xe31ee12bdfdd0573d634124611e85338e2cbf0cf',
-                    sourceUrl: 'https://rwa-api.anzen.finance/metrics/susdz_stats',
-                    path: 'apy',
+                {
+                    url: 'https://api.yo.xyz/api/v1/vault/base/0xbCbc8cb4D1e8ED048a6276a5E94A3e952660BcbC',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            key: '0xbcbc8cb4d1e8ed048a6276a5e94a3e952660bcbc',
+                            path: '$.data.stats.yield.7d',
+                        },
+                    ],
                 },
-                'sp-ysUSDC': {
-                    tokenAddress: '0xffe8b2295cef70290819a8193834cc7900bcef5f',
-                    sourceUrl: 'https://api.superform.xyz/stats/vault/supervault/vL7k-5ZgYCoFgi6kz2jIJ/',
-                    path: 'apy',
-                    isIbYield: true,
+                {
+                    url: 'https://app.renzoprotocol.com/api/apr',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            key: '0x2416092f143378750bb29b79ed961ab195cceea5',
+                            path: '$.apr',
+                        },
+                    ],
+                },
+                {
+                    url: 'https://rwa-api.anzen.finance/metrics/susdz_stats',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            key: '0xe31ee12bdfdd0573d634124611e85338e2cbf0cf',
+                            path: '$.apy',
+                        },
+                    ],
+                },
+                {
+                    url: 'https://api.superform.xyz/stats/vault/supervault/vL7k-5ZgYCoFgi6kz2jIJ/',
+                    scale: 100,
                     headers: {
                         'SF-API-KEY': env.SUPERFORM_API_KEY,
                     },
+                    extractors: [
+                        {
+                            type: 'path',
+                            key: '0xffe8b2295cef70290819a8193834cc7900bcef5f',
+                            path: '$.apy',
+                        },
+                    ],
                 },
-                ysUSDC: {
-                    tokenAddress: '0xe9f2a5f9f3c846f29066d7fb3564f8e6b6b2d65b',
-                    sourceUrl: 'https://api.superform.xyz/stats/vault/supervault/zLVQbgScIbXJuSz-NNsK-/',
-                    path: 'apy',
-                    isIbYield: true,
+                {
+                    url: 'https://api.superform.xyz/stats/vault/supervault/zLVQbgScIbXJuSz-NNsK-/',
+                    scale: 100,
                     headers: {
                         'SF-API-KEY': env.SUPERFORM_API_KEY,
                     },
+                    extractors: [
+                        {
+                            type: 'path',
+                            key: '0xe9f2a5f9f3c846f29066d7fb3564f8e6b6b2d65b',
+                            path: '$.apy',
+                        },
+                    ],
                 },
-                yUSD: {
-                    tokenAddress: '0x895e15020c3f52ddd4d8e9514eb83c39f53b1579',
-                    sourceUrl: 'https://ctrl.yield.fi/t/apy',
-                    path: 'apy',
-                    isIbYield: true,
+                {
+                    url: 'https://ctrl.yield.fi/t/apy',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            key: '0x895e15020c3f52ddd4d8e9514eb83c39f53b1579',
+                            path: '$.apy',
+                        },
+                    ],
                 },
-                yUSD2: {
-                    tokenAddress: '0x4772d2e014f9fc3a820c444e3313968e9a5c8121',
-                    sourceUrl: 'https://api.yield.fi/t/yusd/apy',
-                    path: 'apy',
-                    isIbYield: true,
+                {
+                    url: 'https://api.yield.fi/t/yusd/apy',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            key: '0x4772d2e014f9fc3a820c444e3313968e9a5c8121',
+                            path: '$.apy',
+                        },
+                    ],
                 },
-                cbETH: {
-                    tokenAddress: '0x2ae3f1ec7f1f5012cfeab0185bfc7aa3cf0dec22',
-                    sourceUrl: 'https://api.exchange.coinbase.com/wrapped-assets/CBETH/',
-                    path: 'apy',
+                {
+                    url: 'https://api.exchange.coinbase.com/wrapped-assets/CBETH/',
                     scale: 1,
-                    isIbYield: true,
+                    extractors: [
+                        {
+                            type: 'path',
+                            key: '0x2ae3f1ec7f1f5012cfeab0185bfc7aa3cf0dec22',
+                            path: '$.apy',
+                        },
+                    ],
                 },
-                wstETH: {
-                    tokenAddress: '0xc1cba3fcea344f92d9239c08c0568f6f2f0ee452',
-                    sourceUrl: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
-                    path: 'data.smaApr',
-                    isIbYield: true,
+                {
+                    url: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            key: '0xc1cba3fcea344f92d9239c08c0568f6f2f0ee452',
+                            path: '$.data.smaApr',
+                        },
+                    ],
                 },
-                rETH: {
-                    tokenAddress: '0xb6fe221fe9eef5aba221c348ba20a1bf5e73624c',
-                    sourceUrl: 'https://api.rocketpool.net/mainnet/reth/apr',
-                    path: 'yearlyAPR',
-                    isIbYield: true,
+                {
+                    url: 'https://api.rocketpool.net/mainnet/reth/apr',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            key: '0xb6fe221fe9eef5aba221c348ba20a1bf5e73624c',
+                            path: '$.yearlyAPR',
+                        },
+                    ],
                 },
-            },
+                {
+                    url: 'https://api.fluid.instad.app/v2/lending/8453/tokens',
+                    extractors: [
+                        {
+                            type: 'enumerate',
+                            path: '$.data',
+                            entries: (token: any): [string, number] => [
+                                token.address.toLowerCase(),
+                                parseFloat(token.supplyRate) / 10000,
+                            ],
+                        },
+                    ],
+                },
+                {
+                    url: 'https://blue-api.morpho.org/graphql',
+                    body: JSON.stringify({
+                        query: `{
+                          vaults(first: 1000, where: { chainId_in: [8453], apy_gte: 0.00001 }) {
+                              items {
+                                  address
+                                  state {
+                                      apy
+                                      fee
+                                      netApy
+                                  }
+                              }
+                          }
+                      }`,
+                    }),
+                    headers: { 'Content-Type': 'application/json' },
+                    extractors: [
+                        {
+                            type: 'enumerate',
+                            path: '$.data.vaults.items',
+                            entries: (vault: any): [string, number] => [
+                                vault.address.toLowerCase(),
+                                vault.state.apy * (1 - vault.state.fee),
+                            ],
+                        },
+                    ],
+                },
+            ],
             maker: {
                 sdai: '0x99ac4484e8a1dbd6a185380b3a811913ac884d87',
             },
-            etherfi: '0x04c0599ae5a44757c0af6f9ec3b93da8976c150a',
-            aave: {
-                v3: {
+            aave: [
+                {
+                    market: 'v3',
                     subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/GQFbb95cE6d8mV989mL5figjaGaKCQB3xqYrr1bRyXqF`,
                     tokens: {
                         USDC: {
@@ -188,7 +315,7 @@ export default <NetworkData>{
                         },
                     },
                 },
-            },
+            ],
         },
     },
     multicall: '0xca11bde05977b3631167028862be2a173976ca11',

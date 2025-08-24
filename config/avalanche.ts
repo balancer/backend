@@ -1,4 +1,3 @@
-import { tr } from '@faker-js/faker';
 import { env } from '../apps/env';
 import { DeploymentEnv, NetworkData } from '../modules/network/network-config-types';
 
@@ -76,8 +75,9 @@ export default <NetworkData>{
     aprHandlers: {
         aaveRewardsAprHandler: true,
         ybAprHandler: {
-            aave: {
-                v3: {
+            aave: [
+                {
+                    market: 'v3',
                     subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/2h9woxy8RTjHu1HJsCEnmzpPHFArU33avmUh4f71JpVn`,
                     tokens: {
                         USDC: {
@@ -125,60 +125,115 @@ export default <NetworkData>{
                         },
                     },
                 },
-            },
+            ],
             euler: {
-                vaultsJsonUrl:
-                    'https://raw.githubusercontent.com/euler-xyz/euler-labels/refs/heads/master/43114/vaults.json',
-                lensContractAddress: '0xc820c24905c210aefe21dae40723ec28d62c1544',
+                url: 'https://raw.githubusercontent.com/euler-xyz/euler-labels/refs/heads/master/43114/vaults.json',
+                lens: '0xc820c24905c210aefe21dae40723ec28d62c1544',
+                chain: 'AVALANCHE',
             },
-            etherfi: '0xa3d68b74bf0528fdd07263c60d6488749044914b',
-            defaultHandlers: {
-                yUTY: {
-                    tokenAddress: '0x580d5e1399157fd0d58218b7a514b60974f2ab01',
-                    sourceUrl: 'https://api.xsy.fi/v1/yuty',
-                    path: 'apy',
+            http: [
+                {
+                    url: 'https://ded76165a2fb6f7887260a3a0f626de7.thegraph.chainnodes.org/subgraphs/name/etherfi/etherfi-subgraph-v0-8-2',
+                    body: JSON.stringify({
+                        query: `{
+                    rebaseEventLinkedLists {
+                      latest_aprs
+                    }
+                  }`,
+                    }),
+                    headers: { 'Content-Type': 'application/json' },
+                    average: true,
+                    scale: 10000,
+                    extractors: [
+                        {
+                            type: 'path',
+                            key: '0xa3d68b74bf0528fdd07263c60d6488749044914b',
+                            path: '$.data.rebaseEventLinkedLists[0].latest_aprs',
+                        },
+                    ],
+                },
+                {
+                    url: 'https://api.xsy.fi/v1/yuty',
                     scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            key: '0x580d5e1399157fd0d58218b7a514b60974f2ab01',
+                            path: '$.apy',
+                        },
+                    ],
                 },
-                sAVAX: {
-                    tokenAddress: '0x2b2c81e08f1af8835a78bb2a90ae924ace0ea4be',
-                    sourceUrl: 'https://api.benqi.fi/liquidstaking/apr',
-                    path: 'apr',
-                    scale: 1,
+                {
+                    url: 'https://api.benqi.fi/liquidstaking/apr',
+                    extractors: [
+                        {
+                            type: 'path',
+                            key: '0x2b2c81e08f1af8835a78bb2a90ae924ace0ea4be',
+                            path: '$.apr',
+                        },
+                    ],
                 },
-                yyAVAX: {
-                    tokenAddress: '0xf7d9281e8e363584973f946201b82ba72c965d27',
-                    sourceUrl: 'https://staging-api.yieldyak.com/yyavax',
-                    path: 'yyAVAX.apr',
+                {
+                    url: 'https://staging-api.yieldyak.com/yyavax',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            key: '0xf7d9281e8e363584973f946201b82ba72c965d27',
+                            path: '$.yyAVAX.apr',
+                        },
+                    ],
                 },
-                ggAVAX: {
-                    tokenAddress: '0xa25eaf2906fa1a3a13edac9b9657108af7b703e3',
-                    sourceUrl: 'https://api.gogopool.com/metrics',
-                    path: 'ggavax_apy',
+                {
+                    url: 'https://api.gogopool.com/metrics',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            key: '0xa25eaf2906fa1a3a13edac9b9657108af7b703e3',
+                            path: '$.ggavax_apy',
+                        },
+                    ],
                     // Updated from https://ceres.gogopool.com/ which used below calculation and scale -8.3333
                     // According to solarcurve, the AVAX Monthly Interest must be multiplied by -12 to represent the APR in normal scale, for example, if the monthly interest is -0,15, the APR would be -0,15 * -12 = 1,8%.
                     // @solarcurve: We estimate by multiplying that value by -12 since its the exchange rate of AVAX -> ggAVAX, which will always return less ggAVAX than AVAX
                     // How this -12 became -8,333? It's because the scale parameter is used to divide the number, and the final apr percentage is in decimal format (1,8% = 0,018), so if:
                     // M * -12 = A (M is monthly rate and A is APR) => (M/x) = (A/100) => (A / -12x) = (A / 100) [replacing M by A/-12] => x = 100/-12 = -8,33333
                 },
-                ankrAVAX: {
-                    tokenAddress: '0xc3344870d52688874b06d844e0c36cc39fc727f6',
-                    sourceUrl: 'https://api.staking.ankr.com/v1alpha/metrics',
-                    path: 'services.{serviceName == "avax"}.apy',
-                    isIbYield: true,
+                {
+                    url: 'https://api.staking.ankr.com/v1alpha/metrics',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            key: '0xc3344870d52688874b06d844e0c36cc39fc727f6',
+                            path: '$.services[?(@.serviceName=="avax")].apy',
+                        },
+                    ],
                 },
-                sdeUSD: {
-                    tokenAddress: '0x68088c91446c7bea49ea7dbd3b96ce62b272dc96',
-                    sourceUrl: 'https://api-deusd-prod-public.elixir.xyz/public/deusd_apy',
-                    path: 'deusd_apy',
-                    isIbYield: true,
+                {
+                    url: 'https://api-deusd-prod-public.elixir.xyz/public/deusd_apy',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            key: '0x68088c91446c7bea49ea7dbd3b96ce62b272dc96',
+                            path: '$.deusd_apy',
+                        },
+                    ],
                 },
-                savUSD: {
-                    tokenAddress: '0x06d47f3fb376649c3a9dafe069b3d6e35572219e',
-                    sourceUrl: 'https://app.avantprotocol.com/api/savusdApy',
-                    path: 'savusdApy',
-                    isIbYield: true,
+                {
+                    url: 'https://app.avantprotocol.com/api/savusdApy',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            key: '0x06d47f3fb376649c3a9dafe069b3d6e35572219e',
+                            path: '$.savusdApy',
+                        },
+                    ],
                 },
-            },
+            ],
         },
     },
     datastudio: {

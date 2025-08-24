@@ -65,26 +65,41 @@ export default <NetworkData>{
             maker: {
                 sdai: '0x09eadcbaa812a4c076c3a6cde765dc4a22e0d775',
             },
-            defaultHandlers: {
-                sfrxETH: {
-                    tokenAddress: '0xfc00000000000000000000000000000000000005',
-                    sourceUrl: 'https://api.frax.finance/v2/frxeth/summary/latest',
-                    path: 'sfrxethApr',
-                    isIbYield: true,
+            http: [
+                {
+                    url: 'https://api.frax.finance/v2/frxeth/summary/latest',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            key: '0xfc00000000000000000000000000000000000005',
+                            path: '$.sfrxethApr',
+                        },
+                    ],
                 },
-                sFRAX: {
-                    tokenAddress: '0xfc00000000000000000000000000000000000008',
-                    sourceUrl: 'https://api.frax.finance/v2/frax/sfrax/summary/history?range=1d',
-                    path: 'items.0.sfraxApr',
-                    isIbYield: true,
+                {
+                    url: 'https://api.frax.finance/v2/frax/sfrax/summary/history?range=1d',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            key: '0xfc00000000000000000000000000000000000008',
+                            path: '$.items[0].sfraxApr',
+                        },
+                    ],
                 },
-                sUSDe: {
-                    tokenAddress: '0x211cc4dd073734da055fbf44a2b4667d5e5fe5d2',
-                    sourceUrl: 'https://ethena.fi/api/yields/protocol-and-staking-yield',
-                    path: 'stakingYield.value',
-                    isIbYield: true,
+                {
+                    url: 'https://ethena.fi/api/yields/protocol-and-staking-yield',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            key: '0x211cc4dd073734da055fbf44a2b4667d5e5d2',
+                            path: '$.stakingYield.value',
+                        },
+                    ],
                 },
-            },
+            ],
         },
     },
     multicall: '0xca11bde05977b3631167028862be2a173976ca11',

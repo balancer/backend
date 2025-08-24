@@ -74,26 +74,52 @@ export default <NetworkData>{
     aprHandlers: {
         aaveRewardsAprHandler: true,
         ybAprHandler: {
-            stakewise: {
-                url: 'https://graphs.stakewise.io/mainnet/subgraphs/name/stakewise/prod/',
-                token: '0xf490c80aae5f2616d3e3bda2483e30c4cb21d1a0',
-            },
-            defaultHandlers: {
-                wstETH: {
-                    tokenAddress: '0x6c76971f98945ae98dd7d4dfca8711ebea946ea6',
-                    sourceUrl: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
-                    path: 'data.smaApr',
-                    isIbYield: true,
+            http: [
+                {
+                    url: 'https://graphs.stakewise.io/mainnet/subgraphs/name/stakewise/prod',
+                    body: JSON.stringify({
+                        query: `{
+                        osTokens {
+                          apy
+                        }
+                      }`,
+                    }),
+                    headers: { 'Content-Type': 'application/json' },
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            key: '0xf490c80aae5f2616d3e3bda2483e30c4cb21d1a0',
+                            path: '$.data.osTokens[0].apy',
+                        },
+                    ],
                 },
-                rETH: {
-                    tokenAddress: '0xc791240d1f2def5938e2031364ff4ed887133c3d',
-                    sourceUrl: 'https://api.rocketpool.net/mainnet/reth/apr',
-                    path: 'yearlyAPR',
-                    isIbYield: true,
+                {
+                    url: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            key: '0x6c76971f98945ae98dd7d4dfca8711ebea946ea6',
+                            path: '$.data.smaApr',
+                        },
+                    ],
                 },
-            },
-            aave: {
-                v3: {
+                {
+                    url: 'https://api.rocketpool.net/mainnet/reth/apr',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            key: '0xc791240d1f2def5938e2031364ff4ed887133c3d',
+                            path: '$.yearlyAPR',
+                        },
+                    ],
+                },
+            ],
+            aave: [
+                {
+                    market: 'v3',
                     subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/HtcDaL8L8iZ2KQNNS44EBVmLruzxuNAz1RkBYdui1QUT`,
                     tokens: {
                         USDC: {
@@ -134,7 +160,7 @@ export default <NetworkData>{
                         },
                     },
                 },
-            },
+            ],
         },
     },
     gyro: {

@@ -84,24 +84,9 @@ export default <NetworkData>{
                 token: '0xe5da20f15420ad15de0fa650600afc998bbe3955',
             },
             euler: {
-                vaultsJsonUrl:
-                    'https://raw.githubusercontent.com/euler-xyz/euler-labels/refs/heads/master/146/vaults.json',
-                lensContractAddress: '0xc3a705ea6e339a53a7d301d3c5d7e6f499a9366a',
-            },
-            beefy: {
-                sourceUrl: 'https://api.beefy.finance/apy/',
-                tokens: {
-                    'silov2-usdc': {
-                        address: '0x7870ddfd5aca4e977b2287e9a212bcbe8fc4135a',
-                        vaultId: 'silov2-sonic-usdce-ws',
-                        isIbYield: true,
-                    },
-                    'beefy-besonic': {
-                        address: '0x871a101dcf22fe4fe37be7b654098c801cba1c88',
-                        vaultId: 'beefy-besonic',
-                        isIbYield: true,
-                    },
-                },
+                url: 'https://raw.githubusercontent.com/euler-xyz/euler-labels/refs/heads/master/146/vaults.json',
+                lens: '0xc3a705ea6e339a53a7d301d3c5d7e6f499a9366a',
+                chain: 'SONIC',
             },
             silo: {
                 markets: [
@@ -120,8 +105,8 @@ export default <NetworkData>{
                     '0x11ba70c0ebab7946ac84f0e6d79162b0cbb2693f', // usdc 36
                 ],
             },
-            avalon: {
-                solv: {
+            avalon: [
+                {
                     subgraphUrl: `https://api.studio.thegraph.com/query/102993/avalon-defi-lending-v3/version/latest`,
                     tokens: {
                         SOLVBTC: {
@@ -140,112 +125,122 @@ export default <NetworkData>{
                         },
                     },
                 },
-            },
-            defillama: [
+            ],
+            http: [
                 {
-                    defillamaPoolId: '104b3467-bba3-4923-851d-aa9e6ff47611',
-                    tokenAddress: '0x67a298e5b65db2b4616e05c3b455e017275f53cb',
+                    url: 'https://api.beefy.finance/apy/',
+                    extractors: [
+                        {
+                            type: 'path',
+                            key: '0x7870ddfd5aca4e977b2287e9a212bcbe8fc4135a',
+                            path: '$.silov2-sonic-usdce-ws',
+                        },
+                        { type: 'path', key: '0x871a101dcf22fe4fe37be7b654098c801cba1c88', path: '$.beefy-besonic' },
+                    ],
+                },
+                {
+                    url: 'https://api.goldsky.com/api/public/project_cmcccb4vz1nhh01x888di8lgk/subgraphs/mainstreet/0.0.1/gn',
+                    body: JSON.stringify({
+                        query: `{
+                    smsUsdStats(id: "statsSmsUsd") {
+                      apy
+                    }
+                  }`,
+                    }),
+                    headers: { 'Content-Type': 'application/json' },
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            key: '0xc7990369da608c2f4903715e3bd22f2970536c29',
+                            path: '$.data.smsUsdStats.apy',
+                        },
+                    ],
+                },
+                {
+                    url: 'https://yields.llama.fi/chart/104b3467-bba3-4923-851d-aa9e6ff47611',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            key: '0x67a298e5b65db2b4616e05c3b455e017275f53cb',
+                            path: '$.data[-1:].apyBase',
+                        },
+                    ],
+                },
+                {
+                    url: 'https://api.originprotocol.com/api/v2/os/apr/trailing/7?146',
+                    scale: 100,
+                    extractors: [{ type: 'path', key: '0x9f0df7799f6fdad409300080cff680f5a23df4b1', path: '$.apr' }],
+                },
+                {
+                    url: 'https://be.angles.fi/api/v2/angles/apr/trailing/7',
+                    scale: 100,
+                    extractors: [{ type: 'path', key: '0xfa85fe5a8f5560e9039c04f2b0a90de1415abd70', path: '$.apy' }],
+                },
+                {
+                    url: 'https://usd-locks-api.rings.money/wrapper/apy',
+                    extractors: [{ type: 'path', key: '0x9fb76f7ce5fceaa2c42887ff441d46095e494206', path: '$.apy' }],
+                },
+                {
+                    url: 'https://eth-locks-api.rings.money/wrapper/apy',
+                    extractors: [{ type: 'path', key: '0xe8a41c62bb4d5863c6eadc96792cfe90a1f37c47', path: '$.apy' }],
+                },
+                {
+                    url: 'https://v2.silo.finance/api/detailed-vault/sonic-0xf6f87073cf8929c206a77b0694619dc776f89885',
+                    scale: 1e18,
+                    extractors: [
+                        { type: 'path', key: '0xf6f87073cf8929c206a77b0694619dc776f89885', path: '$.supplyApr' },
+                    ],
+                },
+                {
+                    url: 'https://v2.silo.finance/api/detailed-vault/sonic-0xded4ac8645619334186f28b8798e07ca354cfa0e',
+                    scale: 1e18,
+                    extractors: [
+                        { type: 'path', key: '0xded4ac8645619334186f28b8798e07ca354cfa0e', path: '$.supplyApr' },
+                    ],
+                },
+                {
+                    url: 'https://v2.silo.finance/api/detailed-vault/sonic-0xb6a23cb29e512df41876b28d7a848bd831f9c5ba',
+                    scale: 1e18,
+                    extractors: [
+                        { type: 'path', key: '0xb6a23cb29e512df41876b28d7a848bd831f9c5ba', path: '$.supplyApr' },
+                    ],
+                },
+                {
+                    url: 'https://v2.silo.finance/api/detailed-vault/sonic-0x9a1bf5365edbb99c2c61ca6d9ffad0b705acfc6f',
+                    scale: 1e18,
+                    extractors: [
+                        { type: 'path', key: '0x9a1bf5365edbb99c2c61ca6d9ffad0b705acfc6f', path: '$.supplyApr' },
+                    ],
+                },
+                {
+                    url: 'https://v2.silo.finance/api/detailed-vault/sonic-0x592d1e187729c76efacc6dffb9355bd7bf47b2a7',
+                    scale: 1e18,
+                    extractors: [
+                        { type: 'path', key: '0x592d1e187729c76efacc6dffb9355bd7bf47b2a7', path: '$.supplyApr' },
+                    ],
+                },
+                {
+                    url: 'https://v2.silo.finance/api/detailed-vault/sonic-0x92ebf5a1fb4061b45222a6d76accf4698bde4b95',
+                    scale: 1e18,
+                    extractors: [
+                        { type: 'path', key: '0x92ebf5a1fb4061b45222a6d76accf4698bde4b95', path: '$.supplyApr' },
+                    ],
+                },
+                {
+                    url: 'https://v2.silo.finance/api/detailed-vault/sonic-0xf6bc16b79c469b94cdd25f3e2334dd4fee47a581',
+                    scale: 1e18,
+                    extractors: [
+                        { type: 'path', key: '0xf6bc16b79c469b94cdd25f3e2334dd4fee47a581', path: '$.supplyApr' },
+                    ],
+                },
+                {
+                    url: 'https://api-v2.streamprotocol.money/vaults/xUSD/apy',
+                    scale: 100,
+                    extractors: [{ type: 'path', key: '0x6202b9f02e30e5e1c62cc01e4305450e5d83b926', path: '$.apy' }],
                 },
             ],
-            smsusd: '0xc7990369da608c2f4903715e3bd22f2970536c29',
-            defaultHandlers: {
-                wOS: {
-                    tokenAddress: '0x9f0df7799f6fdad409300080cff680f5a23df4b1',
-                    sourceUrl: 'https://api.originprotocol.com/api/v2/os/apr/trailing/7?146',
-                    path: 'apr',
-                    isIbYield: true,
-                },
-                wanS: {
-                    tokenAddress: '0xfa85fe5a8f5560e9039c04f2b0a90de1415abd70',
-                    sourceUrl: 'https://be.angles.fi/api/v2/angles/apr/trailing/7',
-                    path: 'apy',
-                    isIbYield: true,
-                },
-                wstkscUSD: {
-                    tokenAddress: '0x9fb76f7ce5fceaa2c42887ff441d46095e494206',
-                    sourceUrl: 'https://usd-locks-api.rings.money/wrapper/apy',
-                    path: 'apy',
-                    scale: 1,
-                    isIbYield: true,
-                },
-                wstkscETH: {
-                    tokenAddress: '0xe8a41c62bb4d5863c6eadc96792cfe90a1f37c47',
-                    sourceUrl: 'https://eth-locks-api.rings.money/wrapper/apy',
-                    path: 'apy',
-                    scale: 1,
-                    isIbYield: true,
-                },
-                varlamoreUSDC: {
-                    tokenAddress: '0xf6f87073cf8929c206a77b0694619dc776f89885',
-                    sourceUrl:
-                        'https://v2.silo.finance/api/detailed-vault/sonic-0xf6f87073cf8929c206a77b0694619dc776f89885',
-                    path: 'supplyApr',
-                    scale: 1000000000000000000,
-                    isIbYield: true,
-                },
-                varlamorewS: {
-                    tokenAddress: '0xded4ac8645619334186f28b8798e07ca354cfa0e',
-                    sourceUrl:
-                        'https://v2.silo.finance/api/detailed-vault/sonic-0xded4ac8645619334186f28b8798e07ca354cfa0e',
-                    path: 'supplyApr',
-                    scale: 1000000000000000000,
-                    isIbYield: true,
-                },
-                varlamorescUSD: {
-                    tokenAddress: '0xb6a23cb29e512df41876b28d7a848bd831f9c5ba',
-                    sourceUrl:
-                        'https://v2.silo.finance/api/detailed-vault/sonic-0xb6a23cb29e512df41876b28d7a848bd831f9c5ba',
-                    path: 'supplyApr',
-                    scale: 1000000000000000000,
-                    isIbYield: true,
-                },
-                varlamoredUSD: {
-                    tokenAddress: '0x9a1bf5365edbb99c2c61ca6d9ffad0b705acfc6f',
-                    sourceUrl:
-                        'https://v2.silo.finance/api/detailed-vault/sonic-0x9a1bf5365edbb99c2c61ca6d9ffad0b705acfc6f',
-                    path: 'supplyApr',
-                    scale: 1000000000000000000,
-                    isIbYield: true,
-                },
-                silore7scUSD: {
-                    tokenAddress: '0x592d1e187729c76efacc6dffb9355bd7bf47b2a7',
-                    sourceUrl:
-                        'https://v2.silo.finance/api/detailed-vault/sonic-0x592d1e187729c76efacc6dffb9355bd7bf47b2a7',
-                    path: 'supplyApr',
-                    scale: 1000000000000000000,
-                    isIbYield: true,
-                },
-                silogamiscUSD: {
-                    tokenAddress: '0x92ebf5a1fb4061b45222a6d76accf4698bde4b95',
-                    sourceUrl:
-                        'https://v2.silo.finance/api/detailed-vault/sonic-0x92ebf5a1fb4061b45222a6d76accf4698bde4b95',
-                    path: 'supplyApr',
-                    scale: 1000000000000000000,
-                    isIbYield: true,
-                },
-                siloghUSDC: {
-                    tokenAddress: '0xf6bc16b79c469b94cdd25f3e2334dd4fee47a581',
-                    sourceUrl:
-                        'https://v2.silo.finance/api/detailed-vault/sonic-0xf6bc16b79c469b94cdd25f3e2334dd4fee47a581',
-                    path: 'supplyApr',
-                    scale: 1000000000000000000,
-                    isIbYield: true,
-                },
-                xUSD: {
-                    tokenAddress: '0x6202b9f02e30e5e1c62cc01e4305450e5d83b926',
-                    sourceUrl: 'https://api-v2.streamprotocol.money/vaults/xUSD/apy',
-                    path: 'apy',
-                    scale: 100,
-                    isIbYield: true,
-                },
-                sdusd: {
-                    tokenAddress: '0x41a5477364bf60d8936b90310fecfda79593304e',
-                    sourceUrl: 'https://app.dtrinity.org/v1/api/dstake/latest?chainId=146',
-                    path: 'data.netApy',
-                    scale: 100,
-                    isIbYield: true,
-                },
-            },
         },
     },
     datastudio: {
