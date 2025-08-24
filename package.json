@@ -50,6 +50,7 @@
         "graphql-request": "^3.7.0",
         "graphql-tag": "^2.12.6",
         "helmet": "^5.1.1",
+        "jsonpath-plus": "^10.3.0",
         "limiter": "^2.1.0",
         "lodash": "^4.17.21",
         "memory-cache": "^0.2.0",

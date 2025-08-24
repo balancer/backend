@@ -16,25 +16,18 @@ const config = {
 /** Makes handler callable by chain */
 export const chains = Object.keys(config) as Chain[];
 
-export class Handler implements AprHandler {
-    async getAprs(chain: Chain) {
-        if (chain !== 'GNOSIS') {
-            throw `Handler supports GNOSIS only, but called for ${chain}`;
-        }
-
-        const client = getViemClient(chain);
-        const vaultAPY = await client.readContract({
-            address: config[chain].helperAddress as `0x${string}`,
-            abi: helperAbi,
-            functionName: 'vaultAPY',
-        });
-        const apr = Number(vaultAPY) * 10 ** -18;
-
-        return {
-            [config[chain].sdaiAddress]: {
-                apr,
-                isIbYield: true,
-            },
-        };
+export const handler: AprHandler = async (chain: Chain) => {
+    if (chain !== 'GNOSIS') {
+        throw `Handler supports GNOSIS only, but called for ${chain}`;
     }
-}
+
+    const client = getViemClient(chain);
+    const vaultAPY = await client.readContract({
+        address: config[chain].helperAddress as `0x${string}`,
+        abi: helperAbi,
+        functionName: 'vaultAPY',
+    });
+    const apr = Number(vaultAPY) * 10 ** -18;
+
+    return [{ address: config[chain].sdaiAddress, apr }];
+};

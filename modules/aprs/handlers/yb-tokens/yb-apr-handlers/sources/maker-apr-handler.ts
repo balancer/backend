@@ -1,43 +1,30 @@
-import { YbAprHandler } from '../types';
-import { MakerAprConfig } from '../../../../../network/apr-config-types';
+import { TokenApr, YbAprHandler } from '../../types';
 import { abi as makerPotAbi } from './abis/maker-pot';
-import config from '../../../../../../config';
+import cnfg from '../../../../../../config';
 import { createPublicClient, http } from 'viem';
 import { mainnet } from 'viem/chains';
 
-const client = createPublicClient({
-    chain: mainnet,
-    transport: http(config.MAINNET.rpcUrl),
-});
-
 const potAddress = '0x197e90f9fad81970ba7976f33cbd77088e5d7cf7';
 
-export class MakerAprHandler implements YbAprHandler {
-    group = 'MAKER';
-    private sdai: string;
+export const makerAprHandler: YbAprHandler = async ({ sdai }: { sdai: string }) => {
+    const aprs: TokenApr[] = [];
+    try {
+        const client = createPublicClient({
+            chain: mainnet,
+            transport: http(cnfg.MAINNET.rpcUrl),
+        });
 
-    constructor({ sdai }: MakerAprConfig) {
-        this.sdai = sdai;
+        const dsr = await client.readContract({
+            abi: makerPotAbi,
+            address: potAddress,
+            functionName: 'dsr',
+        });
+
+        const tokenApr = (Number(dsr) * 10 ** -27 - 1) * 365 * 24 * 60 * 60;
+
+        aprs.push({ address: sdai, apr: tokenApr });
+    } catch (error) {
+        throw Error(`Maker IB APR hanlder failed: ${(error as Error).message}`);
     }
-
-    async getAprs() {
-        const aprs: { [p: string]: { apr: number; isIbYield: boolean } } = {};
-        try {
-            const dsr = await client.readContract({
-                abi: makerPotAbi,
-                address: potAddress,
-                functionName: 'dsr',
-            });
-
-            const tokenApr = (Number(dsr) * 10 ** -27 - 1) * 365 * 24 * 60 * 60;
-
-            aprs[this.sdai] = {
-                apr: tokenApr,
-                isIbYield: false,
-            };
-        } catch (error) {
-            throw Error(`Maker IB APR hanlder failed: ${(error as Error).message}`);
-        }
-        return aprs;
-    }
-}
+    return aprs;
+};

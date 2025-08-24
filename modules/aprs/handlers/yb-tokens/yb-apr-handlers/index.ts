@@ -1,110 +1,126 @@
 import * as sources from './sources';
-import { YbAprConfig } from '../../../../network/apr-config-types';
+import { YbAprConfig, YbAprHandler, TokenApr } from '../types';
 import { Chain } from '@prisma/client';
-import { YbAprHandler, AprHandlerConstructor, TokenApr } from './types';
-export type { YbAprHandler as AprHandler, AprHandlerConstructor, TokenApr };
+export type { YbAprHandler as AprHandler, TokenApr };
+import cache from 'memory-cache';
 
 const sourceToHandler = {
-    aave: sources.AaveAprHandler,
-    avalon: sources.AvalonAprHandler,
-    beefy: sources.BeefyAprHandler,
-    euler: sources.EulerAprHandler,
-    fluid: sources.FluidAprHandler,
-    extra: sources.ExtraHandler,
-    maker: sources.MakerAprHandler,
-    defaultHandlers: sources.DefaultAprHandler,
-    stakewise: sources.Stakewise,
-    maple: sources.Maple,
-    yieldnest: sources.Yieldnest,
-    etherfi: sources.Etherfi,
-    dforce: sources.DForce,
-    defillama: sources.Defillama,
-    teth: sources.TreehouseAprHandler,
-    morpho: sources.MorphoAprHandler,
-    usdl: sources.UsdlAprHandler,
-    sts: sources.StsAprHandler,
-    silo: sources.SiloAprHandler,
-    susds: sources.SUSDSAprHandler,
-    smsusd: sources.Mainstreet,
-    hypurrfi: sources.HypurrFi,
-    morphoVaultHyperevm: sources.MorphoHyperevm,
+    aave: sources.aaveAprHandler,
+    avalon: sources.avalonAprHandler,
+    euler: sources.eulerAprHandler,
+    maker: sources.makerAprHandler,
+    dforce: sources.dForce,
+    teth: sources.treehouseAprHandler,
+    sts: sources.stsAprHandler,
+    silo: sources.siloAprHandler,
+    susds: sources.sUSDSAprHandler,
+    hypurrfi: sources.hypurrFi,
+    morphoVaultHyperevm: sources.morphoHyperevm,
+    http: sources.httpAprHandler,
 };
 
+const chainSources = [sources.AaveAuto, sources.MakerGnosis];
+
+type BackoffState = { attempts: number };
+
 export class YbAprHandlers {
-    private handlers: YbAprHandler[] = [];
-    fixedAprTokens?: { [tokenName: string]: { address: string; apr: number; group?: string; isIbYield?: boolean } };
+    private config: YbAprConfig;
+    private baseDelay = 5_000; // 5s
+    private maxDelay = 60_000; // 1min
+    fixedAprTokens?: { [tokenName: string]: { address: string; apr: number } };
 
-    constructor(aprConfig: YbAprConfig, private chain?: Chain) {
+    constructor(
+        aprConfig: YbAprConfig,
+        private chain?: Chain,
+    ) {
         const { fixedAprHandler, ...config } = aprConfig;
-        this.handlers = this.buildAprHandlers(config);
+        this.config = config;
         this.fixedAprTokens = fixedAprHandler;
-    }
-
-    private buildAprHandlers(aprConfig: YbAprConfig) {
-        const handlers: YbAprHandler[] = [];
-
-        // Add handlers from global configuration
-        for (const [source, config] of Object.entries(aprConfig)) {
-            const Handler = sourceToHandler[source as keyof typeof sourceToHandler];
-
-            // Ignore unknown sources
-            if (!Handler) {
-                continue;
-            }
-
-            // Handle nested configs
-            if (source === 'aave' || source === 'avalon' || source === 'defaultHandlers') {
-                for (const nestedConfig of Object.values(config)) {
-                    handlers.push(new Handler(nestedConfig as any));
-                }
-            } else {
-                handlers.push(new Handler(config));
-            }
-        }
-
-        // Add handlers from self-configured sources
-        Object.values(sources as unknown as any[])
-            .filter((source): source is { chains: Chain[]; Handler: AprHandlerConstructor } => 'chains' in source)
-            .filter((source) => this.chain && source.chains.includes(this.chain))
-            .forEach((source) => {
-                handlers.push(new source.Handler());
-            });
-
-        return handlers;
     }
 
     async fetchAprsFromAllHandlers(): Promise<TokenApr[]> {
         let aprs: TokenApr[] = this.fixedAprTokens
-            ? Object.values(this.fixedAprTokens).map(({ address, apr, isIbYield, group }) => ({
+            ? Object.values(this.fixedAprTokens).map(({ address, apr }) => ({
                   apr,
                   address,
-                  isIbYield: isIbYield ?? false,
-                  group,
               }))
             : [];
 
-        const results = await Promise.allSettled(this.handlers.map((handler) => handler.getAprs(this.chain)));
+        const results = await Promise.allSettled([
+            ...Object.entries(this.config).flatMap(([source, config]) => {
+                if (Array.isArray(config)) {
+                    return config.map((c) => this.callHandler(source as keyof typeof sourceToHandler, c));
+                }
 
-        const failedYbHandlerReasons: string[] = [];
+                return [this.callHandler(source as keyof typeof sourceToHandler, config)];
+            }),
+
+            // Add handlers from chain configured sources
+            ...chainSources
+                .filter((source) => this.chain && source.chains.includes(this.chain))
+                .map((source) => source.handler(this.chain)),
+        ]);
+
+        const failedReasons: string[] = [];
 
         for (const result of results) {
-            if (result.status === 'fulfilled') {
-                aprs = aprs.concat(
-                    Object.entries(result.value).map(([address, { apr, isIbYield }]) => ({
-                        apr,
-                        address,
-                        isIbYield,
-                    })),
-                );
-            } else {
-                failedYbHandlerReasons.push(result.reason);
+            if (result.status === 'fulfilled' && result.value !== null) {
+                aprs = aprs.concat(result.value);
+            } else if (result.status === 'rejected') {
+                failedReasons.push(String(result.reason));
             }
         }
 
-        if (failedYbHandlerReasons.length > 0) {
-            console.error(`Failed to fetch APRs from some YB handlers: ${failedYbHandlerReasons.join(', ')}`);
+        if (failedReasons.length > 0) {
+            console.error(`Failed to fetch APRs from some YB handlers: ${failedReasons.join(', ')}`);
         }
 
         return aprs;
+    }
+
+    private callHandler = async (source: keyof typeof sourceToHandler, config: any) => {
+        const handler = sourceToHandler[source as keyof typeof sourceToHandler];
+
+        if (!handler) {
+            throw `no handler ${source}`;
+        }
+
+        const key = this.getCacheKey(source, config);
+
+        if (this.isInBackoff(key)) {
+            throw `Skipping handler ${key}, still in backoff.`;
+        }
+
+        try {
+            const value = await handler(config);
+            this.markSuccess(key);
+            return value;
+        } catch (err) {
+            this.markFailure(key);
+            throw err;
+        }
+    };
+
+    private getCacheKey(source: string, config: any) {
+        // use source name + url
+        return `backoff:${source}:${config.url ?? ''}`;
+    }
+
+    private isInBackoff(key: string) {
+        return cache.get(key) != null;
+    }
+
+    private markFailure(key: string) {
+        console.log('marking failed attempt', key);
+        const prev: BackoffState | undefined = cache.get(key);
+        const attempts = (prev?.attempts ?? 0) + 1;
+        const delay = Math.min(this.baseDelay * attempts, this.maxDelay);
+
+        // store attempts, expire after delay ms
+        cache.put(key, { attempts }, delay);
+    }
+
+    private markSuccess(key: string) {
+        cache.del(key);
     }
 }
