@@ -1,5 +1,11 @@
 # backend
 
+## 1.51.6
+
+### Patch Changes
+
+-   d8f72b0: fix pool search by tags
+
 ## 1.51.5
 
 ### Patch Changes
