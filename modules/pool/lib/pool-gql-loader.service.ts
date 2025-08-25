@@ -1211,11 +1211,11 @@ const searchFilters = (args: QueryPoolGetPoolsArgs) => {
     }
 
     if (args.where?.categoryIn) {
-        where += `AND p.categories = ANY('{${args.where?.categoryIn.map(sanitizeInput).join(',')}')`;
+        where += `AND p.categories @> ARRAY['${args.where?.categoryIn.map(sanitizeInput).join("','")}']`;
     }
 
     if (args.where?.tagIn) {
-        where += `AND p.categories = ANY('{${args.where?.tagIn.map(sanitizeInput).join(',')}}')`;
+        where += `AND p.categories @> ARRAY['${args.where?.tagIn.map(sanitizeInput).join("','")}']`;
     }
 
     if (args.where?.minTvl) {
