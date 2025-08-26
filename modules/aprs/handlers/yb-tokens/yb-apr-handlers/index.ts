@@ -2,7 +2,6 @@ import * as sources from './sources';
 import { YbAprConfig, YbAprHandler, TokenApr } from '../types';
 import { Chain } from '@prisma/client';
 export type { YbAprHandler as AprHandler, TokenApr };
-import cache from 'memory-cache';
 
 const sourceToHandler = {
     aave: sources.aaveAprHandler,
@@ -21,12 +20,8 @@ const sourceToHandler = {
 
 const chainSources = [sources.AaveAuto, sources.MakerGnosis];
 
-type BackoffState = { attempts: number };
-
 export class YbAprHandlers {
     private config: YbAprConfig;
-    private baseDelay = 5_000; // 5s
-    private maxDelay = 60_000; // 1min
     fixedAprTokens?: { [tokenName: string]: { address: string; apr: number } };
 
     constructor(
@@ -85,42 +80,7 @@ export class YbAprHandlers {
             throw `no handler ${source}`;
         }
 
-        const key = this.getCacheKey(source, config);
-
-        if (this.isInBackoff(key)) {
-            throw `Skipping handler ${key}, still in backoff.`;
-        }
-
-        try {
-            const value = await handler(config);
-            this.markSuccess(key);
-            return value;
-        } catch (err) {
-            this.markFailure(key);
-            throw err;
-        }
+        const value = await handler(config);
+        return value;
     };
-
-    private getCacheKey(source: string, config: any) {
-        // use source name + url
-        return `backoff:${source}:${config.url ?? ''}`;
-    }
-
-    private isInBackoff(key: string) {
-        return cache.get(key) != null;
-    }
-
-    private markFailure(key: string) {
-        console.log('marking failed attempt', key);
-        const prev: BackoffState | undefined = cache.get(key);
-        const attempts = (prev?.attempts ?? 0) + 1;
-        const delay = Math.min(this.baseDelay * attempts, this.maxDelay);
-
-        // store attempts, expire after delay ms
-        cache.put(key, { attempts }, delay);
-    }
-
-    private markSuccess(key: string) {
-        cache.del(key);
-    }
 }
