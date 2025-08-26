@@ -138,6 +138,18 @@ export default <NetworkData>{
             ],
             http: [
                 {
+                    name: 'sdusd',
+                    url: 'https://app.dtrinity.org/v1/api/dstake/latest?chainId=146',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x41a5477364bf60d8936b90310fecfda79593304e',
+                            path: '$.data.netApy',
+                        },
+                    ],
+                },
+                {
                     url: 'https://api.beefy.finance/apy/',
                     extractors: [
                         {
