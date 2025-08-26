@@ -47,9 +47,9 @@ const extract = (json: any, config: AprHttpFetchConfig) =>
 const transform = (entries: [string, number][], config: AprHttpFetchConfig) =>
     entries.map(([key, value]) => ({ address: key, apr: normalizeValue(value, config) }));
 
-const normalizeValue = (value: any, { average, scale }: AprHttpFetchConfig) => {
+const normalizeValue = (value: any, { url, average, scale }: AprHttpFetchConfig) => {
     if (value === undefined) {
-        throw 'value parsing error';
+        throw `value parsing error ${url}`;
     }
 
     if (Array.isArray(value)) {
