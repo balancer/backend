@@ -1,5 +1,15 @@
 # backend
 
+## 1.52.0
+
+### Minor Changes
+
+-   f0466ce: APR service cleanup
+
+### Patch Changes
+
+-   931f7e5: hyperrfi USD₮0 liquidity rate
+
 ## 1.51.7
 
 ### Patch Changes
