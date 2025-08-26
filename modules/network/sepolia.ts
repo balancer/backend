@@ -28,43 +28,43 @@ export const sepoliaNetworkConfig: NetworkConfig = {
     workerJobs: [
         {
             name: 'update-liquidity-for-inactive-pools',
-            interval: every(10, 'minutes'),
+            interval: every(20, 'minutes'),
         },
         {
             name: 'update-pool-apr',
-            interval: every(2, 'minutes'),
+            interval: every(20, 'minutes'),
         },
         {
             name: 'load-on-chain-data-for-pools-with-active-updates',
-            interval: every(1, 'minutes'),
+            interval: every(10, 'minutes'),
         },
         {
             name: 'sync-new-pools-from-subgraph',
-            interval: every(2, 'minutes'),
+            interval: every(20, 'minutes'),
         },
         {
             name: 'update-liquidity-24h-ago-v2',
-            interval: every(5, 'minutes'),
+            interval: every(20, 'minutes'),
         },
         {
             name: 'sync-staking-for-pools',
-            interval: every(5, 'minutes'),
+            interval: every(20, 'minutes'),
         },
         {
             name: 'sync-snapshots-v2',
-            interval: every(90, 'minutes'),
+            interval: every(180, 'minutes'),
         },
         {
             name: 'sync-changed-pools',
-            interval: every(30, 'seconds'),
+            interval: every(5, 'minutes'),
         },
         {
             name: 'user-sync-wallet-balances-for-all-pools',
-            interval: every(20, 'seconds'),
+            interval: every(2, 'minutes'),
         },
         {
             name: 'user-sync-staked-balances',
-            interval: every(20, 'seconds'),
+            interval: every(2, 'minutes'),
         },
         {
             name: 'update-fee-volume-yield-all-pools',
@@ -80,28 +80,28 @@ export const sepoliaNetworkConfig: NetworkConfig = {
         // },
         {
             name: 'sync-join-exits-v2',
-            interval: every(1, 'minutes'),
+            interval: every(10, 'minutes'),
         },
         {
             name: 'sync-swaps-v2',
-            interval: every(1, 'minutes'),
+            interval: every(10, 'minutes'),
         },
         // V3 jobs
         {
             name: 'add-pools-v3',
-            interval: every(30, 'seconds'),
+            interval: every(60, 'seconds'),
         },
         {
             name: 'sync-pools-v3',
-            interval: every(30, 'seconds'),
+            interval: every(60, 'seconds'),
         },
         {
             name: 'sync-join-exits-v3',
-            interval: every(1, 'minutes'),
+            interval: every(10, 'minutes'),
         },
         {
             name: 'sync-swaps-v3',
-            interval: every(1, 'minutes'),
+            interval: every(10, 'minutes'),
         },
         {
             name: 'sync-snapshots-v3',
@@ -114,15 +114,15 @@ export const sepoliaNetworkConfig: NetworkConfig = {
         // COW AMM
         {
             name: 'sync-cow-amm-pools',
-            interval: every(30, 'seconds'),
+            interval: every(60, 'seconds'),
         },
         {
             name: 'sync-cow-amm-swaps',
-            interval: every(1, 'minutes'),
+            interval: every(10, 'minutes'),
         },
         {
             name: 'sync-cow-amm-join-exits',
-            interval: every(1, 'minutes'),
+            interval: every(10, 'minutes'),
         },
         { name: 'sync-cow-amm-snapshots', interval: every(90, 'minutes') },
         {

@@ -59,70 +59,121 @@ export default <NetworkData>{
     },
     aprHandlers: {
         ybAprHandler: {
-            defaultHandlers: {
-                siUSD: {
-                    tokenAddress: '0xdbdc1ef57537e34680b898e1febd3d68c7389bcb',
-                    sourceUrl: 'https://api.infinifi.xyz/api/protocol/data',
-                    path: 'data.stats.siusd.lastWeekAPY',
+            http: [
+                {
+                    url: 'https://yields.llama.fi/chart/a8a2a14b-2345-4666-adab-227c991c4837',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x9fd7466f987fd4c45a5bbde22ed8aba5bc8d72d1',
+                            path: '$.data[-1:].apyBase',
+                        },
+                    ],
+                },
+                {
+                    url: 'https://yields.llama.fi/chart/2ad8497d-c855-4840-85ad-cdc536b92ced',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x0a3d8466f5de586fa5f6de117301e2f90bcc5c48',
+                            path: '$.data[-1:].apyBase',
+                        },
+                    ],
+                },
+                {
+                    url: 'https://api.infinifi.xyz/api/protocol/data',
                     scale: 1,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0xdbdc1ef57537e34680b898e1febd3d68c7389bcb',
+                            path: '$.data.stats.siusd.lastWeekAPY',
+                        },
+                    ],
                 },
-                hlhype: {
-                    tokenAddress: '0xd704254eb350e0d3baecd194d095862267897ae0',
-                    sourceUrl: 'https://api.hyperlend.finance/data/markets/rates',
-                    path: '0x5555555555555555555555555555555555555555.supplyAPR',
+                {
+                    url: 'https://api.hyperlend.finance/data/markets/rates',
                     scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0xd704254eb350e0d3baecd194d095862267897ae0',
+                            path: '$["0x5555555555555555555555555555555555555555"].supplyAPR',
+                        },
+                        {
+                            type: 'path',
+                            token: '0x06fd9d03b3d0f18e4919919b72d30c582f0a97e5',
+                            path: '$["0x06Fd9D03b3d0F18E4919919b72D30c582f0a97E5"].supplyAPR',
+                        },
+                    ],
                 },
-                usdtwhlp: {
-                    tokenAddress: '0x06fd9d03b3d0f18e4919919b72d30c582f0a97e5',
-                    sourceUrl: 'https://api.hyperlend.finance/data/markets/rates',
-                    path: '0x06Fd9D03b3d0F18E4919919b72D30c582f0a97E5.supplyAPR',
+                {
+                    url: 'https://backend.nucleusearn.io/v1/vaults/apy?token_address=0x1359b05241cA5076c9F59605214f4F84114c0dE8&lookback_days=14',
                     scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x1359b05241ca5076c9f59605214f4f84114c0de8',
+                            path: '$.apy',
+                        },
+                    ],
                 },
-                whlp: {
-                    tokenAddress: '0x1359b05241ca5076c9f59605214f4f84114c0de8',
-                    sourceUrl:
-                        'https://backend.nucleusearn.io/v1/vaults/apy?token_address=0x1359b05241cA5076c9F59605214f4F84114c0dE8&lookback_days=14',
-                    path: 'apy',
+                {
+                    url: 'https://backend.nucleusearn.io/v1/vaults/apy?token_address=0x5748ae796AE46A4F1348a1693de4b50560485562&lookback_days=14',
                     scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x5748ae796ae46a4f1348a1693de4b50560485562',
+                            path: '$.apy',
+                        },
+                    ],
                 },
-                lhype: {
-                    tokenAddress: '0x5748ae796ae46a4f1348a1693de4b50560485562',
-                    sourceUrl:
-                        'https://backend.nucleusearn.io/v1/vaults/apy?token_address=0x5748ae796AE46A4F1348a1693de4b50560485562&lookback_days=14',
-                    path: 'apy',
-                    scale: 100,
-                },
-                khype: {
-                    tokenAddress: '0xfd739d4e423301ce9385c1fb8850539d657c296d',
-                    sourceUrl: 'https://api.kinetiq.xyz/v1/public/protocol',
-                    path: 'apy',
+                {
+                    url: 'https://api.kinetiq.xyz/v1/public/protocol',
                     scale: 1,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0xfd739d4e423301ce9385c1fb8850539d657c296d',
+                            path: '$.apy',
+                        },
+                    ],
                 },
+            ],
+            contract: {
+                calls: [
+                    {
+                        chain: 'HYPEREVM',
+                        contract: '0x895C799a5bbdCb63B80bEE5BD94E7b9138D977d6', // ProtocolDataProvider
+                        abi: 'function getReserveData(address) view returns (uint256 unbacked, uint256 accruedToTreasuryScaled, uint256 totalAToken, uint256 totalStableDebt, uint256 totalVariableDebt, uint256 liquidityRate, uint256 variableBorrowRate, uint256 stableBorrowRate, uint256 averageStableBorrowRate, uint256 liquidityIndex, uint256 variableBorrowIndex, uint40 lastUpdateTimestamp)',
+                        functionName: 'getReserveData',
+                        token: '0xdc6f4239c1d8d3b955c06cb8f1a6cf18effc5bfe', // stataToken
+                        args: ['0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb'], // USD₮0 market
+                        parser: (data: any) => Number(data[5]) / 1e27, // liquidityRate
+                    },
+                ],
             },
-            hypurrfi: [
-                '0x1c5164a764844356d57654ea83f9f1b72cd10db5', // hyUSD₮0-lhype
-                '0x2c910f67dbf81099e6f8e126e7265d7595dc20ad', // hyUSD₮0-hwHLP
-            ],
-            morphoVaultHyperevm: [
-                '0xfc5126377f0efc0041c0969ef9ba903ce67d151e', // feUSDT0
-                '0x9c59a9389d8f72de2cdaf1126f36ea4790e2275e', // feUSDhl
-                '0x5eec795d919fa97688fb9844eeb0072e6b846f9d', // gtUSDe
-                '0xd3a9cb7312b9c29113290758f5adfe12304cd16a', // mcUSR
-                '0x3bcc0a5a66bb5bdceef5dd8a659a4ec75f3834d8', // mcUSDT
-                '0xd19e3d00f8547f7d108abfd4bbb015486437b487', // mcHYPE
-                '0x53a333e51e96fe288bc9add7cdc4b1ead2cd2ffa', // gtUSDT0
-                '0x0571362ba5ea9784a97605f57483f865a37dbeaa', // gtuETH
-            ],
-            defillama: [
-                {
-                    defillamaPoolId: 'a8a2a14b-2345-4666-adab-227c991c4837',
-                    tokenAddress: '0x9fd7466f987fd4c45a5bbde22ed8aba5bc8d72d1',
-                },
-                {
-                    defillamaPoolId: '2ad8497d-c855-4840-85ad-cdc536b92ced',
-                    tokenAddress: '0x0a3d8466f5de586fa5f6de117301e2f90bcc5c48',
-                },
-            ],
+            hypurrfi: {
+                markets: [
+                    '0x1c5164a764844356d57654ea83f9f1b72cd10db5', // hyUSD₮0-lhype
+                    '0x2c910f67dbf81099e6f8e126e7265d7595dc20ad', // hyUSD₮0-hwHLP
+                ],
+            },
+            morphoVaultHyperevm: {
+                vaults: [
+                    '0xfc5126377f0efc0041c0969ef9ba903ce67d151e', // feUSDT0
+                    '0x9c59a9389d8f72de2cdaf1126f36ea4790e2275e', // feUSDhl
+                    '0x5eec795d919fa97688fb9844eeb0072e6b846f9d', // gtUSDe
+                    '0xd3a9cb7312b9c29113290758f5adfe12304cd16a', // mcUSR
+                    '0x3bcc0a5a66bb5bdceef5dd8a659a4ec75f3834d8', // mcUSDT
+                    '0xd19e3d00f8547f7d108abfd4bbb015486437b487', // mcHYPE
+                    '0x53a333e51e96fe288bc9add7cdc4b1ead2cd2ffa', // gtUSDT0
+                    '0x0571362ba5ea9784a97605f57483f865a37dbeaa', // gtuETH
+                ],
+            },
         },
     },
     multicall: '0xca11bde05977b3631167028862be2a173976ca11',

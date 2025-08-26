@@ -52,112 +52,106 @@ const query = `query getReserves($underlyingTokens: [Bytes!]) {
 /** Makes handler callable by chain */
 export const chains = Object.keys(config) as Chain[];
 
-export class Handler implements AprHandler {
-    async getAprs(chain: Chain) {
-        if (!chains.includes(chain)) {
-            return {};
-        }
+export const handler: AprHandler = async (chain: Chain) => {
+    if (!chains.includes(chain)) {
+        return [];
+    }
 
-        // Get AAVE pools
-        const aavePools = await prisma.prismaPool.findMany({
-            where: {
-                chain,
-                OR: [
-                    {
-                        name: {
-                            contains: 'aave',
-                            mode: 'insensitive' as const,
-                        },
+    // Get AAVE pools
+    const aavePools = await prisma.prismaPool.findMany({
+        where: {
+            chain,
+            OR: [
+                {
+                    name: {
+                        contains: 'aave',
+                        mode: 'insensitive' as const,
                     },
-                    {
-                        tokens: {
-                            some: {
-                                token: {
-                                    name: {
-                                        contains: 'aave',
-                                        mode: 'insensitive' as const,
-                                    },
+                },
+                {
+                    tokens: {
+                        some: {
+                            token: {
+                                name: {
+                                    contains: 'aave',
+                                    mode: 'insensitive' as const,
                                 },
                             },
                         },
                     },
-                ],
-            },
-            include: {
-                tokens: {
-                    include: {
-                        token: true,
-                    },
+                },
+            ],
+        },
+        include: {
+            tokens: {
+                include: {
+                    token: true,
                 },
             },
-        });
+        },
+    });
 
-        const wrapperToUnderlying = aavePools
-            .map((pool) =>
-                pool.tokens
-                    .filter(
-                        (token) => token.token.name.toLowerCase().match('aave') && token.token.underlyingTokenAddress,
-                    )
-                    .map((token) => [token.address, token.token.underlyingTokenAddress!]),
-            )
-            .flat()
-            .filter((item, index, self) => self.findIndex((w) => w[0] === item[0]) === index);
+    const wrapperToUnderlying = aavePools
+        .map((pool) =>
+            pool.tokens
+                .filter((token) => token.token.name.toLowerCase().match('aave') && token.token.underlyingTokenAddress)
+                .map((token) => [token.address, token.token.underlyingTokenAddress!]),
+        )
+        .flat()
+        .filter((item, index, self) => self.findIndex((w) => w[0] === item[0]) === index);
 
-        // Get atokens
-        const client = getViemClient(chain);
-        const contracts = wrapperToUnderlying
-            .map(([wrapper]) => wrapper)
-            .map((wrapper) => ({
-                address: wrapper as `0x${string}`,
-                abi: parseAbi(['function aToken() returns (address)']),
-                functionName: 'aToken',
-            }));
-        const aTokens = await client.multicall({ contracts, allowFailure: false });
-        const aTokenToWrappers = wrapperToUnderlying.reduce(
-            (agg, [wrapper], index) => {
-                agg[aTokens[index].toLowerCase()] ||= [];
-                agg[aTokens[index].toLowerCase()].push(wrapper);
-                return agg;
-            },
-            {} as Record<string, string[]>,
-        );
+    // Get atokens
+    const client = getViemClient(chain);
+    const contracts = wrapperToUnderlying
+        .map(([wrapper]) => wrapper)
+        .map((wrapper) => ({
+            address: wrapper as `0x${string}`,
+            abi: parseAbi(['function aToken() returns (address)']),
+            functionName: 'aToken',
+        }));
+    const aTokens = await client.multicall({ contracts, allowFailure: false });
+    const aTokenToWrappers = wrapperToUnderlying.reduce(
+        (agg, [wrapper], index) => {
+            agg[aTokens[index].toLowerCase()] ||= [];
+            agg[aTokens[index].toLowerCase()].push(wrapper);
+            return agg;
+        },
+        {} as Record<string, string[]>,
+    );
 
-        const requestQuery = {
-            operationName: 'getReserves',
-            query,
-            variables: {
-                underlyingTokens: wrapperToUnderlying.map(([_, underlying]) => underlying),
-            },
-        };
+    const requestQuery = {
+        operationName: 'getReserves',
+        query,
+        variables: {
+            underlyingTokens: wrapperToUnderlying.map(([_, underlying]) => underlying),
+        },
+    };
 
-        const response = await fetch(config[chain as keyof typeof config].subgraphURL, {
-            method: 'post',
-            body: JSON.stringify(requestQuery),
-            headers: { 'Content-Type': 'application/json' },
-        });
+    const response = await fetch(config[chain as keyof typeof config].subgraphURL, {
+        method: 'post',
+        body: JSON.stringify(requestQuery),
+        headers: { 'Content-Type': 'application/json' },
+    });
 
-        const data = await response.json();
+    const data = await response.json();
 
-        const {
-            data: { reserves },
-        } = data as ReserveResponse;
+    const {
+        data: { reserves },
+    } = data as ReserveResponse;
 
-        // For each reserve, match the wrapper by aToken address
-        const aprsByUnderlyingAddress = Object.fromEntries(
-            reserves
-                .flatMap((r) =>
-                    aTokenToWrappers[r.aToken.id].map((wrapper) => [
-                        wrapper,
-                        // Converting from aave ray number (27 digits) to float
-                        { apr: Number(r.liquidityRate.slice(0, 27)) / 1e27, isIbYield: true },
-                    ]),
-                )
-                .filter((r) => r[0]),
-        );
+    // For each reserve, match the wrapper by aToken address
+    const aprsByUnderlyingAddress = reserves
+        .flatMap((r) =>
+            aTokenToWrappers[r.aToken.id]?.map((wrapper) => ({
+                address: wrapper,
+                // Converting from aave ray number (27 digits) to float
+                apr: Number(r.liquidityRate.slice(0, 27)) / 1e27,
+            })),
+        )
+        .filter((v) => !!v);
 
-        return aprsByUnderlyingAddress;
-    }
-}
+    return aprsByUnderlyingAddress;
+};
 
 interface ReserveResponse {
     data: {

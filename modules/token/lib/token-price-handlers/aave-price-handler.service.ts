@@ -14,7 +14,7 @@ export class AavePriceHandlerService implements TokenPriceHandler {
     public readonly id = 'AavePriceHandlerService';
     aaveTokens = Object.keys(config).flatMap((chain) => {
         const chainConfig = config[chain as keyof typeof config];
-        const v3 = chainConfig.aprHandlers.ybAprHandler?.aave?.v3?.tokens;
+        const v3 = chainConfig.aprHandlers.ybAprHandler?.aave?.find((m) => m.market === 'v3')?.tokens;
         if (!v3) return [];
         return Object.values(v3).flatMap(({ aTokenAddress, underlyingAssetAddress, wrappedTokens }) =>
             Object.values(wrappedTokens).map((wrappedToken) => ({

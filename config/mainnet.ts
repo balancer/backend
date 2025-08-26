@@ -111,12 +111,9 @@ export default <NetworkData>{
         morphoRewardsAprHandler: true,
         aaveRewardsAprHandler: true,
         ybAprHandler: {
-            usdl: true,
-            morpho: {
-                tokens: {},
-            },
-            aave: {
-                v2: {
+            aave: [
+                {
+                    market: 'v2',
                     subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/8wR23o1zkS4gpLqLNU4kG3JHYVucqGyopL5utGxP2q1N`,
                     tokens: {
                         USDC: {
@@ -142,7 +139,8 @@ export default <NetworkData>{
                         },
                     },
                 },
-                v3: {
+                {
+                    market: 'v3',
                     subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/Cd2gEDVeqnjBn1hSeqFMitw8Q1iiyV9FYUZkLNRcL87g`,
                     tokens: {
                         USDC: {
@@ -211,7 +209,8 @@ export default <NetworkData>{
                         },
                     },
                 },
-                lido: {
+                {
+                    market: 'lido',
                     subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/5vxMbXRhG1oQr55MWC5j6qg78waWujx1wjeuEWDA6j3`,
                     tokens: {
                         LidoWETH: {
@@ -237,280 +236,420 @@ export default <NetworkData>{
                         },
                     },
                 },
-            },
-            defillama: [
+            ],
+            http: [
                 {
-                    defillamaPoolId: '5a9c2073-2190-4002-9654-8c245d1e8534',
-                    tokenAddress: '0x6dc3ce9c57b20131347fdc9089d740daf6eb34c5',
+                    url: 'https://yields.llama.fi/chart/5a9c2073-2190-4002-9654-8c245d1e8534',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x6dc3ce9c57b20131347fdc9089d740daf6eb34c5',
+                            path: '$.data[-1:].apyBase',
+                        },
+                    ],
                 },
                 {
-                    defillamaPoolId: '46f3828a-cbf6-419e-8399-a83b905bf556',
-                    tokenAddress: '0xf073bac22dab7faf4a3dd6c6189a70d54110525c',
+                    url: 'https://yields.llama.fi/chart/46f3828a-cbf6-419e-8399-a83b905bf556',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0xf073bac22dab7faf4a3dd6c6189a70d54110525c',
+                            path: '$.data[-1:].apyBase',
+                        },
+                    ],
                 },
                 {
-                    defillamaPoolId: '0aedb3f6-9298-49de-8bb0-2f611a4df784',
-                    tokenAddress: '0x1202f5c7b4b9e47a1a484e8b270be34dbbc75055',
+                    url: 'https://yields.llama.fi/chart/0aedb3f6-9298-49de-8bb0-2f611a4df784',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x1202f5c7b4b9e47a1a484e8b270be34dbbc75055',
+                            path: '$.data[-1:].apyBase',
+                        },
+                    ],
                 },
                 {
-                    defillamaPoolId: '2ad8497d-c855-4840-85ad-cdc536b92ced',
-                    tokenAddress: '0x4956b52ae2ff65d74ca2d61207523288e4528f96',
+                    url: 'https://yields.llama.fi/chart/2ad8497d-c855-4840-85ad-cdc536b92ced',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x4956b52ae2ff65d74ca2d61207523288e4528f96',
+                            path: '$.data[-1:].apyBase',
+                        },
+                    ],
                 },
-
                 {
-                    defillamaPoolId: 'a8a2a14b-2345-4666-adab-227c991c4837',
-                    tokenAddress: '0x9fd7466f987fd4c45a5bbde22ed8aba5bc8d72d1',
+                    url: 'https://yields.llama.fi/chart/a8a2a14b-2345-4666-adab-227c991c4837',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x9fd7466f987fd4c45a5bbde22ed8aba5bc8d72d1',
+                            path: '$.data[-1:].apyBase',
+                        },
+                    ],
+                },
+                {
+                    url: 'https://graphs.stakewise.io/mainnet/subgraphs/name/stakewise/prod',
+                    body: JSON.stringify({
+                        query: `{
+                          osTokens {
+                            apy
+                          }
+                        }`,
+                    }),
+                    headers: { 'Content-Type': 'application/json' },
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0xf1c9acdc66974dfb6decb12aa385b9cd01190e38',
+                            path: '$.data.osTokens[0].apy',
+                        },
+                    ],
+                },
+                {
+                    url: 'https://ded76165a2fb6f7887260a3a0f626de7.thegraph.chainnodes.org/subgraphs/name/etherfi/etherfi-subgraph-v0-8-2',
+                    body: JSON.stringify({
+                        query: `{
+                      rebaseEventLinkedLists {
+                        latest_aprs
+                      }
+                    }`,
+                    }),
+                    headers: { 'Content-Type': 'application/json' },
+                    average: true,
+                    scale: 10000,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0xcd5fe23c85820f7b72d0926fc9b05b43e359b7ee',
+                            path: '$.data.rebaseEventLinkedLists[0].latest_aprs',
+                        },
+                    ],
+                },
+                {
+                    name: 'usdl',
+                    url: 'https://blue-api.morpho.org/graphql',
+                    body: JSON.stringify({
+                        query: `{
+                        vault(id: "560b57bd-0e46-425f-9549-f3e38be0e1e6") {
+                            asset {
+                                yield {
+                                    apr
+                                }
+                            }
+                        }
+                    }`,
+                    }),
+                    headers: { 'Content-Type': 'application/json' },
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x7751e2f4b8ae93ef6b79d86419d42fe3295a4559',
+                            path: '$.data.vault.asset.yield.apr',
+                        },
+                    ],
+                },
+                {
+                    url: 'https://blue-api.morpho.org/graphql',
+                    body: JSON.stringify({
+                        query: `{
+                            vaults(first: 1000, where: { chainId_in: [1], apy_gte: 0.00001 }) {
+                                items {
+                                    address
+                                    state {
+                                        apy
+                                        fee
+                                        netApy
+                                    }
+                                }
+                            }
+                        }`,
+                    }),
+                    headers: { 'Content-Type': 'application/json' },
+                    extractors: [
+                        {
+                            type: 'enumerate',
+                            path: '$.data.vaults.items',
+                            entries: (vault: any): [string, number] => [
+                                vault.address.toLowerCase(),
+                                vault.state.apy * (1 - vault.state.fee),
+                            ],
+                        },
+                    ],
+                },
+                {
+                    url: 'https://api.fluid.instad.app/v2/lending/1/tokens',
+                    extractors: [
+                        {
+                            type: 'enumerate',
+                            path: '$.data',
+                            entries: (token: any): [string, number] => [
+                                token.address.toLowerCase(),
+                                parseFloat(token.supplyRate) / 10000,
+                            ],
+                        },
+                    ],
+                },
+                {
+                    url: 'https://gateway.yieldnest.finance/api/v1/graphql',
+                    body: JSON.stringify({
+                        query: `{
+                      getApr {
+                        apr7d
+                      }
+                    }`,
+                    }),
+                    headers: { 'Content-Type': 'application/json' },
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x09db87a538bd693e9d08544577d5ccfaa6373a48',
+                            path: '$.data.getApr.apr7d',
+                        },
+                    ],
+                },
+                {
+                    url: 'https://api.maple.finance/v2/graphql',
+                    body: JSON.stringify({
+                        query: `{
+                      syrupGlobals {
+                        apy
+                      }
+                    }`,
+                    }),
+                    headers: { 'Content-Type': 'application/json' },
+                    scale: 1e30,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x80ac24aa929eaf5013f6436cda2a7ba190f5cc0b',
+                            path: '$.data.syrupGlobals.apy',
+                        },
+                    ],
+                },
+                {
+                    url: 'https://api.infinifi.xyz/api/protocol/data',
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0xdbdc1ef57537e34680b898e1febd3d68c7389bcb',
+                            path: '$.data.stats.siusd.lastWeekAPY',
+                        },
+                    ],
+                },
+                {
+                    url: 'https://prod-gw.openeden.com/sys/apy',
+                    scale: 100,
+                    extractors: [{ type: 'path', token: '0xad55aebc9b8c03fc43cd9f62260391c13c23e7c0', path: '$.apy' }],
+                },
+                {
+                    url: 'https://api-data.loopfi.xyz/api/getData',
+                    extractors: [
+                        { type: 'path', token: '0x3976d71e7ddfbab9bd120ec281b7d35fa0f28528', path: '$.loop.slpETHApr' },
+                        {
+                            type: 'path',
+                            token: '0xbfb53910c935e837c74e6c4ef584557352d20fde',
+                            path: '$.lpUSDLoop.slpUSDApr',
+                        }, // slpUSD too
+                    ],
+                },
+                {
+                    url: 'https://ctrl.yield.fi/t/apy',
+                    scale: 100,
+                    extractors: [
+                        { type: 'path', token: '0x1ce7d9942ff78c328a4181b9f3826fee6d845a97', path: '$.apy' }, // yUSD
+                    ],
+                },
+                {
+                    url: 'https://app.bedrock.technology/unieth/api/v1/e2ls/apy',
+                    scale: 10000,
+                    extractors: [
+                        { type: 'path', token: '0xf1376bcef0f78459c0ed0ba5ddce976f1ddf51f4', path: '$.data.apy' }, // unieth
+                    ],
+                },
+                {
+                    url: 'https://dapi.bifrost.io/api/site',
+                    scale: 100,
+                    extractors: [
+                        { type: 'path', token: '0x4bc3263eb5bb2ef7ad9ab6fb68be80e43b43801f', path: '$.vETH.totalApy' },
+                    ],
+                },
+                {
+                    url: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
+                    scale: 100,
+                    extractors: [
+                        { type: 'path', token: '0xae7ab96520de3a18e5e111b5eaab095312d7fe84', path: '$.data.smaApr' }, // stETH
+                        { type: 'path', token: '0x5fd13359ba15a84b76f7f87568309040176167cd', path: '$.data.smaApr' }, // amphrETH
+                        { type: 'path', token: '0x7a4effd87c2f3c55ca251080b1343b605f327e3a', path: '$.data.smaApr' }, // rstETH
+                        { type: 'path', token: '0x84631c0d0081fde56deb72f6de77abbbf6a9f93a', path: '$.data.smaApr' }, // Re7LRT
+                        { type: 'path', token: '0xbeef69ac7870777598a04b2bd4771c71212e6abc', path: '$.data.smaApr' }, // steakLRT
+                        { type: 'path', token: '0xd9a442856c234a39a81a089c06451ebaa4306a72', path: '$.data.smaApr' }, // pufETH
+                        { type: 'path', token: '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0', path: '$.data.smaApr' }, // wstETH
+                        { type: 'path', token: '0x8e0789d39db454dbe9f4a77acef6dc7c69f6d552', path: '$.data.smaApr' }, // inwstETHs
+                        { type: 'path', token: '0x5e362eb2c0706bd1d134689ec75176018385430b', path: '$.data.smaApr' }, // dvstETH
+                    ],
+                },
+                {
+                    url: 'https://api.exchange.coinbase.com/wrapped-assets/CBETH/',
+                    extractors: [{ type: 'path', token: '0xbe9895146f7af43049ca1c1ae358b0541ea49704', path: '$.apy' }],
+                },
+                {
+                    url: 'https://api.frax.finance/v2/frxeth/summary/latest',
+                    scale: 100,
+                    extractors: [
+                        { type: 'path', token: '0xac3e018457b222d93114458476f3e3416abbe38f', path: '$.sfrxethApr' },
+                    ],
+                },
+                {
+                    url: 'https://drop-api.stafi.io/reth/v1/poolData',
+                    scale: 100,
+                    extractors: [
+                        { type: 'path', token: '0x9559aaa82d9649c7a7b220e7c461d2e74c9a3593', path: '$.data.stakeApr' },
+                    ],
+                },
+                {
+                    url: 'https://api.rocketpool.net/mainnet/reth/apr',
+                    scale: 100,
+                    extractors: [
+                        { type: 'path', token: '0xae78736cd615f374d3085123a210448e74fc6393', path: '$.yearlyAPR' },
+                    ],
+                },
+                {
+                    url: 'https://data.jonesdao.io/api/v1/jones/apy-wjaura',
+                    scale: 100,
+                    extractors: [
+                        { type: 'path', token: '0x198d7387fa97a73f05b8578cdeff8f2a1f34cd1f', path: '$.wjauraApy' },
+                    ],
+                },
+                {
+                    url: 'https://universe.staderlabs.com/eth/apy',
+                    scale: 100,
+                    extractors: [
+                        { type: 'path', token: '0xa35b1b31ce002fbf2058d22f30f95d405200a15b', path: '$.value' },
+                    ],
+                },
+                {
+                    url: 'https://apy.prod.mountainprotocol.com',
+                    extractors: [
+                        { type: 'path', token: '0x57f5e098cad7a3d1eed53991d4d66c45c9af7812', path: '$.value' },
+                    ],
+                },
+                {
+                    url: 'https://api.staking.ankr.com/v1alpha/metrics',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0xe95a203b1a91a908f9b9ce46459d101078c2c3cb',
+                            path: '$.services[?(@.serviceName=="eth")].apy',
+                        },
+                    ],
+                },
+                {
+                    url: 'https://app.renzoprotocol.com/api/apr',
+                    scale: 100,
+                    extractors: [{ type: 'path', token: '0xbf5495efe5db9ce00f80364c8b423567e58d2110', path: '$.apr' }],
+                },
+                {
+                    url: 'https://universe.kelpdao.xyz/rseth/apy',
+                    scale: 100,
+                    extractors: [
+                        { type: 'path', token: '0xa1290d69c65a6fe4df752f95823fae25cb99e5a7', path: '$.value' }, // rsETH
+                        { type: 'path', token: '0xe1b4d34e8754600962cd944b535180bd758e6c2e', path: '$.value' }, // agETH
+                    ],
+                },
+                {
+                    url: 'https://universe.kelpdao.xyz/rseth/gainApy',
+                    scale: 100,
+                    extractors: [
+                        { type: 'path', token: '0xc824a08db624942c5e5f330d56530cd1598859fd', path: '$.hgETH' },
+                    ],
+                },
+                {
+                    url: 'https://www.inverse.finance/api/dola-staking',
+                    scale: 100,
+                    extractors: [{ type: 'path', token: '0xb45ad160634c528cc3d2926d9807104fa3157305', path: '$.apr' }],
+                },
+                {
+                    url: 'https://v3-lrt.svc.swellnetwork.io/api/tokens/rsweth/apr',
+                    scale: 100,
+                    extractors: [{ type: 'path', token: '0xfae103dc9cf190ed75350761e95403b7b8afa6c0', path: '$' }],
+                },
+                {
+                    url: 'https://ethena.fi/api/yields/protocol-and-staking-yield',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x9d39a5de30e57443bff2a8307a4256c8797a3497',
+                            path: '$.stakingYield.value',
+                        },
+                    ],
+                },
+                {
+                    url: 'https://api.crypto.com/pos/v1/public/get-staking-instruments',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ params: { country_code: 'POL' } }),
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0xfe18ae03741a5b84e39c295ac9c856ed7991c38e',
+                            path: '$.result.data[?(@.instrument_name=="ETH.staked")].est_rewards',
+                        },
+                    ],
+                },
+                {
+                    url: 'https://api-deusd-prod-public.elixir.xyz/public/deusd_apy',
+                    scale: 100,
+                    extractors: [
+                        { type: 'path', token: '0x5c5b196abe0d54485975d1ec29617d42d9198326', path: '$.deusd_apy' },
+                    ],
+                },
+                {
+                    url: 'https://app.usdx.money/v1/base/apyInfo',
+                    scale: 1,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x7788a3538c5fc7f9c7c8a74eac4c898fc8d87d92',
+                            path: '$.result.susdxApy',
+                        },
+                    ],
+                },
+                {
+                    url: 'https://usdn.api.smardex.io/v1/wusdn/apr',
+                    extractors: [{ type: 'path', token: '0x99999999999999cc837c997b882957dafdcb1af9', path: '$' }],
+                },
+                {
+                    url: 'https://info-sky.blockanalitica.com/api/v1/savings-rate/?format=json',
+                    scale: 100,
+                    extractors: [
+                        { type: 'path', token: '0xa3931d71877c0e7a3148cb7eb4463524fec27fbd', path: '$[0].ssr_rate' },
+                    ],
                 },
             ],
-            maker: {
-                sdai: '0x83f20f44975d03b1b09e64809b757c47f942beea',
-            },
-            stakewise: {
-                url: 'https://graphs.stakewise.io/mainnet/subgraphs/name/stakewise/prod/',
-                token: '0xf1c9acdc66974dfb6decb12aa385b9cd01190e38',
-            },
-            etherfi: '0xcd5fe23c85820f7b72d0926fc9b05b43e359b7ee',
-            maple: {
-                url: 'https://api.maple.finance/v2/graphql',
-                token: '0x80ac24aa929eaf5013f6436cda2a7ba190f5cc0b',
-            },
-            yieldnest: {
-                url: 'https://gateway.yieldnest.finance/api/v1/graphql',
-                token: '0x09db87a538bd693e9d08544577d5ccfaa6373a48',
+            contract: {
+                calls: [
+                    {
+                        name: 'maker sdai',
+                        chain: 'MAINNET',
+                        contract: '0x197e90f9fad81970ba7976f33cbd77088e5d7cf7',
+                        abi: 'function dsr() view returns(uint256)',
+                        functionName: 'dsr',
+                        parser: (dsr) => (Number(dsr) * 10 ** -27 - 1) * 365 * 24 * 60 * 60,
+                        token: '0x83f20f44975d03b1b09e64809b757c47f942beea',
+                    },
+                ],
             },
             teth: {
                 address: '0xd11c452fc99cf405034ee446803b6f6c1f6d5ed8',
-            },
-            fluid: {
-                url: 'https://api.fluid.instad.app/v2/lending/1/tokens',
-            },
-            defaultHandlers: {
-                siUSD: {
-                    tokenAddress: '0xdbdc1ef57537e34680b898e1febd3d68c7389bcb',
-                    sourceUrl: 'https://api.infinifi.xyz/api/protocol/data',
-                    path: 'data.stats.siusd.lastWeekAPY',
-                    scale: 1,
-                },
-                cUSDO: {
-                    tokenAddress: '0xad55aebc9b8c03fc43cd9f62260391c13c23e7c0',
-                    sourceUrl: 'https://prod-gw.openeden.com/sys/apy',
-                    path: 'apy',
-                    scale: 100,
-                },
-                slpETHApr: {
-                    tokenAddress: '0x3976d71e7ddfbab9bd120ec281b7d35fa0f28528',
-                    sourceUrl: 'https://api-data.loopfi.xyz/api/getData',
-                    path: 'loop.slpETHApr',
-                    scale: 1,
-                },
-                yUSD: {
-                    tokenAddress: '0x1ce7d9942ff78c328a4181b9f3826fee6d845a97',
-                    sourceUrl: 'https://ctrl.yield.fi/t/apy',
-                    path: 'apy',
-                    isIbYield: true,
-                },
-                uniETH: {
-                    tokenAddress: '0xf1376bcef0f78459c0ed0ba5ddce976f1ddf51f4',
-                    sourceUrl: 'https://app.bedrock.technology/unieth/api/v1/e2ls/apy',
-                    path: 'data.apy',
-                    scale: 10000,
-                },
-                vETH: {
-                    tokenAddress: '0x4bc3263eb5bb2ef7ad9ab6fb68be80e43b43801f',
-                    sourceUrl: 'https://dapi.bifrost.io/api/site',
-                    path: 'vETH.totalApy',
-                },
-                stETH: {
-                    tokenAddress: '0xae7ab96520de3a18e5e111b5eaab095312d7fe84',
-                    sourceUrl: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
-                    path: 'data.smaApr',
-                    isIbYield: true,
-                },
-                amphrETH: {
-                    tokenAddress: '0x5fd13359ba15a84b76f7f87568309040176167cd',
-                    sourceUrl: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
-                    path: 'data.smaApr',
-                    isIbYield: true,
-                },
-                rstETH: {
-                    tokenAddress: '0x7a4effd87c2f3c55ca251080b1343b605f327e3a',
-                    sourceUrl: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
-                    path: 'data.smaApr',
-                    isIbYield: true,
-                },
-                Re7LRT: {
-                    tokenAddress: '0x84631c0d0081fde56deb72f6de77abbbf6a9f93a',
-                    sourceUrl: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
-                    path: 'data.smaApr',
-                    isIbYield: true,
-                },
-                steakLRT: {
-                    tokenAddress: '0xbeef69ac7870777598a04b2bd4771c71212e6abc',
-                    sourceUrl: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
-                    path: 'data.smaApr',
-                    isIbYield: true,
-                },
-                pufETH: {
-                    tokenAddress: '0xd9a442856c234a39a81a089c06451ebaa4306a72',
-                    sourceUrl: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
-                    path: 'data.smaApr',
-                    isIbYield: true,
-                },
-                wstETH: {
-                    tokenAddress: '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0',
-                    sourceUrl: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
-                    path: 'data.smaApr',
-                    isIbYield: true,
-                },
-                inwstETHs: {
-                    tokenAddress: '0x8e0789d39db454dbe9f4a77acef6dc7c69f6d552',
-                    sourceUrl: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
-                    path: 'data.smaApr',
-                    isIbYield: true,
-                },
-                cbETH: {
-                    tokenAddress: '0xbe9895146f7af43049ca1c1ae358b0541ea49704',
-                    sourceUrl: 'https://api.exchange.coinbase.com/wrapped-assets/CBETH/',
-                    path: 'apy',
-                    scale: 1,
-                    isIbYield: true,
-                },
-                sfrxETH: {
-                    tokenAddress: '0xac3e018457b222d93114458476f3e3416abbe38f',
-                    sourceUrl: 'https://api.frax.finance/v2/frxeth/summary/latest',
-                    path: 'sfrxethApr',
-                    isIbYield: true,
-                },
-                StaFirETH: {
-                    tokenAddress: '0x9559aaa82d9649c7a7b220e7c461d2e74c9a3593',
-                    sourceUrl: 'https://drop-api.stafi.io/reth/v1/poolData',
-                    path: 'data.stakeApr',
-                    isIbYield: true,
-                },
-                rETH: {
-                    tokenAddress: '0xae78736cd615f374d3085123a210448e74fc6393',
-                    sourceUrl: 'https://api.rocketpool.net/mainnet/reth/apr',
-                    path: 'yearlyAPR',
-                    isIbYield: true,
-                },
-                wjAURA: {
-                    tokenAddress: '0x198d7387fa97a73f05b8578cdeff8f2a1f34cd1f',
-                    sourceUrl: 'https://data.jonesdao.io/api/v1/jones/apy-wjaura',
-                    path: 'wjauraApy',
-                    isIbYield: true,
-                },
-                ETHx: {
-                    tokenAddress: '0xa35b1b31ce002fbf2058d22f30f95d405200a15b',
-                    sourceUrl: 'https://universe.staderlabs.com/eth/apy',
-                    path: 'value',
-                    isIbYield: true,
-                },
-                usdm: {
-                    tokenAddress: '0x57f5e098cad7a3d1eed53991d4d66c45c9af7812',
-                    sourceUrl: 'https://apy.prod.mountainprotocol.com',
-                    path: 'value',
-                    isIbYield: true,
-                    scale: 1,
-                },
-                ankrETH: {
-                    tokenAddress: '0xe95a203b1a91a908f9b9ce46459d101078c2c3cb',
-                    sourceUrl: 'https://api.staking.ankr.com/v1alpha/metrics',
-                    path: 'services.{serviceName == "eth"}.apy',
-                    isIbYield: true,
-                },
-                ezETH: {
-                    tokenAddress: '0xbf5495efe5db9ce00f80364c8b423567e58d2110',
-                    sourceUrl: 'https://app.renzoprotocol.com/api/apr',
-                    path: 'apr',
-                    isIbYield: true,
-                },
-                rsETH: {
-                    tokenAddress: '0xa1290d69c65a6fe4df752f95823fae25cb99e5a7',
-                    sourceUrl: 'https://universe.kelpdao.xyz/rseth/apy',
-                    path: 'value',
-                    isIbYield: true,
-                },
-                hgETH: {
-                    tokenAddress: '0xc824a08db624942c5e5f330d56530cd1598859fd',
-                    sourceUrl: 'https://universe.kelpdao.xyz/rseth/gainApy',
-                    path: 'hgETH',
-                    isIbYield: true,
-                },
-                sDOLA: {
-                    tokenAddress: '0xb45ad160634c528cc3d2926d9807104fa3157305',
-                    sourceUrl: 'https://www.inverse.finance/api/dola-staking',
-                    path: 'apr',
-                    isIbYield: true,
-                },
-                rswETH: {
-                    tokenAddress: '0xfae103dc9cf190ed75350761e95403b7b8afa6c0',
-                    sourceUrl: 'https://v3-lrt.svc.swellnetwork.io/api/tokens/rsweth/apr',
-                    isIbYield: true,
-                },
-                sUSDE: {
-                    tokenAddress: '0x9d39a5de30e57443bff2a8307a4256c8797a3497',
-                    sourceUrl: 'https://ethena.fi/api/yields/protocol-and-staking-yield',
-                    path: 'stakingYield.value',
-                    isIbYield: true,
-                },
-                cdcETH: {
-                    tokenAddress: '0xfe18ae03741a5b84e39c295ac9c856ed7991c38e',
-                    sourceUrl: 'https://api.crypto.com/pos/v1/public/get-staking-instruments',
-                    path: 'result.data.{instrument_name == "ETH.staked"}.est_rewards',
-                    isIbYield: true,
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: {
-                        params: {
-                            country_code: 'POL',
-                        },
-                    },
-                    scale: 1,
-                },
-                agETH: {
-                    tokenAddress: '0xe1b4d34e8754600962cd944b535180bd758e6c2e',
-                    sourceUrl: 'https://universe.kelpdao.xyz/rseth/apy',
-                    path: 'value',
-                    isIbYield: true,
-                },
-                dvstETH: {
-                    tokenAddress: '0x5e362eb2c0706bd1d134689ec75176018385430b',
-                    sourceUrl: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
-                    path: 'data.smaApr',
-                    isIbYield: true,
-                },
-                sdeUSD: {
-                    tokenAddress: '0x5c5b196abe0d54485975d1ec29617d42d9198326',
-                    sourceUrl: 'https://api-deusd-prod-public.elixir.xyz/public/deusd_apy',
-                    path: 'deusd_apy',
-                    isIbYield: true,
-                },
-                sUSDX: {
-                    tokenAddress: '0x7788a3538c5fc7f9c7c8a74eac4c898fc8d87d92',
-                    sourceUrl: 'https://app.usdx.money/v1/base/apyInfo',
-                    path: 'result.susdxApy',
-                    scale: 1,
-                    isIbYield: true,
-                },
-                slpUSD: {
-                    tokenAddress: '0xbfb53910c935e837c74e6c4ef584557352d20fde',
-                    sourceUrl: 'https://api-data.loopfi.xyz/api/getData',
-                    path: 'lpUSDLoop.slpUSDApr',
-                    scale: 1,
-                    isIbYield: true,
-                },
-                wUSDN: {
-                    tokenAddress: '0x99999999999999cc837c997b882957dafdcb1af9',
-                    sourceUrl: 'https://usdn.api.smardex.io/v1/wusdn/apr',
-                    scale: 1,
-                    isIbYield: true,
-                },
-                susds: {
-                    tokenAddress: '0xa3931d71877c0e7a3148cb7eb4463524fec27fbd',
-                    sourceUrl: 'https://info-sky.blockanalitica.com/api/v1/savings-rate/?format=json',
-                    path: '[0].ssr_rate',
-                    isIbYield: true,
-                },
             },
         },
     },

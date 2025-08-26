@@ -1,236 +1,75 @@
 import { Chain } from '@prisma/client';
 
-export interface AprHandlerConstructor {
-    new (config?: any): AprHandler;
-}
-
-export interface AprHandler {
-    group?: string;
-    getAprs(chain?: Chain): Promise<{
-        [tokenAddress: string]: {
-            /** Defined as float, eg: 0.01 is 1% */
-            apr: number;
-            isIbYield: boolean;
-            group?: string;
-        };
-    }>;
-}
-
 export type TokenApr = {
+    /** Defined as float, eg: 0.01 is 1% */
     apr: number;
     address: string;
-    isIbYield: boolean;
-    group?: string;
 };
 
-export interface YbAprConfig {
-    avalon?: AvalonAprConfig;
-    bloom?: BloomAprConfig;
-    beefy?: BeefyAprConfig;
-    sftmx?: SftmxAprConfig;
-    sts?: {
-        token: string;
-    };
-    silo?: SiloAprConfig;
-    euler?: EulerAprConfig;
-    gearbox?: GearBoxAprConfig;
-    idle?: IdleAprConfig;
-    maker?: MakerAprConfig;
-    ovix?: OvixAprConfig;
-    reaper?: ReaperAprConfig;
-    tetu?: TetuAprConfig;
-    tranchess?: TranchessAprConfig;
-    yearn?: YearnAprConfig;
-    stakewise?: {
-        url: string;
-        token: string;
-    };
-    fluid?: {
-        url: string;
-    };
-    maple?: {
-        url: string;
-        token: string;
-    };
-    yieldnest?: {
-        url: string;
-        token: string;
-    };
-    dforce?: {
-        token: string;
-    };
-    etherfi?: string;
-    sveth?: boolean;
-    defillama?: {
-        defillamaPoolId: string;
-        tokenAddress: string;
-    }[];
-    defaultHandlers?: DefaultHandlerAprConfig;
-    fixedAprHandler?: FixedAprConfig;
-    hypurrfi?: string[];
-    morphoVaultHyperevm?: string[];
-}
-
-export interface AvalonAprConfig {
-    [market: string]: {
-        subgraphUrl: string;
-        tokens: {
-            [underlyingAssetName: string]: {
-                underlyingAssetAddress: string;
-                aTokenAddress: string;
-                wrappedTokens: {
-                    [wrappedTokenName: string]: string;
-                };
-                isIbYield?: boolean;
-            };
-        };
-    };
-}
-
-export interface BeefyAprConfig {
-    sourceUrl: string;
-    tokens: {
-        [tokenName: string]: {
-            address: string;
-            // To get the vaultId, get the vault address from the token contract(token.vault()),
-            // and search for the vault address in the link: https://api.beefy.finance/vaults
-            vaultId: string;
-            isIbYield?: boolean;
-        };
-    };
-}
-
-export interface BloomAprConfig {
-    tokens: {
-        [tokenName: string]: {
-            address: string;
-            feedAddress: string;
-            isIbYield?: boolean;
-        };
-    };
-}
-
-export interface SftmxAprConfig {
-    tokens: {
-        [underlyingAssetName: string]: {
-            address: string;
-            ftmStakingAddress: string;
-        };
-    };
-}
-
-export interface EulerAprConfig {
-    vaultsJsonUrl: string;
-    lensContractAddress: string;
-}
-
-export interface GearBoxAprConfig {
-    sourceUrl: string;
-    tokens: {
-        [tokenName: string]: {
-            address: string;
-            isIbYield?: boolean;
-        };
-    };
-}
-
-export interface IdleAprConfig {
-    sourceUrl: string;
-    authorizationHeader: string;
-    tokens: {
-        [tokenName: string]: {
-            address: string;
-            wrapped4626Address: string;
-            isIbYield?: boolean;
-        };
-    };
-}
-
-export interface MakerAprConfig {
-    sdai: string;
-}
-
-export interface OvixAprConfig {
-    tokens: {
-        [tokenName: string]: {
-            yieldAddress: string;
-            wrappedAddress: string;
-            isIbYield?: boolean;
-        };
-    };
-}
-
-export interface ReaperAprConfig {
-    subgraphSource?: {
-        subgraphUrl: string;
-        tokens: {
-            [tokenName: string]: {
-                address: string;
-                isSftmX?: boolean;
-                isWstETH?: boolean;
-                isIbYield?: boolean;
-            };
-        };
-    };
-    onchainSource?: {
-        averageAPRAcrossLastNHarvests: number;
-        tokens: {
-            [tokenName: string]: {
-                address: string;
-                isSftmX?: boolean;
-                isWstETH?: boolean;
-                isIbYield?: boolean;
-            };
-        };
-    };
-}
-
-export interface TetuAprConfig {
-    sourceUrl: string;
-    tokens: {
-        [tokenName: string]: {
-            address: string;
-            isIbYield?: boolean;
-        };
-    };
-}
-
-export interface TranchessAprConfig {
-    sourceUrl: string;
-    tokens: {
-        [tokenName: string]: {
-            address: string;
-            underlyingAssetName: string;
-            isIbYield?: boolean;
-        };
-    };
-}
-
-export interface YearnAprConfig {
-    sourceUrl: string;
-    isIbYield?: boolean;
-}
-
-export interface DefaultHandlerAprConfig {
-    [tokenName: string]: {
-        sourceUrl: string;
-        tokenAddress: string;
-        path?: string;
-        scale?: number;
-        group?: string;
-        isIbYield?: boolean;
-    };
-}
+export type YbAprHandler = (config?: any) => Promise<TokenApr[]>;
 
 export interface FixedAprConfig {
     [tokenName: string]: {
         address: string;
         apr: number;
-        group?: string;
-        isIbYield?: boolean;
     };
 }
 
-export interface SiloAprConfig {
-    markets: string[];
+type EntryExtractor =
+    | { readonly type: 'path'; readonly token: string; readonly path: string }
+    | { readonly type: 'enumerate'; readonly path: string; readonly entries: (item: any) => [string, number] };
+
+export interface AprHttpFetchConfig {
+    url: string;
+    method?: 'GET' | 'POST';
+    headers?: Record<string, string>;
+    body?: string;
+    scale?: number;
+    average?: boolean;
+    extractors: readonly EntryExtractor[];
+}
+
+export interface AprContractFetchConfig {
+    name?: string; // for devs to know what token is this
+    chain: Chain;
+    contract: string;
+    token: string;
+    abi: string;
+    functionName: string;
+    args?: string[];
+    parser: (result: any) => number;
+}
+
+export interface YbAprConfig {
+    aave?: {
+        market: string;
+        subgraphUrl: string;
+        tokens: Record<
+            string,
+            {
+                underlyingAssetAddress: string;
+                aTokenAddress: string;
+                wrappedTokens: Record<string, string>;
+            }
+        >;
+    }[];
+    sts?: {
+        token: string;
+    };
+    euler?: {
+        url: string;
+        lens: string;
+        chain: Chain;
+    };
+    http?: AprHttpFetchConfig[];
+    contract?: {
+        calls: AprContractFetchConfig[];
+    };
+    fixedAprHandler?: FixedAprConfig;
+    hypurrfi?: {
+        markets: string[];
+    };
+    morphoVaultHyperevm?: {
+        vaults: string[];
+    };
 }
