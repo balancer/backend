@@ -60,8 +60,17 @@ export default <NetworkData>{
     },
     aprHandlers: {
         ybAprHandler: {
-            maker: {
-                sdai: '0x3f51c6c5927b88cdec4b61e2787f9bd0f5249138',
+            contract: {
+                calls: [
+                    {
+                        chain: 'MAINNET',
+                        contract: '0x197e90f9fad81970ba7976f33cbd77088e5d7cf7',
+                        abi: 'function dsr() view returns(uint256)',
+                        functionName: 'dsr',
+                        token: '0x3f51c6c5927b88cdec4b61e2787f9bd0f5249138',
+                        parser: (dsr) => (Number(dsr) * 10 ** -27 - 1) * 365 * 24 * 60 * 60,
+                    },
+                ],
             },
             http: [
                 {

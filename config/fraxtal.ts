@@ -62,8 +62,18 @@ export default <NetworkData>{
     },
     aprHandlers: {
         ybAprHandler: {
-            maker: {
-                sdai: '0x09eadcbaa812a4c076c3a6cde765dc4a22e0d775',
+            contract: {
+                calls: [
+                    {
+                        name: 'maker sdai',
+                        chain: 'MAINNET',
+                        contract: '0x197e90f9fad81970ba7976f33cbd77088e5d7cf7',
+                        abi: 'function dsr() view returns(uint256)',
+                        functionName: 'dsr',
+                        parser: (dsr) => (Number(dsr) * 10 ** -27 - 1) * 365 * 24 * 60 * 60,
+                        token: '0x09eadcbaa812a4c076c3a6cde765dc4a22e0d775',
+                    },
+                ],
             },
             http: [
                 {

@@ -29,6 +29,17 @@ export interface AprHttpFetchConfig {
     extractors: readonly EntryExtractor[];
 }
 
+export interface AprContractFetchConfig {
+    name?: string; // for devs to know what token is this
+    chain: Chain;
+    contract: string;
+    token: string;
+    abi: string;
+    functionName: string;
+    args?: string[];
+    parser: (result: any) => number;
+}
+
 export interface YbAprConfig {
     aave?: {
         market: string;
@@ -45,24 +56,14 @@ export interface YbAprConfig {
     sts?: {
         token: string;
     };
-    silo?: {
-        markets: string[];
-    };
     euler?: {
         url: string;
         lens: string;
         chain: Chain;
     };
     http?: AprHttpFetchConfig[];
-    maker?: {
-        sdai: string;
-    };
-    maple?: {
-        url: string;
-        token: string;
-    };
-    dforce?: {
-        token: string;
+    contract?: {
+        calls: AprContractFetchConfig[];
     };
     fixedAprHandler?: FixedAprConfig;
     hypurrfi?: {

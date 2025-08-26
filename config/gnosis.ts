@@ -74,6 +74,19 @@ export default <NetworkData>{
     aprHandlers: {
         aaveRewardsAprHandler: true,
         ybAprHandler: {
+            contract: {
+                calls: [
+                    {
+                        name: 'maker sdai',
+                        chain: 'GNOSIS',
+                        contract: '0xd499b51fcfc66bd31248ef4b28d656d67e591a94',
+                        abi: 'function vaultAPY() view returns (uint256)',
+                        functionName: 'vaultAPY',
+                        parser: (vaultAPY) => Number(vaultAPY) * 10 ** -18,
+                        token: '0xaf204776c7245bf4147c2612bf6e5972ee483701',
+                    },
+                ],
+            },
             http: [
                 {
                     url: 'https://graphs.stakewise.io/mainnet/subgraphs/name/stakewise/prod',

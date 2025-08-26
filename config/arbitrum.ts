@@ -158,8 +158,17 @@ export default <NetworkData>{
                     },
                 },
             ],
-            dforce: {
-                token: '0xbc404429558292ee2d769e57d57d6e74bbd2792d',
+            contract: {
+                calls: [
+                    {
+                        chain: 'ARBITRUM',
+                        contract: '0xbc404429558292ee2d769e57d57d6e74bbd2792d',
+                        token: '0xbc404429558292ee2d769e57d57d6e74bbd2792d',
+                        functionName: 'currentAPY',
+                        abi: 'function currentAPY() view returns (uint256 _apy, uint256 _startTime, uint256 _endTime)',
+                        parser: ([apy]) => Number((Number(apy) / 1e27 - 1).toFixed(6)),
+                    },
+                ],
             },
             http: [
                 {

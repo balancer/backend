@@ -625,8 +625,18 @@ export default <NetworkData>{
                     ],
                 },
             ],
-            maker: {
-                sdai: '0x83f20f44975d03b1b09e64809b757c47f942beea',
+            contract: {
+                calls: [
+                    {
+                        name: 'maker sdai',
+                        chain: 'MAINNET',
+                        contract: '0x197e90f9fad81970ba7976f33cbd77088e5d7cf7',
+                        abi: 'function dsr() view returns(uint256)',
+                        functionName: 'dsr',
+                        parser: (dsr) => (Number(dsr) * 10 ** -27 - 1) * 365 * 24 * 60 * 60,
+                        token: '0x83f20f44975d03b1b09e64809b757c47f942beea',
+                    },
+                ],
             },
             teth: {
                 address: '0xd11c452fc99cf405034ee446803b6f6c1f6d5ed8',

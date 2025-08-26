@@ -111,8 +111,18 @@ export default <NetworkData>{
                     },
                 },
             ],
-            maker: {
-                sdai: '0x2218a117083f5b482b0bb821d27056ba9c04b1d3',
+            contract: {
+                calls: [
+                    {
+                        name: 'maker sdai',
+                        chain: 'MAINNET',
+                        contract: '0x197e90f9fad81970ba7976f33cbd77088e5d7cf7',
+                        abi: 'function dsr() view returns(uint256)',
+                        functionName: 'dsr',
+                        parser: (dsr) => (Number(dsr) * 10 ** -27 - 1) * 365 * 24 * 60 * 60,
+                        token: '0x2218a117083f5b482b0bb821d27056ba9c04b1d3',
+                    },
+                ],
             },
             http: [
                 {

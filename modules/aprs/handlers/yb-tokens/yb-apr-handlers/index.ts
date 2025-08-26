@@ -7,18 +7,15 @@ const sourceToHandler = {
     aave: sources.aaveAprHandler,
     avalon: sources.avalonAprHandler,
     euler: sources.eulerAprHandler,
-    maker: sources.makerAprHandler,
-    dforce: sources.dForce,
     teth: sources.treehouseAprHandler,
     sts: sources.stsAprHandler,
-    silo: sources.siloAprHandler,
-    susds: sources.sUSDSAprHandler,
     hypurrfi: sources.hypurrFi,
     morphoVaultHyperevm: sources.morphoHyperevm,
     http: sources.httpAprHandler,
+    contract: sources.contractAprHandler,
 };
 
-const chainSources = [sources.AaveAuto, sources.MakerGnosis];
+const chainSources = [sources.AaveAuto];
 
 export class YbAprHandlers {
     private config: YbAprConfig;

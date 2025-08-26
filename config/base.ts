@@ -78,10 +78,6 @@ export default <NetworkData>{
         morphoRewardsAprHandler: true,
         aaveRewardsAprHandler: true,
         ybAprHandler: {
-            susds: {
-                oracle: '0x65d946e533748a998b1f0e430803e39a6388f7a1',
-                token: '0x5875eee11cf8398102fdad704c9e96607675467a',
-            },
             http: [
                 {
                     url: 'https://ded76165a2fb6f7887260a3a0f626de7.thegraph.chainnodes.org/subgraphs/name/etherfi/etherfi-subgraph-v0-8-2',
@@ -298,8 +294,27 @@ export default <NetworkData>{
                     ],
                 },
             ],
-            maker: {
-                sdai: '0x99ac4484e8a1dbd6a185380b3a811913ac884d87',
+            contract: {
+                calls: [
+                    {
+                        name: 'maker sdai',
+                        chain: 'MAINNET',
+                        contract: '0x197e90f9fad81970ba7976f33cbd77088e5d7cf7',
+                        abi: 'function dsr() view returns(uint256)',
+                        functionName: 'dsr',
+                        parser: (dsr) => (Number(dsr) * 10 ** -27 - 1) * 365 * 24 * 60 * 60,
+                        token: '0x99ac4484e8a1dbd6a185380b3a811913ac884d87',
+                    },
+                    {
+                        name: 'susds',
+                        chain: 'BASE',
+                        contract: '0x65d946e533748a998b1f0e430803e39a6388f7a1',
+                        abi: 'function getAPR() view returns (uint256)',
+                        functionName: 'getAPR',
+                        parser: (getAPR) => Number(getAPR) * 10 ** -27,
+                        token: '0x5875eee11cf8398102fdad704c9e96607675467a',
+                    },
+                ],
             },
             aave: [
                 {
