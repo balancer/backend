@@ -15,6 +15,20 @@ export interface FixedAprConfig {
     };
 }
 
+type EntryExtractor =
+    | { readonly type: 'path'; readonly token: string; readonly path: string }
+    | { readonly type: 'enumerate'; readonly path: string; readonly entries: (item: any) => [string, number] };
+
+export interface AprHttpFetchConfig {
+    url: string;
+    method?: 'GET' | 'POST';
+    headers?: Record<string, string>;
+    body?: string;
+    scale?: number;
+    average?: boolean;
+    extractors: readonly EntryExtractor[];
+}
+
 export interface YbAprConfig {
     aave?: {
         market: string;
@@ -39,6 +53,7 @@ export interface YbAprConfig {
         lens: string;
         chain: Chain;
     };
+    http?: AprHttpFetchConfig[];
     maker?: {
         sdai: string;
     };

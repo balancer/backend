@@ -155,7 +155,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0x03b54a6e9a984069379fae1a4fc4dbae93b3bccd',
+                            token: '0x03b54a6e9a984069379fae1a4fc4dbae93b3bccd',
                             path: '$.data.smaApr',
                         },
                     ],
@@ -166,7 +166,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0xfa68fb4628dff1028cfec22b4162fccd0d45efb6',
+                            token: '0xfa68fb4628dff1028cfec22b4162fccd0d45efb6',
                             path: '$.value',
                         },
                     ],
@@ -177,7 +177,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0xa2e3356610840701bdf5611a53974510ae27e2e1',
+                            token: '0xa2e3356610840701bdf5611a53974510ae27e2e1',
                             path: '$.data[0].rewardRate',
                         },
                     ],
@@ -188,7 +188,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0xf33687811f3ad0cd6b48dd4b39f9f977bd7165a2',
+                            token: '0xf33687811f3ad0cd6b48dd4b39f9f977bd7165a2',
                             path: '$.apy',
                         },
                     ],

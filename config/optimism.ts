@@ -130,7 +130,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0x5a7facb970d094b6c7ff1df0ea68d99e6e73cbff',
+                            token: '0x5a7facb970d094b6c7ff1df0ea68d99e6e73cbff',
                             path: '$.data.rebaseEventLinkedLists[0].latest_aprs',
                         },
                     ],
@@ -141,7 +141,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0x5a7a183b6b44dc4ec2e3d2ef43f98c5152b1d76d',
+                            token: '0x5a7a183b6b44dc4ec2e3d2ef43f98c5152b1d76d',
                             path: '$.data[-1:].apyBase',
                         },
                     ],
@@ -153,12 +153,12 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0xe5e9168b45a90c1e5730da6184cc5901c6e4353f',
+                            token: '0xe5e9168b45a90c1e5730da6184cc5901c6e4353f',
                             path: '$.exactly-supply-usdc',
                         },
                         {
                             type: 'path',
-                            key: '0x44b1cea4f597f493e2fd0833a9c04dfb1e479ef0',
+                            token: '0x44b1cea4f597f493e2fd0833a9c04dfb1e479ef0',
                             path: '$.exactly-supply-eth',
                         },
                     ],
@@ -169,7 +169,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0x895e15020c3f52ddd4d8e9514eb83c39f53b1579',
+                            token: '0x895e15020c3f52ddd4d8e9514eb83c39f53b1579',
                             path: '$.apy',
                         },
                     ],
@@ -180,7 +180,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0x1f32b1c2345538c0c6f582fcb022739c4a194ebb',
+                            token: '0x1f32b1c2345538c0c6f582fcb022739c4a194ebb',
                             path: '$.data.smaApr',
                         },
                     ],
@@ -191,7 +191,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0x9bcef72be871e61ed4fbbc7630889bee758eb81d',
+                            token: '0x9bcef72be871e61ed4fbbc7630889bee758eb81d',
                             path: '$.yearlyAPR',
                         },
                     ],
@@ -202,12 +202,12 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0x484c2d6e3cdd945a8b2df735e079178c1036578c',
+                            token: '0x484c2d6e3cdd945a8b2df735e079178c1036578c',
                             path: '$.sfrxethApr',
                         },
                         {
                             type: 'path',
-                            key: '0x3ec3849c33291a9ef4c5db86de593eb4a37fde45',
+                            token: '0x3ec3849c33291a9ef4c5db86de593eb4a37fde45',
                             path: '$.sfrxethApr',
                         },
                     ],
@@ -218,12 +218,12 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0x5bff88ca1442c2496f7e475e9e7786383bc070c0',
+                            token: '0x5bff88ca1442c2496f7e475e9e7786383bc070c0',
                             path: '$.items[0].sfraxApr',
                         },
                         {
                             type: 'path',
-                            key: '0x2dd1b4d4548accea497050619965f91f78b3b532',
+                            token: '0x2dd1b4d4548accea497050619965f91f78b3b532',
                             path: '$.items[0].sfraxApr',
                         },
                     ],
@@ -234,7 +234,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0xe05a08226c49b636acf99c40da8dc6af83ce5bb3',
+                            token: '0xe05a08226c49b636acf99c40da8dc6af83ce5bb3',
                             path: '$.services[?(@.serviceName=="eth")].apy',
                         },
                     ],
@@ -245,7 +245,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0x87eee96d50fb761ad85b1c982d28a042169d61b1',
+                            token: '0x87eee96d50fb761ad85b1c982d28a042169d61b1',
                             path: '$.value',
                         },
                     ],
@@ -255,7 +255,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0x57f5e098cad7a3d1eed53991d4d66c45c9af7812',
+                            token: '0x57f5e098cad7a3d1eed53991d4d66c45c9af7812',
                             path: '$.value',
                         },
                     ],

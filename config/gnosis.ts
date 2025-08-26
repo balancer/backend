@@ -89,7 +89,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0xf490c80aae5f2616d3e3bda2483e30c4cb21d1a0',
+                            token: '0xf490c80aae5f2616d3e3bda2483e30c4cb21d1a0',
                             path: '$.data.osTokens[0].apy',
                         },
                     ],
@@ -100,7 +100,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0x6c76971f98945ae98dd7d4dfca8711ebea946ea6',
+                            token: '0x6c76971f98945ae98dd7d4dfca8711ebea946ea6',
                             path: '$.data.smaApr',
                         },
                     ],
@@ -111,7 +111,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0xc791240d1f2def5938e2031364ff4ed887133c3d',
+                            token: '0xc791240d1f2def5938e2031364ff4ed887133c3d',
                             path: '$.yearlyAPR',
                         },
                     ],

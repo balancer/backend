@@ -66,7 +66,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0x9fd7466f987fd4c45a5bbde22ed8aba5bc8d72d1',
+                            token: '0x9fd7466f987fd4c45a5bbde22ed8aba5bc8d72d1',
                             path: '$.data[-1:].apyBase',
                         },
                     ],
@@ -77,7 +77,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0x0a3d8466f5de586fa5f6de117301e2f90bcc5c48',
+                            token: '0x0a3d8466f5de586fa5f6de117301e2f90bcc5c48',
                             path: '$.data[-1:].apyBase',
                         },
                     ],
@@ -88,7 +88,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0xdbdc1ef57537e34680b898e1febd3d68c7389bcb',
+                            token: '0xdbdc1ef57537e34680b898e1febd3d68c7389bcb',
                             path: '$.data.stats.siusd.lastWeekAPY',
                         },
                     ],
@@ -99,12 +99,12 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0xd704254eb350e0d3baecd194d095862267897ae0',
+                            token: '0xd704254eb350e0d3baecd194d095862267897ae0',
                             path: '$["0x5555555555555555555555555555555555555555"].supplyAPR',
                         },
                         {
                             type: 'path',
-                            key: '0x06fd9d03b3d0f18e4919919b72d30c582f0a97e5',
+                            token: '0x06fd9d03b3d0f18e4919919b72d30c582f0a97e5',
                             path: '$["0x06Fd9D03b3d0F18E4919919b72D30c582f0a97E5"].supplyAPR',
                         },
                     ],
@@ -115,7 +115,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0x1359b05241ca5076c9f59605214f4f84114c0de8',
+                            token: '0x1359b05241ca5076c9f59605214f4f84114c0de8',
                             path: '$.apy',
                         },
                     ],
@@ -126,7 +126,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0x5748ae796ae46a4f1348a1693de4b50560485562',
+                            token: '0x5748ae796ae46a4f1348a1693de4b50560485562',
                             path: '$.apy',
                         },
                     ],
@@ -137,7 +137,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0xfd739d4e423301ce9385c1fb8850539d657c296d',
+                            token: '0xfd739d4e423301ce9385c1fb8850539d657c296d',
                             path: '$.apy',
                         },
                     ],

@@ -72,7 +72,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0xfc00000000000000000000000000000000000005',
+                            token: '0xfc00000000000000000000000000000000000005',
                             path: '$.sfrxethApr',
                         },
                     ],
@@ -83,7 +83,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0xfc00000000000000000000000000000000000008',
+                            token: '0xfc00000000000000000000000000000000000008',
                             path: '$.items[0].sfraxApr',
                         },
                     ],
@@ -94,7 +94,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0x211cc4dd073734da055fbf44a2b4667d5e5d2',
+                            token: '0x211cc4dd073734da055fbf44a2b4667d5e5d2',
                             path: '$.stakingYield.value',
                         },
                     ],

@@ -147,7 +147,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0xa3d68b74bf0528fdd07263c60d6488749044914b',
+                            token: '0xa3d68b74bf0528fdd07263c60d6488749044914b',
                             path: '$.data.rebaseEventLinkedLists[0].latest_aprs',
                         },
                     ],
@@ -158,7 +158,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0x580d5e1399157fd0d58218b7a514b60974f2ab01',
+                            token: '0x580d5e1399157fd0d58218b7a514b60974f2ab01',
                             path: '$.apy',
                         },
                     ],
@@ -168,7 +168,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0x2b2c81e08f1af8835a78bb2a90ae924ace0ea4be',
+                            token: '0x2b2c81e08f1af8835a78bb2a90ae924ace0ea4be',
                             path: '$.apr',
                         },
                     ],
@@ -179,7 +179,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0xf7d9281e8e363584973f946201b82ba72c965d27',
+                            token: '0xf7d9281e8e363584973f946201b82ba72c965d27',
                             path: '$.yyAVAX.apr',
                         },
                     ],
@@ -190,7 +190,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0xa25eaf2906fa1a3a13edac9b9657108af7b703e3',
+                            token: '0xa25eaf2906fa1a3a13edac9b9657108af7b703e3',
                             path: '$.ggavax_apy',
                         },
                     ],
@@ -206,7 +206,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0xc3344870d52688874b06d844e0c36cc39fc727f6',
+                            token: '0xc3344870d52688874b06d844e0c36cc39fc727f6',
                             path: '$.services[?(@.serviceName=="avax")].apy',
                         },
                     ],
@@ -217,7 +217,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0x68088c91446c7bea49ea7dbd3b96ce62b272dc96',
+                            token: '0x68088c91446c7bea49ea7dbd3b96ce62b272dc96',
                             path: '$.deusd_apy',
                         },
                     ],
@@ -228,7 +228,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0x06d47f3fb376649c3a9dafe069b3d6e35572219e',
+                            token: '0x06d47f3fb376649c3a9dafe069b3d6e35572219e',
                             path: '$.savusdApy',
                         },
                     ],

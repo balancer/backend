@@ -70,9 +70,8 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0x2416092f143378750bb29b79ed961ab195cceea5',
+                            token: '0x2416092f143378750bb29b79ed961ab195cceea5',
                             path: '$.apr',
-                            isIbYield: true,
                         },
                     ],
                 },

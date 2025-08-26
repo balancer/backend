@@ -132,10 +132,10 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0x7870ddfd5aca4e977b2287e9a212bcbe8fc4135a',
+                            token: '0x7870ddfd5aca4e977b2287e9a212bcbe8fc4135a',
                             path: '$.silov2-sonic-usdce-ws',
                         },
-                        { type: 'path', key: '0x871a101dcf22fe4fe37be7b654098c801cba1c88', path: '$.beefy-besonic' },
+                        { type: 'path', token: '0x871a101dcf22fe4fe37be7b654098c801cba1c88', path: '$.beefy-besonic' },
                     ],
                 },
                 {
@@ -152,7 +152,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0xc7990369da608c2f4903715e3bd22f2970536c29',
+                            token: '0xc7990369da608c2f4903715e3bd22f2970536c29',
                             path: '$.data.smsUsdStats.apy',
                         },
                     ],
@@ -163,7 +163,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0x67a298e5b65db2b4616e05c3b455e017275f53cb',
+                            token: '0x67a298e5b65db2b4616e05c3b455e017275f53cb',
                             path: '$.data[-1:].apyBase',
                         },
                     ],
@@ -171,74 +171,74 @@ export default <NetworkData>{
                 {
                     url: 'https://api.originprotocol.com/api/v2/os/apr/trailing/7?146',
                     scale: 100,
-                    extractors: [{ type: 'path', key: '0x9f0df7799f6fdad409300080cff680f5a23df4b1', path: '$.apr' }],
+                    extractors: [{ type: 'path', token: '0x9f0df7799f6fdad409300080cff680f5a23df4b1', path: '$.apr' }],
                 },
                 {
                     url: 'https://be.angles.fi/api/v2/angles/apr/trailing/7',
                     scale: 100,
-                    extractors: [{ type: 'path', key: '0xfa85fe5a8f5560e9039c04f2b0a90de1415abd70', path: '$.apy' }],
+                    extractors: [{ type: 'path', token: '0xfa85fe5a8f5560e9039c04f2b0a90de1415abd70', path: '$.apy' }],
                 },
                 {
                     url: 'https://usd-locks-api.rings.money/wrapper/apy',
-                    extractors: [{ type: 'path', key: '0x9fb76f7ce5fceaa2c42887ff441d46095e494206', path: '$.apy' }],
+                    extractors: [{ type: 'path', token: '0x9fb76f7ce5fceaa2c42887ff441d46095e494206', path: '$.apy' }],
                 },
                 {
                     url: 'https://eth-locks-api.rings.money/wrapper/apy',
-                    extractors: [{ type: 'path', key: '0xe8a41c62bb4d5863c6eadc96792cfe90a1f37c47', path: '$.apy' }],
+                    extractors: [{ type: 'path', token: '0xe8a41c62bb4d5863c6eadc96792cfe90a1f37c47', path: '$.apy' }],
                 },
                 {
                     url: 'https://v2.silo.finance/api/detailed-vault/sonic-0xf6f87073cf8929c206a77b0694619dc776f89885',
                     scale: 1e18,
                     extractors: [
-                        { type: 'path', key: '0xf6f87073cf8929c206a77b0694619dc776f89885', path: '$.supplyApr' },
+                        { type: 'path', token: '0xf6f87073cf8929c206a77b0694619dc776f89885', path: '$.supplyApr' },
                     ],
                 },
                 {
                     url: 'https://v2.silo.finance/api/detailed-vault/sonic-0xded4ac8645619334186f28b8798e07ca354cfa0e',
                     scale: 1e18,
                     extractors: [
-                        { type: 'path', key: '0xded4ac8645619334186f28b8798e07ca354cfa0e', path: '$.supplyApr' },
+                        { type: 'path', token: '0xded4ac8645619334186f28b8798e07ca354cfa0e', path: '$.supplyApr' },
                     ],
                 },
                 {
                     url: 'https://v2.silo.finance/api/detailed-vault/sonic-0xb6a23cb29e512df41876b28d7a848bd831f9c5ba',
                     scale: 1e18,
                     extractors: [
-                        { type: 'path', key: '0xb6a23cb29e512df41876b28d7a848bd831f9c5ba', path: '$.supplyApr' },
+                        { type: 'path', token: '0xb6a23cb29e512df41876b28d7a848bd831f9c5ba', path: '$.supplyApr' },
                     ],
                 },
                 {
                     url: 'https://v2.silo.finance/api/detailed-vault/sonic-0x9a1bf5365edbb99c2c61ca6d9ffad0b705acfc6f',
                     scale: 1e18,
                     extractors: [
-                        { type: 'path', key: '0x9a1bf5365edbb99c2c61ca6d9ffad0b705acfc6f', path: '$.supplyApr' },
+                        { type: 'path', token: '0x9a1bf5365edbb99c2c61ca6d9ffad0b705acfc6f', path: '$.supplyApr' },
                     ],
                 },
                 {
                     url: 'https://v2.silo.finance/api/detailed-vault/sonic-0x592d1e187729c76efacc6dffb9355bd7bf47b2a7',
                     scale: 1e18,
                     extractors: [
-                        { type: 'path', key: '0x592d1e187729c76efacc6dffb9355bd7bf47b2a7', path: '$.supplyApr' },
+                        { type: 'path', token: '0x592d1e187729c76efacc6dffb9355bd7bf47b2a7', path: '$.supplyApr' },
                     ],
                 },
                 {
                     url: 'https://v2.silo.finance/api/detailed-vault/sonic-0x92ebf5a1fb4061b45222a6d76accf4698bde4b95',
                     scale: 1e18,
                     extractors: [
-                        { type: 'path', key: '0x92ebf5a1fb4061b45222a6d76accf4698bde4b95', path: '$.supplyApr' },
+                        { type: 'path', token: '0x92ebf5a1fb4061b45222a6d76accf4698bde4b95', path: '$.supplyApr' },
                     ],
                 },
                 {
                     url: 'https://v2.silo.finance/api/detailed-vault/sonic-0xf6bc16b79c469b94cdd25f3e2334dd4fee47a581',
                     scale: 1e18,
                     extractors: [
-                        { type: 'path', key: '0xf6bc16b79c469b94cdd25f3e2334dd4fee47a581', path: '$.supplyApr' },
+                        { type: 'path', token: '0xf6bc16b79c469b94cdd25f3e2334dd4fee47a581', path: '$.supplyApr' },
                     ],
                 },
                 {
                     url: 'https://api-v2.streamprotocol.money/vaults/xUSD/apy',
                     scale: 100,
-                    extractors: [{ type: 'path', key: '0x6202b9f02e30e5e1c62cc01e4305450e5d83b926', path: '$.apy' }],
+                    extractors: [{ type: 'path', token: '0x6202b9f02e30e5e1c62cc01e4305450e5d83b926', path: '$.apy' }],
                 },
             ],
         },

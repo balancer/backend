@@ -1,19 +1,5 @@
 import { JSONPath } from 'jsonpath-plus';
-import { YbAprHandler } from '../../types';
-
-type EntryExtractor =
-    | { readonly type: 'path'; readonly key: string; readonly path: string }
-    | { readonly type: 'enumerate'; readonly path: string; readonly entries: (item: any) => [string, number] };
-
-interface AprHttpFetchConfig {
-    url: string;
-    method?: 'GET' | 'POST';
-    headers?: Record<string, string>;
-    body?: string;
-    scale?: number;
-    average?: boolean;
-    extractors: readonly EntryExtractor[];
-}
+import { YbAprHandler, AprHttpFetchConfig } from '../../types';
 
 const fetchWithTimeout = async (url: string, options: RequestInit = {}, timeoutMs: number = 20000): Promise<any> => {
     const controller = new AbortController();
@@ -49,7 +35,7 @@ const extract = (json: any, config: AprHttpFetchConfig) =>
     config.extractors.flatMap((ex) => {
         if (ex.type === 'path') {
             const raw = JSONPath({ path: ex.path, json, wrap: false });
-            return [[ex.key, raw]];
+            return [[ex.token, raw]];
         }
         if (ex.type === 'enumerate') {
             const values = JSONPath({ path: ex.path, json, wrap: false });

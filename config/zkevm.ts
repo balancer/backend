@@ -73,14 +73,14 @@ export default <NetworkData>{
                     url: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
                     scale: 100,
                     extractors: [
-                        { type: 'path', key: '0x5d8cff95d7a57c0bf50b30b43c7cc0d52825d4a9', path: '$.data.smaApr' }, // wstETH
+                        { type: 'path', token: '0x5d8cff95d7a57c0bf50b30b43c7cc0d52825d4a9', path: '$.data.smaApr' }, // wstETH
                     ],
                 },
                 {
                     url: 'https://api.rocketpool.net/mainnet/reth/apr',
                     scale: 100,
                     extractors: [
-                        { type: 'path', key: '0xb23c20efce6e24acca0cef9b7b7aa196b84ec942', path: '$.yearlyAPR' },
+                        { type: 'path', token: '0xb23c20efce6e24acca0cef9b7b7aa196b84ec942', path: '$.yearlyAPR' },
                     ],
                 },
                 {
@@ -89,7 +89,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0x12d8ce035c5de3ce39b1fdd4c1d5a745eaba3b8c',
+                            token: '0x12d8ce035c5de3ce39b1fdd4c1d5a745eaba3b8c',
                             path: '$.services[?(@.serviceName=="eth")].apy',
                         },
                     ],
@@ -98,7 +98,7 @@ export default <NetworkData>{
                     url: 'https://universe.kelpdao.xyz/rseth/apy',
                     scale: 100,
                     extractors: [
-                        { type: 'path', key: '0x8c7d118b5c47a5bcbd47cc51789558b98dad17c5', path: '$.value' }, // rsETH
+                        { type: 'path', token: '0x8c7d118b5c47a5bcbd47cc51789558b98dad17c5', path: '$.value' }, // rsETH
                     ],
                 },
             ],
