@@ -238,6 +238,13 @@ export default <NetworkData>{
                     scale: 100,
                     isIbYield: true,
                 },
+                sdusd: {
+                    tokenAddress: '0x41a5477364bf60d8936b90310fecfda79593304e',
+                    sourceUrl: 'https://app.dtrinity.org/v1/api/dstake/latest?chainId=146',
+                    path: 'data.netApy',
+                    scale: 100,
+                    isIbYield: true,
+                },
             },
         },
     },
