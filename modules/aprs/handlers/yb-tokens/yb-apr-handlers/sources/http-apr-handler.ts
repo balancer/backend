@@ -15,7 +15,7 @@ interface AprHttpFetchConfig {
     extractors: readonly EntryExtractor[];
 }
 
-const fetchWithTimeout = async (url: string, options: RequestInit = {}, timeoutMs: number = 10000): Promise<any> => {
+const fetchWithTimeout = async (url: string, options: RequestInit = {}, timeoutMs: number = 20000): Promise<any> => {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
@@ -28,7 +28,7 @@ const fetchWithTimeout = async (url: string, options: RequestInit = {}, timeoutM
     const timeoutPromise = new Promise((_, reject) => {
         timeoutId; // Reference to clear timeout
         controller.signal.addEventListener('abort', () => {
-            reject(new Error(`Request timed out after ${timeoutMs}ms`));
+            reject(new Error(`${url} timed out after ${timeoutMs}ms`));
         });
     });
 
