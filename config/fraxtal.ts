@@ -104,7 +104,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            token: '0x211cc4dd073734da055fbf44a2b4667d5e5d2',
+                            token: '0x211cc4dd073734da055fbf44a2b4667d5e5fe5d2',
                             path: '$.stakingYield.value',
                         },
                     ],
