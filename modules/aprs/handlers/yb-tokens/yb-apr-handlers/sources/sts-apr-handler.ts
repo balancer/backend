@@ -1,15 +1,8 @@
-import { YbAprConfig } from '../../../../../network/apr-config-types';
 import { prisma } from '../../../../../../prisma/prisma-client';
-import { YbAprHandler } from '../types';
+import { YbAprHandler, YbAprConfig } from '../../types';
 
-export class StsAprHandler implements YbAprHandler {
-    constructor(private config: YbAprConfig['sts']) {}
+export const stsAprHandler: YbAprHandler = async (config: YbAprConfig['sts']) => {
+    const stakingData = await prisma.prismaStakedSonicData.findFirstOrThrow();
 
-    async getAprs() {
-        const stakingData = await prisma.prismaStakedSonicData.findFirstOrThrow();
-
-        return {
-            [this.config!.token]: { apr: parseFloat(stakingData.stakingApr), isIbYield: true },
-        };
-    }
-}
+    return [{ address: config!.token, apr: parseFloat(stakingData.stakingApr) }];
+};

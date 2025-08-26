@@ -60,17 +60,31 @@ export default <NetworkData>{
     },
     aprHandlers: {
         ybAprHandler: {
-            maker: {
-                sdai: '0x3f51c6c5927b88cdec4b61e2787f9bd0f5249138',
+            contract: {
+                calls: [
+                    {
+                        chain: 'MAINNET',
+                        contract: '0x197e90f9fad81970ba7976f33cbd77088e5d7cf7',
+                        abi: 'function dsr() view returns(uint256)',
+                        functionName: 'dsr',
+                        token: '0x3f51c6c5927b88cdec4b61e2787f9bd0f5249138',
+                        parser: (dsr) => (Number(dsr) * 10 ** -27 - 1) * 365 * 24 * 60 * 60,
+                    },
+                ],
             },
-            defaultHandlers: {
-                ezETH: {
-                    tokenAddress: '0x2416092f143378750bb29b79ed961ab195cceea5',
-                    sourceUrl: 'https://app.renzoprotocol.com/api/apr',
-                    path: 'apr',
-                    isIbYield: true,
+            http: [
+                {
+                    url: 'https://app.renzoprotocol.com/api/apr',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x2416092f143378750bb29b79ed961ab195cceea5',
+                            path: '$.apr',
+                        },
+                    ],
                 },
-            },
+            ],
         },
     },
     multicall: '0xca11bde05977b3631167028862be2a173976ca11',

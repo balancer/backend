@@ -82,8 +82,9 @@ export default <NetworkData>{
     avgBlockSpeed: 1,
     aprHandlers: {
         ybAprHandler: {
-            aave: {
-                v3: {
+            aave: [
+                {
+                    market: 'v3',
                     subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/DSfLz8oQBUeU5atALgUFQKMTSYV9mZAVYp4noLSXAfvb`,
                     tokens: {
                         USDCe: {
@@ -109,95 +110,167 @@ export default <NetworkData>{
                         },
                     },
                 },
+            ],
+            contract: {
+                calls: [
+                    {
+                        name: 'maker sdai',
+                        chain: 'MAINNET',
+                        contract: '0x197e90f9fad81970ba7976f33cbd77088e5d7cf7',
+                        abi: 'function dsr() view returns(uint256)',
+                        functionName: 'dsr',
+                        parser: (dsr) => (Number(dsr) * 10 ** -27 - 1) * 365 * 24 * 60 * 60,
+                        token: '0x2218a117083f5b482b0bb821d27056ba9c04b1d3',
+                    },
+                ],
             },
-            beefy: {
-                sourceUrl: 'https://api.beefy.finance/apy/',
-                tokens: {
-                    wmooExactlySupplyUSDC: {
-                        address: '0xe5e9168b45a90c1e5730da6184cc5901c6e4353f',
-                        vaultId: 'exactly-supply-usdc',
-                    },
-                    wmooExactlySupplyETH: {
-                        address: '0x44b1cea4f597f493e2fd0833a9c04dfb1e479ef0',
-                        vaultId: 'exactly-supply-eth',
-                    },
+            http: [
+                {
+                    url: 'https://ded76165a2fb6f7887260a3a0f626de7.thegraph.chainnodes.org/subgraphs/name/etherfi/etherfi-subgraph-v0-8-2',
+                    body: JSON.stringify({
+                        query: `{
+                    rebaseEventLinkedLists {
+                      latest_aprs
+                    }
+                  }`,
+                    }),
+                    headers: { 'Content-Type': 'application/json' },
+                    average: true,
+                    scale: 10000,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x5a7facb970d094b6c7ff1df0ea68d99e6e73cbff',
+                            path: '$.data.rebaseEventLinkedLists[0].latest_aprs',
+                        },
+                    ],
+                },
+                {
+                    url: 'https://yields.llama.fi/chart/46f3828a-cbf6-419e-8399-a83b905bf556',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x5a7a183b6b44dc4ec2e3d2ef43f98c5152b1d76d',
+                            path: '$.data[-1:].apyBase',
+                        },
+                    ],
+                },
+                {
                     // To get the vaultId, get the vault address from the token contract(token.vault()),
                     // and search for the vault address in the link: https://api.beefy.finance/vaults
+                    url: 'https://api.beefy.finance/apy/',
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0xe5e9168b45a90c1e5730da6184cc5901c6e4353f',
+                            path: '$.exactly-supply-usdc',
+                        },
+                        {
+                            type: 'path',
+                            token: '0x44b1cea4f597f493e2fd0833a9c04dfb1e479ef0',
+                            path: '$.exactly-supply-eth',
+                        },
+                    ],
                 },
-            },
-            defillama: [
                 {
-                    defillamaPoolId: '46f3828a-cbf6-419e-8399-a83b905bf556',
-                    tokenAddress: '0x5a7a183b6b44dc4ec2e3d2ef43f98c5152b1d76d',
+                    url: 'https://ctrl.yield.fi/t/apy',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x895e15020c3f52ddd4d8e9514eb83c39f53b1579',
+                            path: '$.apy',
+                        },
+                    ],
+                },
+                {
+                    url: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x1f32b1c2345538c0c6f582fcb022739c4a194ebb',
+                            path: '$.data.smaApr',
+                        },
+                    ],
+                },
+                {
+                    url: 'https://api.rocketpool.net/mainnet/reth/apr',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x9bcef72be871e61ed4fbbc7630889bee758eb81d',
+                            path: '$.yearlyAPR',
+                        },
+                    ],
+                },
+                {
+                    url: 'https://api.frax.finance/v2/frxeth/summary/latest',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x484c2d6e3cdd945a8b2df735e079178c1036578c',
+                            path: '$.sfrxethApr',
+                        },
+                        {
+                            type: 'path',
+                            token: '0x3ec3849c33291a9ef4c5db86de593eb4a37fde45',
+                            path: '$.sfrxethApr',
+                        },
+                    ],
+                },
+                {
+                    url: 'https://api.frax.finance/v2/frax/sfrax/summary/history?range=1d',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x5bff88ca1442c2496f7e475e9e7786383bc070c0',
+                            path: '$.items[0].sfraxApr',
+                        },
+                        {
+                            type: 'path',
+                            token: '0x2dd1b4d4548accea497050619965f91f78b3b532',
+                            path: '$.items[0].sfraxApr',
+                        },
+                    ],
+                },
+                {
+                    url: 'https://api.staking.ankr.com/v1alpha/metrics',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0xe05a08226c49b636acf99c40da8dc6af83ce5bb3',
+                            path: '$.services[?(@.serviceName=="eth")].apy',
+                        },
+                    ],
+                },
+                {
+                    url: 'https://universe.kelpdao.xyz/rseth/apy',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x87eee96d50fb761ad85b1c982d28a042169d61b1',
+                            path: '$.value',
+                        },
+                    ],
+                },
+                {
+                    url: 'https://apy.prod.mountainprotocol.com',
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x57f5e098cad7a3d1eed53991d4d66c45c9af7812',
+                            path: '$.value',
+                        },
+                    ],
                 },
             ],
-            maker: {
-                sdai: '0x2218a117083f5b482b0bb821d27056ba9c04b1d3',
-            },
-            etherfi: '0x5a7facb970d094b6c7ff1df0ea68d99e6e73cbff',
-            defaultHandlers: {
-                yUSD: {
-                    tokenAddress: '0x895e15020c3f52ddd4d8e9514eb83c39f53b1579',
-                    sourceUrl: 'https://ctrl.yield.fi/t/apy',
-                    path: 'apy',
-                    isIbYield: true,
-                },
-                wstEth: {
-                    tokenAddress: '0x1f32b1c2345538c0c6f582fcb022739c4a194ebb',
-                    sourceUrl: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
-                    path: 'data.smaApr',
-                    isIbYield: true,
-                },
-                rETH: {
-                    tokenAddress: '0x9bcef72be871e61ed4fbbc7630889bee758eb81d',
-                    sourceUrl: 'https://api.rocketpool.net/mainnet/reth/apr',
-                    path: 'yearlyAPR',
-                    isIbYield: true,
-                },
-                sfrxETH: {
-                    tokenAddress: '0x484c2d6e3cdd945a8b2df735e079178c1036578c',
-                    sourceUrl: 'https://api.frax.finance/v2/frxeth/summary/latest',
-                    path: 'sfrxethApr',
-                    isIbYield: true,
-                },
-                sfrxETHOft: {
-                    tokenAddress: '0x3ec3849c33291a9ef4c5db86de593eb4a37fde45',
-                    sourceUrl: 'https://api.frax.finance/v2/frxeth/summary/latest',
-                    path: 'sfrxethApr',
-                    isIbYield: true,
-                },
-                sFRAX: {
-                    tokenAddress: '0x5bff88ca1442c2496f7e475e9e7786383bc070c0',
-                    sourceUrl: 'https://api.frax.finance/v2/frax/sfrax/summary/history?range=1d',
-                    path: 'items.0.sfraxApr',
-                    isIbYield: true,
-                },
-                sfrxUSD: {
-                    tokenAddress: '0x2dd1b4d4548accea497050619965f91f78b3b532',
-                    sourceUrl: 'https://api.frax.finance/v2/frax/sfrax/summary/history?range=1d',
-                    path: 'items.0.sfraxApr',
-                    isIbYield: true,
-                },
-                ankrETH: {
-                    tokenAddress: '0xe05a08226c49b636acf99c40da8dc6af83ce5bb3',
-                    sourceUrl: 'https://api.staking.ankr.com/v1alpha/metrics',
-                    path: 'services.{serviceName == "eth"}.apy',
-                    isIbYield: true,
-                },
-                wrsETH: {
-                    tokenAddress: '0x87eee96d50fb761ad85b1c982d28a042169d61b1',
-                    sourceUrl: 'https://universe.kelpdao.xyz/rseth/apy',
-                    path: 'value',
-                    isIbYield: true,
-                },
-                wusdm: {
-                    tokenAddress: '0x57f5e098cad7a3d1eed53991d4d66c45c9af7812',
-                    sourceUrl: 'https://apy.prod.mountainprotocol.com',
-                    path: 'value',
-                    isIbYield: true,
-                    scale: 1,
-                },
-            },
         },
     },
     datastudio: {
