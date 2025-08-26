@@ -244,7 +244,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0x6dc3ce9c57b20131347fdc9089d740daf6eb34c5',
+                            token: '0x6dc3ce9c57b20131347fdc9089d740daf6eb34c5',
                             path: '$.data[-1:].apyBase',
                         },
                     ],
@@ -255,7 +255,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0xf073bac22dab7faf4a3dd6c6189a70d54110525c',
+                            token: '0xf073bac22dab7faf4a3dd6c6189a70d54110525c',
                             path: '$.data[-1:].apyBase',
                         },
                     ],
@@ -266,7 +266,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0x1202f5c7b4b9e47a1a484e8b270be34dbbc75055',
+                            token: '0x1202f5c7b4b9e47a1a484e8b270be34dbbc75055',
                             path: '$.data[-1:].apyBase',
                         },
                     ],
@@ -277,7 +277,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0x4956b52ae2ff65d74ca2d61207523288e4528f96',
+                            token: '0x4956b52ae2ff65d74ca2d61207523288e4528f96',
                             path: '$.data[-1:].apyBase',
                         },
                     ],
@@ -288,7 +288,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0x9fd7466f987fd4c45a5bbde22ed8aba5bc8d72d1',
+                            token: '0x9fd7466f987fd4c45a5bbde22ed8aba5bc8d72d1',
                             path: '$.data[-1:].apyBase',
                         },
                     ],
@@ -307,7 +307,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0xf1c9acdc66974dfb6decb12aa385b9cd01190e38',
+                            token: '0xf1c9acdc66974dfb6decb12aa385b9cd01190e38',
                             path: '$.data.osTokens[0].apy',
                         },
                     ],
@@ -327,7 +327,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0xcd5fe23c85820f7b72d0926fc9b05b43e359b7ee',
+                            token: '0xcd5fe23c85820f7b72d0926fc9b05b43e359b7ee',
                             path: '$.data.rebaseEventLinkedLists[0].latest_aprs',
                         },
                     ],
@@ -350,7 +350,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0x7751e2f4b8ae93ef6b79d86419d42fe3295a4559',
+                            token: '0x7751e2f4b8ae93ef6b79d86419d42fe3295a4559',
                             path: '$.data.vault.asset.yield.apr',
                         },
                     ],
@@ -410,7 +410,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0x09db87a538bd693e9d08544577d5ccfaa6373a48',
+                            token: '0x09db87a538bd693e9d08544577d5ccfaa6373a48',
                             path: '$.data.getApr.apr7d',
                         },
                     ],
@@ -429,7 +429,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0x80ac24aa929eaf5013f6436cda2a7ba190f5cc0b',
+                            token: '0x80ac24aa929eaf5013f6436cda2a7ba190f5cc0b',
                             path: '$.data.syrupGlobals.apy',
                         },
                     ],
@@ -439,7 +439,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0xdbdc1ef57537e34680b898e1febd3d68c7389bcb',
+                            token: '0xdbdc1ef57537e34680b898e1febd3d68c7389bcb',
                             path: '$.data.stats.siusd.lastWeekAPY',
                         },
                     ],
@@ -447,15 +447,15 @@ export default <NetworkData>{
                 {
                     url: 'https://prod-gw.openeden.com/sys/apy',
                     scale: 100,
-                    extractors: [{ type: 'path', key: '0xad55aebc9b8c03fc43cd9f62260391c13c23e7c0', path: '$.apy' }],
+                    extractors: [{ type: 'path', token: '0xad55aebc9b8c03fc43cd9f62260391c13c23e7c0', path: '$.apy' }],
                 },
                 {
                     url: 'https://api-data.loopfi.xyz/api/getData',
                     extractors: [
-                        { type: 'path', key: '0x3976d71e7ddfbab9bd120ec281b7d35fa0f28528', path: '$.loop.slpETHApr' },
+                        { type: 'path', token: '0x3976d71e7ddfbab9bd120ec281b7d35fa0f28528', path: '$.loop.slpETHApr' },
                         {
                             type: 'path',
-                            key: '0xbfb53910c935e837c74e6c4ef584557352d20fde',
+                            token: '0xbfb53910c935e837c74e6c4ef584557352d20fde',
                             path: '$.lpUSDLoop.slpUSDApr',
                         }, // slpUSD too
                     ],
@@ -464,78 +464,82 @@ export default <NetworkData>{
                     url: 'https://ctrl.yield.fi/t/apy',
                     scale: 100,
                     extractors: [
-                        { type: 'path', key: '0x1ce7d9942ff78c328a4181b9f3826fee6d845a97', path: '$.apy' }, // yUSD
+                        { type: 'path', token: '0x1ce7d9942ff78c328a4181b9f3826fee6d845a97', path: '$.apy' }, // yUSD
                     ],
                 },
                 {
                     url: 'https://app.bedrock.technology/unieth/api/v1/e2ls/apy',
                     scale: 10000,
                     extractors: [
-                        { type: 'path', key: '0xf1376bcef0f78459c0ed0ba5ddce976f1ddf51f4', path: '$.data.apy' }, // unieth
+                        { type: 'path', token: '0xf1376bcef0f78459c0ed0ba5ddce976f1ddf51f4', path: '$.data.apy' }, // unieth
                     ],
                 },
                 {
                     url: 'https://dapi.bifrost.io/api/site',
                     scale: 100,
                     extractors: [
-                        { type: 'path', key: '0x4bc3263eb5bb2ef7ad9ab6fb68be80e43b43801f', path: '$.vETH.totalApy' },
+                        { type: 'path', token: '0x4bc3263eb5bb2ef7ad9ab6fb68be80e43b43801f', path: '$.vETH.totalApy' },
                     ],
                 },
                 {
                     url: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
                     scale: 100,
                     extractors: [
-                        { type: 'path', key: '0xae7ab96520de3a18e5e111b5eaab095312d7fe84', path: '$.data.smaApr' }, // stETH
-                        { type: 'path', key: '0x5fd13359ba15a84b76f7f87568309040176167cd', path: '$.data.smaApr' }, // amphrETH
-                        { type: 'path', key: '0x7a4effd87c2f3c55ca251080b1343b605f327e3a', path: '$.data.smaApr' }, // rstETH
-                        { type: 'path', key: '0x84631c0d0081fde56deb72f6de77abbbf6a9f93a', path: '$.data.smaApr' }, // Re7LRT
-                        { type: 'path', key: '0xbeef69ac7870777598a04b2bd4771c71212e6abc', path: '$.data.smaApr' }, // steakLRT
-                        { type: 'path', key: '0xd9a442856c234a39a81a089c06451ebaa4306a72', path: '$.data.smaApr' }, // pufETH
-                        { type: 'path', key: '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0', path: '$.data.smaApr' }, // wstETH
-                        { type: 'path', key: '0x8e0789d39db454dbe9f4a77acef6dc7c69f6d552', path: '$.data.smaApr' }, // inwstETHs
-                        { type: 'path', key: '0x5e362eb2c0706bd1d134689ec75176018385430b', path: '$.data.smaApr' }, // dvstETH
+                        { type: 'path', token: '0xae7ab96520de3a18e5e111b5eaab095312d7fe84', path: '$.data.smaApr' }, // stETH
+                        { type: 'path', token: '0x5fd13359ba15a84b76f7f87568309040176167cd', path: '$.data.smaApr' }, // amphrETH
+                        { type: 'path', token: '0x7a4effd87c2f3c55ca251080b1343b605f327e3a', path: '$.data.smaApr' }, // rstETH
+                        { type: 'path', token: '0x84631c0d0081fde56deb72f6de77abbbf6a9f93a', path: '$.data.smaApr' }, // Re7LRT
+                        { type: 'path', token: '0xbeef69ac7870777598a04b2bd4771c71212e6abc', path: '$.data.smaApr' }, // steakLRT
+                        { type: 'path', token: '0xd9a442856c234a39a81a089c06451ebaa4306a72', path: '$.data.smaApr' }, // pufETH
+                        { type: 'path', token: '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0', path: '$.data.smaApr' }, // wstETH
+                        { type: 'path', token: '0x8e0789d39db454dbe9f4a77acef6dc7c69f6d552', path: '$.data.smaApr' }, // inwstETHs
+                        { type: 'path', token: '0x5e362eb2c0706bd1d134689ec75176018385430b', path: '$.data.smaApr' }, // dvstETH
                     ],
                 },
                 {
                     url: 'https://api.exchange.coinbase.com/wrapped-assets/CBETH/',
-                    extractors: [{ type: 'path', key: '0xbe9895146f7af43049ca1c1ae358b0541ea49704', path: '$.apy' }],
+                    extractors: [{ type: 'path', token: '0xbe9895146f7af43049ca1c1ae358b0541ea49704', path: '$.apy' }],
                 },
                 {
                     url: 'https://api.frax.finance/v2/frxeth/summary/latest',
                     scale: 100,
                     extractors: [
-                        { type: 'path', key: '0xac3e018457b222d93114458476f3e3416abbe38f', path: '$.sfrxethApr' },
+                        { type: 'path', token: '0xac3e018457b222d93114458476f3e3416abbe38f', path: '$.sfrxethApr' },
                     ],
                 },
                 {
                     url: 'https://drop-api.stafi.io/reth/v1/poolData',
                     scale: 100,
                     extractors: [
-                        { type: 'path', key: '0x9559aaa82d9649c7a7b220e7c461d2e74c9a3593', path: '$.data.stakeApr' },
+                        { type: 'path', token: '0x9559aaa82d9649c7a7b220e7c461d2e74c9a3593', path: '$.data.stakeApr' },
                     ],
                 },
                 {
                     url: 'https://api.rocketpool.net/mainnet/reth/apr',
                     scale: 100,
                     extractors: [
-                        { type: 'path', key: '0xae78736cd615f374d3085123a210448e74fc6393', path: '$.yearlyAPR' },
+                        { type: 'path', token: '0xae78736cd615f374d3085123a210448e74fc6393', path: '$.yearlyAPR' },
                     ],
                 },
                 {
                     url: 'https://data.jonesdao.io/api/v1/jones/apy-wjaura',
                     scale: 100,
                     extractors: [
-                        { type: 'path', key: '0x198d7387fa97a73f05b8578cdeff8f2a1f34cd1f', path: '$.wjauraApy' },
+                        { type: 'path', token: '0x198d7387fa97a73f05b8578cdeff8f2a1f34cd1f', path: '$.wjauraApy' },
                     ],
                 },
                 {
                     url: 'https://universe.staderlabs.com/eth/apy',
                     scale: 100,
-                    extractors: [{ type: 'path', key: '0xa35b1b31ce002fbf2058d22f30f95d405200a15b', path: '$.value' }],
+                    extractors: [
+                        { type: 'path', token: '0xa35b1b31ce002fbf2058d22f30f95d405200a15b', path: '$.value' },
+                    ],
                 },
                 {
                     url: 'https://apy.prod.mountainprotocol.com',
-                    extractors: [{ type: 'path', key: '0x57f5e098cad7a3d1eed53991d4d66c45c9af7812', path: '$.value' }],
+                    extractors: [
+                        { type: 'path', token: '0x57f5e098cad7a3d1eed53991d4d66c45c9af7812', path: '$.value' },
+                    ],
                 },
                 {
                     url: 'https://api.staking.ankr.com/v1alpha/metrics',
@@ -543,7 +547,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0xe95a203b1a91a908f9b9ce46459d101078c2c3cb',
+                            token: '0xe95a203b1a91a908f9b9ce46459d101078c2c3cb',
                             path: '$.services[?(@.serviceName=="eth")].apy',
                         },
                     ],
@@ -551,30 +555,32 @@ export default <NetworkData>{
                 {
                     url: 'https://app.renzoprotocol.com/api/apr',
                     scale: 100,
-                    extractors: [{ type: 'path', key: '0xbf5495efe5db9ce00f80364c8b423567e58d2110', path: '$.apr' }],
+                    extractors: [{ type: 'path', token: '0xbf5495efe5db9ce00f80364c8b423567e58d2110', path: '$.apr' }],
                 },
                 {
                     url: 'https://universe.kelpdao.xyz/rseth/apy',
                     scale: 100,
                     extractors: [
-                        { type: 'path', key: '0xa1290d69c65a6fe4df752f95823fae25cb99e5a7', path: '$.value' }, // rsETH
-                        { type: 'path', key: '0xe1b4d34e8754600962cd944b535180bd758e6c2e', path: '$.value' }, // agETH
+                        { type: 'path', token: '0xa1290d69c65a6fe4df752f95823fae25cb99e5a7', path: '$.value' }, // rsETH
+                        { type: 'path', token: '0xe1b4d34e8754600962cd944b535180bd758e6c2e', path: '$.value' }, // agETH
                     ],
                 },
                 {
                     url: 'https://universe.kelpdao.xyz/rseth/gainApy',
                     scale: 100,
-                    extractors: [{ type: 'path', key: '0xc824a08db624942c5e5f330d56530cd1598859fd', path: '$.hgETH' }],
+                    extractors: [
+                        { type: 'path', token: '0xc824a08db624942c5e5f330d56530cd1598859fd', path: '$.hgETH' },
+                    ],
                 },
                 {
                     url: 'https://www.inverse.finance/api/dola-staking',
                     scale: 100,
-                    extractors: [{ type: 'path', key: '0xb45ad160634c528cc3d2926d9807104fa3157305', path: '$.apr' }],
+                    extractors: [{ type: 'path', token: '0xb45ad160634c528cc3d2926d9807104fa3157305', path: '$.apr' }],
                 },
                 {
                     url: 'https://v3-lrt.svc.swellnetwork.io/api/tokens/rsweth/apr',
                     scale: 100,
-                    extractors: [{ type: 'path', key: '0xfae103dc9cf190ed75350761e95403b7b8afa6c0', path: '$' }],
+                    extractors: [{ type: 'path', token: '0xfae103dc9cf190ed75350761e95403b7b8afa6c0', path: '$' }],
                 },
                 {
                     url: 'https://ethena.fi/api/yields/protocol-and-staking-yield',
@@ -582,7 +588,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0x9d39a5de30e57443bff2a8307a4256c8797a3497',
+                            token: '0x9d39a5de30e57443bff2a8307a4256c8797a3497',
                             path: '$.stakingYield.value',
                         },
                     ],
@@ -594,7 +600,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            key: '0xfe18ae03741a5b84e39c295ac9c856ed7991c38e',
+                            token: '0xfe18ae03741a5b84e39c295ac9c856ed7991c38e',
                             path: '$.result.data[?(@.instrument_name=="ETH.staked")].est_rewards',
                         },
                     ],
@@ -603,25 +609,29 @@ export default <NetworkData>{
                     url: 'https://api-deusd-prod-public.elixir.xyz/public/deusd_apy',
                     scale: 100,
                     extractors: [
-                        { type: 'path', key: '0x5c5b196abe0d54485975d1ec29617d42d9198326', path: '$.deusd_apy' },
+                        { type: 'path', token: '0x5c5b196abe0d54485975d1ec29617d42d9198326', path: '$.deusd_apy' },
                     ],
                 },
                 {
                     url: 'https://app.usdx.money/v1/base/apyInfo',
                     scale: 1,
                     extractors: [
-                        { type: 'path', key: '0x7788a3538c5fc7f9c7c8a74eac4c898fc8d87d92', path: '$.result.susdxApy' },
+                        {
+                            type: 'path',
+                            token: '0x7788a3538c5fc7f9c7c8a74eac4c898fc8d87d92',
+                            path: '$.result.susdxApy',
+                        },
                     ],
                 },
                 {
                     url: 'https://usdn.api.smardex.io/v1/wusdn/apr',
-                    extractors: [{ type: 'path', key: '0x99999999999999cc837c997b882957dafdcb1af9', path: '$' }],
+                    extractors: [{ type: 'path', token: '0x99999999999999cc837c997b882957dafdcb1af9', path: '$' }],
                 },
                 {
                     url: 'https://info-sky.blockanalitica.com/api/v1/savings-rate/?format=json',
                     scale: 100,
                     extractors: [
-                        { type: 'path', key: '0xa3931d71877c0e7a3148cb7eb4463524fec27fbd', path: '$[0].ssr_rate' },
+                        { type: 'path', token: '0xa3931d71877c0e7a3148cb7eb4463524fec27fbd', path: '$[0].ssr_rate' },
                     ],
                 },
             ],
