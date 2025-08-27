@@ -48,7 +48,7 @@ export class SwapsPriceHandler implements PriceHandler {
                     if (otherTokenValue > 1) {
                         const price = otherTokenValue / tokenAmount;
                         // New price cant be more than 10x of old price. Assume 10x increase in pricing is inflated and skip.
-                        if (token.currentPrice && token.currentPrice * 10 > price) {
+                        if (!token.currentPrice || token.currentPrice * 10 > price) {
                             priceItems.push({
                                 address: token.address,
                                 chain: token.chain,
