@@ -1,5 +1,11 @@
 # backend
 
+## 1.52.1
+
+### Patch Changes
+
+-   c63c143: fix pricing for new tokens
+
 ## 1.52.0
 
 ### Minor Changes
