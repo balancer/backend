@@ -1,51 +1,40 @@
-import { Chain } from '@prisma/client';
+import { Chain, PrismaPoolSnapshot } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
 import { V2SubgraphClient } from '../../subgraphs/balancer-subgraph';
 import _ from 'lodash';
 import { daysAgo, roundToMidnight } from '../../common/time';
-import { snapshotsV2Transformer } from '../../sources/transformers/snapshots-v2-transformer';
-import { PoolSnapshotService } from './pool-snapshot-service';
+import {
+    BalancerPoolSnapshotFragment,
+    OrderDirection,
+    PoolSnapshot_OrderBy,
+} from '../../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
+import { poolsToIgnore } from '../../sor/utils';
 
-const protocolVersion = 2;
+// Constants
+const PROTOCOL_VERSION = 2;
+const SECONDS_PER_DAY = 86400;
+const SNAPSHOT_STALE_THRESHOLD_DAYS = 5;
+const NEW_POOL_LOOKBACK_DAYS = 2;
+const BATCH_SIZE = 100;
 
-export async function syncSnapshotsV2(subgraphClient: V2SubgraphClient, chain: Chain): Promise<string[]> {
-    // Get the latest snapshot from the DB (assuming there are no gaps)
-    const storedSnapshot = await prisma.prismaPoolSnapshot.findFirst({
-        select: {
-            timestamp: true,
-        },
-        where: {
-            chain,
-            protocolVersion,
-        },
-        orderBy: {
-            timestamp: 'desc',
-        },
-    });
-    const storedTimestamp = storedSnapshot?.timestamp || 0;
+// Safe parsing utilities
+const safeParseFloat = (value: string | undefined | null, defaultValue = 0): number => {
+    if (!value || value === '') return defaultValue;
+    const parsed = parseFloat(value);
+    return isNaN(parsed) ? defaultValue : parsed;
+};
 
-    const prices = await prisma.prismaTokenCurrentPrice
-        .findMany({
-            where: {
-                chain,
-            },
-            select: {
-                tokenAddress: true,
-                price: true,
-            },
-        })
-        .then((prices) => prices.reduce((acc, p) => ({ ...acc, [p.tokenAddress]: p.price }), {}));
+const safeParseInt = (value: string | undefined | null, defaultValue = 0): number => {
+    if (!value || value === '') return defaultValue;
+    const parsed = parseInt(value, 10);
+    return isNaN(parsed) ? defaultValue : parsed;
+};
 
-    // How many day ago was the last snapshot
-    const daysAgo = Math.floor((Date.now() / 1000 - storedTimestamp) / 86400);
-
-    console.log('Syncing snapshots for', chain, 'from', daysAgo, 'days ago');
-
-    const service = new PoolSnapshotService(subgraphClient, chain, prices);
-    await service.syncLatestSnapshotsForAllPools(Math.max(daysAgo, 2));
-
-    return [];
-}
+const safeNumber = (value: string | number | undefined | null, defaultValue = 0): number => {
+    if (value === undefined || value === null || value === '') return defaultValue;
+    const parsed = Number(value);
+    return isNaN(parsed) ? defaultValue : parsed;
+};
 
 /**
  * Sync snapshot balances to the database.
@@ -54,128 +43,241 @@ export async function syncSnapshotsV2(subgraphClient: V2SubgraphClient, chain: C
  * @param chain
  * @returns
  */
-export async function syncSnapshotsForADayV2(
-    subgraphClient: V2SubgraphClient,
-    chain: Chain,
-    timestamp = daysAgo(0), // Current day by default
-): Promise<string[]> {
-    const previous = roundToMidnight(timestamp - 86400); // Previous day stored in the DB
-    const next = roundToMidnight(timestamp); // Day to fetch snapshots for
+export async function syncSnapshotsV2(subgraphClient: V2SubgraphClient, chain: Chain): Promise<string[]> {
+    const midnight = roundToMidnight();
+    const updatedPools = new Set<string>();
 
-    // TODO: do we want to have a bucket for the current day?
-    // const current = roundToNextMidnight(previous);
-
-    // Check for previous snapshots
-    const previousSnapshots = await prisma.prismaPoolSnapshot.findMany({
-        where: {
-            chain: chain,
-            timestamp: previous,
-            protocolVersion,
-        },
-    });
-
-    // Get snapshots for the next day
-    const nextSnapshots = await subgraphClient.getSnapshotsForTimestamp(next);
-
-    // Get all pool IDs we are interested in
-    const dbPools = await prisma.prismaPool.findMany({
-        select: {
-            id: true,
-            tokens: {
-                select: {
-                    address: true,
-                    index: true,
-                },
-            },
-        },
-        where: {
-            protocolVersion,
-            chain,
-        },
-    });
-
-    let prices: { [address: string]: number } = {};
-
-    if (timestamp === daysAgo(0)) {
-        prices = (
-            await prisma.prismaTokenCurrentPrice.findMany({
-                where: {
-                    chain,
-                },
-                select: {
-                    tokenAddress: true,
-                    price: true,
-                },
-            })
-        )
-            .map((p) => ({ [p.tokenAddress]: p.price })) // Assing prices to addresses
-            .reduce((acc, p) => ({ ...acc, ...p }), {}); // Convert to mapped object
-    } else {
-        prices = (
-            await prisma.prismaTokenPrice.findMany({
-                where: {
-                    chain,
-                    timestamp,
-                },
-                select: {
-                    tokenAddress: true,
-                    price: true,
-                },
-            })
-        )
-            .map((p) => ({ [p.tokenAddress]: p.price })) // Assing prices to addresses
-            .reduce((acc, p) => ({ ...acc, ...p }), {}); // Convert to mapped object
-    }
-
-    for (const pool of dbPools) {
-        const poolTokens = pool.tokens.map((t, idx) => pool.tokens.find(({ index }) => index === idx)?.address ?? '');
-        let previousSnapshot = previousSnapshots.find((s) => s.poolId === pool.id);
-        const snapshot = nextSnapshots.find((s) => s.pool.id === pool.id);
-
-        // Handle case when there is already a gap in the snapshots
-        if (!previousSnapshot) {
-            // Check if the gap is more than one day
-            previousSnapshot =
-                (await prisma.prismaPoolSnapshot.findFirst({
-                    where: {
-                        chain,
-                        poolId: pool.id,
-                        timestamp: {
-                            lt: previous,
-                        },
-                        protocolVersion,
-                    },
-                    orderBy: {
-                        timestamp: 'desc',
-                    },
-                })) || undefined;
-
-            if (previousSnapshot && previousSnapshot?.timestamp < previous - 86400) {
-                // Needs to be filled in
-                // Schedule a job to fill in the missing snapshots
-                console.log('Missing snapshots for', pool.id);
-                continue;
-            }
-            // Otherwise it's a new pool
-        }
-
-        const dbEntry = snapshotsV2Transformer(pool.id, poolTokens, next, chain, prices, previousSnapshot, snapshot);
-
-        if (!dbEntry) {
-            continue;
-        }
-
-        await prisma.prismaPoolSnapshot.upsert({
+    try {
+        // Get the latest snapshots from DB using safe Prisma query
+        const latestSnapshotsList = await prisma.prismaPoolSnapshot.findMany({
             where: {
-                id_chain: {
-                    id: dbEntry.id,
-                    chain,
-                },
+                chain,
+                protocolVersion: PROTOCOL_VERSION,
+                timestamp: { lt: midnight },
             },
-            create: dbEntry,
-            update: dbEntry,
+            distinct: ['poolId'],
+            orderBy: { timestamp: 'desc' },
+        });
+
+        const latestSnapshots = Object.fromEntries(latestSnapshotsList.map((s) => [s.poolId, s]));
+
+        const latestIds = Object.keys(latestSnapshots);
+
+        const allIds = (
+            await prisma.prismaPool.findMany({
+                select: { id: true },
+                where: {
+                    chain,
+                    protocolVersion: PROTOCOL_VERSION,
+                    createTime: { gte: daysAgo(NEW_POOL_LOOKBACK_DAYS) }, // Fetch new pools only
+                },
+            })
+        ).map((r) => r.id);
+
+        // Fully resync pools without snapshots
+        const fullSync = new Set(allIds.filter((x) => !latestIds.includes(x)));
+
+        const lastSnapshots = await subgraphClient.legacyService.getAllPoolSnapshots({
+            where: {
+                timestamp: midnight,
+            },
+        });
+
+        // Process snapshots in batches for better performance
+        const snapshotUpdates: any[] = [];
+
+        for (const lastSnapshot of lastSnapshots) {
+            try {
+                // Validate required snapshot data
+                if (!lastSnapshot?.pool?.id || !lastSnapshot.id || lastSnapshot.timestamp === undefined) {
+                    console.warn(`Invalid snapshot data for pool: ${lastSnapshot?.pool?.id || 'unknown'}`);
+                    continue;
+                }
+
+                const latestDb = latestSnapshots[lastSnapshot.pool.id];
+                const timeDiff = latestDb ? lastSnapshot.timestamp - latestDb.timestamp : Infinity;
+                const staleThreshold = SECONDS_PER_DAY * SNAPSHOT_STALE_THRESHOLD_DAYS;
+
+                // If there's no DB record or latest DB snapshot is stale
+                if (!latestDb || timeDiff > staleThreshold) {
+                    fullSync.add(lastSnapshot.pool.id);
+                    continue;
+                }
+
+                console.log('updating latest snapshot', lastSnapshot.id, chain);
+
+                // Safe data parsing with validation
+                const totalSharesNum = safeParseInt(lastSnapshot.totalShares);
+                const totalLiquidity = safeParseFloat(lastSnapshot.liquidity);
+                const totalSwapVolume = safeParseFloat(lastSnapshot.swapVolume);
+                const totalSwapFee = safeParseFloat(lastSnapshot.swapFees);
+
+                const data = {
+                    totalShares: lastSnapshot.totalShares || '0',
+                    swapsCount: safeNumber(lastSnapshot.swapsCount),
+                    holdersCount: safeNumber(lastSnapshot.holdersCount),
+                    volume24h: Math.max(0, totalSwapVolume - (latestDb.totalSwapVolume || 0)),
+                    fees24h: Math.max(0, totalSwapFee - (latestDb.totalSwapFee || 0)),
+                    totalLiquidity,
+                    sharePrice: totalSharesNum > 0 ? totalLiquidity / totalSharesNum : 0,
+                    totalSharesNum,
+                    totalSwapVolume,
+                    totalSwapFee,
+                };
+
+                snapshotUpdates.push({
+                    where: {
+                        id_chain: {
+                            id: lastSnapshot.id,
+                            chain,
+                        },
+                    },
+                    update: data,
+                    create: {
+                        id: lastSnapshot.id,
+                        chain,
+                        poolId: lastSnapshot.pool.id,
+                        timestamp: lastSnapshot.timestamp,
+                        ...data,
+                    },
+                });
+
+                updatedPools.add(lastSnapshot.pool.id);
+            } catch (error) {
+                console.error(`Error processing snapshot for pool ${lastSnapshot?.pool?.id}:`, error);
+            }
+        }
+
+        // Batch upsert snapshots
+        for (let i = 0; i < snapshotUpdates.length; i += BATCH_SIZE) {
+            const batch = snapshotUpdates.slice(i, i + BATCH_SIZE);
+            await Promise.all(
+                batch.map((update) =>
+                    prisma.prismaPoolSnapshot.upsert(update).catch((error) => {
+                        console.error(`Failed to upsert snapshot ${update.create.id}:`, error);
+                    }),
+                ),
+            );
+        }
+
+        await syncSnapshotV2Pools(subgraphClient, [...fullSync], chain);
+
+        fullSync.forEach((id) => updatedPools.add(id));
+
+        return [...updatedPools];
+    } catch (error) {
+        console.error(`Error syncing snapshots for chain ${chain}:`, error);
+        throw error;
+    }
+}
+
+const dailyValues = (
+    chain: Chain,
+    s: BalancerPoolSnapshotFragment,
+    previousSnapshot?: BalancerPoolSnapshotFragment,
+) => {
+    // Safe parsing with validation
+    const totalSharesNum = safeParseInt(s.totalShares);
+    const totalLiquidity = safeParseFloat(s.liquidity);
+    const currentSwapVolume = safeParseFloat(s.swapVolume);
+    const currentSwapFees = safeParseFloat(s.swapFees);
+    const previousSwapVolume = safeParseFloat(previousSnapshot?.swapVolume);
+    const previousSwapFees = safeParseFloat(previousSnapshot?.swapFees);
+
+    return {
+        id: s.id,
+        poolId: s.pool.id,
+        chain,
+        timestamp: s.timestamp,
+        totalShares: s.totalShares || '0',
+        swapsCount: safeNumber(s.swapsCount),
+        holdersCount: safeNumber(s.holdersCount),
+        volume24h: Math.max(0, currentSwapVolume - previousSwapVolume),
+        fees24h: Math.max(0, currentSwapFees - previousSwapFees),
+        totalLiquidity,
+        sharePrice: totalSharesNum > 0 ? totalLiquidity / totalSharesNum : 0,
+        totalSharesNum,
+        totalSwapVolume: currentSwapVolume,
+        totalSwapFee: currentSwapFees,
+    };
+};
+
+export const syncSnapshotV2Pools = async (
+    subgraphClient: V2SubgraphClient,
+    poolIds: string[],
+    chain: Chain,
+    reload = false,
+) => {
+    const processedIds: string[] = [];
+
+    // Process pools in batches for better performance and error isolation
+    for (let i = 0; i < poolIds.length; i += BATCH_SIZE) {
+        const batch = poolIds.slice(i, i + BATCH_SIZE);
+
+        const batchPromises = batch.map(async (poolId) => {
+            try {
+                if (poolsToIgnore.includes(poolId)) {
+                    return null;
+                }
+
+                console.log('filling snapshots for', poolId, chain);
+
+                const sgSnapshots = await subgraphClient.legacyService.getAllPoolSnapshots({
+                    where: { pool: poolId },
+                    orderBy: PoolSnapshot_OrderBy.Timestamp,
+                    orderDirection: OrderDirection.Asc,
+                });
+
+                if (sgSnapshots.length === 0) {
+                    console.warn(`No snapshots found for pool ${poolId}`);
+                    return null;
+                }
+
+                console.log(`found ${sgSnapshots.length} snapshots for`, poolId, chain);
+
+                // Convert cumulative volume/fees to daily values with validation
+                const snapshotsWithDailyValues = sgSnapshots
+                    .filter((s) => s?.id && s?.pool?.id && s?.timestamp !== undefined)
+                    .map((s, idx) => {
+                        const previousSnapshot = sgSnapshots[idx - 1];
+                        return dailyValues(chain, s, previousSnapshot);
+                    });
+
+                if (snapshotsWithDailyValues.length > 0) {
+                    if (reload) {
+                        // Delete existing snapshots for this pool first, then create new ones
+                        await prisma.prismaPoolSnapshot.deleteMany({
+                            where: {
+                                poolId: poolId,
+                                chain: chain,
+                            },
+                        });
+                    }
+
+                    await prisma.prismaPoolSnapshot.createMany({
+                        data: snapshotsWithDailyValues,
+                        skipDuplicates: true,
+                    });
+                }
+
+                return poolId;
+            } catch (error) {
+                console.error(`Error syncing snapshots for pool ${poolId}:`, error);
+                return null;
+            }
+        });
+
+        const batchResults = await Promise.allSettled(batchPromises);
+
+        // Collect successful results
+        batchResults.forEach((result, idx) => {
+            if (result.status === 'fulfilled' && result.value) {
+                processedIds.push(result.value);
+            } else if (result.status === 'rejected') {
+                console.error(`Batch processing failed for pool ${batch[idx]}:`, result.reason);
+            }
         });
     }
 
-    return dbPools.map((p) => p.id);
-}
+    return processedIds;
+};

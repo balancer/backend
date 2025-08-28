@@ -1,8 +1,7 @@
 import { Chain } from '@prisma/client';
 import config from '../../config';
 import { prisma } from '../../prisma/prisma-client';
-import { syncSnapshotsV2, fillMissingSnapshotsV2, syncSnapshots } from '../actions/snapshots';
-import { PoolSnapshotService } from '../actions/snapshots/pool-snapshot-service';
+import { syncSnapshotsV2, syncSnapshotV2Pools, syncSnapshots } from '../actions/snapshots';
 import { getVaultSubgraphClient } from '../sources/subgraphs';
 import { getV2SubgraphClient } from '../subgraphs/balancer-subgraph';
 import { updateLifetimeValues } from '../actions/pool/update-liftetime-values';
@@ -41,7 +40,7 @@ export function SnapshotsController(tracer?: any) {
             await updateLifetimeValues(chain, 2);
             return entries;
         },
-        async syncSnapshotForPools(poolIds: string[], chain: Chain, reload = false) {
+        async syncSnapshotForPools(poolIds: string[], chain: Chain, reload: boolean) {
             const {
                 subgraphs: { balancer },
             } = config[chain];
@@ -51,21 +50,9 @@ export function SnapshotsController(tracer?: any) {
                 throw new Error(`Chain not configured: ${chain}`);
             }
 
-            const prices = await prisma.prismaTokenCurrentPrice
-                .findMany({
-                    where: {
-                        chain,
-                    },
-                    select: {
-                        tokenAddress: true,
-                        price: true,
-                    },
-                })
-                .then((prices) => prices.reduce((acc, p) => ({ ...acc, [p.tokenAddress]: p.price }), {}));
-
             const subgraphClient = getV2SubgraphClient(balancer, chain);
-            const service = new PoolSnapshotService(subgraphClient, chain, prices);
-            const entries = await service.loadAllSnapshotsForPools(poolIds, reload);
+
+            const entries = await syncSnapshotV2Pools(subgraphClient, poolIds, chain, reload);
 
             return entries;
         },
@@ -157,10 +144,6 @@ export function SnapshotsController(tracer?: any) {
             });
 
             // update lifetime values based on snapshots
-            return entries;
-        },
-        async fillMissingSnapshotsV2(chain: Chain) {
-            const entries = await fillMissingSnapshotsV2(chain);
             return entries;
         },
     };

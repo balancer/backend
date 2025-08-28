@@ -13,12 +13,9 @@ import {
 import { tokenService } from '../token/token.service';
 import { PoolGqlLoaderService } from './lib/pool-gql-loader.service';
 import { PoolOnChainDataService, PoolOnChainDataServiceOptions } from './lib/pool-on-chain-data.service';
-import { PoolSnapshotService } from './lib/pool-snapshot.service';
 import { networkContext } from '../network/network-context.service';
 import { ReliquarySubgraphService } from '../subgraphs/reliquary-subgraph/reliquary.service';
 import { ReliquarySnapshotService } from './lib/reliquary-snapshot.service';
-import { coingeckoDataService } from '../token/lib/coingecko-data.service';
-import { syncIncentivizedCategory } from '../actions/pool/sync-incentivized-category';
 import {
     deleteGaugeStakingForAllPools,
     deleteMasterchefStakingForAllPools,
@@ -34,12 +31,14 @@ import { deleteAuraStakingForAllPools, syncAuraStakingForPools } from '../action
 import { AuraSubgraphService } from '../sources/subgraphs/aura/aura.service';
 import { syncVebalStakingForPools } from '../actions/pool/staking/sync-vebal-staking';
 import config from '../../config';
+import { viewSnapshotsV2 } from '../actions/snapshots/view-snapshots-v2';
+import { getV2SubgraphClient } from '../subgraphs/balancer-subgraph';
+import { daysAgo, roundToMidnight } from '../common/time';
 
 export class PoolService {
     constructor(
         private readonly poolOnChainDataService: PoolOnChainDataService,
         private readonly poolGqlLoaderService: PoolGqlLoaderService,
-        private readonly poolSnapshotService: PoolSnapshotService,
     ) {}
 
     private get chain() {
@@ -70,7 +69,30 @@ export class PoolService {
     }
 
     public async getSnapshotsForPool(poolId: string, chain: Chain, range: GqlPoolSnapshotDataRange) {
-        return this.poolSnapshotService.getSnapshotsForPool(poolId, chain, range);
+        const rangeToDays = {
+            ONE_YEAR: 365,
+            ONE_HUNDRED_EIGHTY_DAYS: 180,
+            NINETY_DAYS: 90,
+            THIRTY_DAYS: 30,
+        };
+
+        let since;
+        if (range === 'ALL_TIME') {
+            const poolInfo = await prisma.prismaPool.findFirst({
+                where: {
+                    id: poolId,
+                    chain,
+                },
+            });
+
+            since = poolInfo?.createTime || roundToMidnight();
+        } else {
+            since = roundToMidnight(daysAgo(rangeToDays[range]));
+        }
+
+        const snapshots = await viewSnapshotsV2(poolId, chain, since);
+
+        return snapshots;
     }
 
     public async getSnapshotsForReliquaryFarm(id: number, range: GqlPoolSnapshotDataRange, chain: Chain) {
@@ -181,5 +203,4 @@ const optionsResolverForPoolOnChainDataService: () => PoolOnChainDataServiceOpti
 export const poolService = new PoolService(
     new PoolOnChainDataService(optionsResolverForPoolOnChainDataService),
     new PoolGqlLoaderService(),
-    new PoolSnapshotService(coingeckoDataService),
 );
