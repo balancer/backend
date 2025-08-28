@@ -14,7 +14,7 @@ const fetchWithTimeout = async (url: string, options: RequestInit = {}, timeoutM
     const timeoutPromise = new Promise((_, reject) => {
         timeoutId; // Reference to clear timeout
         controller.signal.addEventListener('abort', () => {
-            reject(new Error(`${url} timed out after ${timeoutMs}ms`));
+            reject(new Error(`timed out after ${timeoutMs}ms`));
         });
     });
 
@@ -24,7 +24,7 @@ const fetchWithTimeout = async (url: string, options: RequestInit = {}, timeoutM
         return response;
     } catch (error: any) {
         clearTimeout(timeoutId);
-        throw error.message;
+        throw `${url} ${error.message}`;
     } finally {
         // Cleanup listener in all cases to prevent potential mem leaks
         controller.signal.removeEventListener('abort', () => {});
