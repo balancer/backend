@@ -1,5 +1,12 @@
 # backend
 
+## 1.52.2
+
+### Patch Changes
+
+-   4ffd63d: change http handler error handling
+-   2e24aa4: remove loopfi apr
+
 ## 1.52.1
 
 ### Patch Changes
