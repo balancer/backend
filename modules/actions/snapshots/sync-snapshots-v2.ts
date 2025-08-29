@@ -1,4 +1,4 @@
-import { Chain, PrismaPoolSnapshot } from '@prisma/client';
+import { Chain } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
 import { V2SubgraphClient } from '../../subgraphs/balancer-subgraph';
 import _ from 'lodash';
@@ -24,16 +24,113 @@ const safeParseFloat = (value: string | undefined | null, defaultValue = 0): num
     return isNaN(parsed) ? defaultValue : parsed;
 };
 
-const safeParseInt = (value: string | undefined | null, defaultValue = 0): number => {
-    if (!value || value === '') return defaultValue;
-    const parsed = parseInt(value, 10);
-    return isNaN(parsed) ? defaultValue : parsed;
-};
-
 const safeNumber = (value: string | number | undefined | null, defaultValue = 0): number => {
     if (value === undefined || value === null || value === '') return defaultValue;
     const parsed = Number(value);
     return isNaN(parsed) ? defaultValue : parsed;
+};
+
+/**
+ * Batch fetch current prices for multiple token addresses
+ * @param tokenAddresses Array of token addresses
+ * @param chain Chain to fetch prices for
+ * @returns Map of tokenAddress -> price
+ */
+const batchFetchCurrentPrices = async (tokenAddresses: string[], chain: Chain): Promise<Record<string, number>> => {
+    try {
+        if (!tokenAddresses.length) return {};
+
+        const prices = await prisma.prismaTokenCurrentPrice.findMany({
+            where: {
+                tokenAddress: { in: tokenAddresses.map((addr) => addr.toLowerCase()) },
+                chain,
+            },
+            select: { tokenAddress: true, price: true },
+        });
+
+        return prices.reduce(
+            (acc, { tokenAddress, price }) => {
+                acc[tokenAddress.toLowerCase()] = price;
+                return acc;
+            },
+            {} as Record<string, number>,
+        );
+    } catch (error) {
+        console.error(`Error batch fetching current prices:`, error);
+        return {};
+    }
+};
+
+/**
+ * Batch fetch historical prices for multiple token addresses using generated midnight timestamps since Apr-19-2021
+ * @param tokenAddresses Array of token addresses
+ * @param chain Chain to fetch prices for
+ * @returns Map of timestamp -> tokenAddress -> price
+ */
+const batchFetchHistoricalPrices = async (
+    tokenAddresses: string[],
+    chain: Chain,
+): Promise<Record<string, Record<number, number>>> => {
+    try {
+        if (!tokenAddresses.length) return {};
+
+        // Use raw SQL with window functions to generate midnight timestamps since Apr-19-2021
+        // and get the most recent price for each token at each midnight timestamp
+        const rawQuery = `
+          WITH midnight_timestamps AS (
+              SELECT extract(epoch from date_series::date)::integer AS timestamp
+              FROM generate_series(
+                  '2021-04-19'::date,
+                  CURRENT_DATE,
+                  '1 day'::interval
+              ) AS date_series
+          ),
+          token_timestamp_pairs AS (
+              SELECT
+                  unnest($1::text[]) as token_address,
+                  mt.timestamp as target_timestamp
+              FROM midnight_timestamps mt
+          )
+          SELECT
+              ttp.token_address,
+              ttp.target_timestamp,
+              tp.price
+          FROM token_timestamp_pairs ttp
+          LEFT JOIN LATERAL (
+              SELECT price
+              FROM "PrismaTokenPrice" tp
+              WHERE tp."tokenAddress" = ttp.token_address
+                AND tp.chain = $2::"Chain"
+                AND tp.timestamp <= ttp.target_timestamp
+              ORDER BY tp.timestamp DESC
+              LIMIT 1
+          ) tp ON TRUE
+          WHERE tp.price IS NOT NULL
+        `;
+
+        const results = await prisma.$queryRawUnsafe<
+            { token_address: string; target_timestamp: number; price: number }[]
+        >(
+            rawQuery,
+            tokenAddresses.map((addr) => addr.toLowerCase()),
+            chain,
+        );
+
+        // Group results by timestamp, then by token address
+        const prices: Record<string, Record<number, number>> = {};
+
+        for (const result of results) {
+            if (!prices[result.token_address.toLowerCase()]) {
+                prices[result.token_address.toLowerCase()] = {};
+            }
+            prices[result.token_address.toLowerCase()][result.target_timestamp] = result.price;
+        }
+
+        return prices;
+    } catch (error) {
+        console.error(`Error batch fetching historical prices:`, error);
+        return {};
+    }
 };
 
 /**
@@ -83,6 +180,10 @@ export async function syncSnapshotsV2(subgraphClient: V2SubgraphClient, chain: C
             },
         });
 
+        // Batch fetch all current prices
+        const poolAddresses = new Set(lastSnapshots.map((s) => s.pool.id.substring(0, 42)));
+        const currentPrices = await batchFetchCurrentPrices([...poolAddresses], chain);
+
         // Process snapshots in batches for better performance
         const snapshotUpdates: any[] = [];
 
@@ -106,24 +207,12 @@ export async function syncSnapshotsV2(subgraphClient: V2SubgraphClient, chain: C
 
                 console.log('updating latest snapshot', lastSnapshot.id, chain);
 
-                // Safe data parsing with validation
-                const totalSharesNum = safeParseInt(lastSnapshot.totalShares);
-                const totalLiquidity = safeParseFloat(lastSnapshot.liquidity);
-                const totalSwapVolume = safeParseFloat(lastSnapshot.swapVolume);
-                const totalSwapFee = safeParseFloat(lastSnapshot.swapFees);
-
-                const data = {
-                    totalShares: lastSnapshot.totalShares || '0',
-                    swapsCount: safeNumber(lastSnapshot.swapsCount),
-                    holdersCount: safeNumber(lastSnapshot.holdersCount),
-                    volume24h: Math.max(0, totalSwapVolume - (latestDb.totalSwapVolume || 0)),
-                    fees24h: Math.max(0, totalSwapFee - (latestDb.totalSwapFee || 0)),
-                    totalLiquidity,
-                    sharePrice: totalSharesNum > 0 ? totalLiquidity / totalSharesNum : 0,
-                    totalSharesNum,
-                    totalSwapVolume,
-                    totalSwapFee,
-                };
+                const data = dailyValues(
+                    chain,
+                    lastSnapshot,
+                    { swapVolume: `${latestDb.totalSwapVolume}`, swapFees: `${latestDb.totalSwapFee}` },
+                    currentPrices[latestDb.poolId.substring(0, 42)],
+                );
 
                 snapshotUpdates.push({
                     where: {
@@ -133,13 +222,7 @@ export async function syncSnapshotsV2(subgraphClient: V2SubgraphClient, chain: C
                         },
                     },
                     update: data,
-                    create: {
-                        id: lastSnapshot.id,
-                        chain,
-                        poolId: lastSnapshot.pool.id,
-                        timestamp: lastSnapshot.timestamp,
-                        ...data,
-                    },
+                    create: data,
                 });
 
                 updatedPools.add(lastSnapshot.pool.id);
@@ -174,11 +257,13 @@ export async function syncSnapshotsV2(subgraphClient: V2SubgraphClient, chain: C
 const dailyValues = (
     chain: Chain,
     s: BalancerPoolSnapshotFragment,
-    previousSnapshot?: BalancerPoolSnapshotFragment,
+    previousSnapshot: { swapVolume: string; swapFees: string } | undefined,
+    btpPrice?: number,
 ) => {
     // Safe parsing with validation
-    const totalSharesNum = safeParseInt(s.totalShares);
-    const totalLiquidity = safeParseFloat(s.liquidity);
+    const totalSharesNum = safeParseFloat(s.totalShares);
+    const sharePrice = btpPrice || totalSharesNum > 0 ? safeParseFloat(s.liquidity) / totalSharesNum : 0;
+    const totalLiquidity = totalSharesNum * sharePrice;
     const currentSwapVolume = safeParseFloat(s.swapVolume);
     const currentSwapFees = safeParseFloat(s.swapFees);
     const previousSwapVolume = safeParseFloat(previousSnapshot?.swapVolume);
@@ -195,7 +280,7 @@ const dailyValues = (
         volume24h: Math.max(0, currentSwapVolume - previousSwapVolume),
         fees24h: Math.max(0, currentSwapFees - previousSwapFees),
         totalLiquidity,
-        sharePrice: totalSharesNum > 0 ? totalLiquidity / totalSharesNum : 0,
+        sharePrice,
         totalSharesNum,
         totalSwapVolume: currentSwapVolume,
         totalSwapFee: currentSwapFees,
@@ -213,6 +298,10 @@ export const syncSnapshotV2Pools = async (
     // Process pools in batches for better performance and error isolation
     for (let i = 0; i < poolIds.length; i += BATCH_SIZE) {
         const batch = poolIds.slice(i, i + BATCH_SIZE);
+
+        // Batch fetch all historical prices for all midnight timestamps since Apr-19-2021
+        const bptAddresses = batch.map((id) => id.substring(0, 42));
+        const historicalPrices = await batchFetchHistoricalPrices(bptAddresses, chain);
 
         const batchPromises = batch.map(async (poolId) => {
             try {
@@ -236,12 +325,18 @@ export const syncSnapshotV2Pools = async (
                 console.log(`found ${sgSnapshots.length} snapshots for`, poolId, chain);
 
                 // Convert cumulative volume/fees to daily values with validation
-                const snapshotsWithDailyValues = sgSnapshots
-                    .filter((s) => s?.id && s?.pool?.id && s?.timestamp !== undefined)
-                    .map((s, idx) => {
-                        const previousSnapshot = sgSnapshots[idx - 1];
-                        return dailyValues(chain, s, previousSnapshot);
-                    });
+                const snapshotsWithDailyValues = await Promise.all(
+                    sgSnapshots
+                        .filter((s) => s?.id && s?.pool?.id && s?.timestamp !== undefined)
+                        .map(async (s, idx) => {
+                            const previousSnapshot = sgSnapshots[idx - 1];
+
+                            const bptAddress = poolId.substring(0, 42).toLowerCase();
+                            const poolHistoricalPrices = historicalPrices[bptAddress];
+                            const btpPrice = poolHistoricalPrices ? poolHistoricalPrices[s.timestamp] : undefined;
+                            return dailyValues(chain, s, previousSnapshot, btpPrice);
+                        }),
+                );
 
                 if (snapshotsWithDailyValues.length > 0) {
                     if (reload) {
