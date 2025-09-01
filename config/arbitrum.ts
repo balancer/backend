@@ -363,16 +363,16 @@ export default <NetworkData>{
                         },
                     ],
                 },
-                {
-                    url: 'https://www.plutusdao.io/api/getPlsRdntInfo',
-                    extractors: [
-                        {
-                            type: 'path',
-                            token: '0x6dbf2155b0636cb3fd5359fccefb8a2c02b6cb51',
-                            path: '$.apr',
-                        },
-                    ],
-                },
+                // {
+                //     url: 'https://www.plutusdao.io/api/getPlsRdntInfo',
+                //     extractors: [
+                //         {
+                //             type: 'path',
+                //             token: '0x6dbf2155b0636cb3fd5359fccefb8a2c02b6cb51',
+                //             path: '$.apr',
+                //         },
+                //     ],
+                // },
                 {
                     url: 'https://app.renzoprotocol.com/api/apr',
                     scale: 100,
