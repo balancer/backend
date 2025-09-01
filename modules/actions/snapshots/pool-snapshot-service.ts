@@ -60,9 +60,10 @@ export class PoolSnapshotService {
             .findMany({
                 where: {
                     chain: this.chain,
+                    protocolVersion: 2,
                 },
                 orderBy: { timestamp: 'desc' },
-                distinct: 'poolId',
+                distinct: ['poolId'],
             })
             .then((snapshots) => Object.fromEntries(snapshots.map((snapshot) => [snapshot.poolId, snapshot])));
 
