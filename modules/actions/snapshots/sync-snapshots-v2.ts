@@ -37,7 +37,7 @@ export async function syncSnapshotsV2(subgraphClient: V2SubgraphClient, chain: C
         .then((prices) => prices.reduce((acc, p) => ({ ...acc, [p.tokenAddress]: p.price }), {}));
 
     // How many day ago was the last snapshot
-    const daysAgo = Math.floor((roundToMidnight() - roundToMidnight(storedTimestamp)) / 86400);
+    const daysAgo = Math.floor((Date.now() / 1000 - storedTimestamp) / 86400);
 
     console.log('Syncing snapshots for', chain, 'from', daysAgo, 'days ago');
 
