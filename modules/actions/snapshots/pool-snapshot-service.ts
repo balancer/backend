@@ -39,7 +39,7 @@ export class PoolSnapshotService {
 
     /*
     Per default, this method syncs the snapshot from today and from yesterday (daysTosync=2). It is important to also sync the snapshot from
-    yesterday in the cron-job to capture all the changes between when it last ran and midnight. 
+    yesterday in the cron-job to capture all the changes between when it last ran and midnight.
     */
     public async syncLatestSnapshotsForAllPools(daysToSync = 2) {
         let operations: any[] = [];
@@ -56,15 +56,15 @@ export class PoolSnapshotService {
             orderDirection: OrderDirection.Asc,
         });
 
-        const latestSyncedSnapshots = await prisma.prismaPoolSnapshot.findMany({
-            where: {
-                // there is no guarantee that a pool receives a swap per day, so we get the last day with a swap
-                timestamp: { lte: moment().utc().startOf('day').subtract(daysToSync, 'days').unix() },
-                chain: this.chain,
-            },
-            orderBy: { timestamp: 'desc' },
-            distinct: 'poolId',
-        });
+        const latestSyncedSnapshots = await prisma.prismaPoolSnapshot
+            .findMany({
+                where: {
+                    chain: this.chain,
+                },
+                orderBy: { timestamp: 'desc' },
+                distinct: 'poolId',
+            })
+            .then((snapshots) => Object.fromEntries(snapshots.map((snapshot) => [snapshot.poolId, snapshot])));
 
         const poolIds = _.uniq(allSnapshots.map((snapshot) => snapshot.pool.id));
         const pools = await prisma.prismaPool.findMany({
@@ -74,7 +74,7 @@ export class PoolSnapshotService {
 
         for (const pool of pools) {
             const snapshots = allSnapshots.filter((snapshot) => snapshot.pool.id === pool.id);
-            const latestSyncedSnapshot = latestSyncedSnapshots.find((snapshot) => snapshot.poolId === pool.id);
+            const latestSyncedSnapshot = latestSyncedSnapshots[pool.id];
 
             if (!latestSyncedSnapshot && pool.createTime < daysAgoStartOfDay) {
                 // in this instance, this pool should already have snapshots stored.
@@ -315,10 +315,13 @@ export class PoolSnapshotService {
                     },
                 })
                 .then((prices) => {
-                    return prices.reduce((acc, price) => {
-                        acc[price.tokenAddress] = price.price;
-                        return acc;
-                    }, {} as { [address: string]: number });
+                    return prices.reduce(
+                        (acc, price) => {
+                            acc[price.tokenAddress] = price.price;
+                            return acc;
+                        },
+                        {} as { [address: string]: number },
+                    );
                 });
         }
 
