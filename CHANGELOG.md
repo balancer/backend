@@ -1,5 +1,11 @@
 # backend
 
+## 1.52.3
+
+### Patch Changes
+
+-   2a4a554: add errorlog for snapshot value descrease
+
 ## 1.52.2
 
 ### Patch Changes
