@@ -21,3 +21,5 @@ app.json
 Users/
 dist
 .env*
+
+profiles
