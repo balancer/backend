@@ -20,33 +20,11 @@ const query = `query getReserves($underlyingAssets: [Bytes!]) {
     }
   }`;
 
-export const aaveAprHandler: YbAprHandler = async ({
-    subgraphUrl,
-    tokens,
-    chain,
-}: {
-    subgraphUrl: string;
-    chain: Chain;
-    tokens: {
-        [underlyingAssetName: string]: {
-            underlyingAssetAddress: string;
-            aTokenAddress: string;
-            wrappedTokens: {
-                [wrappedTokenName: string]: string;
-            };
-            isIbYield?: boolean;
-        };
-    };
-}) => {
+export const aaveAprHandler: YbAprHandler = async ({ subgraphUrl, chain }: { subgraphUrl: string; chain: Chain }) => {
     try {
-        const dbTokenMap = await getDbTokenMappings(chain);
+        const dbTokens = await getDbTokenMappings(chain);
 
-        const underlyingAssets = [
-            ...new Set([
-                ...Object.values(tokens).map(({ underlyingAssetAddress }) => underlyingAssetAddress),
-                ...dbTokenMap.map((t) => t.underlyingAssetAddress),
-            ]),
-        ];
+        const underlyingAssets = [...new Set([...dbTokens.map((t) => t.underlyingAsset)])];
 
         const requestQuery = {
             operationName: 'getReserves',
@@ -72,23 +50,22 @@ export const aaveAprHandler: YbAprHandler = async ({
                 Number(r.liquidityRate.slice(0, 27)) / 1e27,
             ]),
         );
-        const aprEntries = [...Object.values(tokens), ...dbTokenMap]
-            .map(({ wrappedTokens, aTokenAddress, underlyingAssetAddress }) => {
-                const apr = aprsByUnderlyingAddress[`${underlyingAssetAddress}-${aTokenAddress}`];
+
+        const aprEntries = dbTokens
+            .map(({ wrappers, aToken, underlyingAsset }) => {
+                const apr = aprsByUnderlyingAddress[`${underlyingAsset}-${aToken}`];
                 if (apr === undefined) {
                     // skipping tokens that are from a different market (db entries might not overlap with subgraph entries)
                     return;
                 }
-                return Object.values(wrappedTokens).map((wrappedTokenAddress) => ({
-                    address: wrappedTokenAddress,
+                return wrappers.map((wrapper) => ({
+                    address: wrapper,
                     apr,
                 }));
             })
             .flat()
             .filter((item): item is NonNullable<typeof item> => !!item)
             .filter((item, index, self) => self.findIndex((entry) => entry.address === item.address) === index);
-
-        // Fetch also tokens based on the names containing aave
 
         return aprEntries;
     } catch (e) {
@@ -171,9 +148,9 @@ const getDbTokenMappings = async (chain: Chain) => {
             if (!underlying) return;
 
             return {
-                aTokenAddress: aToken,
-                underlyingAssetAddress: underlying,
-                wrappedTokens: Object.fromEntries(aTokenToWrappers[aToken].map((wrapper) => [wrapper, wrapper])),
+                aToken: aToken,
+                underlyingAsset: underlying,
+                wrappers: wrappers,
             };
         })
         .filter((t): t is NonNullable<typeof t> => !!t);

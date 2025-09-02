@@ -53,14 +53,6 @@ export interface YbAprConfig {
         market: string;
         chain: Chain;
         subgraphUrl: string;
-        tokens: Record<
-            string,
-            {
-                underlyingAssetAddress: string;
-                aTokenAddress: string;
-                wrappedTokens: Record<string, string>;
-            }
-        >;
     }[];
     sts?: {
         token: string;

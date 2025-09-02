@@ -80,51 +80,6 @@ export default <NetworkData>{
                     market: 'v3',
                     chain: 'AVALANCHE',
                     subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/2h9woxy8RTjHu1HJsCEnmzpPHFArU33avmUh4f71JpVn`,
-                    tokens: {
-                        USDC: {
-                            underlyingAssetAddress: '0xb97ef9ef8734c71904d8002f8b6bc66dd9c48a6e',
-                            aTokenAddress: '0x625e7708f30ca75bfd92586e17077590c60eb4cd',
-                            wrappedTokens: {
-                                stataAvaUSDC: '0xe7839ea8ea8543c7f5d9c9d7269c661904729fe7',
-                            },
-                        },
-                        USDT: {
-                            underlyingAssetAddress: '0x9702230a8ea53601f5cd2dc00fdbc13d4df4a8c7',
-                            aTokenAddress: '0x6ab707aca953edaefbc4fd23ba73294241490620',
-                            wrappedTokens: {
-                                stataAvaUSDT: '0x759a2e28d4c3ad394d3125d5ab75a6a5d6782fd9',
-                            },
-                        },
-                        DAI: {
-                            underlyingAssetAddress: '0xd586e7f844cea2f87f50152665bcbc2c279d8d70',
-                            aTokenAddress: '0x82e64f49ed5ec1bc6e43dad4fc8af9bb3a2312ee',
-                            wrappedTokens: {
-                                stataAvaDAI: '0x234c4b76f749dfffd9c18ea7cc0972206b42d019',
-                            },
-                        },
-                        wETH: {
-                            underlyingAssetAddress: '0x49d5c2bdffac6ce2bfdb6640f4f80f226bc10bab',
-                            aTokenAddress: '0xe50fa9b3c56ffb159cb0fca61f5c9d750e8128c8',
-                            wrappedTokens: {
-                                stataAvaWETH: '0x41bafe0091d55378ed921af3784622923651fdd8',
-                            },
-                        },
-                        wAVAX: {
-                            underlyingAssetAddress: '0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7',
-                            aTokenAddress: '0x6d80113e533a2c0fe82eabd35f1875dcea89ea97',
-                            wrappedTokens: {
-                                stataAvaWAVAX: '0xa291ae608d8854cdbf9838e28e9badcf10181669',
-                                stataAvaWAVAX2: '0x6a02c7a974f1f13a67980c80f774ec1d2ed8f98d',
-                            },
-                        },
-                        wBTC: {
-                            underlyingAssetAddress: '0x50b7545627a5162f82a992c33b87adc75187b218',
-                            aTokenAddress: '0x078f358208685046a11c85e8ad32895ded33a249',
-                            wrappedTokens: {
-                                stataAvaWBTC: '0xb516f74eb030cebd5f616b1a33f88e1213b93c2c',
-                            },
-                        },
-                    },
                 },
             ],
             euler: {

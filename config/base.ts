@@ -320,15 +320,6 @@ export default <NetworkData>{
                     market: 'v3',
                     chain: 'BASE',
                     subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/GQFbb95cE6d8mV989mL5figjaGaKCQB3xqYrr1bRyXqF`,
-                    tokens: {
-                        USDC: {
-                            underlyingAssetAddress: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
-                            aTokenAddress: '0x4e65fe4dba92790696d040ac24aa414708f5c0ab',
-                            wrappedTokens: {
-                                stataBasUSDC: '0x4ea71a20e655794051d1ee8b6e4a3269b13ccacc',
-                            },
-                        },
-                    },
                 },
             ],
         },
