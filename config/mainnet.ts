@@ -449,17 +449,17 @@ export default <NetworkData>{
                     scale: 100,
                     extractors: [{ type: 'path', token: '0xad55aebc9b8c03fc43cd9f62260391c13c23e7c0', path: '$.apy' }],
                 },
-                {
-                    url: 'https://api-data.loopfi.xyz/api/getData',
-                    extractors: [
-                        { type: 'path', token: '0x3976d71e7ddfbab9bd120ec281b7d35fa0f28528', path: '$.loop.slpETHApr' },
-                        {
-                            type: 'path',
-                            token: '0xbfb53910c935e837c74e6c4ef584557352d20fde',
-                            path: '$.lpUSDLoop.slpUSDApr',
-                        }, // slpUSD too
-                    ],
-                },
+                // {
+                //     url: 'https://api-data.loopfi.xyz/api/getData',
+                //     extractors: [
+                //         { type: 'path', token: '0x3976d71e7ddfbab9bd120ec281b7d35fa0f28528', path: '$.loop.slpETHApr' },
+                //         {
+                //             type: 'path',
+                //             token: '0xbfb53910c935e837c74e6c4ef584557352d20fde',
+                //             path: '$.lpUSDLoop.slpUSDApr',
+                //         }, // slpUSD too
+                //     ],
+                // },
                 {
                     url: 'https://ctrl.yield.fi/t/apy',
                     scale: 100,
