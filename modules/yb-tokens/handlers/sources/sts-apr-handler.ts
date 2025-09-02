@@ -1,4 +1,4 @@
-import { prisma } from '../../../../../../prisma/prisma-client';
+import { prisma } from '../../../../prisma/prisma-client';
 import { YbAprHandler, YbAprConfig } from '../../types';
 
 export const stsAprHandler: YbAprHandler = async (config: YbAprConfig['sts']) => {

@@ -114,6 +114,7 @@ export default <NetworkData>{
             aave: [
                 {
                     market: 'v2',
+                    chain: 'MAINNET',
                     subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/8wR23o1zkS4gpLqLNU4kG3JHYVucqGyopL5utGxP2q1N`,
                     tokens: {
                         USDC: {
@@ -141,6 +142,7 @@ export default <NetworkData>{
                 },
                 {
                     market: 'v3',
+                    chain: 'MAINNET',
                     subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/Cd2gEDVeqnjBn1hSeqFMitw8Q1iiyV9FYUZkLNRcL87g`,
                     tokens: {
                         USDC: {
@@ -211,6 +213,7 @@ export default <NetworkData>{
                 },
                 {
                     market: 'lido',
+                    chain: 'MAINNET',
                     subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/5vxMbXRhG1oQr55MWC5j6qg78waWujx1wjeuEWDA6j3`,
                     tokens: {
                         LidoWETH: {

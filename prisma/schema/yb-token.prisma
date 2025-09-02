@@ -1,0 +1,13 @@
+model PrismaYbToken {
+    @@id([address, chain])
+
+    address             String
+    chain               Chain
+    apr                 Float
+    source              String
+    
+    createdAt           DateTime        @default(now())
+    updatedAt           DateTime        @updatedAt
+
+    @@index([chain, address])
+}

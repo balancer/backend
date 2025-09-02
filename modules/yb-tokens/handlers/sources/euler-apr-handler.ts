@@ -1,12 +1,12 @@
 import axios from 'axios';
 import { TokenApr, YbAprHandler } from '../../types';
 import { Chain } from '@prisma/client';
-import { prisma } from '../../../../../../prisma/prisma-client';
-import { multicallViem } from '../../../../../web3/multicaller-viem';
+import { prisma } from '../../../../prisma/prisma-client';
+import { multicallViem } from '../../../web3/multicaller-viem';
 import eulerVault from './abis/euler-vault';
-import { getViemClient } from '../../../../../sources/viem-client';
+import { getViemClient } from '../../../sources/viem-client';
 import eulerUtilsLens from './abis/euler-utils-lens';
-import { Multicaller3Call } from '../../../../../web3/types';
+import { Multicaller3Call } from '../../../web3/types';
 import { AbiParametersToPrimitiveTypes, ExtractAbiFunction } from 'abitype';
 import { formatUnits } from 'viem';
 

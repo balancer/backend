@@ -1,18 +1,17 @@
 import { Chain, PrismaPoolAprItem, PrismaPoolAprType } from '@prisma/client';
-import { TokenApr, YbAprConfig } from './types';
 import { PoolAPRData, AprHandler } from '../../types';
 import { collectsYieldFee, tokenCollectsYieldFee } from '../../../pool/lib/pool-utils';
-import { YbAprHandlers } from './yb-apr-handlers';
+import { YbTokensService } from '../../../yb-tokens';
 
 /**
  * Calculator for yield-bearing tokens APR
  * This calculates the APR for various yield-bearing tokens in pools
  */
 export class YbTokensAprHandler implements AprHandler {
-    private ybTokensAprHandlers: YbAprHandlers;
+    private ybTokensService: YbTokensService;
 
-    constructor(private aprConfig: YbAprConfig, chain: Chain) {
-        this.ybTokensAprHandlers = new YbAprHandlers(this.aprConfig, chain);
+    constructor() {
+        this.ybTokensService = new YbTokensService();
     }
 
     public getAprServiceName(): string {
@@ -25,7 +24,8 @@ export class YbTokensAprHandler implements AprHandler {
         const aprItems: Omit<PrismaPoolAprItem, 'createdAt' | 'updatedAt'>[] = [];
 
         // Fetch APRs for all yield-bearing tokens
-        const aprs = await this.fetchYieldTokensApr();
+        const chain = pools[0].chain;
+        const aprs = await this.fetchYieldTokensApr(chain);
         const aprKeysLowercase = Array.from(aprs.keys()).map((key) => key.toLowerCase());
         const aprKeysLowercaseSet = new Set(aprKeysLowercase);
 
@@ -93,8 +93,8 @@ export class YbTokensAprHandler implements AprHandler {
                         pool.type === 'META_STABLE'
                             ? parseFloat(pool.dynamicData.protocolSwapFee || '0')
                             : pool.protocolVersion === 3
-                            ? parseFloat(pool.dynamicData.aggregateYieldFee || '0.1')
-                            : parseFloat(pool.dynamicData.protocolYieldFee || '0');
+                              ? parseFloat(pool.dynamicData.aggregateYieldFee || '0.1')
+                              : parseFloat(pool.dynamicData.protocolYieldFee || '0');
 
                     userApr = userApr * (1 - fee);
                 }
@@ -118,14 +118,7 @@ export class YbTokensAprHandler implements AprHandler {
         return aprItems;
     }
 
-    private async fetchYieldTokensApr(): Promise<Map<string, TokenApr>> {
-        const data = await this.ybTokensAprHandlers.fetchAprsFromAllHandlers();
-        return new Map<string, TokenApr>(
-            data
-                .filter((tokenApr) => {
-                    return !isNaN(tokenApr.apr);
-                })
-                .map((apr) => [apr.address, apr]),
-        );
+    private async fetchYieldTokensApr(chain: Chain) {
+        return await this.ybTokensService.getYbTokens(chain);
     }
 }

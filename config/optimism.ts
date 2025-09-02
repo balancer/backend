@@ -85,6 +85,7 @@ export default <NetworkData>{
             aave: [
                 {
                     market: 'v3',
+                    chain: 'OPTIMISM',
                     subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/DSfLz8oQBUeU5atALgUFQKMTSYV9mZAVYp4noLSXAfvb`,
                     tokens: {
                         USDCe: {

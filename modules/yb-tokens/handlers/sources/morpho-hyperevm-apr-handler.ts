@@ -2,9 +2,9 @@ import MorphoBlueAbi from './abis/morpho-blue';
 import MorphoVaultAbi from './abis/morpho-vault';
 import MorphoIrmAbi from './abis/morpho-irm';
 import { YbAprHandler, YbAprConfig, TokenApr } from '../../types';
-import { Multicaller3Viem } from '../../../../../web3/multicaller-viem';
+import { Multicaller3Viem } from '../../../web3/multicaller-viem';
 import { ZERO_ADDRESS } from '@balancer/sdk';
-import { secondsPerYear } from '../../../../../common/time';
+import { secondsPerYear } from '../../../common/time';
 
 // can be used for felix and hyperbeat
 

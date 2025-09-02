@@ -27,6 +27,7 @@ import {
     StakedSonicController,
     UserBalancesController,
     QuantAmmController,
+    YbTokensController,
 } from '../../modules/controllers';
 import { updateVolumeAndFees } from '../../modules/actions/pool/update-volume-and-fees';
 import { TokenController } from '../../modules/controllers/token-controller';
@@ -408,6 +409,9 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
             break;
         case 'sync-token-tvl':
             await runIfNotAlreadyRunning(name, chainId, () => TokenController().syncTvl(), res, next);
+            break;
+        case 'fetch-yb-tokens':
+            await runIfNotAlreadyRunning(name, chainId, () => YbTokensController().fetchAndStoreAll(), res, next);
             break;
         default:
             res.sendStatus(400);

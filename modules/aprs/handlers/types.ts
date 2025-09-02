@@ -1,4 +1,4 @@
-import { YbAprConfig } from './yb-tokens/types';
+import { YbAprConfig } from '../../yb-tokens';
 
 export interface AprHandlerConfigs {
     ybAprHandler?: YbAprConfig;

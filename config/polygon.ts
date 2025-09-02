@@ -70,6 +70,7 @@ export default <NetworkData>{
             aave: [
                 {
                     market: 'v2',
+                    chain: 'POLYGON',
                     subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/H1Et77RZh3XEf27vkAmJyzgCME2RSFLtDS2f4PPW6CGp`,
                     tokens: {
                         USDC: {
@@ -96,6 +97,8 @@ export default <NetworkData>{
                     },
                 },
                 {
+                    market: 'v3',
+                    chain: 'POLYGON',
                     subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/Co2URyXjnxaw8WqxKyVHdirq9Ahhm5vcTs4dMedAq211`,
                     tokens: {
                         USDCn: {

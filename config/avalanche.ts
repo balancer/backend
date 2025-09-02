@@ -78,6 +78,7 @@ export default <NetworkData>{
             aave: [
                 {
                     market: 'v3',
+                    chain: 'AVALANCHE',
                     subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/2h9woxy8RTjHu1HJsCEnmzpPHFArU33avmUh4f71JpVn`,
                     tokens: {
                         USDC: {

@@ -1,5 +1,13 @@
 import { Chain } from '@prisma/client';
 
+export type YbToken = {
+    address: string;
+    chain: Chain;
+    source: string;
+    /** Defined as float, eg: 0.01 is 1% */
+    apr: number;
+};
+
 export type TokenApr = {
     /** Defined as float, eg: 0.01 is 1% */
     apr: number;
@@ -43,6 +51,7 @@ export interface AprContractFetchConfig {
 export interface YbAprConfig {
     aave?: {
         market: string;
+        chain: Chain;
         subgraphUrl: string;
         tokens: Record<
             string,

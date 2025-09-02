@@ -1,7 +1,7 @@
 import { abi } from './abis/hypurrfi-market';
 import { YbAprHandler, YbAprConfig, TokenApr } from '../../types';
-import { secondsPerYear } from '../../../../../common/time';
-import { getViemClient } from '../../../../../sources/viem-client';
+import { secondsPerYear } from '../../../common/time';
+import { getViemClient } from '../../../sources/viem-client';
 
 export const hypurrFi: YbAprHandler = async (config: YbAprConfig['hypurrfi']) => {
     try {

@@ -1,7 +1,7 @@
 import { Chain } from '@prisma/client';
 import { YbAprHandler, AprContractFetchConfig, TokenApr } from '../../types';
-import { getViemClient } from '../../../../../sources/viem-client';
-import { multicallViem } from '../../../../../web3/multicaller-viem';
+import { getViemClient } from '../../../sources/viem-client';
+import { multicallViem } from '../../../web3/multicaller-viem';
 import { parseAbiItem } from 'viem';
 import _ from 'lodash';
 

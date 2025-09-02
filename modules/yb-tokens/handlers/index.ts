@@ -1,7 +1,6 @@
 import * as sources from './sources';
-import { YbAprConfig, YbAprHandler, TokenApr } from '../types';
+import { YbAprConfig, YbToken } from '../types';
 import { Chain } from '@prisma/client';
-export type { YbAprHandler as AprHandler, TokenApr };
 
 const sourceToHandler = {
     aave: sources.aaveAprHandler,
@@ -15,26 +14,26 @@ const sourceToHandler = {
     contract: sources.contractAprHandler,
 };
 
-const chainSources = [sources.AaveAuto];
-
 export class YbAprHandlers {
     private config: YbAprConfig;
     fixedAprTokens?: { [tokenName: string]: { address: string; apr: number } };
 
     constructor(
         aprConfig: YbAprConfig,
-        private chain?: Chain,
+        private chain: Chain,
     ) {
         const { fixedAprHandler, ...config } = aprConfig;
         this.config = config;
         this.fixedAprTokens = fixedAprHandler;
     }
 
-    async fetchAprsFromAllHandlers(): Promise<TokenApr[]> {
-        let aprs: TokenApr[] = this.fixedAprTokens
+    async fetchAprsFromAllHandlers(): Promise<YbToken[]> {
+        let aprs: YbToken[] = this.fixedAprTokens
             ? Object.values(this.fixedAprTokens).map(({ address, apr }) => ({
                   apr,
                   address,
+                  source: 'fixed',
+                  chain: this.chain,
               }))
             : [];
 
@@ -46,11 +45,6 @@ export class YbAprHandlers {
 
                 return [this.callHandler(source as keyof typeof sourceToHandler, config)];
             }),
-
-            // Add handlers from chain configured sources
-            ...chainSources
-                .filter((source) => this.chain && source.chains.includes(this.chain))
-                .map((source) => source.handler(this.chain)),
         ]);
 
         const failedReasons: string[] = [];
@@ -78,6 +72,6 @@ export class YbAprHandlers {
         }
 
         const value = await handler(config);
-        return value;
+        return value.map((item) => ({ source, chain: this.chain, ...item }));
     };
 }

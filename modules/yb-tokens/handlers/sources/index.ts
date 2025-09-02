@@ -5,6 +5,5 @@ export * from './avalon-apr-handler';
 export * from './euler-apr-handler';
 export * from './teth';
 export * from './sts-apr-handler';
-export * as AaveAuto from './aave-auto-apr-handler';
 export * from './hypurrfi-apr-handler';
 export * from './morpho-hyperevm-apr-handler';

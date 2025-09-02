@@ -133,6 +133,7 @@ export default <NetworkData>{
             aave: [
                 {
                     market: 'v3',
+                    chain: 'GNOSIS',
                     subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/HtcDaL8L8iZ2KQNNS44EBVmLruzxuNAz1RkBYdui1QUT`,
                     tokens: {
                         USDC: {
