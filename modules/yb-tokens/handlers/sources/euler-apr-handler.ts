@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { TokenApr, YbAprHandler } from '../../types';
 import { Chain } from '@prisma/client';
 import { prisma } from '../../../../prisma/prisma-client';
@@ -40,7 +39,7 @@ type ComputeAPYs = AbiParametersToPrimitiveTypes<ExtractAbiFunction<typeof euler
 export const eulerAprHandler: YbAprHandler = async (config: { chain: Chain; url: string; lens: string }) => {
     try {
         // find vaults that we have in our pools
-        const vaults = await axios.get<VaultsResponse>(config.url).then((response) => response.data);
+        const vaults = await fetch(config.url).then((response) => response.json() as Promise<VaultsResponse>);
 
         const vaultsAddresses = Object.keys(vaults).map((address) => address.toLowerCase());
 
