@@ -1,5 +1,7 @@
 import { SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { PathGraph } from './pathGraph/pathGraph';
+import { PathGraphBeam } from './pathGraph/pathGraph-beam';
+import { PathGraphBfs } from './pathGraph/pathGraph-proper-bfs';
 import { PathGraphTraversalConfig } from './pathGraph/pathGraphTypes';
 import { max, min } from './utils/math';
 import { BasePool } from './poolsV2/basePool';
@@ -8,12 +10,22 @@ import { parseEther } from 'viem';
 import { Chain } from '@prisma/client';
 import { chainToChainId } from '../../network/chain-id-to-chain';
 
+const pathGraphVersions = {
+    original: PathGraph,
+    beamOptimisation: PathGraphBeam,
+    bfsOptimisation: PathGraphBfs,
+};
+
+type PathGraphClass = PathGraph | PathGraphBeam | PathGraphBfs;
+
+export type PathGraphVersion = keyof typeof pathGraphVersions;
+
 const SWAPS_GREATER_THAN_BUFFER_LIMIT_THRESHOLD = 2;
 export class Router {
-    private readonly pathGraph: PathGraph;
+    private readonly pathGraph: PathGraphClass;
 
-    constructor() {
-        this.pathGraph = new PathGraph();
+    constructor(graphVersion: PathGraphVersion) {
+        this.pathGraph = new pathGraphVersions[graphVersion]();
     }
 
     public getCandidatePaths(

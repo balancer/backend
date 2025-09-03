@@ -1,6 +1,6 @@
 import { SwapKind, Token } from '@balancer/sdk';
 
-import { Router } from './router';
+import { Router, PathGraphVersion } from './router';
 import { PrismaPoolAndHookWithDynamic } from '../../../prisma/prisma-types';
 import { checkInputs, isLiquidityManagement } from './utils/helpers';
 import {
@@ -38,6 +38,7 @@ export class SOR {
         bufferPools: BufferPoolData[],
         protocolVersion: number,
         swapOptions?: Omit<SorSwapOptions, 'graphTraversalConfig.poolIdsToInclude'>,
+        graphVersion: PathGraphVersion = 'original',
     ): Promise<PathWithAmount[] | null> {
         const checkedSwapAmount = checkInputs(tokenIn, tokenOut, swapKind, swapAmountEvm);
 
@@ -144,7 +145,7 @@ export class SOR {
             }
         }
 
-        const router = new Router();
+        const router = new Router(graphVersion);
 
         const candidatePaths = router.getCandidatePaths(
             tokenIn,

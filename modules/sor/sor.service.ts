@@ -16,10 +16,13 @@ import {
 } from './utils';
 import { PathWithAmount } from './lib/path';
 import { getInputAmount, getOutputAmount } from './lib/utils';
+import { PathGraphVersion } from './lib/router';
 
 const DEFAULT_MAX_DEPTH = 4;
 
 export class SorService {
+    constructor(private pathGraphVersion: PathGraphVersion = 'original') {}
+
     async getSorSwapPaths(args: QuerySorGetSwapPathsArgs): Promise<GqlSorGetSwapPaths> {
         console.log('getSorSwaps args', JSON.stringify(args));
         const tokenIn = args.tokenIn.toLowerCase();
@@ -106,6 +109,7 @@ export class SorService {
                 bufferPools,
                 input.protocolVersion,
                 swapOptions,
+                this.pathGraphVersion,
             );
 
             if (!paths) {
@@ -119,6 +123,7 @@ export class SorService {
                     bufferPools,
                     input.protocolVersion,
                     swapOptions,
+                    this.pathGraphVersion,
                 );
             }
 

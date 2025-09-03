@@ -5,7 +5,7 @@ import { PathLocal } from '../path';
 
 const DEFAULT_MAX_PATHS_PER_TOKEN_PAIR = 10;
 
-export class PathGraph {
+export class PathGraphBfs {
     private nodes: Map<string, { isPhantomBpt: boolean }>;
     private edges: Map<string, Map<string, PathGraphEdgeData[]>>;
     private poolAddressMap: Map<string, BasePool>;

@@ -20,6 +20,7 @@ import * as path from 'path';
 import { Session } from 'inspector';
 import { promisify } from 'util';
 import { SorService } from '../modules/sor/sor.service';
+import { PathGraphVersion } from '../modules/sor/lib/router';
 import mainnetConfig from '../config/mainnet';
 import { getViemClient } from '../modules/sources/viem-client';
 import { multicallViem } from '../modules/web3/multicaller-viem';
@@ -50,7 +51,7 @@ interface SwapData {
     tokenOut: string;
     amount: string; // This is amountIn scaled (for backward compatibility)
     amountIn: string; // Raw amount in
-    amountOut: string; // Raw amount out  
+    amountOut: string; // Raw amount out
     amountInScaled?: string; // Scaled amount in
     amountOutScaled?: string; // Scaled amount out
     poolId?: string;
@@ -256,11 +257,11 @@ class SwapDataFetcher {
         for (const swap of swaps) {
             const inDecimals = this.tokenDecimals.get(swap.tokenIn) || 18;
             const outDecimals = this.tokenDecimals.get(swap.tokenOut) || 18;
-            
+
             // Scale both amounts
             swap.amountInScaled = formatUnits(BigInt(swap.amountIn), inDecimals);
             swap.amountOutScaled = formatUnits(BigInt(swap.amountOut), outDecimals);
-            
+
             // Keep 'amount' as scaled amountIn for backward compatibility
             swap.amount = swap.amountInScaled;
         }
@@ -269,8 +270,14 @@ class SwapDataFetcher {
 
 // 2. SOR Profiler - Tests SOR with provided swaps
 class SorProfiler {
-    async profileSwaps(swaps: SwapData[], opts: { heap?: boolean } = {}): Promise<ProfileResult> {
-        console.log(`\n🔄 Profiling SOR with ${swaps.length} swaps... (heap=${!!opts.heap})`);
+    async profileSwaps(swaps: SwapData[], opts: { heap?: boolean; algorithm?: PathGraphVersion | 'all' } = {}): Promise<ProfileResult> {
+        const algorithm = opts.algorithm || 'original';
+        console.log(`\n🔄 Profiling SOR with ${swaps.length} swaps... (heap=${!!opts.heap}, algorithm=${algorithm})`);
+        
+        // If comparing all algorithms
+        if (algorithm === 'all') {
+            return await this.compareAllAlgorithms(swaps, opts);
+        }
 
         const session = new Session();
         session.connect();
@@ -294,8 +301,8 @@ class SorProfiler {
         await post('Profiler.start');
         const startTime = performance.now();
 
-        console.log(`   Creating SorService instance...`);
-        const sor = new SorService();
+        console.log(`   Creating SorService instance with ${algorithm} algorithm...`);
+        const sor = new SorService(algorithm as PathGraphVersion);
 
         let successful = 0;
         let failed = 0;
@@ -311,14 +318,14 @@ class SorProfiler {
                     chain: 'MAINNET',
                 });
                 successful++;
-                
+
                 // Compare SOR result with actual swap output
                 if (sorResult.returnAmount && swap.amountOutScaled) {
                     const sorAmount = parseFloat(sorResult.returnAmount);
                     const actualAmount = parseFloat(swap.amountOutScaled);
                     const deviation = sorAmount - actualAmount;
                     const deviationPercent = actualAmount !== 0 ? (deviation / actualAmount) * 100 : 0;
-                    
+
                     comparisons.push({
                         swap,
                         sorReturnAmount: sorResult.returnAmount,
@@ -327,7 +334,7 @@ class SorProfiler {
                         deviationPercent,
                     });
                 }
-                
+
                 if (successful % 10 === 0) process.stdout.write('.');
             } catch {
                 failed++;
@@ -359,7 +366,7 @@ class SorProfiler {
 
         // --- Analyze comparisons ---
         const biggestDeviations = this.analyzeComparisons(comparisons);
-        
+
         // --- Analyze CPU profile ---
         if (profile) {
             const analysis = this.analyzeProfile(profile);
@@ -376,37 +383,153 @@ class SorProfiler {
             };
         }
 
-        return { 
-            successful, 
-            failed, 
-            duration, 
+        return {
+            successful,
+            failed,
+            duration,
             avgPerSwap: duration / swaps.length,
             comparisons,
             biggestDeviations,
         };
     }
+
+    private async compareAllAlgorithms(swaps: SwapData[], opts: { heap?: boolean }): Promise<ProfileResult> {
+        const algorithms: PathGraphVersion[] = ['original', 'beamOptimisation', 'bfsOptimisation'];
+        const results: Record<string, { duration: number; successful: number; failed: number; comparisons: SwapComparison[] }> = {};
+        
+        console.log('\n🎬 Comparing all path finding algorithms...');
+        console.log('='.repeat(60));
+        
+        for (const algo of algorithms) {
+            console.log(`\n\n🔄 Testing ${algo} algorithm...`);
+            const startTime = performance.now();
+            const sor = new SorService(algo);
+            
+            let successful = 0;
+            let failed = 0;
+            const comparisons: SwapComparison[] = [];
+            
+            for (const swap of swaps) {
+                try {
+                    const sorResult = await sor.getSorSwapPaths({
+                        tokenIn: swap.tokenIn,
+                        tokenOut: swap.tokenOut,
+                        swapAmount: swap.amount,
+                        swapType: 'EXACT_IN',
+                        chain: 'MAINNET',
+                    });
+                    successful++;
+                    
+                    if (sorResult.returnAmount && swap.amountOutScaled) {
+                        const sorAmount = parseFloat(sorResult.returnAmount);
+                        const actualAmount = parseFloat(swap.amountOutScaled);
+                        comparisons.push({
+                            swap,
+                            sorReturnAmount: sorResult.returnAmount,
+                            actualAmountOut: swap.amountOutScaled,
+                            deviation: sorAmount - actualAmount,
+                            deviationPercent: actualAmount !== 0 ? ((sorAmount - actualAmount) / actualAmount) * 100 : 0,
+                        });
+                    }
+                    
+                    if (successful % 10 === 0) process.stdout.write('.');
+                } catch {
+                    failed++;
+                }
+            }
+            
+            const duration = performance.now() - startTime;
+            results[algo] = { duration, successful, failed, comparisons };
+            
+            console.log('');
+            console.log(`   ✅ ${algo}: ${successful}/${swaps.length} successful in ${duration.toFixed(2)}ms`);
+        }
+        
+        // Compare results
+        this.compareAlgorithmResults(results, swaps.length);
+        
+        // Return results for the fastest algorithm
+        const fastest = Object.entries(results).sort((a, b) => a[1].duration - b[1].duration)[0];
+        return {
+            successful: fastest[1].successful,
+            failed: fastest[1].failed,
+            duration: fastest[1].duration,
+            avgPerSwap: fastest[1].duration / swaps.length,
+            comparisons: fastest[1].comparisons,
+            biggestDeviations: this.analyzeComparisons(fastest[1].comparisons),
+        };
+    }
+    
+    private compareAlgorithmResults(results: Record<string, any>, totalSwaps: number): void {
+        console.log('\n\n📊 Algorithm Comparison Summary:');
+        console.log('='.repeat(60));
+        
+        // Sort by duration
+        const sorted = Object.entries(results).sort((a, b) => a[1].duration - b[1].duration);
+        
+        console.log('\n⏱️  Performance Ranking:');
+        sorted.forEach(([algo, data], index) => {
+            const speedup = index > 0 ? ((sorted[0][1].duration / data.duration - 1) * 100).toFixed(1) : '0';
+            console.log(`   ${index + 1}. ${algo}:`);
+            console.log(`      Duration: ${data.duration.toFixed(2)}ms`);
+            console.log(`      Avg/swap: ${(data.duration / totalSwaps).toFixed(2)}ms`);
+            console.log(`      Success rate: ${((data.successful / totalSwaps) * 100).toFixed(1)}%`);
+            if (index > 0) {
+                console.log(`      Speedup vs fastest: ${speedup}%`);
+            }
+        });
+        
+        // Compare output quality
+        console.log('\n🎯 Output Quality Comparison:');
+        for (const [algo, data] of Object.entries(results)) {
+            if (data.comparisons.length > 0) {
+                const avgDeviation = data.comparisons.reduce((sum: number, c: SwapComparison) => 
+                    sum + Math.abs(c.deviationPercent), 0) / data.comparisons.length;
+                const betterCount = data.comparisons.filter((c: SwapComparison) => c.deviation > 0).length;
+                
+                console.log(`   ${algo}:`);
+                console.log(`      Avg deviation: ${avgDeviation.toFixed(2)}%`);
+                console.log(`      Found better paths: ${betterCount}/${data.comparisons.length}`);
+            }
+        }
+        
+        // Check if all algorithms return same results
+        const returnAmounts = Object.entries(results).map(([algo, data]) => {
+            return data.comparisons.map((c: SwapComparison) => c.sorReturnAmount);
+        });
+        
+        if (returnAmounts.length > 1) {
+            let allSame = true;
+            for (let i = 0; i < returnAmounts[0].length; i++) {
+                const amounts = returnAmounts.map(amounts => amounts[i]);
+                if (amounts.some(a => a !== amounts[0])) {
+                    allSame = false;
+                    break;
+                }
+            }
+            console.log(`\n🔍 Result Consistency: ${allSame ? '✅ All algorithms return same amounts' : '⚠️  Algorithms return different amounts'}`);
+        }
+    }
     
     private analyzeComparisons(comparisons: SwapComparison[]): SwapComparison[] {
         if (comparisons.length === 0) return [];
-        
+
         // Sort by absolute deviation percentage
-        const sorted = [...comparisons].sort((a, b) => 
-            Math.abs(b.deviationPercent) - Math.abs(a.deviationPercent)
-        );
-        
+        const sorted = [...comparisons].sort((a, b) => Math.abs(b.deviationPercent) - Math.abs(a.deviationPercent));
+
         // Log summary statistics
         const avgDeviation = comparisons.reduce((sum, c) => sum + Math.abs(c.deviationPercent), 0) / comparisons.length;
-        const betterCount = comparisons.filter(c => c.deviation > 0).length;
-        const worseCount = comparisons.filter(c => c.deviation < 0).length;
-        const exactCount = comparisons.filter(c => Math.abs(c.deviation) < 0.000001).length;
-        
+        const betterCount = comparisons.filter((c) => c.deviation > 0).length;
+        const worseCount = comparisons.filter((c) => c.deviation < 0).length;
+        const exactCount = comparisons.filter((c) => Math.abs(c.deviation) < 0.000001).length;
+
         console.log('\n📊 SOR vs Actual Comparison:');
         console.log(`   Total comparisons: ${comparisons.length}`);
         console.log(`   Average deviation: ${avgDeviation.toFixed(2)}%`);
-        console.log(`   SOR better: ${betterCount} (${(betterCount / comparisons.length * 100).toFixed(1)}%)`);
-        console.log(`   SOR worse: ${worseCount} (${(worseCount / comparisons.length * 100).toFixed(1)}%)`);
+        console.log(`   SOR better: ${betterCount} (${((betterCount / comparisons.length) * 100).toFixed(1)}%)`);
+        console.log(`   SOR worse: ${worseCount} (${((worseCount / comparisons.length) * 100).toFixed(1)}%)`);
         console.log(`   Exact match: ${exactCount}`);
-        
+
         // Return top 10 biggest deviations
         return sorted.slice(0, 10);
     }
@@ -472,18 +595,22 @@ class SorProfiler {
         console.log(`   Failed: ${failed}`);
         console.log(`   Total time: ${duration.toFixed(2)}ms`);
         console.log(`   Avg per swap: ${(duration / total).toFixed(2)}ms`);
-        
+
         // Print biggest deviations
         if (biggestDeviations && biggestDeviations.length > 0) {
             console.log(`\n🎯 Biggest Deviations (SOR vs Actual):`);
             for (let i = 0; i < Math.min(5, biggestDeviations.length); i++) {
                 const comp = biggestDeviations[i];
                 const sign = comp.deviation > 0 ? '+' : '';
-                console.log(`   ${i + 1}. ${comp.swap.tokenIn.slice(0, 6)}...${comp.swap.tokenIn.slice(-4)} → ${comp.swap.tokenOut.slice(0, 6)}...${comp.swap.tokenOut.slice(-4)}`);
+                console.log(
+                    `   ${i + 1}. ${comp.swap.tokenIn.slice(0, 6)}...${comp.swap.tokenIn.slice(-4)} → ${comp.swap.tokenOut.slice(0, 6)}...${comp.swap.tokenOut.slice(-4)}`,
+                );
                 console.log(`      Amount In: ${parseFloat(comp.swap.amount).toFixed(4)}`);
                 console.log(`      SOR Output: ${parseFloat(comp.sorReturnAmount).toFixed(4)}`);
                 console.log(`      Actual Output: ${parseFloat(comp.actualAmountOut).toFixed(4)}`);
-                console.log(`      Deviation: ${sign}${comp.deviation.toFixed(6)} (${sign}${comp.deviationPercent.toFixed(2)}%)`);
+                console.log(
+                    `      Deviation: ${sign}${comp.deviation.toFixed(6)} (${sign}${comp.deviationPercent.toFixed(2)}%)`,
+                );
                 console.log(`      ${comp.deviation > 0 ? '✅ SOR found better path' : '⚠️  SOR predicted worse'}`);
             }
         }
@@ -548,7 +675,10 @@ class CLI {
         }
 
         // Profile the swaps
-        await this.profiler.profileSwaps(swaps);
+        await this.profiler.profileSwaps(swaps, { 
+            heap: options.heap,
+            algorithm: options.algorithm 
+        });
     }
 
     private parseArgs(args: string[]): any {
@@ -558,6 +688,8 @@ class CLI {
             count: CONFIG.defaults.swapCount,
             file: null,
             singleSwap: null,
+            heap: false,
+            algorithm: 'original' as PathGraphVersion | 'all',
         };
 
         // Parse fetch-only mode
@@ -573,6 +705,22 @@ class CLI {
         const countIndex = args.indexOf('--count');
         if (countIndex !== -1 && args[countIndex + 1]) {
             options.count = parseInt(args[countIndex + 1]) || CONFIG.defaults.swapCount;
+        }
+        
+        // Parse heap
+        if (args.includes('--heap')) {
+            options.heap = true;
+        }
+        
+        // Parse algorithm
+        const algoIndex = args.indexOf('--algorithm');
+        if (algoIndex !== -1 && args[algoIndex + 1]) {
+            const algo = args[algoIndex + 1];
+            if (algo === 'all' || algo === 'original' || algo === 'beam' || algo === 'bfs') {
+                options.algorithm = algo === 'beam' ? 'beamOptimisation' : 
+                                  algo === 'bfs' ? 'bfsOptimisation' : 
+                                  algo;
+            }
         }
 
         // Parse file
@@ -621,6 +769,8 @@ Options:
   --file <path>                Use swaps from specified file
   --swap <in,out,amount>       Test single swap (e.g., --swap 0xC02aa...,0x6B17...,1.5)
   --count <n>                  Number of swaps to fetch (default: ${CONFIG.defaults.swapCount})
+  --algorithm <type>           Path finding algorithm: 'original', 'beam', 'bfs', or 'all' to compare (default: original)
+  --heap                       Enable heap profiling
   --help                       Show this help
 
 Examples:
@@ -629,6 +779,12 @@ Examples:
 
   # Test with previously saved swaps
   npx tsx scripts/profile-sor.ts --file profiles/real-swaps/latest-swaps.json
+  
+  # Compare all path finding algorithms
+  npx tsx scripts/profile-sor.ts --algorithm all
+  
+  # Use specific algorithm with heap profiling
+  npx tsx scripts/profile-sor.ts --algorithm beam --heap
 
   # Test single swap
   npx tsx scripts/profile-sor.ts --swap 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2,0x6B175474E89094C44Da98b954EedeAC495271d0F,1.5
