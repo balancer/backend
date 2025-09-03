@@ -6,7 +6,6 @@ export type YieldToken = {
     source: string;
     /** Defined as float, eg: 0.01 is 1% */
     apr: number;
-    success: boolean;
 };
 
 export type TokenApr = {

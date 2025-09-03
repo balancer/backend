@@ -26,6 +26,7 @@ export class TokenYieldsService {
             console.log(`Fetched ${tokenAprs.length} token yields for chain ${chain}`);
 
             // Group by source (we'll need to track which handler provided which data)
+            // For now, we'll store all as 'yb-handlers' source
             await this.tokenYieldRepository.storeTokenYields(chain, tokenAprs);
 
             console.log(`Successfully stored ${tokenAprs.length} token yields for chain ${chain}`);
