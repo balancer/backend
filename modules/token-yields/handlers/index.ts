@@ -35,18 +35,34 @@ export class TokenYieldAprHandlers {
             }),
         ]);
 
+        const allSources = Object.keys(sourceToHandler) as (keyof typeof sourceToHandler)[];
+
         const failedReasons: string[] = [];
 
         for (const result of results) {
             if (result.status === 'fulfilled' && result.value !== null) {
-                aprs = aprs.concat(result.value);
+                aprs.push(...result.value.map((r) => ({ ...r, success: true })));
             } else if (result.status === 'rejected') {
                 failedReasons.push(String(result.reason));
             }
         }
 
         if (failedReasons.length > 0) {
-            console.error(`Failed to fetch APRs from some YB handlers: ${failedReasons.join(', ')}`);
+            console.error(`Failed to fetch APRs from some token yield handlers: ${failedReasons.join(', ')}`);
+        }
+
+        const successfulSources = allSources.filter((source) => aprs.some((r) => r.source === source));
+        const failedSources = allSources.filter((source) => !successfulSources.includes(source));
+
+        for (const failedSource of failedSources) {
+            // need to make sure we dont remove APRs for failed sources but also dont update them. Its ok to have a dummy address here, we only match on the source name
+            aprs.push({
+                address: '0x0000000000000000000000000000000000000000',
+                chain: this.chain,
+                source: failedSource,
+                apr: 0,
+                success: false,
+            });
         }
 
         return aprs;
