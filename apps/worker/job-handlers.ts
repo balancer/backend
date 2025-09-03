@@ -410,7 +410,7 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
         case 'sync-token-tvl':
             await runIfNotAlreadyRunning(name, chainId, () => TokenController().syncTvl(), res, next);
             break;
-        case 'fetch-yb-tokens':
+        case 'fetch-token-yields':
             await runIfNotAlreadyRunning(
                 name,
                 chainId,
