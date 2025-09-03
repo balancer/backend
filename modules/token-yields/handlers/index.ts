@@ -16,26 +16,14 @@ const sourceToHandler = {
 
 export class YbAprHandlers {
     private config: YbAprConfig;
-    fixedAprTokens?: { [tokenName: string]: { address: string; apr: number } };
 
-    constructor(
-        aprConfig: YbAprConfig,
-        private chain: Chain,
-    ) {
+    constructor(aprConfig: YbAprConfig, private chain: Chain) {
         const { fixedAprHandler, ...config } = aprConfig;
         this.config = config;
-        this.fixedAprTokens = fixedAprHandler;
     }
 
     async fetchAprsFromAllHandlers(): Promise<YbToken[]> {
-        let aprs: YbToken[] = this.fixedAprTokens
-            ? Object.values(this.fixedAprTokens).map(({ address, apr }) => ({
-                  apr,
-                  address,
-                  source: 'fixed',
-                  chain: this.chain,
-              }))
-            : [];
+        let aprs: YbToken[] = [];
 
         const results = await Promise.allSettled([
             ...Object.entries(this.config).flatMap(([source, config]) => {
