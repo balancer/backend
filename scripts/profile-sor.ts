@@ -1,539 +1,663 @@
 #!/usr/bin/env node
 
 /**
- * Original SOR CPU Profiling Script
+ * SOR CPU Profiling Script
  *
- * Isolated profiling for the original SOR implementation only
- * Generates CPU profiles compatible with Chrome DevTools
+ * Usage:
+ *   npx tsx scripts/profile-sor.ts [options]
  *
- * Run with: node --loader tsx scripts/profile-sor.ts
+ * Options:
+ *   --fetch <count>              Fetch and save swap data only
+ *   --file <path>                Use swaps from file
+ *   --swap <tokenIn,tokenOut,amount>  Test single swap
+ *   --count <n>                  Number of swaps to fetch (default: 100)
+ *   --help                       Show help
  */
 
-import { performance, PerformanceObserver } from 'perf_hooks';
-import * as v8 from 'v8';
+import { performance } from 'perf_hooks';
 import * as fs from 'fs';
 import * as path from 'path';
 import { Session } from 'inspector';
 import { promisify } from 'util';
 import { SorService } from '../modules/sor/sor.service';
-import { QuerySorGetSwapPathsArgs } from '../apps/api/gql/generated-schema';
+import mainnetConfig from '../config/mainnet';
+import { getViemClient } from '../modules/sources/viem-client';
+import { multicallViem } from '../modules/web3/multicaller-viem';
+import { parseAbiItem } from 'abitype';
+import { formatUnits, getAddress, keccak256, toHex, encodeAbiParameters, parseAbiParameters } from 'viem';
 
-interface SwapConfig {
-    name: string;
+// Configuration
+const CONFIG = {
+    vaults: {
+        v2: mainnetConfig.balancer.v2.vaultAddress,
+        v3: mainnetConfig.balancer.v3.vaultAddress,
+    },
+    eventSignatures: {
+        v2: '0x2170c741c41531aec20e7c107c24eecfdd15e69c9bb0a8dd37b1840b9e0b207b',
+        v3: '0x' + keccak256(toHex('Swap(address,address,address,uint256,uint256,uint256,uint256)')).slice(2),
+    },
+    defaults: {
+        swapCount: 100,
+        blocksToSearch: 7200,
+        dataDir: path.join(process.cwd(), 'profiles', 'real-swaps'),
+        defaultSwapsFile: 'latest-swaps.json',
+    },
+};
+
+// Types
+interface SwapData {
     tokenIn: string;
     tokenOut: string;
-    swapAmount: string;
-    swapType: 'EXACT_IN' | 'EXACT_OUT';
-    chain: string;
+    amount: string; // This is amountIn scaled (for backward compatibility)
+    amountIn: string; // Raw amount in
+    amountOut: string; // Raw amount out  
+    amountInScaled?: string; // Scaled amount in
+    amountOutScaled?: string; // Scaled amount out
+    poolId?: string;
+    blockNumber?: number;
+    transactionHash?: string;
+    protocolVersion?: '2' | '3';
 }
 
-interface FunctionProfile {
-    functionName: string;
-    file: string;
-    line: number;
-    selfTime: number;
-    totalTime: number;
-    callCount: number;
-    percentOfTotal: number;
+interface SwapComparison {
+    swap: SwapData;
+    sorReturnAmount: string;
+    actualAmountOut: string;
+    deviation: number;
+    deviationPercent: number;
 }
 
-interface CPUProfile {
-    topFunctions: FunctionProfile[];
-    totalTime: number;
-    profileData?: any;
+interface ProfileResult {
+    successful: number;
+    failed: number;
+    duration: number;
+    avgPerSwap: number;
+    topFunctions?: any[];
+    comparisons?: SwapComparison[];
+    biggestDeviations?: SwapComparison[];
 }
 
-class OriginalSorProfiler {
-    private session: Session | null = null;
-    private originalSor = new SorService();
-    private profilesDir = path.join(process.cwd(), 'profiles', 'original-sor');
+// Utilities
+function ensureDirectory(dir: string): void {
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+    }
+}
 
-    constructor() {
-        // Create profiles directory if it doesn't exist
-        if (!fs.existsSync(this.profilesDir)) {
-            fs.mkdirSync(this.profilesDir, { recursive: true });
+function formatTimestamp(): string {
+    return new Date().toISOString().replace(/:/g, '-').split('.')[0];
+}
+
+function getSwapsFilePath(filename?: string): string {
+    ensureDirectory(CONFIG.defaults.dataDir);
+    return path.join(CONFIG.defaults.dataDir, filename || CONFIG.defaults.defaultSwapsFile);
+}
+
+// 1. Swap Data Fetcher - Fetches and stores swap data
+class SwapDataFetcher {
+    private viemClient = getViemClient('MAINNET');
+    private tokenDecimals = new Map<string, number>();
+
+    async fetchAndSaveSwaps(count: number = CONFIG.defaults.swapCount, outputFile?: string): Promise<string> {
+        console.log(`\n🔍 Fetching ${count} recent swaps from Balancer...`);
+
+        const swaps = await this.fetchRecentSwaps(count);
+        const filePath = getSwapsFilePath(outputFile);
+
+        fs.writeFileSync(filePath, JSON.stringify(swaps, null, 2));
+        console.log(`✅ Saved ${swaps.length} swaps to: ${filePath}`);
+
+        return filePath;
+    }
+
+    private async fetchRecentSwaps(count: number): Promise<SwapData[]> {
+        const currentBlock = Number(await this.viemClient.getBlockNumber());
+        const fromBlock = currentBlock - CONFIG.defaults.blocksToSearch;
+
+        // Fetch logs
+        const [v2Logs, v3Logs] = await Promise.all([
+            this.fetchLogs(CONFIG.vaults.v2, CONFIG.eventSignatures.v2, fromBlock, currentBlock),
+            this.fetchLogs(CONFIG.vaults.v3, CONFIG.eventSignatures.v3, fromBlock, currentBlock),
+        ]);
+
+        console.log(`   Found: ${v2Logs.length} v2, ${v3Logs.length} v3 swaps`);
+
+        // Parse swaps
+        const v2Swaps = this.parseV2Swaps(v2Logs);
+        const v3Swaps = this.parseV3Swaps(v3Logs);
+
+        // Select balanced set
+        const selected = this.selectBalancedSwaps(v2Swaps, v3Swaps, count);
+
+        // Fetch decimals and scale amounts
+        await this.fetchTokenDecimals(selected);
+
+        console.log(`   Selected: ${selected.length} unique swaps`);
+        return selected;
+    }
+
+    private async fetchLogs(address: string, topic: string, fromBlock: number, toBlock: number): Promise<any[]> {
+        const logs = (await this.viemClient.request({
+            method: 'eth_getLogs',
+            params: [
+                {
+                    address: address as `0x${string}`,
+                    topics: [topic as `0x${string}`],
+                    fromBlock: toHex(fromBlock),
+                    toBlock: toHex(toBlock),
+                },
+            ],
+        })) as any[];
+
+        return logs;
+    }
+
+    private parseV2Swaps(logs: any[]): SwapData[] {
+        return logs
+            .map((log) => {
+                try {
+                    const data = (log.data as string).slice(2);
+                    const amountIn = BigInt('0x' + data.slice(0, 64)).toString();
+                    const amountOut = BigInt('0x' + data.slice(64, 128)).toString();
+                    return {
+                        tokenIn: getAddress('0x' + (log.topics[2] as string).slice(26)).toLowerCase(),
+                        tokenOut: getAddress('0x' + (log.topics[3] as string).slice(26)).toLowerCase(),
+                        amount: amountIn, // Keep for backward compatibility
+                        amountIn,
+                        amountOut,
+                        poolId: log.topics[1] as string,
+                        blockNumber:
+                            typeof log.blockNumber === 'string'
+                                ? parseInt(log.blockNumber, 16)
+                                : Number(log.blockNumber),
+                        transactionHash: log.transactionHash as string,
+                        protocolVersion: '2' as const,
+                    };
+                } catch {
+                    return null;
+                }
+            })
+            .filter(Boolean) as SwapData[];
+    }
+
+    private parseV3Swaps(logs: any[]): SwapData[] {
+        return logs
+            .map((log) => {
+                try {
+                    const data = (log.data as string).slice(2);
+                    const amountIn = BigInt('0x' + data.slice(0, 64)).toString();
+                    const amountOut = BigInt('0x' + data.slice(64, 128)).toString();
+                    // Note: V3 also has swapFeePercentage at data.slice(128, 192) and swapFeeAmount at data.slice(192, 256)
+                    return {
+                        tokenIn: getAddress('0x' + (log.topics[2] as string).slice(26)).toLowerCase(),
+                        tokenOut: getAddress('0x' + (log.topics[3] as string).slice(26)).toLowerCase(),
+                        amount: amountIn, // Keep for backward compatibility
+                        amountIn,
+                        amountOut,
+                        poolId: '0x' + (log.topics[1] as string).slice(26),
+                        blockNumber:
+                            typeof log.blockNumber === 'string'
+                                ? parseInt(log.blockNumber, 16)
+                                : Number(log.blockNumber),
+                        transactionHash: log.transactionHash as string,
+                        protocolVersion: '3' as const,
+                    };
+                } catch {
+                    return null;
+                }
+            })
+            .filter(Boolean) as SwapData[];
+    }
+
+    private selectBalancedSwaps(v2Swaps: SwapData[], v3Swaps: SwapData[], count: number): SwapData[] {
+        const selected: SwapData[] = [];
+        const seenPairs = new Set<string>();
+
+        // Sort by newest
+        v2Swaps.sort((a, b) => (b.blockNumber || 0) - (a.blockNumber || 0));
+        v3Swaps.sort((a, b) => (b.blockNumber || 0) - (a.blockNumber || 0));
+
+        // Select unique pairs
+        for (const swaps of [v2Swaps, v3Swaps]) {
+            for (const swap of swaps) {
+                if (selected.length >= count) break;
+
+                const pairKey = `${swap.tokenIn}-${swap.tokenOut}`;
+                if (!seenPairs.has(pairKey)) {
+                    seenPairs.add(pairKey);
+                    selected.push(swap);
+                }
+            }
+        }
+
+        return selected;
+    }
+
+    private async fetchTokenDecimals(swaps: SwapData[]): Promise<void> {
+        const uniqueTokens = Array.from(new Set(swaps.flatMap((s) => [s.tokenIn, s.tokenOut])));
+
+        const calls = uniqueTokens.map((token) => ({
+            path: token,
+            address: token as `0x${string}`,
+            abi: [parseAbiItem('function decimals() view returns(uint8)')],
+            functionName: 'decimals',
+        }));
+
+        try {
+            const results = await multicallViem(this.viemClient, calls);
+            for (const token of uniqueTokens) {
+                this.tokenDecimals.set(token, Number(results[token] || 18));
+            }
+        } catch {
+            uniqueTokens.forEach((token) => this.tokenDecimals.set(token, 18));
+        }
+
+        // Convert amounts to human-readable format
+        for (const swap of swaps) {
+            const inDecimals = this.tokenDecimals.get(swap.tokenIn) || 18;
+            const outDecimals = this.tokenDecimals.get(swap.tokenOut) || 18;
+            
+            // Scale both amounts
+            swap.amountInScaled = formatUnits(BigInt(swap.amountIn), inDecimals);
+            swap.amountOutScaled = formatUnits(BigInt(swap.amountOut), outDecimals);
+            
+            // Keep 'amount' as scaled amountIn for backward compatibility
+            swap.amount = swap.amountInScaled;
         }
     }
+}
 
-    private async startCPUProfiling(): Promise<void> {
-        this.session = new Session();
-        this.session.connect();
+// 2. SOR Profiler - Tests SOR with provided swaps
+class SorProfiler {
+    async profileSwaps(swaps: SwapData[], opts: { heap?: boolean } = {}): Promise<ProfileResult> {
+        console.log(`\n🔄 Profiling SOR with ${swaps.length} swaps... (heap=${!!opts.heap})`);
 
-        const post = promisify(this.session.post.bind(this.session));
+        const session = new Session();
+        session.connect();
+        const post = promisify(session.post.bind(session));
+
+        // --- Enable profiling domains ---
         await post('Profiler.enable');
-        await post('Profiler.setSamplingInterval', { interval: 100 }); // 100 microseconds
+        await post('Profiler.setSamplingInterval', { interval: 100 });
+        await post('Runtime.enable');
+
+        if (opts.heap) {
+            await post('HeapProfiler.enable');
+            await post('HeapProfiler.startTrackingHeapObjects', { trackAllocations: true });
+            await post('HeapProfiler.startSampling', {
+                samplingInterval: 256 * 1024,
+                stackDepth: 32,
+            });
+        }
+
+        // --- Start CPU profiler ---
         await post('Profiler.start');
-    }
+        const startTime = performance.now();
 
-    private async stopCPUProfiling(): Promise<any> {
-        if (!this.session) return null;
+        console.log(`   Creating SorService instance...`);
+        const sor = new SorService();
 
-        const post = promisify(this.session.post.bind(this.session));
-        const profile = await post('Profiler.stop');
+        let successful = 0;
+        let failed = 0;
+        const comparisons: SwapComparison[] = [];
+
+        for (const swap of swaps) {
+            try {
+                const sorResult = await sor.getSorSwapPaths({
+                    tokenIn: swap.tokenIn,
+                    tokenOut: swap.tokenOut,
+                    swapAmount: swap.amount,
+                    swapType: 'EXACT_IN',
+                    chain: 'MAINNET',
+                });
+                successful++;
+                
+                // Compare SOR result with actual swap output
+                if (sorResult.returnAmount && swap.amountOutScaled) {
+                    const sorAmount = parseFloat(sorResult.returnAmount);
+                    const actualAmount = parseFloat(swap.amountOutScaled);
+                    const deviation = sorAmount - actualAmount;
+                    const deviationPercent = actualAmount !== 0 ? (deviation / actualAmount) * 100 : 0;
+                    
+                    comparisons.push({
+                        swap,
+                        sorReturnAmount: sorResult.returnAmount,
+                        actualAmountOut: swap.amountOutScaled,
+                        deviation,
+                        deviationPercent,
+                    });
+                }
+                
+                if (successful % 10 === 0) process.stdout.write('.');
+            } catch {
+                failed++;
+            }
+        }
+
+        console.log('');
+        const duration = performance.now() - startTime;
+
+        // --- Stop CPU profiler ---
+        const { profile } = await post('Profiler.stop');
+
+        let heapProfile: any = null;
+        if (opts.heap) {
+            const { profile: hp } = await post('HeapProfiler.stopSampling');
+            heapProfile = hp;
+            await post('HeapProfiler.stopTrackingHeapObjects');
+            await post('HeapProfiler.disable');
+        }
+
+        // --- Disable domains ---
+        await post('Runtime.disable');
         await post('Profiler.disable');
+        session.disconnect();
 
-        this.session.disconnect();
-        this.session = null;
+        // --- Save profiles ---
+        if (profile) this.saveProfile(profile, 'cpuprofile');
+        if (heapProfile) this.saveProfile(heapProfile, 'heapprofile');
 
-        return profile.profile;
+        // --- Analyze comparisons ---
+        const biggestDeviations = this.analyzeComparisons(comparisons);
+        
+        // --- Analyze CPU profile ---
+        if (profile) {
+            const analysis = this.analyzeProfile(profile);
+            this.printResults(successful, failed, duration, swaps.length, analysis, biggestDeviations);
+
+            return {
+                successful,
+                failed,
+                duration,
+                avgPerSwap: duration / swaps.length,
+                topFunctions: analysis,
+                comparisons,
+                biggestDeviations,
+            };
+        }
+
+        return { 
+            successful, 
+            failed, 
+            duration, 
+            avgPerSwap: duration / swaps.length,
+            comparisons,
+            biggestDeviations,
+        };
+    }
+    
+    private analyzeComparisons(comparisons: SwapComparison[]): SwapComparison[] {
+        if (comparisons.length === 0) return [];
+        
+        // Sort by absolute deviation percentage
+        const sorted = [...comparisons].sort((a, b) => 
+            Math.abs(b.deviationPercent) - Math.abs(a.deviationPercent)
+        );
+        
+        // Log summary statistics
+        const avgDeviation = comparisons.reduce((sum, c) => sum + Math.abs(c.deviationPercent), 0) / comparisons.length;
+        const betterCount = comparisons.filter(c => c.deviation > 0).length;
+        const worseCount = comparisons.filter(c => c.deviation < 0).length;
+        const exactCount = comparisons.filter(c => Math.abs(c.deviation) < 0.000001).length;
+        
+        console.log('\n📊 SOR vs Actual Comparison:');
+        console.log(`   Total comparisons: ${comparisons.length}`);
+        console.log(`   Average deviation: ${avgDeviation.toFixed(2)}%`);
+        console.log(`   SOR better: ${betterCount} (${(betterCount / comparisons.length * 100).toFixed(1)}%)`);
+        console.log(`   SOR worse: ${worseCount} (${(worseCount / comparisons.length * 100).toFixed(1)}%)`);
+        console.log(`   Exact match: ${exactCount}`);
+        
+        // Return top 10 biggest deviations
+        return sorted.slice(0, 10);
     }
 
-    private analyzeCPUProfile(profile: any): CPUProfile {
+    private analyzeProfile(profile: any): any[] {
         const nodes = profile.nodes;
         const samples = profile.samples;
         const timeDeltas = profile.timeDeltas;
 
-        // Build node map
-        const nodeMap = new Map<number, any>();
-        for (const node of nodes) {
-            nodeMap.set(node.id, node);
-        }
-
-        // Calculate time spent in each function
-        const functionTimes = new Map<number, { self: number; total: number; count: number }>();
-        let currentTime = profile.startTime;
+        const functionTimes = new Map<number, { self: number; count: number }>();
+        const nodeMap = new Map(nodes.map((n: any) => [n.id, n]));
 
         for (let i = 0; i < samples.length; i++) {
             const nodeId = samples[i];
             const delta = timeDeltas[i];
 
-            // Update self time for the sampled node
             if (!functionTimes.has(nodeId)) {
-                functionTimes.set(nodeId, { self: 0, total: 0, count: 0 });
+                functionTimes.set(nodeId, { self: 0, count: 0 });
             }
+
             const times = functionTimes.get(nodeId)!;
             times.self += delta;
             times.count++;
-
-            // Update total time for all ancestors
-            let currentNode = nodeMap.get(nodeId);
-            while (currentNode) {
-                if (!functionTimes.has(currentNode.id)) {
-                    functionTimes.set(currentNode.id, { self: 0, total: 0, count: 0 });
-                }
-                functionTimes.get(currentNode.id)!.total += delta;
-
-                if (currentNode.parent) {
-                    currentNode = nodeMap.get(currentNode.parent);
-                } else {
-                    break;
-                }
-            }
-
-            currentTime += delta;
         }
 
-        const totalTime = currentTime - profile.startTime;
+        const totalTime = timeDeltas.reduce((sum: number, d: number) => sum + d, 0);
 
-        // Convert to function profiles
-        const functionProfiles: FunctionProfile[] = [];
+        return Array.from(functionTimes.entries())
+            .map(([nodeId, times]) => {
+                const node = nodeMap.get(nodeId) as any;
+                if (!node?.callFrame) return null;
 
-        for (const [nodeId, times] of functionTimes.entries()) {
-            const node = nodeMap.get(nodeId);
-            if (!node || !node.callFrame) continue;
-
-            const callFrame = node.callFrame;
-            const functionName = callFrame.functionName || '(anonymous)';
-
-            // Filter out system/runtime functions
-            if (functionName.startsWith('(') && functionName.endsWith(')')) continue;
-
-            functionProfiles.push({
-                functionName,
-                file: callFrame.url || 'unknown',
-                line: callFrame.lineNumber || 0,
-                selfTime: times.self,
-                totalTime: times.total,
-                callCount: times.count,
-                percentOfTotal: (times.self / totalTime) * 100,
-            });
-        }
-
-        // Sort by self time
-        functionProfiles.sort((a, b) => b.selfTime - a.selfTime);
-
-        return {
-            topFunctions: functionProfiles.slice(0, 50),
-            totalTime: totalTime / 1000, // Convert to milliseconds
-            profileData: profile,
-        };
+                return {
+                    functionName: node.callFrame.functionName || '(anonymous)',
+                    file: node.callFrame.url || 'unknown',
+                    selfTime: times.self,
+                    callCount: times.count,
+                    percentOfTotal: (times.self / totalTime) * 100,
+                };
+            })
+            .filter(Boolean)
+            .sort((a, b) => b!.selfTime - a!.selfTime)
+            .slice(0, 10);
     }
 
-    private formatFunctionName(func: FunctionProfile): string {
-        const fileName = func.file.split('/').pop() || func.file;
-        return `${func.functionName} (${fileName}:${func.line})`;
-    }
-
-    private async profileSingleSwap(config: SwapConfig, iterations: number = 100): Promise<CPUProfile> {
-        console.log(`\n🔄 Profiling Original SOR: ${config.name}`);
-        console.log(`   Running ${iterations} iterations with CPU profiling...`);
-
-        // Warm up (without profiling)
-        console.log('   Warming up...');
-        for (let i = 0; i < 5; i++) {
-            try {
-                await this.originalSor.getSorSwapPaths(config as QuerySorGetSwapPathsArgs);
-            } catch (error) {
-                // Continue even if swap fails
-            }
-        }
-
-        // Start CPU profiling
-        await this.startCPUProfiling();
-
-        const startTime = performance.now();
-        let successfulSwaps = 0;
-        let failedSwaps = 0;
-
-        // Run the swap multiple times
-        for (let i = 0; i < iterations; i++) {
-            try {
-                await this.originalSor.getSorSwapPaths(config as QuerySorGetSwapPathsArgs);
-                successfulSwaps++;
-            } catch (error) {
-                failedSwaps++;
-            }
-        }
-
-        const endTime = performance.now();
-        const totalDuration = endTime - startTime;
-
-        // Stop profiling and analyze
-        const profile = await this.stopCPUProfiling();
-        const analysis = this.analyzeCPUProfile(profile);
-
-        // Save raw profile for Chrome DevTools
-        const timestamp = new Date().toISOString().replace(/:/g, '-').split('.')[0];
-        const profilePath = path.join(this.profilesDir, `${config.name.replace(/\s+/g, '-')}-${timestamp}.cpuprofile`);
+    private saveProfile(profile: any, type: 'cpuprofile' | 'heapprofile'): void {
+        ensureDirectory(CONFIG.defaults.dataDir);
+        const profilePath = path.join(CONFIG.defaults.dataDir, `profile-${formatTimestamp()}.${type}`);
         fs.writeFileSync(profilePath, JSON.stringify(profile, null, 2));
-
-        console.log(`   ✅ Successful swaps: ${successfulSwaps}/${iterations}`);
-        if (failedSwaps > 0) {
-            console.log(`   ⚠️  Failed swaps: ${failedSwaps}`);
-        }
-        console.log(`   ⏱️  Total time: ${totalDuration.toFixed(2)}ms`);
-        console.log(`   ⏱️  Average per swap: ${(totalDuration / iterations).toFixed(2)}ms`);
-        console.log(`   📁 Profile saved: ${profilePath}`);
-
-        return analysis;
+        console.log(`📁 ${type.toUpperCase()} saved: ${profilePath}`);
     }
 
-    private printFunctionBreakdown(profile: CPUProfile, limit: number = 20): void {
-        console.log(`\n📊 Top ${limit} Functions by CPU Time:`);
-        console.log('─'.repeat(100));
-        console.log(
-            'Function'.padEnd(50) +
-                'Self Time'.padEnd(12) +
-                'Total Time'.padEnd(12) +
-                'Calls'.padEnd(10) +
-                '% of Total',
-        );
-        console.log('─'.repeat(100));
-
-        const topFunctions = profile.topFunctions.slice(0, limit);
-
-        for (const func of topFunctions) {
-            const funcName = this.formatFunctionName(func);
-            const truncatedName = funcName.length > 48 ? funcName.substring(0, 45) + '...' : funcName;
-
-            console.log(
-                truncatedName.padEnd(50) +
-                    `${(func.selfTime / 1000).toFixed(2)}ms`.padEnd(12) +
-                    `${(func.totalTime / 1000).toFixed(2)}ms`.padEnd(12) +
-                    func.callCount.toString().padEnd(10) +
-                    `${func.percentOfTotal.toFixed(1)}%`,
-            );
-        }
-    }
-
-    private identifyHotspots(profile: CPUProfile): void {
-        console.log('\n🔥 Performance Hotspots in Original SOR:');
-        console.log('─'.repeat(80));
-
-        // Group functions by category
-        const categories = {
-            pathFinding: [] as FunctionProfile[],
-            poolOperations: [] as FunctionProfile[],
-            optimization: [] as FunctionProfile[],
-            validation: [] as FunctionProfile[],
-            calculations: [] as FunctionProfile[],
-            utils: [] as FunctionProfile[],
-            other: [] as FunctionProfile[],
-        };
-
-        for (const func of profile.topFunctions) {
-            const name = func.functionName.toLowerCase();
-            const file = func.file.toLowerCase();
-
-            if (name.includes('path') || name.includes('route') || file.includes('path')) {
-                categories.pathFinding.push(func);
-            } else if (name.includes('pool') || file.includes('pool')) {
-                categories.poolOperations.push(func);
-            } else if (name.includes('optim') || name.includes('best') || name.includes('sort')) {
-                categories.optimization.push(func);
-            } else if (name.includes('valid') || name.includes('check') || name.includes('filter')) {
-                categories.validation.push(func);
-            } else if (name.includes('calc') || name.includes('compute') || name.includes('amount')) {
-                categories.calculations.push(func);
-            } else if (file.includes('util') || name.includes('format') || name.includes('parse')) {
-                categories.utils.push(func);
-            } else {
-                categories.other.push(func);
+    private printResults(
+        successful: number,
+        failed: number,
+        duration: number,
+        total: number,
+        topFunctions?: any[],
+        biggestDeviations?: SwapComparison[],
+    ): void {
+        console.log(`\n📊 Results:`);
+        console.log(`   Successful: ${successful}/${total}`);
+        console.log(`   Failed: ${failed}`);
+        console.log(`   Total time: ${duration.toFixed(2)}ms`);
+        console.log(`   Avg per swap: ${(duration / total).toFixed(2)}ms`);
+        
+        // Print biggest deviations
+        if (biggestDeviations && biggestDeviations.length > 0) {
+            console.log(`\n🎯 Biggest Deviations (SOR vs Actual):`);
+            for (let i = 0; i < Math.min(5, biggestDeviations.length); i++) {
+                const comp = biggestDeviations[i];
+                const sign = comp.deviation > 0 ? '+' : '';
+                console.log(`   ${i + 1}. ${comp.swap.tokenIn.slice(0, 6)}...${comp.swap.tokenIn.slice(-4)} → ${comp.swap.tokenOut.slice(0, 6)}...${comp.swap.tokenOut.slice(-4)}`);
+                console.log(`      Amount In: ${parseFloat(comp.swap.amount).toFixed(4)}`);
+                console.log(`      SOR Output: ${parseFloat(comp.sorReturnAmount).toFixed(4)}`);
+                console.log(`      Actual Output: ${parseFloat(comp.actualAmountOut).toFixed(4)}`);
+                console.log(`      Deviation: ${sign}${comp.deviation.toFixed(6)} (${sign}${comp.deviationPercent.toFixed(2)}%)`);
+                console.log(`      ${comp.deviation > 0 ? '✅ SOR found better path' : '⚠️  SOR predicted worse'}`);
             }
         }
 
-        // Calculate and display category totals
-        for (const [category, functions] of Object.entries(categories)) {
-            if (functions.length === 0) continue;
-
-            const totalTime = functions.reduce((sum, f) => sum + f.selfTime, 0);
-            const percent = (totalTime / (profile.totalTime * 1000)) * 100;
-
-            if (percent > 1) {
-                // Only show categories with >1% CPU usage
-                console.log(`\n${category.charAt(0).toUpperCase() + category.slice(1)}:`);
-                console.log(`  Total CPU: ${percent.toFixed(1)}%`);
-                console.log(`  Top functions:`);
-
-                const topInCategory = functions.sort((a, b) => b.selfTime - a.selfTime).slice(0, 3);
-
-                for (const func of topInCategory) {
-                    console.log(`    - ${func.functionName}: ${func.percentOfTotal.toFixed(1)}%`);
-                }
+        if (topFunctions && topFunctions.length > 0) {
+            console.log(`\n🔥 Top Functions:`);
+            for (let i = 0; i < Math.min(5, topFunctions.length); i++) {
+                const func = topFunctions[i];
+                const fileName = func.file.split('/').pop() || func.file;
+                console.log(`   ${func.percentOfTotal.toFixed(1)}% - ${func.functionName} (${fileName})`);
             }
-        }
-    }
-
-    private async generateFlameGraph(profile: CPUProfile, name: string): Promise<void> {
-        console.log('\n🔥 Generating Flame Graph Data...');
-
-        // Convert profile to collapsed stack format for flamegraph
-        const stacks: string[] = [];
-        const nodes = profile.profileData.nodes;
-        const samples = profile.profileData.samples;
-        const timeDeltas = profile.profileData.timeDeltas;
-
-        // Build node map
-        const nodeMap = new Map<number, any>();
-        for (const node of nodes) {
-            nodeMap.set(node.id, node);
-        }
-
-        // Process each sample
-        for (let i = 0; i < samples.length; i++) {
-            const nodeId = samples[i];
-            const weight = timeDeltas[i];
-
-            // Build stack trace
-            const stack: string[] = [];
-            let currentNode = nodeMap.get(nodeId);
-
-            while (currentNode) {
-                if (currentNode.callFrame) {
-                    const frame = currentNode.callFrame;
-                    const funcName = frame.functionName || '(anonymous)';
-                    const fileName = (frame.url || 'unknown').split('/').pop();
-                    stack.unshift(`${funcName} (${fileName})`);
-                }
-
-                if (currentNode.parent) {
-                    currentNode = nodeMap.get(currentNode.parent);
-                } else {
-                    break;
-                }
-            }
-
-            if (stack.length > 0) {
-                stacks.push(`${stack.join(';')} ${weight}`);
-            }
-        }
-
-        // Save collapsed stacks
-        const timestamp = new Date().toISOString().replace(/:/g, '-').split('.')[0];
-        const stacksPath = path.join(this.profilesDir, `${name}-stacks-${timestamp}.txt`);
-        fs.writeFileSync(stacksPath, stacks.join('\n'));
-
-        console.log(`   📁 Collapsed stacks saved: ${stacksPath}`);
-        console.log(`   💡 To generate flamegraph:`);
-        console.log(`      1. Install: npm install -g flamegraph`);
-        console.log(`      2. Generate: flamegraph ${stacksPath} > ${name}.svg`);
-    }
-
-    async runDetailedProfiling(configs?: SwapConfig[]): Promise<void> {
-        const defaultConfigs: SwapConfig[] = [
-            {
-                name: 'Small-ETH-USDC',
-                tokenIn: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // WETH
-                tokenOut: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', // USDC
-                swapAmount: '0.1',
-                swapType: 'EXACT_IN',
-                chain: 'MAINNET',
-            },
-            {
-                name: 'Medium-ETH-USDC',
-                tokenIn: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // WETH
-                tokenOut: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', // USDC
-                swapAmount: '1',
-                swapType: 'EXACT_IN',
-                chain: 'MAINNET',
-            },
-            {
-                name: 'Large-ETH-USDC',
-                tokenIn: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // WETH
-                tokenOut: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', // USDC
-                swapAmount: '100',
-                swapType: 'EXACT_IN',
-                chain: 'MAINNET',
-            },
-        ];
-
-        const swapConfigs = configs || defaultConfigs;
-
-        console.log('🚀 Original SOR CPU Profiling Analysis');
-        console.log('='.repeat(80));
-        console.log('This will generate detailed CPU profiles for the original SOR implementation');
-        console.log('Profiles will be saved in: ' + this.profilesDir);
-        console.log('');
-
-        const allProfiles: { config: SwapConfig; profile: CPUProfile }[] = [];
-
-        for (const config of swapConfigs) {
-            const profile = await this.profileSingleSwap(config, 50);
-            this.printFunctionBreakdown(profile, 15);
-            this.identifyHotspots(profile);
-            await this.generateFlameGraph(profile, `original-${config.name}`);
-
-            allProfiles.push({ config, profile });
-        }
-
-        // Summary comparison across different swap sizes
-        if (allProfiles.length > 1) {
-            console.log('\n📊 Performance Summary Across Swap Sizes:');
-            console.log('─'.repeat(80));
-
-            for (const { config, profile } of allProfiles) {
-                console.log(`\n${config.name}:`);
-                console.log(`  Total profiling time: ${profile.totalTime.toFixed(2)}ms`);
-                console.log(
-                    `  Top CPU consumer: ${profile.topFunctions[0]?.functionName || 'N/A'} (${profile.topFunctions[0]?.percentOfTotal.toFixed(1)}%)`,
-                );
-            }
-        }
-
-        console.log('\n✅ Profiling complete!');
-        console.log('\n📖 How to analyze the profiles:');
-        console.log('1. Open Chrome DevTools (F12)');
-        console.log('2. Go to Performance tab');
-        console.log('3. Click "Load profile" button (up arrow icon)');
-        console.log('4. Select a .cpuprofile file from: ' + this.profilesDir);
-        console.log('\nThis will show you:');
-        console.log('- Call tree with time spent in each function');
-        console.log('- Flame chart visualization');
-        console.log('- Bottom-up view of expensive functions');
-    }
-
-    async profileWithMemory(): Promise<void> {
-        console.log('\n💾 Profiling with Memory Analysis...');
-
-        // Take initial heap snapshot
-        this.takeHeapSnapshot('before');
-        const initialMemory = process.memoryUsage();
-
-        const config: SwapConfig = {
-            name: 'Memory-Profile',
-            tokenIn: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
-            tokenOut: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
-            swapAmount: '10',
-            swapType: 'EXACT_IN',
-            chain: 'MAINNET',
-        };
-
-        // Run profiling
-        const profile = await this.profileSingleSwap(config, 20);
-
-        // Take final heap snapshot
-        this.takeHeapSnapshot('after');
-        const finalMemory = process.memoryUsage();
-
-        // Memory analysis
-        console.log('\n💾 Memory Usage:');
-        console.log(
-            `   Heap Used: ${((finalMemory.heapUsed - initialMemory.heapUsed) / 1024 / 1024).toFixed(2)} MB increase`,
-        );
-        console.log(`   Total Heap: ${(finalMemory.heapTotal / 1024 / 1024).toFixed(2)} MB`);
-        console.log(`   External: ${(finalMemory.external / 1024 / 1024).toFixed(2)} MB`);
-        console.log(`   RSS: ${(finalMemory.rss / 1024 / 1024).toFixed(2)} MB`);
-    }
-
-    private takeHeapSnapshot(name: string): void {
-        const heapSnapshotPath = path.join(this.profilesDir, `heap-${name}-${Date.now()}.heapsnapshot`);
-        const heapSnapshot = v8.writeHeapSnapshot();
-
-        if (heapSnapshot) {
-            fs.writeFileSync(heapSnapshotPath, heapSnapshot);
-            console.log(`📸 Heap snapshot saved: ${heapSnapshotPath}`);
         }
     }
 }
 
-// Main execution
-async function main() {
-    const args = process.argv.slice(2);
+// 3. CLI Handler
+class CLI {
+    private fetcher = new SwapDataFetcher();
+    private profiler = new SorProfiler();
 
-    if (args.includes('--help') || args.includes('-h')) {
+    async run(args: string[]): Promise<void> {
+        const options = this.parseArgs(args);
+
+        if (options.help) {
+            this.printHelp();
+            return;
+        }
+
+        if (options.fetchOnly) {
+            // Just fetch and save swaps
+            await this.fetcher.fetchAndSaveSwaps(options.count);
+            return;
+        }
+
+        // Determine swap source
+        let swaps: SwapData[] = [];
+
+        if (options.singleSwap) {
+            // Use single swap from CLI params
+            swaps = [options.singleSwap];
+            console.log(`\n📝 Using single swap from CLI params`);
+        } else if (options.file) {
+            // Load from specified file
+            swaps = this.loadSwapsFromFile(options.file);
+            console.log(`\n📂 Loaded ${swaps.length} swaps from: ${options.file}`);
+        } else {
+            // Try to load from default file, or fetch new ones
+            const defaultFile = getSwapsFilePath();
+            if (fs.existsSync(defaultFile)) {
+                swaps = this.loadSwapsFromFile(defaultFile);
+                console.log(`\n📂 Loaded ${swaps.length} swaps from: ${defaultFile}`);
+            } else {
+                console.log(`\n🔄 No saved swaps found. Fetching new ones...`);
+                const filePath = await this.fetcher.fetchAndSaveSwaps(options.count);
+                swaps = this.loadSwapsFromFile(filePath);
+            }
+        }
+
+        if (swaps.length === 0) {
+            console.error('❌ No swaps to test');
+            process.exit(1);
+        }
+
+        // Profile the swaps
+        await this.profiler.profileSwaps(swaps);
+    }
+
+    private parseArgs(args: string[]): any {
+        const options: any = {
+            help: args.includes('--help') || args.includes('-h'),
+            fetchOnly: false,
+            count: CONFIG.defaults.swapCount,
+            file: null,
+            singleSwap: null,
+        };
+
+        // Parse fetch-only mode
+        const fetchIndex = args.indexOf('--fetch');
+        if (fetchIndex !== -1) {
+            options.fetchOnly = true;
+            if (args[fetchIndex + 1] && !args[fetchIndex + 1].startsWith('--')) {
+                options.count = parseInt(args[fetchIndex + 1]) || CONFIG.defaults.swapCount;
+            }
+        }
+
+        // Parse count
+        const countIndex = args.indexOf('--count');
+        if (countIndex !== -1 && args[countIndex + 1]) {
+            options.count = parseInt(args[countIndex + 1]) || CONFIG.defaults.swapCount;
+        }
+
+        // Parse file
+        const fileIndex = args.indexOf('--file');
+        if (fileIndex !== -1 && args[fileIndex + 1]) {
+            options.file = args[fileIndex + 1];
+        }
+
+        // Parse single swap
+        const swapIndex = args.indexOf('--swap');
+        if (swapIndex !== -1 && args[swapIndex + 1]) {
+            const parts = args[swapIndex + 1].split(',');
+            if (parts.length === 3) {
+                options.singleSwap = {
+                    tokenIn: parts[0],
+                    tokenOut: parts[1],
+                    amount: parts[2],
+                };
+            } else {
+                console.error('❌ Invalid swap format. Use: --swap tokenIn,tokenOut,amount');
+                process.exit(1);
+            }
+        }
+
+        return options;
+    }
+
+    private loadSwapsFromFile(filePath: string): SwapData[] {
+        try {
+            const data = fs.readFileSync(filePath, 'utf-8');
+            return JSON.parse(data);
+        } catch (error) {
+            console.error(`❌ Failed to load swaps from ${filePath}:`, error);
+            return [];
+        }
+    }
+
+    private printHelp(): void {
         console.log(`
-Original SOR CPU Profiling Script
+SOR CPU Profiling Tool
 
-Usage: node --loader tsx scripts/profile-original-sor.ts [options]
+Usage: npx tsx scripts/profile-sor.ts [options]
 
 Options:
-  --iterations <n>   Number of swap iterations per test (default: 50)
-  --memory          Include memory profiling
-  --help            Show this help message
+  --fetch [count]              Fetch and save swap data only (default: ${CONFIG.defaults.swapCount})
+  --file <path>                Use swaps from specified file
+  --swap <in,out,amount>       Test single swap (e.g., --swap 0xC02aa...,0x6B17...,1.5)
+  --count <n>                  Number of swaps to fetch (default: ${CONFIG.defaults.swapCount})
+  --help                       Show this help
 
-The script generates:
-  1. CPU profiles (.cpuprofile) - Load in Chrome DevTools
-  2. Collapsed stacks (.txt) - For flamegraph generation
-  3. Heap snapshots (.heapsnapshot) - Memory analysis (with --memory flag)
+Examples:
+  # Fetch latest 200 swaps and save to file
+  npx tsx scripts/profile-sor.ts --fetch 200
 
-Output directory: ./profiles/original-sor/
+  # Test with previously saved swaps
+  npx tsx scripts/profile-sor.ts --file profiles/real-swaps/latest-swaps.json
 
-To view CPU profiles:
-  1. Open Chrome DevTools (F12)
-  2. Go to Performance tab
-  3. Click "Load profile" (up arrow icon)
-  4. Select the .cpuprofile file
+  # Test single swap
+  npx tsx scripts/profile-sor.ts --swap 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2,0x6B175474E89094C44Da98b954EedeAC495271d0F,1.5
 
-To generate flamegraphs:
-  1. Install: npm install -g flamegraph
-  2. Generate: flamegraph profiles/original-sor/[name]-stacks.txt > flamegraph.svg
-  3. Open the SVG in a browser
+  # Auto mode: use saved swaps if available, otherwise fetch new ones
+  npx tsx scripts/profile-sor.ts
+
+Data directory: ${CONFIG.defaults.dataDir}/
         `);
-        process.exit(0);
     }
-
-    const profiler = new OriginalSorProfiler();
-
-    console.log('🚀 Starting Original SOR CPU Profiling...');
-    console.log('This will identify performance bottlenecks in the original SOR implementation.\n');
-
-    if (args.includes('--memory')) {
-        await profiler.profileWithMemory();
-    } else {
-        await profiler.runDetailedProfiling();
-    }
-
-    console.log('\n✨ Done! Check the ./profiles/original-sor directory for output files.');
 }
 
-// Run if called directly
+// Main entry point
+async function main() {
+    const cli = new CLI();
+
+    try {
+        await cli.run(process.argv.slice(2));
+        console.log('\n✨ Done!');
+    } catch (error) {
+        console.error('❌ Error:', error);
+        process.exit(1);
+    }
+}
+
 if (require.main === module) {
     main()
-        .catch((error) => {
-            console.error('❌ Profiling failed:', error);
-            process.exit(1);
-        })
+        .catch(console.error)
         .finally(() => process.exit(0));
 }
 
-export { OriginalSorProfiler };
+export { SwapDataFetcher, SorProfiler, SwapData };
