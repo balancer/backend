@@ -1,10 +1,10 @@
 import { Chain } from '@prisma/client';
-import { YbTokenRepository } from './repository';
+import { TokenYieldRepository } from './repository';
 import { YbAprHandlers } from './handlers';
 import { YbAprConfig, TokenApr } from './types';
 
-export class YbTokensService {
-    constructor(private ybTokenRepository = new YbTokenRepository()) {}
+export class TokenYieldsService {
+    constructor(private tokenYieldRepository = new TokenYieldRepository()) {}
 
     /**
      * Fetch yields from external sources and store them in the database
@@ -15,7 +15,7 @@ export class YbTokensService {
         try {
             console.log(`Fetching yields for chain ${chain}...`);
 
-            // Fetch APRs from all handlers
+            // Fetch APRs/yield from all handlers
             const tokenAprs = await ybAprHandlers.fetchAprsFromAllHandlers();
 
             if (tokenAprs.length === 0) {
@@ -27,7 +27,7 @@ export class YbTokensService {
 
             // Group by source (we'll need to track which handler provided which data)
             // For now, we'll store all as 'yb-handlers' source
-            await this.ybTokenRepository.storeTokens(chain, tokenAprs);
+            await this.tokenYieldRepository.storeTokenYields(chain, tokenAprs);
 
             console.log(`Successfully stored ${tokenAprs.length} token yields for chain ${chain}`);
         } catch (error) {
@@ -38,8 +38,8 @@ export class YbTokensService {
     /**
      * Get stored token yields from database
      */
-    async getYbTokens(chain: Chain): Promise<Map<string, TokenApr>> {
-        const tokens = await this.ybTokenRepository.getTokens(chain);
+    async getTokenYields(chain: Chain): Promise<Map<string, TokenApr>> {
+        const tokens = await this.tokenYieldRepository.getTokenYields(chain);
 
         return new Map<string, TokenApr>(
             tokens.filter((token) => !isNaN(token.apr)).map((token) => [token.address, token]),

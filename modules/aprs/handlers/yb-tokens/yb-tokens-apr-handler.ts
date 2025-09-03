@@ -1,17 +1,17 @@
 import { Chain, PrismaPoolAprItem, PrismaPoolAprType } from '@prisma/client';
 import { PoolAPRData, AprHandler } from '../../types';
 import { collectsYieldFee, tokenCollectsYieldFee } from '../../../pool/lib/pool-utils';
-import { YbTokensService } from '../../../yb-tokens';
+import { TokenYieldsService } from '../../../token-yields';
 
 /**
  * Calculator for yield-bearing tokens APR
  * This calculates the APR for various yield-bearing tokens in pools
  */
 export class YbTokensAprHandler implements AprHandler {
-    private ybTokensService: YbTokensService;
+    private ybTokensService: TokenYieldsService;
 
     constructor() {
-        this.ybTokensService = new YbTokensService();
+        this.ybTokensService = new TokenYieldsService();
     }
 
     public getAprServiceName(): string {
@@ -93,8 +93,8 @@ export class YbTokensAprHandler implements AprHandler {
                         pool.type === 'META_STABLE'
                             ? parseFloat(pool.dynamicData.protocolSwapFee || '0')
                             : pool.protocolVersion === 3
-                              ? parseFloat(pool.dynamicData.aggregateYieldFee || '0.1')
-                              : parseFloat(pool.dynamicData.protocolYieldFee || '0');
+                            ? parseFloat(pool.dynamicData.aggregateYieldFee || '0.1')
+                            : parseFloat(pool.dynamicData.protocolYieldFee || '0');
 
                     userApr = userApr * (1 - fee);
                 }
@@ -119,6 +119,6 @@ export class YbTokensAprHandler implements AprHandler {
     }
 
     private async fetchYieldTokensApr(chain: Chain) {
-        return await this.ybTokensService.getYbTokens(chain);
+        return await this.ybTokensService.getTokenYields(chain);
     }
 }

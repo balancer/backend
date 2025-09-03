@@ -1,4 +1,4 @@
-model PrismaYbToken {
+model PrismaTokenYield {
     @@id([address, chain])
 
     address             String

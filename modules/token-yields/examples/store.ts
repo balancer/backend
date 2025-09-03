@@ -1,10 +1,10 @@
-import { YbTokensService } from '../service';
+import { TokenYieldsService } from '../service';
 import cnfg from '../../../config';
 
 const main = async (_chain: string) => {
     const chain = _chain as keyof typeof cnfg;
     const config = cnfg[chain].aprHandlers.ybAprHandler;
-    const service = new YbTokensService();
+    const service = new TokenYieldsService();
 
     return service.fetchAndStoreYields(config!, chain);
 };

@@ -1,14 +1,14 @@
-import { Chain, PrismaYbToken } from '@prisma/client';
+import { Chain, PrismaTokenYield } from '@prisma/client';
 import { prisma } from '../../prisma/prisma-client';
 import { prismaBulkExecuteOperations } from '../../prisma/prisma-util';
 import { YbToken } from './types';
 
-export class YbTokenRepository {
+export class TokenYieldRepository {
     /**
      * Get all token yields for a specific chain
      */
-    async getTokens(chain: Chain): Promise<PrismaYbToken[]> {
-        return prisma.prismaYbToken.findMany({
+    async getTokenYields(chain: Chain): Promise<PrismaTokenYield[]> {
+        return prisma.prismaTokenYield.findMany({
             where: { chain },
         });
     }
@@ -16,7 +16,7 @@ export class YbTokenRepository {
     /**
      * Store token yields in database
      */
-    async storeTokens(chain: Chain, tokenAprs: YbToken[]): Promise<void> {
+    async storeTokenYields(chain: Chain, tokenAprs: YbToken[]): Promise<void> {
         const operations = tokenAprs.map((tokenApr) => ({
             where: {
                 address_chain: {
@@ -37,7 +37,7 @@ export class YbTokenRepository {
         }));
 
         await prismaBulkExecuteOperations(
-            operations.map((operation) => prisma.prismaYbToken.upsert(operation)),
+            operations.map((operation) => prisma.prismaTokenYield.upsert(operation)),
             true,
         );
     }

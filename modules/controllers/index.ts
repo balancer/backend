@@ -12,4 +12,4 @@ export * from './event-controller';
 export * from './staking-controller';
 export * from './token-controller';
 export * from './quant-amm-controller';
-export { YbTokensController } from '../yb-tokens/controller';
+export { TokenYieldsController } from '../token-yields/controller';

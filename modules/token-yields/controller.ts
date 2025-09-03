@@ -1,9 +1,9 @@
 import { Chain } from '@prisma/client';
 import config from '../../config';
-import { YbTokensService } from './service';
+import { TokenYieldsService } from './service';
 import { YbAprConfig } from './types';
 
-const fetchAndStoreAll = async () => {
+const fetchAndStoreAllYields = async () => {
     const configs = Object.fromEntries(
         Object.keys(config)
             .map((chain) => [chain, config[chain as keyof typeof config].aprHandlers.ybAprHandler])
@@ -12,7 +12,7 @@ const fetchAndStoreAll = async () => {
 
     const chains = Object.keys(configs) as Chain[];
 
-    const s = new YbTokensService();
+    const s = new TokenYieldsService();
 
     for (const chain of chains) {
         try {
@@ -23,6 +23,6 @@ const fetchAndStoreAll = async () => {
     }
 };
 
-export const YbTokensController = () => ({
-    fetchAndStoreAll,
+export const TokenYieldsController = () => ({
+    fetchAndStoreAllYields,
 });
