@@ -1,6 +1,6 @@
 import { Chain } from '@prisma/client';
 
-export type YbToken = {
+export type YieldToken = {
     address: string;
     chain: Chain;
     source: string;
@@ -14,20 +14,13 @@ export type TokenApr = {
     address: string;
 };
 
-export type YbAprHandler = (config?: any) => Promise<TokenApr[]>;
-
-export interface FixedAprConfig {
-    [tokenName: string]: {
-        address: string;
-        apr: number;
-    };
-}
+export type TokenYieldHandler = (config?: any) => Promise<TokenApr[]>;
 
 type EntryExtractor =
     | { readonly type: 'path'; readonly token: string; readonly path: string }
     | { readonly type: 'enumerate'; readonly path: string; readonly entries: (item: any) => [string, number] };
 
-export interface AprHttpFetchConfig {
+export interface TokenYieldHttpFetchConfig {
     url: string;
     method?: 'GET' | 'POST';
     headers?: Record<string, string>;
@@ -37,7 +30,7 @@ export interface AprHttpFetchConfig {
     extractors: readonly EntryExtractor[];
 }
 
-export interface AprContractFetchConfig {
+export interface TokenYieldContractFetchConfig {
     name?: string; // for devs to know what token is this
     chain: Chain;
     contract: string;
@@ -48,7 +41,7 @@ export interface AprContractFetchConfig {
     parser: (result: any) => number;
 }
 
-export interface YbAprConfig {
+export interface TokenYieldConfig {
     aave?: {
         market: string;
         chain: Chain;
@@ -62,11 +55,10 @@ export interface YbAprConfig {
         lens: string;
         chain: Chain;
     };
-    http?: AprHttpFetchConfig[];
+    http?: TokenYieldHttpFetchConfig[];
     contract?: {
-        calls: AprContractFetchConfig[];
+        calls: TokenYieldContractFetchConfig[];
     };
-    fixedAprHandler?: FixedAprConfig;
     hypurrfi?: {
         markets: string[];
     };

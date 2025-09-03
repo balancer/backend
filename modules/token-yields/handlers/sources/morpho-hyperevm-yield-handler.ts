@@ -1,14 +1,16 @@
 import MorphoBlueAbi from './abis/morpho-blue';
 import MorphoVaultAbi from './abis/morpho-vault';
 import MorphoIrmAbi from './abis/morpho-irm';
-import { YbAprHandler, YbAprConfig, TokenApr } from '../../types';
+import { TokenYieldHandler, TokenYieldConfig, TokenApr } from '../../types';
 import { Multicaller3Viem } from '../../../web3/multicaller-viem';
 import { ZERO_ADDRESS } from '@balancer/sdk';
 import { secondsPerYear } from '../../../common/time';
 
 // can be used for felix and hyperbeat
 
-export const morphoHyperevm: YbAprHandler = async (config: YbAprConfig['morphoVaultHyperevm']) => {
+export const morphoHyperevmYieldHandler: TokenYieldHandler = async (
+    config: TokenYieldConfig['morphoVaultHyperevm'],
+) => {
     const MORPHO_BLUE_ADDRESS = '0x68e37de8d93d3496ae143f2e900490f6280c57cd';
     try {
         const allAprs: TokenApr[] = [];

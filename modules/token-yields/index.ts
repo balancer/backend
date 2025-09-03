@@ -1,3 +1,3 @@
 export * from './service';
 export * from './controller';
-export type { YbAprConfig } from './types';
+export type { TokenYieldConfig as YbAprConfig } from './types';

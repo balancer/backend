@@ -1,29 +1,29 @@
 import * as sources from './sources';
-import { YbAprConfig, YbToken } from '../types';
+import { TokenYieldConfig, YieldToken } from '../types';
 import { Chain } from '@prisma/client';
 
 const sourceToHandler = {
-    aave: sources.aaveAprHandler,
-    avalon: sources.avalonAprHandler,
-    euler: sources.eulerAprHandler,
-    teth: sources.treehouseAprHandler,
-    sts: sources.stsAprHandler,
-    hypurrfi: sources.hypurrFi,
-    morphoVaultHyperevm: sources.morphoHyperevm,
-    http: sources.httpAprHandler,
-    contract: sources.contractAprHandler,
+    aave: sources.aaveTokenYieldHandler,
+    avalon: sources.avalonYieldHandler,
+    euler: sources.eulerYieldHandler,
+    teth: sources.treehouseYieldHandler,
+    sts: sources.stsYieldHandler,
+    hypurrfi: sources.hypurrFiYieldhandler,
+    morphoVaultHyperevm: sources.morphoHyperevmYieldHandler,
+    http: sources.httpTokenYieldHandler,
+    contract: sources.contractTokenYieldHandler,
 };
 
-export class YbAprHandlers {
-    private config: YbAprConfig;
+export class TokenYieldAprHandlers {
+    private config: TokenYieldConfig;
 
-    constructor(aprConfig: YbAprConfig, private chain: Chain) {
-        const { fixedAprHandler, ...config } = aprConfig;
+    constructor(aprConfig: TokenYieldConfig, private chain: Chain) {
+        const { ...config } = aprConfig;
         this.config = config;
     }
 
-    async fetchAprsFromAllHandlers(): Promise<YbToken[]> {
-        let aprs: YbToken[] = [];
+    async fetchAprsFromAllHandlers(): Promise<YieldToken[]> {
+        let aprs: YieldToken[] = [];
 
         const results = await Promise.allSettled([
             ...Object.entries(this.config).flatMap(([source, config]) => {

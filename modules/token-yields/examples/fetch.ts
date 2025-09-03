@@ -1,10 +1,10 @@
-import { YbAprHandlers } from '../handlers';
+import { TokenYieldAprHandlers } from '../handlers';
 import cnfg from '../../../config';
 
 const main = async (_chain: string) => {
     const chain = _chain as keyof typeof cnfg;
     const config = cnfg[chain].aprHandlers.ybAprHandler;
-    const handler = new YbAprHandlers(config!, chain);
+    const handler = new TokenYieldAprHandlers(config!, chain);
 
     return handler.fetchAprsFromAllHandlers();
 };

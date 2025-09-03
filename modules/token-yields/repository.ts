@@ -1,7 +1,7 @@
 import { Chain, PrismaTokenYield } from '@prisma/client';
 import { prisma } from '../../prisma/prisma-client';
 import { prismaBulkExecuteOperations } from '../../prisma/prisma-util';
-import { YbToken } from './types';
+import { YieldToken } from './types';
 
 export class TokenYieldRepository {
     /**
@@ -16,7 +16,7 @@ export class TokenYieldRepository {
     /**
      * Store token yields in database
      */
-    async storeTokenYields(chain: Chain, tokenAprs: YbToken[]): Promise<void> {
+    async storeTokenYields(chain: Chain, tokenAprs: YieldToken[]): Promise<void> {
         const operations = tokenAprs.map((tokenApr) => ({
             where: {
                 address_chain: {

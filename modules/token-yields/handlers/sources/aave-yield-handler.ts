@@ -1,6 +1,6 @@
 import { Chain } from '@prisma/client';
 import { prisma } from '../../../../prisma/prisma-client';
-import { YbAprHandler } from '../../types';
+import { TokenYieldHandler } from '../../types';
 import { getViemClient } from '../../../sources/viem-client';
 import { parseAbi } from 'viem';
 
@@ -20,7 +20,13 @@ const query = `query getReserves($underlyingAssets: [Bytes!]) {
     }
   }`;
 
-export const aaveAprHandler: YbAprHandler = async ({ subgraphUrl, chain }: { subgraphUrl: string; chain: Chain }) => {
+export const aaveTokenYieldHandler: TokenYieldHandler = async ({
+    subgraphUrl,
+    chain,
+}: {
+    subgraphUrl: string;
+    chain: Chain;
+}) => {
     try {
         const dbTokens = await getDbTokenMappings(chain);
 
@@ -130,14 +136,11 @@ const getDbTokenMappings = async (chain: Chain) => {
 
     const aTokens = await client.multicall({ contracts, allowFailure: false });
 
-    const aTokenToWrappers = wrapperToUnderlying.reduce(
-        (agg, [wrapper], index) => {
-            agg[aTokens[index].toLowerCase()] ||= [];
-            agg[aTokens[index].toLowerCase()].push(wrapper);
-            return agg;
-        },
-        {} as Record<string, string[]>,
-    );
+    const aTokenToWrappers = wrapperToUnderlying.reduce((agg, [wrapper], index) => {
+        agg[aTokens[index].toLowerCase()] ||= [];
+        agg[aTokens[index].toLowerCase()].push(wrapper);
+        return agg;
+    }, {} as Record<string, string[]>);
 
     const mappedTokens = Object.keys(aTokenToWrappers)
         .map((aToken) => {

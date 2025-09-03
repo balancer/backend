@@ -1,7 +1,7 @@
 import { Chain } from '@prisma/client';
 import { TokenYieldRepository } from './repository';
-import { YbAprHandlers } from './handlers';
-import { YbAprConfig, TokenApr } from './types';
+import { TokenYieldAprHandlers } from './handlers';
+import { TokenYieldConfig, TokenApr } from './types';
 
 export class TokenYieldsService {
     constructor(private tokenYieldRepository = new TokenYieldRepository()) {}
@@ -9,14 +9,14 @@ export class TokenYieldsService {
     /**
      * Fetch yields from external sources and store them in the database
      */
-    async fetchAndStoreYields(aprConfig: YbAprConfig, chain: Chain): Promise<void> {
-        const ybAprHandlers = new YbAprHandlers(aprConfig, chain);
+    async fetchAndStoreYields(aprConfig: TokenYieldConfig, chain: Chain): Promise<void> {
+        const tokenYieldAprHandlers = new TokenYieldAprHandlers(aprConfig, chain);
 
         try {
             console.log(`Fetching yields for chain ${chain}...`);
 
             // Fetch APRs/yield from all handlers
-            const tokenAprs = await ybAprHandlers.fetchAprsFromAllHandlers();
+            const tokenAprs = await tokenYieldAprHandlers.fetchAprsFromAllHandlers();
 
             if (tokenAprs.length === 0) {
                 console.log(`No token yields fetched for chain ${chain}`);
