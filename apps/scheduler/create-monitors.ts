@@ -1,7 +1,6 @@
 import { env } from '../env';
 import { AllNetworkConfigs } from '../../modules/network/network-config';
 import { sleep } from '../../modules/common/promise';
-import axios from 'axios';
 import { WorkerJob } from '../../modules/network/network-config-types';
 
 type SentryMonitorRetrieve = {
@@ -40,11 +39,17 @@ export async function createMonitors(chainId: string): Promise<void> {
 }
 
 async function createMonitorsIfNotExist(chainId: string, jobs: WorkerJob[]): Promise<void> {
-    const { data: currentMonitors } = await axios.get<SentryMonitorRetrieve[]>(SENTRY_BASE_URL, {
+    const response = await fetch(SENTRY_BASE_URL, {
         headers: {
             Authorization: `Bearer ${env.SENTRY_AUTH_TOKEN}`,
         },
     });
+
+    if (!response.ok) {
+        throw new Error(`Failed to fetch monitors: ${response.status} ${response.statusText}`);
+    }
+
+    const currentMonitors = (await response.json()) as SentryMonitorRetrieve[];
 
     // update or add monitors
     for (const cronJob of jobs) {
@@ -124,28 +129,50 @@ async function createMonitorsIfNotExist(chainId: string, jobs: WorkerJob[]): Pro
 }
 
 async function addMonitor(monitor: SentryMonitorSend): Promise<void> {
-    await axios.post(SENTRY_BASE_URL, monitor, {
+    const response = await fetch(SENTRY_BASE_URL, {
+        method: 'POST',
         headers: {
             Authorization: `Bearer ${env.SENTRY_AUTH_TOKEN}`,
+            'Content-Type': 'application/json',
         },
+        body: JSON.stringify(monitor),
     });
+
+    if (!response.ok) {
+        throw new Error(`Failed to add monitor: ${response.status} ${response.statusText}`);
+    }
+
     sleep(1000);
 }
 
 async function updateMonitor(monitor: SentryMonitorSend): Promise<void> {
-    await axios.put(SENTRY_BASE_URL + `${monitor.slug}/`, monitor, {
+    const response = await fetch(SENTRY_BASE_URL + `${monitor.slug}/`, {
+        method: 'PUT',
         headers: {
             Authorization: `Bearer ${env.SENTRY_AUTH_TOKEN}`,
+            'Content-Type': 'application/json',
         },
+        body: JSON.stringify(monitor),
     });
+
+    if (!response.ok) {
+        throw new Error(`Failed to update monitor: ${response.status} ${response.statusText}`);
+    }
+
     sleep(1000);
 }
 
 async function deleteMonitor(monitorSlug: string): Promise<void> {
-    await axios.delete(SENTRY_BASE_URL + `${monitorSlug}/`, {
+    const response = await fetch(SENTRY_BASE_URL + `${monitorSlug}/`, {
+        method: 'DELETE',
         headers: {
             Authorization: `Bearer ${env.SENTRY_AUTH_TOKEN}`,
         },
     });
+
+    if (!response.ok) {
+        throw new Error(`Failed to delete monitor: ${response.status} ${response.statusText}`);
+    }
+
     sleep(1000);
 }

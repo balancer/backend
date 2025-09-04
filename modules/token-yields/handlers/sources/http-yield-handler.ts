@@ -1,5 +1,5 @@
 import { JSONPath } from 'jsonpath-plus';
-import { YbAprHandler, AprHttpFetchConfig } from '../../types';
+import { TokenYieldHandler, TokenYieldHttpFetchConfig } from '../../types';
 
 const fetchWithTimeout = async (url: string, options: RequestInit = {}, timeoutMs: number = 20000): Promise<any> => {
     const controller = new AbortController();
@@ -31,7 +31,7 @@ const fetchWithTimeout = async (url: string, options: RequestInit = {}, timeoutM
     }
 };
 
-const extract = (json: any, config: AprHttpFetchConfig) =>
+const extract = (json: any, config: TokenYieldHttpFetchConfig) =>
     config.extractors.flatMap((ex) => {
         if (ex.type === 'path') {
             const raw = JSONPath({ path: ex.path, json, wrap: false });
@@ -44,10 +44,10 @@ const extract = (json: any, config: AprHttpFetchConfig) =>
         return [];
     });
 
-const transform = (entries: [string, number][], config: AprHttpFetchConfig) =>
+const transform = (entries: [string, number][], config: TokenYieldHttpFetchConfig) =>
     entries.map(([key, value]) => ({ address: key, apr: normalizeValue(value, config) }));
 
-const normalizeValue = (value: any, { url, average, scale }: AprHttpFetchConfig) => {
+const normalizeValue = (value: any, { url, average, scale }: TokenYieldHttpFetchConfig) => {
     if (value === undefined) {
         throw `value parsing error ${url}`;
     }
@@ -64,7 +64,7 @@ const normalizeValue = (value: any, { url, average, scale }: AprHttpFetchConfig)
     return parseFloat(value);
 };
 
-export const httpAprHandler: YbAprHandler = async (config: AprHttpFetchConfig) => {
+export const httpTokenYieldHandler: TokenYieldHandler = async (config: TokenYieldHttpFetchConfig) => {
     const res = await fetchWithTimeout(config.url, {
         method: config.method ?? (config.body ? 'POST' : 'GET'),
         headers: config.headers,

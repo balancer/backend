@@ -2,7 +2,6 @@ import { prisma } from '../../../prisma/prisma-client';
 import _, { add } from 'lodash';
 import { env } from '../../../apps/env';
 import { RateLimiter } from 'limiter';
-import axios, { AxiosError } from 'axios';
 import config from '../../../config';
 import { Chain } from '@prisma/client';
 
@@ -169,18 +168,17 @@ export class CoingeckoDataService {
     private async get<T>(endpoint: string): Promise<T> {
         const remainingRequests = await requestRateLimiter.removeTokens(1);
         console.log('Remaining coingecko requests', remainingRequests);
-        let response;
-        try {
-            response = await axios.get(this.baseUrl + endpoint + this.apiKeyParam);
-        } catch (err: any | AxiosError) {
-            if (axios.isAxiosError(err)) {
-                if (err.response?.status === 429) {
-                    throw Error(`Coingecko ratelimit: ${err}`);
-                }
+        
+        const response = await fetch(this.baseUrl + endpoint + this.apiKeyParam);
+        
+        if (!response.ok) {
+            if (response.status === 429) {
+                throw Error(`Coingecko ratelimit: ${response.status} ${response.statusText}`);
             }
-            throw err;
+            throw Error(`Coingecko API error: ${response.status} ${response.statusText}`);
         }
-        return response.data;
+        
+        return await response.json() as T;
     }
 }
 

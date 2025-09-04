@@ -1,11 +1,15 @@
 import { Chain } from '@prisma/client';
-import { YbAprHandler, AprContractFetchConfig, TokenApr } from '../../types';
-import { getViemClient } from '../../../../../sources/viem-client';
-import { multicallViem } from '../../../../../web3/multicaller-viem';
+import { TokenYieldHandler, TokenYieldContractFetchConfig, TokenApr } from '../../types';
+import { getViemClient } from '../../../sources/viem-client';
+import { multicallViem } from '../../../web3/multicaller-viem';
 import { parseAbiItem } from 'viem';
 import _ from 'lodash';
 
-export const contractAprHandler: YbAprHandler = async ({ calls }: { calls: AprContractFetchConfig[] }) => {
+export const contractTokenYieldHandler: TokenYieldHandler = async ({
+    calls,
+}: {
+    calls: TokenYieldContractFetchConfig[];
+}) => {
     // group calls by chain
     const callsByChain = _.groupBy(calls, 'chain');
 

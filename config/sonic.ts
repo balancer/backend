@@ -14,7 +14,7 @@ export default <NetworkData>{
         startDate: '2024-12-12',
         balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmPXaLKDvMMZdjD1ZuMpMSkRjKf8ALLVRtjUpTwWdKSvpQ`,
         balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmUgRWkb5JUocGkVidpKtZFMHjexJzkBiSbjufURsXwn9X`,
-        balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmVZrey68W5HEhth7PKim8Do9cZdP8WsEMFpBpDXccAo9G`,
+        balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/Qmf61sxkSwc1x15jfonJeoYzHWWR8WJFqhWzgtVPNtar6H`,
         gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmPvzExEGhqUYBB1oVLdQDXoHWUxuBJ8Sb3Dowx5qt5xze`,
         reliquary: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmUM8aU6H3gFx6JL65GQV5baPPjczU9hUb6VRiDQ1jEp3B`,
         sts: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmYmPEGqVZPyJKRah4NVbCYtxkHrXq3QzqBrnVQYBt15MU`,
@@ -76,6 +76,13 @@ export default <NetworkData>{
     },
     avgBlockSpeed: 1,
     aprHandlers: {
+        aave: [
+            {
+                market: 'v3',
+                chain: 'SONIC',
+                subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/FQcacc4ZJaQVS9euWb76nvpSq2GxavBnUM6DU6tmspbi`,
+            },
+        ],
         maBeetsAprHandler: {
             beetsAddress: '0x2d0e0814e62d80056181f5cd932274405966e4f0',
         },

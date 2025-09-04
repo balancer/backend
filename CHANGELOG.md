@@ -1,5 +1,15 @@
 # backend
 
+## 1.53.0
+
+### Minor Changes
+
+-   6e57cbe: store yb-tokens in the db
+
+### Patch Changes
+
+-   3f4e755: removed axios
+
 ## 1.52.4
 
 ### Patch Changes

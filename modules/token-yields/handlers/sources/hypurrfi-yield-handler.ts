@@ -1,9 +1,9 @@
 import { abi } from './abis/hypurrfi-market';
-import { YbAprHandler, YbAprConfig, TokenApr } from '../../types';
-import { secondsPerYear } from '../../../../../common/time';
-import { getViemClient } from '../../../../../sources/viem-client';
+import { TokenYieldHandler, TokenYieldConfig, TokenApr } from '../../types';
+import { secondsPerYear } from '../../../common/time';
+import { getViemClient } from '../../../sources/viem-client';
 
-export const hypurrFi: YbAprHandler = async (config: YbAprConfig['hypurrfi']) => {
+export const hypurrFiYieldhandler: TokenYieldHandler = async (config: TokenYieldConfig['hypurrfi']) => {
     try {
         const client = getViemClient('HYPEREVM');
         const allAprs: TokenApr[] = [];

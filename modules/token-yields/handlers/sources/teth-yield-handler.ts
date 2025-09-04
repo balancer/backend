@@ -1,10 +1,10 @@
-import { YbAprHandler } from '../../types';
+import { TokenYieldHandler } from '../../types';
 
 const url = 'https://api.treehouse.finance/rate/mey';
 
 // The apr config needs to be custom made as the resulting value
 // is equal to Lido's wstETH APR plus the data from the below query.
-export const treehouseAprHandler: YbAprHandler = async (config: { address: string }) => {
+export const treehouseYieldHandler: TokenYieldHandler = async (config: { address: string }) => {
     try {
         const response = await fetch(url);
         const { key, message, data } = (await response.json()) as { key: string; message: string; data: string };

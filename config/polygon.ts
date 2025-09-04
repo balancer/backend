@@ -70,82 +70,13 @@ export default <NetworkData>{
             aave: [
                 {
                     market: 'v2',
+                    chain: 'POLYGON',
                     subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/H1Et77RZh3XEf27vkAmJyzgCME2RSFLtDS2f4PPW6CGp`,
-                    tokens: {
-                        USDC: {
-                            underlyingAssetAddress: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',
-                            aTokenAddress: '0x1a13f4ca1d028320a707d99520abfefca3998b7f',
-                            wrappedTokens: {
-                                waUSDC: '0x221836a597948dce8f3568e044ff123108acc42a',
-                            },
-                        },
-                        USDT: {
-                            underlyingAssetAddress: '0xc2132d05d31c914a87c6611c10748aeb04b58e8f',
-                            aTokenAddress: '0x60d55f02a771d515e077c9c2403a1ef324885cec',
-                            wrappedTokens: {
-                                waUSDT: '0x19c60a251e525fa88cd6f3768416a8024e98fc19',
-                            },
-                        },
-                        DAI: {
-                            underlyingAssetAddress: '0x8f3cf7ad23cd3cadbd9735aff958023239c6a063',
-                            aTokenAddress: '0x27f8d03b3a2196956ed754badc28d73be8830a6e',
-                            wrappedTokens: {
-                                waDAI: '0xee029120c72b0607344f35b17cdd90025e647b00',
-                            },
-                        },
-                    },
                 },
                 {
+                    market: 'v3',
+                    chain: 'POLYGON',
                     subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/Co2URyXjnxaw8WqxKyVHdirq9Ahhm5vcTs4dMedAq211`,
-                    tokens: {
-                        USDCn: {
-                            underlyingAssetAddress: '0x3c499c542cef5e3811e1192ce70d8cc03d5c3359',
-                            aTokenAddress: '0xa4d94019934d8333ef880abffbf2fdd611c762bd',
-                            wrappedTokens: {
-                                stataPolUSDCn: '0x2dca80061632f3f87c9ca28364d1d0c30cd79a19',
-                            },
-                        },
-                        USDC: {
-                            underlyingAssetAddress: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',
-                            aTokenAddress: '0x625e7708f30ca75bfd92586e17077590c60eb4cd',
-                            wrappedTokens: {
-                                waUSDC: '0xac69e38ed4298490906a3f8d84aefe883f3e86b5',
-                                stataPolUSDC: '0xc04296aa4534f5a3bab2d948705bc89317b2f1ed',
-                            },
-                        },
-                        USDT: {
-                            underlyingAssetAddress: '0xc2132d05d31c914a87c6611c10748aeb04b58e8f',
-                            aTokenAddress: '0x6ab707aca953edaefbc4fd23ba73294241490620',
-                            wrappedTokens: {
-                                stataPolUSDT: '0x31f5ac91804a4c0b54c0243789df5208993235a1',
-                                stataPolUSDT2: '0x87a1fdc4c726c459f597282be639a045062c0e46',
-                            },
-                        },
-                        DAI: {
-                            underlyingAssetAddress: '0x8f3cf7ad23cd3cadbd9735aff958023239c6a063',
-                            aTokenAddress: '0x82e64f49ed5ec1bc6e43dad4fc8af9bb3a2312ee',
-                            wrappedTokens: {
-                                waDAI: '0xdb6df721a6e7fdb97363079b01f107860ac156f9',
-                                stataPolDAI: '0xfcf5d4b313e06bb3628eb4fe73320e94039dc4b7',
-                            },
-                        },
-                        wETH: {
-                            underlyingAssetAddress: '0x7ceb23fd6bc0add59e62ac25578270cff1b9f619',
-                            aTokenAddress: '0xe50fa9b3c56ffb159cb0fca61f5c9d750e8128c8',
-                            wrappedTokens: {
-                                waWETH: '0xa5bbf0f46b9dc8a43147862ba35c8134eb45f1f5',
-                                stataPolWETH: '0xd08b78b11df105d2861568959fca28e30c91cf68',
-                            },
-                        },
-                        wMATIC: {
-                            underlyingAssetAddress: '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270',
-                            aTokenAddress: '0x6d80113e533a2c0fe82eabd35f1875dcea89ea97',
-                            wrappedTokens: {
-                                waWMATIC: '0x0d6135b2cfbae3b1c58368a93b855fa54fa5aae1',
-                                stataPolWMATIC: '0x6f3913333f2d4b7b01d17bedbce1e4c758b94465',
-                            },
-                        },
-                    },
                 },
             ],
             http: [

@@ -116,6 +116,10 @@ export const mainnetNetworkConfig: NetworkConfig = {
         },
         // APRs
         {
+            name: 'fetch-token-yields',
+            interval: every(20, 'minutes'),
+        },
+        {
             name: 'update-pool-apr',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(6, 'minutes') : every(2, 'minutes'),
         },

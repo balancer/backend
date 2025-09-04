@@ -5,7 +5,6 @@ import { Chain, PrismaLastBlockSyncedCategory, PrismaUserBalanceType } from '@pr
 import _ from 'lodash';
 import { networkContext } from '../network/network-context.service';
 import { GqlProtocolMetricsAggregated, GqlProtocolMetricsChain } from '../../apps/api/gql/generated-schema';
-import axios from 'axios';
 import config from '../../config';
 import { SwapEvent } from '../../prisma/prisma-types';
 
@@ -205,7 +204,8 @@ export class ProtocolService {
             return 0;
         }
 
-        const { data } = await axios.get<number>('https://api.llama.fi/tvl/balancer-v1');
+        const response = await fetch('https://api.llama.fi/tvl/balancer-v1');
+        const data = await response.json() as number;
 
         return data;
     }

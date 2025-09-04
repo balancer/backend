@@ -1,4 +1,4 @@
-import { TokenPriceHandler, TokenPriceItem } from '../token-types';
+import { TokenPriceItem } from '../token-types';
 import { prisma } from '../../../prisma/prisma-client';
 import _ from 'lodash';
 import { timestampRoundedUpToNearestHour } from '../../common/time';
@@ -6,38 +6,10 @@ import { Chain, PrismaTokenCurrentPrice, PrismaTokenPrice } from '@prisma/client
 import moment from 'moment-timezone';
 import { GqlTokenChartDataRange } from '../../../apps/api/gql/generated-schema';
 import { Cache, CacheClass } from 'memory-cache';
-import * as Sentry from '@sentry/node';
-import { FbeetsPriceHandlerService } from './token-price-handlers/fbeets-price-handler.service';
-import { ClqdrPriceHandlerService } from './token-price-handlers/clqdr-price-handler.service';
-import { CoingeckoPriceHandlerService } from './token-price-handlers/coingecko-price-handler.service';
-import { FallbackHandlerService } from './token-price-handlers/fallback-price-handler.service';
-import { BptPriceHandlerService } from './token-price-handlers/bpt-price-handler.service';
-import { SwapsPriceHandlerService } from './token-price-handlers/swaps-price-handler.service';
-import { PrismaTokenWithTypes } from '../../../prisma/prisma-types';
-import { AavePriceHandlerService } from './token-price-handlers/aave-price-handler.service';
-import { MorphoPriceHandlerService } from './token-price-handlers/morpho-price-handler.service';
-import { RektTokensHandlerService } from './token-price-handlers/rekt-tokens-handler.service';
 import config from '../../../config';
-import { BeetsPriceHandlerService } from './token-price-handlers/beets-price-handler.service';
-import { ERC4626PriceHandlerService } from './token-price-handlers/erc4626-price-handler.service';
-import { LbpPriceHandlerService } from './token-price-handlers/lbp-price-handler.service';
 
 export class TokenPriceService {
     cache: CacheClass<string, any> = new Cache<string, any>();
-    private readonly priceHandlers: TokenPriceHandler[] = [
-        new RektTokensHandlerService(),
-        new ERC4626PriceHandlerService(),
-        new FbeetsPriceHandlerService(),
-        new BeetsPriceHandlerService(),
-        new ClqdrPriceHandlerService(),
-        new AavePriceHandlerService(),
-        new MorphoPriceHandlerService(),
-        new CoingeckoPriceHandlerService(),
-        new BptPriceHandlerService(),
-        new SwapsPriceHandlerService(),
-        new LbpPriceHandlerService(),
-        new FallbackHandlerService(),
-    ];
 
     public async getCurrentTokenPrices(chains: Chain[]): Promise<PrismaTokenCurrentPrice[]> {
         const tokenPrices = await prisma.prismaTokenCurrentPrice.findMany({
