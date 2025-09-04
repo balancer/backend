@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { PrismaPoolAprItem, PrismaPoolAprType } from '@prisma/client';
 import { AprHandler, PoolAPRData } from '../../types';
 
@@ -19,9 +18,10 @@ export class BeetswarsGaugeVotingAprHandler implements AprHandler {
                 continue;
             }
 
-            const response = await axios.get('https://www.beetswars.live/api/trpc/chart.chartdata');
+            const response = await fetch('https://www.beetswars.live/api/trpc/chart.chartdata');
+            const data: any = await response.json();
 
-            const raw: number[] = response.data.result.data.json.chartdata.votingApr;
+            const raw = data.result.data.json.chartdata.votingApr as number[];
 
             // Filter out non-numbers and infinity values
             const votingAprs = raw.filter((apr) => apr && isFinite(apr));

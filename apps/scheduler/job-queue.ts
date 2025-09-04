@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { AllNetworkConfigs } from '../../modules/network/network-config';
 import { SendMessageCommand, SendMessageCommandInput, SQSClient } from '@aws-sdk/client-sqs';
 import { env } from '../env';
@@ -32,11 +31,17 @@ class WokerQueue {
             throw new Error('WORKER_QUEUE_URL is undefined');
         }
 
-        await axios.post(this.queueUrl, json, {
+        const response = await fetch(this.queueUrl, {
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
+            body: json,
         });
+        
+        if (!response.ok) {
+            throw new Error(`Failed to send message: ${response.status} ${response.statusText}`);
+        }
     }
 
     public async sendMessage(json: string, deDuplicationId?: string, delaySeconds?: number): Promise<void> {
