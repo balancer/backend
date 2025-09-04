@@ -36,6 +36,15 @@ export const computeDailyValues = (
 
             // Calculate daily values as the difference from the previous snapshot
             if (previousSnapshot) {
+                (snapshot.totalVolumes as string[]).map((value, i) => {
+                    if (parseFloat(value) < parseFloat((previousSnapshot.totalVolumes as string[])[i])) {
+                        console.error(
+                            `Volume decreased for v3 pool ${snapshot.poolId} from ${
+                                (previousSnapshot.totalVolumes as string[])[i]
+                            } to ${value} at timestamp ${snapshot.timestamp}`,
+                        );
+                    }
+                });
                 dailyVolumes = diff(snapshot.totalVolumes as string[], previousSnapshot.totalVolumes as string[]);
                 dailySwapFees = diff(snapshot.totalSwapFees as string[], previousSnapshot.totalSwapFees as string[]);
                 dailySurpluses = diff(snapshot.totalSurpluses as string[], previousSnapshot.totalSurpluses as string[]);
