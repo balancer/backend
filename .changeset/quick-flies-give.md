@@ -1,0 +1,5 @@
+---
+'backend': patch
+---
+
+removed axios
