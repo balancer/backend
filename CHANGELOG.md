@@ -1,5 +1,13 @@
 # backend
 
+## 1.52.4
+
+### Patch Changes
+
+-   2cd4020: erc4626 price spike protection
+-   93d0c62: log v3 snapshot anomalies
+-   9492c85: sor profiling script
+
 ## 1.52.3
 
 ### Patch Changes
