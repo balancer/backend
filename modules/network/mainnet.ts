@@ -116,7 +116,7 @@ export const mainnetNetworkConfig: NetworkConfig = {
         },
         // APRs
         {
-            name: 'fetch-yb-tokens',
+            name: 'fetch-token-yields',
             interval: every(20, 'minutes'),
         },
         {
