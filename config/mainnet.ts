@@ -2,16 +2,6 @@ import { BigNumber } from 'ethers';
 import { env } from '../apps/env';
 import { NetworkData } from '../modules/network/network-config-types';
 
-const underlyingTokens = {
-    USDC: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
-    USDT: '0xdac17f958d2ee523a2206206994597c13d831ec7',
-    DAI: '0x6b175474e89094c44da98b954eedeac495271d0f',
-    wETH: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
-    crvUSD: '0xf939e0a03fb07f59a73314e73794be0e57ac1b4e',
-    LUSD: '0x5f98805a4e8be255a32880fdec7f6728c6568ba0',
-    USDe: '0x4c9edd5852cd905f086c759e8383e09bff1e68b3',
-};
-
 export default <NetworkData>{
     chain: {
         slug: 'ethereum',
@@ -114,127 +104,18 @@ export default <NetworkData>{
             aave: [
                 {
                     market: 'v2',
+                    chain: 'MAINNET',
                     subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/8wR23o1zkS4gpLqLNU4kG3JHYVucqGyopL5utGxP2q1N`,
-                    tokens: {
-                        USDC: {
-                            underlyingAssetAddress: underlyingTokens.USDC,
-                            aTokenAddress: '0xbcca60bb61934080951369a648fb03df4f96263c',
-                            wrappedTokens: {
-                                waUSDC: '0xd093fa4fb80d09bb30817fdcd442d4d02ed3e5de',
-                            },
-                        },
-                        USDT: {
-                            underlyingAssetAddress: underlyingTokens.USDT,
-                            aTokenAddress: '0x3ed3b47dd13ec9a98b44e6204a523e766b225811',
-                            wrappedTokens: {
-                                waUSDT: '0xf8fd466f12e236f4c96f7cce6c79eadb819abf58',
-                            },
-                        },
-                        DAI: {
-                            underlyingAssetAddress: underlyingTokens.DAI,
-                            aTokenAddress: '0x028171bca77440897b824ca71d1c56cac55b68a3',
-                            wrappedTokens: {
-                                waDAI: '0x02d60b84491589974263d922d9cc7a3152618ef6',
-                            },
-                        },
-                    },
                 },
                 {
                     market: 'v3',
+                    chain: 'MAINNET',
                     subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/Cd2gEDVeqnjBn1hSeqFMitw8Q1iiyV9FYUZkLNRcL87g`,
-                    tokens: {
-                        USDC: {
-                            underlyingAssetAddress: underlyingTokens.USDC,
-                            aTokenAddress: '0x98c23e9d8f34fefb1b7bd6a91b7ff122f4e16f5c',
-                            wrappedTokens: {
-                                waUSDC: '0x57d20c946a7a3812a7225b881cdcd8431d23431c',
-                                stataEthUSDC: '0x02c2d189b45ce213a40097b62d311cf0dd16ec92',
-                                stataV2USDC: '0xd4fa2d31b7968e448877f69a96de69f5de8cd23e',
-                            },
-                        },
-                        USDT: {
-                            underlyingAssetAddress: underlyingTokens.USDT,
-                            aTokenAddress: '0x23878914efe38d27c4d67ab83ed1b93a74d4086a',
-                            wrappedTokens: {
-                                waUSDT: '0xa7e0e66f38b8ad8343cff67118c1f33e827d1455',
-                                stataEthUSDT: '0x65799b9fd4206cdaa4a1db79254fcbc2fd2ffee6',
-                                stataEthUSDT2: '0x862c57d48becb45583aeba3f489696d22466ca1b',
-                                stataV2USDT: '0x7bc3485026ac48b6cf9baf0a377477fff5703af8',
-                            },
-                        },
-                        DAI: {
-                            underlyingAssetAddress: underlyingTokens.DAI,
-                            aTokenAddress: '0x018008bfb33d285247a21d44e50697654f754e63',
-                            wrappedTokens: {
-                                waDAI: '0x098256c06ab24f5655c5506a6488781bd711c14b',
-                                stataEthDAI: '0xeb708639e8e518b86a916db3685f90216b1c1c67',
-                            },
-                        },
-                        wETH: {
-                            underlyingAssetAddress: underlyingTokens.wETH,
-                            aTokenAddress: '0x4d5f47fa6a74757f35c14fd3a6ef8e3c9bc514e8',
-                            wrappedTokens: {
-                                waWETH: '0x59463bb67ddd04fe58ed291ba36c26d99a39fbc6',
-                                stataEthWETH: '0x03928473f25bb2da6bc880b07ecbadc636822264',
-                                stataV2WETH: '0x0bfc9d54fc184518a81162f8fb99c2eaca081202',
-                            },
-                        },
-                        crvUSD: {
-                            underlyingAssetAddress: underlyingTokens.crvUSD,
-                            aTokenAddress: '0xb82fa9f31612989525992fcfbb09ab22eff5c85a',
-                            wrappedTokens: {
-                                stataEthcrvUSD: '0x848107491e029afde0ac543779c7790382f15929',
-                            },
-                        },
-                        LUSD: {
-                            underlyingAssetAddress: underlyingTokens.LUSD,
-                            aTokenAddress: '0x3fe6a295459fae07df8a0cecc36f37160fe86aa9',
-                            wrappedTokens: {
-                                stataEthLUSD: '0xdbf5e36569798d1e39ee9d7b1c61a7409a74f23a',
-                            },
-                        },
-                        USDe: {
-                            underlyingAssetAddress: underlyingTokens.USDe,
-                            aTokenAddress: '0x4f5923fc5fd4a93352581b38b7cd26943012decf',
-                            wrappedTokens: {
-                                stataEthUSDe: '0x5f9d59db355b4a60501544637b00e94082ca575b',
-                            },
-                        },
-                        pyUSD: {
-                            underlyingAssetAddress: '0x6c3ea9036406852006290770bedfcaba0e23a0e8',
-                            aTokenAddress: '0x0c0d01abf3e6adfca0989ebba9d6e85dd58eab1e',
-                            wrappedTokens: {
-                                waEthPYUSD: '0xb51edddd8c47856d81c8681ea71404cec93e92c6',
-                            },
-                        },
-                    },
                 },
                 {
                     market: 'lido',
+                    chain: 'MAINNET',
                     subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/5vxMbXRhG1oQr55MWC5j6qg78waWujx1wjeuEWDA6j3`,
-                    tokens: {
-                        LidoWETH: {
-                            underlyingAssetAddress: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
-                            aTokenAddress: '0xfa1fdbbd71b0aa16162d76914d69cd8cb3ef92da',
-                            wrappedTokens: {
-                                waEthLido: '0x0fe906e030a44ef24ca8c7dc7b7c53a6c4f00ce9',
-                            },
-                        },
-                        LidoWSTETH: {
-                            underlyingAssetAddress: '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0',
-                            aTokenAddress: '0xc035a7cf15375ce2706766804551791ad035e0c2',
-                            wrappedTokens: {
-                                waEthLidowstETH: '0x775f661b0bd1739349b9a2a3ef60be277c5d2d29',
-                            },
-                        },
-                        LidoGHO: {
-                            underlyingAssetAddress: '0x40d16fc0246ad3160ccc09b8d0d3a2cd28ae6c2f',
-                            aTokenAddress: '0x18efe565a5373f430e2f809b97de30335b3ad96a',
-                            wrappedTokens: {
-                                waEthLidoGHO: '0xc71ea051a5f82c67adcf634c36ffe6334793d24c',
-                            },
-                        },
-                    },
                 },
             ],
             http: [

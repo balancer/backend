@@ -34,7 +34,7 @@ export function createHandlers(chain: Chain): AprHandler[] {
     }
 
     if (config[chain].aprHandlers.ybAprHandler) {
-        handlerList.push(new handlers.YbTokensAprHandler(config[chain].aprHandlers.ybAprHandler, chain));
+        handlerList.push(new handlers.YbTokensAprHandler());
     }
 
     if (config[chain].aprHandlers.morphoRewardsAprHandler) {

@@ -1,12 +1,11 @@
-import axios from 'axios';
-import { TokenApr, YbAprHandler } from '../../types';
+import { TokenApr, TokenYieldHandler } from '../../types';
 import { Chain } from '@prisma/client';
-import { prisma } from '../../../../../../prisma/prisma-client';
-import { multicallViem } from '../../../../../web3/multicaller-viem';
+import { prisma } from '../../../../prisma/prisma-client';
+import { multicallViem } from '../../../web3/multicaller-viem';
 import eulerVault from './abis/euler-vault';
-import { getViemClient } from '../../../../../sources/viem-client';
+import { getViemClient } from '../../../sources/viem-client';
 import eulerUtilsLens from './abis/euler-utils-lens';
-import { Multicaller3Call } from '../../../../../web3/types';
+import { Multicaller3Call } from '../../../web3/types';
 import { AbiParametersToPrimitiveTypes, ExtractAbiFunction } from 'abitype';
 import { formatUnits } from 'viem';
 
@@ -37,10 +36,10 @@ type ComputeAPYs = AbiParametersToPrimitiveTypes<ExtractAbiFunction<typeof euler
   for each results for the above query, compute apy via utilsLens contract
   and return the result as apr
 */
-export const eulerAprHandler: YbAprHandler = async (config: { chain: Chain; url: string; lens: string }) => {
+export const eulerYieldHandler: TokenYieldHandler = async (config: { chain: Chain; url: string; lens: string }) => {
     try {
         // find vaults that we have in our pools
-        const vaults = await axios.get<VaultsResponse>(config.url).then((response) => response.data);
+        const vaults = await fetch(config.url).then((response) => response.json() as Promise<VaultsResponse>);
 
         const vaultsAddresses = Object.keys(vaults).map((address) => address.toLowerCase());
 

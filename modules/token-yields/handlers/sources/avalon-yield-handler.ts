@@ -1,4 +1,4 @@
-import { YbAprHandler } from '../../types';
+import { TokenYieldHandler } from '../../types';
 
 const query = `query getReserves($aTokens: [String!], $underlyingAssets: [Bytes!]) {
   reserves(
@@ -14,7 +14,7 @@ const query = `query getReserves($aTokens: [String!], $underlyingAssets: [Bytes!
   }
 }`;
 
-export const avalonAprHandler: YbAprHandler = async ({
+export const avalonYieldHandler: TokenYieldHandler = async ({
     subgraphUrl,
     tokens,
 }: {
