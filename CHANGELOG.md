@@ -1,5 +1,12 @@
 # backend
 
+## 1.53.1
+
+### Patch Changes
+
+-   aaf67f5: monitor protocol yield fee
+-   a5808ae: detect negative tvl24h ago
+
 ## 1.53.0
 
 ### Minor Changes
