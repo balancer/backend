@@ -30,20 +30,27 @@ export const updateLiquidity24hAgo = async (
     if (!data) return;
 
     // Update liquidity data
-    const updates = Object.entries(data).map(([id, { tvl, totalShares }]) => {
-        return {
-            where: {
-                poolId_chain: {
-                    poolId: id,
-                    chain,
+    const updates = Object.entries(data)
+        .map(([id, { tvl, totalShares }]) => {
+            if (tvl && tvl < 0) {
+                console.error('Negative Tvl24h ago', id, chain, tvl);
+                return;
+            }
+
+            return {
+                where: {
+                    poolId_chain: {
+                        poolId: id,
+                        chain,
+                    },
                 },
-            },
-            data: {
-                totalLiquidity24hAgo: tvl,
-                totalShares24hAgo: totalShares,
-            },
-        };
-    });
+                data: {
+                    totalLiquidity24hAgo: tvl,
+                    totalShares24hAgo: totalShares,
+                },
+            };
+        })
+        .filter((item) => !!item);
 
     const updated: string[] = [];
     for (const update of updates) {
