@@ -39,7 +39,7 @@ export const fetchUnwrapRates = async (
     }
     const chain = validTokens[0].chain;
     const caller = new Multicaller3Viem(chain, MinimalErc4626Abi);
-    validTokens.forEach((token) => caller.call(token.address, token.address, 'convertToAssets', [parseEther('1')]));
+    validTokens.forEach((token) => caller.call(token.address, token.address, 'convertToAssets', [parseUnits('1', 36)]));
     const results = await caller.execute<{ [id: string]: bigint }>();
 
     // Convert the results to floats
@@ -47,7 +47,7 @@ export const fetchUnwrapRates = async (
         Object.entries(results).map(([key, value], index) => {
             const token = validTokens[index];
             const underlyingToken = underlyingTokenMap[token.underlyingTokenAddress!];
-            const unwrapRateDecimals = 18 - token.decimals + underlyingToken.decimals;
+            const unwrapRateDecimals = 36 - token.decimals + underlyingToken.decimals;
             return [key, { unwrapRate: formatUnits(value, unwrapRateDecimals) }];
         }),
     );

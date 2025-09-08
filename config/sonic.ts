@@ -265,6 +265,13 @@ export default <NetworkData>{
                     ],
                 },
                 {
+                    url: 'https://v2.silo.finance/api/detailed-vault/sonic-0x391b3f70e254d582588b27e97e48d1cfcdf0be7e',
+                    scale: 1e18,
+                    extractors: [
+                        { type: 'path', token: '0x391b3f70e254d582588b27e97e48d1cfcdf0be7e', path: '$.supplyApr' },
+                    ],
+                },
+                {
                     url: 'https://api-v2.streamprotocol.money/vaults/xUSD/apy',
                     scale: 100,
                     extractors: [{ type: 'path', token: '0x6202b9f02e30e5e1c62cc01e4305450e5d83b926', path: '$.apy' }],
