@@ -1,5 +1,11 @@
 # backend
 
+## 1.53.2
+
+### Patch Changes
+
+-   6a1f1b4: more precision for unwrap rate
+
 ## 1.53.1
 
 ### Patch Changes
