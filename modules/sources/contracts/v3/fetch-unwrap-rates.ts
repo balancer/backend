@@ -1,7 +1,7 @@
 import { PrismaToken } from '@prisma/client';
 import { Multicaller3Viem } from '../../../web3/multicaller-viem';
 import MinimalErc4626Abi from '../abis/MinimalERC4626';
-import { formatUnits, parseEther, parseUnits } from 'viem';
+import { formatEther, parseUnits } from 'viem';
 
 /**
  * Fetches convertToAssets rates for a list of ERC4626 tokens and returns them as strings
@@ -39,16 +39,17 @@ export const fetchUnwrapRates = async (
     }
     const chain = validTokens[0].chain;
     const caller = new Multicaller3Viem(chain, MinimalErc4626Abi);
-    validTokens.forEach((token) => caller.call(token.address, token.address, 'convertToAssets', [parseUnits('1', 36)]));
+    validTokens.forEach((token) =>
+        caller.call(token.address, token.address, 'convertToAssets', [
+            parseUnits('1', 18 + token.decimals - underlyingTokenMap[token.underlyingTokenAddress!].decimals),
+        ]),
+    );
     const results = await caller.execute<{ [id: string]: bigint }>();
 
     // Convert the results to floats
     const formattedResults = Object.fromEntries(
-        Object.entries(results).map(([key, value], index) => {
-            const token = validTokens[index];
-            const underlyingToken = underlyingTokenMap[token.underlyingTokenAddress!];
-            const unwrapRateDecimals = 36 - token.decimals + underlyingToken.decimals;
-            return [key, { unwrapRate: formatUnits(value, unwrapRateDecimals) }];
+        Object.entries(results).map(([key, value]) => {
+            return [key, { unwrapRate: formatEther(value) }];
         }),
     );
 
