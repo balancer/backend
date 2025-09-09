@@ -1,5 +1,11 @@
 # backend
 
+## 1.53.3
+
+### Patch Changes
+
+-   bff466b: pools SG version bump
+
 ## 1.53.2
 
 ### Patch Changes
