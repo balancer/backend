@@ -98,6 +98,10 @@ export class AprRepository {
 
         // Only create operations for items that don't exist or have changed
         const operations = newAprItems
+            .map((item) => ({
+                ...item,
+                apr: Math.abs(item.apr) < 0.0001 ? 0 : item.apr, // round to zero when less that 0.01%
+            }))
             .filter((item) => {
                 const existingItem = existingItemsMap.get(item.id);
                 const changed = !existingItem || Math.abs(existingItem.apr - item.apr) > 0.0001;
