@@ -4,7 +4,10 @@ import { AprRepository } from './apr-repository';
 import _ from 'lodash';
 
 export class AprManager {
-    constructor(private readonly aprRepository: AprRepository, private readonly aprHandlers: AprHandler[]) {}
+    constructor(
+        private readonly aprRepository: AprRepository,
+        private readonly aprHandlers: AprHandler[],
+    ) {}
 
     /**
      * Calculate APRs without writing to the database
@@ -27,7 +30,7 @@ export class AprManager {
             try {
                 const items = await handler.calculateAprForPools(pools);
                 allAprItems.push(...items);
-            } catch (e) {
+            } catch (e: any) {
                 failedHandlers.push(handler.getAprServiceName());
             }
         }

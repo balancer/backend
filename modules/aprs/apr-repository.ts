@@ -104,10 +104,19 @@ export class AprRepository {
             }))
             .filter((item) => {
                 const existingItem = existingItemsMap.get(item.id);
-                const changed = !existingItem || Math.abs(existingItem.apr - item.apr) > 0.0001;
+
+                if (!existingItem) {
+                    changedPoolIds.add(item.poolId);
+                    return true;
+                }
+
+                const changed =
+                    Math.abs(existingItem.apr - item.apr) > 0.0001 || (existingItem.apr !== 0 && item.apr === 0);
+
                 if (changed) {
                     changedPoolIds.add(item.poolId);
                 }
+
                 return changed;
             })
             .map((item) =>
