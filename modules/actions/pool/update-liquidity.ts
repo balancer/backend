@@ -46,7 +46,7 @@ export const updateLiquidity24hAgo = async (ids: string[], chain: Chain, client:
 
     // Prepare multicall calls
     const calls = ids.flatMap((id) => [
-        id.length === 42
+        id.length === 42 // address is 42 chars long, but v2 ids are longer
             ? {
                   path: `${id}.poolTokens`,
                   address: v3VaultAddress,
