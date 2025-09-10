@@ -1,5 +1,12 @@
 # backend
 
+## 1.53.4
+
+### Patch Changes
+
+-   7821cdf: patch APR updates to include rounding to 0
+-   c01cdcb: round negligable aprs to 0
+
 ## 1.53.3
 
 ### Patch Changes
