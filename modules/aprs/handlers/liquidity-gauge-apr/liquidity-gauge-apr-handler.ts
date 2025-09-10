@@ -93,10 +93,11 @@ export class LiquidityGaugeAprHandler implements AprHandler {
                     type: isVeBalemissions ? PrismaPoolAprType.VEBAL_EMISSIONS : PrismaPoolAprType.STAKING,
                 };
 
+                const adjustedGaugeTvl = gaugeTvl === 0 ? 1 : gaugeTvl; // Avoid division by zero
+
                 // veBAL rewards have a min and max, we create two items for them
                 if (isVeBalemissions && (pool.chain === 'MAINNET' || gauge.version === 2)) {
                     let minApr = 0;
-                    const adjustedGaugeTvl = gaugeTvl === 0 ? 1 : gaugeTvl; // Avoid division by zero
                     if (workingSupply > 0 && gaugeTotalShares > 0) {
                         minApr = (((gaugeTotalShares * 0.4) / workingSupply) * rewardPerYear) / adjustedGaugeTvl;
                     } else {
@@ -117,7 +118,7 @@ export class LiquidityGaugeAprHandler implements AprHandler {
                         type: PrismaPoolAprType.STAKING_BOOST,
                     });
                 } else {
-                    itemData.apr = gaugeTvl > 0 ? rewardPerYear / gaugeTvl : 0;
+                    itemData.apr = rewardPerYear / adjustedGaugeTvl;
 
                     aprItems.push(itemData);
                 }
