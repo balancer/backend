@@ -1,5 +1,5 @@
 import { env } from '../apps/env';
-import { DeploymentEnv, NetworkData } from '../modules/network/network-config-types';
+import { NetworkData } from '../modules/network/network-config-types';
 
 export default <NetworkData>{
     chain: {
@@ -88,6 +88,24 @@ export default <NetworkData>{
                 chain: 'AVALANCHE',
             },
             http: [
+                {
+                    name: 'MEV USDC',
+                    url: 'https://app.silo.finance/api/earn',
+                    body: JSON.stringify({
+                        chainKeys: ['avalanche'],
+                        type: 'vault',
+                        limit: 100,
+                        offset: 0,
+                    }),
+                    scale: 1e18,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x4dc1ce9b9f9ef00c144bfad305f16c62293dc0e8',
+                            path: '$.pools[?(@.vaultAddress=="0x4dc1ce9b9f9EF00c144BfAD305f16c62293dC0E8")].supplyApr',
+                        },
+                    ],
+                },
                 {
                     url: 'https://ded76165a2fb6f7887260a3a0f626de7.thegraph.chainnodes.org/subgraphs/name/etherfi/etherfi-subgraph-v0-8-2',
                     body: JSON.stringify({

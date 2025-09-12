@@ -1,5 +1,5 @@
 import { env } from '../apps/env';
-import { DeploymentEnv, NetworkData } from '../modules/network/network-config-types';
+import { NetworkData } from '../modules/network/network-config-types';
 
 export default <NetworkData>{
     chain: {
@@ -98,6 +98,36 @@ export default <NetworkData>{
                 ],
             },
             http: [
+                {
+                    name: 'Varlamore USDC Growth',
+                    url: 'https://app.silo.finance/api/earn',
+                    body: JSON.stringify({
+                        chainKeys: ['arbitrum'],
+                        type: 'vault',
+                        limit: 100,
+                        offset: 0,
+                    }),
+                    scale: 1e18,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x2ba39e5388ac6c702cb29aea78d52aa66832f1ee',
+                            path: '$.pools[?(@.vaultAddress=="0x2BA39e5388aC6C702Cb29AEA78d52aa66832f1ee")].supplyApr',
+                        },
+                    ],
+                },
+                {
+                    name: 'eeUSDC',
+                    url: 'https://indexer-main.euler.finance/v1/earn/vault?chainId=42161&vaultAddress=0xe4783824593a50Bfe9dc873204CEc171ebC62dE0',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0xe4783824593a50Bfe9dc873204CEc171ebC62dE0',
+                            path: '$.vault.apyCurrent',
+                        },
+                    ],
+                },
                 {
                     name: 'usdl',
                     url: 'https://blue-api.morpho.org/graphql',
