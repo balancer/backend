@@ -170,9 +170,9 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
             return aprService.updateAprs(chain);
         }
     } else if (job === 'update-prices') {
-        await tokenService.syncTokenContentData(chain);
-        await TokenController().syncErc4626Tokens(chain);
-        await TokenController().syncErc4626OnChainData(chain);
+        // await tokenService.syncTokenContentData(chain);
+        // await TokenController().syncErc4626Tokens(chain);
+        // await TokenController().syncErc4626OnChainData(chain);
         const service = new PricingService([chain]);
         return service.updatePrices(chain);
     } else if (job === 'sync-vebal') {

@@ -343,7 +343,8 @@ export class PoolSnapshotService {
 
         const totalShares = parseFloat(snapshot.totalShares);
 
-        if (parseFloat(snapshot.swapVolume) < parseFloat(prevTotalSwapVolume)) {
+        // leave room for some rounding errors
+        if (Math.floor(parseFloat(snapshot.swapVolume)) < Math.floor(parseFloat(prevTotalSwapVolume))) {
             console.error(
                 `Total swapVolume of pool ${snapshot.pool.id} decreased from ${prevTotalSwapVolume} to ${snapshot.swapVolume} on ${snapshot.timestamp}.`,
             );

@@ -31,6 +31,7 @@ export class AprManager {
                 const items = await handler.calculateAprForPools(pools);
                 allAprItems.push(...items);
             } catch (e: any) {
+                console.error(e)
                 failedHandlers.push(handler.getAprServiceName());
             }
         }

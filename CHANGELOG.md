@@ -1,5 +1,15 @@
 # backend
 
+## 1.53.6
+
+### Patch Changes
+
+-   8055d2e: add xusd apr on arb and avax
+-   4f26298: log APR error messages
+-   046149d: calculate all swap aprs from events
+-   c6a39d7: add yearn apr
+-   7361207: fix empty fee data in the swap fee APR handler
+
 ## 1.53.5
 
 ### Patch Changes

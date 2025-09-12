@@ -405,6 +405,32 @@ export default <NetworkData>{
                         },
                     ],
                 },
+                {
+                    url: 'https://api-v2.streamprotocol.money/vaults/xUSD/apy',
+                    scale: 100,
+                    extractors: [{ type: 'path', token: '0x6eaf19b2fc24552925db245f9ff613157a7dbb4c', path: '$.apy' }],
+                },
+                {
+                    url: 'https://kong.yearn.farm/api/gql',
+                    body: JSON.stringify({
+                        query: `{
+                        vault(chainId: 42161, address: "0x252b965400862d94bda35fecf7ee0f204a53cc36") {
+                            apy {
+                            weeklyNet
+                            }
+                        }
+                        }`,
+                    }),
+                    headers: { 'Content-Type': 'application/json' },
+                    scale: 1,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x252b965400862d94bda35fecf7ee0f204a53cc36',
+                            path: '$.data.vault.apy.weeklyNet',
+                        },
+                    ],
+                },
             ],
         },
     },
