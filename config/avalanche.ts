@@ -207,6 +207,11 @@ export default <NetworkData>{
                         },
                     ],
                 },
+                {
+                    url: 'https://api-v2.streamprotocol.money/vaults/xUSD/apy',
+                    scale: 100,
+                    extractors: [{ type: 'path', token: '0x94f9bb5c972285728dcee7eaece48bec2ff341ce', path: '$.apy' }],
+                },
             ],
         },
     },
