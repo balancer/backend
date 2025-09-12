@@ -1,5 +1,11 @@
 # backend
 
+## 1.53.5
+
+### Patch Changes
+
+-   bf686fe: APRs: silo and euler on arb and avax
+
 ## 1.53.4
 
 ### Patch Changes
