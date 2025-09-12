@@ -13,12 +13,10 @@ export function createHandlers(chain: Chain): AprHandler[] {
 
     // Default handlers for all of the chains
     handlerList.push(new handlers.SwapFeeAprHandler());
-    handlerList.push(new handlers.DynamicSwapFeeAprHandler());
     handlerList.push(new handlers.NestedPoolAprHandler());
     // handlerList.push(new handlers.QuantAmmAprHandler());
     handlerList.push(new handlers.LiquidityGaugeAprHandler(tokenService));
     handlerList.push(new handlers.MerklAprHandler());
-    handlerList.push(new handlers.SurplusSwapFeeAprHandler());
 
     // Mainnet specific handlers
     if (chain === Chain.MAINNET) {
