@@ -134,7 +134,7 @@ const swapFeeCalculation = (totalLiquidity: number, swapFees: number, protocolFe
     }
 
     if (apr_24h > MAX_DB_INT) {
-        apr_24h = 0;
+        apr_24h = MAX_DB_INT;
     }
 
     return apr_24h;
