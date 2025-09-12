@@ -1,5 +1,5 @@
 import { prisma } from '../../../../prisma/prisma-client';
-import { Chain, PrismaPoolAprItem, PrismaPoolAprType, PrismaPoolType } from '@prisma/client';
+import { Chain, PrismaPoolAprItem, PrismaPoolAprType } from '@prisma/client';
 import { daysAgo } from '../../../common/time';
 import { AprHandler, PoolAPRData } from '../../types';
 
@@ -52,7 +52,7 @@ export class SwapFeeAprHandler implements AprHandler {
 
         const aprItems: Omit<PrismaPoolAprItem, 'createdAt' | 'updatedAt'>[] = ([] = pools
             .flatMap((pool) => {
-                if (!pool.dynamicData) return null;
+                if (!pool.dynamicData || !swapFeeDataMap[pool.id]) return null;
 
                 let protocolFee = pool.dynamicData.protocolSwapFee;
 
