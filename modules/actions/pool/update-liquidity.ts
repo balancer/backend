@@ -8,7 +8,7 @@ import { multicallViem } from '../../web3/multicaller-viem';
 import { ViemClient } from '../../sources/viem-client';
 import config from '../../../config';
 import { blockNumbers } from '../../block-numbers';
-import { Abi, erc20Abi, formatUnits } from 'viem';
+import { Abi, formatUnits } from 'viem';
 import { DAYS_OF_HOURLY_PRICES } from '../../../config';
 import _ from 'lodash';
 import vaultV2 from '../../pool/abi/Vault.json';
@@ -65,19 +65,12 @@ export const updateLiquidity24hAgo = async (ids: string[], chain: Chain, client:
                   parser: (info: any) =>
                       new Map(info[0].map((token: string, idx: number) => [token.toLowerCase(), info[1][idx]])),
               },
-        {
-            path: `${id}.totalSupply`,
-            address: id.substring(0, 42) as `0x${string}`,
-            abi: erc20Abi,
-            functionName: 'totalSupply',
-            parser: (totalSupply: bigint) => formatUnits(totalSupply, 18),
-        },
     ]);
 
     if (calls.length === 0) return [];
 
     // Execute multicall at historical block
-    const results = await multicallViem<{ [pool: string]: { poolTokens: Map<string, bigint>; totalSupply: string } }>(
+    const results = await multicallViem<{ [pool: string]: { poolTokens: Map<string, bigint> } }>(
         client,
         calls,
         BigInt(blockNumber),
@@ -106,12 +99,11 @@ export const updateLiquidity24hAgo = async (ids: string[], chain: Chain, client:
         .then((results) => new Map(results.map((r) => [r.address, r.decimals])));
 
     // Calculate TVL and total shares for each pool
-    const data: Record<string, { tvl: number; totalShares: string }> = {};
+    const data: Record<string, { tvl: number }> = {};
 
     for (const [poolId, poolInfo] of Object.entries(results)) {
         const tokens = [...poolInfo.poolTokens.keys()];
         const balances = [...poolInfo.poolTokens.values()];
-        const totalSupply = poolInfo.totalSupply;
 
         const bptTokenIndex = tokens.findIndex(
             (token) => token.toLowerCase() === poolId.substring(0, 42).toLowerCase(),
@@ -140,12 +132,12 @@ export const updateLiquidity24hAgo = async (ids: string[], chain: Chain, client:
             return tvl + parseFloat(balance) * price.price;
         }, 0);
 
-        data[poolId] = { tvl, totalShares: totalSupply };
+        data[poolId] = { tvl };
     }
 
     // Update liquidity data
     const updates = Object.entries(data)
-        .map(([id, { tvl, totalShares }]) => {
+        .map(([id, { tvl }]) => {
             if (tvl && tvl < 0) {
                 console.error('Negative Tvl24h ago', id, chain, tvl);
                 return;
@@ -160,7 +152,7 @@ export const updateLiquidity24hAgo = async (ids: string[], chain: Chain, client:
                 },
                 data: {
                     totalLiquidity24hAgo: tvl,
-                    totalShares24hAgo: totalShares,
+                    totalShares24hAgo: '0',
                 },
             };
         })
