@@ -515,6 +515,17 @@ export default <NetworkData>{
                         { type: 'path', token: '0xa3931d71877c0e7a3148cb7eb4463524fec27fbd', path: '$[0].ssr_rate' },
                     ],
                 },
+                {
+                    url: 'https://api.cap.app/v1/vaults/1/0xcccc62962d17b8914c62d74ffb843d73b2a3cccc/metrics',
+                    scale: 1,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x88887be419578051ff9f4eb6c858a951921d8888',
+                            path: '$.stakingApr7d',
+                        },
+                    ],
+                },
             ],
             contract: {
                 calls: [

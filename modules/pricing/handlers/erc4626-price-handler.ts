@@ -41,7 +41,9 @@ export class ERC4626PriceHandler implements PriceHandler {
                     const price = Number((unwrapRate * underlyingPrice).toFixed(10));
 
                     if (erc4626Token.currentPrice && price > 10 * erc4626Token.currentPrice) {
-                        throw `over 10x price spike - ${erc4626Token.unwrapRate} - ${erc4626Token.underlyingTokenPrice}`;
+                        throw Error(
+                            `over 10x price spike - ${erc4626Token.unwrapRate} - ${erc4626Token.underlyingTokenPrice}`,
+                        );
                     }
 
                     priceItems.push({
