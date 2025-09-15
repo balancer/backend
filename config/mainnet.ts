@@ -164,7 +164,7 @@ export default <NetworkData>{
                     ],
                 },
                 {
-                    url: 'https://yields.llama.fi/chart/a8a2a14b-2345-4666-adab-227c991c4837',
+                    url: 'https://yields.llama.fi/chart/06a8d79e-8307-4064-ab01-2d00c4532c5d',
                     scale: 100,
                     extractors: [
                         {
