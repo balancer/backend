@@ -98,27 +98,16 @@ export function PoolController(tracer?: any) {
         },
 
         async updateLiquidity24hAgoV2(chain: Chain) {
-            const {
-                subgraphs: { balancer },
-            } = config[chain];
+            const client = getViemClient(chain);
 
-            // Guard against unconfigured chains
-            const subgraph = balancer && getV2SubgraphClient(balancer, chain);
+            const poolIds = await prisma.prismaPool
+                .findMany({
+                    where: { chain, protocolVersion: 2 },
+                    select: { id: true },
+                })
+                .then((results) => results.map((r) => r.id));
 
-            if (!subgraph) {
-                throw new Error(`Chain not configured: ${chain}`);
-            }
-
-            const poolIds = await prisma.prismaPoolDynamicData.findMany({
-                where: { chain },
-                select: { poolId: true },
-            });
-
-            const updates = await updateLiquidity24hAgo(
-                poolIds.map(({ poolId }) => poolId),
-                subgraph,
-                chain,
-            );
+            const updates = await updateLiquidity24hAgo(poolIds, chain, client);
 
             return updates;
         },
@@ -287,27 +276,16 @@ export function PoolController(tracer?: any) {
             return ids;
         },
         async updateLiquidity24hAgoV3(chain: Chain) {
-            const {
-                subgraphs: { balancerV3 },
-            } = config[chain];
+            const client = getViemClient(chain);
 
-            // Guard against unconfigured chains
-            const subgraph = balancerV3 && getVaultSubgraphClient(balancerV3, chain);
+            const poolIds = await prisma.prismaPool
+                .findMany({
+                    where: { chain, protocolVersion: 3 },
+                    select: { id: true },
+                })
+                .then((results) => results.map((r) => r.id));
 
-            if (!subgraph) {
-                throw new Error(`Chain not configured: ${chain}`);
-            }
-
-            const poolIds = await prisma.prismaPoolDynamicData.findMany({
-                where: { chain },
-                select: { poolId: true },
-            });
-
-            const updates = await updateLiquidity24hAgo(
-                poolIds.map(({ poolId }) => poolId),
-                subgraph,
-                chain,
-            );
+            const updates = await updateLiquidity24hAgo(poolIds, chain, client);
 
             return updates;
         },
