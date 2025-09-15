@@ -1,5 +1,11 @@
 # backend
 
+## 1.53.7
+
+### Patch Changes
+
+-   7bf10d9: add stcUSD apr
+
 ## 1.53.6
 
 ### Patch Changes
