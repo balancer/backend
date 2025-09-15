@@ -116,7 +116,6 @@ export const updateLiquidity24hAgo = async (ids: string[], chain: Chain, client:
             const price = prices.find((p) => p.tokenAddress.toLowerCase() === address);
 
             if (!price) {
-                console.error(`Price not found for ${address} in TVL 24h ago calculation`);
                 return tvl;
             }
 
