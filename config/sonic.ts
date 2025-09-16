@@ -76,17 +76,17 @@ export default <NetworkData>{
     },
     avgBlockSpeed: 1,
     aprHandlers: {
-        aave: [
-            {
-                market: 'v3',
-                chain: 'SONIC',
-                subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/FQcacc4ZJaQVS9euWb76nvpSq2GxavBnUM6DU6tmspbi`,
-            },
-        ],
         maBeetsAprHandler: {
             beetsAddress: '0x2d0e0814e62d80056181f5cd932274405966e4f0',
         },
         ybAprHandler: {
+            aave: [
+                {
+                    market: 'v3',
+                    chain: 'SONIC',
+                    subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/FQcacc4ZJaQVS9euWb76nvpSq2GxavBnUM6DU6tmspbi`,
+                },
+            ],
             sts: {
                 token: '0xe5da20f15420ad15de0fa650600afc998bbe3955',
             },

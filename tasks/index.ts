@@ -11,6 +11,7 @@ import {
     StakedSonicController,
     TokenController,
     QuantAmmController,
+    TokenYieldsController,
 } from '../modules/controllers';
 import { chainIdToChain } from '../modules/network/chain-id-to-chain';
 import { tokenService } from '../modules/token/token.service';
@@ -186,6 +187,9 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         return 'OK';
     } else if (job === 'sync-lbps') {
         await LBPController.syncData(chain);
+        return 'OK';
+    } else if (job === 'sync-token-yields') {
+        await TokenYieldsController().fetchAndStoreAllYields();
         return 'OK';
     }
     // Maintenance
