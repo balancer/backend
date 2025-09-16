@@ -1,5 +1,12 @@
 # backend
 
+## 1.53.8
+
+### Patch Changes
+
+-   8df1a64: liquidity 24h ago from RPC
+-   9e309a7: removing error in liquidity
+
 ## 1.53.7
 
 ### Patch Changes
