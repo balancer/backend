@@ -1,5 +1,11 @@
 # backend
 
+## 1.53.10
+
+### Patch Changes
+
+-   2512f21: fix maxWithdraw/maxDeposit agg query
+
 ## 1.53.9
 
 ### Patch Changes
