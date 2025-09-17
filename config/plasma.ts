@@ -19,14 +19,14 @@ export default <NetworkData>{
     },
     hooks: {},
     eth: {
-        address: '0x2222222222222222222222222222222222222222',
-        addressFormatted: '0x2222222222222222222222222222222222222222',
+        address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+        addressFormatted: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
         symbol: 'XPL',
         name: 'Plasma',
     },
     weth: {
-        address: '0x5555555555555555555555555555555555555555',
-        addressFormatted: '0x5555555555555555555555555555555555555555',
+        address: '0x6100e367285b01f48d07953803a2d8dca5d19873',
+        addressFormatted: '0x6100E367285b01F48D07953803A2d8dCA5D19873',
     },
     coingecko: {
         nativeAssetId: 'plasma',
