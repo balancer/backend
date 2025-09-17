@@ -120,7 +120,7 @@ export default <NetworkData>{
                         {
                             type: 'path',
                             token: '0x1f8e769b5b6010b2c2bbcd68629ea1a0a0eda7e3',
-                            path: '$.pools[?(@.vaultAddress=="0x1f8e769b5b6010b2c2bbcd68629ea1a0a0eda7e3")].supplyApr',
+                            path: '$.pools[?(@.vaultAddress=="0x1f8E769B5B6010B2C2BBCd68629EA1a0a0Eda7E3")].supplyApr',
                         },
                     ],
                 },
