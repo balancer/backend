@@ -129,14 +129,11 @@ export class PoolAggregatorLoader {
             }),
         ]);
 
-        const typesMap = dbTypes.reduce(
-            (agg, item) => {
-                agg[`${item.chain}-${item.tokenAddress}`] ||= [];
-                agg[`${item.chain}-${item.tokenAddress}`].push(item);
-                return agg;
-            },
-            {} as Record<string, PrismaTokenType[]>,
-        );
+        const typesMap = dbTypes.reduce((agg, item) => {
+            agg[`${item.chain}-${item.tokenAddress}`] ||= [];
+            agg[`${item.chain}-${item.tokenAddress}`].push(item);
+            return agg;
+        }, {} as Record<string, PrismaTokenType[]>);
 
         const tokensMap = Object.fromEntries(
             dbTokens.map((token) => [
@@ -344,6 +341,9 @@ export class PoolAggregatorLoader {
                     useWrappedForAddRemove: review.useWrappedForAddRemove,
                     priceRate: token.priceRate,
                     priceRateProvider: token.priceRateProvider,
+                    maxDeposit: token.token.maxDeposit === '0' ? undefined : token.token.maxDeposit,
+                    maxWithdraw: token.token.maxWithdraw === '0' ? undefined : token.token.maxWithdraw,
+                    scalingFactor: token.scalingFactor,
                     underlyingToken: underlying
                         ? {
                               address: underlying.address,
