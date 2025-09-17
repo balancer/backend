@@ -121,7 +121,7 @@ export const updateLiquidity24hAgo = async (ids: string[], chain: Chain, client:
 
             const decimals = decimalsMap.get(address);
 
-            if (!decimals) {
+            if (decimals === undefined || decimals === null) {
                 console.error(`Decimals not found for ${address} in TVL 24h ago calculation`);
                 return tvl;
             }

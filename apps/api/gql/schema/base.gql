@@ -11,6 +11,7 @@ enum GqlChain {
     MAINNET
     OPTIMISM
     POLYGON
+    PLASMA
     ZKEVM
     SEPOLIA
     FRAXTAL

@@ -6,7 +6,6 @@ import _ from 'lodash';
 import { networkContext } from '../network/network-context.service';
 import { GqlProtocolMetricsAggregated, GqlProtocolMetricsChain } from '../../apps/api/gql/generated-schema';
 import config from '../../config';
-import { SwapEvent } from '../../prisma/prisma-types';
 
 interface LatestSyncedBlocks {
     userWalletSyncBlock: string;
@@ -205,7 +204,7 @@ export class ProtocolService {
         }
 
         const response = await fetch('https://api.llama.fi/tvl/balancer-v1');
-        const data = await response.json() as number;
+        const data = (await response.json()) as number;
 
         return data;
     }

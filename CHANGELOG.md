@@ -1,5 +1,13 @@
 # backend
 
+## 1.53.9
+
+### Patch Changes
+
+-   ebaa180: add plasma support
+-   369c418: add xbtc and mevbtc apr
+-   2a770d2: handle 0 decimals
+
 ## 1.53.8
 
 ### Patch Changes

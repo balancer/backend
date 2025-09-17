@@ -107,6 +107,24 @@ export default <NetworkData>{
                     ],
                 },
                 {
+                    name: 'MEV BTC',
+                    url: 'https://app.silo.finance/api/earn',
+                    body: JSON.stringify({
+                        chainKeys: ['avalanche'],
+                        type: 'vault',
+                        limit: 100,
+                        offset: 0,
+                    }),
+                    scale: 1e18,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x1f8e769b5b6010b2c2bbcd68629ea1a0a0eda7e3',
+                            path: '$.pools[?(@.vaultAddress=="0x1f8E769B5B6010B2C2BBCd68629EA1a0a0Eda7E3")].supplyApr',
+                        },
+                    ],
+                },
+                {
                     url: 'https://ded76165a2fb6f7887260a3a0f626de7.thegraph.chainnodes.org/subgraphs/name/etherfi/etherfi-subgraph-v0-8-2',
                     body: JSON.stringify({
                         query: `{
@@ -211,6 +229,11 @@ export default <NetworkData>{
                     url: 'https://api-v2.streamprotocol.money/vaults/xUSD/apy',
                     scale: 100,
                     extractors: [{ type: 'path', token: '0x94f9bb5c972285728dcee7eaece48bec2ff341ce', path: '$.apy' }],
+                },
+                {
+                    url: 'https://api-v2.streamprotocol.money/vaults/xBTC/apy',
+                    scale: 100,
+                    extractors: [{ type: 'path', token: '0x6eaf19b2fc24552925db245f9ff613157a7dbb4c', path: '$.apy' }],
                 },
             ],
         },
