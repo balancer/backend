@@ -14,6 +14,7 @@ import { sepoliaNetworkConfig } from './sepolia';
 import { modeNetworkConfig } from './mode';
 import { sonicNetworkConfig } from './sonic';
 import { hyperevmNetworkConfig } from './hyperevm';
+import { plasmaNetworkConfig } from './plasma';
 
 export const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
     '250': fantomNetworkConfig,
@@ -30,6 +31,7 @@ export const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
     '34443': modeNetworkConfig,
     '146': sonicNetworkConfig,
     '999': hyperevmNetworkConfig,
+    '9745': plasmaNetworkConfig,
 };
 
 export const AllNetworkConfigsKeyedOnChain: { [chain in Chain]: NetworkConfig } = {
@@ -47,6 +49,7 @@ export const AllNetworkConfigsKeyedOnChain: { [chain in Chain]: NetworkConfig } 
     MODE: modeNetworkConfig,
     SONIC: sonicNetworkConfig,
     HYPEREVM: hyperevmNetworkConfig,
+    PLASMA: plasmaNetworkConfig,
 };
 
 export const BalancerChainIds = [
@@ -61,5 +64,6 @@ export const BalancerChainIds = [
     '252',
     '34443',
     '999',
+    '9745',
 ];
 export const BeethovenChainIds = ['250', '10', '146'];

@@ -111,6 +111,7 @@ export const schema = gql`
         MAINNET
         MODE
         OPTIMISM
+        PLASMA
         POLYGON
         SEPOLIA
         SONIC

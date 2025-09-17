@@ -22,6 +22,7 @@ enum Chain {
     MAINNET
     OPTIMISM
     POLYGON
+    PLASMA
     SEPOLIA
     ZKEVM
     FRAXTAL
