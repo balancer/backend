@@ -96,6 +96,7 @@ export enum GqlChain {
     MAINNET = 'MAINNET',
     MODE = 'MODE',
     OPTIMISM = 'OPTIMISM',
+    PLASMA = 'PLASMA',
     POLYGON = 'POLYGON',
     SEPOLIA = 'SEPOLIA',
     SONIC = 'SONIC',

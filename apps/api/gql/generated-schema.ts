@@ -105,6 +105,7 @@ export type GqlChain =
     | 'MAINNET'
     | 'MODE'
     | 'OPTIMISM'
+    | 'PLASMA'
     | 'POLYGON'
     | 'SEPOLIA'
     | 'SONIC'
