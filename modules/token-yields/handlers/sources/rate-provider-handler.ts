@@ -1,4 +1,4 @@
-import { TokenApr, TokenYieldHandler } from '../../types';
+import { TokenYieldHandler } from '../../types';
 import { Chain } from '@prisma/client';
 import { prisma } from '../../../../prisma/prisma-client';
 import { getViemClient } from '../../../sources/viem-client';
@@ -86,7 +86,6 @@ export const rateProviderHandler: TokenYieldHandler = async ({
 
                 return {
                     address,
-                    priceRateProvider,
                     apr,
                 };
             }),
