@@ -52,7 +52,43 @@ export default <NetworkData>{
             defaultYieldFeePercentage: '0.1',
         },
     },
-    aprHandlers: {},
+    aprHandlers: {
+        ybAprHandler: {
+            http: [
+                {
+                    url: 'https://ded76165a2fb6f7887260a3a0f626de7.thegraph.chainnodes.org/subgraphs/name/etherfi/etherfi-subgraph-v0-8-2',
+                    body: JSON.stringify({
+                        query: `{
+                      rebaseEventLinkedLists {
+                        latest_aprs
+                      }
+                    }`,
+                    }),
+                    headers: { 'Content-Type': 'application/json' },
+                    average: true,
+                    scale: 10000,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0xA3D68b74bF0528fdD07263c60d6488749044914b',
+                            path: '$.data.rebaseEventLinkedLists[0].latest_aprs',
+                        },
+                    ],
+                },
+                {
+                    url: 'https://ethena.fi/api/yields/protocol-and-staking-yield',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x211Cc4DD073734dA055fbF44a2b4667d5E5fE5d2',
+                            path: '$.stakingYield.value',
+                        },
+                    ],
+                },
+            ],
+        },
+    },
     multicall: '0xca11bde05977b3631167028862be2a173976ca11',
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',
     avgBlockSpeed: 1,
