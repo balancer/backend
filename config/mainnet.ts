@@ -526,6 +526,29 @@ export default <NetworkData>{
                         },
                     ],
                 },
+                {
+                    name: 'Varlamore USDC Growth',
+                    url: 'https://app.silo.finance/api/earn',
+                    body: JSON.stringify({
+                        chainKeys: ['ethereum'],
+                        type: 'vault',
+                        limit: 100,
+                        offset: 0,
+                    }),
+                    scale: 1e18,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x8399c8fc273bd165c346af74a02e65f10e4fd78f',
+                            path: '$.pools[?(@.vaultAddress=="0x8399C8Fc273bD165C346Af74A02e65f10e4FD78F")].supplyApr',
+                        },
+                    ],
+                },
+                {
+                    url: 'https://api-v2.streamprotocol.money/vaults/xUSD/apy',
+                    scale: 100,
+                    extractors: [{ type: 'path', token: '0xe2fc85bfb48c4cf147921fbe110cf92ef9f26f94', path: '$.apy' }],
+                },
             ],
             contract: {
                 calls: [
