@@ -1,5 +1,11 @@
 # backend
 
+## 1.53.11
+
+### Patch Changes
+
+-   60c6fc8: xusd and vgusdc apr mainnet
+
 ## 1.53.10
 
 ### Patch Changes
