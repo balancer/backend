@@ -86,13 +86,11 @@ export const poolDataCalls = (pool: string, vault: string, blockNumber: bigint) 
             const poolTokenRates =
                 results[index + 1].status === 'success' ? (results[index + 1].result as PoolTokenRates) : undefined;
 
-            const decimals = decodeDecimalDiffs(Number(config.tokenDecimalDiffs), poolTokenInfo[0].length ?? 0);
-
             return poolTokenInfo[0].map((token: string, i: number) => ({
                 id: `${pool.toLowerCase()}-${token.toLowerCase()}`,
                 index: i,
                 address: token.toLowerCase(),
-                balance: formatUnits(poolTokenInfo[2][i], decimals[i]),
+                balance: formatUnits(poolTokenInfo[3][i], 18), // we use lastBalancesLiveScaled18 to get the balance in 18 decimals
                 exemptFromProtocolYieldFee: !poolTokenInfo[1][i].paysYieldFees,
                 priceRateProvider: poolTokenInfo[1][i].rateProvider.toLowerCase(),
                 priceRate: formatEther(poolTokenRates ? poolTokenRates[1][i] : 1000000000000000000n),
@@ -120,18 +118,3 @@ export async function fetchPoolData(
 
     return results;
 }
-
-const DECIMAL_DIFF_BITS = 5;
-
-const decodeDecimalDiffs = (diff: number, numTokens: number): number[] => {
-    const result: number[] = [];
-
-    for (let i = 0; i < numTokens; i++) {
-        // Compute the 5-bit mask for each token.
-        const mask = (2 ** DECIMAL_DIFF_BITS - 1) << (i * DECIMAL_DIFF_BITS);
-        // Logical AND with the input, and shift back down to get the final result.
-        result[i] = (diff & mask) >> (i * DECIMAL_DIFF_BITS);
-    }
-
-    return result.map((d) => 18 - d);
-};
