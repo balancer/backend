@@ -1,5 +1,12 @@
 # backend
 
+## 1.53.12
+
+### Patch Changes
+
+-   e76cc2a: susde, weeth apr plasma
+-   d10ffa2: use lastBalancesLiveScaled18 for v3 balance sync
+
 ## 1.53.11
 
 ### Patch Changes
