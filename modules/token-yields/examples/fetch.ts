@@ -6,7 +6,9 @@ const main = async (_chain: string) => {
     const config = cnfg[chain].aprHandlers.ybAprHandler;
     const handler = new TokenYieldAprHandlers(config!, chain);
 
-    return handler.fetchAprsFromAllHandlers();
+    const aprs = await handler.fetchAprsFromAllHandlers();
+
+    return aprs.filter((a) => a.source === 'aave');
 };
 
 main(process.argv[2])
