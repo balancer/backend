@@ -12,6 +12,7 @@ const sourceToHandler = {
     morphoVaultHyperevm: sources.morphoHyperevmYieldHandler,
     http: sources.httpTokenYieldHandler,
     contract: sources.contractTokenYieldHandler,
+    rateProvider: sources.rateProviderHandler,
 };
 
 export class TokenYieldAprHandlers {
@@ -29,6 +30,11 @@ export class TokenYieldAprHandlers {
         let aprs: YieldToken[] = [];
 
         const results = await Promise.allSettled([
+            // Rate providers are fetched first, so they can be overwritten by other sources
+            this.callHandler('rateProvider', {
+                chain: this.chain,
+                intervalInDays: 7,
+            }),
             ...Object.entries(this.config).flatMap(([source, config]) => {
                 if (Array.isArray(config)) {
                     return config.map((c) => this.callHandler(source as keyof typeof sourceToHandler, c));
