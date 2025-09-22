@@ -87,6 +87,19 @@ export default <NetworkData>{
                     ],
                 },
             ],
+            // contract: {
+            //     calls: [
+            //         {
+            //             chain: 'PLASMA',
+            //             contract: '0x0000000000000000000000000000000000000000', // ProtocolDataProvider
+            //             abi: 'function getReserveData(address) view returns (uint256 unbacked, uint256 accruedToTreasuryScaled, uint256 totalAToken, uint256 totalStableDebt, uint256 totalVariableDebt, uint256 liquidityRate, uint256 variableBorrowRate, uint256 stableBorrowRate, uint256 averageStableBorrowRate, uint256 liquidityIndex, uint256 variableBorrowIndex, uint40 lastUpdateTimestamp)',
+            //             functionName: 'getReserveData',
+            //             token: '0x0000000000000000000000000000000000000000', // stataToken
+            //             args: ['0x0000000000000000000000000000000000000000'], // market address
+            //             parser: (data: any) => Number(data[5]) / 1e27, // liquidityRate
+            //         },
+            //     ],
+            // },
         },
     },
     multicall: '0xca11bde05977b3631167028862be2a173976ca11',
