@@ -86,11 +86,13 @@ export const poolDataCalls = (pool: string, vault: string, blockNumber: bigint) 
             const poolTokenRates =
                 results[index + 1].status === 'success' ? (results[index + 1].result as PoolTokenRates) : undefined;
 
+            const decimals = decodeDecimalDiffs(BigInt(config.tokenDecimalDiffs), poolTokenInfo[0].length ?? 0);
+
             return poolTokenInfo[0].map((token: string, i: number) => ({
                 id: `${pool.toLowerCase()}-${token.toLowerCase()}`,
                 index: i,
                 address: token.toLowerCase(),
-                balance: poolTokenInfo[2][i].toString(), // we format the decimals after
+                balance: formatUnits(poolTokenInfo[2][i], decimals[i]),
                 exemptFromProtocolYieldFee: !poolTokenInfo[1][i].paysYieldFees,
                 priceRateProvider: poolTokenInfo[1][i].rateProvider.toLowerCase(),
                 priceRate: formatEther(poolTokenRates ? poolTokenRates[1][i] : 1000000000000000000n),
@@ -118,3 +120,17 @@ export async function fetchPoolData(
 
     return results;
 }
+
+const DECIMAL_DIFF_BITS = 5;
+
+const decodeDecimalDiffs = (diff: bigint, numTokens: number): number[] => {
+    const result: number[] = [];
+    const mask = (1n << BigInt(DECIMAL_DIFF_BITS)) - 1n;
+
+    for (let i = 0; i < numTokens; i++) {
+        const shift = BigInt(i * DECIMAL_DIFF_BITS);
+        result[i] = Number((diff >> shift) & mask);
+    }
+
+    return result.map((d) => 18 - d);
+};

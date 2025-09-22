@@ -6,7 +6,6 @@ import _ from 'lodash';
 import { fetchPoolSyncData } from '../../../sources/contracts/v3/fetch-pool-sync-data';
 import { ViemClient } from '../../../sources/viem-client';
 import { mergeArraysById } from '../../../helper/merge-arrays-by-id';
-import { formatUnits } from 'viem';
 
 /**
  * Gets and syncs all the pools state with the database
@@ -30,30 +29,6 @@ export const syncPools = async (
     const onchainData = await fetchPoolSyncData(viemClient, vault, dbPools, BigInt(blockNumber));
 
     const upserts = dbPools.map((pool) => _.mergeWith({ pool }, onchainData[pool.id], mergeArraysById));
-
-    // decimals formatting
-    const tokenDecimalsMap = await prisma.prismaToken
-        .findMany({
-            where: {
-                chain,
-                address: {
-                    in: Object.values(onchainData)
-                        .flatMap((item) => item.poolToken)
-                        .map((token) => token.address),
-                },
-            },
-            select: { address: true, decimals: true },
-        })
-        .then((data) => Object.fromEntries(data.map((token) => [token.address, token.decimals])));
-
-    upserts.forEach((pool) => {
-        pool.poolToken.forEach((token) => {
-            const decimals = tokenDecimalsMap[token.address];
-            if (decimals) {
-                token.balance = formatUnits(BigInt(token.balance), decimals);
-            }
-        });
-    });
 
     // USD Pricing
     const prices = await prisma.prismaTokenCurrentPrice
