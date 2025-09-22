@@ -27,10 +27,17 @@ export class PathGraph {
         pools,
         maxPathsPerTokenPair = DEFAULT_MAX_PATHS_PER_TOKEN_PAIR,
         enableAddRemoveLiquidityPaths,
+        // Optional extras ignored in this implementation
+        swapKind,
+        tokenPrices,
+        minLimitThresholdUSD,
     }: {
         pools: BasePool[];
         maxPathsPerTokenPair?: number;
         enableAddRemoveLiquidityPaths: boolean;
+        swapKind?: SwapKind;
+        tokenPrices?: Map<string, number>;
+        minLimitThresholdUSD?: number;
     }) {
         this.poolAddressMap = new Map();
         this.nodes = new Map();
@@ -63,12 +70,15 @@ export class PathGraph {
         swapAmount,
         swapKind,
         graphTraversalConfig,
+        // Optional USD threshold hint ignored in this implementation
+        minLimitThresholdUSD,
     }: {
         tokenIn: Token;
         tokenOut: Token;
         swapAmount: TokenAmount;
         swapKind: SwapKind;
         graphTraversalConfig?: Partial<PathGraphTraversalConfig>;
+        minLimitThresholdUSD?: number;
     }): PathLocal[] {
         const isHyperEvm = tokenIn.chainId === 999;
 

@@ -2,14 +2,14 @@ import { Address, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { PathGraphEdgeData, PathGraphTraversalConfig } from './pathGraphTypes';
 import { BasePool } from '../poolsV2/basePool';
 import { PathLocal } from '../path';
+import { formatUnits } from 'viem';
 
-const DEFAULT_MAX_PATHS_PER_TOKEN_PAIR = 10;
+const DEFAULT_MAX_PATHS_PER_TOKEN_PAIR = 4;
 
 export class PathGraphBeam {
     private nodes: Map<string, { isPhantomBpt: boolean }>;
     private edges: Map<string, Map<string, PathGraphEdgeData[]>>;
     private poolAddressMap: Map<string, BasePool>;
-    private maxPathsPerTokenPair = DEFAULT_MAX_PATHS_PER_TOKEN_PAIR;
 
     constructor() {
         this.nodes = new Map();
@@ -24,39 +24,36 @@ export class PathGraphBeam {
     // (b) For any token pair x -> y, we include only the most liquid ${maxPathsPerTokenPair}
     // pool pairs (default 2).
 
-    // Add this private cache in the class
-    private edgeLimitCache: Map<string, bigint> = new Map();
-
     // In buildGraph() reset the cache so it doesn't leak across builds
     public buildGraph({
         pools,
         maxPathsPerTokenPair = DEFAULT_MAX_PATHS_PER_TOKEN_PAIR,
         enableAddRemoveLiquidityPaths,
+        swapKind,
+        tokenPrices,
+        minLimitThresholdUSD,
     }: {
         pools: BasePool[];
         maxPathsPerTokenPair?: number;
         enableAddRemoveLiquidityPaths: boolean;
+        swapKind?: SwapKind;
+        tokenPrices?: Map<string, number>;
+        minLimitThresholdUSD?: number;
     }) {
         this.poolAddressMap = new Map();
         this.nodes = new Map();
         this.edges = new Map();
-        this.edgeLimitCache = new Map(); // <-- reset cache
-        this.maxPathsPerTokenPair = maxPathsPerTokenPair;
 
         this.buildPoolAddressMap(pools);
         this.addAllTokensAsGraphNodes({ pools, enableAddRemoveLiquidityPaths });
-        this.addTokenPairsAsGraphEdges({ pools, maxPathsPerTokenPair, enableAddRemoveLiquidityPaths });
-    }
-
-    // Small helper for cached per-edge limit (optimistic bound)
-    private getEdgeLimitCached(edge: PathGraphEdgeData, swapKind: SwapKind): bigint {
-        const key = `${edge.pool.id}|${edge.tokenIn}|${edge.tokenOut}|${swapKind}`;
-        let v = this.edgeLimitCache.get(key);
-        if (v === undefined) {
-            v = edge.pool.getLimitAmountSwap(edge.tokenIn, edge.tokenOut, swapKind);
-            this.edgeLimitCache.set(key, v);
-        }
-        return v;
+        this.addTokenPairsAsGraphEdges({
+            pools,
+            maxPathsPerTokenPair,
+            enableAddRemoveLiquidityPaths,
+            swapKind,
+            tokenPrices,
+            minLimitThresholdUSD,
+        });
     }
 
     // Since the path combinations here can get quite large, we use configurable parameters
@@ -119,7 +116,6 @@ export class PathGraphBeam {
                 tokenPath,
                 swapKind,
                 minLimitThreshold,
-                maxRanksPerSegment: config.maxRanksPerSegment,
                 approxPathsToReturn: config.approxPathsToReturn,
             });
 
@@ -131,7 +127,7 @@ export class PathGraphBeam {
             }
         }
 
-        return this.sortAndFilterPaths(paths).map((path) => {
+        return paths.map((path) => {
             const pathTokens: Token[] = [...path.map((segment) => segment.tokenOut)];
             pathTokens.unshift(tokenIn);
             pathTokens[pathTokens.length - 1] = tokenOut;
@@ -142,44 +138,6 @@ export class PathGraphBeam {
                 path.map((segment) => segment.isBuffer),
             );
         });
-    }
-
-    private sortAndFilterPaths(paths: PathGraphEdgeData[][]): PathGraphEdgeData[][] {
-        const pathsWithLimits = paths
-            .map((path) => {
-                try {
-                    const limit = this.getLimitAmountSwapForPath(path, SwapKind.GivenIn);
-                    return { path, limit };
-                } catch (_e) {
-                    console.log('Error getting limit for path', path.map((p) => p.pool.id).join(' -> '));
-                    return undefined;
-                }
-            })
-            .filter((path): path is { path: PathGraphEdgeData[]; limit: bigint } => !!path)
-            .sort((a, b) => (a.limit < b.limit ? 1 : -1));
-
-        const filtered: PathGraphEdgeData[][] = [];
-
-        // Remove any paths with duplicate pools. since the paths are now sorted by limit,
-        // selecting the first path will always be the optimal.
-        for (const { path } of pathsWithLimits) {
-            let seenPools: string[] = [];
-            let isValid = true;
-
-            for (const segment of path) {
-                if (seenPools.includes(segment.pool.id)) {
-                    isValid = false;
-                    break;
-                }
-            }
-
-            if (isValid) {
-                filtered.push(path);
-                seenPools = [...seenPools, ...path.map((segment) => segment.pool.id)];
-            }
-        }
-
-        return filtered;
     }
 
     private buildPoolAddressMap(pools: BasePool[]) {
@@ -212,10 +170,16 @@ export class PathGraphBeam {
         pools,
         maxPathsPerTokenPair,
         enableAddRemoveLiquidityPaths,
+        swapKind,
+        tokenPrices,
+        minLimitThresholdUSD,
     }: {
         pools: BasePool[];
         maxPathsPerTokenPair: number;
         enableAddRemoveLiquidityPaths: boolean;
+        swapKind?: SwapKind;
+        tokenPrices?: Map<string, number>;
+        minLimitThresholdUSD?: number;
     }) {
         for (const pool of pools) {
             const tokens = [...pool.tokens.map((t) => t.token)];
@@ -225,16 +189,16 @@ export class PathGraphBeam {
             for (const tokenIn of tokens) {
                 for (const tokenOut of tokens) {
                     if (tokenIn === tokenOut) continue;
-                    this.addEdge({
-                        edgeProps: {
-                            pool,
-                            tokenIn,
-                            tokenOut,
-                            normalizedLiquidity: pool.getNormalizedLiquidity(tokenIn, tokenOut),
-                            isBuffer: pool.poolType === 'Buffer',
-                        },
-                        maxPathsPerTokenPair,
-                    });
+                    const edgeProps = this.buildEdgeProps({ pool, tokenIn, tokenOut, swapKind, tokenPrices });
+                    // Skip edges whose USD limit is known and below threshold; allow undefined to pass
+                    if (
+                        minLimitThresholdUSD !== undefined &&
+                        edgeProps.limitUSD !== undefined &&
+                        edgeProps.limitUSD < minLimitThresholdUSD
+                    ) {
+                        continue;
+                    }
+                    this.addEdge({ edgeProps, maxPathsPerTokenPair });
                 }
             }
         }
@@ -248,6 +212,45 @@ export class PathGraphBeam {
         if (!this.edges.has(token.wrapped)) {
             this.edges.set(token.wrapped, new Map());
         }
+    }
+
+    // Build edge properties including optional limitUSD using tokenPrices for the given swapKind
+    private buildEdgeProps({
+        pool,
+        tokenIn,
+        tokenOut,
+        swapKind,
+        tokenPrices,
+    }: {
+        pool: BasePool;
+        tokenIn: Token;
+        tokenOut: Token;
+        swapKind?: SwapKind;
+        tokenPrices?: Map<string, number>;
+    }): PathGraphEdgeData {
+        let limitUSD: number | undefined = undefined;
+        if (swapKind && tokenPrices) {
+            try {
+                const limit = pool.getLimitAmountSwap(tokenIn, tokenOut, swapKind);
+                const priceToken = (swapKind as any) === SwapKind.GivenIn ? tokenIn : tokenOut;
+                const price = tokenPrices.get(priceToken.wrapped.toLowerCase());
+                if (price !== undefined) {
+                    const amount = Number(formatUnits(limit, priceToken.decimals));
+                    limitUSD = amount * price;
+                }
+            } catch (_e) {
+                // leave limitUSD undefined if anything fails
+            }
+        }
+
+        return {
+            pool,
+            tokenIn,
+            tokenOut,
+            normalizedLiquidity: pool.getNormalizedLiquidity(tokenIn, tokenOut),
+            isBuffer: pool.poolType === 'Buffer',
+            limitUSD,
+        };
     }
 
     /**
@@ -268,7 +271,6 @@ export class PathGraphBeam {
             throw new Error('Attempting to add invalid edge');
         }
 
-        const hasPhantomBpt = tokenInVertex.isPhantomBpt || tokenOutVertex.isPhantomBpt;
         const existingEdges = tokenInNode.get(edgeProps.tokenOut.wrapped) || [];
 
         //TODO: ideally we don't call sort every time, this isn't performant
@@ -276,11 +278,9 @@ export class PathGraphBeam {
             a.normalizedLiquidity > b.normalizedLiquidity ? -1 : 1,
         );
 
-        // TODO: double check if the hasPhantomBpt issue is not affecting v3 liquidity more frequently (considering all
-        // pools have their BPT artificially added so we consider them for add/remove liquidity steps)
         tokenInNode.set(
             edgeProps.tokenOut.wrapped,
-            sorted.length > maxPathsPerTokenPair && !hasPhantomBpt ? sorted.slice(0, maxPathsPerTokenPair) : sorted,
+            sorted.length > maxPathsPerTokenPair ? sorted.slice(0, maxPathsPerTokenPair) : sorted,
         );
     }
 
@@ -296,88 +296,64 @@ export class PathGraphBeam {
         const results: string[][] = [];
         if (tokenIn === tokenOut) return [[tokenIn]];
 
-        // State tracked incrementally to avoid rescanning the whole path
-        const path: string[] = [tokenIn];
-        const visited = new Set<string>([tokenIn]);
-
-        // We use an iterative DFS (non-recursive) for performance.
-        // Ordering doesn’t matter since caller sorts by length later.
-        type Frame = {
-            token: string;
-            iter: IterableIterator<[string, PathGraphEdgeData[]]>;
-            isBoosted: boolean;
+        // Use BFS queue instead of DFS stack
+        type QueueItem = {
+            node: string;
+            path: string[];
             numStandardHopTokens: number;
         };
 
-        const startNeighbors = this.edges.get(tokenIn)?.entries() ?? new Map<string, PathGraphEdgeData[]>().entries();
-        let current: Frame = {
-            token: tokenIn,
-            iter: startNeighbors,
-            isBoosted: this.poolAddressMap.has(tokenIn),
-            numStandardHopTokens: 0,
-        };
-        const stack: Frame[] = [];
+        const queue: QueueItem[] = [
+            {
+                node: tokenIn,
+                path: [tokenIn],
+                numStandardHopTokens: 0,
+            },
+        ];
 
         // Respect the "approxPathsToReturn" as an upper bound (per docs).
         const maxTokenPaths = Math.max(1, config.approxPathsToReturn);
 
-        outer: while (true) {
-            const step = current.iter.next();
+        while (queue.length > 0 && results.length < maxTokenPaths) {
+            const { node, path, numStandardHopTokens } = queue.shift()!;
 
-            if (step.done) {
-                // backtrack
-                if (stack.length === 0) break;
-                const lastNode = path.pop()!;
-                visited.delete(lastNode);
-                current = stack.pop()!;
-                continue;
+            const neighbors = this.edges.get(node);
+            if (!neighbors) continue;
+
+            for (const [neighbor] of neighbors) {
+                // No revisiting the same token
+                if (path.includes(neighbor)) continue;
+
+                const nextDepth = path.length + 1;
+                if (nextDepth > config.maxDepth) continue;
+
+                // Count hop tokens excluding endpoints
+                const isHopToken = neighbor !== tokenIn && neighbor !== tokenOut;
+                const nextNumStandardHopTokens = numStandardHopTokens + (isHopToken ? 1 : 0);
+
+                if (
+                    nextDepth > config.maxNonBoostedPathDepth &&
+                    nextNumStandardHopTokens > config.maxNonBoostedHopTokensInBoostedPath
+                ) {
+                    continue;
+                }
+
+                const newPath = [...path, neighbor];
+
+                if (neighbor === tokenOut) {
+                    // Complete path checks
+                    if (nextDepth > config.maxNonBoostedPathDepth) continue;
+                    results.push(newPath);
+                    if (results.length >= maxTokenPaths) break;
+                } else {
+                    // Add to queue for further exploration (BFS)
+                    queue.push({
+                        node: neighbor,
+                        path: newPath,
+                        numStandardHopTokens: nextNumStandardHopTokens,
+                    });
+                }
             }
-
-            const neighbor = step.value[0];
-
-            // No revisiting the same token
-            if (visited.has(neighbor)) continue;
-
-            const nextDepth = path.length + 1;
-            if (nextDepth > config.maxDepth) continue;
-
-            const neighborIsPhantom = this.poolAddressMap.has(neighbor);
-            const nextIsBoosted = current.isBoosted || neighborIsPhantom;
-
-            // Count hop tokens excluding endpoints
-            const isHopToken = neighbor !== tokenIn && neighbor !== tokenOut;
-            const nextNumStandardHopTokens = current.numStandardHopTokens + (isHopToken && !neighborIsPhantom ? 1 : 0);
-
-            // Prune using the same rules as isValidTokenPath but incrementally
-            if (nextIsBoosted && nextNumStandardHopTokens > config.maxNonBoostedHopTokensInBoostedPath) continue;
-
-            if (
-                nextDepth > config.maxNonBoostedPathDepth &&
-                nextNumStandardHopTokens > config.maxNonBoostedHopTokensInBoostedPath
-            ) {
-                continue;
-            }
-
-            if (neighbor === tokenOut) {
-                // Complete path checks
-                if (!nextIsBoosted && nextDepth > config.maxNonBoostedPathDepth) continue;
-                results.push([...path, neighbor]);
-                if (results.length >= maxTokenPaths) break outer;
-                continue;
-            }
-
-            // Go deeper
-            path.push(neighbor);
-            visited.add(neighbor);
-
-            // Save current frame and descend
-            stack.push(current);
-            current = {
-                token: neighbor,
-                iter: this.edges.get(neighbor)?.entries() ?? new Map<string, PathGraphEdgeData[]>().entries(),
-                isBoosted: nextIsBoosted,
-                numStandardHopTokens: nextNumStandardHopTokens,
-            };
         }
 
         return results;
@@ -444,6 +420,27 @@ export class PathGraphBeam {
         return id;
     }
 
+    // please add a description to how this function works internally
+    /**
+     * Calculates the maximum feasible swap size for a given path.
+     * @param path - The path to calculate the limit for.
+     * @param swapKind - The type of swap to calculate the limit for.
+     * @returns The maximum feasible swap size for the path.
+     *
+     * This function works by starting with the last segment of the path and working backwards.
+     * It calculates the limit for the last segment using the getLimitAmountSwap method.
+     * Then, it iterates through the remaining segments, calculating the limit for each segment.
+     * The limit for each segment is the minimum of the limit for the previous segment and the limit for the current segment.
+     * If the limit for the current segment is greater than the limit for the previous segment, it means that the current segment is the bottleneck.
+     * In this case, the function calculates the limit for the current segment by pulling the limit from the previous segment.
+     * The function returns the limit for the first segment.
+     *
+     * This function is used to calculate the limit for a given path.
+     * The limit is used to determine if a path is valid.
+     * The limit is also used to determine the best path to use.
+     *
+     *
+     */
     private getLimitAmountSwapForPath(path: PathGraphEdgeData[], swapKind: SwapKind): bigint {
         let limit = path[path.length - 1].pool.getLimitAmountSwap(
             path[path.length - 1].tokenIn,
@@ -494,13 +491,11 @@ export class PathGraphBeam {
         tokenPath,
         swapKind,
         minLimitThreshold,
-        maxRanksPerSegment,
         approxPathsToReturn,
     }: {
         tokenPath: string[];
         swapKind: SwapKind;
         minLimitThreshold: bigint;
-        maxRanksPerSegment: number;
         approxPathsToReturn: number;
     }): PathGraphEdgeData[][] {
         const segmentCount = tokenPath.length - 1;
@@ -509,83 +504,64 @@ export class PathGraphBeam {
         // Gather candidate edges per segment (already sorted by normalizedLiquidity desc).
         const perSegmentEdges: PathGraphEdgeData[][] = new Array(segmentCount);
         for (let i = 0; i < segmentCount; i++) {
-            const edges = this.edges.get(tokenPath[i])?.get(tokenPath[i + 1]) ?? [];
-            if (edges.length === 0) return []; // path cannot be built
-            // Limit choices per segment
-            perSegmentEdges[i] = edges.slice(0, Math.min(edges.length, maxRanksPerSegment, this.maxPathsPerTokenPair));
+            const edges = this.edges.get(tokenPath[i])?.get(tokenPath[i + 1]);
+            if (!edges) return []; // path cannot be built
+            perSegmentEdges[i] = edges;
         }
 
-        // Precompute optimistic bound per candidate edge (cached)
-        const perSegmentEdgeBounds: bigint[][] = perSegmentEdges.map((edges) =>
-            edges.map((e) => this.getEdgeLimitCached(e, swapKind)),
-        );
-
-        // Beam search: keep only the top K partial combos by optimistic bound
-        type Partial = { ranks: number[]; bound: bigint };
-        let partials: Partial[] = [{ ranks: [], bound: 0n }]; // bound will be set on first expansion
+        // Beam search: keep only the top K partial combos by bottleneck normalizedLiquidity
+        type Partial = { ranks: number[]; boundNL: bigint };
+        let partials: Partial[] = [{ ranks: [], boundNL: 0n }];
 
         // Make the beam wider than the final number to ensure diversity
-        const beamWidth = Math.max(approxPathsToReturn * 3, approxPathsToReturn);
+        const beamWidth = Math.max(approxPathsToReturn * 10, approxPathsToReturn);
 
         for (let seg = 0; seg < segmentCount; seg++) {
             const edges = perSegmentEdges[seg];
-            const bounds = perSegmentEdgeBounds[seg];
             const next: Partial[] = [];
 
             for (const p of partials) {
                 for (let r = 0; r < edges.length; r++) {
-                    // optimistic bound for extended partial is min of previous bound and this edge bound
-                    const newBound = p.ranks.length === 0 ? bounds[r] : bounds[r] < p.bound ? bounds[r] : p.bound;
+                    const edge = edges[r];
 
-                    // Early prune by minLimitThreshold
-                    if (newBound < minLimitThreshold) continue;
+                    // bottleneck normalizedLiquidity across segments so far
+                    const edgeNL = edge.normalizedLiquidity;
+                    const newBoundNL = p.boundNL < edgeNL ? p.boundNL : edgeNL;
 
                     const ranks = p.ranks.length === 0 ? [r] : [...p.ranks, r];
-                    next.push({ ranks, bound: newBound });
+                    next.push({ ranks, boundNL: newBoundNL });
                 }
             }
 
             if (next.length === 0) return [];
 
-            // Keep only the best by optimistic bound (desc)
-            next.sort((a, b) => (a.bound < b.bound ? 1 : -1));
+            // Keep only the best by bottleneck NL (desc)
+            next.sort((a, b) => (a.boundNL < b.boundNL ? 1 : -1));
             partials = next.slice(0, beamWidth);
         }
 
         // Evaluate real limits only for the finalists and filter by threshold
         // This is the expensive part; we limited it by beamWidth.
         const pathsWithRealLimit: { path: PathGraphEdgeData[]; limit: bigint }[] = [];
-        const seenCombos = new Set<string>();
 
         for (const p of partials) {
-            const key = p.ranks.join(',');
-            if (seenCombos.has(key)) continue;
-            seenCombos.add(key);
-
             try {
-                const path = this.expandTokenPathWithRanks({ tokenPath, ranks: p.ranks });
+                const path = this.expandTokenPathWithRanks({ perSegmentEdges, ranks: p.ranks });
                 const limit = this.getLimitAmountSwapForPath(path, swapKind);
                 if (limit >= minLimitThreshold) {
                     pathsWithRealLimit.push({ path, limit });
                     if (pathsWithRealLimit.length >= approxPathsToReturn) {
-                        // We can stop early if we already have enough
-                        // candidates meeting the threshold.
-                        // We will still sort below for determinism.
-                        // This keeps CPU in check on large graphs.
+                        // We can stop early if we already have enough candidates meeting the threshold.
                         break;
                     }
                 }
             } catch {
-                // Missing rank or edge; skip
+                // getLimitAmountSwapForPath failed (likely due to trade/wrap amount too small)
                 continue;
             }
         }
 
-        if (pathsWithRealLimit.length === 0) return [];
-
-        // Return top approxPathsToReturn by real limit
-        pathsWithRealLimit.sort((a, b) => (a.limit < b.limit ? 1 : -1));
-        return pathsWithRealLimit.slice(0, approxPathsToReturn).map((x) => x.path);
+        return pathsWithRealLimit.map((x) => x.path);
     }
 
     /**
@@ -594,23 +570,22 @@ export class PathGraphBeam {
      * @param tokenPath - Array of token addresses representing the path
      * @param ranks - Array of liquidity ranks to use for each segment (must match path length - 1)
      */
-    private expandTokenPathWithRanks({ tokenPath, ranks }: { tokenPath: string[]; ranks: number[] }) {
+    private expandTokenPathWithRanks({
+        perSegmentEdges,
+        ranks,
+    }: {
+        perSegmentEdges: PathGraphEdgeData[][];
+        ranks: number[];
+    }) {
         const segments: PathGraphEdgeData[] = [];
 
-        for (let i = 0; i < tokenPath.length - 1; i++) {
-            const edge = this.edges.get(tokenPath[i])?.get(tokenPath[i + 1]);
-
-            if (!edge || edge.length === 0) {
-                throw new Error(`Missing edge for pair ${tokenPath[i]} -> ${tokenPath[i + 1]}`);
-            }
-
+        for (let i = 0; i < perSegmentEdges.length; i++) {
+            const edgeChoices = perSegmentEdges[i];
             const rank = ranks[i];
-
-            if (!edge[rank]) {
-                throw new Error(`Missing rank ${rank} on edge for pair ${tokenPath[i]} -> ${tokenPath[i + 1]}`);
+            if (!edgeChoices[rank]) {
+                throw new Error('Missing rank on edge for segment');
             }
-
-            segments.push(edge[rank]);
+            segments.push(edgeChoices[rank]);
         }
 
         return segments;

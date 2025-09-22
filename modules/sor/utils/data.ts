@@ -33,17 +33,16 @@ export async function getBasePoolsFromDb(
     considerPoolsWithHooks: boolean,
     poolIds?: string[],
 ): Promise<{ pools: SORDbPool[]; bufferPools: BufferPoolData[] }> {
+    console.time('SOR:getpools');
     const cacheKey = `${SOR_POOLS_CACHE_KEY}:${chain}:${poolIds}`;
 
     let cached = cache.get(cacheKey);
 
     if (!cached) {
         // get pools
-        console.time('SOR:getpools');
         const pools = await getPools(chain, poolIds);
-        console.timeEnd('SOR:getpools');
         const bufferPools = await getBufferPoolsFromDBPools(pools, chain);
-        cached = cache.put(cacheKey, { pools, bufferPools }, parseInt(env.SOR_POOLS_CACHE_TTL_SECONDS) * 1000);
+        cached = cache.put(cacheKey, { pools, bufferPools }, 60 * 1000);
     }
 
     // Filter
@@ -66,6 +65,8 @@ export async function getBasePoolsFromDb(
     const requestedPoolIds = pools.map((pool) => pool.id);
 
     const bufferPools = cached.bufferPools.filter((bufferPool) => requestedPoolIds.includes(bufferPool.poolId));
+
+    console.timeEnd('SOR:getpools');
 
     return { pools, bufferPools };
 }
@@ -283,4 +284,17 @@ function logMissingTokens(underlyingTokens: PrismaToken[], underlyingTokenAddres
             }
         });
     }
+}
+
+/**
+ * Fetches current token prices for a chain and returns a lowercase-address -> price map.
+ * Uses the shared tokenService cache to avoid redundant DB hits.
+ */
+export async function getTokenPricesMap(chain: Chain): Promise<Map<string, number>> {
+    const prices = await tokenService.getTokenPrices(chain);
+    const map = new Map<string, number>();
+    for (const p of prices) {
+        map.set(p.tokenAddress.toLowerCase(), p.price);
+    }
+    return map;
 }

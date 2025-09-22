@@ -49,4 +49,7 @@ export interface PathGraphEdgeData {
     tokenIn: Token;
     tokenOut: Token;
     isBuffer: boolean;
+    // Optional USD-denominated optimistic limit for this edge for the active swapKind
+    // Defined only in beam graph when prices are available
+    limitUSD?: number;
 }

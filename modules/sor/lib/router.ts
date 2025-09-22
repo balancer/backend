@@ -6,7 +6,9 @@ import { PathGraphTraversalConfig } from './pathGraph/pathGraphTypes';
 import { max, min } from './utils/math';
 import { BasePool } from './poolsV2/basePool';
 import { PathLocal, PathWithAmount } from './path';
-import { parseEther } from 'viem';
+import { formatUnits, parseEther } from 'viem';
+import { tokenService } from '../../token/token.service';
+import { chainIdToChain } from '../../network/chain-id-to-chain';
 import { Chain } from '@prisma/client';
 import { chainToChainId } from '../../network/chain-id-to-chain';
 
@@ -35,9 +37,28 @@ export class Router {
         swapAmount: TokenAmount,
         swapKind: SwapKind,
         enableAddRemoveLiquidityPaths: boolean,
+        tokenPrices: Map<string, number>,
         graphTraversalConfig?: Partial<PathGraphTraversalConfig>,
     ): PathLocal[] {
-        this.pathGraph.buildGraph({ pools, enableAddRemoveLiquidityPaths });
+        // Compute USD threshold if prices provided
+        let minLimitThresholdUSD: number | undefined = undefined;
+        if (graphTraversalConfig?.minSwapAmountRatio !== undefined && tokenPrices) {
+            const ratio = Math.max(0, Math.min(1, graphTraversalConfig.minSwapAmountRatio));
+            const priceToken = swapKind === SwapKind.GivenIn ? tokenIn : tokenOut;
+            const price = tokenPrices.get(priceToken.wrapped.toLowerCase());
+            if (price !== undefined) {
+                const amount = Number(formatUnits(swapAmount.amount, priceToken.decimals));
+                minLimitThresholdUSD = amount * ratio * price;
+            }
+        }
+
+        this.pathGraph.buildGraph({
+            pools,
+            enableAddRemoveLiquidityPaths,
+            swapKind,
+            tokenPrices,
+            minLimitThresholdUSD,
+        });
 
         const candidatePaths = this.pathGraph.getCandidatePaths({
             tokenIn,
@@ -45,6 +66,7 @@ export class Router {
             swapAmount,
             swapKind,
             graphTraversalConfig,
+            minLimitThresholdUSD,
         });
 
         return candidatePaths;

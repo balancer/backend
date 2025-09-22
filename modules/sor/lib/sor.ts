@@ -37,9 +37,12 @@ export class SOR {
         prismaPools: PrismaPoolAndHookWithDynamic[],
         bufferPools: BufferPoolData[],
         protocolVersion: number,
+        tokenPrices: Map<string, number>,
         swapOptions?: Omit<SorSwapOptions, 'graphTraversalConfig.poolIdsToInclude'>,
         graphVersion: PathGraphVersion = 'original',
     ): Promise<PathWithAmount[] | null> {
+        const sorStart = performance.now();
+
         const checkedSwapAmount = checkInputs(tokenIn, tokenOut, swapKind, swapAmountEvm);
 
         // get current block timestamp if not provided
@@ -154,6 +157,7 @@ export class SOR {
             checkedSwapAmount,
             swapKind,
             protocolVersion === 3,
+            tokenPrices,
             swapOptions?.graphTraversalConfig,
         );
 
@@ -162,6 +166,9 @@ export class SOR {
         const bestPaths = router.getBestPaths(candidatePaths, swapKind, checkedSwapAmount);
 
         if (!bestPaths) return null;
+
+        const sorEnd = performance.now();
+        console.log(`SOR:getPathsWithPools: ${(sorEnd - sorStart).toFixed(2)}ms`);
 
         return bestPaths;
     }

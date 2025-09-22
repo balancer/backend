@@ -7,6 +7,7 @@ import { SOR } from './lib/sor';
 import {
     getBasePoolsFromDb,
     getToken,
+    getTokenPricesMap,
     isValidSwapRequest,
     mapSwapKind,
     mapToGetSwapPathsInput,
@@ -40,12 +41,15 @@ export class SorService {
         const getSwapPathsInput = await mapToGetSwapPathsInput({ ...args, tokenIn, tokenOut });
 
         // get swap paths from sor for the requested protocol version mapped as sor service output type
+        const sorStart = performance.now();
         const { paths, protocolVersion } = args.useProtocolVersion
             ? await this.getSwapPathsWithRetry({
                   ...getSwapPathsInput,
                   protocolVersion: args.useProtocolVersion,
               })
             : await this.getBestSwapPathFromBothVersions(getSwapPathsInput);
+        const sorEnd = performance.now();
+        console.log(`SOR:getSwapPaths: ${(sorEnd - sorStart).toFixed(2)}ms`);
 
         // return zero response if no paths are found
         if (!paths) {
@@ -94,6 +98,9 @@ export class SorService {
                 input.poolIds,
             );
 
+            // used for early pruning of paths based on swap limits
+            const tokenPrices = await getTokenPricesMap(input.chain);
+
             const tokenIn = await getToken(input.tokenIn as Address, input.chain);
             const tokenOut = await getToken(input.tokenOut as Address, input.chain);
             const swapKind = mapSwapKind(input.swapType);
@@ -108,6 +115,7 @@ export class SorService {
                 poolsFromDb,
                 bufferPools,
                 input.protocolVersion,
+                tokenPrices,
                 swapOptions,
                 this.pathGraphVersion,
             );
@@ -122,6 +130,7 @@ export class SorService {
                     poolsFromDb,
                     bufferPools,
                     input.protocolVersion,
+                    tokenPrices,
                     swapOptions,
                     this.pathGraphVersion,
                 );
