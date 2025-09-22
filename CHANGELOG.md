@@ -1,5 +1,11 @@
 # backend
 
+## 1.53.13
+
+### Patch Changes
+
+-   dcbbd0d: fix decimal diff decoding
+
 ## 1.53.12
 
 ### Patch Changes
