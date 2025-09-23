@@ -47,9 +47,6 @@ export class PathGraph {
     // Since the path combinations here can get quite large, we use configurable parameters
     // to enforce upper limits across several dimensions, defined in the pathConfig.
     // (a) maxDepth - the max depth of the traversal (length of token path), defaults to 7.
-    // (b) maxNonBoostedPathDepth - the max depth for any path that does not contain a phantom bpt.
-    // (c) maxNonBoostedHopTokensInBoostedPath - The max number of non boosted hop tokens
-    // allowed in a boosted path.
     // (d) approxPathsToReturn - search for up to this many paths. Since all paths for a single traversal
     // are added, its possible that the amount returned is larger than this number.
     // (e) poolIdsToInclude - Only include paths with these poolIds (optional)
@@ -74,9 +71,7 @@ export class PathGraph {
 
         // apply defaults, allowing caller override whatever they'd like
         const config: PathGraphTraversalConfig = {
-            maxDepth: 6,
-            maxNonBoostedPathDepth: 3,
-            maxNonBoostedHopTokensInBoostedPath: 2,
+            maxDepth: 4,
             maxBuffersInPath: isHyperEvm ? 2 : 5, // limited only on HyperEvm due to gas cost limits on small blocks - virtually unlimited otherwise
             approxPathsToReturn: 20, // Default to 20 - likely won't be reached, but acts as a bound to the computation if needed
             maxRanksPerSegment: 2, // Default 2 for diversity
@@ -322,8 +317,6 @@ export class PathGraph {
         for (const neighbor of neighbors) {
             const validTokenPath = this.isValidTokenPath({
                 tokenPath: [...tokenPath, neighbor],
-                tokenIn,
-                tokenOut,
                 config,
             });
 
@@ -342,40 +335,8 @@ export class PathGraph {
         }
     }
 
-    private isValidTokenPath({
-        tokenPath,
-        config,
-        tokenIn,
-        tokenOut,
-    }: {
-        tokenPath: string[];
-        config: PathGraphTraversalConfig;
-        tokenIn: string;
-        tokenOut: string;
-    }) {
-        const isCompletePath = tokenPath[tokenPath.length - 1] === tokenOut;
-        const hopTokens = tokenPath.filter((token) => token !== tokenIn && token !== tokenOut);
-        const numStandardHopTokens = hopTokens.filter((token) => !this.poolAddressMap.has(token)).length;
-        const isBoostedPath = tokenPath.filter((token) => this.poolAddressMap.has(token)).length > 0;
-
+    private isValidTokenPath({ tokenPath, config }: { tokenPath: string[]; config: PathGraphTraversalConfig }) {
         if (tokenPath.length > config.maxDepth) {
-            return false;
-        }
-
-        if (isBoostedPath && numStandardHopTokens > config.maxNonBoostedHopTokensInBoostedPath) {
-            return false;
-        }
-
-        // if the path length is greater than maxNonBoostedPathDepth, then this path
-        // will only be valid if its a boosted path, so it must honor maxNonBoostedHopTokensInBoostedPath
-        if (
-            tokenPath.length > config.maxNonBoostedPathDepth &&
-            numStandardHopTokens > config.maxNonBoostedHopTokensInBoostedPath
-        ) {
-            return false;
-        }
-
-        if (isCompletePath && !isBoostedPath && tokenPath.length > config.maxNonBoostedPathDepth) {
             return false;
         }
 
