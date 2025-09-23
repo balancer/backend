@@ -1,4 +1,5 @@
 import { Chain } from '@prisma/client';
+import { Hex } from 'viem';
 
 export type YieldToken = {
     address: string;
@@ -41,12 +42,24 @@ export interface TokenYieldContractFetchConfig {
     parser: (result: any) => number;
 }
 
+export interface AaveAddressBookEntry {
+    UI_POOL_DATA_PROVIDER: Hex;
+    POOL_ADDRESSES_PROVIDER: Hex;
+    ASSETS?: Record<
+        string,
+        {
+            UNDERLYING: string;
+            STATIC_A_TOKEN?: string;
+            STATA_TOKEN?: string;
+        }
+    >;
+    CHAIN_ID: number;
+}
+
 export interface TokenYieldConfig {
     aave?: {
-        market: string;
-        chain: Chain;
-        subgraphUrl: string;
-    }[];
+        markets: AaveAddressBookEntry[];
+    };
     sts?: {
         token: string;
     };

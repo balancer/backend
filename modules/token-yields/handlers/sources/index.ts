@@ -1,6 +1,6 @@
 export * from './http-yield-handler';
 export * from './contract-yield-handler';
-export * from './aave-yield-handler';
+export * from './aave-onchain-handler';
 export * from './avalon-yield-handler';
 export * from './euler-yield-handler';
 export * from './teth-yield-handler';

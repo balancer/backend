@@ -1,6 +1,6 @@
 {
     "name": "backend",
-    "version": "1.53.13",
+    "version": "1.54.0",
     "description": "Backend service for Beethoven X and Balancer",
     "repository": "https://github.com/balancer/backend",
     "author": "Beethoven X",
@@ -27,6 +27,7 @@
         "@aws-sdk/client-sqs": "^3.734.0",
         "@balancer-labs/balancer-maths": "^0.0.36",
         "@balancer/sdk": "^4.5.1",
+        "@bgd-labs/aave-address-book": "^4.30.5",
         "@ethersproject/address": "^5.7.0",
         "@ethersproject/bignumber": "^5.7.0",
         "@ethersproject/constants": "^5.7.0",

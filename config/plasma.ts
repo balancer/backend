@@ -1,3 +1,4 @@
+import { AaveV3Plasma } from '@bgd-labs/aave-address-book';
 import { env } from '../apps/env';
 import { NetworkData } from '../modules/network/network-config-types';
 
@@ -86,7 +87,15 @@ export default <NetworkData>{
                         },
                     ],
                 },
+                {
+                    url: 'https://api-v2.streamprotocol.money/vaults/xUSD/apy',
+                    scale: 100,
+                    extractors: [{ type: 'path', token: '0x6eaf19b2fc24552925db245f9ff613157a7dbb4c', path: '$.apy' }],
+                },
             ],
+            aave: {
+                markets: [AaveV3Plasma],
+            },
         },
     },
     multicall: '0xca11bde05977b3631167028862be2a173976ca11',

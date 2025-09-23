@@ -3,7 +3,7 @@ import { TokenYieldConfig, YieldToken } from '../types';
 import { Chain } from '@prisma/client';
 
 const sourceToHandler = {
-    aave: sources.aaveTokenYieldHandler,
+    aave: sources.aaveOnchainHandler,
     avalon: sources.avalonYieldHandler,
     euler: sources.eulerYieldHandler,
     teth: sources.treehouseYieldHandler,
@@ -17,7 +17,10 @@ const sourceToHandler = {
 export class TokenYieldAprHandlers {
     private config: TokenYieldConfig;
 
-    constructor(aprConfig: TokenYieldConfig, private chain: Chain) {
+    constructor(
+        aprConfig: TokenYieldConfig,
+        private chain: Chain,
+    ) {
         const { ...config } = aprConfig;
         this.config = config;
     }

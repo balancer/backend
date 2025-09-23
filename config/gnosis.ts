@@ -1,5 +1,6 @@
+import { AaveV3Gnosis } from '@bgd-labs/aave-address-book';
 import { env } from '../apps/env';
-import { DeploymentEnv, NetworkData } from '../modules/network/network-config-types';
+import { NetworkData } from '../modules/network/network-config-types';
 
 export default <NetworkData>{
     chain: {
@@ -130,13 +131,9 @@ export default <NetworkData>{
                     ],
                 },
             ],
-            aave: [
-                {
-                    market: 'v3',
-                    chain: 'GNOSIS',
-                    subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/HtcDaL8L8iZ2KQNNS44EBVmLruzxuNAz1RkBYdui1QUT`,
-                },
-            ],
+            aave: {
+                markets: [AaveV3Gnosis],
+            },
         },
     },
     gyro: {

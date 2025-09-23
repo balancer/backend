@@ -1,5 +1,6 @@
 import { env } from '../apps/env';
 import { NetworkData } from '../modules/network/network-config-types';
+import { AaveV3Arbitrum } from '@bgd-labs/aave-address-book';
 
 export default <NetworkData>{
     chain: {
@@ -78,13 +79,9 @@ export default <NetworkData>{
             teth: {
                 address: '0xd09acb80c1e8f2291862c4978a008791c9167003',
             },
-            aave: [
-                {
-                    market: 'v3',
-                    chain: 'ARBITRUM',
-                    subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/DLuE98kEb5pQNXAcKFQGQgfSQ57Xdou4jnVbAEqMfy3B`,
-                },
-            ],
+            aave: {
+                markets: [AaveV3Arbitrum],
+            },
             contract: {
                 calls: [
                     {

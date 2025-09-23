@@ -1,6 +1,7 @@
 import { BigNumber } from 'ethers';
 import { env } from '../apps/env';
 import { NetworkData } from '../modules/network/network-config-types';
+import { AaveV3Ethereum, AaveV3EthereumLido } from '@bgd-labs/aave-address-book';
 
 export default <NetworkData>{
     chain: {
@@ -101,23 +102,9 @@ export default <NetworkData>{
         morphoRewardsAprHandler: true,
         aaveRewardsAprHandler: true,
         ybAprHandler: {
-            aave: [
-                {
-                    market: 'v2',
-                    chain: 'MAINNET',
-                    subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/8wR23o1zkS4gpLqLNU4kG3JHYVucqGyopL5utGxP2q1N`,
-                },
-                {
-                    market: 'v3',
-                    chain: 'MAINNET',
-                    subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/Cd2gEDVeqnjBn1hSeqFMitw8Q1iiyV9FYUZkLNRcL87g`,
-                },
-                {
-                    market: 'lido',
-                    chain: 'MAINNET',
-                    subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/5vxMbXRhG1oQr55MWC5j6qg78waWujx1wjeuEWDA6j3`,
-                },
-            ],
+            aave: {
+                markets: [AaveV3Ethereum, AaveV3EthereumLido],
+            },
             http: [
                 {
                     url: 'https://yields.llama.fi/chart/5a9c2073-2190-4002-9654-8c245d1e8534',
@@ -548,6 +535,17 @@ export default <NetworkData>{
                     url: 'https://api-v2.streamprotocol.money/vaults/xUSD/apy',
                     scale: 100,
                     extractors: [{ type: 'path', token: '0xe2fc85bfb48c4cf147921fbe110cf92ef9f26f94', path: '$.apy' }],
+                },
+                {
+                    url: 'https://app-integration.rocksolid.network/api/vaults/0x936facdf10c8c36294e7b9d28345255539d81bc7/apr',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x936facdf10c8c36294e7b9d28345255539d81bc7',
+                            path: '$.totalAprAgainstEth',
+                        },
+                    ],
                 },
             ],
             contract: {

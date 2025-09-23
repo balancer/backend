@@ -1,5 +1,6 @@
 import { env } from '../apps/env';
 import { NetworkData } from '../modules/network/network-config-types';
+import { AaveV3Avalanche } from '@bgd-labs/aave-address-book';
 
 export default <NetworkData>{
     chain: {
@@ -75,13 +76,9 @@ export default <NetworkData>{
     aprHandlers: {
         aaveRewardsAprHandler: true,
         ybAprHandler: {
-            aave: [
-                {
-                    market: 'v3',
-                    chain: 'AVALANCHE',
-                    subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/2h9woxy8RTjHu1HJsCEnmzpPHFArU33avmUh4f71JpVn`,
-                },
-            ],
+            aave: {
+                markets: [AaveV3Avalanche],
+            },
             euler: {
                 url: 'https://raw.githubusercontent.com/euler-xyz/euler-labels/refs/heads/master/43114/vaults.json',
                 lens: '0xc820c24905c210aefe21dae40723ec28d62c1544',

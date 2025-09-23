@@ -1,5 +1,6 @@
+import { AaveV3Polygon } from '@bgd-labs/aave-address-book';
 import { env } from '../apps/env';
-import { DeploymentEnv, NetworkData } from '../modules/network/network-config-types';
+import { NetworkData } from '../modules/network/network-config-types';
 
 export default <NetworkData>{
     chain: {
@@ -67,18 +68,9 @@ export default <NetworkData>{
     avgBlockSpeed: 1,
     aprHandlers: {
         ybAprHandler: {
-            aave: [
-                {
-                    market: 'v2',
-                    chain: 'POLYGON',
-                    subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/H1Et77RZh3XEf27vkAmJyzgCME2RSFLtDS2f4PPW6CGp`,
-                },
-                {
-                    market: 'v3',
-                    chain: 'POLYGON',
-                    subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/Co2URyXjnxaw8WqxKyVHdirq9Ahhm5vcTs4dMedAq211`,
-                },
-            ],
+            aave: {
+                markets: [AaveV3Polygon],
+            },
             http: [
                 {
                     url: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
