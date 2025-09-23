@@ -153,12 +153,12 @@ export class SorService {
         }
     }
 
-    private buildSwapOptions(maxNonBoostedPathDepth: number): {
+    private buildSwapOptions(maxDepth: number): {
         graphTraversalConfig: GraphTraversalConfig;
     } {
         return {
             graphTraversalConfig: {
-                maxNonBoostedPathDepth,
+                maxDepth,
             },
         };
     }

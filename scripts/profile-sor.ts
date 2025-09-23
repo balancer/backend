@@ -534,15 +534,19 @@ class SorProfiler {
             const deltasPct: number[] = [];
             let better = 0,
                 worse = 0,
-                same = 0;
+                same = 0,
+                zero = 0;
             for (let i = 0; i < baseline.length; i++) {
                 const base = baseline[i] || 0;
                 const val = data.amounts[i] || 0;
                 const delta = val - base;
                 const pct = base !== 0 ? (delta / base) * 100 : 0;
                 deltas.push(delta);
-                if (Math.abs(delta) < 1e-12) same++;
-                else {
+                if (base === 0 && val === 0) {
+                    zero++;
+                } else if (Math.abs(delta) < 1e-12) {
+                    same++;
+                } else {
                     deltasPct.push(pct);
                     if (delta > 0) better++;
                     else worse++;
@@ -551,28 +555,28 @@ class SorProfiler {
             const avgPct = deltasPct.reduce((s, v) => s + v, 0) / deltasPct.length;
             console.log(`   ${algo}:`);
             console.log(`      Avg delta % vs baseline: ${avgPct.toFixed(4)}%`);
-            console.log(`      Better: ${better}, Worse: ${worse}, Same: ${same}`);
+            console.log(`      Better: ${better}, Worse: ${worse}, Same: ${same}, Zero: ${zero}`);
 
-            // Detailed logs for worse cases to understand path differences
-            const maxLogs = 10;
-            let logged = 0;
-            for (let i = 0; i < baseline.length && logged < maxLogs; i++) {
-                const baseVal = baseline[i] || 0;
-                const curVal = data.amounts[i] || 0;
-                if (curVal <= baseVal && Math.abs(curVal - baseVal) > 1e-12) {
-                    const swap = swaps[i];
-                    const baseRes = results[baselineAlgo].results[i];
-                    const curRes = data.results[i];
-                    console.log(`\n   🔎 Swap #${i + 1}: ${swap.tokenIn} -> ${swap.tokenOut} amount=${swap.amount}`);
-                    console.log(
-                        `      Baseline(${baselineAlgo}) return=${baseRes.returnAmount}, paths=${baseRes.paths.length}`,
-                    );
-                    this.printPaths(baseRes.paths);
-                    console.log(`      ${algo} return=${curRes.returnAmount}, paths=${curRes.paths.length}`);
-                    this.printPaths(curRes.paths);
-                    logged++;
-                }
-            }
+            // // Detailed logs for worse cases to understand path differences
+            // const maxLogs = 10;
+            // let logged = 0;
+            // for (let i = 0; i < baseline.length && logged < maxLogs; i++) {
+            //     const baseVal = baseline[i] || 0;
+            //     const curVal = data.amounts[i] || 0;
+            //     if (curVal <= baseVal && Math.abs(curVal - baseVal) > 1e-12) {
+            //         const swap = swaps[i];
+            //         const baseRes = results[baselineAlgo].results[i];
+            //         const curRes = data.results[i];
+            //         console.log(`\n   🔎 Swap #${i + 1}: ${swap.tokenIn} -> ${swap.tokenOut} amount=${swap.amount}`);
+            //         console.log(
+            //             `      Baseline(${baselineAlgo}) return=${baseRes.returnAmount}, paths=${baseRes.paths.length}`,
+            //         );
+            //         this.printPaths(baseRes.paths);
+            //         console.log(`      ${algo} return=${curRes.returnAmount}, paths=${curRes.paths.length}`);
+            //         this.printPaths(curRes.paths);
+            //         logged++;
+            //     }
+            // }
         }
     }
 

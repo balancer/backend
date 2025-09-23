@@ -84,9 +84,8 @@ export class PathGraph {
 
         // apply defaults, allowing caller override whatever they'd like
         const config: PathGraphTraversalConfig = {
-            maxDepth: 6,
-            maxNonBoostedPathDepth: 3,
-            maxNonBoostedHopTokensInBoostedPath: 2,
+            maxDepth: 4,
+            maxTokenPaths: 100,
             maxBuffersInPath: isHyperEvm ? 2 : 5, // limited only on HyperEvm due to gas cost limits on small blocks - virtually unlimited otherwise
             approxPathsToReturn: 20, // Default to 20 - likely won't be reached, but acts as a bound to the computation if needed
             maxRanksPerSegment: 2, // Default 2 for diversity
@@ -355,37 +354,13 @@ export class PathGraph {
     private isValidTokenPath({
         tokenPath,
         config,
-        tokenIn,
-        tokenOut,
     }: {
         tokenPath: string[];
         config: PathGraphTraversalConfig;
         tokenIn: string;
         tokenOut: string;
     }) {
-        const isCompletePath = tokenPath[tokenPath.length - 1] === tokenOut;
-        const hopTokens = tokenPath.filter((token) => token !== tokenIn && token !== tokenOut);
-        const numStandardHopTokens = hopTokens.filter((token) => !this.poolAddressMap.has(token)).length;
-        const isBoostedPath = tokenPath.filter((token) => this.poolAddressMap.has(token)).length > 0;
-
         if (tokenPath.length > config.maxDepth) {
-            return false;
-        }
-
-        if (isBoostedPath && numStandardHopTokens > config.maxNonBoostedHopTokensInBoostedPath) {
-            return false;
-        }
-
-        // if the path length is greater than maxNonBoostedPathDepth, then this path
-        // will only be valid if its a boosted path, so it must honor maxNonBoostedHopTokensInBoostedPath
-        if (
-            tokenPath.length > config.maxNonBoostedPathDepth &&
-            numStandardHopTokens > config.maxNonBoostedHopTokensInBoostedPath
-        ) {
-            return false;
-        }
-
-        if (isCompletePath && !isBoostedPath && tokenPath.length > config.maxNonBoostedPathDepth) {
             return false;
         }
 

@@ -4,7 +4,7 @@ import { PathGraphEdgeData, PathGraphTraversalConfig } from './pathGraphTypes';
 import { BasePool } from '../poolsV2/basePool';
 import { PathLocal } from '../path';
 
-const DEFAULT_MAX_PATHS_PER_TOKEN_PAIR = 2;
+const DEFAULT_MAX_PATHS_PER_TOKEN_PAIR = 4;
 
 export class PathGraphBfs {
     private nodes: Map<string, { isPhantomBpt: boolean }>;
@@ -77,22 +77,19 @@ export class PathGraphBfs {
         swapAmount,
         swapKind,
         graphTraversalConfig,
-        minLimitThresholdUSD,
     }: {
         tokenIn: Token;
         tokenOut: Token;
         swapAmount: TokenAmount;
         swapKind: SwapKind;
         graphTraversalConfig?: Partial<PathGraphTraversalConfig>;
-        minLimitThresholdUSD?: number;
     }): PathLocal[] {
         const isHyperEvm = tokenIn.chainId === 999;
 
         // apply defaults, allowing caller override whatever they'd like
         const config: PathGraphTraversalConfig = {
-            maxDepth: 6,
-            maxNonBoostedPathDepth: 3,
-            maxNonBoostedHopTokensInBoostedPath: 2,
+            maxDepth: 4,
+            maxTokenPaths: 50,
             maxBuffersInPath: isHyperEvm ? 2 : 5, // limited only on HyperEvm due to gas cost limits on small blocks - virtually unlimited otherwise
             approxPathsToReturn: 20, // Default to 20 - likely won't be reached, but acts as a bound to the computation if needed
             maxRanksPerSegment: 2, // Default 2 for diversity
@@ -104,12 +101,11 @@ export class PathGraphBfs {
         const minLimitThreshold = (swapAmount.amount * BigInt(Math.floor(config.minSwapAmountRatio * 100))) / 100n;
 
         const tokenPaths = this.findAllValidTokenPaths({
-            token: tokenIn.wrapped,
             tokenIn: tokenIn.wrapped,
             tokenOut: tokenOut.wrapped,
             config,
-            tokenPath: [tokenIn.wrapped],
-        }).sort((a, b) => (a.length < b.length ? -1 : 1));
+        });
+        console.log('tokenPaths found -> ', tokenPaths.length);
 
         const paths: PathGraphEdgeData[][] = [];
         const selectedPathIds: string[] = [];
@@ -288,22 +284,18 @@ export class PathGraphBfs {
     }
 
     private findAllValidTokenPaths({
-        token,
         tokenIn,
         tokenOut,
-        tokenPath,
         config,
     }: {
-        token: string;
         tokenIn: string;
         tokenOut: string;
-        tokenPath: string[];
         config: PathGraphTraversalConfig;
     }): string[][] {
         const results: string[][] = [];
-        const queue: { node: string; path: string[] }[] = [{ node: token, path: tokenPath }];
+        const queue: { node: string; path: string[] }[] = [{ node: tokenIn, path: [tokenIn] }];
 
-        while (queue.length > 0) {
+        while (queue.length > 0 && results.length < config.maxTokenPaths) {
             const { node, path } = queue.shift()!;
 
             const neighbors = this.edges.get(node);
@@ -313,10 +305,10 @@ export class PathGraphBfs {
                 // small hot-path optimization: check length bounds before cloning array
                 if (path.length + 1 > config.maxDepth) continue;
 
-                if (path.includes(neighbor)) continue; // no cycles
+                // no cycles
+                if (path.includes(neighbor)) continue;
 
                 const newPath = [...path, neighbor];
-                if (!this.isValidTokenPath({ tokenPath: newPath, tokenIn, tokenOut, config })) continue;
 
                 if (neighbor === tokenOut) {
                     results.push(newPath);
@@ -328,46 +320,6 @@ export class PathGraphBfs {
         }
 
         return results;
-    }
-
-    private isValidTokenPath({
-        tokenPath,
-        config,
-        tokenIn,
-        tokenOut,
-    }: {
-        tokenPath: string[];
-        config: PathGraphTraversalConfig;
-        tokenIn: string;
-        tokenOut: string;
-    }) {
-        const isCompletePath = tokenPath[tokenPath.length - 1] === tokenOut;
-        const hopTokens = tokenPath.filter((token) => token !== tokenIn && token !== tokenOut);
-        const numStandardHopTokens = hopTokens.filter((token) => !this.poolAddressMap.has(token)).length;
-        const isBoostedPath = tokenPath.filter((token) => this.poolAddressMap.has(token)).length > 0;
-
-        if (tokenPath.length > config.maxDepth) {
-            return false;
-        }
-
-        if (isBoostedPath && numStandardHopTokens > config.maxNonBoostedHopTokensInBoostedPath) {
-            return false;
-        }
-
-        // if the path length is greater than maxNonBoostedPathDepth, then this path
-        // will only be valid if its a boosted path, so it must honor maxNonBoostedHopTokensInBoostedPath
-        if (
-            tokenPath.length > config.maxNonBoostedPathDepth &&
-            numStandardHopTokens > config.maxNonBoostedHopTokensInBoostedPath
-        ) {
-            return false;
-        }
-
-        if (isCompletePath && !isBoostedPath && tokenPath.length > config.maxNonBoostedPathDepth) {
-            return false;
-        }
-
-        return true;
     }
 
     private isValidPath({
@@ -485,18 +437,24 @@ export class PathGraphBfs {
         const results: PathGraphEdgeData[][] = [];
         const seen = new Set<string>();
 
+        const segmentCount = tokenPath.length - 1;
+        if (segmentCount <= 0) return [];
+        // Gather candidate edges per segment (already sorted by normalizedLiquidity desc).
+        const perSegmentEdges: PathGraphEdgeData[][] = new Array(segmentCount);
+        for (let i = 0; i < segmentCount; i++) {
+            const edges = this.edges.get(tokenPath[i])?.get(tokenPath[i + 1]);
+            if (!edges) return []; // path cannot be built
+            perSegmentEdges[i] = edges;
+        }
+
         // Start with all-segment rank 0
         const queue: number[][] = [new Array(tokenPath.length - 1).fill(0)];
 
         while (queue.length > 0 && results.length < approxPathsToReturn) {
             const ranks = queue.shift()!;
-            const key = ranks.join(',');
-            if (seen.has(key)) continue;
-            seen.add(key);
 
-            let path: PathGraphEdgeData[];
             try {
-                path = this.expandTokenPathWithRanks({ tokenPath, ranks });
+                const path = this.expandTokenPathWithRanks({ perSegmentEdges, ranks });
                 const limit = this.getLimitAmountSwapForPath(path, swapKind);
                 if (limit >= minLimitThreshold) {
                     results.push(path);
@@ -524,23 +482,22 @@ export class PathGraphBfs {
      * @param tokenPath - Array of token addresses representing the path
      * @param ranks - Array of liquidity ranks to use for each segment (must match path length - 1)
      */
-    private expandTokenPathWithRanks({ tokenPath, ranks }: { tokenPath: string[]; ranks: number[] }) {
+    private expandTokenPathWithRanks({
+        perSegmentEdges,
+        ranks,
+    }: {
+        perSegmentEdges: PathGraphEdgeData[][];
+        ranks: number[];
+    }) {
         const segments: PathGraphEdgeData[] = [];
 
-        for (let i = 0; i < tokenPath.length - 1; i++) {
-            const edge = this.edges.get(tokenPath[i])?.get(tokenPath[i + 1]);
-
-            if (!edge || edge.length === 0) {
-                throw new Error(`Missing edge for pair ${tokenPath[i]} -> ${tokenPath[i + 1]}`);
-            }
-
+        for (let i = 0; i < perSegmentEdges.length; i++) {
+            const edgeChoices = perSegmentEdges[i];
             const rank = ranks[i];
-
-            if (!edge[rank]) {
-                throw new Error(`Missing rank ${rank} on edge for pair ${tokenPath[i]} -> ${tokenPath[i + 1]}`);
+            if (!edgeChoices[rank]) {
+                throw new Error('Missing rank on edge for segment');
             }
-
-            segments.push(edge[rank]);
+            segments.push(edgeChoices[rank]);
         }
 
         return segments;

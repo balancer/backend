@@ -150,6 +150,8 @@ export class SOR {
 
         const router = new Router(graphVersion);
 
+        // time router.getCandidatePaths
+        const candidatePathsStart = performance.now();
         const candidatePaths = router.getCandidatePaths(
             tokenIn,
             tokenOut,
@@ -160,10 +162,16 @@ export class SOR {
             tokenPrices,
             swapOptions?.graphTraversalConfig,
         );
+        const candidatePathsEnd = performance.now();
+        console.log(`SOR:getCandidatePaths: ${(candidatePathsEnd - candidatePathsStart).toFixed(2)}ms`);
 
         if (candidatePaths.length === 0) return null;
 
+        // time router.getBestPaths
+        const bestPathsStart = performance.now();
         const bestPaths = router.getBestPaths(candidatePaths, swapKind, checkedSwapAmount);
+        const bestPathsEnd = performance.now();
+        console.log(`SOR:getBestPaths: ${(bestPathsEnd - bestPathsStart).toFixed(2)}ms`);
 
         if (!bestPaths) return null;
 

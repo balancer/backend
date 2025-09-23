@@ -52,6 +52,7 @@ export class Router {
             }
         }
 
+        const buildGraphStart = performance.now();
         this.pathGraph.buildGraph({
             pools,
             enableAddRemoveLiquidityPaths,
@@ -59,6 +60,8 @@ export class Router {
             tokenPrices,
             minLimitThresholdUSD,
         });
+        const buildGraphEnd = performance.now();
+        console.log(`SOR:buildGraph: ${(buildGraphEnd - buildGraphStart).toFixed(2)}ms`);
 
         const candidatePaths = this.pathGraph.getCandidatePaths({
             tokenIn,
