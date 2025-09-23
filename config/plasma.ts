@@ -87,6 +87,9 @@ export default <NetworkData>{
                     ],
                 },
             ],
+            aaveV3: {
+                chain: 'PLASMA',
+            },
         },
     },
     multicall: '0xca11bde05977b3631167028862be2a173976ca11',
