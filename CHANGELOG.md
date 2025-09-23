@@ -1,5 +1,11 @@
 # backend
 
+## 1.54.1
+
+### Patch Changes
+
+-   c75b38c: stable surge hook plasma
+
 ## 1.54.0
 
 ### Minor Changes
