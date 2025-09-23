@@ -1,5 +1,16 @@
 # backend
 
+## 1.54.0
+
+### Minor Changes
+
+-   93296dc: aave APRs switched to contracts and added Plasma integration
+
+### Patch Changes
+
+-   8406286: bump aave-address-book
+-   2296bad: apr placeholder for aave market on plasma
+
 ## 1.53.13
 
 ### Patch Changes
