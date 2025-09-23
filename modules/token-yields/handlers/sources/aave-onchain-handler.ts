@@ -1,9 +1,7 @@
 import * as aaveAddresses from '@bgd-labs/aave-address-book';
-import { Hex, parseAbi } from 'viem';
 import { Chain } from '@prisma/client';
 import { TokenYieldHandler } from '../../types';
 import aaveUiPoolDataProvider from './abis/aave-ui-pool-data-provider';
-import { prisma } from '../../../../prisma/prisma-client';
 import { getViemClient } from '../../../sources/viem-client';
 
 const mapChainToAaveKeys = {
@@ -21,7 +19,7 @@ const mapChainToAaveKeys = {
 
 export const aaveOnchainHandler: TokenYieldHandler = async ({ chain }: { chain: Chain }) => {
     try {
-        const dbTokens = await getDbTokenMappings(chain);
+        const tokens = await getTokenMappings(chain);
 
         const client = getViemClient(chain as Chain);
         const addresses = mapChainToAaveKeys[chain as keyof typeof mapChainToAaveKeys];
@@ -44,8 +42,7 @@ export const aaveOnchainHandler: TokenYieldHandler = async ({ chain }: { chain: 
                     ),
             );
 
-        // Map reserve assets to tokens
-        return dbTokens
+        return tokens
             .flatMap((token) => {
                 const apr = reserves.get(token.underlyingAsset);
                 if (!apr) return;
@@ -61,91 +58,18 @@ export const aaveOnchainHandler: TokenYieldHandler = async ({ chain }: { chain: 
     }
 };
 
-const getDbTokenMappings = async (chain: Chain) => {
-    // Get AAVE pools
-    const aavePools = await prisma.prismaPool.findMany({
-        where: {
-            chain,
-            OR: [
-                {
-                    name: {
-                        contains: 'aave',
-                        mode: 'insensitive' as const,
-                    },
-                },
-                {
-                    tokens: {
-                        some: {
-                            token: {
-                                name: {
-                                    contains: 'aave',
-                                    mode: 'insensitive' as const,
-                                },
-                            },
-                        },
-                    },
-                },
-            ],
-        },
-        include: {
-            tokens: {
-                include: {
-                    token: true,
-                },
-            },
-        },
-    });
+const getTokenMappings = async (chain: Chain) => {
+    const assets = mapChainToAaveKeys[chain as keyof typeof mapChainToAaveKeys]?.ASSETS;
 
-    const wrapperToUnderlying = aavePools
-        .map((pool) =>
-            pool.tokens
-                .filter((token) => token.token.name.toLowerCase().match('aave') && token.token.underlyingTokenAddress)
-                .map((token) => [token.address, token.token.underlyingTokenAddress!]),
-        )
-        .flat()
-        .filter((item, index, self) => self.findIndex((w) => w[0] === item[0]) === index);
+    if (!assets) return [];
 
-    // Get atokens
-    const client = getViemClient(chain);
+    const mappings = Object.values(assets)
+        .map((asset) => ({
+            aToken: asset.A_TOKEN.toLowerCase(),
+            underlyingAsset: asset.UNDERLYING.toLowerCase(),
+            wrappers: [asset.STATIC_A_TOKEN?.toLowerCase(), asset.STATA_TOKEN?.toLowerCase()].filter((w) => !!w),
+        }))
+        .filter((w) => w.wrappers.length > 0);
 
-    const contracts = wrapperToUnderlying
-        .map(([wrapper]) => wrapper)
-        .map((wrapper) => ({
-            address: wrapper as `0x${string}`,
-            abi: parseAbi(['function aToken() returns (address)']),
-            functionName: 'aToken',
-        }));
-
-    const aTokens = await client.multicall({
-        contracts,
-        allowFailure: false,
-        multicallAddress: '0xca11bde05977b3631167028862be2a173976ca11',
-    });
-
-    const aTokenToWrappers = wrapperToUnderlying.reduce(
-        (agg, [wrapper], index) => {
-            agg[aTokens[index].toLowerCase()] ||= [];
-            agg[aTokens[index].toLowerCase()].push(wrapper);
-            return agg;
-        },
-        {} as Record<string, string[]>,
-    );
-
-    const mappedTokens = Object.keys(aTokenToWrappers)
-        .map((aToken) => {
-            const wrappers = aTokenToWrappers[aToken];
-            const underlyingMap = wrapperToUnderlying.find(([wrapper]) => wrapper === wrappers[0]);
-            const underlying = underlyingMap ? underlyingMap[1] : undefined;
-
-            if (!underlying) return;
-
-            return {
-                aToken: aToken as Hex,
-                underlyingAsset: underlying as Hex,
-                wrappers: wrappers as Hex[],
-            };
-        })
-        .filter((t): t is NonNullable<typeof t> => !!t);
-
-    return mappedTokens;
+    return mappings;
 };
