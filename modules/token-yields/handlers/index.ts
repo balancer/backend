@@ -3,8 +3,7 @@ import { TokenYieldConfig, YieldToken } from '../types';
 import { Chain } from '@prisma/client';
 
 const sourceToHandler = {
-    aave: sources.aaveTokenYieldHandler,
-    aaveV3: sources.aaveOnchainHandler,
+    aave: sources.aaveOnchainHandler,
     avalon: sources.avalonYieldHandler,
     euler: sources.eulerYieldHandler,
     teth: sources.treehouseYieldHandler,

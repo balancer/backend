@@ -1,3 +1,4 @@
+import { AaveV3Plasma } from '@bgd-labs/aave-address-book';
 import { env } from '../apps/env';
 import { NetworkData } from '../modules/network/network-config-types';
 
@@ -92,8 +93,8 @@ export default <NetworkData>{
                     extractors: [{ type: 'path', token: '0x6eaf19b2fc24552925db245f9ff613157a7dbb4c', path: '$.apy' }],
                 },
             ],
-            aaveV3: {
-                chain: 'PLASMA',
+            aave: {
+                markets: [AaveV3Plasma],
             },
         },
     },

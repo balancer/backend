@@ -1,5 +1,6 @@
+import { AaveV3Base } from '@bgd-labs/aave-address-book';
 import { env } from '../apps/env';
-import { DeploymentEnv, NetworkData } from '../modules/network/network-config-types';
+import { NetworkData } from '../modules/network/network-config-types';
 
 export default <NetworkData>{
     chain: {
@@ -315,13 +316,9 @@ export default <NetworkData>{
                     },
                 ],
             },
-            aave: [
-                {
-                    market: 'v3',
-                    chain: 'BASE',
-                    subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/GQFbb95cE6d8mV989mL5figjaGaKCQB3xqYrr1bRyXqF`,
-                },
-            ],
+            aave: {
+                markets: [AaveV3Base],
+            },
         },
     },
     multicall: '0xca11bde05977b3631167028862be2a173976ca11',

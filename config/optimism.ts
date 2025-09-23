@@ -1,6 +1,6 @@
-import { BigNumber } from 'ethers';
+import { AaveV3Optimism } from '@bgd-labs/aave-address-book';
 import { env } from '../apps/env';
-import { DeploymentEnv, NetworkData } from '../modules/network/network-config-types';
+import { NetworkData } from '../modules/network/network-config-types';
 
 export default <NetworkData>{
     chain: {
@@ -82,13 +82,9 @@ export default <NetworkData>{
     avgBlockSpeed: 1,
     aprHandlers: {
         ybAprHandler: {
-            aave: [
-                {
-                    market: 'v3',
-                    chain: 'OPTIMISM',
-                    subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/DSfLz8oQBUeU5atALgUFQKMTSYV9mZAVYp4noLSXAfvb`,
-                },
-            ],
+            aave: {
+                markets: [AaveV3Optimism],
+            },
             contract: {
                 calls: [
                     {

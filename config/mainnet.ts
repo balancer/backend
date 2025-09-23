@@ -1,6 +1,7 @@
 import { BigNumber } from 'ethers';
 import { env } from '../apps/env';
 import { NetworkData } from '../modules/network/network-config-types';
+import { AaveV3Ethereum, AaveV3EthereumLido } from '@bgd-labs/aave-address-book';
 
 export default <NetworkData>{
     chain: {
@@ -101,23 +102,9 @@ export default <NetworkData>{
         morphoRewardsAprHandler: true,
         aaveRewardsAprHandler: true,
         ybAprHandler: {
-            aave: [
-                {
-                    market: 'v2',
-                    chain: 'MAINNET',
-                    subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/8wR23o1zkS4gpLqLNU4kG3JHYVucqGyopL5utGxP2q1N`,
-                },
-                {
-                    market: 'v3',
-                    chain: 'MAINNET',
-                    subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/Cd2gEDVeqnjBn1hSeqFMitw8Q1iiyV9FYUZkLNRcL87g`,
-                },
-                {
-                    market: 'lido',
-                    chain: 'MAINNET',
-                    subgraphUrl: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/subgraphs/id/5vxMbXRhG1oQr55MWC5j6qg78waWujx1wjeuEWDA6j3`,
-                },
-            ],
+            aave: {
+                markets: [AaveV3Ethereum, AaveV3EthereumLido],
+            },
             http: [
                 {
                     url: 'https://yields.llama.fi/chart/5a9c2073-2190-4002-9654-8c245d1e8534',
