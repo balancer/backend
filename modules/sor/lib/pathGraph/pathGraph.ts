@@ -6,13 +6,13 @@ import { PathLocal } from '../path';
 const DEFAULT_MAX_PATHS_PER_TOKEN_PAIR = 10;
 
 export class PathGraph {
-    private nodes: Map<string, { isPhantomBpt: boolean }>;
+    private nodes: Set<string>;
     private edges: Map<string, Map<string, PathGraphEdgeData[]>>;
     private poolAddressMap: Map<string, BasePool>;
     private maxPathsPerTokenPair = DEFAULT_MAX_PATHS_PER_TOKEN_PAIR;
 
     constructor() {
-        this.nodes = new Map();
+        this.nodes = new Set();
         this.edges = new Map();
         this.poolAddressMap = new Map();
     }
@@ -20,8 +20,7 @@ export class PathGraph {
     // We build a directed graph for all pools.
     // Nodes are tokens and edges are triads: [pool.id, tokenIn, tokenOut].
     // The current criterion for including a pool path into this graph is the following:
-    // (a) We include every path that includes a phantom BPT.
-    // (b) For any token pair x -> y, we include only the most liquid ${maxPathsPerTokenPair}
+    // - For any token pair x -> y, we include only the most liquid ${maxPathsPerTokenPair}
     // pool pairs (default 2).
     public buildGraph({
         pools,
@@ -33,7 +32,7 @@ export class PathGraph {
         enableAddRemoveLiquidityPaths: boolean;
     }) {
         this.poolAddressMap = new Map();
-        this.nodes = new Map();
+        this.nodes = new Set();
         this.edges = new Map();
         this.maxPathsPerTokenPair = maxPathsPerTokenPair;
 
@@ -221,9 +220,7 @@ export class PathGraph {
     }
 
     private addNode(token: Token): void {
-        this.nodes.set(token.wrapped, {
-            isPhantomBpt: !!this.poolAddressMap.get(token.wrapped),
-        });
+        this.nodes.add(token.wrapped);
 
         if (!this.edges.has(token.wrapped)) {
             this.edges.set(token.wrapped, new Map());
@@ -254,27 +251,23 @@ export class PathGraph {
         edgeProps: PathGraphEdgeData;
         maxPathsPerTokenPair: number;
     }): void {
-        const tokenInVertex = this.nodes.get(edgeProps.tokenIn.wrapped);
-        const tokenOutVertex = this.nodes.get(edgeProps.tokenOut.wrapped);
+        const tokenInVertex = this.nodes.has(edgeProps.tokenIn.wrapped);
+        const tokenOutVertex = this.nodes.has(edgeProps.tokenOut.wrapped);
         const tokenInNode = this.edges.get(edgeProps.tokenIn.wrapped);
 
         if (!tokenInVertex || !tokenOutVertex || !tokenInNode) {
             throw new Error('Attempting to add invalid edge');
         }
 
-        const hasPhantomBpt = tokenInVertex.isPhantomBpt || tokenOutVertex.isPhantomBpt;
         const existingEdges = tokenInNode.get(edgeProps.tokenOut.wrapped) || [];
 
-        //TODO: ideally we don't call sort every time, this isn't performant
         const sorted = [...existingEdges, edgeProps].sort((a, b) =>
             a.normalizedLiquidity > b.normalizedLiquidity ? -1 : 1,
         );
 
-        // TODO: double check if the hasPhantomBpt issue is not affecting v3 liquidity more frequently (considering all
-        // pools have their BPT artificially added so we consider them for add/remove liquidity steps)
         tokenInNode.set(
             edgeProps.tokenOut.wrapped,
-            sorted.length > maxPathsPerTokenPair && !hasPhantomBpt ? sorted.slice(0, maxPathsPerTokenPair) : sorted,
+            sorted.length > maxPathsPerTokenPair ? sorted.slice(0, maxPathsPerTokenPair) : sorted,
         );
     }
 
