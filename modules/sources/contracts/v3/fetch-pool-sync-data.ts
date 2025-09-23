@@ -43,12 +43,16 @@ export const fetchPoolSyncData = async (
         id: string;
         type: PrismaPoolType;
         hook?: HookData;
+        tokens: {
+            address: string;
+            decimals: number;
+        }[];
     }[],
     blockNumber: bigint,
 ): Promise<{ [address: string]: PoolSyncDataV3 }> => {
     let calls: ViemMulticallCall[] = [];
     for (const pool of pools) {
-        const poolCalls = poolDataCalls(pool.id, vault, blockNumber);
+        const poolCalls = poolDataCalls(pool, vault, blockNumber);
         const typeCalls = poolTypeCalls(pool);
         const hookCalls = hookDataCalls(pool);
         calls = [...calls, ...poolCalls, ...typeCalls, ...hookCalls];

@@ -3,6 +3,7 @@ import { ViemClient } from '../../types';
 import VaultV3Abi from '../abis/VaultV3';
 import { formatEther, formatUnits } from 'viem';
 import { multicallViem } from '../../../web3/multicaller-viem';
+import { format } from 'path';
 
 // TODO: Find out if we need to do that,
 // or can somehow get the correct type infered automatically from the viem's result set?
@@ -42,24 +43,34 @@ export interface PoolDataV3 {
     }[];
 }
 
-export const poolDataCalls = (pool: string, vault: string, blockNumber: bigint) => [
+export const poolDataCalls = (
+    pool: {
+        id: string;
+        tokens: {
+            address: string;
+            decimals: number;
+        }[];
+    },
+    vault: string,
+    blockNumber: bigint,
+) => [
     {
-        path: `${pool.toLowerCase()}.poolDynamicData`,
+        path: `${pool.id.toLowerCase()}.poolDynamicData`,
         address: vault as `0x${string}`,
         abi: VaultV3Abi,
         functionName: 'totalSupply',
-        args: [pool as `0x${string}`],
+        args: [pool.id as `0x${string}`],
         parser: (result: bigint) => ({
             totalShares: formatEther(result),
             totalSharesNum: parseFloat(formatEther(result)),
         }),
     },
     {
-        path: `${pool.toLowerCase()}.poolDynamicData`,
+        path: `${pool.id.toLowerCase()}.poolDynamicData`,
         address: vault as `0x${string}`,
         abi: VaultV3Abi,
         functionName: 'getPoolConfig',
-        args: [pool as `0x${string}`],
+        args: [pool.id as `0x${string}`],
         parser: (config: PoolConfig) => ({
             swapFee: formatEther(config.staticSwapFeePercentage ?? 0n),
             aggregateSwapFee: formatEther(config.aggregateSwapFeePercentage ?? 0n),
@@ -70,11 +81,11 @@ export const poolDataCalls = (pool: string, vault: string, blockNumber: bigint) 
         }),
     },
     {
-        path: `${pool.toLowerCase()}.poolToken`,
+        path: `${pool.id.toLowerCase()}.poolToken`,
         address: vault as `0x${string}`,
         abi: VaultV3Abi,
         functionName: 'getPoolTokenInfo',
-        args: [pool as `0x${string}`],
+        args: [pool.id as `0x${string}`],
         parser: (poolTokenInfo: PoolTokenInfo, results: any, index: number) => {
             const config =
                 results[index - 1].status === 'success' ? (results[index - 1].result as PoolConfig) : undefined;
@@ -86,13 +97,15 @@ export const poolDataCalls = (pool: string, vault: string, blockNumber: bigint) 
             const poolTokenRates =
                 results[index + 1].status === 'success' ? (results[index + 1].result as PoolTokenRates) : undefined;
 
-            const decimals = decodeDecimalDiffs(BigInt(config.tokenDecimalDiffs), poolTokenInfo[0].length ?? 0);
+            const decimalsMap = Object.fromEntries(
+                pool.tokens.map((token) => [token.address.toLowerCase(), token.decimals]),
+            );
 
             return poolTokenInfo[0].map((token: string, i: number) => ({
-                id: `${pool.toLowerCase()}-${token.toLowerCase()}`,
+                id: `${pool.id.toLowerCase()}-${token.toLowerCase()}`,
                 index: i,
                 address: token.toLowerCase(),
-                balance: formatUnits(poolTokenInfo[2][i], decimals[i]),
+                balance: formatUnits(poolTokenInfo[2][i], decimalsMap[poolTokenInfo[0][i].toLowerCase()]),
                 exemptFromProtocolYieldFee: !poolTokenInfo[1][i].paysYieldFees,
                 priceRateProvider: poolTokenInfo[1][i].rateProvider.toLowerCase(),
                 priceRate: formatEther(poolTokenRates ? poolTokenRates[1][i] : 1000000000000000000n),
@@ -104,13 +117,19 @@ export const poolDataCalls = (pool: string, vault: string, blockNumber: bigint) 
         address: vault as `0x${string}`,
         abi: VaultV3Abi,
         functionName: 'getPoolTokenRates',
-        args: [pool as `0x${string}`],
+        args: [pool.id as `0x${string}`],
     },
 ];
 
 export async function fetchPoolData(
     vault: string,
-    pools: string[],
+    pools: {
+        id: string;
+        tokens: {
+            address: string;
+            decimals: number;
+        }[];
+    }[],
     client: ViemClient,
     blockNumber: bigint,
 ): Promise<{ [address: string]: PoolDataV3 }> {
@@ -120,17 +139,3 @@ export async function fetchPoolData(
 
     return results;
 }
-
-const DECIMAL_DIFF_BITS = 5;
-
-const decodeDecimalDiffs = (diff: bigint, numTokens: number): number[] => {
-    const result: number[] = [];
-    const mask = (1n << BigInt(DECIMAL_DIFF_BITS)) - 1n;
-
-    for (let i = 0; i < numTokens; i++) {
-        const shift = BigInt(i * DECIMAL_DIFF_BITS);
-        result[i] = Number((diff >> shift) & mask);
-    }
-
-    return result.map((d) => 18 - d);
-};

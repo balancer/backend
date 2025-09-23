@@ -264,12 +264,25 @@ export function PoolController(tracer?: any) {
                 return [];
             }
 
-            const dbPools = (await prisma.prismaPool.findMany({
-                where: { chain, protocolVersion: 3, id: { in: changedIds } },
-                select: { id: true, type: true, hook: true, typeData: true },
-            })) as PoolWithMappedJsonFields[];
+            const [dbPools, poolTokens] = await Promise.all([
+                (await prisma.prismaPool.findMany({
+                    where: { chain, protocolVersion: 3, id: { in: changedIds } },
+                    select: { id: true, type: true, hook: true, typeData: true },
+                })) as PoolWithMappedJsonFields[],
+                await prisma.prismaPoolToken.findMany({
+                    where: { chain, poolId: { in: changedIds } },
+                    include: { token: true },
+                }),
+            ]);
 
-            const ids = await syncPoolsV3(dbPools, chain, vaultAddress, viemClient, latestBlock);
+            const poolsToSync = dbPools.map((pool) => ({
+                ...pool,
+                tokens: poolTokens
+                    .filter((pt) => pt.poolId === pool.id)
+                    .map((pt) => ({ address: pt.token.address, decimals: pt.token.decimals })), // Decimals will be updated later
+            }));
+
+            const ids = await syncPoolsV3(poolsToSync, chain, vaultAddress, viemClient, latestBlock);
             await syncTokenPairs(ids, viemClient, routerAddress, chain);
             await upsertLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.POOLS_V3, latestBlock);
 

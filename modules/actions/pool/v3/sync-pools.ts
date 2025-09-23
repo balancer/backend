@@ -6,6 +6,7 @@ import _ from 'lodash';
 import { fetchPoolSyncData } from '../../../sources/contracts/v3/fetch-pool-sync-data';
 import { ViemClient } from '../../../sources/viem-client';
 import { mergeArraysById } from '../../../helper/merge-arrays-by-id';
+import { formatUnits } from 'viem';
 
 /**
  * Gets and syncs all the pools state with the database
@@ -18,7 +19,13 @@ import { mergeArraysById } from '../../../helper/merge-arrays-by-id';
  * @param blockNumber
  */
 export const syncPools = async (
-    dbPools: { id: string; type: PrismaPoolType; hook?: HookData; typeData: any }[],
+    dbPools: {
+        id: string;
+        type: PrismaPoolType;
+        hook?: HookData;
+        typeData: any;
+        tokens: { address: string; decimals: number }[];
+    }[],
     chain: Chain,
     vault: string,
     viemClient: ViemClient,
