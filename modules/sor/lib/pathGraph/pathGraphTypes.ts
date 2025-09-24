@@ -38,7 +38,6 @@ export interface PathGraphTraversalConfig {
     maxBuffersInPath: number;
     approxPathsToReturn: number;
     minSwapAmountRatio: number;
-    maxRanksPerSegment: number;
     poolIdsToInclude?: string[];
 }
 

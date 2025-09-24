@@ -4,7 +4,7 @@ import { BasePool } from '../poolsV2/basePool';
 import { PathLocal } from '../path';
 import { formatUnits } from 'viem';
 
-const DEFAULT_MAX_PATHS_PER_TOKEN_PAIR = 10;
+const DEFAULT_MAX_PATHS_PER_TOKEN_PAIR = 4;
 
 export class PathGraph {
     private nodes: Set<string>;
@@ -55,10 +55,13 @@ export class PathGraph {
 
     // Since the path combinations here can get quite large, we use configurable parameters
     // to enforce upper limits across several dimensions, defined in the pathConfig.
-    // (a) maxDepth - the max depth of the traversal (length of token path), defaults to 7.
+    // (a) maxDepth - the max depth of the traversal (length of token path), defaults to 4.
+    // (b) maxTokenPaths - the max number of token paths to search for, defaults to 50.
+    // (c) maxBuffersInPath - the max number of buffers in a path, defaults to 5.
     // (d) approxPathsToReturn - search for up to this many paths. Since all paths for a single traversal
     // are added, its possible that the amount returned is larger than this number.
-    // (e) poolIdsToInclude - Only include paths with these poolIds (optional)
+    // (e) minSwapAmountRatio - the min swap amount ratio, defaults to 0.5.
+    // (f) poolIdsToInclude - Only include paths with these poolIds (optional)
 
     // Additionally, we impose the following requirements for a path to be considered valid
     // (a) It does not visit the same token twice
@@ -84,7 +87,6 @@ export class PathGraph {
             maxTokenPaths: 50,
             maxBuffersInPath: isHyperEvm ? 2 : 5, // limited only on HyperEvm due to gas cost limits on small blocks - virtually unlimited otherwise
             approxPathsToReturn: 20, // Default to 20 - likely won't be reached, but acts as a bound to the computation if needed
-            maxRanksPerSegment: 2, // Default 2 for diversity
             minSwapAmountRatio: 0.5, // Default to 50% so we're sure selected paths support splitPath logic
             ...graphTraversalConfig,
         };
@@ -102,7 +104,7 @@ export class PathGraph {
 
         // Use the new greedy best-first approach for each token path
         for (const tokenPath of tokenPaths) {
-            const expandedPaths = this.expandTokenPathWithBestRanks({
+            const expandedPaths = this.expandTokenPathWithBeamSearch({
                 tokenPath,
                 swapKind,
                 minLimitThreshold,
@@ -386,12 +388,21 @@ export class PathGraph {
     }
 
     /**
-     * Beam-search over ranks per segment.
-     * - Precompute a cheap optimistic bound per edge using getLimitAmountSwap (cached).
-     * - Expand only top candidates by that bound before evaluating expensive full-path limit.
-     * - Keeps at most approxPathsToReturn candidates throughout.
+     * Performs beam search to find optimal token swap paths by exploring combinations of pool liquidity ranks.
+     *
+     * This method uses a beam search algorithm to efficiently find the best swap paths without exhaustively
+     * exploring all possible combinations. The algorithm works by:
+     *
+     * 1. For each segment in the token path, it considers pools ranked by normalized liquidity
+     * 2. It maintains a beam of the best partial path combinations, limited by beam width
+     * 3. It uses bottleneck normalized liquidity as the heuristic to rank partial paths
+     * 4. Only the most promising candidates are expanded to the next segment
+     * 5. Finally, it evaluates the real swap limits only for the top candidates
+     *
+     * This approach balances exploration of diverse paths with computational efficiency by avoiding
+     * expensive full-path limit calculations until the final candidate selection phase.
      */
-    private expandTokenPathWithBestRanks({
+    private expandTokenPathWithBeamSearch({
         tokenPath,
         swapKind,
         minLimitThreshold,
