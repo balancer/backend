@@ -2,6 +2,7 @@ import { Address, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { PathGraphEdgeData, PathGraphTraversalConfig } from './pathGraphTypes';
 import { BasePool } from '../poolsV2/basePool';
 import { PathLocal } from '../path';
+import { formatUnits } from 'viem';
 
 const DEFAULT_MAX_PATHS_PER_TOKEN_PAIR = 10;
 
@@ -26,10 +27,16 @@ export class PathGraph {
         pools,
         maxPathsPerTokenPair = DEFAULT_MAX_PATHS_PER_TOKEN_PAIR,
         enableAddRemoveLiquidityPaths,
+        swapKind,
+        tokenPrices,
+        minLimitThresholdUSD,
     }: {
         pools: BasePool[];
         maxPathsPerTokenPair?: number;
         enableAddRemoveLiquidityPaths: boolean;
+        swapKind: SwapKind;
+        tokenPrices: Map<string, number>;
+        minLimitThresholdUSD: number;
     }) {
         this.poolAddressMap = new Map();
         this.nodes = new Set();
@@ -40,7 +47,14 @@ export class PathGraph {
 
         this.addAllTokensAsGraphNodes({ pools, enableAddRemoveLiquidityPaths });
 
-        this.addTokenPairsAsGraphEdges({ pools, maxPathsPerTokenPair, enableAddRemoveLiquidityPaths });
+        this.addTokenPairsAsGraphEdges({
+            pools,
+            maxPathsPerTokenPair,
+            enableAddRemoveLiquidityPaths,
+            swapKind,
+            tokenPrices,
+            minLimitThresholdUSD,
+        });
     }
 
     // Since the path combinations here can get quite large, we use configurable parameters
@@ -191,10 +205,16 @@ export class PathGraph {
         pools,
         maxPathsPerTokenPair,
         enableAddRemoveLiquidityPaths,
+        swapKind,
+        tokenPrices,
+        minLimitThresholdUSD,
     }: {
         pools: BasePool[];
         maxPathsPerTokenPair: number;
         enableAddRemoveLiquidityPaths: boolean;
+        swapKind?: SwapKind;
+        tokenPrices?: Map<string, number>;
+        minLimitThresholdUSD?: number;
     }) {
         for (const pool of pools) {
             const tokens = [...pool.tokens.map((t) => t.token)];
@@ -204,19 +224,58 @@ export class PathGraph {
             for (const tokenIn of tokens) {
                 for (const tokenOut of tokens) {
                     if (tokenIn === tokenOut) continue;
-                    this.addEdge({
-                        edgeProps: {
-                            pool,
-                            tokenIn,
-                            tokenOut,
-                            normalizedLiquidity: pool.getNormalizedLiquidity(tokenIn, tokenOut),
-                            isBuffer: pool.poolType === 'Buffer',
-                        },
-                        maxPathsPerTokenPair,
-                    });
+                    try {
+                        const edgeProps = this.buildEdgeProps({ pool, tokenIn, tokenOut, swapKind, tokenPrices });
+                        // Skip edges whose USD limit is known and below threshold; allow undefined to pass
+                        if (
+                            minLimitThresholdUSD !== undefined &&
+                            edgeProps.limitUSD !== undefined &&
+                            edgeProps.limitUSD < minLimitThresholdUSD
+                        ) {
+                            continue;
+                        }
+                        this.addEdge({ edgeProps, maxPathsPerTokenPair });
+                    } catch (error) {
+                        // leave edge undefined if anything fails
+                    }
                 }
             }
         }
+    }
+
+    // Build edge properties including optional limitUSD using tokenPrices for the given swapKind
+    private buildEdgeProps({
+        pool,
+        tokenIn,
+        tokenOut,
+        swapKind,
+        tokenPrices,
+    }: {
+        pool: BasePool;
+        tokenIn: Token;
+        tokenOut: Token;
+        swapKind?: SwapKind;
+        tokenPrices?: Map<string, number>;
+    }): PathGraphEdgeData {
+        let limitUSD: number | undefined = undefined;
+        if (swapKind && tokenPrices) {
+            const limit = pool.getLimitAmountSwap(tokenIn, tokenOut, swapKind);
+            const priceToken = (swapKind as any) === SwapKind.GivenIn ? tokenIn : tokenOut;
+            const price = tokenPrices.get(priceToken.wrapped.toLowerCase());
+            if (price !== undefined) {
+                const amount = Number(formatUnits(limit, priceToken.decimals));
+                limitUSD = amount * price;
+            }
+        }
+
+        return {
+            pool,
+            tokenIn,
+            tokenOut,
+            normalizedLiquidity: pool.getNormalizedLiquidity(tokenIn, tokenOut),
+            isBuffer: pool.poolType === 'Buffer',
+            limitUSD,
+        };
     }
 
     private addNode(token: Token): void {

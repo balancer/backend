@@ -4,7 +4,7 @@ import { PathGraphTraversalConfig } from './pathGraph/pathGraphTypes';
 import { max, min } from './utils/math';
 import { BasePool } from './poolsV2/basePool';
 import { PathLocal, PathWithAmount } from './path';
-import { parseEther } from 'viem';
+import { formatUnits, parseEther } from 'viem';
 import { Chain } from '@prisma/client';
 import { chainToChainId } from '../../network/chain-id-to-chain';
 
@@ -23,9 +23,26 @@ export class Router {
         swapAmount: TokenAmount,
         swapKind: SwapKind,
         enableAddRemoveLiquidityPaths: boolean,
+        tokenPrices: Map<string, number>,
         graphTraversalConfig?: Partial<PathGraphTraversalConfig>,
     ): PathLocal[] {
-        this.pathGraph.buildGraph({ pools, enableAddRemoveLiquidityPaths });
+        const minSwapAmountRatio = graphTraversalConfig?.minSwapAmountRatio ?? 0.5;
+        // Compute USD threshold if prices provided
+        const priceToken = swapKind === SwapKind.GivenIn ? tokenIn : tokenOut;
+        const price = tokenPrices.get(priceToken.wrapped.toLowerCase());
+        if (price === undefined) {
+            throw new Error('Token price not found for token: ' + priceToken.wrapped);
+        }
+        const amount = Number(formatUnits(swapAmount.amount, priceToken.decimals));
+        const minLimitThresholdUSD = amount * minSwapAmountRatio * price;
+
+        this.pathGraph.buildGraph({
+            pools,
+            enableAddRemoveLiquidityPaths,
+            swapKind,
+            tokenPrices,
+            minLimitThresholdUSD,
+        });
 
         const candidatePaths = this.pathGraph.getCandidatePaths({
             tokenIn,

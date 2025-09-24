@@ -47,4 +47,5 @@ export interface PathGraphEdgeData {
     tokenIn: Token;
     tokenOut: Token;
     isBuffer: boolean;
+    limitUSD?: number;
 }
