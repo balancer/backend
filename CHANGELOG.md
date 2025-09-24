@@ -1,5 +1,11 @@
 # backend
 
+## 1.54.2
+
+### Patch Changes
+
+-   0e6c60c: fix multicall plasma
+
 ## 1.54.1
 
 ### Patch Changes

@@ -65,7 +65,31 @@ const chain2ViemChain = {
             },
         },
     }),
-    [Chain.PLASMA]: plasma,
+    [Chain.PLASMA]: defineChain({
+        id: 9745,
+        name: 'plasma',
+        nativeCurrency: {
+            decimals: 18,
+            name: 'Plasma',
+            symbol: 'PLASMA',
+        },
+        rpcUrls: {
+            default: {
+                http: [config[Chain.PLASMA].rpcUrl],
+            },
+        },
+        blockExplorers: {
+            default: {
+                name: 'Plasma Block Explorer',
+                url: 'https://plasmascan.to/',
+            },
+        },
+        contracts: {
+            multicall3: {
+                address: config[Chain.PLASMA].multicall3 as `0x${string}`,
+            },
+        },
+    }),
 };
 
 export const getViemClient = (chain: Chain) => {
