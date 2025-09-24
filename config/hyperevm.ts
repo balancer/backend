@@ -142,6 +142,16 @@ export default <NetworkData>{
                         },
                     ],
                 },
+                {
+                    url: 'https://api.hyperdrive.fi/integrations/hyped/apr',
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x4d0ff6a0dd9f7316b674fb37993a3ce28bea340e',
+                            path: '$.apr',
+                        },
+                    ],
+                },
             ],
             contract: {
                 calls: [
