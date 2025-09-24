@@ -3,7 +3,7 @@ import { AprHandler, PoolAPRData } from '../../types';
 import { chainIdToChain } from '../../../network/chain-id-to-chain';
 
 const opportunityUrl =
-    'https://api.merkl.xyz/v4/opportunities/?test=false&status=LIVE&campaigns=true&mainProtocolId=balancer';
+    'https://api.merkl.xyz/v4/opportunities/?test=false&status=LIVE&campaigns=true&mainProtocolId=balancer&page=0&items=100';
 
 interface MerklOpportunity {
     chainId: number;
