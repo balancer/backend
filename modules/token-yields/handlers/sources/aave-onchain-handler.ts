@@ -19,7 +19,7 @@ export const aaveOnchainHandler: TokenYieldHandler = async ({ markets }: { marke
 
             const client = getViemClient(chain);
 
-            const reserves = await client
+            const liquidityRates = await client
                 .readContract({
                     address: market.UI_POOL_DATA_PROVIDER,
                     abi: chain === 'PLASMA' ? aaveUiPoolDataProviderPlasma : aaveUiPoolDataProvider,
@@ -39,7 +39,7 @@ export const aaveOnchainHandler: TokenYieldHandler = async ({ markets }: { marke
             tokenAprs.push(
                 ...tokens
                     .flatMap((token) => {
-                        const apr = reserves.get(token.underlyingAsset);
+                        const apr = liquidityRates.get(token.underlyingAsset);
 
                         if (!apr) return;
 
