@@ -85,6 +85,7 @@ export class PathGraph {
         // apply defaults, allowing caller override whatever they'd like
         const config: PathGraphTraversalConfig = {
             maxDepth: 4,
+            maxTokenPaths: 50,
             maxBuffersInPath: isHyperEvm ? 2 : 5, // limited only on HyperEvm due to gas cost limits on small blocks - virtually unlimited otherwise
             approxPathsToReturn: 20, // Default to 20 - likely won't be reached, but acts as a bound to the computation if needed
             maxRanksPerSegment: 2, // Default 2 for diversity
@@ -96,12 +97,10 @@ export class PathGraph {
         const minLimitThreshold = (swapAmount.amount * BigInt(Math.floor(config.minSwapAmountRatio * 100))) / 100n;
 
         const tokenPaths = this.findAllValidTokenPaths({
-            token: tokenIn.wrapped,
             tokenIn: tokenIn.wrapped,
             tokenOut: tokenOut.wrapped,
             config,
-            tokenPath: [tokenIn.wrapped],
-        }).sort((a, b) => (a.length < b.length ? -1 : 1));
+        });
 
         const paths: PathGraphEdgeData[][] = [];
         const selectedPathIds: string[] = [];
@@ -330,69 +329,43 @@ export class PathGraph {
         );
     }
 
-    private findAllValidTokenPaths(args: {
-        token: string;
-        tokenIn: string;
-        tokenOut: string;
-        tokenPath: string[];
-        config: PathGraphTraversalConfig;
-    }): string[][] {
-        const tokenPaths: string[][] = [];
-
-        this.traverseBfs({
-            ...args,
-            callback: (tokenPath) => {
-                tokenPaths.push(tokenPath);
-            },
-        });
-
-        return tokenPaths;
-    }
-
-    private traverseBfs({
-        token,
+    private findAllValidTokenPaths({
         tokenIn,
         tokenOut,
-        tokenPath,
-        callback,
         config,
     }: {
-        token: string;
         tokenIn: string;
         tokenOut: string;
-        tokenPath: string[];
-        callback: (tokenPath: string[]) => void;
         config: PathGraphTraversalConfig;
-    }): void {
-        const neighbors = this.getConnectedVertices(token);
+    }): string[][] {
+        const results: string[][] = [];
+        const queue: { node: string; path: string[] }[] = [{ node: tokenIn, path: [tokenIn] }];
 
-        for (const neighbor of neighbors) {
-            const validTokenPath = this.isValidTokenPath({
-                tokenPath: [...tokenPath, neighbor],
-                config,
-            });
+        while (queue.length > 0 && results.length < config.maxTokenPaths) {
+            const { node, path } = queue.shift()!;
 
-            if (validTokenPath && neighbor === tokenOut) {
-                callback([...tokenPath, neighbor]);
-            } else if (validTokenPath && !tokenPath.includes(neighbor)) {
-                this.traverseBfs({
-                    tokenPath: [...tokenPath, neighbor],
-                    token: neighbor,
-                    tokenIn,
-                    tokenOut,
-                    callback,
-                    config,
-                });
+            const neighbors = this.edges.get(node);
+            if (!neighbors) continue;
+
+            for (const [neighbor] of neighbors) {
+                // small hot-path optimization: check length bounds before cloning array
+                if (path.length + 1 > config.maxDepth) continue;
+
+                // no cycles
+                if (path.includes(neighbor)) continue;
+
+                const newPath = [...path, neighbor];
+
+                if (neighbor === tokenOut) {
+                    results.push(newPath);
+                } else {
+                    // push longer path into queue
+                    queue.push({ node: neighbor, path: newPath });
+                }
             }
         }
-    }
 
-    private isValidTokenPath({ tokenPath, config }: { tokenPath: string[]; config: PathGraphTraversalConfig }) {
-        if (tokenPath.length > config.maxDepth) {
-            return false;
-        }
-
-        return true;
+        return results;
     }
 
     private isValidPath({
