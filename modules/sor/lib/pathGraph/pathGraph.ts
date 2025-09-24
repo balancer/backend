@@ -10,7 +10,6 @@ export class PathGraph {
     private nodes: Set<string>;
     private edges: Map<string, Map<string, PathGraphEdgeData[]>>;
     private poolAddressMap: Map<string, BasePool>;
-    private maxPathsPerTokenPair = DEFAULT_MAX_PATHS_PER_TOKEN_PAIR;
 
     constructor() {
         this.nodes = new Set();
@@ -41,12 +40,9 @@ export class PathGraph {
         this.poolAddressMap = new Map();
         this.nodes = new Set();
         this.edges = new Map();
-        this.maxPathsPerTokenPair = maxPathsPerTokenPair;
 
         this.buildPoolAddressMap(pools);
-
         this.addAllTokensAsGraphNodes({ pools, enableAddRemoveLiquidityPaths });
-
         this.addTokenPairsAsGraphEdges({
             pools,
             maxPathsPerTokenPair,
@@ -103,7 +99,6 @@ export class PathGraph {
         });
 
         const paths: PathGraphEdgeData[][] = [];
-        const selectedPathIds: string[] = [];
 
         // Use the new greedy best-first approach for each token path
         for (const tokenPath of tokenPaths) {
@@ -111,13 +106,12 @@ export class PathGraph {
                 tokenPath,
                 swapKind,
                 minLimitThreshold,
-                maxRanksPerSegment: config.maxRanksPerSegment,
                 approxPathsToReturn: config.approxPathsToReturn,
+                config,
             });
 
             for (const path of expandedPaths) {
-                if (this.isValidPath({ path, seenPoolAddresses: [], selectedPathIds, config })) {
-                    selectedPathIds.push(this.getIdForPath(path));
+                if (this.isValidPath({ path, config })) {
                     paths.push(path);
                 }
             }
@@ -286,20 +280,6 @@ export class PathGraph {
     }
 
     /**
-     * Returns the vertices connected to a given vertex
-     */
-    private getConnectedVertices(tokenAddress: string): string[] {
-        const result: string[] = [];
-        const edges = this.edges.get(tokenAddress) || [];
-
-        for (const [otherToken] of edges) {
-            result.push(otherToken);
-        }
-
-        return result;
-    }
-
-    /**
      * Adds a directed edge from a source vertex to a destination
      */
     private addEdge({
@@ -368,19 +348,8 @@ export class PathGraph {
         return results;
     }
 
-    private isValidPath({
-        path,
-        seenPoolAddresses,
-        selectedPathIds,
-        config,
-    }: {
-        path: PathGraphEdgeData[];
-        seenPoolAddresses: string[];
-        selectedPathIds: string[];
-        config: PathGraphTraversalConfig;
-    }) {
+    private isValidPath({ path, config }: { path: PathGraphEdgeData[]; config: PathGraphTraversalConfig }) {
         const poolIdsInPath = path.map((segment) => segment.pool.id);
-        const uniquePools = [...new Set(poolIdsInPath)];
 
         if (config.poolIdsToInclude) {
             for (const poolId of poolIdsInPath) {
@@ -392,22 +361,12 @@ export class PathGraph {
         }
 
         //dont include any path that hops through the same pool twice
+        const uniquePools = [...new Set(poolIdsInPath)];
         if (uniquePools.length !== poolIdsInPath.length) {
             return false;
         }
 
-        for (const segment of path) {
-            if (seenPoolAddresses.includes(segment.pool.address)) {
-                //this path contains a pool that has already been used
-                return false;
-            }
-        }
-
-        //this is a duplicate path
-        if (selectedPathIds.includes(this.getIdForPath(path))) {
-            return false;
-        }
-
+        //dont include any path that has more than maxBuffersInPath buffers
         if (path.filter((segment) => segment.isBuffer).length > config.maxBuffersInPath) {
             return false;
         }
@@ -465,78 +424,91 @@ export class PathGraph {
     }
 
     /**
-     * Expands a token path using a greedy best-first approach with early limit checking.
-     * Instead of exploring all rank combinations, this prioritizes highest liquidity options
-     * and stops when paths meet the minimum limit threshold.
+     * Beam-search over ranks per segment.
+     * - Precompute a cheap optimistic bound per edge using getLimitAmountSwap (cached).
+     * - Expand only top candidates by that bound before evaluating expensive full-path limit.
+     * - Keeps at most approxPathsToReturn candidates throughout.
      */
     private expandTokenPathWithBestRanks({
         tokenPath,
         swapKind,
         minLimitThreshold,
-        maxRanksPerSegment,
         approxPathsToReturn,
+        config,
     }: {
         tokenPath: string[];
         swapKind: SwapKind;
         minLimitThreshold: bigint;
-        maxRanksPerSegment: number;
         approxPathsToReturn: number;
+        config: PathGraphTraversalConfig;
     }): PathGraphEdgeData[][] {
-        const paths: PathGraphEdgeData[][] = [];
-        // Ranks respective to each valid path
-        const pathsRanks: number[][] = [];
+        const segmentCount = tokenPath.length - 1;
+        if (segmentCount <= 0) return [];
 
-        // Start with highest liquidity rank for each segment
-        const initialRanks = new Array(tokenPath.length - 1).fill(0);
-        // Array that will be used to identify when to stop exploring ranks for a segment
-        const finalRanks: number[] = [];
-
-        // Use a queue to explore rank combinations
-        let rankQueue: number[][] = [initialRanks];
-        const exploredCombinations = new Set<string>();
-
-        while (rankQueue.length > 0 && paths.length < approxPathsToReturn) {
-            const ranks = rankQueue.shift()!;
-            const combinationKey = ranks.join(',');
-
-            if (exploredCombinations.has(combinationKey)) continue;
-            exploredCombinations.add(combinationKey);
-
-            try {
-                const path = this.expandTokenPathWithRanks({ tokenPath, ranks });
-                const limit = this.getLimitAmountSwapForPath(path, swapKind);
-                if (limit >= minLimitThreshold) {
-                    paths.push(path);
-                    pathsRanks.push(ranks);
-
-                    // if reached limit of maxRanksPerSegment, set final rank for current segment
-                    const currentFinalRankIndex = finalRanks.length;
-                    const uniqueRanksForCurrentSegment = new Set(pathsRanks.map((rank) => rank[currentFinalRankIndex]));
-                    if (uniqueRanksForCurrentSegment.size >= maxRanksPerSegment) {
-                        finalRanks.push(ranks[currentFinalRankIndex]);
-                        // remove ranks from rankQueue that are greater than the final rank for this segment
-                        rankQueue = rankQueue.filter(
-                            (rank) => rank[currentFinalRankIndex] <= finalRanks[currentFinalRankIndex],
-                        );
-                    }
-                }
-            } catch (error) {
-                // this error means the code reached a rank that does not exist for a pathSegment
-                // we can add it to finalRanks array to stop exploring ranks for this segment
-                const currentFinalRankIndex = finalRanks.length;
-                const currentFinalRank = ranks[currentFinalRankIndex] - 1;
-                if (currentFinalRank !== undefined) {
-                    finalRanks.push(currentFinalRank);
-                    // remove ranks from rankQueue that are greater than the final rank for this segment
-                    rankQueue = rankQueue.filter(
-                        (rank) => rank[currentFinalRankIndex] <= finalRanks[currentFinalRankIndex],
-                    );
-                }
-            }
-            this.addAlternativeRanks(rankQueue, ranks, finalRanks, maxRanksPerSegment);
+        // Gather candidate edges per segment (already sorted by normalizedLiquidity desc).
+        const perSegmentEdges: PathGraphEdgeData[][] = new Array(segmentCount);
+        for (let i = 0; i < segmentCount; i++) {
+            const edges = this.edges.get(tokenPath[i])?.get(tokenPath[i + 1]);
+            if (!edges) return []; // path cannot be built
+            perSegmentEdges[i] = edges;
         }
 
-        return paths;
+        // Beam search: keep only the top K partial combos by bottleneck normalizedLiquidity
+        type Partial = { ranks: number[]; boundNL: bigint };
+        let partials: Partial[] = [{ ranks: [], boundNL: 0n }];
+
+        // Make the beam wider than the final number to ensure diversity
+        const beamWidth = Math.max(approxPathsToReturn * 2, approxPathsToReturn);
+
+        for (let seg = 0; seg < segmentCount; seg++) {
+            const edges = perSegmentEdges[seg];
+            const next: Partial[] = [];
+
+            for (const p of partials) {
+                for (let r = 0; r < edges.length; r++) {
+                    const edge = edges[r];
+
+                    // bottleneck normalizedLiquidity across segments so far
+                    const edgeNL = edge.normalizedLiquidity;
+                    const newBoundNL = p.boundNL < edgeNL ? p.boundNL : edgeNL;
+
+                    const ranks = p.ranks.length === 0 ? [r] : [...p.ranks, r];
+                    next.push({ ranks, boundNL: newBoundNL });
+                }
+            }
+
+            if (next.length === 0) return [];
+
+            // Keep only the best by bottleneck NL (desc)
+            next.sort((a, b) => (a.boundNL < b.boundNL ? 1 : -1));
+            partials = next.slice(0, beamWidth);
+        }
+
+        // Evaluate real limits only for the finalists and filter by threshold
+        // This is the expensive part; we limited it by beamWidth.
+        const pathsWithRealLimit: { path: PathGraphEdgeData[]; limit: bigint }[] = [];
+
+        for (const p of partials) {
+            try {
+                const path = this.expandTokenPathWithRanks({ perSegmentEdges, ranks: p.ranks });
+                if (!this.isValidPath({ path, config })) {
+                    continue;
+                }
+                const limit = this.getLimitAmountSwapForPath(path, swapKind);
+                if (limit >= minLimitThreshold) {
+                    pathsWithRealLimit.push({ path, limit });
+                    if (pathsWithRealLimit.length >= approxPathsToReturn) {
+                        // We can stop early if we already have enough candidates meeting the threshold.
+                        break;
+                    }
+                }
+            } catch {
+                // getLimitAmountSwapForPath failed (likely due to trade/wrap amount too small)
+                continue;
+            }
+        }
+
+        return pathsWithRealLimit.map((x) => x.path);
     }
 
     /**
@@ -545,51 +517,24 @@ export class PathGraph {
      * @param tokenPath - Array of token addresses representing the path
      * @param ranks - Array of liquidity ranks to use for each segment (must match path length - 1)
      */
-    private expandTokenPathWithRanks({ tokenPath, ranks }: { tokenPath: string[]; ranks: number[] }) {
+    private expandTokenPathWithRanks({
+        perSegmentEdges,
+        ranks,
+    }: {
+        perSegmentEdges: PathGraphEdgeData[][];
+        ranks: number[];
+    }) {
         const segments: PathGraphEdgeData[] = [];
 
-        for (let i = 0; i < tokenPath.length - 1; i++) {
-            const edge = this.edges.get(tokenPath[i])?.get(tokenPath[i + 1]);
-
-            if (!edge || edge.length === 0) {
-                throw new Error(`Missing edge for pair ${tokenPath[i]} -> ${tokenPath[i + 1]}`);
-            }
-
+        for (let i = 0; i < perSegmentEdges.length; i++) {
+            const edgeChoices = perSegmentEdges[i];
             const rank = ranks[i];
-
-            if (!edge[rank]) {
-                throw new Error(`Missing rank ${rank} on edge for pair ${tokenPath[i]} -> ${tokenPath[i + 1]}`);
+            if (!edgeChoices[rank]) {
+                throw new Error('Missing rank on edge for segment');
             }
-
-            segments.push(edge[rank]);
+            segments.push(edgeChoices[rank]);
         }
 
         return segments;
-    }
-
-    /**
-     * Adds alternative rank combinations to the queue for path diversity.
-     * For each segment, tries the next highest rank if available.
-     */
-    private addAlternativeRanks(
-        rankQueue: number[][],
-        currentRanks: number[],
-        finalRanks: number[],
-        maxRanksPerSegment: number,
-    ): void {
-        // For each segment, try the next highest rank if available
-        for (let segmentIndex = 0; segmentIndex < currentRanks.length; segmentIndex++) {
-            // if already reached the final rank for this segment, skip
-            if (finalRanks[segmentIndex] !== undefined) {
-                continue;
-            }
-
-            const currentRank = currentRanks[segmentIndex];
-            if (currentRank + 1 < this.maxPathsPerTokenPair) {
-                const newRanks = [...currentRanks];
-                newRanks[segmentIndex] = currentRank + 1;
-                rankQueue.push(newRanks);
-            }
-        }
     }
 }
