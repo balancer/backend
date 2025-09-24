@@ -117,7 +117,7 @@ export class PathGraph {
             }
         }
 
-        return this.sortAndFilterPaths(paths).map((path) => {
+        return paths.map((path) => {
             const pathTokens: Token[] = [...path.map((segment) => segment.tokenOut)];
             pathTokens.unshift(tokenIn);
             pathTokens[pathTokens.length - 1] = tokenOut;
@@ -128,44 +128,6 @@ export class PathGraph {
                 path.map((segment) => segment.isBuffer),
             );
         });
-    }
-
-    private sortAndFilterPaths(paths: PathGraphEdgeData[][]): PathGraphEdgeData[][] {
-        const pathsWithLimits = paths
-            .map((path) => {
-                try {
-                    const limit = this.getLimitAmountSwapForPath(path, SwapKind.GivenIn);
-                    return { path, limit };
-                } catch (_e) {
-                    console.log('Error getting limit for path', path.map((p) => p.pool.id).join(' -> '));
-                    return undefined;
-                }
-            })
-            .filter((path): path is { path: PathGraphEdgeData[]; limit: bigint } => !!path)
-            .sort((a, b) => (a.limit < b.limit ? 1 : -1));
-
-        const filtered: PathGraphEdgeData[][] = [];
-
-        // Remove any paths with duplicate pools. since the paths are now sorted by limit,
-        // selecting the first path will always be the optimal.
-        for (const { path } of pathsWithLimits) {
-            let seenPools: string[] = [];
-            let isValid = true;
-
-            for (const segment of path) {
-                if (seenPools.includes(segment.pool.id)) {
-                    isValid = false;
-                    break;
-                }
-            }
-
-            if (isValid) {
-                filtered.push(path);
-                seenPools = [...seenPools, ...path.map((segment) => segment.pool.id)];
-            }
-        }
-
-        return filtered;
     }
 
     private buildPoolAddressMap(pools: BasePool[]) {
