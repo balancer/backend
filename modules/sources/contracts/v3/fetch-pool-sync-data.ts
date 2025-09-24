@@ -17,12 +17,14 @@ export interface PoolSyncDataV3 {
         isPaused: boolean;
         isInRecoveryMode: boolean;
         blockNumber: number;
+        totalLiquidity: number;
     };
     poolToken: {
         id: string;
         index: number;
         address: string;
         balance: string;
+        balanceUSD: number;
         priceRateProvider: string;
         priceRate: string;
         scalingFactor: string;

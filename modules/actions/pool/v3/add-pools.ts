@@ -2,7 +2,6 @@ import { Chain } from '@prisma/client';
 import { V3JoinedSubgraphPool, ViemClient } from '../../../sources/types';
 import { poolUpsertTransformerV3 } from '../../../sources/transformers/pool-upsert-transformer-v3';
 import { prisma } from '../../../../prisma/prisma-client';
-import { enrichPoolUpsertsUsd } from '../../../sources/enrichers';
 import _ from 'lodash';
 import { fetchPoolSyncData } from '../../../sources/contracts/v3/fetch-pool-sync-data';
 import { mergeArraysById } from '../../../helper/merge-arrays-by-id';
@@ -36,10 +35,18 @@ export const addPools = async (
         })
         .then((priceData) => Object.fromEntries(priceData.map((price) => [price.tokenAddress, price.price])));
 
-    const withUsd = inserts.map((item) => enrichPoolUpsertsUsd<typeof item>(item, prices));
+    inserts.forEach((pool) => {
+        pool.poolToken.forEach((pt) => {
+            pt.balanceUSD = parseFloat(pt.balance) * prices[pt.address] || 0;
+        });
+        pool.poolDynamicData = {
+            ...pool.poolDynamicData,
+            totalLiquidity: pool.poolToken.reduce((acc, token) => acc + Number(token.balanceUSD), 0),
+        };
+    });
 
     // Upsert pools to the database
-    for (const { pool, tokens, poolToken, poolDynamicData, poolExpandedTokens } of withUsd) {
+    for (const { pool, tokens, poolToken, poolDynamicData, poolExpandedTokens } of inserts) {
         try {
             await prisma.$transaction([
                 prisma.prismaPool.upsert({
@@ -112,5 +119,5 @@ export const addPools = async (
         }
     }
 
-    return withUsd;
+    return inserts;
 };

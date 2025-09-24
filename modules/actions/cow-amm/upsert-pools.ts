@@ -1,7 +1,6 @@
 import { Chain } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
 import { fetchCowAmmData } from '../../sources/contracts';
-import { enrichPoolUpsertsUsd } from '../../sources/enrichers';
 import { poolUpsertTransformerCowAmm } from '../../sources/transformers';
 import type { CowAmmSubgraphClient } from '../../sources/subgraphs';
 import type { ViemClient } from '../../sources/types';
@@ -58,17 +57,18 @@ export const upsertPools = async (
             };
         })
         .map((upsert) => {
-            const update = enrichPoolUpsertsUsd<typeof upsert>(
-                {
-                    poolDynamicData: upsert.poolDynamicData,
-                    poolToken: upsert.poolToken,
-                },
-                prices,
-            );
+            const updatePoolToken = upsert.poolToken.map((pt) => {
+                pt.balanceUSD = parseFloat(pt.balance) * prices[pt.address] || 0;
+                return pt;
+            });
+
             return {
                 ...upsert,
-                poolDynamicData: update.poolDynamicData,
-                poolToken: update.poolToken,
+                poolToken: updatePoolToken,
+                poolDynamicData: {
+                    ...upsert.poolDynamicData,
+                    totalLiquidity: updatePoolToken.reduce((acc, token) => acc + Number(token.balanceUSD), 0),
+                },
             };
         });
 

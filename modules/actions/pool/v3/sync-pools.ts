@@ -1,7 +1,6 @@
 import { Chain, Prisma, PrismaPoolType } from '@prisma/client';
 import { HookData } from '../../../../prisma/prisma-types';
 import { prisma } from '../../../../prisma/prisma-client';
-import { enrichPoolUpsertsUsd } from '../../../sources/enrichers/pool-upserts-usd';
 import _ from 'lodash';
 import { fetchPoolSyncData } from '../../../sources/contracts/v3/fetch-pool-sync-data';
 import { ViemClient } from '../../../sources/viem-client';
@@ -50,17 +49,28 @@ export const syncPools = async (
         })
         .then((priceData) => Object.fromEntries(priceData.map((price) => [price.tokenAddress, price.price])));
 
-    // Organize the data into upserts
-    const withUsd = upserts.map((item) => enrichPoolUpsertsUsd<typeof item>(item, prices));
+    upserts.forEach((pool) => {
+        pool.poolToken = pool.poolToken.map((pt) => ({
+            ...pt,
+            balanceUSD: parseFloat(pt.balance) * prices[pt.address] || 0,
+        }));
+        pool.poolDynamicData = {
+            ...pool.poolDynamicData,
+            totalLiquidity: pool.poolToken.reduce((acc, token) => acc + Number(token.balanceUSD), 0),
+        };
+    });
 
     // Upsert pools to the database in batches
-    for (const { pool, poolToken, poolDynamicData } of withUsd) {
+    for (const { pool, poolToken, poolDynamicData } of upserts) {
         try {
             await prisma.$transaction([
                 ...((pool && [
                     prisma.prismaPool.update({
                         where: { id_chain: { id: pool.id, chain } },
-                        data: pool as Prisma.PrismaPoolUpdateInput,
+                        data: {
+                            hook: pool.hook,
+                            typeData: pool.typeData,
+                        },
                     }),
                 ]) ||
                     []),
@@ -79,7 +89,11 @@ export const syncPools = async (
                     poolToken.map((token) =>
                         prisma.prismaPoolToken.update({
                             where: { id_chain: { id: token.id, chain } },
-                            data: token,
+                            data: {
+                                balance: token.balance,
+                                balanceUSD: token.balanceUSD,
+                                priceRate: token.priceRate,
+                            },
                         }),
                     )) ||
                     []),
