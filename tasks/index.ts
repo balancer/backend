@@ -178,6 +178,11 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         // await TokenController().syncErc4626OnChainData(chain);
         const service = new PricingService([chain]);
         return service.updatePrices(chain);
+    } else if (job === 'update-erc4626-tokens') {
+        await TokenController().syncErc4626Tokens(chain);
+        await TokenController().syncErc4626OnChainData(chain);
+        const service = new PricingService([chain]);
+        return service.updatePrices(chain);
     } else if (job === 'sync-vebal') {
         return new VeBalVotingListService().syncVotingGauges();
     } else if (job === 'sync-token-tvl') {
