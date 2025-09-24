@@ -73,7 +73,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            token: '0xA3D68b74bF0528fdD07263c60d6488749044914b',
+                            token: '0xa3d68b74bf0528fdd07263c60d6488749044914b',
                             path: '$.data.rebaseEventLinkedLists[0].latest_aprs',
                         },
                     ],
@@ -84,7 +84,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            token: '0x211Cc4DD073734dA055fbF44a2b4667d5E5fE5d2',
+                            token: '0x211cc4dd073734da055fbf44a2b4667d5e5fe5d2',
                             path: '$.stakingYield.value',
                         },
                     ],
