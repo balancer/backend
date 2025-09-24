@@ -279,7 +279,7 @@ export function PoolController(tracer?: any) {
                 ...pool,
                 tokens: poolTokens
                     .filter((pt) => pt.poolId === pool.id)
-                    .map((pt) => ({ address: pt.token.address, decimals: pt.token.decimals })), // Decimals will be updated later
+                    .map((pt) => ({ address: pt.token.address, decimals: pt.token.decimals })),
             }));
 
             const ids = await syncPoolsV3(poolsToSync, chain, vaultAddress, viemClient, latestBlock);

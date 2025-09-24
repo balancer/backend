@@ -3,7 +3,6 @@ import { ViemClient } from '../../types';
 import VaultV3Abi from '../abis/VaultV3';
 import { formatEther, formatUnits } from 'viem';
 import { multicallViem } from '../../../web3/multicaller-viem';
-import { format } from 'path';
 
 // TODO: Find out if we need to do that,
 // or can somehow get the correct type infered automatically from the viem's result set?

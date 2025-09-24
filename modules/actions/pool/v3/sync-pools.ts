@@ -6,7 +6,6 @@ import _ from 'lodash';
 import { fetchPoolSyncData } from '../../../sources/contracts/v3/fetch-pool-sync-data';
 import { ViemClient } from '../../../sources/viem-client';
 import { mergeArraysById } from '../../../helper/merge-arrays-by-id';
-import { formatUnits } from 'viem';
 
 /**
  * Gets and syncs all the pools state with the database

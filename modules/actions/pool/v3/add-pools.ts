@@ -20,7 +20,7 @@ export const addPools = async (
     const onchainData = await fetchPoolSyncData(
         viemClient,
         vault,
-        data.map((pool) => ({ id: pool.pool.id, type: pool.pool.type, hook: pool.pool.hook, tokens: pool.tokens })),
+        data.map((item) => ({ id: item.pool.id, type: item.pool.type, hook: item.pool.hook, tokens: item.tokens })),
         BigInt(blockNumber),
     );
 
