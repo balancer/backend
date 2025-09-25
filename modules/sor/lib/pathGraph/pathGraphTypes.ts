@@ -37,7 +37,7 @@ export interface PathGraphTraversalConfig {
     maxDepthFallback: number;
     maxTokenPaths: number;
     maxBuffersInPath: number;
-    approxPathsToReturn: number;
+    maxCandidatesPerTokenPath: number;
     minSwapAmountRatio: number;
     poolIdsToInclude?: string[];
 }

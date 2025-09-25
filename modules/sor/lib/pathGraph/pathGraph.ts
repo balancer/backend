@@ -87,7 +87,7 @@ export class PathGraph {
             maxDepthFallback: 5,
             maxTokenPaths: 50,
             maxBuffersInPath: isHyperEvm ? 2 : 5, // limited only on HyperEvm due to gas cost limits on small blocks - virtually unlimited otherwise
-            approxPathsToReturn: 20, // Default to 20 - likely won't be reached, but acts as a bound to the computation if needed
+            maxCandidatesPerTokenPath: 20,
             minSwapAmountRatio: 0.5, // Default to 50% so we're sure selected paths support splitPath logic
             ...graphTraversalConfig,
         };
@@ -121,7 +121,7 @@ export class PathGraph {
             }
 
             // Generate all combinations for this token path using beam search
-            const candidates = this.selectTopCandidatesPerTokenPath(perSegmentEdges, config.approxPathsToReturn);
+            const candidates = this.selectTopCandidatesPerTokenPath(perSegmentEdges, config.maxCandidatesPerTokenPath);
 
             if (candidates.length > 0) {
                 allCandidates.push({
@@ -132,11 +132,16 @@ export class PathGraph {
             }
         }
 
-        // Step 2: Apply global beam search to select top candidates
-        const topCandidates = this.selectTopCandidatesGlobally(allCandidates, config.approxPathsToReturn);
+        const flattenedCandidates = allCandidates.flatMap(({ tokenPath, perSegmentEdges, candidates }) =>
+            candidates.map((candidate) => ({
+                tokenPath,
+                perSegmentEdges,
+                candidate,
+            })),
+        );
 
-        // Step 3: Expand and validate the selected candidates
-        const paths = this.expandAndValidateCandidates(topCandidates, swapKind, minLimitThreshold, config);
+        // Step 2: Expand and validate the selected candidates
+        const paths = this.expandAndValidateCandidates(flattenedCandidates, swapKind, minLimitThreshold, config);
 
         return paths.map((path) => {
             const pathTokens: Token[] = [...path.map((segment) => segment.tokenOut)];
@@ -332,7 +337,17 @@ export class PathGraph {
         return results;
     }
 
-    private isValidPath({ path, config }: { path: PathGraphEdgeData[]; config: PathGraphTraversalConfig }) {
+    private isValidPath({
+        path,
+        config,
+        swapKind,
+        minLimitThreshold,
+    }: {
+        path: PathGraphEdgeData[];
+        config: PathGraphTraversalConfig;
+        swapKind: SwapKind;
+        minLimitThreshold: bigint;
+    }) {
         const poolIdsInPath = path.map((segment) => segment.pool.id);
 
         if (config.poolIdsToInclude) {
@@ -352,6 +367,10 @@ export class PathGraph {
 
         //dont include any path that has more than maxBuffersInPath buffers
         if (path.filter((segment) => segment.isBuffer).length > config.maxBuffersInPath) {
+            return false;
+        }
+
+        if (this.getLimitAmountSwapForPath(path, swapKind) < minLimitThreshold) {
             return false;
         }
 
@@ -502,11 +521,8 @@ export class PathGraph {
         for (const { perSegmentEdges, candidate } of topCandidates) {
             try {
                 const path = this.expandTokenPathWithRanks({ perSegmentEdges, ranks: candidate.ranks });
-                if (this.isValidPath({ path, config })) {
-                    const limit = this.getLimitAmountSwapForPath(path, swapKind);
-                    if (limit >= minLimitThreshold) {
-                        validPaths.push(path);
-                    }
+                if (this.isValidPath({ path, config, swapKind, minLimitThreshold })) {
+                    validPaths.push(path);
                 }
             } catch {
                 // getLimitAmountSwapForPath failed (likely due to trade/wrap amount too small)
