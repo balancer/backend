@@ -17,8 +17,6 @@ export const syncJoinExits = async (
 ): Promise<string[]> => {
     const lastSyncedBlock = await getLastSyncedBlock(chain, 'JOIN_EXITS_V3');
 
-    if (lastSyncedBlock === 0) return [];
-
     // Get events
     const addRemoves = await vaultSubgraphClient.getAddRemovesFromBlock(lastSyncedBlock);
 

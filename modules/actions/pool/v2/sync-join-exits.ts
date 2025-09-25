@@ -17,8 +17,6 @@ export const syncJoinExits = async (
 ): Promise<string[]> => {
     const lastSyncedBlock = await getLastSyncedBlock(chain, 'JOIN_EXITS_V2');
 
-    if (lastSyncedBlock === 0) return [];
-
     // Get events
     const joinExits = await v2SubgraphClient.getJoinExitsFromBlock(lastSyncedBlock);
 

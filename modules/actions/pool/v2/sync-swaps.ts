@@ -21,8 +21,6 @@ export async function syncSwaps(
 ): Promise<string[]> {
     const lastSyncedBlock = await getLastSyncedBlock(chain, 'SWAPS_V2');
 
-    if (lastSyncedBlock === 0) return [];
-
     // Get list of FX pool addresses for the fee calculation
     const fxPools = (await prisma.prismaPool.findMany({
         where: {

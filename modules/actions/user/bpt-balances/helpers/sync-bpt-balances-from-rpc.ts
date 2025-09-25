@@ -30,7 +30,7 @@ export const syncBptBalancesFromRpc = async (
     const startBlock = await getLastSyncedBlock(chain, syncCategory);
 
     // Don't use RPC when balances weren't synced at all
-    if (startBlock === 0) {
+    if (startBlock === 1) {
         console.log(`syncBptBalancesFromRpc ${syncCategory} on ${chain} no start block provided`);
         return 0;
     }

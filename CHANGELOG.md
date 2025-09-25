@@ -1,5 +1,13 @@
 # backend
 
+## 1.54.3
+
+### Patch Changes
+
+-   41fbe53: SOR - Filter out non-Stable pools with StableSurge hook
+-   680b550: add plasma events parition
+-   48005b1: sync from block 1 if no prior sync
+
 ## 1.54.2
 
 ### Patch Changes

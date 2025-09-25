@@ -20,8 +20,6 @@ export async function syncSwaps(
 ): Promise<string[]> {
     const lastSyncedBlock = await getLastSyncedBlock(chain, 'SWAPS_V3');
 
-    if (lastSyncedBlock === 0) return [];
-
     // Get events
     const swaps = await vaultSubgraphClient.getSwapsFromBlock(lastSyncedBlock);
 

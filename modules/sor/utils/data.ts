@@ -56,6 +56,9 @@ export async function getBasePoolsFromDb(
             if (hook.type === 'MEV_TAX') return true;
             if (!considerPoolsWithHooks) return false;
 
+            // non-STABLE pools with STABLE_SURGE hooks are not supported
+            if (pool.type !== 'STABLE' && hook.type === 'STABLE_SURGE') return false;
+
             const isSupportedHookType = hook.type !== undefined && hook.type !== 'UNKNOWN';
             if (!isSupportedHookType) {
                 console.log('Pool has unsupported hook type', pool.id, hook.type);
