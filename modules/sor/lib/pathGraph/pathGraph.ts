@@ -114,9 +114,7 @@ export class PathGraph {
             });
 
             for (const path of expandedPaths) {
-                if (this.isValidPath({ path, config })) {
-                    paths.push(path);
-                }
+                paths.push(path);
             }
         }
 
