@@ -11,7 +11,7 @@ export const getLastSyncedBlock = async (chain: Chain, syncCategory: PrismaLastB
         })
     )?.blockNumber;
 
-    return lastSyncBlock || 0;
+    return lastSyncBlock || 1;
 };
 
 export const upsertLastSyncedBlock = async (

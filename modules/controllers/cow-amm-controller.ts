@@ -43,7 +43,7 @@ export function CowAmmController(tracer?: any) {
             const viemClient = getViemClient(chain);
 
             const lastSyncBlock = await getLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.COW_AMM_POOLS);
-            const fromBlock = Math.max(0, lastSyncBlock - 1);
+            const fromBlock = Math.max(1, lastSyncBlock - 1);
             const latestBlock = await viemClient.getBlockNumber().then(Number);
 
             // no new blocks have been minted, needed for slow networks

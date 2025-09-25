@@ -44,7 +44,7 @@ export const syncBptBalancesFromSubgraph = async (
 
     // Get the balances synced block from the DB
     const startBlock = syncCategory ? await getLastSyncedBlock(chain, syncCategory) : 0;
-    const fromBlock = Math.max(startBlock - BALANCES_SYNC_BLOCKS_MARGIN, 0);
+    const fromBlock = Math.max(startBlock - BALANCES_SYNC_BLOCKS_MARGIN, 1);
     const benchMessage = `syncBptBalancesFromSubgraph ${
         syncCategory || ''
     } on ${chain} from ${fromBlock} to ${endBlock} for ${poolIds.length} pools`;
