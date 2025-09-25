@@ -101,22 +101,42 @@ export class PathGraph {
             config,
         });
 
-        const paths: PathGraphEdgeData[][] = [];
+        // Step 1: Generate all candidate combinations across all token paths
+        const allCandidates: Array<{
+            tokenPath: string[];
+            perSegmentEdges: PathGraphEdgeData[][];
+            candidates: { ranks: number[]; boundNL: bigint }[];
+        }> = [];
 
-        // Use the new greedy best-first approach for each token path
         for (const tokenPath of tokenPaths) {
-            const expandedPaths = this.expandTokenPathWithBeamSearch({
-                tokenPath,
-                swapKind,
-                minLimitThreshold,
-                approxPathsToReturn: config.approxPathsToReturn,
-                config,
-            });
+            const segmentCount = tokenPath.length - 1;
+            if (segmentCount <= 0) continue;
 
-            for (const path of expandedPaths) {
-                paths.push(path);
+            // Gather candidate edges per segment (already sorted by normalizedLiquidity desc)
+            const perSegmentEdges: PathGraphEdgeData[][] = new Array(segmentCount);
+            for (let i = 0; i < segmentCount; i++) {
+                const edges = this.edges.get(tokenPath[i])?.get(tokenPath[i + 1]);
+                if (!edges) continue; // path cannot be built
+                perSegmentEdges[i] = edges;
+            }
+
+            // Generate all combinations for this token path using beam search
+            const candidates = this.selectTopCandidatesPerTokenPath(perSegmentEdges, config.approxPathsToReturn);
+
+            if (candidates.length > 0) {
+                allCandidates.push({
+                    tokenPath,
+                    perSegmentEdges,
+                    candidates,
+                });
             }
         }
+
+        // Step 2: Apply global beam search to select top candidates
+        const topCandidates = this.selectTopCandidatesGlobally(allCandidates, config.approxPathsToReturn);
+
+        // Step 3: Expand and validate the selected candidates
+        const paths = this.expandAndValidateCandidates(topCandidates, swapKind, minLimitThreshold, config);
 
         return paths.map((path) => {
             const pathTokens: Token[] = [...path.map((segment) => segment.tokenOut)];
@@ -338,20 +358,6 @@ export class PathGraph {
         return true;
     }
 
-    private getIdForPath(path: PathGraphEdgeData[]): string {
-        let id = '';
-
-        for (const segment of path) {
-            if (id.length > 0) {
-                id += '_';
-            }
-
-            id += `${segment.pool.id}-${segment.tokenIn}-${segment.tokenOut}`;
-        }
-
-        return id;
-    }
-
     private getLimitAmountSwapForPath(path: PathGraphEdgeData[], swapKind: SwapKind): bigint {
         let limit = path[path.length - 1].pool.getLimitAmountSwap(
             path[path.length - 1].tokenIn,
@@ -388,50 +394,22 @@ export class PathGraph {
     }
 
     /**
-     * Performs beam search to find optimal token swap paths by exploring combinations of pool liquidity ranks.
+     * Generates candidate combinations for a single token path using beam search.
      *
-     * This method uses a beam search algorithm to efficiently find the best swap paths without exhaustively
-     * exploring all possible combinations. The algorithm works by:
-     *
-     * 1. For each segment in the token path, it considers pools ranked by normalized liquidity
-     * 2. It maintains a beam of the best partial path combinations, limited by beam width
-     * 3. It uses bottleneck normalized liquidity as the heuristic to rank partial paths
-     * 4. Only the most promising candidates are expanded to the next segment
-     * 5. Finally, it evaluates the real swap limits only for the top candidates
-     *
-     * This approach balances exploration of diverse paths with computational efficiency by avoiding
-     * expensive full-path limit calculations until the final candidate selection phase.
+     * @param perSegmentEdges - Array of edge arrays for each segment
+     * @param beamWidth - Maximum number of candidates to keep
+     * @returns Array of candidate rank combinations
      */
-    private expandTokenPathWithBeamSearch({
-        tokenPath,
-        swapKind,
-        minLimitThreshold,
-        approxPathsToReturn,
-        config,
-    }: {
-        tokenPath: string[];
-        swapKind: SwapKind;
-        minLimitThreshold: bigint;
-        approxPathsToReturn: number;
-        config: PathGraphTraversalConfig;
-    }): PathGraphEdgeData[][] {
-        const segmentCount = tokenPath.length - 1;
+    private selectTopCandidatesPerTokenPath(
+        perSegmentEdges: PathGraphEdgeData[][],
+        beamWidth: number,
+    ): { ranks: number[]; boundNL: bigint }[] {
+        const segmentCount = perSegmentEdges.length;
         if (segmentCount <= 0) return [];
-
-        // Gather candidate edges per segment (already sorted by normalizedLiquidity desc).
-        const perSegmentEdges: PathGraphEdgeData[][] = new Array(segmentCount);
-        for (let i = 0; i < segmentCount; i++) {
-            const edges = this.edges.get(tokenPath[i])?.get(tokenPath[i + 1]);
-            if (!edges) return []; // path cannot be built
-            perSegmentEdges[i] = edges;
-        }
 
         // Beam search: keep only the top K partial combos by bottleneck normalizedLiquidity
         type Partial = { ranks: number[]; boundNL: bigint };
         let partials: Partial[] = [{ ranks: [], boundNL: 0n }];
-
-        // Make the beam wider than the final number to ensure diversity
-        const beamWidth = Math.max(approxPathsToReturn * 2, approxPathsToReturn);
 
         for (let seg = 0; seg < segmentCount; seg++) {
             const edges = perSegmentEdges[seg];
@@ -457,22 +435,77 @@ export class PathGraph {
             partials = next.slice(0, beamWidth);
         }
 
-        // Evaluate real limits only for the finalists and filter by threshold
-        // This is the expensive part; we limited it by beamWidth.
-        const pathsWithRealLimit: { path: PathGraphEdgeData[]; limit: bigint }[] = [];
+        return partials;
+    }
 
-        for (const p of partials) {
+    /**
+     * Applies global beam search to select the top candidates across all token paths.
+     *
+     * This method aggregates all candidates from different token paths and applies beam search
+     * globally to select the most promising candidates based on bottleneck normalized liquidity.
+     *
+     * @param allCandidates - Array of candidate groups from all token paths
+     * @param beamWidth - Maximum number of candidates to select globally
+     * @returns Array of top candidates with their associated data
+     */
+    private selectTopCandidatesGlobally(
+        allCandidates: Array<{
+            tokenPath: string[];
+            perSegmentEdges: PathGraphEdgeData[][];
+            candidates: { ranks: number[]; boundNL: bigint }[];
+        }>,
+        beamWidth: number,
+    ): Array<{
+        tokenPath: string[];
+        perSegmentEdges: PathGraphEdgeData[][];
+        candidate: { ranks: number[]; boundNL: bigint };
+    }> {
+        // Flatten all candidates with their associated data
+        const flattenedCandidates = allCandidates.flatMap(({ tokenPath, perSegmentEdges, candidates }) =>
+            candidates.map((candidate) => ({
+                tokenPath,
+                perSegmentEdges,
+                candidate,
+            })),
+        );
+
+        // Sort by bottleneck normalized liquidity (descending) and take top K
+        flattenedCandidates.sort((a, b) => (a.candidate.boundNL < b.candidate.boundNL ? 1 : -1));
+
+        return flattenedCandidates.slice(0, beamWidth);
+    }
+
+    /**
+     * Expands and validates the selected candidates to return final paths.
+     *
+     * This method takes the top candidates selected by global beam search and performs
+     * the expensive path expansion and validation only for these candidates.
+     *
+     * @param topCandidates - Array of top candidates with their associated data
+     * @param swapKind - Type of swap (exact input or exact output)
+     * @param minLimitThreshold - Minimum swap limit threshold
+     * @param config - Path graph traversal configuration
+     * @returns Array of valid paths that meet the criteria
+     */
+    private expandAndValidateCandidates(
+        topCandidates: Array<{
+            tokenPath: string[];
+            perSegmentEdges: PathGraphEdgeData[][];
+            candidate: { ranks: number[]; boundNL: bigint };
+        }>,
+        swapKind: SwapKind,
+        minLimitThreshold: bigint,
+        config: PathGraphTraversalConfig,
+    ): PathGraphEdgeData[][] {
+        const validPaths: PathGraphEdgeData[][] = [];
+
+        for (const { perSegmentEdges, candidate } of topCandidates) {
             try {
-                const path = this.expandTokenPathWithRanks({ perSegmentEdges, ranks: p.ranks });
-                if (!this.isValidPath({ path, config })) {
-                    continue;
-                }
-                const limit = this.getLimitAmountSwapForPath(path, swapKind);
-                if (limit >= minLimitThreshold) {
-                    pathsWithRealLimit.push({ path, limit });
-                    if (pathsWithRealLimit.length >= approxPathsToReturn) {
-                        // We can stop early if we already have enough candidates meeting the threshold.
-                        break;
+                const path = this.expandTokenPathWithRanks({ perSegmentEdges, ranks: candidate.ranks });
+                if (this.isValidPath({ path, config })) {
+                    const limit = this.getLimitAmountSwapForPath(path, swapKind);
+                    if (limit >= minLimitThreshold) {
+                        validPaths.push(path);
                     }
                 }
             } catch {
@@ -481,7 +514,7 @@ export class PathGraph {
             }
         }
 
-        return pathsWithRealLimit.map((x) => x.path);
+        return validPaths;
     }
 
     /**
