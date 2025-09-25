@@ -58,8 +58,7 @@ export class PathGraph {
     // (a) maxDepth - the max depth of the traversal (length of token path), defaults to 4.
     // (b) maxTokenPaths - the max number of token paths to search for, defaults to 50.
     // (c) maxBuffersInPath - the max number of buffers in a path, defaults to 5.
-    // (d) approxPathsToReturn - search for up to this many paths. Since all paths for a single traversal
-    // are added, its possible that the amount returned is larger than this number.
+    // (d) maxCandidatesPerTokenPath - search for up to this many candidates within a single token path
     // (e) minSwapAmountRatio - the min swap amount ratio, defaults to 0.5.
     // (f) poolIdsToInclude - Only include paths with these poolIds (optional)
 
