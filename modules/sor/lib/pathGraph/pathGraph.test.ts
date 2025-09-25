@@ -1,7 +1,7 @@
 import { PathGraph } from './pathGraph';
 import { BasePool } from '../poolsV2/basePool';
 import { Token, TokenAmount, SwapKind } from '@balancer/sdk';
-import { describe, test, expect, mock, spyOn, beforeEach } from 'bun:test';
+import { describe, test, expect, beforeEach } from 'bun:test';
 
 const baseConfig = {
     maxDepth: 6,
@@ -11,6 +11,7 @@ const baseConfig = {
     approxPathsToReturn: 20,
     maxRanksPerSegment: 2,
     minSwapAmountRatio: 0.5,
+    maxTokenPaths: 5,
 };
 
 function createMockPool(id: string, tokens: Token[], opts: Partial<BasePool> = {}): BasePool {
@@ -31,7 +32,6 @@ describe('PathGraph search algorithms', () => {
     const tokenB = new Token(1, '0xb', 18);
     const tokenC = new Token(1, '0xc', 18);
     const tokenD = new Token(1, '0xd', 18);
-    const tokenE = new Token(1, '0xe', 18); // extra token for extended tests
 
     let pools: BasePool[];
     let graph: PathGraph;
@@ -81,7 +81,7 @@ describe('PathGraph search algorithms', () => {
             tokenIn: tokenA.wrapped,
             tokenOut: tokenD.wrapped,
             tokenPath: [tokenA.wrapped],
-            config: { ...baseConfig, maxDepth: 2, maxNonBoostedPathDepth: 2, maxNonBoostedHopTokensInBoostedPath: 1 },
+            config: { ...baseConfig, maxDepth: 2 },
         });
 
         // Only A -> D (buffer pool) should be valid, not A -> B -> C -> D
