@@ -84,6 +84,7 @@ export class PathGraph {
         // apply defaults, allowing caller override whatever they'd like
         const config: PathGraphTraversalConfig = {
             maxDepth: 4,
+            maxDepthFallback: 5,
             maxTokenPaths: 50,
             maxBuffersInPath: isHyperEvm ? 2 : 5, // limited only on HyperEvm due to gas cost limits on small blocks - virtually unlimited otherwise
             approxPathsToReturn: 20, // Default to 20 - likely won't be reached, but acts as a bound to the computation if needed
@@ -293,7 +294,8 @@ export class PathGraph {
 
             for (const [neighbor] of neighbors) {
                 // small hot-path optimization: check length bounds before cloning array
-                if (path.length + 1 > config.maxDepth) continue;
+                const maxDepth = results.length > 0 ? config.maxDepth : config.maxDepthFallback;
+                if (path.length + 1 > maxDepth) continue;
 
                 // no cycles
                 if (path.includes(neighbor)) continue;

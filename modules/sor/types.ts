@@ -15,13 +15,6 @@ export interface GetSwapPathsInput {
     callDataInput?: (GqlSwapCallDataInput & { wethIsEth: boolean }) | undefined;
 }
 
-export interface GraphTraversalConfig {
-    approxPathsToReturn?: number;
-    maxDepth?: number;
-    maxNonBoostedHopTokensInBoostedPath?: number;
-    maxNonBoostedPathDepth?: number;
-}
-
 export interface LiquidityManagement {
     disableUnbalancedLiquidity: boolean;
     enableAddLiquidityCustom: boolean;
