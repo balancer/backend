@@ -94,6 +94,11 @@ export default <NetworkData>{
                     scale: 100,
                     extractors: [{ type: 'path', token: '0x6eaf19b2fc24552925db245f9ff613157a7dbb4c', path: '$.apy' }],
                 },
+                {
+                    url: 'https://api-platform-analytics.metastreet.xyz/v2/usdai/dashboard/apy',
+                    scale: 100,
+                    extractors: [{ type: 'path', token: '0x0b2b2b2076d95dda7817e785989fe353fe955ef9', path: '$' }],
+                },
             ],
             aave: {
                 markets: [AaveV3Plasma],
