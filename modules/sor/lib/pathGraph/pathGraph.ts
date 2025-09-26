@@ -88,11 +88,11 @@ export class PathGraph {
         const minLimitThreshold = (swapAmount.amount * BigInt(Math.floor(config.minSwapAmountRatio * 100))) / 100n;
 
         const tokenPaths = this.findAllValidTokenPaths({
-            token: tokenIn.wrapped,
-            tokenIn: tokenIn.wrapped,
-            tokenOut: tokenOut.wrapped,
+            token: tokenIn.address,
+            tokenIn: tokenIn.address,
+            tokenOut: tokenOut.address,
             config,
-            tokenPath: [tokenIn.wrapped],
+            tokenPath: [tokenIn.address],
         }).sort((a, b) => (a.length < b.length ? -1 : 1));
 
         const paths: PathGraphEdgeData[][] = [];
@@ -186,7 +186,7 @@ export class PathGraph {
                 tokens.push(new Token(pool.tokens[0].token.chainId, pool.address.toLowerCase() as Address, 18)); // Add BPT as token nodes
             }
             for (const token of tokens) {
-                if (!this.nodes.has(token.wrapped)) {
+                if (!this.nodes.has(token.address)) {
                     this.addNode(token);
                 }
             }
@@ -226,12 +226,12 @@ export class PathGraph {
     }
 
     private addNode(token: Token): void {
-        this.nodes.set(token.wrapped, {
-            isPhantomBpt: !!this.poolAddressMap.get(token.wrapped),
+        this.nodes.set(token.address, {
+            isPhantomBpt: !!this.poolAddressMap.get(token.address),
         });
 
-        if (!this.edges.has(token.wrapped)) {
-            this.edges.set(token.wrapped, new Map());
+        if (!this.edges.has(token.address)) {
+            this.edges.set(token.address, new Map());
         }
     }
 
@@ -259,16 +259,16 @@ export class PathGraph {
         edgeProps: PathGraphEdgeData;
         maxPathsPerTokenPair: number;
     }): void {
-        const tokenInVertex = this.nodes.get(edgeProps.tokenIn.wrapped);
-        const tokenOutVertex = this.nodes.get(edgeProps.tokenOut.wrapped);
-        const tokenInNode = this.edges.get(edgeProps.tokenIn.wrapped);
+        const tokenInVertex = this.nodes.get(edgeProps.tokenIn.address);
+        const tokenOutVertex = this.nodes.get(edgeProps.tokenOut.address);
+        const tokenInNode = this.edges.get(edgeProps.tokenIn.address);
 
         if (!tokenInVertex || !tokenOutVertex || !tokenInNode) {
             throw new Error('Attempting to add invalid edge');
         }
 
         const hasPhantomBpt = tokenInVertex.isPhantomBpt || tokenOutVertex.isPhantomBpt;
-        const existingEdges = tokenInNode.get(edgeProps.tokenOut.wrapped) || [];
+        const existingEdges = tokenInNode.get(edgeProps.tokenOut.address) || [];
 
         //TODO: ideally we don't call sort every time, this isn't performant
         const sorted = [...existingEdges, edgeProps].sort((a, b) =>
@@ -278,7 +278,7 @@ export class PathGraph {
         // TODO: double check if the hasPhantomBpt issue is not affecting v3 liquidity more frequently (considering all
         // pools have their BPT artificially added so we consider them for add/remove liquidity steps)
         tokenInNode.set(
-            edgeProps.tokenOut.wrapped,
+            edgeProps.tokenOut.address,
             sorted.length > maxPathsPerTokenPair && !hasPhantomBpt ? sorted.slice(0, maxPathsPerTokenPair) : sorted,
         );
     }
