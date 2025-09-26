@@ -1799,7 +1799,7 @@ type GqlPoolAprItem {
     """
     title: String! @deprecated(reason: "No replacement, should be built client side")
     """
-    The APR value in % -> 0.2 = 0.2%
+    The APR value in % -> 0.2 = 20%
     """
     apr: Float!
     """
