@@ -87,6 +87,9 @@ export interface NetworkData {
         baseAprUrl: string;
         validatorFee: number;
     };
+    loops?: {
+        address: string;
+    };
     bal?: {
         address: string;
     };

@@ -224,6 +224,88 @@ export const schema = gql`
         userWalletSyncBlock: BigInt!
     }
 
+    type GqlLoopsData {
+        """
+        Aave Merit APR
+        """
+        aaveMeritApr: Float!
+
+        """
+        Aave S borrow APR
+        """
+        aaveSBorrowApr: Float!
+
+        """
+        Actual TotalSupply of LoopS.
+        """
+        actualSupply: String!
+
+        """
+        The total APR for LoopS
+        """
+        apr: Float!
+
+        """
+        The amount of stS provided to Aave.
+        """
+        collateralAmount: String!
+
+        """
+        The amount of stS provided to Aave in S.
+        """
+        collateralAmountInEth: String!
+
+        """
+        The total S debt amount of the position
+        """
+        debtAmount: String!
+
+        """
+        The health factor of the Aave position
+        """
+        healthFactor: String!
+
+        """
+        The amount of leverage the current position has.
+        """
+        leverage: Float!
+
+        """
+        Loan To Value of the position
+        """
+        ltv: String!
+
+        """
+        Net Asset Value. The amount of collateral minus the amount of debt.
+        """
+        nav: String!
+
+        """
+        The current rate of LoopS against S.
+        """
+        rate: String!
+
+        """
+        The current Sonic points multiplier for LoopS
+        """
+        sonicPointsMultiplier: String!
+
+        """
+        The current cap on the stS market on Aave
+        """
+        stSAaveMarketCap: String!
+
+        """
+        The max LTV of the market with e-mode
+        """
+        stSAaveMarketMaxLTV: String!
+
+        """
+        The current amount of stS supplied to the Aave market
+        """
+        stSAaveMarketSupply: String!
+    }
+
     """
     All info on the nested pool if the token is a BPT. It will only support 1 level of nesting.
     """
@@ -670,7 +752,7 @@ export const schema = gql`
     """
     type GqlPoolAprItem {
         """
-        The APR value in % -> 0.2 = 0.2%
+        The APR value in % -> 0.2 = 20%
         """
         apr: Float!
 
@@ -4224,6 +4306,11 @@ export const schema = gql`
         blocksGetBlocksPerYear: Float! @deprecated
         latestSyncedBlocks: GqlLatestSyncedBlocks!
         lbpPriceChart(chain: GqlChain!, dataPoints: Int, id: String!, interval: Int @deprecated): [LBPPriceChartData!]
+
+        """
+        Get the LoopS data
+        """
+        loopsGetData: GqlLoopsData!
 
         """
         Getting swap, add and remove events with paging
