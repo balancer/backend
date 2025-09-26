@@ -32,7 +32,7 @@ export const plasmaNetworkConfig: NetworkConfig = {
         },
         {
             name: 'update-fee-volume-yield-all-pools',
-            interval: every(30, 'minutes'),
+            interval: every(10, 'minutes'),
         },
         // V3 Jobs
         {
