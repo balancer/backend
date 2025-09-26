@@ -1,5 +1,11 @@
 # backend
 
+## 1.54.4
+
+### Patch Changes
+
+-   08342db: changed plasma volume sync to 10 min
+
 ## 1.54.3
 
 ### Patch Changes
