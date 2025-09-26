@@ -12,7 +12,7 @@
  * Run with: bun run modules/sor/lib/pathGraph/performance/tune-params.ts
  */
 
-import { PathGraphBeam } from '../pathGraph-beam';
+import { PathGraph } from '../pathGraph';
 import { BasePool } from '../../poolsV2/basePool';
 import { Token, TokenAmount, SwapKind } from '@balancer/sdk';
 import { topologies, GraphSpec } from './helpers';
@@ -51,8 +51,14 @@ const GRAPHS: GraphSpec[] = [
 ];
 
 async function testParams(graph: { tokens: Token[]; pools: BasePool[] }, params: ParamSet): Promise<TuneResult> {
-    const pathGraph = new PathGraphBeam();
-    pathGraph.buildGraph({ pools: graph.pools, enableAddRemoveLiquidityPaths: false });
+    const pathGraph = new PathGraph();
+    pathGraph.buildGraph({
+        pools: graph.pools,
+        swapKind: 0,
+        tokenPrices: new Map<string, number>(),
+        minLimitThresholdUSD: 0,
+        enableAddRemoveLiquidityPaths: false,
+    });
 
     const testPairs = 3;
     const runs = 2;
