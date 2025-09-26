@@ -112,12 +112,10 @@ export class PathGraph {
             if (segmentCount <= 0) continue;
 
             // Gather candidate edges per segment (already sorted by normalizedLiquidity desc)
-            const perSegmentEdges: PathGraphEdgeData[][] = new Array(segmentCount);
-            for (let i = 0; i < segmentCount; i++) {
-                const edges = this.edges.get(tokenPath[i])?.get(tokenPath[i + 1]);
-                if (!edges) continue; // path cannot be built
-                perSegmentEdges[i] = edges;
-            }
+            const perSegmentEdges: PathGraphEdgeData[][] = Array.from(
+                { length: segmentCount },
+                (_, i) => this.edges.get(tokenPath[i])?.get(tokenPath[i + 1]) || [],
+            );
 
             // Generate all combinations for this token path using beam search
             const candidates = this.selectTopCandidatesPerTokenPath(perSegmentEdges, config.maxCandidatesPerTokenPath);
@@ -143,7 +141,7 @@ export class PathGraph {
         const paths = this.expandAndValidateCandidates(flattenedCandidates, swapKind, minLimitThreshold, config);
 
         return paths.map((path) => {
-            const pathTokens: Token[] = [...path.map((segment) => segment.tokenOut)];
+            const pathTokens: Token[] = path.map((segment) => segment.tokenOut);
             pathTokens.unshift(tokenIn);
             pathTokens[pathTokens.length - 1] = tokenOut;
 
@@ -169,7 +167,7 @@ export class PathGraph {
         enableAddRemoveLiquidityPaths: boolean;
     }) {
         for (const pool of pools) {
-            const tokens = [...pool.tokens.map((t) => t.token)];
+            const tokens = pool.tokens.map((t) => t.token);
             if (enableAddRemoveLiquidityPaths && pool.poolType !== 'Buffer') {
                 tokens.push(new Token(pool.tokens[0].token.chainId, pool.address.toLowerCase() as Address, 18)); // Add BPT as token nodes
             }
@@ -197,7 +195,7 @@ export class PathGraph {
         minLimitThresholdUSD?: number;
     }) {
         for (const pool of pools) {
-            const tokens = [...pool.tokens.map((t) => t.token)];
+            const tokens = pool.tokens.map((t) => t.token);
             if (enableAddRemoveLiquidityPaths && pool.poolType !== 'Buffer') {
                 tokens.push(new Token(pool.tokens[0].token.chainId, pool.address.toLowerCase() as Address, 18)); // Also consider BPT token pairs
             }
@@ -215,7 +213,7 @@ export class PathGraph {
                             continue;
                         }
                         this.addEdge({ edgeProps, maxPathsPerTokenPair });
-                    } catch (error) {
+                    } catch {
                         // leave edge undefined if anything fails
                     }
                 }
@@ -238,9 +236,9 @@ export class PathGraph {
         tokenPrices?: Map<string, number>;
     }): PathGraphEdgeData {
         let limitUSD: number | undefined = undefined;
-        if (swapKind && tokenPrices) {
+        if (swapKind !== undefined && tokenPrices) {
             const limit = pool.getLimitAmountSwap(tokenIn, tokenOut, swapKind);
-            const priceToken = (swapKind as any) === SwapKind.GivenIn ? tokenIn : tokenOut;
+            const priceToken = (swapKind as SwapKind) === SwapKind.GivenIn ? tokenIn : tokenOut;
             const price = tokenPrices.get(priceToken.wrapped.toLowerCase());
             if (price !== undefined) {
                 const amount = Number(formatUnits(limit, priceToken.decimals));
