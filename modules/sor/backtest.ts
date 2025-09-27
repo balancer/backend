@@ -115,7 +115,7 @@ class SorBacktester {
     }
 
     private printSummary(results: BacktestResult[]): void {
-        const avgDuration = results.reduce((s, r) => s + r.durationMs, 0) / (results.length || 1);
+        const avgDuration = results.slice(1).reduce((s, r) => s + r.durationMs, 0) / (results.length || 1);
         const avgImprovement = results.reduce((s, r) => s + r.improvement, 0) / (results.length || 1);
 
         console.log('\n📈 Backtest Summary:');
