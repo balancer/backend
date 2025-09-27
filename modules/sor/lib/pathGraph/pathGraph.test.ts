@@ -51,6 +51,32 @@ describe('PathGraph search algorithms', () => {
         });
     });
 
+    test('addEdge throws error for invalid vertices', () => {
+        const g = new PathGraph();
+        const orphanToken = new Token(1, '0xorphan', 18);
+
+        g.buildGraph({
+            pools: [createMockPool('p1', [tokenA, tokenB])],
+            enableAddRemoveLiquidityPaths: false,
+            swapKind: SwapKind.GivenIn,
+            tokenPrices: new Map<string, number>(),
+            minLimitThresholdUSD: 0,
+        });
+
+        const edgeProps = {
+            pool: createMockPool('test', [tokenA, tokenB]),
+            tokenIn: tokenA,
+            tokenOut: orphanToken,
+            normalizedLiquidity: 100n,
+            isBuffer: false,
+            limitUSD: undefined,
+        };
+
+        expect(() => {
+            g['addEdge']({ edgeProps, maxPathsPerTokenPair: 2 });
+        }).toThrow('Attempting to add invalid edge');
+    });
+
     test('finds direct path', () => {
         const paths = graph['findAllValidTokenPaths']({
             tokenIn: tokenA.wrapped,
@@ -426,6 +452,32 @@ describe('PathGraph search algorithms', () => {
         // B->A should NOT be created (1000 < 1200)
         const edgesBA = graph['edges'].get(tokenB.wrapped)?.get(tokenA.wrapped);
         expect(edgesBA).toBeUndefined();
+    });
+
+    test('buildEdgeProps sets limitUSD as undefined when tokenPrices is missing an entry', () => {
+        const g = new PathGraph();
+
+        const pAB = createMockPool('pAB', [tokenA, tokenB], {
+            getLimitAmountSwap: () => 1000n * 10n ** 18n, // 1000 tokens
+        });
+
+        // Price map only has tokenA, missing tokenB
+        const tokenPrices = new Map<string, number>();
+        tokenPrices.set(tokenA.wrapped.toLowerCase(), 2.0);
+
+        g.buildGraph({
+            pools: [pAB],
+            enableAddRemoveLiquidityPaths: false,
+            swapKind: SwapKind.GivenOut, // for GivenOut, limitUSD uses tokenOut’s price (tokenB in this case)
+            tokenPrices,
+            minLimitThresholdUSD: 0,
+        });
+
+        // For GivenOut swap, priceToken = tokenOut = tokenB, but
+        // we *did not* provide price for tokenB. So limitUSD should be undefined.
+        const edges = (g as any).edges.get(tokenA.wrapped).get(tokenB.wrapped);
+        expect(edges.length).toBe(1);
+        expect(edges[0].limitUSD).toBeUndefined();
     });
 
     test('beam search considers bottleneck liquidity across path segments', () => {
