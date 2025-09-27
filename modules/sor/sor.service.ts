@@ -23,7 +23,6 @@ const DEFAULT_MAX_DEPTH = 4;
 
 export class SorService {
     async getSorSwapPaths(args: QuerySorGetSwapPathsArgs): Promise<GqlSorGetSwapPaths> {
-        console.log('getSorSwaps args', JSON.stringify(args));
         const tokenIn = args.tokenIn.toLowerCase();
         const tokenOut = args.tokenOut.toLowerCase();
 
