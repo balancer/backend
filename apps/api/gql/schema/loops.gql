@@ -1,0 +1,73 @@
+extend type Query {
+    """
+    Get the LoopS data
+    """
+    loopsGetData: GqlLoopsData!
+}
+
+type GqlLoopsData {
+    """
+    Net Asset Value. The amount of collateral minus the amount of debt.
+    """
+    nav: String!
+    """
+    Actual TotalSupply of LoopS.
+    """
+    actualSupply: String!
+    """
+    The current rate of LoopS against S.
+    """
+    rate: String!
+    """
+    The amount of stS provided to Aave.
+    """
+    collateralAmount: String!
+    """
+    The amount of stS provided to Aave in S.
+    """
+    collateralAmountInEth: String!
+    """
+    The total S debt amount of the position
+    """
+    debtAmount: String!
+    """
+    The health factor of the Aave position
+    """
+    healthFactor: String!
+    """
+    Loan To Value of the position
+    """
+    ltv: String!
+    """
+    The amount of leverage the current position has.
+    """
+    leverage: Float!
+    """
+    The current amount of stS supplied to the Aave market
+    """
+    stSAaveMarketSupply: String!
+    """
+    The current cap on the stS market on Aave
+    """
+    stSAaveMarketCap: String!
+    """
+    The max LTV of the market with e-mode
+    """
+    stSAaveMarketMaxLTV: String!
+    """
+    The total APR for LoopS
+    """
+    apr: Float!
+    """
+    Aave Merit APR
+    """
+    aaveMeritApr: Float!
+    """
+    Aave S borrow APR
+    """
+    aaveSBorrowApr: Float!
+    """
+    The current Sonic points multiplier for LoopS
+    """
+    sonicPointsMultiplier: String!
+}

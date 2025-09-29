@@ -50,6 +50,9 @@ export default <NetworkData>{
         baseAprUrl: 'https://apr.soniclabs.com/current',
         validatorFee: 0.15,
     },
+    loops: {
+        address: '0xb6adbb29f2d8ae731c7c72036a7fd5a7e970b198',
+    },
     balancer: {
         v2: {
             vaultAddress: '0xba12222222228d8ba445958a75a0704d566bf2c8',

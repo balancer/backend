@@ -35,6 +35,7 @@ import { SubgraphMonitorController } from '../../modules/controllers/subgraph-mo
 import config from '../../config';
 import { LBPController } from '../../modules/controllers/lbp-controller';
 import { AprsController } from '../../modules/controllers/aprs-controller';
+import { LoopsService } from '../../modules/loops/service';
 
 const runningJobs: Set<string> = new Set();
 
@@ -280,6 +281,15 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
                 name,
                 chainId,
                 () => StakedSonicController().syncSonicStakingSnapshots(),
+                res,
+                next,
+            );
+            break;
+        case 'sync-loops-data':
+            await runIfNotAlreadyRunning(
+                name,
+                chainId,
+                () => new LoopsService().fetchAndStoreLoopsData(chainId),
                 res,
                 next,
             );

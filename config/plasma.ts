@@ -59,6 +59,17 @@ export default <NetworkData>{
         ybAprHandler: {
             http: [
                 {
+                    url: 'https://universe.kelpdao.xyz/rseth/apy',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0xe561fe05c39075312aa9bc6af79ddae981461359',
+                            path: '$.value',
+                        },
+                    ],
+                },
+                {
                     url: 'https://ded76165a2fb6f7887260a3a0f626de7.thegraph.chainnodes.org/subgraphs/name/etherfi/etherfi-subgraph-v0-8-2',
                     body: JSON.stringify({
                         query: `{
