@@ -1,5 +1,11 @@
 # backend
 
+## 1.54.6
+
+### Patch Changes
+
+-   71735d4: integrate loops
+
 ## 1.54.5
 
 ### Patch Changes

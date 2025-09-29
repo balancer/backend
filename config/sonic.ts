@@ -51,7 +51,9 @@ export default <NetworkData>{
         validatorFee: 0.15,
     },
     loops: {
-        address: '0xb6adbb29f2d8ae731c7c72036a7fd5a7e970b198',
+        address: '0xa9659b91edb861b703160a32af5131860018951f',
+        aavePoolDataProvider: '0x9005a69fe088680827f292e8ae885be4be1beb2f',
+        aavePoolAddressesProvider: '0x5c2e738f6e27bce0f7558051bf90605dd6176900',
     },
     balancer: {
         v2: {

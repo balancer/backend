@@ -1,56 +1,68 @@
 import { prisma } from '../../prisma/prisma-client';
-import { fetchLoopsData } from './onchain-data';
+import { fetchAaveData, fetchLoopsData } from './onchain-data';
 import { calculateLoopsApr } from './apr-data';
 import { GqlLoopsData } from '../../apps/api/gql/generated-schema';
 import config from '../../config';
-import { chainIdToChain } from '../network/chain-id-to-chain';
+import { Chain } from '@prisma/client';
 
 export class LoopsService {
-    async fetchAndStoreLoopsData(chainId: string): Promise<void> {
-        const loopsAddress = config[chainIdToChain[chainId]].loops?.address;
-        if (!loopsAddress) {
+    async fetchAndStoreLoopsData(chain: Chain): Promise<void> {
+        const loopsAddress = config[chain].loops?.address;
+        const aaveDataProvider = config[chain].loops?.aavePoolDataProvider;
+        const aavePoolAddressesProvider = config[chain].loops?.aavePoolAddressesProvider;
+        const stsAddress = config[chain].sts?.address;
+        const wsAddress = config[chain].weth.address;
+        if (!loopsAddress || !aaveDataProvider || !stsAddress || !wsAddress || !aavePoolAddressesProvider) {
             return;
         }
 
         const onchainLoopsData = await fetchLoopsData(loopsAddress);
-        const loopsApr = await calculateLoopsApr(onchainLoopsData);
+        const onchainAaveData = await fetchAaveData(aaveDataProvider, aavePoolAddressesProvider, stsAddress, wsAddress);
+        console.log(onchainLoopsData);
+        console.log(onchainAaveData);
+        const loopsApr = await calculateLoopsApr(onchainLoopsData, onchainAaveData, stsAddress);
+
+        const sonicPrice = await prisma.prismaTokenCurrentPrice.findUniqueOrThrow({
+            where: { tokenAddress_chain: { tokenAddress: wsAddress, chain } },
+        });
+        const tvl = parseFloat(onchainLoopsData.nav) * sonicPrice.price;
 
         await prisma.prismaLoopsData.upsert({
             where: { id: loopsAddress.toLowerCase() },
             create: {
                 id: loopsAddress.toLowerCase(),
                 nav: onchainLoopsData.nav,
+                tvl: tvl.toString(),
                 actualSupply: onchainLoopsData.actualSupply,
-                rate: onchainLoopsData.getRate,
+                rate: onchainLoopsData.rate,
                 collateralAmount: onchainLoopsData.collateralAmount,
                 collateralAmountInEth: onchainLoopsData.collateralAmountInEth,
                 debtAmount: onchainLoopsData.debtAmount,
                 healthFactor: onchainLoopsData.healthFactor,
-                stsAaveMarketCap: onchainLoopsData.stsAaveMarketCap,
-                stsAaveMarketSupply: onchainLoopsData.stsAaveMarketSupply,
-                stsAaveMarketMaxLTV: onchainLoopsData.stsAaveMarketMaxLTV,
                 totalApr: loopsApr,
-                loanToValue: '0',
-                leverage: 0,
-                meritApr: 0,
-                borrowApr: 0,
+                leverage: parseFloat(onchainLoopsData.collateralAmountInEth) / parseFloat(onchainLoopsData.nav),
+                stsAaveMarketSupplyCap: onchainAaveData.aaveStSMarketSupplyCap,
+                stsAaveMarketSupply: onchainAaveData.aaveStSMarketAvailableLiquidity,
+                wSAaveMarketSupplyCap: onchainAaveData.aaveWSMarketSupplyCap,
+                wSAaveMarketBorrowed: onchainAaveData.aaveWSTotalScaledVariableDebt,
+                wSAaveMarketBorrowCap: onchainAaveData.aaveWSMarketBorrowCap,
             },
             update: {
                 nav: onchainLoopsData.nav,
+                tvl: tvl.toString(),
                 actualSupply: onchainLoopsData.actualSupply,
-                rate: onchainLoopsData.getRate,
+                rate: onchainLoopsData.rate,
                 collateralAmount: onchainLoopsData.collateralAmount,
                 collateralAmountInEth: onchainLoopsData.collateralAmountInEth,
                 debtAmount: onchainLoopsData.debtAmount,
                 healthFactor: onchainLoopsData.healthFactor,
-                stsAaveMarketCap: onchainLoopsData.stsAaveMarketCap,
-                stsAaveMarketSupply: onchainLoopsData.stsAaveMarketSupply,
-                stsAaveMarketMaxLTV: onchainLoopsData.stsAaveMarketMaxLTV,
+                stsAaveMarketSupplyCap: onchainAaveData.aaveStSMarketSupplyCap,
+                stsAaveMarketSupply: onchainAaveData.aaveStSMarketAvailableLiquidity,
                 totalApr: loopsApr,
-                loanToValue: '0',
-                leverage: 0,
-                meritApr: 0,
-                borrowApr: 0,
+                leverage: parseFloat(onchainLoopsData.collateralAmountInEth) / parseFloat(onchainLoopsData.nav),
+                wSAaveMarketSupplyCap: onchainAaveData.aaveWSMarketSupplyCap,
+                wSAaveMarketBorrowed: onchainAaveData.aaveWSTotalScaledVariableDebt,
+                wSAaveMarketBorrowCap: onchainAaveData.aaveWSMarketBorrowCap,
             },
         });
     }
@@ -59,21 +71,18 @@ export class LoopsService {
         const dbData = await prisma.prismaLoopsData.findFirstOrThrow();
         return {
             nav: dbData.nav,
+            tvl: dbData.tvl,
             actualSupply: dbData.actualSupply,
             rate: dbData.rate,
             collateralAmount: dbData.collateralAmount,
             collateralAmountInEth: dbData.collateralAmountInEth,
             debtAmount: dbData.debtAmount,
             healthFactor: dbData.healthFactor,
-            stSAaveMarketCap: dbData.stsAaveMarketCap,
+            stSAaveMarketSupplyCap: dbData.stsAaveMarketSupplyCap,
             stSAaveMarketSupply: dbData.stsAaveMarketSupply,
-            stSAaveMarketMaxLTV: dbData.stsAaveMarketMaxLTV,
             apr: dbData.totalApr,
-            ltv: dbData.loanToValue,
             leverage: dbData.leverage,
-            aaveMeritApr: dbData.meritApr,
-            aaveSBorrowApr: dbData.borrowApr,
-            sonicPointsMultiplier: '1', // TODO: fetch from config
+            sonicPointsMultiplier: `${(parseFloat(dbData.collateralAmount) / parseFloat(dbData.actualSupply)) * 12}`,
         };
     }
 }

@@ -11,6 +11,10 @@ type GqlLoopsData {
     """
     nav: String!
     """
+    Net Asset Value in USD.
+    """
+    tvl: String!
+    """
     Actual TotalSupply of LoopS.
     """
     actualSupply: String!
@@ -35,10 +39,6 @@ type GqlLoopsData {
     """
     healthFactor: String!
     """
-    Loan To Value of the position
-    """
-    ltv: String!
-    """
     The amount of leverage the current position has.
     """
     leverage: Float!
@@ -49,23 +49,11 @@ type GqlLoopsData {
     """
     The current cap on the stS market on Aave
     """
-    stSAaveMarketCap: String!
-    """
-    The max LTV of the market with e-mode
-    """
-    stSAaveMarketMaxLTV: String!
+    stSAaveMarketSupplyCap: String!
     """
     The total APR for LoopS
     """
     apr: Float!
-    """
-    Aave Merit APR
-    """
-    aaveMeritApr: Float!
-    """
-    Aave S borrow APR
-    """
-    aaveSBorrowApr: Float!
     """
     The current Sonic points multiplier for LoopS
     """
