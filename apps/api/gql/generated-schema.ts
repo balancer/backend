@@ -220,10 +220,6 @@ export interface GqlLatestSyncedBlocks {
 
 export interface GqlLoopsData {
     __typename?: 'GqlLoopsData';
-    /** Aave Merit APR */
-    aaveMeritApr: Scalars['Float'];
-    /** Aave S borrow APR */
-    aaveSBorrowApr: Scalars['Float'];
     /** Actual TotalSupply of LoopS. */
     actualSupply: Scalars['String'];
     /** The total APR for LoopS */
@@ -238,20 +234,18 @@ export interface GqlLoopsData {
     healthFactor: Scalars['String'];
     /** The amount of leverage the current position has. */
     leverage: Scalars['Float'];
-    /** Loan To Value of the position */
-    ltv: Scalars['String'];
     /** Net Asset Value. The amount of collateral minus the amount of debt. */
     nav: Scalars['String'];
     /** The current rate of LoopS against S. */
     rate: Scalars['String'];
     /** The current Sonic points multiplier for LoopS */
     sonicPointsMultiplier: Scalars['String'];
-    /** The current cap on the stS market on Aave */
-    stSAaveMarketCap: Scalars['String'];
-    /** The max LTV of the market with e-mode */
-    stSAaveMarketMaxLTV: Scalars['String'];
     /** The current amount of stS supplied to the Aave market */
     stSAaveMarketSupply: Scalars['String'];
+    /** The current cap on the stS market on Aave */
+    stSAaveMarketSupplyCap: Scalars['String'];
+    /** Net Asset Value in USD. */
+    tvl: Scalars['String'];
 }
 
 /** All info on the nested pool if the token is a BPT. It will only support 1 level of nesting. */
@@ -4036,8 +4030,6 @@ export type GqlLoopsDataResolvers<
     ContextType = ResolverContext,
     ParentType extends ResolversParentTypes['GqlLoopsData'] = ResolversParentTypes['GqlLoopsData'],
 > = ResolversObject<{
-    aaveMeritApr?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
-    aaveSBorrowApr?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
     actualSupply?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     apr?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
     collateralAmount?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -4045,13 +4037,12 @@ export type GqlLoopsDataResolvers<
     debtAmount?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     healthFactor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     leverage?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
-    ltv?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     nav?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     rate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     sonicPointsMultiplier?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    stSAaveMarketCap?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    stSAaveMarketMaxLTV?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     stSAaveMarketSupply?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+    stSAaveMarketSupplyCap?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+    tvl?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 

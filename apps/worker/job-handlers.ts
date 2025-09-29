@@ -289,7 +289,7 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
             await runIfNotAlreadyRunning(
                 name,
                 chainId,
-                () => new LoopsService().fetchAndStoreLoopsData(chainId),
+                () => new LoopsService().fetchAndStoreLoopsData(chain),
                 res,
                 next,
             );
