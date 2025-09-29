@@ -1,5 +1,12 @@
 # backend
 
+## 1.54.5
+
+### Patch Changes
+
+-   55c888b: prepare loops integration
+-   6cc9934: APR for rsETH on plasma
+
 ## 1.54.4
 
 ### Patch Changes
