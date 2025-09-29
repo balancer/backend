@@ -226,16 +226,6 @@ export const schema = gql`
 
     type GqlLoopsData {
         """
-        Aave Merit APR
-        """
-        aaveMeritApr: Float!
-
-        """
-        Aave S borrow APR
-        """
-        aaveSBorrowApr: Float!
-
-        """
         Actual TotalSupply of LoopS.
         """
         actualSupply: String!
@@ -271,11 +261,6 @@ export const schema = gql`
         leverage: Float!
 
         """
-        Loan To Value of the position
-        """
-        ltv: String!
-
-        """
         Net Asset Value. The amount of collateral minus the amount of debt.
         """
         nav: String!
@@ -291,19 +276,19 @@ export const schema = gql`
         sonicPointsMultiplier: String!
 
         """
-        The current cap on the stS market on Aave
-        """
-        stSAaveMarketCap: String!
-
-        """
-        The max LTV of the market with e-mode
-        """
-        stSAaveMarketMaxLTV: String!
-
-        """
         The current amount of stS supplied to the Aave market
         """
         stSAaveMarketSupply: String!
+
+        """
+        The current cap on the stS market on Aave
+        """
+        stSAaveMarketSupplyCap: String!
+
+        """
+        Net Asset Value in USD.
+        """
+        tvl: String!
     }
 
     """

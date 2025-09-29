@@ -89,6 +89,8 @@ export interface NetworkData {
     };
     loops?: {
         address: string;
+        aavePoolDataProvider: string;
+        aavePoolAddressesProvider: string;
     };
     bal?: {
         address: string;

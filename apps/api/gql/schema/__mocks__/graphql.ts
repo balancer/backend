@@ -372,8 +372,6 @@ export const aGqlLatestSyncedBlocks = (overrides?: Partial<GqlLatestSyncedBlocks
 
 export const aGqlLoopsData = (overrides?: Partial<GqlLoopsData>): GqlLoopsData => {
     return {
-        aaveMeritApr: overrides && overrides.hasOwnProperty('aaveMeritApr') ? overrides.aaveMeritApr! : 9.4,
-        aaveSBorrowApr: overrides && overrides.hasOwnProperty('aaveSBorrowApr') ? overrides.aaveSBorrowApr! : 6.4,
         actualSupply: overrides && overrides.hasOwnProperty('actualSupply') ? overrides.actualSupply! : 'varietas',
         apr: overrides && overrides.hasOwnProperty('apr') ? overrides.apr! : 8,
         collateralAmount:
@@ -385,17 +383,17 @@ export const aGqlLoopsData = (overrides?: Partial<GqlLoopsData>): GqlLoopsData =
         debtAmount: overrides && overrides.hasOwnProperty('debtAmount') ? overrides.debtAmount! : 'uxor',
         healthFactor: overrides && overrides.hasOwnProperty('healthFactor') ? overrides.healthFactor! : 'asper',
         leverage: overrides && overrides.hasOwnProperty('leverage') ? overrides.leverage! : 2.8,
-        ltv: overrides && overrides.hasOwnProperty('ltv') ? overrides.ltv! : 'aqua',
         nav: overrides && overrides.hasOwnProperty('nav') ? overrides.nav! : 'praesentium',
         rate: overrides && overrides.hasOwnProperty('rate') ? overrides.rate! : 'acceptus',
         sonicPointsMultiplier:
             overrides && overrides.hasOwnProperty('sonicPointsMultiplier') ? overrides.sonicPointsMultiplier! : 'umbra',
-        stSAaveMarketCap:
-            overrides && overrides.hasOwnProperty('stSAaveMarketCap') ? overrides.stSAaveMarketCap! : 'eaque',
-        stSAaveMarketMaxLTV:
-            overrides && overrides.hasOwnProperty('stSAaveMarketMaxLTV') ? overrides.stSAaveMarketMaxLTV! : 'coruscus',
         stSAaveMarketSupply:
             overrides && overrides.hasOwnProperty('stSAaveMarketSupply') ? overrides.stSAaveMarketSupply! : 'absorbeo',
+        stSAaveMarketSupplyCap:
+            overrides && overrides.hasOwnProperty('stSAaveMarketSupplyCap')
+                ? overrides.stSAaveMarketSupplyCap!
+                : 'volaticus',
+        tvl: overrides && overrides.hasOwnProperty('tvl') ? overrides.tvl! : 'apud',
     };
 };
 

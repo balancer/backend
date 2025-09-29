@@ -63,6 +63,9 @@ export interface TokenYieldConfig {
     sts?: {
         token: string;
     };
+    loops?: {
+        token: string;
+    };
     euler?: {
         url: string;
         lens: string;

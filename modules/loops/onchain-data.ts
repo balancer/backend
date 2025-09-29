@@ -1,54 +1,94 @@
+import { formatEther, formatUnits } from 'viem';
 import { Multicaller3Viem } from '../web3/multicaller-viem';
-import aaveDataProvider from './abi/aave-data-provider';
+import aavePoolDataProviderAbi from './abi/aave-ui-pool-data-provider';
 import loopsAbi from './abi/loops-abi';
+import { getViemClient } from '../sources/viem-client';
 
 export type OnchainLoopsData = {
     nav: string;
     actualSupply: string;
-    getRate: string;
+    rate: string;
     collateralAmount: string;
     collateralAmountInEth: string;
     debtAmount: string;
     healthFactor: string;
-    stsAaveMarketCap: string;
-    stsAaveMarketSupply: string;
-    stsAaveMarketMaxLTV: string;
+};
+
+export type OnchainAaveData = {
+    liquidityRateLst: string;
+    variableBorrowRateWS: string;
+    aaveStSMarketSupplyCap: string;
+    aaveWSMarketSupplyCap: string;
+    aaveWSMarketBorrowCap: string;
+    aaveStSMarketAvailableLiquidity: string;
+    aaveWSMarketAvailableLiquidity: string;
+    aaveStSTotalScaledVariableDebt: string;
+    aaveWSTotalScaledVariableDebt: string;
 };
 
 export async function fetchLoopsData(loopsAddress: string): Promise<OnchainLoopsData> {
-    // const multicaller = new Multicaller3Viem('SONIC', loopsAbi);
+    const multicaller = new Multicaller3Viem('SONIC', loopsAbi);
 
-    // multicaller.call('totalAssets', loopsAddress, 'totalAssets', []);
-    // multicaller.call('actualSupply', loopsAddress, 'actualSupply', []);
-    // multicaller.call('getRate', loopsAddress, 'getRate', []);
-    // multicaller.call('collateralAmount', loopsAddress, 'collateralAmount', []);
-    // multicaller.call('collateralAmountInEth', loopsAddress, 'collateralAmountInEth', []);
-    // multicaller.call('debtAmount', loopsAddress, 'debtAmount', []);
-    // multicaller.call('healthFactor', loopsAddress, 'healthFactor', []);
+    multicaller.call('nav', loopsAddress, 'totalAssets', []);
+    multicaller.call('actualSupply', loopsAddress, 'actualSupply', []);
+    multicaller.call('rate', loopsAddress, 'getRate', []);
+    multicaller.call('collateralAmount', loopsAddress, 'getAaveLstCollateralAmount', []);
+    multicaller.call('collateralAmountInEth', loopsAddress, 'getAaveLstCollateralAmountInEth', []);
+    multicaller.call('debtAmount', loopsAddress, 'getAaveWethDebtAmount', []);
+    multicaller.call('healthFactor', loopsAddress, 'getHealthFactor', []);
 
-    // const loopsResults = await multicaller.execute<OnchainLoopsData>();
-    // if (loopsResults) {
-    //     return loopsResults;
-    // }
-
-    // const aaveMulticaller = new Multicaller3Viem('SONIC', aaveDataProvider);
-    // aaveMulticaller.call('stsReserveData', '0xc0a344397cfa89dF1e1d3e4fb330834D789cF2CD', 'getReserveData', [
-    //     '0xE5DA20F15420aD15DE0fa650600aFc998bbE3955',
-    // ]);
-    // aaveMulticaller.call('wSReserveData', '0xc0a344397cfa89dF1e1d3e4fb330834D789cF2CD', 'getReserveData', [
-    //     '0x039e2fb66102314ce7b64ce5ce3e5183bc94ad38',
-    // ]);
+    const loopsResults = (await multicaller.execute()) as {
+        nav: bigint;
+        actualSupply: bigint;
+        rate: bigint;
+        collateralAmount: bigint;
+        collateralAmountInEth: bigint;
+        debtAmount: bigint;
+        healthFactor: bigint;
+    };
 
     return {
-        nav: '10',
-        actualSupply: '20',
-        getRate: '1.02',
-        collateralAmount: '20',
-        collateralAmountInEth: '20.6',
-        debtAmount: '10',
-        healthFactor: '1.5',
-        stsAaveMarketCap: '2000',
-        stsAaveMarketSupply: '1800',
-        stsAaveMarketMaxLTV: '0.87',
+        nav: formatEther(loopsResults.nav),
+        actualSupply: formatEther(loopsResults.actualSupply),
+        rate: formatEther(loopsResults.rate),
+        collateralAmount: formatEther(loopsResults.collateralAmount),
+        collateralAmountInEth: formatEther(loopsResults.collateralAmountInEth),
+        debtAmount: formatEther(loopsResults.debtAmount),
+        healthFactor: formatEther(loopsResults.healthFactor),
     };
+}
+
+export async function fetchAaveData(
+    aavePoolDataProvider: string,
+    poolAddressesProvider: string,
+    stsAddress: string,
+    wsAddress: string,
+) {
+    const client = getViemClient('SONIC');
+    const aaveData = await client
+        .readContract({
+            address: aavePoolDataProvider as `0x${string}`,
+            abi: aavePoolDataProviderAbi,
+            functionName: 'getReservesData',
+            args: [poolAddressesProvider as `0x${string}`],
+        })
+        .then((list) => new Map(list[0].map((item) => [item.underlyingAsset.toLowerCase(), item])));
+
+    const aaveOnChainData: OnchainAaveData = {
+        liquidityRateLst: formatEther(aaveData.get(stsAddress.toLowerCase())?.liquidityRate ?? 0n),
+        variableBorrowRateWS: formatUnits(aaveData.get(wsAddress.toLowerCase())?.variableBorrowRate ?? 0n, 27),
+        aaveStSMarketSupplyCap: aaveData.get(stsAddress.toLowerCase())?.supplyCap.toString() ?? '0',
+        aaveWSMarketSupplyCap: aaveData.get(wsAddress.toLowerCase())?.supplyCap.toString() ?? '0',
+        aaveWSMarketBorrowCap: aaveData.get(wsAddress.toLowerCase())?.borrowCap.toString() ?? '0',
+        aaveStSMarketAvailableLiquidity: formatEther(aaveData.get(stsAddress.toLowerCase())?.availableLiquidity ?? 0n),
+        aaveWSTotalScaledVariableDebt: formatEther(
+            aaveData.get(wsAddress.toLowerCase())?.totalScaledVariableDebt ?? 0n,
+        ),
+        aaveStSTotalScaledVariableDebt: formatEther(
+            aaveData.get(stsAddress.toLowerCase())?.totalScaledVariableDebt ?? 0n,
+        ),
+        aaveWSMarketAvailableLiquidity: formatEther(aaveData.get(wsAddress.toLowerCase())?.availableLiquidity ?? 0n),
+    };
+
+    return aaveOnChainData;
 }
