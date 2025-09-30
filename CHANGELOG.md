@@ -1,5 +1,11 @@
 # backend
 
+## 1.54.7
+
+### Patch Changes
+
+-   418ec31: APR for maple's syrupUSDT on Plasma
+
 ## 1.54.6
 
 ### Patch Changes
