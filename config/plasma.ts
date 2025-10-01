@@ -59,6 +59,25 @@ export default <NetworkData>{
         ybAprHandler: {
             http: [
                 {
+                    url: 'https://api.maple.finance/v2/graphql',
+                    body: JSON.stringify({
+                        query: `{
+                          syrupGlobals {
+                            apy
+                          }
+                        }`,
+                    }),
+                    headers: { 'Content-Type': 'application/json' },
+                    scale: 1e30,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0xc4374775489cb9c56003bf2c9b12495fc64f0771',
+                            path: '$.data.syrupGlobals.apy',
+                        },
+                    ],
+                },
+                {
                     url: 'https://universe.kelpdao.xyz/rseth/apy',
                     scale: 100,
                     extractors: [
