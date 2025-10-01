@@ -1,5 +1,6 @@
 import { Chain } from '@prisma/client';
-import { eventsRepository, BlockNumbersRepository } from '../repositories/events';
+import { eventsRepository } from '../events/events-repository';
+import { BlockNumbersRepository } from '../events/types';
 
 export const blockNumbers = (repo: BlockNumbersRepository = eventsRepository) => ({
     /**

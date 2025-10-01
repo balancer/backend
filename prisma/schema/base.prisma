@@ -41,6 +41,7 @@ model PrismaLastBlockSynced {
 enum PrismaLastBlockSyncedCategory {
     POOLS
     POOLS_V3
+    STATE_EVENTS_V2
     ADD_POOLS_V3
     FARMS
     COW_AMM_POOLS

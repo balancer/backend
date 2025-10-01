@@ -11,7 +11,7 @@ import { blockNumbers } from '../../block-numbers';
 import { Abi, formatUnits } from 'viem';
 import { DAYS_OF_HOURLY_PRICES } from '../../../config';
 import _ from 'lodash';
-import vaultV2 from '../../pool/abi/Vault.json';
+import vaultV2 from '../abi/Vault.json';
 import vaultV3 from '../../sources/contracts/abis/VaultV3';
 
 // V2 Vault ABI - only the functions we need
@@ -220,6 +220,7 @@ export const updateLiquidityValuesForPools = async (chain: Chain, poolIds?: stri
                 continue;
             }
 
+            // only update if the change is significant (> $1) to avoid excessive writes
             if (Math.abs(item.balanceUSD - item.previousBalanceUSD) > 1) {
                 updates.push(
                     prisma.prismaPoolToken.update({

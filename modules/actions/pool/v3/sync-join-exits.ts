@@ -2,8 +2,9 @@ import { Chain } from '@prisma/client';
 import { V3VaultSubgraphClient } from '../../../sources/subgraphs';
 import { joinExitsUsd } from '../../../sources/enrichers/join-exits-usd';
 import { joinExitV3Transformer } from '../../../sources/transformers/join-exit-v3-transformer';
-import { eventsRepository, EventStoreRepository, LatestEventRepository } from '../../../repositories/events';
 import { getLastSyncedBlock, upsertLastSyncedBlock } from '../../last-synced-block';
+import { eventsRepository } from '../../../events/events-repository';
+import { EventStoreRepository } from '../../../events/types';
 
 /**
  * Get the join and exit events from the subgraph and store them in the database
@@ -13,7 +14,7 @@ import { getLastSyncedBlock, upsertLastSyncedBlock } from '../../last-synced-blo
 export const syncJoinExits = async (
     vaultSubgraphClient: V3VaultSubgraphClient,
     chain: Chain,
-    eventRepo: LatestEventRepository & EventStoreRepository = eventsRepository,
+    eventRepo: EventStoreRepository = eventsRepository,
 ): Promise<string[]> => {
     const lastSyncedBlock = await getLastSyncedBlock(chain, 'JOIN_EXITS_V3');
 

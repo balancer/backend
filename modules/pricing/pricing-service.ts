@@ -3,7 +3,7 @@ import { PricingManager } from './pricing-manager';
 import { PricingRepository } from './pricing-repository';
 import { PriceItem } from './types';
 import { createHandlers } from './create-handlers';
-import { eventsRepository } from '../repositories/events';
+import { eventsRepository } from '../events/events-repository';
 
 export class PricingService {
     private repository: PricingRepository;

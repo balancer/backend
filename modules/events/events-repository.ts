@@ -1,8 +1,8 @@
 import { Prisma, Chain, PoolEventType } from '@prisma/client';
-import { prisma } from '../../../prisma/prisma-client';
-import { JoinExitEvent, SwapEvent } from '../../../prisma/prisma-types';
-import type { SwapStats } from './types';
-import { daysAgo, now } from '../../common/time';
+import { prisma } from '../../prisma/prisma-client';
+import { JoinExitEvent, SwapEvent } from '../../prisma/prisma-types';
+import { daysAgo, now } from '../common/time';
+import { SwapStats } from './types';
 
 const orderBy: Prisma.PrismaPoolEventOrderByWithRelationInput[] = [
     { blockTimestamp: 'desc' },

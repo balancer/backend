@@ -8,7 +8,7 @@ export * from './event-query-controller';
 export * from './content-controller';
 export * from './fx-pools-controller';
 export * from './pool-controller';
-export * from './event-controller';
+export * from '../events/event-controller';
 export * from './staking-controller';
 export * from './token-controller';
 export * from './quant-amm-controller';

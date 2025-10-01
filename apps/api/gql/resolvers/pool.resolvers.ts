@@ -56,7 +56,7 @@ const balancerResolvers: Resolvers = {
             });
         },
         poolGetFeaturedPools: async (parent, { chains }, context) => {
-            return poolService.getFeaturedPools(chains);
+            return [];
         },
         poolGetSnapshots: async (parent, { id, chain, range }, context) => {
             const currentChain = headerChain();
@@ -96,7 +96,7 @@ const balancerResolvers: Resolvers = {
                 });
             }
 
-            return PoolController().addPoolsV2(chain);
+            return [];
         },
         poolReloadAllPoolAprs: async (parent, { chain }, context) => {
             isAdminRoute(context);
@@ -135,13 +135,9 @@ const balancerResolvers: Resolvers = {
             const result: { type: string; chain: GqlChain; success: boolean; error: string | undefined }[] = [];
 
             for (const chain of chains) {
-                try {
-                    await PoolController().syncOnchainDataForAllPoolsV2(chain);
-                    result.push({ type: 'v2', chain, success: true, error: undefined });
-                } catch (e) {
-                    result.push({ type: 'v2', chain, success: false, error: `${e}` });
-                    console.log(`Could not sync v2 pools for chain ${chain}: ${e}`);
-                }
+                result.push({ type: 'v2', chain, success: false, error: `not implemented` });
+                console.log(`Could not sync v2 pools for chain ${chain}: not implemented`);
+
                 try {
                     await upsertLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.POOLS_V3, 0);
                     await PoolController().syncPoolsV3(chain);

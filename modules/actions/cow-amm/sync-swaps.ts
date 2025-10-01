@@ -5,7 +5,8 @@ import _ from 'lodash';
 import { OrderDirection, Swap_OrderBy } from '../../sources/subgraphs/cow-amm/generated/types';
 import { swapsUsd } from '../../sources/enrichers/swaps-usd';
 import { swapCowAmmTransformer } from '../../sources/transformers/swap-cowamm-transformer';
-import { eventsRepository, EventStoreRepository } from '../../repositories/events';
+import { eventsRepository } from '../../events/events-repository';
+import { EventStoreRepository } from '../../events/types';
 
 /**
  * Adds all swaps since daysToSync to the database. Checks for latest synced swap to avoid duplicate work.
