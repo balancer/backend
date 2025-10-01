@@ -3,9 +3,8 @@ import { V3VaultSubgraphClient } from '../../../sources/subgraphs';
 import _ from 'lodash';
 import { swapV3Transformer } from '../../../sources/transformers/swap-v3-transformer';
 import { swapsUsd } from '../../../sources/enrichers/swaps-usd';
+import { eventsRepository, EventStoreRepository, LatestEventRepository } from '../../../repositories/events';
 import { getLastSyncedBlock, upsertLastSyncedBlock } from '../../last-synced-block';
-import { eventsRepository } from '../../../events/events-repository';
-import { LatestEventRepository, EventStoreRepository } from '../../../events/types';
 
 /**
  * Adds all swaps since daysToSync to the database. Checks for latest synced swap to avoid duplicate work.

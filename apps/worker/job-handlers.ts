@@ -29,8 +29,7 @@ import {
     QuantAmmController,
     TokenYieldsController,
 } from '../../modules/controllers';
-import { PoolController as PoolControllerNew } from '../../modules/pool/pool-controller';
-import { updateVolumeAndFees } from '../../modules/pool/lib/update-volume-and-fees';
+import { updateVolumeAndFees } from '../../modules/actions/pool/update-volume-and-fees';
 import { TokenController } from '../../modules/controllers/token-controller';
 import { SubgraphMonitorController } from '../../modules/controllers/subgraph-monitor-controller';
 import config from '../../config';
@@ -118,7 +117,7 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
     const chain = chainIdToChain[chainId];
     switch (name) {
         case 'sync-changed-pools':
-            await runIfNotAlreadyRunning(name, chainId, () => PoolControllerNew().syncV2Pools(chain), res, next);
+            await runIfNotAlreadyRunning(name, chainId, () => PoolController().syncChangedPoolsV2(chain), res, next);
             break;
         case 'user-sync-wallet-balances-for-all-pools':
             await runIfNotAlreadyRunning(name, chainId, () => UserBalancesController().syncBalances(chain), res, next);
@@ -159,6 +158,12 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
                 res,
                 next,
             );
+            break;
+        case 'sync-new-pools-from-subgraph':
+            await runIfNotAlreadyRunning(name, chainId, () => PoolController().addPoolsV2(chain), res, next);
+            break;
+        case 'sync-join-exits-v2':
+            await runIfNotAlreadyRunning(name, chainId, () => EventController().syncJoinExitsV2(chain), res, next);
             break;
         case 'sync-token-content-data':
             await runIfNotAlreadyRunning(name, chainId, () => tokenService.syncTokenContentData(chain), res, next);
@@ -338,6 +343,15 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
                 name,
                 chainId,
                 () => EventController().syncSwapsUpdateVolumeAndFeesV3(chain),
+                res,
+                next,
+            );
+            break;
+        case 'sync-swaps-v2':
+            await runIfNotAlreadyRunning(
+                name,
+                chainId,
+                () => EventController().syncSwapsUpdateVolumeAndFeesV2(chain),
                 res,
                 next,
             );

@@ -3,9 +3,8 @@ import { prisma } from '../../../prisma/prisma-client';
 import _ from 'lodash';
 import moment from 'moment';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
-import { capturesYield } from './pool-utils';
-import { SwapStatsRepository } from '../../events/types';
-import { eventsRepository } from '../../events/events-repository';
+import { capturesYield } from '../../pool/lib/pool-utils';
+import { SwapStatsRepository, eventsRepository } from '../../repositories/events';
 
 const emptyStats = {
     volume: 0,

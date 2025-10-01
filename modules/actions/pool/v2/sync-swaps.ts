@@ -1,12 +1,11 @@
 import { Chain } from '@prisma/client';
-import { prisma } from '../../../prisma/prisma-client';
-import { getLastSyncedBlock, upsertLastSyncedBlock } from '../../actions/last-synced-block';
-import { swapsUsd, joinExitsUsd } from '../../sources/enrichers';
-import { joinExitV2Transformer } from '../../sources/transformers/join-exit-v2-transformer';
-import { swapV2Transformer } from '../../sources/transformers/swap-v2-transformer';
-import { V2SubgraphClient } from '../../subgraphs/balancer-subgraph';
-import { EventStoreRepository, LatestEventRepository } from '../types';
-import { eventsRepository } from '../events-repository';
+import { prisma } from '../../../../prisma/prisma-client';
+import { V2SubgraphClient } from '../../../subgraphs/balancer-subgraph';
+import _ from 'lodash';
+import { swapV2Transformer } from '../../../sources/transformers/swap-v2-transformer';
+import { swapsUsd } from '../../../sources/enrichers/swaps-usd';
+import { eventsRepository, LatestEventRepository, EventStoreRepository } from '../../../repositories/events';
+import { getLastSyncedBlock, upsertLastSyncedBlock } from '../../last-synced-block';
 
 /**
  * Adds all swaps since daysToSync to the database. Checks for latest synced swap to avoid duplicate work.
@@ -15,7 +14,7 @@ import { eventsRepository } from '../events-repository';
  * @param chain
  * @returns
  */
-export async function syncSwapsV2(
+export async function syncSwaps(
     subgraphClient: V2SubgraphClient,
     chain: Chain,
     eventRepo: LatestEventRepository & EventStoreRepository = eventsRepository,
@@ -61,35 +60,3 @@ export async function syncSwapsV2(
 
     return [...new Set(dbEntries.map((entry) => entry.poolId))];
 }
-
-/**
- * Get the join and exit events from the subgraph and store them in the database
- *
- * @param vaultSubgraphClient
- */
-export const syncAddRemoveV2 = async (
-    v2SubgraphClient: V2SubgraphClient,
-    chain: Chain,
-    eventRepo: LatestEventRepository & EventStoreRepository = eventsRepository,
-): Promise<string[]> => {
-    const lastSyncedBlock = await getLastSyncedBlock(chain, 'JOIN_EXITS_V2');
-
-    // Get events
-    const joinExits = await v2SubgraphClient.getJoinExitsFromBlock(lastSyncedBlock);
-
-    // Prepare DB entries
-    const dbEntries = await joinExitV2Transformer(joinExits, chain);
-
-    // Enrich with USD values
-    const dbEntriesWithUsd = await joinExitsUsd(dbEntries, chain);
-
-    // Create entries and skip duplicates
-    await eventRepo.storeEvents(dbEntriesWithUsd);
-
-    // Store last block
-    const lastEvent = dbEntriesWithUsd.sort((a, b) => a.blockNumber - b.blockNumber).pop();
-    if (!lastEvent) return [];
-    await upsertLastSyncedBlock(chain, 'JOIN_EXITS_V2', lastEvent.blockNumber);
-
-    return dbEntries.map((entry) => entry.id);
-};

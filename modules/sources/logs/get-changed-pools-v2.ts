@@ -2,7 +2,7 @@ import { ViemClient } from '../types';
 import VaultV2 from '../../pool/abi/Vault.json';
 
 const events = VaultV2.filter(
-    (i) => i.type === 'event' && ['PoolBalanceChanged', 'Swap', 'PoolBalanceManaged'].includes(i.name || ''), // pause, recoverymode and swapfeepercentage are emitted by the pools instead of the vault
+    (i) => i.type === 'event' && ['PoolBalanceChanged', 'Swap', 'PoolBalanceManaged'].includes(i.name || ''),
 );
 
 /**

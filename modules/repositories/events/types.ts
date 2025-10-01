@@ -1,5 +1,5 @@
 import { Chain, PoolEventType } from '@prisma/client';
-import { JoinExitEvent, SwapEvent } from '../../prisma/prisma-types';
+import { JoinExitEvent, SwapEvent } from '../../../prisma/prisma-types';
 
 export type SwapStats = { poolId: string; volume: number; fees: number; dynamicFees?: number; surplus?: number };
 

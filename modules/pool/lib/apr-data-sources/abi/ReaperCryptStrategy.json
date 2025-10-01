@@ -1,0 +1,586 @@
+[
+    {
+        "inputs": [
+            { "internalType": "address", "name": "_vault", "type": "address" },
+            { "internalType": "address[]", "name": "_feeRemitters", "type": "address[]" },
+            { "internalType": "address[]", "name": "_strategists", "type": "address[]" },
+            { "internalType": "address[]", "name": "_multisigRoles", "type": "address[]" },
+            { "internalType": "contract IAToken", "name": "_aWant", "type": "address" },
+            { "internalType": "address[]", "name": "_opToWantPath", "type": "address[]" },
+            { "internalType": "uint256", "name": "_targetLtv", "type": "uint256" },
+            { "internalType": "uint256", "name": "_maxLtv", "type": "uint256" },
+            { "internalType": "uint8", "name": "_eModeCategory", "type": "uint8" }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            { "indexed": false, "internalType": "uint256", "name": "newCallFee", "type": "uint256" },
+            { "indexed": false, "internalType": "uint256", "name": "newTreasuryFee", "type": "uint256" },
+            { "indexed": false, "internalType": "uint256", "name": "newStrategistFee", "type": "uint256" }
+        ],
+        "name": "FeesUpdated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [{ "indexed": false, "internalType": "address", "name": "account", "type": "address" }],
+        "name": "Paused",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            { "indexed": true, "internalType": "bytes32", "name": "role", "type": "bytes32" },
+            { "indexed": true, "internalType": "bytes32", "name": "previousAdminRole", "type": "bytes32" },
+            { "indexed": true, "internalType": "bytes32", "name": "newAdminRole", "type": "bytes32" }
+        ],
+        "name": "RoleAdminChanged",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            { "indexed": true, "internalType": "bytes32", "name": "role", "type": "bytes32" },
+            { "indexed": true, "internalType": "address", "name": "account", "type": "address" },
+            { "indexed": true, "internalType": "address", "name": "sender", "type": "address" }
+        ],
+        "name": "RoleGranted",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            { "indexed": true, "internalType": "bytes32", "name": "role", "type": "bytes32" },
+            { "indexed": true, "internalType": "address", "name": "account", "type": "address" },
+            { "indexed": true, "internalType": "address", "name": "sender", "type": "address" }
+        ],
+        "name": "RoleRevoked",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [{ "indexed": true, "internalType": "address", "name": "harvester", "type": "address" }],
+        "name": "StratHarvest",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [{ "indexed": false, "internalType": "address", "name": "newStrategistRemitter", "type": "address" }],
+        "name": "StrategistRemitterUpdated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [{ "indexed": false, "internalType": "uint256", "name": "newFee", "type": "uint256" }],
+        "name": "TotalFeeUpdated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [{ "indexed": false, "internalType": "address", "name": "account", "type": "address" }],
+        "name": "Unpaused",
+        "type": "event"
+    },
+    {
+        "inputs": [],
+        "name": "AAVE_ADDRESSES_PROVIDER",
+        "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "AAVE_DATA_PROVIDER",
+        "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "AAVE_REWARDS_CONTROLLER",
+        "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "ADDRESSES_PROVIDER",
+        "outputs": [{ "internalType": "contract IPoolAddressesProvider", "name": "", "type": "address" }],
+        "stateMutability": "pure",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "ADMIN",
+        "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "DEFAULT_ADMIN_ROLE",
+        "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "GUARDIAN",
+        "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "KEEPER",
+        "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "MAX_FEE",
+        "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "ONE_YEAR",
+        "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "OP",
+        "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "PERCENT_DIVISOR",
+        "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "POOL",
+        "outputs": [{ "internalType": "contract IPool", "name": "", "type": "address" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "STRATEGIST",
+        "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "STRATEGIST_MAX_FEE",
+        "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "USDC",
+        "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "VELO_ROUTER",
+        "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "aWant",
+        "outputs": [{ "internalType": "contract IAToken", "name": "", "type": "address" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [{ "internalType": "uint256", "name": "_amount", "type": "uint256" }],
+        "name": "authorizedDelever",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [{ "internalType": "uint256", "name": "_amount", "type": "uint256" }],
+        "name": "authorizedSendToVault",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [{ "internalType": "uint256", "name": "_amount", "type": "uint256" }],
+        "name": "authorizedWithdrawUnderlying",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [{ "internalType": "int256", "name": "_n", "type": "int256" }],
+        "name": "averageAPRAcrossLastNHarvests",
+        "outputs": [{ "internalType": "int256", "name": "", "type": "int256" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "balanceOf",
+        "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            { "internalType": "uint256", "name": "_startIndex", "type": "uint256" },
+            { "internalType": "uint256", "name": "_endIndex", "type": "uint256" }
+        ],
+        "name": "calculateAPRUsingLogs",
+        "outputs": [{ "internalType": "int256", "name": "", "type": "int256" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "callFee",
+        "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    { "inputs": [], "name": "deposit", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
+    {
+        "inputs": [
+            { "internalType": "address[]", "name": "", "type": "address[]" },
+            { "internalType": "uint256[]", "name": "", "type": "uint256[]" },
+            { "internalType": "uint256[]", "name": "", "type": "uint256[]" },
+            { "internalType": "address", "name": "initiator", "type": "address" },
+            { "internalType": "bytes", "name": "", "type": "bytes" }
+        ],
+        "name": "executeOperation",
+        "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [{ "internalType": "bytes32", "name": "role", "type": "bytes32" }],
+        "name": "getRoleAdmin",
+        "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            { "internalType": "bytes32", "name": "role", "type": "bytes32" },
+            { "internalType": "uint256", "name": "index", "type": "uint256" }
+        ],
+        "name": "getRoleMember",
+        "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [{ "internalType": "bytes32", "name": "role", "type": "bytes32" }],
+        "name": "getRoleMemberCount",
+        "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getSupplyAndBorrow",
+        "outputs": [
+            { "internalType": "uint256", "name": "supply", "type": "uint256" },
+            { "internalType": "uint256", "name": "borrow", "type": "uint256" }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            { "internalType": "bytes32", "name": "role", "type": "bytes32" },
+            { "internalType": "address", "name": "account", "type": "address" }
+        ],
+        "name": "grantRole",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "harvest",
+        "outputs": [{ "internalType": "uint256", "name": "callerFee", "type": "uint256" }],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+        "name": "harvestLog",
+        "outputs": [
+            { "internalType": "uint256", "name": "timestamp", "type": "uint256" },
+            { "internalType": "uint256", "name": "vaultSharePrice", "type": "uint256" }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "harvestLogCadence",
+        "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "harvestLogLength",
+        "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            { "internalType": "bytes32", "name": "role", "type": "bytes32" },
+            { "internalType": "address", "name": "account", "type": "address" }
+        ],
+        "name": "hasRole",
+        "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "lastHarvestTimestamp",
+        "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "maxLtv",
+        "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "minLeverageAmount",
+        "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+        "name": "opToUsdcPath",
+        "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+        "name": "opToWantPath",
+        "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    { "inputs": [], "name": "panic", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
+    { "inputs": [], "name": "pause", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
+    {
+        "inputs": [],
+        "name": "paused",
+        "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            { "internalType": "bytes32", "name": "role", "type": "bytes32" },
+            { "internalType": "address", "name": "account", "type": "address" }
+        ],
+        "name": "renounceRole",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            { "internalType": "bytes32", "name": "role", "type": "bytes32" },
+            { "internalType": "address", "name": "account", "type": "address" }
+        ],
+        "name": "revokeRole",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+        "name": "rewardClaimingTokens",
+        "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            { "internalType": "uint256", "name": "_newTargetLtv", "type": "uint256" },
+            { "internalType": "uint256", "name": "_newMaxLtv", "type": "uint256" }
+        ],
+        "name": "setLTVs",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            { "internalType": "uint256", "name": "_newWithdrawSlippageTolerance", "type": "uint256" },
+            { "internalType": "uint256", "name": "_newMinLeverageAmount", "type": "uint256" }
+        ],
+        "name": "setLeverageParams",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [{ "internalType": "address[]", "name": "_path", "type": "address[]" }],
+        "name": "setOpToUsdcPath",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [{ "internalType": "address[]", "name": "_path", "type": "address[]" }],
+        "name": "setOpToWantPath",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "strategistFee",
+        "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "strategistRemitter",
+        "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [{ "internalType": "bytes4", "name": "interfaceId", "type": "bytes4" }],
+        "name": "supportsInterface",
+        "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "targetLtv",
+        "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "totalFee",
+        "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "treasury",
+        "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "treasuryFee",
+        "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    { "inputs": [], "name": "unpause", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
+    {
+        "inputs": [
+            { "internalType": "uint256", "name": "_callFee", "type": "uint256" },
+            { "internalType": "uint256", "name": "_treasuryFee", "type": "uint256" },
+            { "internalType": "uint256", "name": "_strategistFee", "type": "uint256" }
+        ],
+        "name": "updateFees",
+        "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [{ "internalType": "uint256", "name": "_newCadenceInSeconds", "type": "uint256" }],
+        "name": "updateHarvestLogCadence",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [{ "internalType": "address", "name": "_newStrategistRemitter", "type": "address" }],
+        "name": "updateStrategistRemitter",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [{ "internalType": "uint256", "name": "_totalFee", "type": "uint256" }],
+        "name": "updateTotalFee",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [{ "internalType": "address", "name": "newTreasury", "type": "address" }],
+        "name": "updateTreasury",
+        "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "vault",
+        "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "want",
+        "outputs": [{ "internalType": "contract IERC20", "name": "", "type": "address" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [{ "internalType": "uint256", "name": "_amount", "type": "uint256" }],
+        "name": "withdraw",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "withdrawSlippageTolerance",
+        "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+        "stateMutability": "view",
+        "type": "function"
+    }
+]

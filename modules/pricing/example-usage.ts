@@ -1,8 +1,8 @@
 import { Chain } from '@prisma/client';
 import { PricingManager } from './pricing-manager';
 import { PricingRepository } from './pricing-repository';
+import { eventsRepository } from '../repositories/events';
 import { createHandlers } from './create-handlers';
-import { eventsRepository } from '../events/events-repository';
 
 /**
  * Example usage of PricingManager with mock token data

@@ -4,8 +4,7 @@ import { CowAmmSubgraphClient } from '../../sources/subgraphs';
 import { AddRemove_OrderBy, OrderDirection } from '../../sources/subgraphs/cow-amm/generated/types';
 import { joinExitsUsd } from '../../sources/enrichers/join-exits-usd';
 import { joinExitV3Transformer } from '../../sources/transformers/join-exit-v3-transformer';
-import { eventsRepository } from '../../events/events-repository';
-import { EventStoreRepository } from '../../events/types';
+import { eventsRepository, EventStoreRepository } from '../../repositories/events';
 
 /**
  * Get the join and exit events from the subgraph and store them in the database

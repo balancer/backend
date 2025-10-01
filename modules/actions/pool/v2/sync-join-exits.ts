@@ -1,8 +1,8 @@
 import { Chain } from '@prisma/client';
-import { V3VaultSubgraphClient } from '../../../sources/subgraphs';
+import type { V2SubgraphClient } from '../../../subgraphs/balancer-subgraph';
 import { joinExitsUsd } from '../../../sources/enrichers/join-exits-usd';
-import { joinExitV3Transformer } from '../../../sources/transformers/join-exit-v3-transformer';
-import { eventsRepository, EventStoreRepository, LatestEventRepository } from '../../../repositories/events';
+import { joinExitV2Transformer } from '../../../sources/transformers/join-exit-v2-transformer';
+import { eventsRepository, LatestEventRepository, EventStoreRepository } from '../../../repositories/events';
 import { getLastSyncedBlock, upsertLastSyncedBlock } from '../../last-synced-block';
 
 /**
@@ -11,29 +11,28 @@ import { getLastSyncedBlock, upsertLastSyncedBlock } from '../../last-synced-blo
  * @param vaultSubgraphClient
  */
 export const syncJoinExits = async (
-    vaultSubgraphClient: V3VaultSubgraphClient,
+    v2SubgraphClient: V2SubgraphClient,
     chain: Chain,
     eventRepo: LatestEventRepository & EventStoreRepository = eventsRepository,
 ): Promise<string[]> => {
-    const lastSyncedBlock = await getLastSyncedBlock(chain, 'JOIN_EXITS_V3');
+    const lastSyncedBlock = await getLastSyncedBlock(chain, 'JOIN_EXITS_V2');
 
     // Get events
-    const addRemoves = await vaultSubgraphClient.getAddRemovesFromBlock(lastSyncedBlock);
+    const joinExits = await v2SubgraphClient.getJoinExitsFromBlock(lastSyncedBlock);
 
     // Prepare DB entries
-    const dbEntries = await joinExitV3Transformer(addRemoves, chain);
-
-    console.log(`Syncing ${dbEntries.length} join/exit events`);
+    const dbEntries = await joinExitV2Transformer(joinExits, chain);
 
     // Enrich with USD values
     const dbEntriesWithUsd = await joinExitsUsd(dbEntries, chain);
 
+    // Create entries and skip duplicates
     await eventRepo.storeEvents(dbEntriesWithUsd);
 
     // Store last block
     const lastEvent = dbEntriesWithUsd.sort((a, b) => a.blockNumber - b.blockNumber).pop();
     if (!lastEvent) return [];
-    await upsertLastSyncedBlock(chain, 'JOIN_EXITS_V3', lastEvent.blockNumber);
+    await upsertLastSyncedBlock(chain, 'JOIN_EXITS_V2', lastEvent.blockNumber);
 
     return dbEntries.map((entry) => entry.id);
 };

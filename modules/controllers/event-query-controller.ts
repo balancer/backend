@@ -7,7 +7,7 @@ import {
 } from '../../apps/api/gql/generated-schema';
 import { Chain, PoolEventType } from '@prisma/client';
 import { JoinExitEvent, SwapEvent } from '../../prisma/prisma-types';
-import { eventsRepository } from '../events/events-repository';
+import { eventsRepository } from '../repositories/events';
 
 const parseJoinExit = (event: JoinExitEvent): GqlPoolAddRemoveEventV3 => {
     return {
@@ -72,8 +72,8 @@ const getMultichainEvents = async (chainIn: Chain[], limit: number = 100) => {
                 event.type === 'SWAP' && (event as SwapEvent).payload?.surplus
                     ? parseCowAmmSwap(event as SwapEvent)
                     : event.type === 'SWAP'
-                    ? parseSwap(event as SwapEvent)
-                    : parseJoinExit(event as JoinExitEvent),
+                      ? parseSwap(event as SwapEvent)
+                      : parseJoinExit(event as JoinExitEvent),
             );
         }),
     );
@@ -137,8 +137,8 @@ export function EventsQueryController(env = process.env) {
                 event.type === 'SWAP' && (event as SwapEvent).payload?.surplus
                     ? parseCowAmmSwap(event as SwapEvent)
                     : event.type === 'SWAP'
-                    ? parseSwap(event as SwapEvent)
-                    : parseJoinExit(event as JoinExitEvent),
+                      ? parseSwap(event as SwapEvent)
+                      : parseJoinExit(event as JoinExitEvent),
             );
 
             return results;

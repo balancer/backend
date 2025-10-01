@@ -1,5 +1,12 @@
 import config from '../../config';
+import { addPools as addPoolsV2 } from '../actions/pool/v2/add-pools';
 import { addPools as addPoolsV3 } from '../actions/pool/v3/add-pools';
+import { getV2SubgraphClient } from '../subgraphs/balancer-subgraph';
+import {
+    syncOnchainDataForAllPools as syncOnchainDataForAllPoolsV2,
+    syncChangedPools as syncChangedPoolsV2,
+    syncOnChainDataForPools as syncOnChainDataForPoolsV2,
+} from '../actions/pool/v2';
 import { getViemClient } from '../sources/viem-client';
 import {
     getPoolsSubgraphClient,
@@ -8,7 +15,7 @@ import {
     V3JoinedSubgraphPool,
 } from '../sources/subgraphs';
 import { prisma } from '../../prisma/prisma-client';
-import { updateLiquidity24hAgo, updateLiquidityValuesForPools } from '../pool/lib/update-liquidity';
+import { updateLiquidity24hAgo, updateLiquidityValuesForPools } from '../actions/pool/update-liquidity';
 import { Chain, PrismaLastBlockSyncedCategory } from '@prisma/client';
 import { syncPools as syncPoolsV3 } from '../actions/pool/v3/sync-pools';
 import { syncTokenPairs } from '../actions/pool/v3/sync-tokenpairs';
@@ -23,6 +30,73 @@ import { PoolWithMappedJsonFields } from '../../prisma/prisma-types';
 
 export function PoolController(tracer?: any) {
     return {
+        async addPoolsV2(chain: Chain) {
+            const subgraphUrl = config[chain].subgraphs.balancer;
+            const subgraphService = getV2SubgraphClient(subgraphUrl, chain);
+
+            return addPoolsV2(subgraphService, chain);
+        },
+
+        async syncOnchainDataForAllPoolsV2(chain: Chain) {
+            const vaultAddress = config[chain].balancer.v2.vaultAddress;
+            const balancerQueriesAddress = config[chain].balancer.v2.balancerQueriesAddress;
+            const yieldProtocolFeePercentage = config[chain].balancer.v2.defaultYieldFeePercentage;
+            const swapProtocolFeePercentage = config[chain].balancer.v2.defaultSwapFeePercentage;
+            const gyroConfig = config[chain].gyro?.config;
+
+            const viemClient = getViemClient(chain);
+            const latestBlock = await viemClient.getBlockNumber();
+
+            return syncOnchainDataForAllPoolsV2(
+                Number(latestBlock),
+                chain,
+                vaultAddress,
+                balancerQueriesAddress,
+                yieldProtocolFeePercentage,
+                swapProtocolFeePercentage,
+                gyroConfig,
+            );
+        },
+
+        async syncOnchainDataForPoolsV2(chain: Chain, poolIds?: string[]) {
+            const vaultAddress = config[chain].balancer.v2.vaultAddress;
+            const balancerQueriesAddress = config[chain].balancer.v2.balancerQueriesAddress;
+            const yieldProtocolFeePercentage = config[chain].balancer.v2.defaultYieldFeePercentage;
+            const swapProtocolFeePercentage = config[chain].balancer.v2.defaultSwapFeePercentage;
+            const gyroConfig = config[chain].gyro?.config;
+
+            const viemClient = getViemClient(chain);
+            const latestBlock = await viemClient.getBlockNumber();
+
+            return syncOnChainDataForPoolsV2(
+                Number(latestBlock),
+                chain,
+                vaultAddress,
+                balancerQueriesAddress,
+                yieldProtocolFeePercentage,
+                swapProtocolFeePercentage,
+                gyroConfig,
+                poolIds,
+            );
+        },
+
+        async syncChangedPoolsV2(chain: Chain) {
+            const vaultAddress = config[chain].balancer.v2.vaultAddress;
+            const balancerQueriesAddress = config[chain].balancer.v2.balancerQueriesAddress;
+            const yieldProtocolFeePercentage = config[chain].balancer.v2.defaultYieldFeePercentage;
+            const swapProtocolFeePercentage = config[chain].balancer.v2.defaultSwapFeePercentage;
+            const gyroConfig = config[chain].gyro?.config;
+
+            return syncChangedPoolsV2(
+                chain,
+                vaultAddress,
+                balancerQueriesAddress,
+                yieldProtocolFeePercentage,
+                swapProtocolFeePercentage,
+                gyroConfig,
+            );
+        },
+
         async updateLiquidity24hAgoV2(chain: Chain) {
             const client = getViemClient(chain);
 
