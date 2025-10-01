@@ -8,7 +8,8 @@ import { swapsUsd } from '../../../sources/enrichers/swaps-usd';
 import { V2SubgraphClient } from '../../../subgraphs/balancer-subgraph';
 import { SwapEvent } from '../../../../prisma/prisma-types';
 import { swapV2Transformer } from '../../../sources/transformers/swap-v2-transformer';
-import { eventsRepository, EventStoreRepository } from '../../../repositories/events';
+import { eventsRepository } from '../../../events/events-repository';
+import { EventStoreRepository } from '../../../events/types';
 
 /**
  * Adds all swaps since daysToSync to the database. Checks for latest synced swap to avoid duplicate work.

@@ -13,6 +13,7 @@ import {
     QuantAmmController,
     TokenYieldsController,
 } from '../modules/controllers';
+import { PoolController as PoolControllerNew } from '../modules/pool/pool-controller';
 import { chainIdToChain } from '../modules/network/chain-id-to-chain';
 import { tokenService } from '../modules/token/token.service';
 import { VeBalVotingListService } from '../modules/vebal/vebal-voting-list.service';
@@ -39,19 +40,12 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
 
     const chain = chainIdToChain[chainId];
 
-    if (job === 'add-pools-v2') {
-        return PoolController().addPoolsV2(chain);
-    } else if (job === 'sync-all-pools-v2') {
-        return PoolController().syncOnchainDataForAllPoolsV2(chain);
-    } else if (job === 'sync-changed-pools-v2') {
-        return PoolController().syncChangedPoolsV2(chain);
-    } else if (job === 'reload-pools-v3') {
+    if (job === 'reload-pools-v3') {
         await upsertLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.ADD_POOLS_V3, 0);
         return PoolController().addPoolsV3(chain, false);
     } else if (job === 'sor-sync-v2') {
         console.log('Syncing V2 pools');
-        await PoolController().addPoolsV2(chain);
-        await PoolController().syncOnchainDataForAllPoolsV2(chain);
+        await PoolControllerNew().syncV2Pools(chain);
 
         console.log('Syncing pools metadata');
         await ContentController().syncCategories();
@@ -98,10 +92,6 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         return StakingController().syncStaking(chain);
     } else if (job === 'sync-join-exits-v3') {
         return EventController().syncJoinExitsV3(chain);
-    } else if (job === 'sync-join-exits-v2') {
-        return EventController().syncJoinExitsV2(chain);
-    } else if (job === 'sync-swaps-v2') {
-        return EventController().syncSwapsUpdateVolumeAndFeesV2(chain);
     } else if (job === 'sync-snapshots-v2') {
         return SnapshotsController().syncSnapshotsV2(chain);
     } else if (job === 'fill-missing-snapshots-v2') {
@@ -203,15 +193,7 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         return 'OK';
     }
     // Maintenance
-    else if (job === 'sync-onchain-data-v2') {
-        const poolIds = process.argv[4]?.split(',');
-        if (poolIds) {
-            await PoolController().syncOnchainDataForPoolsV2(chain, poolIds);
-        } else {
-            await PoolController().syncOnchainDataForPoolsV2(chain);
-        }
-        return 'OK';
-    } else if (job === 'sync-fx-quote-tokens') {
+    else if (job === 'sync-fx-quote-tokens') {
         return FXPoolsController().syncQuoteTokens(chain);
     } else if (job === 'sync-current-prices') {
         await syncCurrentPricesFromApi(chain);

@@ -13,33 +13,23 @@ import {
 import { tokenService } from '../token/token.service';
 import { PoolGqlLoaderService } from './lib/pool-gql-loader.service';
 import { PoolOnChainDataService, PoolOnChainDataServiceOptions } from './lib/pool-on-chain-data.service';
-import { PoolSnapshotService } from './lib/pool-snapshot.service';
 import { networkContext } from '../network/network-context.service';
 import { ReliquarySubgraphService } from '../subgraphs/reliquary-subgraph/reliquary.service';
 import { ReliquarySnapshotService } from './lib/reliquary-snapshot.service';
-import { coingeckoDataService } from '../token/lib/coingecko-data.service';
-import { syncIncentivizedCategory } from '../actions/pool/sync-incentivized-category';
 import {
     deleteGaugeStakingForAllPools,
     deleteMasterchefStakingForAllPools,
     deleteReliquaryStakingForAllPools,
     loadReliquarySnapshotsForAllFarms,
-    syncGaugeStakingForPools,
-    syncMasterchefStakingForPools,
-    syncReliquaryStakingForPools,
 } from '../actions/pool/staking';
-import { MasterchefSubgraphService } from '../subgraphs/masterchef-subgraph/masterchef.service';
-import { GaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
-import { deleteAuraStakingForAllPools, syncAuraStakingForPools } from '../actions/pool/staking/sync-aura-staking';
-import { AuraSubgraphService } from '../sources/subgraphs/aura/aura.service';
-import { syncVebalStakingForPools } from '../actions/pool/staking/sync-vebal-staking';
+import { deleteAuraStakingForAllPools } from '../actions/pool/staking/sync-aura-staking';
 import config from '../../config';
+import { StakingController } from '../controllers';
 
 export class PoolService {
     constructor(
         private readonly poolOnChainDataService: PoolOnChainDataService,
         private readonly poolGqlLoaderService: PoolGqlLoaderService,
-        private readonly poolSnapshotService: PoolSnapshotService,
     ) {}
 
     private get chain() {
@@ -61,16 +51,28 @@ export class PoolService {
         return this.poolGqlLoaderService.getPoolsCount(args);
     }
 
-    public async getPoolFilters(): Promise<PrismaPoolFilter[]> {
-        return prisma.prismaPoolFilter.findMany({ where: { chain: this.chain } });
-    }
-
-    public async getFeaturedPools(chains: Chain[]): Promise<GqlPoolFeaturedPool[]> {
-        return this.poolGqlLoaderService.getFeaturedPools(chains);
-    }
-
     public async getSnapshotsForPool(poolId: string, chain: Chain, range: GqlPoolSnapshotDataRange) {
-        return this.poolSnapshotService.getSnapshotsForPool(poolId, chain, range);
+        const timestamp = this.getTimestampForRange(range);
+
+        return prisma.prismaPoolSnapshot.findMany({
+            where: { poolId, timestamp: { gt: timestamp }, chain },
+            orderBy: { timestamp: 'asc' },
+        });
+    }
+
+    private getTimestampForRange(range: GqlPoolSnapshotDataRange): number {
+        switch (range) {
+            case 'THIRTY_DAYS':
+                return moment().startOf('day').subtract(30, 'days').unix();
+            case 'NINETY_DAYS':
+                return moment().startOf('day').subtract(90, 'days').unix();
+            case 'ONE_HUNDRED_EIGHTY_DAYS':
+                return moment().startOf('day').subtract(180, 'days').unix();
+            case 'ONE_YEAR':
+                return moment().startOf('day').subtract(365, 'days').unix();
+            case 'ALL_TIME':
+                return 0;
+        }
     }
 
     public async getSnapshotsForReliquaryFarm(id: number, range: GqlPoolSnapshotDataRange, chain: Chain) {
@@ -95,7 +97,7 @@ export class PoolService {
             this.loadReliquarySnapshotsForAllFarms(chain);
         }
         // reload it for all pools
-        await this.syncStakingForPools([this.chain]);
+        await StakingController().syncStaking(chain);
     }
 
     public async loadOnChainDataForPoolsWithActiveUpdates() {
@@ -105,48 +107,6 @@ export class PoolService {
         const tokenPrices = await tokenService.getTokenPrices(this.chain);
 
         await this.poolOnChainDataService.updateOnChainData(this.chain, blockNumber, tokenPrices, poolIds);
-    }
-
-    /**
-     * Deprecated in favor of StakingController().syncStaking(chain)
-     */
-    public async syncStakingForPools(chains: Chain[]) {
-        for (const chain of chains) {
-            const networkconfig = config[chain];
-            if (networkconfig.subgraphs.masterchef) {
-                await syncMasterchefStakingForPools(
-                    chain,
-                    new MasterchefSubgraphService(networkconfig.subgraphs.masterchef),
-                    networkconfig.masterchef?.excludedFarmIds || [],
-                    networkconfig.fbeets?.address || '',
-                    networkconfig.fbeets?.farmId || '',
-                    networkconfig.fbeets?.poolId || '',
-                );
-            }
-            if (networkconfig.subgraphs.reliquary) {
-                await syncReliquaryStakingForPools(
-                    chain,
-                    new ReliquarySubgraphService(networkconfig.subgraphs.reliquary),
-                    networkconfig.reliquary?.address || '',
-                    networkconfig.reliquary?.excludedFarmIds || [],
-                );
-            }
-            if (networkconfig.subgraphs.gauge && networkconfig.bal?.address) {
-                await syncGaugeStakingForPools(
-                    new GaugeSubgraphService(networkconfig.subgraphs.gauge),
-                    networkconfig.bal.address,
-                    chain,
-                    networkconfig.gaugeControllerAddress,
-                );
-            }
-            if (networkconfig.subgraphs.aura) {
-                await syncAuraStakingForPools(chain, new AuraSubgraphService(networkconfig.subgraphs.aura));
-            }
-
-            if (chain === 'MAINNET') {
-                await syncVebalStakingForPools();
-            }
-        }
     }
 
     public async syncLatestReliquarySnapshotsForAllFarms(chain: Chain) {
@@ -181,5 +141,4 @@ const optionsResolverForPoolOnChainDataService: () => PoolOnChainDataServiceOpti
 export const poolService = new PoolService(
     new PoolOnChainDataService(optionsResolverForPoolOnChainDataService),
     new PoolGqlLoaderService(),
-    new PoolSnapshotService(coingeckoDataService),
 );

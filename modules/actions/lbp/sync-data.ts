@@ -3,7 +3,7 @@ import { lbpCalls, LBPCallsOutput } from '../../sources/contracts/pool-type-dyna
 import { prisma } from '../../../prisma/prisma-client';
 import { multicallViem } from '../../web3/multicaller-viem';
 import { ViemClient } from '../../sources/types';
-import { eventsRepository } from '../../repositories/events/events-repository';
+import { eventsRepository } from '../../events/events-repository';
 import { V3VaultSubgraphClient } from '../../sources/subgraphs';
 
 /**
@@ -39,13 +39,10 @@ export const syncData = async (
                 },
             })
             .then((records) =>
-                records.reduce(
-                    (acc, token) => {
-                        acc[token.id] = token;
-                        return acc;
-                    },
-                    {} as Record<string, (typeof records)[0]>,
-                ),
+                records.reduce((acc, token) => {
+                    acc[token.id] = token;
+                    return acc;
+                }, {} as Record<string, (typeof records)[0]>),
             ),
         prisma.prismaPoolDynamicData
             .findMany({

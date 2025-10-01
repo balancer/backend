@@ -1,6 +1,6 @@
 import config from '../../config';
 import { syncSwaps } from '../actions/pool/v3/sync-swaps';
-import { updateVolumeAndFees } from '../actions/pool/update-volume-and-fees';
+import { updateVolumeAndFees } from '../pool/lib/update-volume-and-fees';
 import { getVaultSubgraphClient } from '../sources/subgraphs';
 import { Chain } from '@prisma/client';
 

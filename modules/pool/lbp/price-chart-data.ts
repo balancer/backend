@@ -1,7 +1,8 @@
 import { Chain } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
-import { eventsRepository, TokenFlowsRepository } from '../../repositories/events';
 import { SwapEvent, JoinExitEvent } from '../../../prisma/prisma-types';
+import { eventsRepository } from '../../events/events-repository';
+import { TokenFlowsRepository } from '../../events/types';
 
 interface PriceChartLPB {
     id: string;

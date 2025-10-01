@@ -2,7 +2,7 @@ import { test, expect, mock, beforeEach, describe } from 'bun:test';
 import { Chain } from '@prisma/client';
 import { priceChartData } from './price-chart-data';
 import { SwapEvent, JoinExitEvent } from '../../../prisma/prisma-types';
-import { TokenFlowsRepository } from '../../repositories/events';
+import { TokenFlowsRepository } from '../../events/repository';
 
 // Mock the prisma client using Bun's mock.module()
 mock.module('../../../prisma/prisma-client', () => ({

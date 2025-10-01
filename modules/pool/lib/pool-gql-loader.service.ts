@@ -214,8 +214,8 @@ export class PoolGqlLoaderService {
             const query =
                 Prisma.raw(`SELECT p.id, p.chain FROM "PrismaPool" p LEFT JOIN "PrismaPoolDynamicData" d on (p.id = d."poolId") WHERE p.search_vector @@ websearch_to_tsquery('simple', '${searchQuery}') AND d."totalSharesNum" > 0.000000000001 AND NOT ('BLACK_LISTED' = ANY(p.categories)) AND ${filters}
             ORDER BY d."${orderColumn}" ${
-                args.orderDirection && args.orderDirection === 'asc' ? 'ASC' : 'DESC'
-            } LIMIT ${limit} OFFSET ${offset}`);
+                    args.orderDirection && args.orderDirection === 'asc' ? 'ASC' : 'DESC'
+                } LIMIT ${limit} OFFSET ${offset}`);
 
             const searchResults = await prisma.$queryRaw<{ id: string }[]>(query);
 
@@ -474,8 +474,8 @@ export class PoolGqlLoaderService {
             ...(where?.hasHook !== undefined && where.hasHook
                 ? { hook: { path: ['address'], string_starts_with: '0x' } }
                 : where?.hasHook !== undefined && !where.hasHook
-                  ? { hook: { equals: Prisma.DbNull } }
-                  : {}),
+                ? { hook: { equals: Prisma.DbNull } }
+                : {}),
         };
 
         if (!textSearch) {
