@@ -4,10 +4,10 @@ import { BufferPool } from './poolsV3/buffer/bufferPool';
 
 export class PathLocal {
     public readonly pools: BasePool[];
-    public readonly tokens: Token[];
+    public readonly tokens: BaseToken[];
     public readonly isBuffer: boolean[];
 
-    public constructor(tokens: Token[], pools: BasePool[], isBuffer: boolean[]) {
+    public constructor(tokens: BaseToken[], pools: BasePool[], isBuffer: boolean[]) {
         if (pools.length === 0 || tokens.length < 2) {
             throw new Error('Invalid path: must contain at least 1 pool and 2 tokens.');
         }
@@ -35,7 +35,7 @@ export class PathWithAmount extends PathLocal {
     public readonly swapStepsGreaterThanBufferLimit: number = 0;
 
     public constructor(
-        tokens: Token[],
+        tokens: BaseToken[],
         pools: BasePool[],
         isBuffer: boolean[],
         swapAmount: TokenAmount,
@@ -46,7 +46,7 @@ export class PathWithAmount extends PathLocal {
         this.mutateBalances = Boolean(mutateBalances);
 
         //call to super ensures this array access is safe
-        if (tokens[0].isUnderlyingEqual(swapAmount.token)) {
+        if (tokens[0].isSameAddress(swapAmount.token.address)) {
             this.swapKind = SwapKind.GivenIn;
         } else {
             this.swapKind = SwapKind.GivenOut;

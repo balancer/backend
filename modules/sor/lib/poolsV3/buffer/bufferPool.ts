@@ -1,5 +1,5 @@
 import { Address, Hex } from 'viem';
-import { MAX_UINT256, SwapKind, Token, TokenAmount } from '@balancer/sdk';
+import { MAX_UINT256, SwapKind, Token, TokenAmount, BaseToken } from '@balancer/sdk';
 import { BufferState, Vault } from '@balancer-labs/balancer-maths';
 
 import { BasePoolMethodsV3 } from '../basePoolMethodsV3';
@@ -189,7 +189,7 @@ export class BufferPool implements BasePoolMethodsV3 {
 
     // Helper methods
 
-    public getPoolTokens(tokenIn: Token, tokenOut: Token): { tIn: BasePoolToken; tOut: BasePoolToken } {
+    public getPoolTokens(tokenIn: BaseToken, tokenOut: BaseToken): { tIn: BasePoolToken; tOut: BasePoolToken } {
         const tIn = this.tokenMap.get(tokenIn.address);
         const tOut = this.tokenMap.get(tokenOut.address);
 
@@ -213,7 +213,7 @@ export class BufferPool implements BasePoolMethodsV3 {
         );
     }
 
-    public swapGivenInGreaterThanBufferLimit(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): boolean {
+    public swapGivenInGreaterThanBufferLimit(tokenIn: BaseToken, tokenOut: BaseToken, swapAmount: TokenAmount): boolean {
         const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
         const mainTokenAmount = this.tokens[0];
         const underlyingTokenAmount = this.tokens[1];
@@ -227,7 +227,7 @@ export class BufferPool implements BasePoolMethodsV3 {
         }
     }
 
-    public swapGivenOutGreaterThanBufferLimit(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): boolean {
+    public swapGivenOutGreaterThanBufferLimit(tokenIn: BaseToken, tokenOut: BaseToken, swapAmount: TokenAmount): boolean {
         const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
         const mainTokenAmount = this.tokens[0];
         const underlyingTokenAmount = this.tokens[1];
