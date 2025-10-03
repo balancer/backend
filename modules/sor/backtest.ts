@@ -5,9 +5,11 @@ import { formatUnits, getAddress, keccak256, parseAbiItem, toHex } from 'viem';
 import { multicallViem } from '../web3/multicaller-viem';
 import { getViemClient } from '../sources/viem-client';
 import mainnetConfig from '../../config/mainnet';
+import { Chain } from '@prisma/client';
 
 // Configuration
 const CONFIG = {
+    chain: 'MAINNET' as Chain,
     vaults: {
         v2: mainnetConfig.balancer.v2.vaultAddress,
         v3: mainnetConfig.balancer.v3.vaultAddress,
@@ -17,8 +19,8 @@ const CONFIG = {
         v3: '0x' + keccak256(toHex('Swap(address,address,address,uint256,uint256,uint256,uint256)')).slice(2),
     },
     defaults: {
-        swapCount: 100,
-        blocksToSearch: 1000,
+        swapCount: 1000,
+        blocksToSearch: 10000,
     },
 };
 
@@ -36,6 +38,7 @@ interface SwapData {
     poolId?: string;
     blockNumber?: number;
     transactionHash?: string;
+    logIndex?: number;
     protocolVersion?: '2' | '3';
 }
 
@@ -60,6 +63,22 @@ class SorBacktester {
         // 1. Fetch swaps
         const swapData = await this.fetcher.fetchRecentSwaps(count);
 
+        // const swapData = [
+        //     {
+        //         transactionHash: '0x0',
+        //         tokenIn: '0x7c050be1dded733bd44116b60a8a35125ba47459',
+        //         tokenInSymbol: 'wrsETH',
+        //         tokenOut: '0x53a6abb52b2f968fa80df6a894e4f1b1020da975',
+        //         tokenOutSymbol: 'dUSD',
+        //         amount: '1',
+        //         amountIn: '10000000000000000',
+        //         amountInScaled: '1',
+        //         amountOut: '10000000000000000',
+        //         amountOutScaled: '4661.8117',
+        //         protocolVersion: '3',
+        //     },
+        // ];
+
         const results: BacktestResult[] = [];
 
         for (const swap of swapData) {
@@ -70,7 +89,7 @@ class SorBacktester {
                     tokenOut: swap.tokenOut,
                     swapAmount: swap.amountInScaled || '0',
                     swapType: 'EXACT_IN',
-                    chain: 'MAINNET',
+                    chain: CONFIG.chain,
                     useProtocolVersion: Number(swap.protocolVersion),
                 };
 
@@ -87,6 +106,11 @@ class SorBacktester {
                         : 0;
 
                 const improvement = historicOut > 0 ? ((sorOut - historicOut) / historicOut) * 100 : 0;
+
+                // console.log(
+                //     sorResult.routes[0].hops.length,
+                //     sorResult.routes[0].hops.map((h) => h.poolId),
+                // );
 
                 results.push({
                     txHash: swap.transactionHash!,
@@ -123,8 +147,9 @@ class SorBacktester {
             swapsTested: results.length,
             avgLatencyMs: avgDuration.toFixed(2),
             avgImprovementPercent: avgImprovement.toFixed(2),
+            notFound: results.filter((r) => r.sorAmountOut === '0').length,
             betterInCount: results.filter((r) => r.improvement > 0).length,
-            worseInCount: results.filter((r) => r.improvement < 0).length,
+            worseInCount: results.filter((r) => r.sorAmountOut !== '0' && r.improvement < 0).length,
         });
     }
 }
@@ -138,7 +163,7 @@ class SorBacktester {
 
 // 1. Swap Data Fetcher - Fetches and stores swap data
 class SwapDataFetcher {
-    private viemClient = getViemClient('MAINNET');
+    private viemClient = getViemClient(CONFIG.chain);
     private tokenDecimals = new Map<string, number>();
 
     async fetchRecentSwaps(count: number): Promise<SwapData[]> {
@@ -157,8 +182,11 @@ class SwapDataFetcher {
         const v2Swaps = this.parseV2Swaps(v2Logs);
         const v3Swaps = this.parseV3Swaps(v3Logs);
 
+        // Group swaps by transaction hash
+        const groupedSwaps = this.groupSwapsByTransaction([...v2Swaps, ...v3Swaps]);
+
         // Select balanced set
-        const selected = this.selectBalancedSwaps(v2Swaps, v3Swaps, count);
+        const selected = this.selectBalancedSwaps(groupedSwaps, [], count);
 
         // Fetch decimals and scale amounts
         await this.processTokens(selected);
@@ -202,6 +230,7 @@ class SwapDataFetcher {
                                 ? parseInt(log.blockNumber, 16)
                                 : Number(log.blockNumber),
                         transactionHash: log.transactionHash as string,
+                        logIndex: typeof log.logIndex === 'string' ? parseInt(log.logIndex, 16) : Number(log.logIndex),
                         protocolVersion: '2' as const,
                     };
                 } catch {
@@ -231,6 +260,7 @@ class SwapDataFetcher {
                                 ? parseInt(log.blockNumber, 16)
                                 : Number(log.blockNumber),
                         transactionHash: log.transactionHash as string,
+                        logIndex: typeof log.logIndex === 'string' ? parseInt(log.logIndex, 16) : Number(log.logIndex),
                         protocolVersion: '3' as const,
                     };
                 } catch {
@@ -238,6 +268,51 @@ class SwapDataFetcher {
                 }
             })
             .filter(Boolean) as SwapData[];
+    }
+
+    private groupSwapsByTransaction(swaps: SwapData[]): SwapData[] {
+        const grouped = new Map<string, SwapData[]>();
+
+        // Group swaps by transaction hash
+        for (const swap of swaps) {
+            if (!swap.transactionHash) continue;
+
+            const txHash = swap.transactionHash;
+            if (!grouped.has(txHash)) {
+                grouped.set(txHash, []);
+            }
+            grouped.get(txHash)!.push(swap);
+        }
+
+        // Combine swaps within each transaction
+        const result: SwapData[] = [];
+        for (const [txHash, txSwaps] of grouped.entries()) {
+            if (txSwaps.length === 1) {
+                // Single swap, keep as is
+                result.push(txSwaps[0]);
+            } else {
+                // Multiple swaps in same transaction - sort by log index
+                const sorted = txSwaps.sort((a, b) => (a.logIndex || 0) - (b.logIndex || 0));
+
+                // First swap (lowest log index)
+                const firstSwap = sorted[0];
+                // Last swap (highest log index)
+                const lastSwap = sorted[sorted.length - 1];
+
+                // Combine: tokenIn/amountIn from first, tokenOut/amountOut from last
+                const combined: SwapData = {
+                    ...firstSwap,
+                    tokenOut: lastSwap.tokenOut,
+                    tokenOutSymbol: lastSwap.tokenOutSymbol,
+                    amountOut: lastSwap.amountOut,
+                    amountOutScaled: lastSwap.amountOutScaled,
+                };
+
+                result.push(combined);
+            }
+        }
+
+        return result;
     }
 
     private selectBalancedSwaps(v2Swaps: SwapData[], v3Swaps: SwapData[], count: number): SwapData[] {

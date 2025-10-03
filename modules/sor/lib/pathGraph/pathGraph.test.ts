@@ -113,6 +113,76 @@ describe('PathGraph search algorithms', () => {
         expect(paths).not.toContainEqual([tokenA.wrapped, tokenB.wrapped, tokenC.wrapped, tokenD.wrapped]);
     });
 
+    test('algorithm explores longer paths in queue before finding shorter optimal ones', () => {
+        // This test demonstrates the dual-phase maxDepth behavior:
+        // Phase 1: Uses maxDepthFallback while results.length === 0
+        // Phase 2: Switches to maxDepth once results.length > 0
+        //
+        // This can cause issues where you need maxDepth much higher than expected
+        // to find all paths, especially when a short path is found first
+
+        const g = new PathGraph();
+        const tokenE = new Token(1, '0xe', 18);
+        const tokenF = new Token(1, '0xf', 18);
+        const tokenG = new Token(1, '0xg', 18);
+
+        // Create a graph where:
+        // - A short direct path exists: A -> B -> D (3 nodes)
+        // - A longer valuable path exists: A -> E -> F -> G -> D (5 nodes)
+        const localPools = [
+            // Short path (found first in BFS, triggers phase switch)
+            createMockPool('pAB', [tokenA, tokenB], { getNormalizedLiquidity: () => 100n }),
+            createMockPool('pBD', [tokenB, tokenD], { getNormalizedLiquidity: () => 100n }),
+
+            // Longer path (needs to be explored after short path is found)
+            createMockPool('pAE', [tokenA, tokenE], { getNormalizedLiquidity: () => 50n }),
+            createMockPool('pEF', [tokenE, tokenF], { getNormalizedLiquidity: () => 50n }),
+            createMockPool('pFG', [tokenF, tokenG], { getNormalizedLiquidity: () => 50n }),
+            createMockPool('pGD', [tokenG, tokenD], { getNormalizedLiquidity: () => 50n }),
+        ];
+
+        g.buildGraph({
+            pools: localPools,
+            enableAddRemoveLiquidityPaths: false,
+            swapKind: SwapKind.GivenIn,
+            tokenPrices: new Map<string, number>(),
+            minLimitThresholdUSD: 0,
+        });
+
+        // Scenario 1: maxDepth=3, maxDepthFallback=5
+        // - Short path (3 nodes) will be found using maxDepthFallback=5
+        // - Once found, switches to maxDepth=3
+        // - Longer path (5 nodes) gets cut off because 5 > 3
+        const pathsRestrictive = g['findAllValidTokenPaths']({
+            tokenIn: tokenA.wrapped,
+            tokenOut: tokenD.wrapped,
+            config: { ...baseConfig, maxDepth: 3, maxDepthFallback: 5 },
+        });
+        expect(pathsRestrictive.length).toBe(1); // Only short path found
+        expect(pathsRestrictive).toContainEqual([tokenA.wrapped, tokenB.wrapped, tokenD.wrapped]);
+
+        // Scenario 2: maxDepth=5, maxDepthFallback=5
+        // - Both paths can be found because maxDepth doesn't restrict after switch
+        const pathsPermissive = g['findAllValidTokenPaths']({
+            tokenIn: tokenA.wrapped,
+            tokenOut: tokenD.wrapped,
+            config: { ...baseConfig, maxDepth: 5, maxDepthFallback: 5 },
+        });
+        expect(pathsPermissive.length).toBe(2); // Both paths found
+        expect(pathsPermissive).toContainEqual([tokenA.wrapped, tokenB.wrapped, tokenD.wrapped]);
+        expect(pathsPermissive).toContainEqual([
+            tokenA.wrapped,
+            tokenE.wrapped,
+            tokenF.wrapped,
+            tokenG.wrapped,
+            tokenD.wrapped,
+        ]);
+
+        // This demonstrates why you might need maxDepth=9 to find a 5-node path:
+        // If shorter paths are found first, they trigger the phase switch,
+        // and maxDepth must be high enough to continue exploring longer paths
+    });
+
     test('expandTokenPathWithRanks expands a simple path', () => {
         const edgesAB = (graph as any).edges.get(tokenA.wrapped).get(tokenB.wrapped);
         const edgesBC = (graph as any).edges.get(tokenB.wrapped).get(tokenC.wrapped);
