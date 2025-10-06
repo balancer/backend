@@ -6,6 +6,7 @@ import { describe, test, expect, beforeEach } from 'bun:test';
 const baseConfig = {
     maxDepth: 6,
     maxDepthFallback: 5,
+    maxQueue: 1_000_000,
     maxTokenPaths: 50,
     maxBuffersInPath: 5,
     maxCandidatesPerTokenPath: 20,

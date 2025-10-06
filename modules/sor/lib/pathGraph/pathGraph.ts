@@ -57,6 +57,7 @@ export class PathGraph {
     // to enforce upper limits across several dimensions, defined in the pathConfig.
     // (a) maxDepth - the max depth of the traversal (length of token path), defaults to 4.
     // (b) maxTokenPaths - the max number of token paths to search for, defaults to 50.
+    // (b) maxQueue - an extra emergency brake to cut off exploration time with too many partial paths
     // (c) maxBuffersInPath - the max number of buffers in a path, defaults to 5.
     // (d) maxCandidatesPerTokenPath - search for up to this many candidates within a single token path
     // (e) minSwapAmountRatio - the min swap amount ratio, defaults to 0.5.
@@ -84,6 +85,7 @@ export class PathGraph {
         const config: PathGraphTraversalConfig = {
             maxDepth: 8,
             maxDepthFallback: 10,
+            maxQueue: 1_000_000,
             maxTokenPaths: 50,
             maxBuffersInPath: isHyperEvm ? 2 : 5, // limited only on HyperEvm due to gas cost limits on small blocks - virtually unlimited otherwise
             maxCandidatesPerTokenPath: 20,
@@ -306,7 +308,7 @@ export class PathGraph {
         const results: string[][] = [];
         const queue: { node: string; path: string[] }[] = [{ node: tokenIn, path: [tokenIn] }];
 
-        while (queue.length > 0 && results.length < config.maxTokenPaths) {
+        while (queue.length > 0 && results.length < config.maxTokenPaths && queue.length < config.maxQueue) {
             const { node, path } = queue.shift()!;
 
             const neighbors = this.edges.get(node);

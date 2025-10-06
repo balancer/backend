@@ -35,6 +35,7 @@ export interface PathGraphEdge extends PathGraphEdgeLabel {
 export interface PathGraphTraversalConfig {
     maxDepth: number;
     maxDepthFallback: number;
+    maxQueue: number;
     maxTokenPaths: number;
     maxBuffersInPath: number;
     maxCandidatesPerTokenPath: number;
