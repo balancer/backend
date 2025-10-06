@@ -90,7 +90,6 @@ class SorBacktester {
                     swapAmount: swap.amountInScaled || '0',
                     swapType: 'EXACT_IN',
                     chain: CONFIG.chain,
-                    useProtocolVersion: Number(swap.protocolVersion),
                 };
 
                 // 3. Run SOR with timing
@@ -127,7 +126,7 @@ class SorBacktester {
                 console.log(
                     `${swap.tokenInSymbol.padStart(16, '.')} > ${swap.tokenOutSymbol.padEnd(16, '.')} | hist=${historicOut.toFixed(
                         4,
-                    )}, sor=${sorOut.toFixed(4)} | Δ=${improvement.toFixed(2)}% | ${durationMs.toFixed(1)}ms`,
+                    )}, sor=${sorOut.toFixed(4)} | Δ=${improvement.toFixed(2)}% | ${durationMs.toFixed(1)}ms | ${sorResult.swaps.length} hops`,
                 );
             } catch (err) {
                 console.warn(`   ⚠️ Error processing swap: ${swap.transactionHash}`, err);

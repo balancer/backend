@@ -82,8 +82,8 @@ export class PathGraph {
 
         // apply defaults, allowing caller override whatever they'd like
         const config: PathGraphTraversalConfig = {
-            maxDepth: 4,
-            maxDepthFallback: 5,
+            maxDepth: 8,
+            maxDepthFallback: 10,
             maxTokenPaths: 50,
             maxBuffersInPath: isHyperEvm ? 2 : 5, // limited only on HyperEvm due to gas cost limits on small blocks - virtually unlimited otherwise
             maxCandidatesPerTokenPath: 20,
