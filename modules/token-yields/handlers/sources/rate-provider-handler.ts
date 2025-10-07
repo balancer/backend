@@ -60,7 +60,7 @@ export const rateProviderHandler: TokenYieldHandler = async ({
         const client = getViemClient(chain, { multicallBatch: true, jsonRpcBatch: true });
 
         const pastBlock = await blockNumbers().getBlock(chain, daysAgo(intervalInDays));
-        const fallbackIntervalBlock = await blockNumbers().getBlock(chain, now() - 12 * 3600);
+        const fallbackIntervalBlock = await blockNumbers().getBlock(chain, now() - 24 * 3600);
 
         if (!pastBlock) {
             return [];
