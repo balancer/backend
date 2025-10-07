@@ -393,6 +393,8 @@ export const aGqlLoopsData = (overrides?: Partial<GqlLoopsData>): GqlLoopsData =
             overrides && overrides.hasOwnProperty('stSAaveMarketSupplyCap')
                 ? overrides.stSAaveMarketSupplyCap!
                 : 'volaticus',
+        targetHealthFactor:
+            overrides && overrides.hasOwnProperty('targetHealthFactor') ? overrides.targetHealthFactor! : 'aggero',
         tvl: overrides && overrides.hasOwnProperty('tvl') ? overrides.tvl! : 'apud',
     };
 };

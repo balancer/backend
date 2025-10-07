@@ -39,6 +39,10 @@ type GqlLoopsData {
     """
     healthFactor: String!
     """
+    The health factor that the Aave position should have
+    """
+    targetHealthFactor: String!
+    """
     The amount of leverage the current position has.
     """
     leverage: Float!

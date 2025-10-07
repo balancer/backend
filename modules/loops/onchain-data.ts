@@ -12,6 +12,7 @@ export type OnchainLoopsData = {
     collateralAmountInEth: string;
     debtAmount: string;
     healthFactor: string;
+    targetHealthFactor: string;
 };
 
 export type OnchainAaveData = {
@@ -36,6 +37,7 @@ export async function fetchLoopsData(loopsAddress: string): Promise<OnchainLoops
     multicaller.call('collateralAmountInEth', loopsAddress, 'getAaveLstCollateralAmountInEth', []);
     multicaller.call('debtAmount', loopsAddress, 'getAaveWethDebtAmount', []);
     multicaller.call('healthFactor', loopsAddress, 'getHealthFactor', []);
+    multicaller.call('targetHealthFactor', loopsAddress, 'targetHealthFactor', []);
 
     const loopsResults = (await multicaller.execute()) as {
         nav: bigint;
@@ -45,6 +47,7 @@ export async function fetchLoopsData(loopsAddress: string): Promise<OnchainLoops
         collateralAmountInEth: bigint;
         debtAmount: bigint;
         healthFactor: bigint;
+        targetHealthFactor: bigint;
     };
 
     return {
@@ -55,6 +58,7 @@ export async function fetchLoopsData(loopsAddress: string): Promise<OnchainLoops
         collateralAmountInEth: formatEther(loopsResults.collateralAmountInEth),
         debtAmount: formatEther(loopsResults.debtAmount),
         healthFactor: formatEther(loopsResults.healthFactor),
+        targetHealthFactor: formatEther(loopsResults.targetHealthFactor),
     };
 }
 

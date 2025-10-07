@@ -237,6 +237,8 @@ export type GqlLoopsData = {
     stSAaveMarketSupply: Scalars['String'];
     /** The current cap on the stS market on Aave */
     stSAaveMarketSupplyCap: Scalars['String'];
+    /** The health factor that the Aave position should have */
+    targetHealthFactor: Scalars['String'];
     /** Net Asset Value in USD. */
     tvl: Scalars['String'];
 };
