@@ -92,6 +92,15 @@ export class SorService {
                 input.poolIds,
             );
 
+            // Check if the tokens are in the pools
+            const allTokens = poolsFromDb.flatMap((pool) => pool.tokens);
+            const tokenInDecimals = allTokens.find((t) => t.address === input.tokenIn.toLowerCase())?.token.decimals;
+            const tokenOutDecimals = allTokens.find((t) => t.address === input.tokenOut.toLowerCase())?.token.decimals;
+
+            if (!tokenInDecimals || !tokenOutDecimals) {
+                return { paths: null, protocolVersion: input.protocolVersion, returnAmount: '0' };
+            }
+
             // used for early pruning of paths based on swap limits
             const tokenPrices = await getTokenPricesMap(input.chain);
 
