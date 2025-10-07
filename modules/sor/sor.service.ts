@@ -23,8 +23,6 @@ const DEFAULT_MAX_DEPTH = 4;
 
 export class SorService {
     async getSorSwapPaths(args: QuerySorGetSwapPathsArgs): Promise<GqlSorGetSwapPaths> {
-        // emergency disable SOR - needs a flag!!
-        return swapPathsZeroResponse(args.tokenIn, args.tokenOut, args.chain);
         const tokenIn = args.tokenIn.toLowerCase();
         const tokenOut = args.tokenOut.toLowerCase();
 
