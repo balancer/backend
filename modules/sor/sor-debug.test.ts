@@ -73,7 +73,7 @@ describe('sor debugging', () => {
         expect(ratio).toBeCloseTo(1, 3);
     }, 5000000);
 
-    it.only('sor v3', async () => {
+    it('sor v3', async () => {
         const useProtocolVersion = 3;
         const chain = Chain.SONIC;
 
