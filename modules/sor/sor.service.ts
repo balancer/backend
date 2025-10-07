@@ -23,42 +23,41 @@ const DEFAULT_MAX_DEPTH = 4;
 
 export class SorService {
     async getSorSwapPaths(args: QuerySorGetSwapPathsArgs): Promise<GqlSorGetSwapPaths> {
-        return swapPathsZeroResponse(args.tokenIn, args.tokenOut, args.chain);
-        // const tokenIn = args.tokenIn.toLowerCase();
-        // const tokenOut = args.tokenOut.toLowerCase();
+        const tokenIn = args.tokenIn.toLowerCase();
+        const tokenOut = args.tokenOut.toLowerCase();
 
-        // // early returns for invalid requests
-        // if (!isValidSwapRequest(tokenIn, tokenOut, args.swapAmount, args.chain!)) {
-        //     return swapPathsZeroResponse(args.tokenIn, args.tokenOut, args.chain);
-        // }
-        // if (!(await validateTokens(tokenIn, tokenOut, args.chain))) {
-        //     return swapPathsZeroResponse(args.tokenIn, args.tokenOut, args.chain);
-        // }
+        // early returns for invalid requests
+        if (!isValidSwapRequest(tokenIn, tokenOut, args.swapAmount, args.chain!)) {
+            return swapPathsZeroResponse(args.tokenIn, args.tokenOut, args.chain);
+        }
+        if (!(await validateTokens(tokenIn, tokenOut, args.chain))) {
+            return swapPathsZeroResponse(args.tokenIn, args.tokenOut, args.chain);
+        }
 
-        // // map SOR Service inputs to SOR inputs
-        // const getSwapPathsInput = await mapToGetSwapPathsInput({ ...args, tokenIn, tokenOut });
+        // map SOR Service inputs to SOR inputs
+        const getSwapPathsInput = await mapToGetSwapPathsInput({ ...args, tokenIn, tokenOut });
 
-        // // get swap paths from sor for the requested protocol version mapped as sor service output type
-        // const { paths, protocolVersion } = args.useProtocolVersion
-        //     ? await this.getSwapPathsWithRetry({
-        //           ...getSwapPathsInput,
-        //           protocolVersion: args.useProtocolVersion,
-        //       })
-        //     : await this.getBestSwapPathFromBothVersions(getSwapPathsInput);
+        // get swap paths from sor for the requested protocol version mapped as sor service output type
+        const { paths, protocolVersion } = args.useProtocolVersion
+            ? await this.getSwapPaths({
+                  ...getSwapPathsInput,
+                  protocolVersion: args.useProtocolVersion,
+              })
+            : await this.getBestSwapPathFromBothVersions(getSwapPathsInput);
 
-        // // return zero response if no paths are found
-        // if (!paths) {
-        //     return swapPathsZeroResponse(
-        //         getSwapPathsInput.tokenIn,
-        //         getSwapPathsInput.tokenOut,
-        //         getSwapPathsInput.chain,
-        //     );
-        // }
+        // return zero response if no paths are found
+        if (!paths) {
+            return swapPathsZeroResponse(
+                getSwapPathsInput.tokenIn,
+                getSwapPathsInput.tokenOut,
+                getSwapPathsInput.chain,
+            );
+        }
 
-        // // map SOR output to SOR Service output
-        // const mappedPaths = await mapToSorSwapPaths(paths, args.swapType, args.chain, protocolVersion);
+        // map SOR output to SOR Service output
+        const mappedPaths = await mapToSorSwapPaths(paths, args.swapType, args.chain, protocolVersion);
 
-        // return mappedPaths;
+        return mappedPaths;
     }
 
     private async getBestSwapPathFromBothVersions(input: Omit<GetSwapPathsInput, 'protocolVersion'>): Promise<{
