@@ -1,5 +1,11 @@
 # backend
 
+## 1.54.8
+
+### Patch Changes
+
+-   fd58d4f: emergency disable SOR
+
 ## 1.54.7
 
 ### Patch Changes
