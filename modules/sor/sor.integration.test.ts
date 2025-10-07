@@ -10,7 +10,8 @@ import { readTestData } from '../../test/testData/read/readTestData';
 import { PrismaPoolAndHookWithDynamic } from '../../prisma/prisma-types';
 import { getTokensFromPrismaPools } from '../../test/utils';
 import { formatUnits } from 'viem';
-import { BufferPoolData } from './utils/data';
+import { BufferPoolData, getTokenPricesMap } from './utils/data';
+import { chainIdToChain } from '../network/chain-id-to-chain';
 
 // This test will run against all files added to test/testData/read
 // In order to add new scenarios, please add them to test/testData/config.json
@@ -37,6 +38,8 @@ describe('SOR V3 Swap Paths Integration Tests', () => {
 
         const amountRawSum = queryPaths.reduce((acc, path) => acc + path.amountRaw, 0n);
 
+        const tokenPrices = await getTokenPricesMap(chainIdToChain[Number(chainId)]);
+
         const sorPaths = (await SOR.getPathsWithPools(
             tokenIn,
             tokenOut,
@@ -45,6 +48,7 @@ describe('SOR V3 Swap Paths Integration Tests', () => {
             prismaPools,
             bufferPools,
             protocolVersion,
+            tokenPrices,
             {
                 currentTimestamp,
             },

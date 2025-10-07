@@ -2,11 +2,12 @@ import * as Sentry from '@sentry/node';
 import { Address, formatUnits } from 'viem';
 
 import { GqlSorGetSwapPaths, QuerySorGetSwapPathsArgs } from '../../apps/api/gql/generated-schema';
-import { GetSwapPathsInput, GraphTraversalConfig } from './types';
+import { GetSwapPathsInput } from './types';
 import { SOR } from './lib/sor';
 import {
     getBasePoolsFromDb,
     getToken,
+    getTokenPricesMap,
     isValidSwapRequest,
     mapSwapKind,
     mapToGetSwapPathsInput,
@@ -16,12 +17,12 @@ import {
 } from './utils';
 import { PathWithAmount } from './lib/path';
 import { getInputAmount, getOutputAmount } from './lib/utils';
+import { PathGraphTraversalConfig } from './lib/pathGraph/pathGraphTypes';
 
 const DEFAULT_MAX_DEPTH = 4;
 
 export class SorService {
     async getSorSwapPaths(args: QuerySorGetSwapPathsArgs): Promise<GqlSorGetSwapPaths> {
-        console.log('getSorSwaps args', JSON.stringify(args));
         const tokenIn = args.tokenIn.toLowerCase();
         const tokenOut = args.tokenOut.toLowerCase();
 
@@ -38,7 +39,7 @@ export class SorService {
 
         // get swap paths from sor for the requested protocol version mapped as sor service output type
         const { paths, protocolVersion } = args.useProtocolVersion
-            ? await this.getSwapPathsWithRetry({
+            ? await this.getSwapPaths({
                   ...getSwapPathsInput,
                   protocolVersion: args.useProtocolVersion,
               })
@@ -63,8 +64,8 @@ export class SorService {
         paths: PathWithAmount[] | null;
         protocolVersion: number;
     }> {
-        const pathsV2 = await this.getSwapPathsWithRetry({ ...input, protocolVersion: 2 });
-        const pathsV3 = await this.getSwapPathsWithRetry({ ...input, protocolVersion: 3 });
+        const pathsV2 = await this.getSwapPaths({ ...input, protocolVersion: 2 });
+        const pathsV3 = await this.getSwapPaths({ ...input, protocolVersion: 3 });
 
         if (input.swapType === 'EXACT_IN') {
             return parseFloat(pathsV2.returnAmount) > parseFloat(pathsV3.returnAmount) ? pathsV2 : pathsV3;
@@ -80,7 +81,7 @@ export class SorService {
         }
     }
 
-    private async getSwapPathsWithRetry(
+    private async getSwapPaths(
         input: GetSwapPathsInput,
     ): Promise<{ paths: PathWithAmount[] | null; protocolVersion: number; returnAmount: string }> {
         try {
@@ -90,6 +91,9 @@ export class SorService {
                 input.considerPoolsWithHooks,
                 input.poolIds,
             );
+
+            // used for early pruning of paths based on swap limits
+            const tokenPrices = await getTokenPricesMap(input.chain);
 
             const tokenIn = await getToken(input.tokenIn as Address, input.chain);
             const tokenOut = await getToken(input.tokenOut as Address, input.chain);
@@ -105,22 +109,9 @@ export class SorService {
                 poolsFromDb,
                 bufferPools,
                 input.protocolVersion,
+                tokenPrices,
                 swapOptions,
             );
-
-            if (!paths) {
-                swapOptions = this.buildSwapOptions(DEFAULT_MAX_DEPTH + 1);
-                paths = await SOR.getPathsWithPools(
-                    tokenIn,
-                    tokenOut,
-                    swapKind,
-                    input.swapAmount.amount,
-                    poolsFromDb,
-                    bufferPools,
-                    input.protocolVersion,
-                    swapOptions,
-                );
-            }
 
             if (!paths) {
                 return { paths: null, protocolVersion: input.protocolVersion, returnAmount: '0' };
@@ -139,12 +130,13 @@ export class SorService {
         }
     }
 
-    private buildSwapOptions(maxNonBoostedPathDepth: number): {
-        graphTraversalConfig: GraphTraversalConfig;
+    private buildSwapOptions(maxDepth: number): {
+        graphTraversalConfig: Partial<PathGraphTraversalConfig>;
     } {
         return {
             graphTraversalConfig: {
-                maxNonBoostedPathDepth,
+                maxDepth,
+                maxDepthFallback: maxDepth + 1,
             },
         };
     }
