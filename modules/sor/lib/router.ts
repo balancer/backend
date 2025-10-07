@@ -30,11 +30,8 @@ export class Router {
         // Compute USD threshold if prices provided
         const priceToken = swapKind === SwapKind.GivenIn ? tokenIn : tokenOut;
         const price = tokenPrices.get(priceToken.wrapped.toLowerCase());
-        if (price === undefined) {
-            throw new Error('Token price not found for token: ' + priceToken.wrapped);
-        }
         const amount = Number(formatUnits(swapAmount.amount, priceToken.decimals));
-        const minLimitThresholdUSD = amount * minSwapAmountRatio * price;
+        const minLimitThresholdUSD = amount * minSwapAmountRatio * (price ?? 0);
 
         this.pathGraph.buildGraph({
             pools,

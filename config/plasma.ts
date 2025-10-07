@@ -129,6 +129,18 @@ export default <NetworkData>{
                     scale: 100,
                     extractors: [{ type: 'path', token: '0x0b2b2b2076d95dda7817e785989fe353fe955ef9', path: '$' }],
                 },
+                {
+                    name: 'tcUSDT0',
+                    url: 'https://indexer-main.euler.finance/v1/earn/vault?chainId=9745&vaultAddress=0xa9c251f8304b1b3fc2b9e8fcae78d94eff82ac66',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0xa9c251f8304b1b3fc2b9e8fcae78d94eff82ac66',
+                            path: '$.vault.apyCurrent',
+                        },
+                    ],
+                },
             ],
             aave: {
                 markets: [AaveV3Plasma],
