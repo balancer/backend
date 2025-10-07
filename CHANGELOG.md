@@ -1,5 +1,14 @@
 # backend
 
+## 1.54.8
+
+### Patch Changes
+
+-   b36264d: optimised db reads in LBP weight syncing
+-   a6ddb72: sor early return when tokens not in the pools
+-   6aa9b76: commening out sor
+-   b40137f: dont include default hooks in agg query
+
 ## 1.54.7
 
 ### Patch Changes
