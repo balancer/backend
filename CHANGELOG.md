@@ -1,5 +1,12 @@
 # backend
 
+## 1.54.9
+
+### Patch Changes
+
+-   cb2a7c3: SOR - Fix swap with ETH
+-   bc5df9b: SOR - Accept tokens without prices
+
 ## 1.54.8
 
 ### Patch Changes
