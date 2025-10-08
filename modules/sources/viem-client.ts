@@ -92,10 +92,12 @@ const chain2ViemChain = {
     }),
 };
 
-export const getViemClient = (chain: Chain) => {
+export const getViemClient = (chain: Chain, options?: { multicallBatch?: boolean; jsonRpcBatch?: boolean }) => {
     return createPublicClient({
         chain: chain2ViemChain[chain],
+        batch: options?.multicallBatch ? { multicall: true } : undefined,
         transport: http(config[chain]?.rpcUrl, {
+            batch: options?.jsonRpcBatch || undefined,
             onFetchRequest(request) {
                 if (process.env.DEBUG) {
                     const reader = request.body?.getReader();

@@ -18,8 +18,6 @@ export class LoopsService {
 
         const onchainLoopsData = await fetchLoopsData(loopsAddress);
         const onchainAaveData = await fetchAaveData(aaveDataProvider, aavePoolAddressesProvider, stsAddress, wsAddress);
-        console.log(onchainLoopsData);
-        console.log(onchainAaveData);
         const loopsApr = await calculateLoopsApr(onchainLoopsData, onchainAaveData, stsAddress);
 
         const sonicPrice = await prisma.prismaTokenCurrentPrice.findUniqueOrThrow({
@@ -78,6 +76,7 @@ export class LoopsService {
             collateralAmountInEth: dbData.collateralAmountInEth,
             debtAmount: dbData.debtAmount,
             healthFactor: dbData.healthFactor,
+            targetHealthFactor: '1.3', // hardcoded for now, we can store it in the db later if needed
             stSAaveMarketSupplyCap: dbData.stsAaveMarketSupplyCap,
             stSAaveMarketSupply: dbData.stsAaveMarketSupply,
             apr: dbData.totalApr,

@@ -244,6 +244,8 @@ export interface GqlLoopsData {
     stSAaveMarketSupply: Scalars['String'];
     /** The current cap on the stS market on Aave */
     stSAaveMarketSupplyCap: Scalars['String'];
+    /** The health factor that the Aave position should have */
+    targetHealthFactor: Scalars['String'];
     /** Net Asset Value in USD. */
     tvl: Scalars['String'];
 }
@@ -4042,6 +4044,7 @@ export type GqlLoopsDataResolvers<
     sonicPointsMultiplier?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     stSAaveMarketSupply?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     stSAaveMarketSupplyCap?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+    targetHealthFactor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     tvl?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;

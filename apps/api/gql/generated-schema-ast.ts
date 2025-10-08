@@ -286,6 +286,11 @@ export const schema = gql`
         stSAaveMarketSupplyCap: String!
 
         """
+        The health factor that the Aave position should have
+        """
+        targetHealthFactor: String!
+
+        """
         Net Asset Value in USD.
         """
         tvl: String!

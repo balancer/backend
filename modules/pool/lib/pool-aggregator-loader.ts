@@ -226,7 +226,8 @@ export class PoolAggregatorLoader {
 
         for (const mappedPool of gqlPools) {
             // if a pool has a hook, we skip it if either there are no included hooks, or its type does not match an included hook
-            if (mappedPool.hook) {
+            // we always return reclammns and lbps. They make special use of the hook system but are not real hooks
+            if (mappedPool.hook && mappedPool.type !== 'RECLAMM' && mappedPool.type !== 'LIQUIDITY_BOOTSTRAPPING') {
                 if (!args.where?.includeHooks || !args.where.includeHooks.includes(mappedPool.hook.type)) {
                     continue;
                 }

@@ -54,6 +54,8 @@ export async function getBasePoolsFromDb(
 
             const hook = pool.hook as HookData;
             if (hook.type === 'MEV_TAX') return true;
+            if (hook.type === 'RECLAMM') return true;
+            if (hook.type === 'LBP') return true;
             if (!considerPoolsWithHooks) return false;
 
             // non-STABLE pools with STABLE_SURGE hooks are not supported
