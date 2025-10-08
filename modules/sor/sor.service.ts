@@ -96,15 +96,6 @@ export class SorService {
             const tokenOut = await getToken(input.tokenOut as Address, input.chain);
             const swapKind = mapSwapKind(input.swapType);
 
-            // Check if the tokens are in the pools
-            const allTokens = poolsFromDb.flatMap((pool) => pool.tokens);
-            const tokenInDecimals = allTokens.find((t) => tokenIn.isSameAddress(t.address as Address))?.token.decimals;
-            const tokenOutDecimals = allTokens.find((t) => tokenOut.isSameAddress(t.address as Address))?.token
-                .decimals;
-            if (!tokenInDecimals || !tokenOutDecimals) {
-                return { paths: null, protocolVersion: input.protocolVersion, returnAmount: '0' };
-            }
-
             // used for early pruning of paths based on swap limits
             const tokenPrices = await getTokenPricesMap(input.chain);
 
