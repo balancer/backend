@@ -1,5 +1,13 @@
 # backend
 
+## 1.54.10
+
+### Patch Changes
+
+-   002541a: default rate provider fallback for yield
+-   e12ce91: exclude reclamm and lbp from hook filters in SOR and agg query
+-   f08e2b6: SOR - Revert early return
+
 ## 1.54.9
 
 ### Patch Changes
