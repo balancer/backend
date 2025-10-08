@@ -1,5 +1,11 @@
 # backend
 
+## 1.54.11
+
+### Patch Changes
+
+-   9ab87e7: SOR exit when tokens not in pools
+
 ## 1.54.10
 
 ### Patch Changes
