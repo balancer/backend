@@ -3116,6 +3116,10 @@ export const aQuery = (overrides?: Partial<Query>): Query => {
             overrides && overrides.hasOwnProperty('sorGetSwapPaths')
                 ? overrides.sorGetSwapPaths!
                 : aGqlSorGetSwapPaths(),
+        sorGetSwapPathsInternal:
+            overrides && overrides.hasOwnProperty('sorGetSwapPathsInternal')
+                ? overrides.sorGetSwapPathsInternal!
+                : aGqlSorGetSwapPaths(),
         stsGetGqlStakedSonicData:
             overrides && overrides.hasOwnProperty('stsGetGqlStakedSonicData')
                 ? overrides.stsGetGqlStakedSonicData!

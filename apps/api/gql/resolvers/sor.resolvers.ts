@@ -5,7 +5,10 @@ import { env } from '../../../env';
 
 const balancerSdkResolvers: Resolvers = {
     Query: {
-        sorGetSwapPaths: async (parent, args, context, info) => {
+        sorGetSwapPaths: async (parent, args, context) => {
+            return sorService.getSorSwapPaths(args);
+        },
+        sorGetSwapPathsInternal: async (parent, args, context, info) => {
             if (env.DEPLOYMENT_ENV === 'canary') {
                 const url = `http://sor-internal-75e33c0e4ea5363e.elb.eu-central-1.amazonaws.com/graphql`;
 
