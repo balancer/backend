@@ -6,6 +6,10 @@ import { env } from '../../../env';
 const balancerSdkResolvers: Resolvers = {
     Query: {
         sorGetSwapPaths: async (parent, args, context, info) => {
+            if (env.SOR_INSTANCE) {
+                return sorService.getSorSwapPaths(args);
+            }
+
             if (env.DEPLOYMENT_ENV === 'canary') {
                 const url = `http://sor-internal-75e33c0e4ea5363e.elb.eu-central-1.amazonaws.com/graphql`;
 
@@ -52,7 +56,7 @@ const balancerSdkResolvers: Resolvers = {
                     .join(', ');
 
                 const graphqlQuery = `
-                    sorGetSwapPathsInternal(${argsString}) {
+                    sorGetSwapPaths(${argsString}) {
                         ${requestedFields}
                     }`;
 
@@ -67,9 +71,6 @@ const balancerSdkResolvers: Resolvers = {
             } else {
                 return sorService.getSorSwapPaths(args);
             }
-        },
-        sorGetSwapPathsInternal: async (parent, args, context, info) => {
-            return sorService.getSorSwapPaths(args);
         },
     },
 };

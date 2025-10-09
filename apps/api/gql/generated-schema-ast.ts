@@ -4375,65 +4375,9 @@ export const schema = gql`
         sftmxGetWithdrawalRequests(user: String!): [GqlSftmxWithdrawalRequests!]!
 
         """
-        Get swap quote from the SOR v2 for the V2 vault
+        Get swap quote from the SOR v2
         """
         sorGetSwapPaths(
-            """
-            Input data to create and return transaction data. If this config is given, call data is added to the response.
-            """
-            callDataInput: GqlSwapCallDataInput
-                @deprecated(reason: "Use Balancer SDK to build swap callData from SOR response")
-
-            """
-            The Chain to query
-            """
-            chain: GqlChain!
-
-            """
-            Whether it should consider pools that have hooks. Default is false if not provided.
-            """
-            considerPoolsWithHooks: Boolean
-
-            """
-            Use specified poolIds only
-            """
-            poolIds: [String!]
-
-            """
-            Whether to run queryBatchSwap to update the return amount with most up-to-date on-chain values, default: false
-            """
-            queryBatchSwap: Boolean @deprecated(reason: "Use Balancer SDK to query on-chain amounts from SOR response")
-
-            """
-            The amount to swap, in human form.
-            """
-            swapAmount: AmountHumanReadable!
-
-            """
-            SwapType either exact_in or exact_out (also givenIn or givenOut)
-            """
-            swapType: GqlSorSwapType!
-
-            """
-            Token address of the tokenIn
-            """
-            tokenIn: String!
-
-            """
-            Token address of the tokenOut
-            """
-            tokenOut: String!
-
-            """
-            Which protocol version to use (currently 2 and 3). If none provided, will chose the better return from any version
-            """
-            useProtocolVersion: Int
-        ): GqlSorGetSwapPaths!
-
-        """
-        Get swap quote from the SOR v2 for the V2 vault
-        """
-        sorGetSwapPathsInternal(
             """
             Input data to create and return transaction data. If this config is given, call data is added to the response.
             """

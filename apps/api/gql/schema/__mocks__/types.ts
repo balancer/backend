@@ -3090,10 +3090,8 @@ export type Query = {
     sftmxGetStakingSnapshots: Array<GqlSftmxStakingSnapshot>;
     /** Retrieve the withdrawalrequests from a user */
     sftmxGetWithdrawalRequests: Array<GqlSftmxWithdrawalRequests>;
-    /** Get swap quote from the SOR v2 for the V2 vault */
+    /** Get swap quote from the SOR v2 */
     sorGetSwapPaths: GqlSorGetSwapPaths;
-    /** Get swap quote from the SOR v2 for the V2 vault */
-    sorGetSwapPathsInternal: GqlSorGetSwapPaths;
     /** Get the staking data and status for stS */
     stsGetGqlStakedSonicData: GqlStakedSonicData;
     /** Get snapshots for sftmx staking for a specific range */
@@ -3242,19 +3240,6 @@ export type QuerySftmxGetWithdrawalRequestsArgs = {
 };
 
 export type QuerySorGetSwapPathsArgs = {
-    callDataInput?: InputMaybe<GqlSwapCallDataInput>;
-    chain: GqlChain;
-    considerPoolsWithHooks?: InputMaybe<Scalars['Boolean']>;
-    poolIds?: InputMaybe<Array<Scalars['String']>>;
-    queryBatchSwap?: InputMaybe<Scalars['Boolean']>;
-    swapAmount: Scalars['AmountHumanReadable'];
-    swapType: GqlSorSwapType;
-    tokenIn: Scalars['String'];
-    tokenOut: Scalars['String'];
-    useProtocolVersion?: InputMaybe<Scalars['Int']>;
-};
-
-export type QuerySorGetSwapPathsInternalArgs = {
     callDataInput?: InputMaybe<GqlSwapCallDataInput>;
     chain: GqlChain;
     considerPoolsWithHooks?: InputMaybe<Scalars['Boolean']>;
