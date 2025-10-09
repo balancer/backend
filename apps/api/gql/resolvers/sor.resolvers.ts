@@ -68,8 +68,8 @@ const balancerSdkResolvers: Resolvers = {
                     body: JSON.stringify({ query: graphqlQuery }),
                 });
 
-                const result = (await response.json()) as { data?: { sorGetSwapPathsInternal: any } };
-                return result.data?.sorGetSwapPathsInternal;
+                const result = (await response.json()) as { data?: { sorGetSwapPaths: any } };
+                return result.data?.sorGetSwapPaths;
             } else {
                 return sorService.getSorSwapPaths(args);
             }
