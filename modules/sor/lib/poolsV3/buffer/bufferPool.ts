@@ -1,5 +1,5 @@
 import { Address, Hex } from 'viem';
-import { MAX_UINT256, SwapKind, Token, TokenAmount, BaseToken } from '@balancer/sdk';
+import { MAX_UINT256, SwapKind, BaseToken, TokenAmount } from '@balancer/sdk';
 import { BufferState, Vault } from '@balancer-labs/balancer-maths';
 
 import { BasePoolMethodsV3 } from '../basePoolMethodsV3';
@@ -38,12 +38,12 @@ export class BufferPool implements BasePoolMethodsV3 {
             bufferPoolData.chainId,
             bufferPoolData.unwrapRate,
             new BasePoolToken(
-                new Token(bufferPoolData.chainId, bufferPoolData.mainToken.address, bufferPoolData.mainToken.decimals),
+                new BaseToken(bufferPoolData.chainId, bufferPoolData.mainToken.address, bufferPoolData.mainToken.decimals),
                 bufferPoolData.mainToken.balance,
                 0,
             ),
             new BasePoolToken(
-                new Token(
+                new BaseToken(
                     bufferPoolData.chainId,
                     bufferPoolData.underlyingToken.address,
                     bufferPoolData.underlyingToken.decimals,
@@ -79,11 +79,11 @@ export class BufferPool implements BasePoolMethodsV3 {
         this.poolState = this.getPoolState();
     }
 
-    public getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint {
+    public getNormalizedLiquidity(tokenIn: BaseToken, tokenOut: BaseToken): bigint {
         return MAX_UINT256;
     }
 
-    public getLimitAmountSwap(tokenIn: Token, tokenOut: Token, swapKind: SwapKind): bigint {
+    public getLimitAmountSwap(tokenIn: BaseToken, tokenOut: BaseToken, swapKind: SwapKind): bigint {
         const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
 
         const mainTokenAmount = this.tokens[0];
@@ -146,7 +146,7 @@ export class BufferPool implements BasePoolMethodsV3 {
         }
     }
 
-    public swapGivenIn(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount {
+    public swapGivenIn(tokenIn: BaseToken, tokenOut: BaseToken, swapAmount: TokenAmount): TokenAmount {
         const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
 
         const calculatedAmount = this.vault.swap(
@@ -162,7 +162,7 @@ export class BufferPool implements BasePoolMethodsV3 {
         return TokenAmount.fromRawAmount(tOut.token, calculatedAmount);
     }
 
-    public swapGivenOut(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount {
+    public swapGivenOut(tokenIn: BaseToken, tokenOut: BaseToken, swapAmount: TokenAmount): TokenAmount {
         const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
 
         // swap

@@ -6,7 +6,7 @@ import { PrismaPoolAndHookWithDynamic } from '../../../../../prisma/prisma-types
 import { WAD } from '../../utils/math';
 import { StablePoolV3 } from './stablePool';
 
-import { Token, TokenAmount } from '@balancer/sdk';
+import { BaseToken, TokenAmount } from '@balancer/sdk';
 
 // keep factories imports at the end - moving up will break the test
 import {
@@ -149,9 +149,9 @@ describe('SOR V3 Stable Pool Tests', () => {
         expect(poolState).toEqual(stablePoolWithHook.getPoolState('StableSurge'));
     });
     test('results differ when hookState is passed', () => {
-        const poolToken1 = new Token(1, stablePool.tokens[0].token.address, 18, 'pt1', 'poolToken2');
+        const poolToken1 = new BaseToken(1, stablePool.tokens[0].token.address, 18, 'pt1', 'poolToken2');
 
-        const poolToken2 = new Token(1, stablePool.tokens[1].token.address, 18, 'pt2', 'poolToken2');
+        const poolToken2 = new BaseToken(1, stablePool.tokens[1].token.address, 18, 'pt2', 'poolToken2');
 
         // If given a high enough swap Amount, the pool with hookState should return a lower amount Out
         // as it charges the surge Fee.

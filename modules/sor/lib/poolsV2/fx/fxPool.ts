@@ -7,7 +7,7 @@ import { Chain } from '@prisma/client';
 import { _calcInGivenOut, _calcOutGivenIn } from './fxMath';
 import { RAY } from '../../utils/math';
 import { FxPoolPairData } from './types';
-import { PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
+import { PoolType, SwapKind, BaseToken, TokenAmount } from '@balancer/sdk';
 import { chainToChainId as chainToIdMap } from '../../../../network/chain-id-to-chain';
 import { TokenPairData } from '../../../../pool/lib/pool-on-chain-tokenpair-data';
 import { BasePool } from '../basePool';
@@ -48,7 +48,7 @@ export class FxPool implements BasePool {
                 throw new Error('FX pool token does not have latestFXPrice');
             }
 
-            const token = new Token(
+            const token = new BaseToken(
                 parseFloat(chainToIdMap[pool.chain]),
                 poolToken.address as Address,
                 poolToken.token.decimals,
@@ -116,7 +116,7 @@ export class FxPool implements BasePool {
         this.tokenPairs = tokenPairs;
     }
 
-    public getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint {
+    public getNormalizedLiquidity(tokenIn: BaseToken, tokenOut: BaseToken): bigint {
         const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
 
         const tokenPair = this.tokenPairs.find(
@@ -130,8 +130,8 @@ export class FxPool implements BasePool {
     }
 
     public swapGivenIn(
-        tokenIn: Token,
-        tokenOut: Token,
+        tokenIn: BaseToken,
+        tokenOut: BaseToken,
         swapAmount: TokenAmount,
         mutateBalances?: boolean,
     ): TokenAmount {
@@ -155,8 +155,8 @@ export class FxPool implements BasePool {
     }
 
     public swapGivenOut(
-        tokenIn: Token,
-        tokenOut: Token,
+        tokenIn: BaseToken,
+        tokenOut: BaseToken,
         swapAmount: TokenAmount,
         mutateBalances?: boolean,
     ): TokenAmount {
@@ -183,7 +183,7 @@ export class FxPool implements BasePool {
      * Fx pool logic has an alpha region where it halts swaps.
      * maxLimit  = [(1 + alpha) * oGLiq * 0.5] - token liquidity
      */
-    public getLimitAmountSwap(tokenIn: Token, tokenOut: Token, swapKind: SwapKind): bigint {
+    public getLimitAmountSwap(tokenIn: BaseToken, tokenOut: BaseToken, swapKind: SwapKind): bigint {
         const { _oGLiq, tIn, tOut } = this.getPoolPairData(tokenIn, tokenOut, 0n, swapKind);
         const maxLimit = MathFx.mulDownFixed(this.alpha + RAY, _oGLiq) / 2n; // TODO: double check if RAY is indeed 1e36 or 1e27 - google says it's 1e27
         if (swapKind === SwapKind.GivenIn) {
@@ -194,7 +194,7 @@ export class FxPool implements BasePool {
         return FxPoolToken.fromNumeraire(tOut, maxAmount).amount;
     }
 
-    public getPoolTokens(tokenIn: Token, tokenOut: Token): { tIn: FxPoolToken; tOut: FxPoolToken } {
+    public getPoolTokens(tokenIn: BaseToken, tokenOut: BaseToken): { tIn: FxPoolToken; tOut: FxPoolToken } {
         const tIn = this.tokenMap.get(tokenIn.address);
         const tOut = this.tokenMap.get(tokenOut.address);
 
@@ -205,7 +205,7 @@ export class FxPool implements BasePool {
         return { tIn, tOut };
     }
 
-    public getPoolPairData(tokenIn: Token, tokenOut: Token, swapAmount: bigint, swapKind: SwapKind): FxPoolPairData {
+    public getPoolPairData(tokenIn: BaseToken, tokenOut: BaseToken, swapAmount: bigint, swapKind: SwapKind): FxPoolPairData {
         const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
 
         const usdcToken = isUSDC(tokenIn.address) ? tIn : tOut;

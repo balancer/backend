@@ -1,4 +1,4 @@
-import { Address, SwapKind, Token, TokenAmount } from '@balancer/sdk';
+import { Address, SwapKind, TokenAmount, BaseToken } from '@balancer/sdk';
 import { PathGraphEdgeData, PathGraphTraversalConfig } from './pathGraphTypes';
 import { BasePool } from '../poolsV2/basePool';
 import { PathLocal } from '../path';
@@ -64,8 +64,8 @@ export class PathGraph {
         swapKind,
         graphTraversalConfig,
     }: {
-        tokenIn: Token;
-        tokenOut: Token;
+        tokenIn: BaseToken;
+        tokenOut: BaseToken;
         swapAmount: TokenAmount;
         swapKind: SwapKind;
         graphTraversalConfig?: Partial<PathGraphTraversalConfig>;
@@ -117,7 +117,7 @@ export class PathGraph {
         }
 
         return this.sortAndFilterPaths(paths).map((path) => {
-            const pathTokens: Token[] = [...path.map((segment) => segment.tokenOut)];
+            const pathTokens: BaseToken[] = [...path.map((segment) => segment.tokenOut)];
             pathTokens.unshift(tokenIn);
             pathTokens[pathTokens.length - 1] = tokenOut;
 
@@ -183,7 +183,7 @@ export class PathGraph {
         for (const pool of pools) {
             const tokens = [...pool.tokens.map((t) => t.token)];
             if (enableAddRemoveLiquidityPaths && pool.poolType !== 'Buffer') {
-                tokens.push(new Token(pool.tokens[0].token.chainId, pool.address.toLowerCase() as Address, 18)); // Add BPT as token nodes
+                tokens.push(new BaseToken(pool.tokens[0].token.chainId, pool.address.toLowerCase() as Address, 18)); // Add BPT as token nodes
             }
             for (const token of tokens) {
                 if (!this.nodes.has(token.address)) {
@@ -205,7 +205,7 @@ export class PathGraph {
         for (const pool of pools) {
             const tokens = [...pool.tokens.map((t) => t.token)];
             if (enableAddRemoveLiquidityPaths && pool.poolType !== 'Buffer') {
-                tokens.push(new Token(pool.tokens[0].token.chainId, pool.address.toLowerCase() as Address, 18)); // Also consider BPT token pairs
+                tokens.push(new BaseToken(pool.tokens[0].token.chainId, pool.address.toLowerCase() as Address, 18)); // Also consider BPT token pairs
             }
             for (const tokenIn of tokens) {
                 for (const tokenOut of tokens) {
@@ -225,7 +225,7 @@ export class PathGraph {
         }
     }
 
-    private addNode(token: Token): void {
+    private addNode(token: BaseToken): void {
         this.nodes.set(token.address, {
             isPhantomBpt: !!this.poolAddressMap.get(token.address),
         });

@@ -4,7 +4,7 @@ import { chainToChainId as chainToIdMap } from '../../network/chain-id-to-chain'
 import { GqlSorGetSwapPaths } from '../../../apps/api/gql/generated-schema';
 import { replaceZeroAddressWithEth } from '../../web3/addresses';
 import { Address } from 'viem';
-import { Token, TokenAmount } from '@balancer/sdk';
+import { BaseToken, TokenAmount } from '@balancer/sdk';
 import config from '../../../config';
 
 export async function getTokenAmountHuman(tokenAddr: string, humanAmount: string, chain: Chain): Promise<TokenAmount> {
@@ -23,13 +23,13 @@ export async function getTokenAmountRaw(tokenAddr: string, rawAmount: string, ch
  * @param chain
  * @returns
  */
-export const getToken = async (tokenAddr: string, chain: Chain): Promise<Token> => {
+export const getToken = async (tokenAddr: string, chain: Chain): Promise<BaseToken> => {
     if (tokenAddr === config[chain].eth.address) {
-        return new Token(parseInt(chainToIdMap[chain]), config[chain].weth.address as Address, 18);
+        return new BaseToken(parseInt(chainToIdMap[chain]), config[chain].weth.address as Address, 18);
     } else {
         const decimals = await tokenService.getTokenDecimals(tokenAddr, chain);
         if (!decimals) throw Error(`Missing token from tokenService ${tokenAddr}`);
-        return new Token(parseInt(chainToIdMap[chain]), tokenAddr as Address, decimals);
+        return new BaseToken(parseInt(chainToIdMap[chain]), tokenAddr as Address, decimals);
     }
 };
 

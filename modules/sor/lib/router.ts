@@ -1,4 +1,4 @@
-import { SwapKind, Token, TokenAmount } from '@balancer/sdk';
+import { SwapKind, BaseToken, TokenAmount } from '@balancer/sdk';
 import { PathGraph } from './pathGraph/pathGraph';
 import { PathGraphTraversalConfig } from './pathGraph/pathGraphTypes';
 import { max, min } from './utils/math';
@@ -17,8 +17,8 @@ export class Router {
     }
 
     public getCandidatePaths(
-        tokenIn: Token,
-        tokenOut: Token,
+        tokenIn: BaseToken,
+        tokenOut: BaseToken,
         pools: BasePool[],
         swapAmount: TokenAmount,
         swapKind: SwapKind,

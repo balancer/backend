@@ -1,10 +1,10 @@
-import { BigintIsh, DECIMAL_SCALES, MathSol, Token, TokenAmount, WAD } from '@balancer/sdk';
+import { BigintIsh, DECIMAL_SCALES, MathSol, BaseToken, TokenAmount, WAD } from '@balancer/sdk';
 import { BasePoolToken } from './basePoolToken';
 
 export class PoolTokenWithRate extends BasePoolToken {
     public readonly rate: bigint;
 
-    public constructor(token: Token, amount: BigintIsh, index: number, rate: BigintIsh) {
+    public constructor(token: BaseToken, amount: BigintIsh, index: number, rate: BigintIsh) {
         super(token, amount, index);
         this.rate = BigInt(rate);
         this.scale18 = (this.amount * this.scalar * this.rate) / WAD;
@@ -27,7 +27,7 @@ export class PoolTokenWithRate extends BasePoolToken {
     }
 
     static fromScale18AmountWithRate(
-        token: Token,
+        token: BaseToken,
         scale18: bigint,
         rate: bigint,
         index: number,

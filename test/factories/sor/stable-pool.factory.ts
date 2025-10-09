@@ -1,7 +1,7 @@
 // stablePoolFactory.ts
 import { Factory } from 'fishery';
 import { faker } from '@faker-js/faker';
-import { Token, TokenAmount } from '@balancer/sdk';
+import { BaseToken, TokenAmount } from '@balancer/sdk';
 import { Chain } from '@prisma/client';
 import { parseEther, parseUnits, Address } from 'viem';
 import { TokenPairData } from '../../../modules/sources/contracts/v3/fetch-tokenpair-data';
@@ -30,7 +30,7 @@ export const StablePoolFactory = Factory.define<StablePoolV3>(({ params }) => {
     const tokens =
         params.tokens ||
         Array.from({ length: 3 }, (_, index) => {
-            const token = new Token(
+            const token = new BaseToken(
                 parseFloat(faker.number.int({ min: 1, max: 1000 }).toString()),
                 faker.finance.ethereumAddress() as Address,
                 18,

@@ -1,4 +1,4 @@
-import { TokenAmount, SwapKind, BaseToken, Token } from '@balancer/sdk';
+import { TokenAmount, SwapKind, BaseToken } from '@balancer/sdk';
 import { BasePool } from './poolsV2/basePool';
 import { BufferPool } from './poolsV3/buffer/bufferPool';
 

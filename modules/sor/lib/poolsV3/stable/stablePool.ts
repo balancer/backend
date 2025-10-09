@@ -1,5 +1,5 @@
 import { Address, Hex, parseEther, parseUnits } from 'viem';
-import { PoolType, Token } from '@balancer/sdk';
+import { PoolType, BaseToken } from '@balancer/sdk';
 import { StableState, HookState } from '@balancer-labs/balancer-maths';
 import { Chain } from '@prisma/client';
 
@@ -33,7 +33,7 @@ export class StablePoolV3 extends BasePoolV3 implements BasePoolMethodsV3 {
 
         for (const poolToken of pool.tokens) {
             if (!poolToken.priceRate) throw new Error(`${pool.type} pool token does not have a price rate`);
-            const token = new Token(
+            const token = new BaseToken(
                 parseFloat(chainToIdMap[pool.chain]),
                 poolToken.address as Address,
                 poolToken.token.decimals,
@@ -97,7 +97,7 @@ export class StablePoolV3 extends BasePoolV3 implements BasePoolMethodsV3 {
         this.tokenMap = new Map(this.tokens.map((token) => [token.token.address, token]));
 
         // add BPT to tokenMap, so we can handle add/remove liquidity operations
-        const bpt = new Token(tokens[0].token.chainId, this.id, 18, 'BPT', 'BPT');
+        const bpt = new BaseToken(tokens[0].token.chainId, this.id, 18, 'BPT', 'BPT');
         this.tokenMap.set(bpt.address, new PoolTokenWithRate(bpt, totalShares, -1, WAD));
 
         this.poolState = this.getPoolState(hookState?.hookType);
@@ -123,7 +123,7 @@ export class StablePoolV3 extends BasePoolV3 implements BasePoolMethodsV3 {
         return poolState;
     }
 
-    public getPoolTokens(tokenIn: Token, tokenOut: Token): { tIn: StablePoolToken; tOut: StablePoolToken } {
+    public getPoolTokens(tokenIn: BaseToken, tokenOut: BaseToken): { tIn: StablePoolToken; tOut: StablePoolToken } {
         const tIn = this.tokenMap.get(tokenIn.address);
         const tOut = this.tokenMap.get(tokenOut.address);
 
