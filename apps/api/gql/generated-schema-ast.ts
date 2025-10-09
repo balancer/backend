@@ -4375,7 +4375,7 @@ export const schema = gql`
         sftmxGetWithdrawalRequests(user: String!): [GqlSftmxWithdrawalRequests!]!
 
         """
-        Get swap quote from the SOR v2 for the V2 vault
+        Get swap quote from the SOR v2
         """
         sorGetSwapPaths(
             """

@@ -1,5 +1,6 @@
 import { EnvType, load } from 'ts-dotenv';
 import { resolve } from 'path';
+import { B } from '@bgd-labs/aave-address-book/dist/AaveV3Ethereum-BqlC-GSv';
 
 type Env = EnvType<typeof schema>;
 
@@ -65,6 +66,10 @@ export const schema = {
     SOR_POOLS_CACHE_TTL_SECONDS: {
         type: String,
         default: '10',
+    },
+    SOR_INSTANCE: {
+        type: Boolean,
+        default: false,
     },
 };
 
