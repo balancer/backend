@@ -11,7 +11,8 @@ const balancerSdkResolvers: Resolvers = {
             }
 
             if (env.DEPLOYMENT_ENV === 'canary') {
-                const url = `http://sor-internal-75e33c0e4ea5363e.elb.eu-central-1.amazonaws.com/graphql`;
+                // const url = `http://sor-internal-75e33c0e4ea5363e.elb.eu-central-1.amazonaws.com/graphql`;
+                const url = `https://backend-v3.beets-ftm-node.com`;
 
                 // Extract the query structure from the GraphQL info object
                 const query = info.fieldNodes[0];
@@ -55,12 +56,10 @@ const balancerSdkResolvers: Resolvers = {
                     .filter(Boolean)
                     .join(', ');
 
-                const graphqlQuery = `
+                const graphqlQuery = `{
                     sorGetSwapPaths(${argsString}) {
                         ${requestedFields}
-                    }`;
-
-                console.log('GraphQL Query:', graphqlQuery);
+                    }}`;
 
                 const response = await fetch(url, {
                     method: 'POST',
