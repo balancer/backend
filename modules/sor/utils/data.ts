@@ -54,6 +54,8 @@ export async function getBasePoolsFromDb(
 
             const hook = pool.hook as HookData;
             if (hook.type === 'MEV_TAX') return true;
+            if (hook.type === 'RECLAMM') return true;
+            if (hook.type === 'LBP') return true;
             if (!considerPoolsWithHooks) return false;
 
             // non-STABLE pools with STABLE_SURGE hooks are not supported
@@ -286,4 +288,17 @@ function logMissingTokens(underlyingTokens: PrismaToken[], underlyingTokenAddres
             }
         });
     }
+}
+
+/**
+ * Fetches current token prices for a chain and returns a lowercase-address -> price map.
+ * Uses the shared tokenService cache to avoid redundant DB hits.
+ */
+export async function getTokenPricesMap(chain: Chain): Promise<Map<string, number>> {
+    const prices = await tokenService.getTokenPrices(chain);
+    const map = new Map<string, number>();
+    for (const p of prices) {
+        map.set(p.tokenAddress.toLowerCase(), p.price);
+    }
+    return map;
 }

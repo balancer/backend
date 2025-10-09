@@ -1,5 +1,60 @@
 # backend
 
+## 1.54.11
+
+### Patch Changes
+
+-   9ab87e7: SOR exit when tokens not in pools
+
+## 1.54.10
+
+### Patch Changes
+
+-   002541a: default rate provider fallback for yield
+-   e12ce91: exclude reclamm and lbp from hook filters in SOR and agg query
+-   f08e2b6: SOR - Revert early return
+
+## 1.54.9
+
+### Patch Changes
+
+-   cb2a7c3: SOR - Fix swap with ETH
+-   bc5df9b: SOR - Accept tokens without prices
+
+## 1.54.8
+
+### Patch Changes
+
+-   b36264d: optimised db reads in LBP weight syncing
+-   a6ddb72: sor early return when tokens not in the pools
+-   6aa9b76: commening out sor
+-   b40137f: dont include default hooks in agg query
+
+## 1.54.7
+
+### Patch Changes
+
+-   418ec31: APR for maple's syrupUSDT on Plasma
+
+## 1.54.6
+
+### Patch Changes
+
+-   71735d4: integrate loops
+
+## 1.54.5
+
+### Patch Changes
+
+-   55c888b: prepare loops integration
+-   6cc9934: APR for rsETH on plasma
+
+## 1.54.4
+
+### Patch Changes
+
+-   08342db: changed plasma volume sync to 10 min
+
 ## 1.54.3
 
 ### Patch Changes

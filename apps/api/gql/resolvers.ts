@@ -10,6 +10,7 @@ import tokenResolver from './resolvers/token.resolvers';
 import userResolver from './resolvers/user.resolvers';
 import vebalResolver from './resolvers/vebal.resolvers';
 import lbpResolver from './resolvers/lbp.resolvers';
+import loopsResolver from './resolvers/loops.resolvers';
 
 export const resolvers = {
     Query: {
@@ -25,6 +26,7 @@ export const resolvers = {
         ...userResolver.Query,
         ...vebalResolver.Query,
         ...lbpResolver.Query,
+        ...loopsResolver.Query,
     },
     Mutation: {
         ...poolResolver.Mutation,

@@ -87,6 +87,11 @@ export interface NetworkData {
         baseAprUrl: string;
         validatorFee: number;
     };
+    loops?: {
+        address: string;
+        aavePoolDataProvider: string;
+        aavePoolAddressesProvider: string;
+    };
     bal?: {
         address: string;
     };

@@ -1,0 +1,19 @@
+
+model PrismaLoopsData {
+    id                      String              @id
+    nav                     String
+    tvl                     String
+    actualSupply            String
+    rate                    String
+    collateralAmount        String
+    collateralAmountInEth   String
+    debtAmount              String
+    healthFactor            String
+    leverage                Float
+    totalApr                Float
+    stsAaveMarketSupplyCap  String
+    stsAaveMarketSupply     String
+    wSAaveMarketSupplyCap   String
+    wSAaveMarketBorrowCap   String
+    wSAaveMarketBorrowed    String
+}

@@ -24,6 +24,7 @@ import { request, gql } from 'graphql-request';
 import _ from 'lodash';
 import { AprService } from '../modules/aprs';
 import { PricingService } from '../modules/pricing';
+import { LoopsService } from '../modules/loops/service';
 
 /**
  * Used to run jobs or mutations locally from the command line
@@ -160,6 +161,8 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         return PoolController().syncHookData(chain);
     } else if (job === 'sync-sts-data') {
         return StakedSonicController().syncSonicStakingData();
+    } else if (job === 'sync-loops-data') {
+        return new LoopsService().fetchAndStoreLoopsData(chain);
     } else if (job === 'reload-pool-aprs') {
         const aprService = new AprService();
         return aprService.reloadAprs(chain);

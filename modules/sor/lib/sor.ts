@@ -37,6 +37,7 @@ export class SOR {
         prismaPools: PrismaPoolAndHookWithDynamic[],
         bufferPools: BufferPoolData[],
         protocolVersion: number,
+        tokenPrices: Map<string, number>,
         swapOptions?: Omit<SorSwapOptions, 'graphTraversalConfig.poolIdsToInclude'>,
     ): Promise<PathWithAmount[] | null> {
         const checkedSwapAmount = checkInputs(tokenIn, tokenOut, swapKind, swapAmountEvm);
@@ -153,6 +154,7 @@ export class SOR {
             checkedSwapAmount,
             swapKind,
             protocolVersion === 3,
+            tokenPrices,
             swapOptions?.graphTraversalConfig,
         );
 

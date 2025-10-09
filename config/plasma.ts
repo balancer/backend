@@ -59,6 +59,36 @@ export default <NetworkData>{
         ybAprHandler: {
             http: [
                 {
+                    url: 'https://api.maple.finance/v2/graphql',
+                    body: JSON.stringify({
+                        query: `{
+                          syrupGlobals {
+                            apy
+                          }
+                        }`,
+                    }),
+                    headers: { 'Content-Type': 'application/json' },
+                    scale: 1e30,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0xc4374775489cb9c56003bf2c9b12495fc64f0771',
+                            path: '$.data.syrupGlobals.apy',
+                        },
+                    ],
+                },
+                {
+                    url: 'https://universe.kelpdao.xyz/rseth/apy',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0xe561fe05c39075312aa9bc6af79ddae981461359',
+                            path: '$.value',
+                        },
+                    ],
+                },
+                {
                     url: 'https://ded76165a2fb6f7887260a3a0f626de7.thegraph.chainnodes.org/subgraphs/name/etherfi/etherfi-subgraph-v0-8-2',
                     body: JSON.stringify({
                         query: `{
@@ -98,6 +128,18 @@ export default <NetworkData>{
                     url: 'https://api-platform-analytics.metastreet.xyz/v2/usdai/dashboard/apy',
                     scale: 100,
                     extractors: [{ type: 'path', token: '0x0b2b2b2076d95dda7817e785989fe353fe955ef9', path: '$' }],
+                },
+                {
+                    name: 'tcUSDT0',
+                    url: 'https://indexer-main.euler.finance/v1/earn/vault?chainId=9745&vaultAddress=0xa9c251f8304b1b3fc2b9e8fcae78d94eff82ac66',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0xa9c251f8304b1b3fc2b9e8fcae78d94eff82ac66',
+                            path: '$.vault.apyCurrent',
+                        },
+                    ],
                 },
             ],
             aave: {

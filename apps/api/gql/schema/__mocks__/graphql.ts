@@ -14,6 +14,7 @@ import {
     GqlHookReviewData,
     GqlLbpTopTrade,
     GqlLatestSyncedBlocks,
+    GqlLoopsData,
     GqlNestedPool,
     GqlPoolAddRemoveEventV3,
     GqlPoolAggregator,
@@ -366,6 +367,35 @@ export const aGqlLatestSyncedBlocks = (overrides?: Partial<GqlLatestSyncedBlocks
             overrides && overrides.hasOwnProperty('userStakeSyncBlock') ? overrides.userStakeSyncBlock! : 'currus',
         userWalletSyncBlock:
             overrides && overrides.hasOwnProperty('userWalletSyncBlock') ? overrides.userWalletSyncBlock! : 'valde',
+    };
+};
+
+export const aGqlLoopsData = (overrides?: Partial<GqlLoopsData>): GqlLoopsData => {
+    return {
+        actualSupply: overrides && overrides.hasOwnProperty('actualSupply') ? overrides.actualSupply! : 'varietas',
+        apr: overrides && overrides.hasOwnProperty('apr') ? overrides.apr! : 8,
+        collateralAmount:
+            overrides && overrides.hasOwnProperty('collateralAmount') ? overrides.collateralAmount! : 'acidus',
+        collateralAmountInEth:
+            overrides && overrides.hasOwnProperty('collateralAmountInEth')
+                ? overrides.collateralAmountInEth!
+                : 'agnosco',
+        debtAmount: overrides && overrides.hasOwnProperty('debtAmount') ? overrides.debtAmount! : 'uxor',
+        healthFactor: overrides && overrides.hasOwnProperty('healthFactor') ? overrides.healthFactor! : 'asper',
+        leverage: overrides && overrides.hasOwnProperty('leverage') ? overrides.leverage! : 2.8,
+        nav: overrides && overrides.hasOwnProperty('nav') ? overrides.nav! : 'praesentium',
+        rate: overrides && overrides.hasOwnProperty('rate') ? overrides.rate! : 'acceptus',
+        sonicPointsMultiplier:
+            overrides && overrides.hasOwnProperty('sonicPointsMultiplier') ? overrides.sonicPointsMultiplier! : 'umbra',
+        stSAaveMarketSupply:
+            overrides && overrides.hasOwnProperty('stSAaveMarketSupply') ? overrides.stSAaveMarketSupply! : 'absorbeo',
+        stSAaveMarketSupplyCap:
+            overrides && overrides.hasOwnProperty('stSAaveMarketSupplyCap')
+                ? overrides.stSAaveMarketSupplyCap!
+                : 'volaticus',
+        targetHealthFactor:
+            overrides && overrides.hasOwnProperty('targetHealthFactor') ? overrides.targetHealthFactor! : 'aggero',
+        tvl: overrides && overrides.hasOwnProperty('tvl') ? overrides.tvl! : 'apud',
     };
 };
 
@@ -3043,6 +3073,7 @@ export const aQuery = (overrides?: Partial<Query>): Query => {
                 : aGqlLatestSyncedBlocks(),
         lbpPriceChart:
             overrides && overrides.hasOwnProperty('lbpPriceChart') ? overrides.lbpPriceChart! : [aLbpPriceChartData()],
+        loopsGetData: overrides && overrides.hasOwnProperty('loopsGetData') ? overrides.loopsGetData! : aGqlLoopsData(),
         poolEvents: overrides && overrides.hasOwnProperty('poolEvents') ? overrides.poolEvents! : [aGqlPoolEvent()],
         poolGetAggregatorPools:
             overrides && overrides.hasOwnProperty('poolGetAggregatorPools')
