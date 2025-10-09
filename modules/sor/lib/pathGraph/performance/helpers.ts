@@ -1,10 +1,10 @@
 import { BasePool } from '../../poolsV2/basePool';
-import { Token, TokenAmount } from '@balancer/sdk';
+import { BaseToken, TokenAmount } from '@balancer/sdk';
 
 export interface GraphTopology {
     name: 'hub-spoke' | 'dense-mesh' | 'chain-bridges' | 'realistic-defi';
     description: string;
-    generator: (tokenCount: number, poolCount: number) => { tokens: Token[]; pools: BasePool[] };
+    generator: (tokenCount: number, poolCount: number) => { tokens: BaseToken[]; pools: BasePool[] };
 }
 
 export interface GraphSpec {
@@ -19,16 +19,16 @@ export const topologies: Record<GraphTopology['name'], GraphTopology> = {
         name: 'hub-spoke',
         description: 'Central hub with radiating spokes',
         generator: (tokenCount: number, poolCount: number) => {
-            const tokens: Token[] = [];
+            const tokens: BaseToken[] = [];
             const pools: BasePool[] = [];
 
             // Hub token (WETH-like)
-            const hubToken = new Token(1, '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', 18);
+            const hubToken = new BaseToken(1, '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', 18);
             tokens.push(hubToken);
 
             // Spoke tokens
             for (let i = 0; i < tokenCount - 1; i++) {
-                tokens.push(new Token(1, `0x${(0x1000 + i).toString(16).padStart(40, '0')}`, 18));
+                tokens.push(new BaseToken(1, `0x${(0x1000 + i).toString(16).padStart(40, '0')}`, 18));
             }
 
             let poolsCreated = 0;
@@ -66,11 +66,11 @@ export const topologies: Record<GraphTopology['name'], GraphTopology> = {
         name: 'dense-mesh',
         description: 'High connectivity mesh network',
         generator: (tokenCount: number, poolCount: number) => {
-            const tokens: Token[] = [];
+            const tokens: BaseToken[] = [];
             const pools: BasePool[] = [];
 
             for (let i = 0; i < tokenCount; i++) {
-                tokens.push(new Token(1, `0x${(0x2000 + i).toString(16).padStart(40, '0')}`, 18));
+                tokens.push(new BaseToken(1, `0x${(0x2000 + i).toString(16).padStart(40, '0')}`, 18));
             }
 
             const maxPossiblePools = (tokenCount * (tokenCount - 1)) / 2;
@@ -103,11 +103,11 @@ export const topologies: Record<GraphTopology['name'], GraphTopology> = {
         name: 'chain-bridges',
         description: 'Token chains with bridge connections',
         generator: (tokenCount: number, poolCount: number) => {
-            const tokens: Token[] = [];
+            const tokens: BaseToken[] = [];
             const pools: BasePool[] = [];
 
             for (let i = 0; i < tokenCount; i++) {
-                tokens.push(new Token(1, `0x${(0x3000 + i).toString(16).padStart(40, '0')}`, 18));
+                tokens.push(new BaseToken(1, `0x${(0x3000 + i).toString(16).padStart(40, '0')}`, 18));
             }
 
             let poolsCreated = 0;
@@ -145,23 +145,23 @@ export const topologies: Record<GraphTopology['name'], GraphTopology> = {
         name: 'realistic-defi',
         description: 'Simulates realistic DeFi token distribution',
         generator: (tokenCount: number, poolCount: number) => {
-            const tokens: Token[] = [];
+            const tokens: BaseToken[] = [];
             const pools: BasePool[] = [];
 
             // Major tokens (ETH, USDC, USDT, DAI, WBTC equivalent)
             const majorTokens = [
-                new Token(1, '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', 18), // WETH
-                new Token(1, '0xA0b86a33E6441942b3B9F1c882e6F2A5A86E1B5F', 6), // USDC-like
-                new Token(1, '0xdAC17F958D2ee523a2206206994597C13D831ec7', 6), // USDT-like
-                new Token(1, '0x6B175474E89094C44Da98b954EedeAC495271d0F', 18), // DAI-like
-                new Token(1, '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', 8), // WBTC-like
+                new BaseToken(1, '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', 18), // WETH
+                new BaseToken(1, '0xA0b86a33E6441942b3B9F1c882e6F2A5A86E1B5F', 6), // USDC-like
+                new BaseToken(1, '0xdAC17F958D2ee523a2206206994597C13D831ec7', 6), // USDT-like
+                new BaseToken(1, '0x6B175474E89094C44Da98b954EedeAC495271d0F', 18), // DAI-like
+                new BaseToken(1, '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', 8), // WBTC-like
             ];
 
             tokens.push(...majorTokens.slice(0, Math.min(5, tokenCount)));
 
             // Add remaining tokens as smaller altcoins
             for (let i = majorTokens.length; i < tokenCount; i++) {
-                tokens.push(new Token(1, `0x${(0x4000 + i).toString(16).padStart(40, '0')}`, 18));
+                tokens.push(new BaseToken(1, `0x${(0x4000 + i).toString(16).padStart(40, '0')}`, 18));
             }
 
             let poolsCreated = 0;
@@ -212,7 +212,7 @@ export const topologies: Record<GraphTopology['name'], GraphTopology> = {
     },
 };
 
-function createMockPool(id: string, tokens: Token[], opts: Partial<BasePool> = {}): BasePool {
+function createMockPool(id: string, tokens: BaseToken[], opts: Partial<BasePool> = {}): BasePool {
     return {
         id,
         address: id.startsWith('0x') ? id : `0x${id.padEnd(40, '0')}`,
@@ -220,7 +220,7 @@ function createMockPool(id: string, tokens: Token[], opts: Partial<BasePool> = {
         tokens: tokens.map((t) => ({ token: t })),
         getNormalizedLiquidity: opts.getNormalizedLiquidity ?? (() => 100n),
         getLimitAmountSwap: opts.getLimitAmountSwap ?? (() => 1_000_000n),
-        swapGivenOut: opts.swapGivenOut ?? ((_in: Token, _out: Token, amt: TokenAmount) => amt),
+        swapGivenOut: opts.swapGivenOut ?? ((_in: BaseToken, _out: BaseToken, amt: TokenAmount) => amt),
         ...opts,
     } as unknown as BasePool;
 }

@@ -29,7 +29,7 @@ export class Router {
         const minSwapAmountRatio = graphTraversalConfig?.minSwapAmountRatio ?? 0.5;
         // Compute USD threshold if prices provided
         const priceToken = swapKind === SwapKind.GivenIn ? tokenIn : tokenOut;
-        const price = tokenPrices.get(priceToken.wrapped.toLowerCase());
+        const price = tokenPrices.get(priceToken.address.toLowerCase());
         const amount = Number(formatUnits(swapAmount.amount, priceToken.decimals));
         const minLimitThresholdUSD = amount * minSwapAmountRatio * (price ?? 0);
 

@@ -16,7 +16,7 @@
 
 import { PathGraph } from '../pathGraph';
 import { BasePool } from '../../poolsV2/basePool';
-import { Token, TokenAmount, SwapKind } from '@balancer/sdk';
+import { BaseToken, TokenAmount, SwapKind } from '@balancer/sdk';
 import { topologies } from './helpers';
 
 // Performance benchmark configuration
@@ -89,7 +89,7 @@ function percentile(arr: number[], p: number): number {
 async function benchmarkImplementation(
     ImplementationClass: typeof PathGraph,
     implementationName: string,
-    tokens: Token[],
+    tokens: BaseToken[],
     pools: BasePool[],
     topology: string,
     graphSize: string,
@@ -118,7 +118,7 @@ async function benchmarkImplementation(
     const memoryUsageKB = (memAfter.heapUsed - memBefore.heapUsed) / 1024;
 
     // Generate diverse token pairs
-    const tokenPairs: { tokenIn: Token; tokenOut: Token }[] = [];
+    const tokenPairs: { tokenIn: BaseToken; tokenOut: BaseToken }[] = [];
 
     // Add some random pairs
     for (let i = 0; i < BENCHMARK_CONFIG.tokenPairTests; i++) {
