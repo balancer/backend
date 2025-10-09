@@ -60,6 +60,8 @@ const balancerSdkResolvers: Resolvers = {
                         ${requestedFields}
                     }`;
 
+                console.log('GraphQL Query:', graphqlQuery);
+
                 const response = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
