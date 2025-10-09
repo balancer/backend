@@ -89,6 +89,7 @@ export type BalancerPoolSchema = {
     poolAPRs: Scalars['JSON'];
     protocolVersion: Scalars['JSON'];
     totalLiquidity: Scalars['JSON'];
+    type: Scalars['JSON'];
     underlyingTokens: Scalars['JSON'];
 };
 
