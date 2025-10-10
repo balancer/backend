@@ -2,7 +2,7 @@ import { TokenYieldHandler } from '../../types';
 import { Chain } from '@prisma/client';
 import { prisma } from '../../../../prisma/prisma-client';
 import { getViemClient } from '../../../sources/viem-client';
-import { formatEther, parseAbiItem, zeroAddress, Hex } from 'viem';
+import { formatEther, parseAbiItem, Hex } from 'viem';
 import { blockNumbers } from '../../../block-numbers';
 import { daysAgo, now } from '../../../common/time';
 
@@ -16,46 +16,16 @@ export const rateProviderHandler: TokenYieldHandler = async ({
     intervalInDays: number;
 }) => {
     try {
-        const poolTokensWithRateProvider = await prisma.prismaPoolToken.findMany({
+        const rateProviders = await prisma.prismaPriceRateProviderData.findMany({
             where: {
                 chain,
-                AND: [
-                    {
-                        priceRateProvider: {
-                            not: null,
-                        },
-                    },
-                    {
-                        priceRateProvider: {
-                            not: zeroAddress,
-                        },
-                    },
-                    {
-                        priceRate: {
-                            not: '1.0',
-                        },
-                    },
-                    {
-                        priceRate: {
-                            not: '1',
-                        },
-                    },
-                ],
-                token: {
-                    types: {
-                        some: {
-                            type: 'ERC4626',
-                        },
-                    },
-                },
+                summary: 'safe',
             },
-            select: { address: true, priceRateProvider: true },
+            select: {
+                tokenAddress: true,
+                rateProviderAddress: true,
+            },
         });
-
-        // Make tokens unique
-        const uniqueTokens = poolTokensWithRateProvider.filter(
-            (pt, idx, arr) => arr.findIndex((t) => t.address === pt.address) === idx,
-        );
 
         const client = getViemClient(chain, { multicallBatch: true, jsonRpcBatch: true });
 
@@ -67,9 +37,9 @@ export const rateProviderHandler: TokenYieldHandler = async ({
         }
 
         const aprs = await Promise.allSettled(
-            uniqueTokens.map(async ({ address, priceRateProvider }) => {
+            rateProviders.map(async ({ tokenAddress, rateProviderAddress }) => {
                 const currentRate = await client.readContract({
-                    address: priceRateProvider as Hex,
+                    address: rateProviderAddress as Hex,
                     abi,
                     functionName: 'getRate',
                 });
@@ -78,7 +48,7 @@ export const rateProviderHandler: TokenYieldHandler = async ({
                 let apr: number;
                 try {
                     pastRate = await client.readContract({
-                        address: priceRateProvider as Hex,
+                        address: rateProviderAddress as Hex,
                         abi,
                         functionName: 'getRate',
                         blockNumber: BigInt(pastBlock),
@@ -92,7 +62,7 @@ export const rateProviderHandler: TokenYieldHandler = async ({
                     if (!fallbackIntervalBlock) return;
 
                     pastRate = await client.readContract({
-                        address: priceRateProvider as Hex,
+                        address: rateProviderAddress as Hex,
                         abi,
                         functionName: 'getRate',
                         blockNumber: BigInt(fallbackIntervalBlock),
@@ -103,7 +73,7 @@ export const rateProviderHandler: TokenYieldHandler = async ({
                 }
 
                 return {
-                    address,
+                    address: tokenAddress,
                     apr,
                 };
             }),
