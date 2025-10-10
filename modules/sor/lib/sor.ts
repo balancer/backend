@@ -1,6 +1,7 @@
 import { SwapKind, Token } from '@balancer/sdk';
 
 import { Router } from './router';
+import { SorAbortError } from '../errors';
 import { PrismaPoolAndHookWithDynamic } from '../../../prisma/prisma-types';
 import { checkInputs, isLiquidityManagement } from './utils/helpers';
 import {
@@ -39,7 +40,13 @@ export class SOR {
         protocolVersion: number,
         tokenPrices: Map<string, number>,
         swapOptions?: Omit<SorSwapOptions, 'graphTraversalConfig.poolIdsToInclude'>,
+        signal?: AbortSignal,
     ): Promise<PathWithAmount[] | null> {
+        // Check if already aborted
+        if (signal?.aborted) {
+            throw new SorAbortError();
+        }
+
         const checkedSwapAmount = checkInputs(tokenIn, tokenOut, swapKind, swapAmountEvm);
 
         // get current block timestamp if not provided
@@ -48,6 +55,11 @@ export class SOR {
         const basePools: BasePool[] = [];
 
         for (const prismaPool of prismaPools) {
+            // Check for abort periodically
+            if (signal?.aborted) {
+                throw new SorAbortError();
+            }
+
             // typeguard
             if (prismaPool.protocolVersion === 3) {
                 if (
@@ -145,6 +157,11 @@ export class SOR {
             }
         }
 
+        // Check for abort before starting router
+        if (signal?.aborted) {
+            throw new SorAbortError();
+        }
+
         const router = new Router();
 
         const candidatePaths = router.getCandidatePaths(
@@ -156,9 +173,15 @@ export class SOR {
             protocolVersion === 3,
             tokenPrices,
             swapOptions?.graphTraversalConfig,
+            signal,
         );
 
         if (candidatePaths.length === 0) return null;
+
+        // Check for abort before getBestPaths
+        if (signal?.aborted) {
+            throw new SorAbortError();
+        }
 
         const bestPaths = router.getBestPaths(candidatePaths, swapKind, checkedSwapAmount);
 

@@ -1,76 +1,92 @@
-import { Resolvers } from '../generated-schema';
+import { QuerySorGetSwapPathsArgs, Resolvers } from '../generated-schema';
 import { sorService } from '../../../../modules/sor/sor.service';
-import { SelectionNode } from 'graphql';
+import { GraphQLResolveInfo, print } from 'graphql';
 import { env } from '../../../env';
+
+const TIMEOUT = 10_000;
+
+const handleSorCall = async (args: QuerySorGetSwapPathsArgs, abortController: AbortController) => {
+    // Terminate after 10 seconds
+    const abortTimeout = setTimeout(() => {
+        abortController.abort();
+    }, TIMEOUT);
+
+    try {
+        const response = await sorService.getSorSwapPaths(args, abortController.signal);
+        clearTimeout(abortTimeout);
+        return response;
+    } catch (error: any) {
+        clearTimeout(abortTimeout);
+        if (error.name === 'SorAbortError') {
+            throw new Error('Request aborted: The operation timed out after 10s.');
+        } else {
+            throw new Error('Request aborted: The operation was cancelled.');
+        }
+    }
+};
+
+const handleProxyRequest = async (
+    args: QuerySorGetSwapPathsArgs,
+    info: GraphQLResolveInfo,
+    abortController: AbortController,
+) => {
+    const url = env.SOR_SERVICE_URL;
+
+    // Use graphql-js print() to convert the original operation to a string
+    const query = print(info.operation);
+
+    // Create a promise that rejects on timeout
+    const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => {
+            abortController.abort();
+            reject(new Error('Request aborted: The operation timed out.'));
+        }, TIMEOUT);
+    });
+
+    // Create the fetch promise
+    const fetchPromise = (async () => {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                query,
+                variables: args,
+                operationName: info.operation.name?.value,
+            }),
+            signal: abortController.signal,
+        });
+
+        const responseData = (await response.json()) as any;
+
+        if (responseData.errors) {
+            const error = responseData.errors.map((e: any) => e.message).join(';');
+            throw new Error(`Request failed: ${error}`);
+        }
+
+        return responseData.data?.sorGetSwapPaths;
+    })();
+
+    return Promise.race([fetchPromise, timeoutPromise]);
+};
 
 const balancerSdkResolvers: Resolvers = {
     Query: {
         sorGetSwapPaths: async (parent, args, context, info) => {
+            // Create AbortSignal from request
+            const abortController = new AbortController();
+            context.req.on('close', () => {
+                abortController.abort();
+            });
+
             if (env.SOR_INSTANCE) {
-                return sorService.getSorSwapPaths(args);
+                return handleSorCall(args, abortController);
             }
 
             if (env.DEPLOYMENT_ENV === 'canary') {
-                const url = `http://sor-internal-75e33c0e4ea5363e.elb.eu-central-1.amazonaws.com/graphql`;
-
-                // Extract the query structure from the GraphQL info object
-                const query = info.fieldNodes[0];
-                const selections = query.selectionSet?.selections;
-
-                // Build the GraphQL query dynamically based on the requested fields
-                const buildQuery = (selections: readonly SelectionNode[]): string => {
-                    return selections
-                        .map((selection: SelectionNode) => {
-                            if (selection.kind === 'Field') {
-                                const fieldName = selection.name.value;
-                                if (selection.selectionSet) {
-                                    const subFields = buildQuery(selection.selectionSet.selections);
-                                    return `${fieldName} { ${subFields} }`;
-                                }
-                                return fieldName;
-                            }
-                            return '';
-                        })
-                        .join(' ');
-                };
-
-                const requestedFields = selections ? buildQuery(selections) : '';
-
-                // Build arguments string
-                const argsString = Object.entries(args)
-                    .map(([key, value]) => {
-                        if (value === null || value === undefined) return null;
-
-                        // Handle enums (chain, swapType) - these should not be quoted
-                        if (key === 'chain' || key === 'swapType') {
-                            return `${key}: ${value}`;
-                        } else if (typeof value === 'string') {
-                            return `${key}: "${value}"`;
-                        } else if (Array.isArray(value)) {
-                            return `${key}: ${JSON.stringify(value)}`;
-                        } else {
-                            return `${key}: ${value}`;
-                        }
-                    })
-                    .filter(Boolean)
-                    .join(', ');
-
-                const graphqlQuery = `{
-                    sorGetSwapPaths(${argsString}) {
-                        ${requestedFields}
-                    }}`;
-
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ query: graphqlQuery }),
-                });
-
-                const result = (await response.json()) as { data?: { sorGetSwapPaths: any } };
-                return result.data?.sorGetSwapPaths;
-            } else {
-                return sorService.getSorSwapPaths(args);
+                return handleProxyRequest(args, info, abortController);
             }
+
+            return handleSorCall(args, abortController);
         },
     },
 };

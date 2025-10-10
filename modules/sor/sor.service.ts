@@ -4,6 +4,7 @@ import { Address, formatUnits } from 'viem';
 import { GqlSorGetSwapPaths, QuerySorGetSwapPathsArgs } from '../../apps/api/gql/generated-schema';
 import { GetSwapPathsInput } from './types';
 import { SOR } from './lib/sor';
+import { SorAbortError } from './errors';
 import {
     getBasePoolsFromDb,
     getToken,
@@ -22,7 +23,7 @@ import { PathGraphTraversalConfig } from './lib/pathGraph/pathGraphTypes';
 const DEFAULT_MAX_DEPTH = 4;
 
 export class SorService {
-    async getSorSwapPaths(args: QuerySorGetSwapPathsArgs): Promise<GqlSorGetSwapPaths> {
+    async getSorSwapPaths(args: QuerySorGetSwapPathsArgs, signal?: AbortSignal): Promise<GqlSorGetSwapPaths> {
         const tokenIn = args.tokenIn.toLowerCase();
         const tokenOut = args.tokenOut.toLowerCase();
 
@@ -42,8 +43,9 @@ export class SorService {
             ? await this.getSwapPaths({
                   ...getSwapPathsInput,
                   protocolVersion: args.useProtocolVersion,
+                  signal,
               })
-            : await this.getBestSwapPathFromBothVersions(getSwapPathsInput);
+            : await this.getBestSwapPathFromBothVersions(getSwapPathsInput, signal);
 
         // return zero response if no paths are found
         if (!paths) {
@@ -60,12 +62,15 @@ export class SorService {
         return mappedPaths;
     }
 
-    private async getBestSwapPathFromBothVersions(input: Omit<GetSwapPathsInput, 'protocolVersion'>): Promise<{
+    private async getBestSwapPathFromBothVersions(
+        input: Omit<GetSwapPathsInput, 'protocolVersion'>,
+        signal?: AbortSignal,
+    ): Promise<{
         paths: PathWithAmount[] | null;
         protocolVersion: number;
     }> {
-        const pathsV2 = await this.getSwapPaths({ ...input, protocolVersion: 2 });
-        const pathsV3 = await this.getSwapPaths({ ...input, protocolVersion: 3 });
+        const pathsV2 = await this.getSwapPaths({ ...input, protocolVersion: 2, signal });
+        const pathsV3 = await this.getSwapPaths({ ...input, protocolVersion: 3, signal });
 
         if (input.swapType === 'EXACT_IN') {
             return parseFloat(pathsV2.returnAmount) > parseFloat(pathsV3.returnAmount) ? pathsV2 : pathsV3;
@@ -82,15 +87,25 @@ export class SorService {
     }
 
     private async getSwapPaths(
-        input: GetSwapPathsInput,
+        input: GetSwapPathsInput & { signal?: AbortSignal },
     ): Promise<{ paths: PathWithAmount[] | null; protocolVersion: number; returnAmount: string }> {
         try {
+            // Check if already aborted
+            if (input.signal?.aborted) {
+                throw new SorAbortError();
+            }
+
             const { pools: poolsFromDb, bufferPools } = await getBasePoolsFromDb(
                 input.chain,
                 input.protocolVersion,
                 input.considerPoolsWithHooks,
                 input.poolIds,
             );
+
+            // Check again after async operation
+            if (input.signal?.aborted) {
+                throw new SorAbortError();
+            }
 
             const tokenIn = await getToken(input.tokenIn as Address, input.chain);
             const tokenOut = await getToken(input.tokenOut as Address, input.chain);
@@ -117,6 +132,11 @@ export class SorService {
             // used for early pruning of paths based on swap limits
             const tokenPrices = await getTokenPricesMap(input.chain);
 
+            // Check again after async operation
+            if (input.signal?.aborted) {
+                throw new SorAbortError();
+            }
+
             // retry with different max depth if no paths are found
             let swapOptions = this.buildSwapOptions(DEFAULT_MAX_DEPTH);
             let paths = await SOR.getPathsWithPools(
@@ -129,6 +149,7 @@ export class SorService {
                 input.protocolVersion,
                 tokenPrices,
                 swapOptions,
+                input.signal,
             );
 
             if (!paths) {
@@ -143,6 +164,10 @@ export class SorService {
 
             return { paths, protocolVersion: input.protocolVersion, returnAmount };
         } catch (err: any) {
+            // Re-throw if it's an abort error
+            if (err instanceof SorAbortError || err.name === 'AbortError' || input.signal?.aborted) {
+                throw err;
+            }
             this.logSwapPathError(err, input);
             return { paths: null, protocolVersion: input.protocolVersion, returnAmount: '0' };
         }

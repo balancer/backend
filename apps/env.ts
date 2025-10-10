@@ -67,6 +67,10 @@ export const schema = {
         type: String,
         default: '10',
     },
+    SOR_SERVICE_URL: {
+        type: String,
+        default: 'http://sor-internal-75e33c0e4ea5363e.elb.eu-central-1.amazonaws.com/graphql',
+    },
     SOR_INSTANCE: {
         type: Boolean,
         default: false,
