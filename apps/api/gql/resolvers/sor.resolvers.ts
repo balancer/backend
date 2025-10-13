@@ -63,7 +63,11 @@ const handleProxyRequest = async (
             throw new Error(`Request failed: ${error}`);
         }
 
-        return responseData.data?.sorGetSwapPaths;
+        // Get the field name from the query (handles aliases)
+        const fieldNode = info.fieldNodes[0];
+        const responseFieldName = fieldNode.alias?.value || fieldNode.name.value;
+
+        return responseData.data?.[responseFieldName];
     })();
 
     return Promise.race([fetchPromise, timeoutPromise]);
