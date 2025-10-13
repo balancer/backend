@@ -102,6 +102,16 @@ export default <NetworkData>{
         morphoRewardsAprHandler: true,
         aaveRewardsAprHandler: true,
         ybAprHandler: {
+            rateProvider: {
+                chain: 'MAINNET',
+                intervalInDays: 30,
+                rateProviders: [
+                    {
+                        tokenAddress: '0xd11c452fc99cf405034ee446803b6f6c1f6d5ed8',
+                        rateProviderAddress: '0x7aee5f039da2891bf02414bc6ada1b53c0c3902a',
+                    },
+                ],
+            },
             aave: {
                 markets: [AaveV3Ethereum, AaveV3EthereumLido],
             },
