@@ -1,20 +1,10 @@
-import { TokenYieldHandler } from '../../types';
-import { Chain } from '@prisma/client';
+import { TokenYieldHandler, RateProviderYieldConfig } from '../../types';
 import { getViemClient } from '../../../sources/viem-client';
 import { formatEther, parseAbiItem, Hex } from 'viem';
 import { blockNumbers } from '../../../block-numbers';
 import { daysAgo, now } from '../../../common/time';
 
 const abi = [parseAbiItem('function getRate() view returns(uint)')];
-
-type RateProviderYieldConfig = {
-    chain: Chain;
-    intervalInDays: number;
-    rateProviders: {
-        tokenAddress: string;
-        rateProviderAddress: string;
-    }[];
-};
 
 export const rateProviderHandler: TokenYieldHandler = async ({
     chain,
