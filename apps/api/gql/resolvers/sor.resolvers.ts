@@ -3,10 +3,10 @@ import { sorService } from '../../../../modules/sor/sor.service';
 import { GraphQLResolveInfo, print } from 'graphql';
 import { env } from '../../../env';
 
-const TIMEOUT = 10_000;
+const TIMEOUT = 15_000;
 
 const handleSorCall = async (args: QuerySorGetSwapPathsArgs, abortController: AbortController) => {
-    // Terminate after 10 seconds
+    // Terminate after 15 seconds
     const abortTimeout = setTimeout(() => {
         abortController.abort();
     }, TIMEOUT);
@@ -18,9 +18,9 @@ const handleSorCall = async (args: QuerySorGetSwapPathsArgs, abortController: Ab
     } catch (error: any) {
         clearTimeout(abortTimeout);
         if (error.name === 'SorAbortError') {
-            throw new Error('Request aborted: The operation timed out after 10s.');
+            throw new Error(`SOR Request aborted: The operation timed out after ${TIMEOUT / 1000} seconds.`);
         } else {
-            throw new Error('Request aborted: The operation was cancelled.');
+            throw new Error('SOR Request aborted: The operation was cancelled.');
         }
     }
 };
@@ -86,11 +86,7 @@ const balancerSdkResolvers: Resolvers = {
                 return handleSorCall(args, abortController);
             }
 
-            if (env.DEPLOYMENT_ENV === 'canary') {
-                return handleProxyRequest(args, info, abortController);
-            }
-
-            return handleSorCall(args, abortController);
+            return handleProxyRequest(args, info, abortController);
         },
     },
 };
