@@ -139,5 +139,9 @@ export const baseNetworkConfig: NetworkConfig = {
             name: 'sync-weights',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(60, 'minutes') : every(10, 'minutes'),
         },
+        {
+            name: 'sync-lbps',
+            interval: every(1, 'minutes'),
+        },
     ],
 };

@@ -194,5 +194,9 @@ export const mainnetNetworkConfig: NetworkConfig = {
             name: 'sync-token-tvl',
             interval: every(30, 'minutes'),
         },
+        {
+            name: 'sync-lbps',
+            interval: every(1, 'minutes'),
+        },
     ],
 };
