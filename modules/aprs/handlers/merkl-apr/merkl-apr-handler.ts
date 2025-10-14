@@ -1,6 +1,7 @@
 import { $Enums, PrismaPoolAprItem, PrismaPoolAprType } from '@prisma/client';
 import { AprHandler, PoolAPRData } from '../../types';
 import { chainIdToChain } from '../../../network/chain-id-to-chain';
+import { AaveV3Plasma } from '@bgd-labs/aave-address-book';
 
 const opportunityUrl =
     'https://api.merkl.xyz/v4/opportunities/?test=false&status=LIVE&campaigns=true&mainProtocolId=balancer&page=0&items=100';
@@ -97,17 +98,28 @@ export class MerklAprHandler implements AprHandler {
 
     // for boosted pools, merkl doesnt forward the APR to the pools so we need to query merkl for any apr of any pool tokens (we limit to tokens that have underlying)
     private async findTokenOpportunities(pools: PoolAPRData[]) {
+        const aaveMarkets = [AaveV3Plasma];
+        const aaveMarketForChain = aaveMarkets.find((market) => chainIdToChain[market.CHAIN_ID] === pools[0].chain);
+        if (!aaveMarketForChain) {
+            throw new Error(`No Aave market found for chain ${pools[0].chain}`);
+        }
+        const aaveTokenMappings = await this.getTokenMappings(Object.values(aaveMarketForChain.ASSETS));
+
         const tokensWithUnderlying: string[] = [];
         pools.forEach((pool) => {
             tokensWithUnderlying.push(
                 ...pool.tokens
                     .filter((token) => token.token.underlyingTokenAddress)
-                    .map((token) => token.address.toLowerCase())
+                    .map((token) =>
+                        aaveTokenMappings.get(token.address.toLowerCase()) // we replace the waTokens with aTokens as merkl tracks aTokens
+                            ? aaveTokenMappings.get(token.address.toLowerCase())!
+                            : token.address.toLowerCase(),
+                    )
                     .flat(),
             );
         });
-
         const uniqueTokensWithUnderlying = Array.from(new Set(tokensWithUnderlying));
+
         let tokenOpportunities: MerklOpportunity[] = [];
 
         if (uniqueTokensWithUnderlying.length > 0) {
@@ -121,19 +133,16 @@ export class MerklAprHandler implements AprHandler {
             );
 
             // Flatten the array of arrays and filter out opportunities with whitelist
-            tokenOpportunities = tokenOpportunityResponses
-                .flat()
-                .filter((opportunity) =>
-                    opportunity.campaigns.every((campaign) => campaign.params.whitelist.length === 0),
-                );
+            tokenOpportunities = tokenOpportunityResponses.flat();
         }
 
-        return this.mapTokenOpportunitiesToAprs(tokenOpportunities, pools);
+        return this.mapTokenOpportunitiesToAprs(tokenOpportunities, pools, aaveTokenMappings);
     }
 
     private mapTokenOpportunitiesToAprs(
         opportunities: MerklOpportunity[],
         affectedPools: PoolAPRData[],
+        aaveTokenMappings: Map<string, string>,
     ): {
         id: string;
         type: PrismaPoolAprType;
@@ -155,7 +164,12 @@ export class MerklAprHandler implements AprHandler {
             const pool = affectedPools.find(
                 (pool) =>
                     pool.chain === chainIdToChain[opportunity.chainId] &&
-                    pool.tokens.some((token) => token.address === opportunity.explorerAddress.toLowerCase()),
+                    pool.tokens.some((token) =>
+                        aaveTokenMappings.get(token.address.toLowerCase())
+                            ? aaveTokenMappings.get(token.address.toLowerCase()) ===
+                              opportunity.explorerAddress.toLowerCase()
+                            : token.address === opportunity.explorerAddress.toLowerCase(),
+                    ),
             );
 
             if (!pool || !pool.dynamicData?.totalLiquidity) {
@@ -164,8 +178,11 @@ export class MerklAprHandler implements AprHandler {
 
             const tvl = pool.tokens.map((t) => t.balanceUSD).reduce((a, b) => a + b, 0);
             const tokenTvl =
-                pool.tokens.find((token) => token.address === opportunity.explorerAddress.toLowerCase())?.balanceUSD ||
-                0;
+                pool.tokens.find((token) =>
+                    aaveTokenMappings.get(token.address.toLowerCase())
+                        ? aaveTokenMappings.get(token.address) === opportunity.explorerAddress.toLowerCase()
+                        : token.address === opportunity.explorerAddress.toLowerCase(),
+                )?.balanceUSD || 0;
 
             const tokenShareOfPoolTvl = tokenTvl === 0 || tvl === 0 ? 0 : tokenTvl / tvl;
 
@@ -224,5 +241,18 @@ export class MerklAprHandler implements AprHandler {
         }
 
         return aprs.filter((item) => item !== null);
+    }
+
+    private async getTokenMappings(assets?: any[]) {
+        const wrapperToATokenMap = new Map<string, string>();
+        if (!assets || assets.length === 0) return wrapperToATokenMap;
+        // create map wrapper -> aToken
+        for (const asset of assets) {
+            const wrappers = [asset.STATIC_A_TOKEN?.toLowerCase(), asset.STATA_TOKEN?.toLowerCase()].filter((w) => !!w);
+            for (const wrapper of wrappers) {
+                wrapperToATokenMap.set(wrapper, asset.A_TOKEN.toLowerCase());
+            }
+        }
+        return wrapperToATokenMap;
     }
 }
