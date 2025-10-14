@@ -1,5 +1,5 @@
 import { Address, Hex, parseEther } from 'viem';
-import { PoolType, BaseToken, TokenAmount, WAD } from '@balancer/sdk';
+import { PoolType, Token, TokenAmount, WAD } from '@balancer/sdk';
 import { WeightedState, HookState } from '@balancer-labs/balancer-maths';
 import { Chain } from '@prisma/client';
 
@@ -36,7 +36,7 @@ export class WeightedPoolV3 extends BasePoolV3 implements BasePoolMethodsV3 {
                 throw new Error('Weighted pool token does not have a weight');
             }
 
-            const token = new BaseToken(
+            const token = new Token(
                 parseFloat(chainToIdMap[pool.chain]),
                 poolToken.address as Address,
                 poolToken.token.decimals,
@@ -101,7 +101,7 @@ export class WeightedPoolV3 extends BasePoolV3 implements BasePoolMethodsV3 {
         this.tokenMap = new Map(tokens.map((token) => [token.token.address, token]));
 
         // add BPT to tokenMap, so we can handle add/remove liquidity operations
-        const bpt = new BaseToken(tokens[0].token.chainId, this.id, 18, 'BPT', 'BPT');
+        const bpt = new Token(tokens[0].token.chainId, this.id, 18, 'BPT', 'BPT');
         this.tokenMap.set(bpt.address, new WeightedPoolTokenWithRate(bpt, totalShares, -1, WAD, 0n));
 
         this.poolState = this.getPoolState(hookState?.hookType);
@@ -129,7 +129,7 @@ export class WeightedPoolV3 extends BasePoolV3 implements BasePoolMethodsV3 {
 
     // Helper methods
 
-    public getPoolTokens(tokenIn: BaseToken, tokenOut: BaseToken): { tIn: WeightedPoolToken; tOut: WeightedPoolToken } {
+    public getPoolTokens(tokenIn: Token, tokenOut: Token): { tIn: WeightedPoolToken; tOut: WeightedPoolToken } {
         const tIn = this.tokenMap.get(tokenIn.address);
         const tOut = this.tokenMap.get(tokenOut.address);
 

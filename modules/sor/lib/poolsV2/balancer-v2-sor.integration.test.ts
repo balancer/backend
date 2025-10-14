@@ -1,6 +1,6 @@
 // yarn vitest balancer-v2-sor.integration.test.ts
 
-import { ExactInQueryOutput, Swap, SwapKind, BaseToken, Address } from '@balancer/sdk';
+import { ExactInQueryOutput, Swap, SwapKind, Token, Address } from '@balancer/sdk';
 
 import { PathWithAmount } from '../path';
 import { SOR } from '../sor';
@@ -51,8 +51,8 @@ describe('Balancer V2 SOR Integration Tests', () => {
 
     describe('Weighted Pool Path - Token with 0 decimals', () => {
         let prismaWeightedPool: PrismaPoolAndHookWithDynamic;
-        let tIn: BaseToken;
-        let tOut: BaseToken;
+        let tIn: Token;
+        let tOut: Token;
 
         beforeAll(async () => {
             // setup mock pool data
@@ -82,8 +82,8 @@ describe('Balancer V2 SOR Integration Tests', () => {
                 chain: 'GNOSIS',
             });
 
-            tIn = new BaseToken(parseFloat(chainToIdMap['GNOSIS']), wxDAI.address as Address, wxDAI.token.decimals);
-            tOut = new BaseToken(parseFloat(chainToIdMap['GNOSIS']), MPS.address as Address, MPS.token.decimals);
+            tIn = new Token(parseFloat(chainToIdMap['GNOSIS']), wxDAI.address as Address, wxDAI.token.decimals);
+            tOut = new Token(parseFloat(chainToIdMap['GNOSIS']), MPS.address as Address, MPS.token.decimals);
         });
 
         test('SOR quote should match swap query - below min', async () => {

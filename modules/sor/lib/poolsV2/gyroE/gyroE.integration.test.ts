@@ -1,6 +1,6 @@
 // yarn vitest gyroE.integration.test.ts
 
-import { ExactInQueryOutput, Swap, SwapKind, BaseToken, Address, ExactOutQueryOutput, ChainId } from '@balancer/sdk';
+import { ExactInQueryOutput, Swap, SwapKind, Token, Address, ExactOutQueryOutput, ChainId } from '@balancer/sdk';
 import { createTestClient, formatUnits, Hex, http, parseUnits, TestClient } from 'viem';
 import { gnosis, sonic } from 'viem/chains';
 
@@ -24,8 +24,8 @@ describe('SOR - GyroE Integration Tests', () => {
     let client: TestClient;
     let chainId: number;
     let prismaPool: PrismaPoolAndHookWithDynamic;
-    let tIn: BaseToken;
-    let tOut: BaseToken;
+    let tIn: Token;
+    let tOut: Token;
 
     beforeEach(async () => {
         await client.revert({
@@ -85,8 +85,8 @@ describe('SOR - GyroE Integration Tests', () => {
                     }),
                 });
 
-            tIn = new BaseToken(chainId, scUSD.address as Address, scUSD.token.decimals);
-            tOut = new BaseToken(chainId, scETH.address as Address, scETH.token.decimals);
+            tIn = new Token(chainId, scUSD.address as Address, scUSD.token.decimals);
+            tOut = new Token(chainId, scETH.address as Address, scETH.token.decimals);
 
             snapshot = await client.snapshot();
         });
@@ -225,8 +225,8 @@ describe('SOR - GyroE Integration Tests', () => {
                     }),
                 });
 
-            tIn = new BaseToken(chainId, sDAI.address as Address, sDAI.token.decimals);
-            tOut = new BaseToken(chainId, bCSPX.address as Address, bCSPX.token.decimals);
+            tIn = new Token(chainId, sDAI.address as Address, sDAI.token.decimals);
+            tOut = new Token(chainId, bCSPX.address as Address, bCSPX.token.decimals);
 
             snapshot = await client.snapshot();
         });

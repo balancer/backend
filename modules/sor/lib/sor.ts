@@ -1,4 +1,4 @@
-import { SwapKind, BaseToken } from '@balancer/sdk';
+import { SwapKind, Token } from '@balancer/sdk';
 
 import { Router } from './router';
 import { PrismaPoolAndHookWithDynamic } from '../../../prisma/prisma-types';
@@ -30,8 +30,8 @@ import { BufferPoolData } from '../utils/data';
 
 export class SOR {
     static async getPathsWithPools(
-        tokenIn: BaseToken,
-        tokenOut: BaseToken,
+        tokenIn: Token,
+        tokenOut: Token,
         swapKind: SwapKind,
         swapAmountEvm: bigint,
         prismaPools: PrismaPoolAndHookWithDynamic[],

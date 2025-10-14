@@ -1,9 +1,9 @@
-import { BigintIsh, BaseToken, TokenAmount } from '@balancer/sdk';
+import { BigintIsh, Token, TokenAmount } from '@balancer/sdk';
 
 export class BasePoolToken extends TokenAmount {
     public readonly index: number;
 
-    public constructor(token: BaseToken, amount: BigintIsh, index: number) {
+    public constructor(token: Token, amount: BigintIsh, index: number) {
         super(token, amount);
         this.index = index;
     }

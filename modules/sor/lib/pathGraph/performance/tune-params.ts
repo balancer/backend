@@ -14,7 +14,7 @@
 
 import { PathGraph } from '../pathGraph';
 import { BasePool } from '../../poolsV2/basePool';
-import { BaseToken, TokenAmount, SwapKind } from '@balancer/sdk';
+import { Token, TokenAmount, SwapKind } from '@balancer/sdk';
 import { topologies, GraphSpec } from './helpers';
 
 interface ParamSet {
@@ -50,7 +50,7 @@ const GRAPHS: GraphSpec[] = [
     { name: 'med-mesh', tokens: 100, pools: 300, type: 'dense-mesh' },
 ];
 
-async function testParams(graph: { tokens: BaseToken[]; pools: BasePool[] }, params: ParamSet): Promise<TuneResult> {
+async function testParams(graph: { tokens: Token[]; pools: BasePool[] }, params: ParamSet): Promise<TuneResult> {
     const pathGraph = new PathGraph();
     pathGraph.buildGraph({
         pools: graph.pools,

@@ -1,11 +1,11 @@
-import { BaseToken } from '@balancer/sdk';
+import { Token } from '@balancer/sdk';
 import { BasePool } from '../poolsV2/basePool';
 
 export interface PoolTokenPair {
     id: string;
     pool: BasePool;
-    tokenIn: BaseToken;
-    tokenOut: BaseToken;
+    tokenIn: Token;
+    tokenOut: Token;
 }
 
 export type PoolAddressDictionary = {
@@ -46,8 +46,8 @@ export interface PathGraphTraversalConfig {
 export interface PathGraphEdgeData {
     pool: BasePool;
     normalizedLiquidity: bigint;
-    tokenIn: BaseToken;
-    tokenOut: BaseToken;
+    tokenIn: Token;
+    tokenOut: Token;
     isBuffer: boolean;
     limitUSD?: number;
 }

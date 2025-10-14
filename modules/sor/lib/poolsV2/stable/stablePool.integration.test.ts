@@ -19,7 +19,7 @@
  * TODO: improve test data setup by creating a script that fetches all necessary data automatically for a given blockNumber.
  */
 
-import { ExactInQueryOutput, Swap, SwapKind, BaseToken, Address, Path } from '@balancer/sdk';
+import { ExactInQueryOutput, Swap, SwapKind, Token, Address, Path } from '@balancer/sdk';
 
 import { createTestClient, Hex, http, TestClient } from 'viem';
 import { mainnet } from 'viem/chains';
@@ -86,12 +86,12 @@ describe('Balancer SOR Integration Tests', () => {
             });
 
             // get SOR paths
-            const tIn = new BaseToken(
+            const tIn = new Token(
                 parseFloat(chainToChainId[DOLA.token.chain]),
                 DOLA.address as Address,
                 DOLA.token.decimals,
             );
-            const tOut = new BaseToken(
+            const tOut = new Token(
                 parseFloat(chainToChainId[USDC.token.chain]),
                 USDC.address as Address,
                 USDC.token.decimals,

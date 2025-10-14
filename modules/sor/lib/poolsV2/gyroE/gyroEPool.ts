@@ -1,6 +1,6 @@
 import { Address, Hex, parseEther, parseUnits } from 'viem';
 import { Chain } from '@prisma/client';
-import { PoolType, SwapKind, BaseToken, TokenAmount } from '@balancer/sdk';
+import { PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 
 import { PrismaPoolAndHookWithDynamic } from '../../../../../prisma/prisma-types';
 import { MathSol, WAD } from '../../utils/math';
@@ -40,7 +40,7 @@ export class GyroEPool implements BasePool {
                 throw new Error('Gyro pool as no dynamic pool token data');
             }
 
-            const token = new BaseToken(
+            const token = new Token(
                 parseFloat(chainToIdMap[pool.chain]),
                 poolToken.address as Address,
                 poolToken.token.decimals,
@@ -116,7 +116,7 @@ export class GyroEPool implements BasePool {
         this.tokenPairs = tokenPairs;
     }
 
-    public getNormalizedLiquidity(tokenIn: BaseToken, tokenOut: BaseToken): bigint {
+    public getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint {
         const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
 
         const tokenPair = this.tokenPairs.find(
@@ -130,8 +130,8 @@ export class GyroEPool implements BasePool {
     }
 
     public swapGivenIn(
-        tokenIn: BaseToken,
-        tokenOut: BaseToken,
+        tokenIn: Token,
+        tokenOut: Token,
         swapAmount: TokenAmount,
         mutateBalances?: boolean,
     ): TokenAmount {
@@ -175,8 +175,8 @@ export class GyroEPool implements BasePool {
     }
 
     public swapGivenOut(
-        tokenIn: BaseToken,
-        tokenOut: BaseToken,
+        tokenIn: Token,
+        tokenOut: Token,
         swapAmount: TokenAmount,
         mutateBalances?: boolean,
     ): TokenAmount {
@@ -215,7 +215,7 @@ export class GyroEPool implements BasePool {
         return inAmount;
     }
 
-    public getLimitAmountSwap(tokenIn: BaseToken, tokenOut: BaseToken, swapKind: SwapKind): bigint {
+    public getLimitAmountSwap(tokenIn: Token, tokenOut: Token, swapKind: SwapKind): bigint {
         const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
         if (swapKind === SwapKind.GivenIn) {
             const orderedNormalizedBalances = balancesFromTokenInOut(tIn.scale18, tOut.scale18, tIn.index === 0);
@@ -249,8 +249,8 @@ export class GyroEPool implements BasePool {
     }
 
     public getPoolTokens(
-        tokenIn: BaseToken,
-        tokenOut: BaseToken,
+        tokenIn: Token,
+        tokenOut: Token,
     ): {
         tIn: PoolTokenWithRate;
         tOut: PoolTokenWithRate;

@@ -3,7 +3,7 @@ import { GqlPoolType } from '../../../../../apps/api/gql/generated-schema';
 import { Chain } from '@prisma/client';
 import { MathSol, WAD } from '../../utils/math';
 import { Address, Hex, parseEther } from 'viem';
-import { SwapKind, BaseToken, TokenAmount } from '@balancer/sdk';
+import { SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { chainToChainId as chainToIdMap } from '../../../../network/chain-id-to-chain';
 import { TokenPairData } from '../../../../pool/lib/pool-on-chain-tokenpair-data';
 import { BasePool } from '../basePool';
@@ -35,7 +35,7 @@ export class WeightedPool implements BasePool {
                 throw new Error('Weighted pool token does not have a weight');
             }
 
-            const token = new BaseToken(
+            const token = new Token(
                 parseFloat(chainToIdMap[pool.chain]),
                 poolToken.address as Address,
                 poolToken.token.decimals,
@@ -79,7 +79,7 @@ export class WeightedPool implements BasePool {
         this.tokenPairs = tokenPairs;
     }
 
-    public getNormalizedLiquidity(tokenIn: BaseToken, tokenOut: BaseToken): bigint {
+    public getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint {
         const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
 
         const tokenPair = this.tokenPairs.find(
@@ -92,7 +92,7 @@ export class WeightedPool implements BasePool {
         return 0n;
     }
 
-    public getLimitAmountSwap(tokenIn: BaseToken, tokenOut: BaseToken, swapKind: SwapKind): bigint {
+    public getLimitAmountSwap(tokenIn: Token, tokenOut: Token, swapKind: SwapKind): bigint {
         const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
 
         if (swapKind === SwapKind.GivenIn) {
@@ -101,7 +101,7 @@ export class WeightedPool implements BasePool {
         return (tOut.amount * this.MAX_OUT_RATIO) / WAD;
     }
 
-    public swapGivenIn(tokenIn: BaseToken, tokenOut: BaseToken, swapAmount: TokenAmount): TokenAmount {
+    public swapGivenIn(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount {
         const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
 
         if (swapAmount.amount > this.getLimitAmountSwap(tokenIn, tokenOut, SwapKind.GivenIn)) {
@@ -124,7 +124,7 @@ export class WeightedPool implements BasePool {
         return tokenOutAmount;
     }
 
-    public swapGivenOut(tokenIn: BaseToken, tokenOut: BaseToken, swapAmount: TokenAmount): TokenAmount {
+    public swapGivenOut(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount {
         const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
 
         if (swapAmount.amount > this.getLimitAmountSwap(tokenIn, tokenOut, SwapKind.GivenOut)) {
@@ -154,7 +154,7 @@ export class WeightedPool implements BasePool {
         return amount.divUpFixed(MathSol.complementFixed(this.swapFee));
     }
 
-    public getPoolTokens(tokenIn: BaseToken, tokenOut: BaseToken): { tIn: WeightedPoolToken; tOut: WeightedPoolToken } {
+    public getPoolTokens(tokenIn: Token, tokenOut: Token): { tIn: WeightedPoolToken; tOut: WeightedPoolToken } {
         const tIn = this.tokenMap.get(tokenIn.address);
         const tOut = this.tokenMap.get(tokenOut.address);
 

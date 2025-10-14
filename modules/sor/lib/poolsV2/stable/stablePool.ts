@@ -3,7 +3,7 @@ import { Address, Hex, parseEther, parseUnits } from 'viem';
 import { PrismaPoolAndHookWithDynamic } from '../../../../../prisma/prisma-types';
 import { _calcInGivenOut, _calcOutGivenIn, _calculateInvariant } from '../composableStable/stableMath';
 import { MathSol } from '../../utils/math';
-import { PoolType, SwapKind, TokenAmount, BaseToken } from '@balancer/sdk';
+import { PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { chainToChainId as chainToIdMap } from '../../../../network/chain-id-to-chain';
 import { StableData } from '../../../../pool/subgraph-mapper';
 import { TokenPairData } from '../../../../pool/lib/pool-on-chain-tokenpair-data';
@@ -28,7 +28,7 @@ export class StablePool implements BasePool {
         if (!pool.dynamicData) throw new Error('Stable pool has no dynamic data');
 
         for (const poolToken of pool.tokens) {
-            const token = new BaseToken(
+            const token = new Token(
                 parseFloat(chainToIdMap[pool.chain]),
                 poolToken.address as Address,
                 poolToken.token.decimals,
@@ -74,7 +74,7 @@ export class StablePool implements BasePool {
         this.tokenPairs = tokenPairs;
     }
 
-    public getNormalizedLiquidity(tokenIn: BaseToken, tokenOut: BaseToken): bigint {
+    public getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint {
         const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
 
         const tokenPair = this.tokenPairs.find(
@@ -88,8 +88,8 @@ export class StablePool implements BasePool {
     }
 
     public swapGivenIn(
-        tokenIn: BaseToken,
-        tokenOut: BaseToken,
+        tokenIn: Token,
+        tokenOut: Token,
         swapAmount: TokenAmount,
         mutateBalances?: boolean,
     ): TokenAmount {
@@ -126,8 +126,8 @@ export class StablePool implements BasePool {
     }
 
     public swapGivenOut(
-        tokenIn: BaseToken,
-        tokenOut: BaseToken,
+        tokenIn: Token,
+        tokenOut: Token,
         swapAmount: TokenAmount,
         mutateBalances?: boolean,
     ): TokenAmount {
@@ -172,7 +172,7 @@ export class StablePool implements BasePool {
         return amount.divUpFixed(MathSol.complementFixed(this.swapFee));
     }
 
-    public getLimitAmountSwap(tokenIn: BaseToken, tokenOut: BaseToken, swapKind: SwapKind): bigint {
+    public getLimitAmountSwap(tokenIn: Token, tokenOut: Token, swapKind: SwapKind): bigint {
         const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
 
         if (swapKind === SwapKind.GivenIn) {
@@ -184,7 +184,7 @@ export class StablePool implements BasePool {
         return tOut.amount;
     }
 
-    public getPoolTokens(tokenIn: BaseToken, tokenOut: BaseToken): { tIn: BasePoolToken; tOut: BasePoolToken } {
+    public getPoolTokens(tokenIn: Token, tokenOut: Token): { tIn: BasePoolToken; tOut: BasePoolToken } {
         const tIn = this.tokenMap.get(tokenIn.address);
         const tOut = this.tokenMap.get(tokenOut.address);
 

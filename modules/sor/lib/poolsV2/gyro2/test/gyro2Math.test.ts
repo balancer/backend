@@ -1,7 +1,7 @@
 import { _calculateInvariant, _calcOutGivenIn, _findVirtualParams } from "../gyro2Math";
 import { Gyro2Pool, Gyro2PoolToken } from "../gyro2Pool"; 
 
-import { BaseToken, TokenAmount } from '@balancer/sdk'
+import { Token, TokenAmount, NativeToken } from '@balancer/sdk'
 
 import { parseEther } from 'viem';
 
@@ -24,8 +24,8 @@ describe('gyro2Math', () => {
         const expectedAmountOut = 879697n;
 
         // Create dummy tokens
-        const tokenIn = new BaseToken(1, '0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9', 6, 'TKN1', 'Token 1');
-        const tokenOut = new BaseToken(1, '0xb165a74407fe1e519d6bcbdec1ed3202b35a4140', 6, 'TKN2', 'Token 2');
+        const tokenIn = new Token(1, '0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9', 6, 'TKN1', 'Token 1');
+        const tokenOut = new Token(1, '0xb165a74407fe1e519d6bcbdec1ed3202b35a4140', 6, 'TKN2', 'Token 2');
 
         // Create Gyro2PoolTokens (pool balances, index and rate)
         const gyro2PoolTokenIn = new Gyro2PoolToken(tokenIn, 54239799503n, 0, 1000000000000000000n);
@@ -45,22 +45,22 @@ describe('gyro2Math', () => {
             [{ tokenA: '0xTokenInAddress', tokenB: '0xTokenOutAddress', normalizedLiquidity: '1000000', spotPrice: '1.5' }]
         );
 
-        const tIn = new BaseToken(
+        const tIn = new NativeToken(
             42161,
             "0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9",
             6,
+            "0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9",
             "USDT",
             "Tether USD",
-            "0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9",
           )
 
-        const tOut = new BaseToken(
+        const tOut = new NativeToken(
             42161,
             "0xb165a74407fe1e519d6bcbdec1ed3202b35a4140",
             6,
+            "0xb165a74407fe1e519d6bcbdec1ed3202b35a4140",
             "stataArbUSDT",
             "Static Aave Arbitrum USDT",
-            "0xb165a74407fe1e519d6bcbdec1ed3202b35a4140",
         )
         
         const swapAmount = TokenAmount.fromHumanAmount(tIn, '1');
@@ -84,8 +84,8 @@ describe('gyro2Math', () => {
         const expectedAmountOut = 1000003n;
 
         // Create dummy tokens
-        const tokenIn = new BaseToken(1, '0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9', 6, 'TKN1', 'Token 1');
-        const tokenOut = new BaseToken(1, '0xb165a74407fe1e519d6bcbdec1ed3202b35a4140', 6, 'TKN2', 'Token 2');
+        const tokenIn = new Token(1, '0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9', 6, 'TKN1', 'Token 1');
+        const tokenOut = new Token(1, '0xb165a74407fe1e519d6bcbdec1ed3202b35a4140', 6, 'TKN2', 'Token 2');
 
         // Create Gyro2PoolTokens (pool balances, index and rate) based on sim from block 257426306
         const gyro2PoolTokenIn = new Gyro2PoolToken(tokenIn, 54239799503n, 0, 1000000000000000000n);
@@ -104,22 +104,22 @@ describe('gyro2Math', () => {
             [{ tokenA: '0xTokenInAddress', tokenB: '0xTokenOutAddress', normalizedLiquidity: '1000000', spotPrice: '1.5' }]
         );
 
-        const tIn = new BaseToken(
+        const tIn = new NativeToken(
             42161,
             "0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9",
             6,
+            "0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9",
             "USDT",
             "Tether USD",
-            "0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9",
           )
 
-        const tOut = new BaseToken(
+        const tOut = new NativeToken(
             42161,
             "0xb165a74407fe1e519d6bcbdec1ed3202b35a4140",
             6,
+            "0xb165a74407fe1e519d6bcbdec1ed3202b35a4140",
             "stataArbUSDT",
             "Static Aave Arbitrum USDT",
-            "0xb165a74407fe1e519d6bcbdec1ed3202b35a4140",
         )
         const swapAmount = TokenAmount.fromHumanAmount(tIn, '0.879697');
 

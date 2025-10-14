@@ -1,6 +1,6 @@
 import { Hex } from 'viem';
 
-import { MAX_UINT256, PoolType, SwapKind, BaseToken, TokenAmount } from '@balancer/sdk';
+import { MAX_UINT256, PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { AddKind, RemoveKind, Vault, HookState, PoolState } from '@balancer-labs/balancer-maths';
 import { Chain } from '@prisma/client';
 
@@ -55,7 +55,7 @@ export class BasePoolV3 {
         this.vault = new Vault();
     }
 
-    public getLimitAmountSwap(tokenIn: BaseToken, tokenOut: BaseToken, swapKind: SwapKind): bigint {
+    public getLimitAmountSwap(tokenIn: Token, tokenOut: Token, swapKind: SwapKind): bigint {
         const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
 
         // remove liquidity
@@ -90,8 +90,8 @@ export class BasePoolV3 {
     }
 
     public swapGivenIn(
-        tokenIn: BaseToken,
-        tokenOut: BaseToken,
+        tokenIn: Token,
+        tokenOut: Token,
         swapAmount: TokenAmount,
         mutateBalances?: boolean,
     ): TokenAmount {
@@ -163,8 +163,8 @@ export class BasePoolV3 {
     }
 
     public swapGivenOut(
-        tokenIn: BaseToken,
-        tokenOut: BaseToken,
+        tokenIn: Token,
+        tokenOut: Token,
         swapAmount: TokenAmount,
         mutateBalances?: boolean,
     ): TokenAmount {
@@ -235,7 +235,7 @@ export class BasePoolV3 {
         return TokenAmount.fromRawAmount(tIn.token, calculatedAmount);
     }
 
-    public getNormalizedLiquidity(tokenIn: BaseToken, tokenOut: BaseToken): bigint {
+    public getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint {
         const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
 
         const tokenPair = this.tokenPairs.find(
@@ -254,7 +254,7 @@ export class BasePoolV3 {
         throw new Error('Must be implemented by the subclass');
     }
 
-    public getPoolTokens(tokenIn: BaseToken, tokenOut: BaseToken): { tIn: BasePoolToken; tOut: BasePoolToken } {
+    public getPoolTokens(tokenIn: Token, tokenOut: Token): { tIn: BasePoolToken; tOut: BasePoolToken } {
         throw new Error('Must be implemented by the subclass');
     }
 

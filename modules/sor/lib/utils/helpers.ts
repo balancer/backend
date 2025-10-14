@@ -1,4 +1,4 @@
-import { BigintIsh, SwapKind, BaseToken, TokenAmount } from '@balancer/sdk';
+import { BigintIsh, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { PathWithAmount } from '../path';
 
 import { HookState } from '@balancer-labs/balancer-maths';
@@ -8,8 +8,8 @@ import { parseEther, parseUnits } from 'viem';
 import { PrismaPoolAndHookWithDynamic, HookData } from '../../../../prisma/prisma-types';
 
 export function checkInputs(
-    tokenIn: BaseToken,
-    tokenOut: BaseToken,
+    tokenIn: Token,
+    tokenOut: Token,
     swapKind: SwapKind,
     swapAmount: BigintIsh | TokenAmount,
 ): TokenAmount {

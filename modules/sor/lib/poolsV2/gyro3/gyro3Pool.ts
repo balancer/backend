@@ -4,7 +4,7 @@ import { Chain } from '@prisma/client';
 import { MathSol, WAD } from '../../utils/math';
 import { MathGyro, SWAP_LIMIT_FACTOR } from '../../utils/gyroHelpers/math';
 import { _calcInGivenOut, _calcOutGivenIn, _calculateInvariant } from './gyro3Math';
-import { PoolType, SwapKind, BaseToken, TokenAmount } from '@balancer/sdk';
+import { PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
 import { chainToChainId as chainToIdMap } from '../../../../network/chain-id-to-chain';
 import { GyroData } from '../../../../pool/subgraph-mapper';
 import { TokenPairData } from '../../../../pool/lib/pool-on-chain-tokenpair-data';
@@ -35,7 +35,7 @@ export class Gyro3Pool implements BasePool {
             if (!poolToken.balance) {
                 throw new Error('Gyro pool as no dynamic pool token data');
             }
-            const token = new BaseToken(
+            const token = new Token(
                 parseFloat(chainToIdMap[pool.chain]),
                 poolToken.address as Address,
                 poolToken.token.decimals,
@@ -80,7 +80,7 @@ export class Gyro3Pool implements BasePool {
         this.tokenPairs = tokenPairs;
     }
 
-    public getNormalizedLiquidity(tokenIn: BaseToken, tokenOut: BaseToken): bigint {
+    public getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint {
         const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
 
         const tokenPair = this.tokenPairs.find(
@@ -94,8 +94,8 @@ export class Gyro3Pool implements BasePool {
     }
 
     public swapGivenIn(
-        tokenIn: BaseToken,
-        tokenOut: BaseToken,
+        tokenIn: Token,
+        tokenOut: Token,
         swapAmount: TokenAmount,
         mutateBalances?: boolean,
     ): TokenAmount {
@@ -124,8 +124,8 @@ export class Gyro3Pool implements BasePool {
     }
 
     public swapGivenOut(
-        tokenIn: BaseToken,
-        tokenOut: BaseToken,
+        tokenIn: Token,
+        tokenOut: Token,
         swapAmount: TokenAmount,
         mutateBalances?: boolean,
     ): TokenAmount {
@@ -148,7 +148,7 @@ export class Gyro3Pool implements BasePool {
         return inAmount;
     }
 
-    public getLimitAmountSwap(tokenIn: BaseToken, tokenOut: BaseToken, swapKind: SwapKind): bigint {
+    public getLimitAmountSwap(tokenIn: Token, tokenOut: Token, swapKind: SwapKind): bigint {
         const { tIn, tOut, tertiary } = this.getPoolPairData(tokenIn, tokenOut);
         if (swapKind === SwapKind.GivenIn) {
             const invariant = _calculateInvariant([tIn.scale18, tOut.scale18, tertiary.scale18], this.root3Alpha);
@@ -171,7 +171,7 @@ export class Gyro3Pool implements BasePool {
         return amount.divUpFixed(MathSol.complementFixed(this.swapFee));
     }
 
-    public getPoolTokens(tokenIn: BaseToken, tokenOut: BaseToken): { tIn: BasePoolToken; tOut: BasePoolToken } {
+    public getPoolTokens(tokenIn: Token, tokenOut: Token): { tIn: BasePoolToken; tOut: BasePoolToken } {
         const tIn = this.tokenMap.get(tokenIn.address);
         const tOut = this.tokenMap.get(tokenOut.address);
 
@@ -183,8 +183,8 @@ export class Gyro3Pool implements BasePool {
     }
 
     public getPoolPairData(
-        tokenIn: BaseToken,
-        tokenOut: BaseToken,
+        tokenIn: Token,
+        tokenOut: Token,
     ): {
         tIn: BasePoolToken;
         tOut: BasePoolToken;

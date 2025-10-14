@@ -1,6 +1,6 @@
 // bun vitest balancer-sor.integration.test.ts
 
-import { ExactInQueryOutput, Swap, SwapKind, BaseToken, Address, Path, ExactOutQueryOutput } from '@balancer/sdk';
+import { ExactInQueryOutput, Swap, SwapKind, Token, Address, Path, ExactOutQueryOutput } from '@balancer/sdk';
 
 import { PathWithAmount } from './lib/path';
 import { SOR } from './lib/sor';
@@ -90,12 +90,12 @@ describe('Balancer SOR Integration Tests', () => {
             });
 
             // get SOR paths
-            const tIn = new BaseToken(
+            const tIn = new Token(
                 parseFloat(chainToIdMap[stataUSDC.token.chain]),
                 stataUSDC.token.underlyingTokenAddress as Address, // USDC
                 stataUSDC.token.decimals,
             );
-            const tOut = new BaseToken(
+            const tOut = new Token(
                 parseFloat(chainToIdMap[stataUSDT.token.chain]),
                 stataUSDT.token.underlyingTokenAddress as Address, // DAI
                 stataUSDT.token.decimals,
@@ -159,10 +159,10 @@ describe('Balancer SOR Integration Tests', () => {
         let exitFeeHook: HookData;
         let directionalFeeHook: HookData;
 
-        let weightedBpt: BaseToken;
-        let stableBpt: BaseToken;
-        let wethToken: BaseToken;
-        let aaveFaucetUsdcToken: BaseToken;
+        let weightedBpt: Token;
+        let stableBpt: Token;
+        let wethToken: Token;
+        let aaveFaucetUsdcToken: Token;
 
         beforeAll(async () => {
             // setup mock pool data - Weighted
@@ -275,23 +275,23 @@ describe('Balancer SOR Integration Tests', () => {
                 },
             });
 
-            weightedBpt = new BaseToken(
+            weightedBpt = new Token(
                 parseFloat(chainToIdMap[BAL.token.chain]),
                 prismaWeightedPool.address as Address,
                 18,
             );
-            wethToken = new BaseToken(
+            wethToken = new Token(
                 parseFloat(chainToIdMap[WETH.token.chain]),
                 WETH.address as Address,
                 WETH.token.decimals,
             );
 
-            stableBpt = new BaseToken(
+            stableBpt = new Token(
                 parseFloat(chainToIdMap[BAL.token.chain]),
                 prismaStablePoolWithExitFee.address as Address,
                 18,
             );
-            aaveFaucetUsdcToken = new BaseToken(
+            aaveFaucetUsdcToken = new Token(
                 parseFloat(chainToIdMap[WETH.token.chain]),
                 aaveFaucetUsdc.address as Address,
                 aaveFaucetUsdc.token.decimals,
@@ -475,12 +475,12 @@ describe('Balancer SOR Integration Tests', () => {
         });
         test('SOR quote should match swap query with directional fee hook used - GIVEN IN', async () => {
             // GIVEN IN
-            const dai = new BaseToken(
+            const dai = new Token(
                 parseFloat(chainToIdMap[BAL.token.chain]),
                 aaveFaucetDai.address as Address,
                 aaveFaucetDai.token.decimals,
             );
-            const usdc = new BaseToken(
+            const usdc = new Token(
                 parseFloat(chainToIdMap[WETH.token.chain]),
                 aaveFaucetUsdc.address as Address,
                 aaveFaucetUsdc.token.decimals,
@@ -522,12 +522,12 @@ describe('Balancer SOR Integration Tests', () => {
         });
         test('SOR quote should match swap query with directional fee hook used - GIVEN OUT', async () => {
             // GIVEN OUT
-            const dai = new BaseToken(
+            const dai = new Token(
                 parseFloat(chainToIdMap[BAL.token.chain]),
                 aaveFaucetDai.address as Address,
                 aaveFaucetDai.token.decimals,
             );
-            const usdc = new BaseToken(
+            const usdc = new Token(
                 parseFloat(chainToIdMap[WETH.token.chain]),
                 aaveFaucetUsdc.address as Address,
                 aaveFaucetUsdc.token.decimals,

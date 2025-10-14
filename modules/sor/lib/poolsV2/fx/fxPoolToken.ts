@@ -1,7 +1,7 @@
 import { parseUnits } from 'viem';
 import { WAD } from '../../utils/math';
 import { MathFx } from './helpers';
-import { BigintIsh, BaseToken, TokenAmount } from '@balancer/sdk';
+import { BigintIsh, Token, TokenAmount } from '@balancer/sdk';
 import { BasePoolToken } from '../../utils/basePoolToken';
 
 export class FxPoolToken extends BasePoolToken {
@@ -11,7 +11,7 @@ export class FxPoolToken extends BasePoolToken {
     private readonly scalar36 = this.scalar * WAD;
 
     public constructor(
-        token: BaseToken,
+        token: Token,
         amount: BigintIsh,
         index: number,
         latestFXPrice: string,

@@ -1,7 +1,7 @@
 import { randomBytes } from 'crypto';
 import { providers } from 'ethers';
 import { mainnetNetworkConfig } from '../modules/network/mainnet';
-import { BaseToken } from '@balancer/sdk';
+import { Token } from '@balancer/sdk';
 import { PrismaPoolAndHookWithDynamic } from '../prisma/prisma-types';
 import { isSameAddress } from '@balancer/sdk';
 import { Address } from 'viem';
@@ -60,8 +60,8 @@ export function getTokensFromPrismaPools(
     tokens: string[],
     bufferPools: BufferPoolData[],
 ): {
-    tokenIn: BaseToken;
-    tokenOut: BaseToken;
+    tokenIn: Token;
+    tokenOut: Token;
 } {
     const prismaTokens = supportedPools.flatMap((p) =>
         p.tokens.map((t) => ({ address: t.token.address as Address, decimals: t.token.decimals })),
@@ -75,7 +75,7 @@ export function getTokensFromPrismaPools(
     const prismaTokenIn = prismaTokens.find((p) => isSameAddress(p.address, tokens[0] as Address))!;
     const prismaTokenOut = prismaTokens.find((p) => isSameAddress(p.address, tokens[tokens.length - 1] as Address))!;
 
-    const tokenIn = new BaseToken(chainId, prismaTokenIn.address, prismaTokenIn.decimals);
-    const tokenOut = new BaseToken(chainId, prismaTokenOut.address, prismaTokenOut.decimals);
+    const tokenIn = new Token(chainId, prismaTokenIn.address, prismaTokenIn.decimals);
+    const tokenOut = new Token(chainId, prismaTokenOut.address, prismaTokenOut.decimals);
     return { tokenIn, tokenOut };
 }

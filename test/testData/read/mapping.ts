@@ -1,5 +1,5 @@
 import { Address, formatEther, formatUnits } from 'viem';
-import { isSameAddress, BaseToken } from '@balancer/sdk';
+import { isSameAddress, Token } from '@balancer/sdk';
 
 import { PoolTokenWithRate } from '../../../modules/sor/lib/utils';
 import { PrismaPoolAndHookWithDynamic } from '../../../prisma/prisma-types';
@@ -28,10 +28,10 @@ export function mapGyroPoolStateToPrismaPool(
     );
 
     const poolTokens = poolState.tokens.map(
-        (token: string, i: number) => new BaseToken(chainId, token as Address, decimals[i]),
+        (token: string, i: number) => new Token(chainId, token as Address, decimals[i]),
     );
 
-    const tokenAmounts = poolTokens.map((token: BaseToken, i: number) =>
+    const tokenAmounts = poolTokens.map((token: Token, i: number) =>
         PoolTokenWithRate.fromScale18AmountWithRate(
             token,
             poolState.balancesLiveScaled18[i],
@@ -118,10 +118,10 @@ export function mapStablePoolStateToPrismaPool(
     );
 
     const poolTokens = poolState.tokens.map(
-        (token: string, i: number) => new BaseToken(chainId, token as Address, decimals[i]),
+        (token: string, i: number) => new Token(chainId, token as Address, decimals[i]),
     );
 
-    const tokenAmounts = poolTokens.map((token: BaseToken, i: number) =>
+    const tokenAmounts = poolTokens.map((token: Token, i: number) =>
         PoolTokenWithRate.fromScale18AmountWithRate(
             token,
             poolState.balancesLiveScaled18[i],
@@ -189,10 +189,10 @@ export function mapWeightedPoolStateToPrismaPool(
     );
 
     const poolTokens = poolState.tokens.map(
-        (token: string, i: number) => new BaseToken(chainId, token as Address, decimals[i]),
+        (token: string, i: number) => new Token(chainId, token as Address, decimals[i]),
     );
 
-    const tokenAmounts = poolTokens.map((token: BaseToken, i: number) =>
+    const tokenAmounts = poolTokens.map((token: Token, i: number) =>
         PoolTokenWithRate.fromScale18AmountWithRate(
             token,
             poolState.balancesLiveScaled18[i],
@@ -261,10 +261,10 @@ export function mapLiquidityBootstrappingPoolStateToPrismaPool(
     );
 
     const poolTokens = poolState.tokens.map(
-        (token: string, i: number) => new BaseToken(chainId, token as Address, decimals[i]),
+        (token: string, i: number) => new Token(chainId, token as Address, decimals[i]),
     );
 
-    const tokenAmounts = poolTokens.map((token: BaseToken, i: number) =>
+    const tokenAmounts = poolTokens.map((token: Token, i: number) =>
         PoolTokenWithRate.fromScale18AmountWithRate(
             token,
             poolState.balancesLiveScaled18[i],
@@ -342,10 +342,10 @@ export function mapReClammPoolStateToPrismaPool(
     );
 
     const poolTokens = poolState.tokens.map(
-        (token: string, i: number) => new BaseToken(chainId, token as Address, decimals[i]),
+        (token: string, i: number) => new Token(chainId, token as Address, decimals[i]),
     );
 
-    const tokenAmounts = poolTokens.map((token: BaseToken, i: number) =>
+    const tokenAmounts = poolTokens.map((token: Token, i: number) =>
         PoolTokenWithRate.fromScale18AmountWithRate(
             token,
             poolState.balancesLiveScaled18[i],
@@ -427,10 +427,10 @@ export function mapQuantAmmPoolStateToPrismaPool(
     );
 
     const poolTokens = poolState.tokens.map(
-        (token: string, i: number) => new BaseToken(chainId, token as Address, decimals[i]),
+        (token: string, i: number) => new Token(chainId, token as Address, decimals[i]),
     );
 
-    const tokenAmounts = poolTokens.map((token: BaseToken, i: number) =>
+    const tokenAmounts = poolTokens.map((token: Token, i: number) =>
         PoolTokenWithRate.fromScale18AmountWithRate(
             token,
             poolState.balancesLiveScaled18[i],
