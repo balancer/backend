@@ -208,11 +208,11 @@ export default <NetworkData>{
                     extractors: [{ type: 'path', token: '0xfa85fe5a8f5560e9039c04f2b0a90de1415abd70', path: '$.apy' }],
                 },
                 {
-                    url: 'https://usd-locks-api.rings.money/wrapper/apy',
+                    url: 'https://locks-usd-api-sonic-earn.trevee.xyz/wrapper/apy',
                     extractors: [{ type: 'path', token: '0x9fb76f7ce5fceaa2c42887ff441d46095e494206', path: '$.apy' }],
                 },
                 {
-                    url: 'https://eth-locks-api.rings.money/wrapper/apy',
+                    url: 'https://locks-eth-api-sonic-earn.trevee.xyz/wrapper/apy',
                     extractors: [{ type: 'path', token: '0xe8a41c62bb4d5863c6eadc96792cfe90a1f37c47', path: '$.apy' }],
                 },
                 {
