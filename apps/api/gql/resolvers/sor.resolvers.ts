@@ -1,6 +1,6 @@
 import { QuerySorGetSwapPathsArgs, Resolvers } from '../generated-schema';
 import { sorService } from '../../../../modules/sor/sor.service';
-import { GraphQLResolveInfo, print } from 'graphql';
+import { GraphQLResolveInfo, print, Kind, DocumentNode } from 'graphql';
 import { env } from '../../../env';
 
 const TIMEOUT = 15_000;
@@ -32,8 +32,15 @@ const handleProxyRequest = async (
 ) => {
     const url = env.SOR_SERVICE_URL;
 
-    // Use graphql-js print() to convert the original operation to a string
-    const query = print(info.operation);
+    // Construct a complete document including fragments
+    const fragmentDefinitions = Object.values(info.fragments);
+    const documentWithFragments: DocumentNode = {
+        kind: Kind.DOCUMENT,
+        definitions: [info.operation, ...fragmentDefinitions],
+    };
+
+    // Use graphql-js print() to convert the complete document to a string
+    const query = print(documentWithFragments);
 
     // Create a promise that rejects on timeout
     const timeoutPromise = new Promise<never>((_, reject) => {
