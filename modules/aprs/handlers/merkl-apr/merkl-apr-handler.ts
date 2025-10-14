@@ -1,14 +1,19 @@
 import { $Enums, PrismaPoolAprItem, PrismaPoolAprType } from '@prisma/client';
 import { AprHandler, PoolAPRData } from '../../types';
 import { chainIdToChain } from '../../../network/chain-id-to-chain';
+import { AaveV3Plasma } from '@bgd-labs/aave-address-book';
 
 const opportunityUrl =
     'https://api.merkl.xyz/v4/opportunities/?test=false&status=LIVE&campaigns=true&mainProtocolId=balancer&page=0&items=100';
+
+const tokenOpportunityUrlBase = `https://api.merkl.xyz/v4/opportunities/?status=LIVE&explorerAddress=`;
 
 interface MerklOpportunity {
     chainId: number;
     identifier: string;
     dailyRewards: number;
+    explorerAddress: string;
+    apr: number;
     campaigns: {
         params: {
             whitelist: string[];
@@ -36,17 +41,12 @@ export class MerklAprHandler implements AprHandler {
     public async calculateAprForPools(
         pools: PoolAPRData[],
     ): Promise<Omit<PrismaPoolAprItem, 'createdAt' | 'updatedAt'>[]> {
-        const chain = pools[0].chain;
+        const aprsFromOpportunities = await this.findPoolOpportunities(pools);
 
-        const opportunities = await this.fetchMerklOpportunities();
+        // for boosted pools
+        const aprsFromTokenOpportunities = await this.findTokenOpportunities(pools);
 
-        const allAffectedPoolAddresses = opportunities.map((campaign) => campaign.identifier.toLowerCase());
-
-        const affectedPools = pools.filter((pool) => allAffectedPoolAddresses.includes(pool.address.toLowerCase()));
-
-        const aprsFromOpportunities = this.mapOpportunitiesToAprs(opportunities, affectedPools);
-
-        const data = aprsFromOpportunities;
+        const data = this.combineAndDeduplicateAprs([...aprsFromOpportunities, ...aprsFromTokenOpportunities]);
 
         return data.map((apr) => ({
             id: apr.id,
@@ -58,6 +58,145 @@ export class MerklAprHandler implements AprHandler {
             rewardTokenAddress: null,
             rewardTokenSymbol: null,
         }));
+    }
+
+    private combineAndDeduplicateAprs(
+        aprs: {
+            id: string;
+            type: PrismaPoolAprType;
+            title: string;
+            chain: $Enums.Chain;
+            poolId: string;
+            apr: number;
+        }[],
+    ): Omit<PrismaPoolAprItem, 'createdAt' | 'updatedAt'>[] {
+        // Combine APRs by summing APR values for the same pool
+        const aprMap: Map<string, Omit<PrismaPoolAprItem, 'createdAt' | 'updatedAt'>> = new Map();
+
+        for (const apr of aprs) {
+            if (aprMap.has(apr.poolId)) {
+                const existingApr = aprMap.get(apr.poolId)!;
+                existingApr.apr += apr.apr; // Sum the APR values
+                aprMap.set(apr.poolId, existingApr);
+            } else {
+                aprMap.set(apr.poolId, { ...apr, rewardTokenAddress: null, rewardTokenSymbol: null });
+            }
+        }
+        return Array.from(aprMap.values());
+    }
+
+    private async findPoolOpportunities(pools: PoolAPRData[]) {
+        const opportunities = await this.fetchMerklOpportunities();
+
+        const allAffectedPoolAddresses = opportunities.map((campaign) => campaign.identifier.toLowerCase());
+
+        const affectedPools = pools.filter((pool) => allAffectedPoolAddresses.includes(pool.address.toLowerCase()));
+
+        const aprsFromOpportunities = this.mapOpportunitiesToAprs(opportunities, affectedPools);
+        return aprsFromOpportunities;
+    }
+
+    // for boosted pools, merkl doesnt forward the APR to the pools so we need to query merkl for any apr of any pool tokens (we limit to tokens that have underlying)
+    private async findTokenOpportunities(pools: PoolAPRData[]) {
+        const aaveMarkets = [AaveV3Plasma];
+        const aaveMarketForChain = aaveMarkets.find((market) => chainIdToChain[market.CHAIN_ID] === pools[0].chain);
+        if (!aaveMarketForChain) {
+            throw new Error(`No Aave market found for chain ${pools[0].chain}`);
+        }
+        const aaveTokenMappings = await this.getTokenMappings(Object.values(aaveMarketForChain.ASSETS));
+
+        const tokensWithUnderlying: string[] = [];
+        pools.forEach((pool) => {
+            tokensWithUnderlying.push(
+                ...pool.tokens
+                    .filter((token) => token.token.underlyingTokenAddress)
+                    .map((token) =>
+                        aaveTokenMappings.get(token.address.toLowerCase()) // we replace the waTokens with aTokens as merkl tracks aTokens
+                            ? aaveTokenMappings.get(token.address.toLowerCase())!
+                            : token.address.toLowerCase(),
+                    )
+                    .flat(),
+            );
+        });
+        const uniqueTokensWithUnderlying = Array.from(new Set(tokensWithUnderlying));
+
+        let tokenOpportunities: MerklOpportunity[] = [];
+
+        if (uniqueTokensWithUnderlying.length > 0) {
+            // Fetch opportunities for the unique tokens
+            const tokenOpportunityResponses = await Promise.all(
+                uniqueTokensWithUnderlying.map((tokenAddress) =>
+                    fetch(`${tokenOpportunityUrlBase}${tokenAddress}`).then(
+                        (res) => res.json() as unknown as MerklOpportunity[],
+                    ),
+                ),
+            );
+
+            // Flatten the array of arrays and filter out opportunities with whitelist
+            tokenOpportunities = tokenOpportunityResponses.flat();
+        }
+
+        return this.mapTokenOpportunitiesToAprs(tokenOpportunities, pools, aaveTokenMappings);
+    }
+
+    private mapTokenOpportunitiesToAprs(
+        opportunities: MerklOpportunity[],
+        affectedPools: PoolAPRData[],
+        aaveTokenMappings: Map<string, string>,
+    ): {
+        id: string;
+        type: PrismaPoolAprType;
+        title: string;
+        chain: $Enums.Chain;
+        poolId: string;
+        apr: number;
+    }[] {
+        const aprs: {
+            id: string;
+            type: PrismaPoolAprType;
+            title: string;
+            chain: $Enums.Chain;
+            poolId: string;
+            apr: number;
+        }[] = [];
+
+        for (const opportunity of opportunities) {
+            const pool = affectedPools.find(
+                (pool) =>
+                    pool.chain === chainIdToChain[opportunity.chainId] &&
+                    pool.tokens.some((token) =>
+                        aaveTokenMappings.get(token.address.toLowerCase())
+                            ? aaveTokenMappings.get(token.address.toLowerCase()) ===
+                              opportunity.explorerAddress.toLowerCase()
+                            : token.address === opportunity.explorerAddress.toLowerCase(),
+                    ),
+            );
+
+            if (!pool || !pool.dynamicData?.totalLiquidity) {
+                continue;
+            }
+
+            const tvl = pool.tokens.map((t) => t.balanceUSD).reduce((a, b) => a + b, 0);
+            const tokenTvl =
+                pool.tokens.find((token) =>
+                    aaveTokenMappings.get(token.address.toLowerCase())
+                        ? aaveTokenMappings.get(token.address) === opportunity.explorerAddress.toLowerCase()
+                        : token.address === opportunity.explorerAddress.toLowerCase(),
+                )?.balanceUSD || 0;
+
+            const tokenShareOfPoolTvl = tokenTvl === 0 || tvl === 0 ? 0 : tokenTvl / tvl;
+
+            aprs.push({
+                id: `${pool.id}-merkl`,
+                type: PrismaPoolAprType.MERKL,
+                title: `Merkl Rewards`,
+                chain: chainIdToChain[opportunity.chainId],
+                poolId: pool.id,
+                apr: (opportunity.apr / 100) * tokenShareOfPoolTvl,
+            });
+        }
+
+        return aprs.filter((item) => item !== null);
     }
 
     private mapOpportunitiesToAprs(
@@ -102,5 +241,18 @@ export class MerklAprHandler implements AprHandler {
         }
 
         return aprs.filter((item) => item !== null);
+    }
+
+    private async getTokenMappings(assets?: any[]) {
+        const wrapperToATokenMap = new Map<string, string>();
+        if (!assets || assets.length === 0) return wrapperToATokenMap;
+        // create map wrapper -> aToken
+        for (const asset of assets) {
+            const wrappers = [asset.STATIC_A_TOKEN?.toLowerCase(), asset.STATA_TOKEN?.toLowerCase()].filter((w) => !!w);
+            for (const wrapper of wrappers) {
+                wrapperToATokenMap.set(wrapper, asset.A_TOKEN.toLowerCase());
+            }
+        }
+        return wrapperToATokenMap;
     }
 }
