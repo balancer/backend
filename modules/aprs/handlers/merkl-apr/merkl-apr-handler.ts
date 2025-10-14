@@ -101,7 +101,7 @@ export class MerklAprHandler implements AprHandler {
         const aaveMarkets = [AaveV3Plasma];
         const aaveMarketForChain = aaveMarkets.find((market) => chainIdToChain[market.CHAIN_ID] === pools[0].chain);
         if (!aaveMarketForChain) {
-            throw new Error(`No Aave market found for chain ${pools[0].chain}`);
+            return [];
         }
         const aaveTokenMappings = await this.getTokenMappings(Object.values(aaveMarketForChain.ASSETS));
 
