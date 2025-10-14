@@ -123,5 +123,9 @@ export const optimismNetworkConfig: NetworkConfig = {
             name: 'sync-hook-data',
             interval: every(1, 'hours'),
         },
+        {
+            name: 'sync-lbps',
+            interval: every(1, 'minutes'),
+        },
     ],
 };

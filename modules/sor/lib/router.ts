@@ -25,6 +25,7 @@ export class Router {
         enableAddRemoveLiquidityPaths: boolean,
         tokenPrices: Map<string, number>,
         graphTraversalConfig?: Partial<PathGraphTraversalConfig>,
+        signal?: AbortSignal,
     ): PathLocal[] {
         const minSwapAmountRatio = graphTraversalConfig?.minSwapAmountRatio ?? 0.5;
         // Compute USD threshold if prices provided
@@ -47,6 +48,7 @@ export class Router {
             swapAmount,
             swapKind,
             graphTraversalConfig,
+            signal,
         });
 
         return candidatePaths;

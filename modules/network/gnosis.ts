@@ -134,5 +134,9 @@ export const gnosisNetworkConfig: NetworkConfig = {
             name: 'sync-erc4626-onchain-data',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(60, 'minutes') : every(20, 'minutes'),
         },
+        {
+            name: 'sync-lbps',
+            interval: every(1, 'minutes'),
+        },
     ],
 };

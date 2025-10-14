@@ -3090,7 +3090,7 @@ export type Query = {
     sftmxGetStakingSnapshots: Array<GqlSftmxStakingSnapshot>;
     /** Retrieve the withdrawalrequests from a user */
     sftmxGetWithdrawalRequests: Array<GqlSftmxWithdrawalRequests>;
-    /** Get swap quote from the SOR v2 for the V2 vault */
+    /** Get swap quote from the SOR v2 */
     sorGetSwapPaths: GqlSorGetSwapPaths;
     /** Get the staking data and status for stS */
     stsGetGqlStakedSonicData: GqlStakedSonicData;

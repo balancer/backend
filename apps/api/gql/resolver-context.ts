@@ -9,6 +9,7 @@ export interface ResolverContext {
     adminApiKey: string | null;
     chainId: string | null;
     accountAddress: string | null;
+    req: Request;
 }
 
 export async function resolverContext(req: Request) {
@@ -21,5 +22,6 @@ export async function resolverContext(req: Request) {
         accountAddress: accountAddress ? accountAddress.toLowerCase() : null,
         adminApiKey: adminApiKey ?? null,
         chainId: chainId ?? null,
+        req,
     };
 }
