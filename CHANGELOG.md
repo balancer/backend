@@ -1,5 +1,20 @@
 # backend
 
+## 1.55.0
+
+### Minor Changes
+
+-   b0f3c5a: handle SOR closed conn and timeout
+
+### Patch Changes
+
+-   d030e91: enable lbp sync
+-   c66e8f8: SOR: handle query alias
+-   37510e2: rate provider APRs based on config
+-   964aae0: enable sor proxy on prod
+-   e18677c: route canary sor to dedicated env
+-   fe05ac7: APRs use safe rate providers only
+
 ## 1.54.11
 
 ### Patch Changes
