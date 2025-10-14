@@ -59,6 +59,17 @@ export default <NetworkData>{
         ybAprHandler: {
             http: [
                 {
+                    url: 'https://app.avantprotocol.com/api/savusdApy',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0xa29420057f3e3b9512d4786df135da1674bd74d4',
+                            path: '$.savusdApy',
+                        },
+                    ],
+                },
+                {
                     url: 'https://api.maple.finance/v2/graphql',
                     body: JSON.stringify({
                         query: `{
