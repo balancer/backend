@@ -1,5 +1,11 @@
 # backend
 
+## 1.55.1
+
+### Patch Changes
+
+-   5c1c24c: add support for fragments
+
 ## 1.55.0
 
 ### Minor Changes
