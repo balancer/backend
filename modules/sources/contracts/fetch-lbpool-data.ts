@@ -1,6 +1,8 @@
 import abi from './abis/lb-pool';
+import vaultV3 from '../contracts/abis/VaultV3';
 import { Chain } from '@prisma/client';
 import { getViemClient } from '../viem-client';
+import config from '../../../config';
 import { AbiParametersToPrimitiveTypes, ExtractAbiFunction } from 'abitype';
 import { fetchErc20Headers } from './fetch-erc20-headers';
 
@@ -10,8 +12,15 @@ type ImmutableData = AbiParametersToPrimitiveTypes<
 
 type DynamicData = AbiParametersToPrimitiveTypes<ExtractAbiFunction<typeof abi, 'getLBPoolDynamicData'>['outputs']>[0];
 
+const getPoolRoleAccounts = vaultV3.filter((item) => item.type === 'function' && item.name === 'getPoolRoleAccounts');
+
+type PoolRoleAccounts = AbiParametersToPrimitiveTypes<
+    ExtractAbiFunction<typeof getPoolRoleAccounts, 'getPoolRoleAccounts'>['outputs']
+>[0];
+
 export async function fetchLBPoolData(pool: string, chain: Chain) {
     const client = getViemClient(chain);
+    const vaultAddress = config[chain].balancer.v3.vaultAddress;
     const blockNumber = await client.getBlockNumber().then(Number);
 
     let contracts = [
@@ -40,11 +49,18 @@ export async function fetchLBPoolData(pool: string, chain: Chain) {
             abi,
             functionName: 'owner',
         },
+        {
+            address: vaultAddress as `0x${string}`,
+            abi: getPoolRoleAccounts,
+            functionName: 'getPoolRoleAccounts',
+            args: [pool],
+        },
     ];
 
     const results = await client.multicall({ contracts, allowFailure: false });
     const immutableData = results[0] as unknown as ImmutableData;
     const dynamicData = results[1] as unknown as DynamicData;
+    const roleAccounts = results[5] as unknown as PoolRoleAccounts;
 
     // Tokens
     const tokenHeaders = await fetchErc20Headers(immutableData.tokens, client).then((headers) =>
@@ -58,6 +74,9 @@ export async function fetchLBPoolData(pool: string, chain: Chain) {
         pool: {
             name: results[2] as string,
             symbol: results[3] as string,
+            swapFeeManager: roleAccounts.swapFeeManager,
+            poolCreator: roleAccounts.poolCreator,
+            pauseManager: roleAccounts.pauseManager,
             typeData: {
                 startTime: Number(immutableData.startTime),
                 endTime: Number(immutableData.endTime),
