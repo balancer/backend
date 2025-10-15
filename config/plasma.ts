@@ -57,6 +57,19 @@ export default <NetworkData>{
     },
     aprHandlers: {
         ybAprHandler: {
+            contract: {
+                calls: [
+                    {
+                        name: 'gearbox usdt0 pool',
+                        chain: 'PLASMA',
+                        contract: '0x76309a9a56309104518847bba321c261b7b4a43f',
+                        abi: 'function supplyRate() view returns(uint256)',
+                        functionName: 'supplyRate',
+                        parser: (rate) => Number(rate) * 10 ** -27,
+                        token: '0x76309a9a56309104518847bba321c261b7b4a43f',
+                    },
+                ],
+            },
             http: [
                 {
                     url: 'https://app.avantprotocol.com/api/savusdApy',
