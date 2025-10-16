@@ -1,5 +1,14 @@
 # backend
 
+## 1.55.2
+
+### Patch Changes
+
+-   b3ad094: adding poolRoleAccounts to LBP initial data sync
+-   06d754f: savUSD APR on plasma
+-   33b4ce4: gearbox usdt0 APR plasma
+-   72a9e62: handle boostedpools for merkl
+
 ## 1.55.1
 
 ### Patch Changes

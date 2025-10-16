@@ -21,10 +21,6 @@ export async function calculateLoopsApr(
 
     const meritApr = meritAprData['stS'].supplyIncentives.reduce((acc, curr) => acc + curr.apr, 0) / 100;
 
-    console.log('stS APR:', stSApr.apr);
-    console.log('Merit APR:', meritApr);
-    console.log('Aave WS variable borrow APR:', onchainAaveData.variableBorrowRateWS);
-
     // calculate loops APR as (stS APR * collateralAmount + aave merit incentive apr * debtAmount - Aave S borrow APR * debtAmount) / actualSupply
     const loopsApr =
         (stSApr.apr * parseFloat(onchainLoopsData.collateralAmount) +

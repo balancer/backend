@@ -81,7 +81,7 @@ export class LoopsService {
             stSAaveMarketSupply: dbData.stsAaveMarketSupply,
             apr: dbData.totalApr,
             leverage: dbData.leverage,
-            sonicPointsMultiplier: `${(parseFloat(dbData.collateralAmount) / parseFloat(dbData.actualSupply)) * 12}`,
+            sonicPointsMultiplier: `${dbData.leverage * 12}`,
         };
     }
 }

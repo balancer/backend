@@ -2,7 +2,6 @@ import { Chain, Prisma, PrismaPoolType } from '@prisma/client';
 import { CreateLbpInput } from '../../../apps/api/gql/generated-schema';
 import { fetchLBPoolData } from '../contracts/fetch-lbpool-data';
 import { prisma } from '../../../prisma/prisma-client';
-import { zeroAddress } from 'viem';
 
 export const lbPoolInputToDB = async (input: CreateLbpInput) => {
     const rpcData = await fetchLBPoolData(input.poolContract.address, input.poolContract.chain as Chain);
@@ -54,7 +53,6 @@ export const lbPoolInputToDB = async (input: CreateLbpInput) => {
         chain: input.poolContract.chain.toUpperCase() as Chain,
         type: PrismaPoolType.LIQUIDITY_BOOTSTRAPPING,
         createTime: Math.floor(+new Date() / 1000),
-        swapFeeManager: zeroAddress,
         protocolVersion: 3,
         typeData: {
             ...rpcData.pool.typeData,

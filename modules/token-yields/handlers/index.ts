@@ -13,15 +13,13 @@ const sourceToHandler = {
     http: sources.httpTokenYieldHandler,
     contract: sources.contractTokenYieldHandler,
     rateProvider: sources.rateProviderHandler,
+    loops: sources.loopsYieldHandler,
 };
 
 export class TokenYieldAprHandlers {
     private config: TokenYieldConfig;
 
-    constructor(
-        aprConfig: TokenYieldConfig,
-        private chain: Chain,
-    ) {
+    constructor(aprConfig: TokenYieldConfig, private chain: Chain) {
         const { ...config } = aprConfig;
         this.config = config;
     }
