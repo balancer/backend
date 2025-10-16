@@ -161,7 +161,7 @@ export class MerklAprHandler implements AprHandler {
         }[] = [];
 
         for (const opportunity of opportunities) {
-            const pool = affectedPools.find(
+            const pools = affectedPools.filter(
                 (pool) =>
                     pool.chain === chainIdToChain[opportunity.chainId] &&
                     pool.tokens.some((token) =>
@@ -172,28 +172,30 @@ export class MerklAprHandler implements AprHandler {
                     ),
             );
 
-            if (!pool || !pool.dynamicData?.totalLiquidity) {
-                continue;
+            for (const pool of pools) {
+                if (!pool || !pool.dynamicData?.totalLiquidity) {
+                    continue;
+                }
+
+                const tvl = pool.tokens.map((t) => t.balanceUSD).reduce((a, b) => a + b, 0);
+                const tokenTvl =
+                    pool.tokens.find((token) =>
+                        aaveTokenMappings.get(token.address.toLowerCase())
+                            ? aaveTokenMappings.get(token.address) === opportunity.explorerAddress.toLowerCase()
+                            : token.address === opportunity.explorerAddress.toLowerCase(),
+                    )?.balanceUSD || 0;
+
+                const tokenShareOfPoolTvl = tokenTvl === 0 || tvl === 0 ? 0 : tokenTvl / tvl;
+
+                aprs.push({
+                    id: `${pool.id}-merkl`,
+                    type: PrismaPoolAprType.MERKL,
+                    title: `Merkl Rewards`,
+                    chain: chainIdToChain[opportunity.chainId],
+                    poolId: pool.id,
+                    apr: (opportunity.apr / 100) * tokenShareOfPoolTvl,
+                });
             }
-
-            const tvl = pool.tokens.map((t) => t.balanceUSD).reduce((a, b) => a + b, 0);
-            const tokenTvl =
-                pool.tokens.find((token) =>
-                    aaveTokenMappings.get(token.address.toLowerCase())
-                        ? aaveTokenMappings.get(token.address) === opportunity.explorerAddress.toLowerCase()
-                        : token.address === opportunity.explorerAddress.toLowerCase(),
-                )?.balanceUSD || 0;
-
-            const tokenShareOfPoolTvl = tokenTvl === 0 || tvl === 0 ? 0 : tokenTvl / tvl;
-
-            aprs.push({
-                id: `${pool.id}-merkl`,
-                type: PrismaPoolAprType.MERKL,
-                title: `Merkl Rewards`,
-                chain: chainIdToChain[opportunity.chainId],
-                poolId: pool.id,
-                apr: (opportunity.apr / 100) * tokenShareOfPoolTvl,
-            });
         }
 
         return aprs.filter((item) => item !== null);
