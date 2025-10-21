@@ -385,16 +385,12 @@ export const aGqlLoopsData = (overrides?: Partial<GqlLoopsData>): GqlLoopsData =
         leverage: overrides && overrides.hasOwnProperty('leverage') ? overrides.leverage! : 2.8,
         nav: overrides && overrides.hasOwnProperty('nav') ? overrides.nav! : 'praesentium',
         rate: overrides && overrides.hasOwnProperty('rate') ? overrides.rate! : 'acceptus',
-        sonicPointsMultiplier:
-            overrides && overrides.hasOwnProperty('sonicPointsMultiplier') ? overrides.sonicPointsMultiplier! : 'umbra',
         stSAaveMarketSupply:
             overrides && overrides.hasOwnProperty('stSAaveMarketSupply') ? overrides.stSAaveMarketSupply! : 'absorbeo',
         stSAaveMarketSupplyCap:
             overrides && overrides.hasOwnProperty('stSAaveMarketSupplyCap')
                 ? overrides.stSAaveMarketSupplyCap!
                 : 'volaticus',
-        targetHealthFactor:
-            overrides && overrides.hasOwnProperty('targetHealthFactor') ? overrides.targetHealthFactor! : 'aggero',
         tvl: overrides && overrides.hasOwnProperty('tvl') ? overrides.tvl! : 'apud',
     };
 };

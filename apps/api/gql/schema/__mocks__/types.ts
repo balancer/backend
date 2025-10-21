@@ -231,14 +231,10 @@ export type GqlLoopsData = {
     nav: Scalars['String'];
     /** The current rate of LoopS against S. */
     rate: Scalars['String'];
-    /** The current Sonic points multiplier for LoopS */
-    sonicPointsMultiplier: Scalars['String'];
     /** The current amount of stS supplied to the Aave market */
     stSAaveMarketSupply: Scalars['String'];
     /** The current cap on the stS market on Aave */
     stSAaveMarketSupplyCap: Scalars['String'];
-    /** The health factor that the Aave position should have */
-    targetHealthFactor: Scalars['String'];
     /** Net Asset Value in USD. */
     tvl: Scalars['String'];
 };

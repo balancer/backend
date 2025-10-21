@@ -271,11 +271,6 @@ export const schema = gql`
         rate: String!
 
         """
-        The current Sonic points multiplier for LoopS
-        """
-        sonicPointsMultiplier: String!
-
-        """
         The current amount of stS supplied to the Aave market
         """
         stSAaveMarketSupply: String!
@@ -284,11 +279,6 @@ export const schema = gql`
         The current cap on the stS market on Aave
         """
         stSAaveMarketSupplyCap: String!
-
-        """
-        The health factor that the Aave position should have
-        """
-        targetHealthFactor: String!
 
         """
         Net Asset Value in USD.
