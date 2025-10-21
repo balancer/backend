@@ -165,6 +165,12 @@ export default <NetworkData>{
                         },
                     ],
                 },
+                {
+                    url: 'https://apr-api-plasma-earn.trevee.xyz/apy/current',
+                    extractors: [
+                        { type: 'path', token: '0x616185600989bf8339b58ac9e539d49536598343', path: '$.staking' },
+                    ],
+                },
             ],
             aave: {
                 markets: [AaveV3Plasma],

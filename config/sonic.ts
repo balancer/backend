@@ -86,6 +86,9 @@ export default <NetworkData>{
             beetsAddress: '0x2d0e0814e62d80056181f5cd932274405966e4f0',
         },
         ybAprHandler: {
+            loops: {
+                token: '0xc76995054ce51dfbbc954840d699b2f33d2538ee',
+            },
             aave: {
                 markets: [AaveV3Sonic],
             },
