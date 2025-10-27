@@ -557,6 +557,16 @@ export default <NetworkData>{
                         },
                     ],
                 },
+                {
+                    url: 'https://app-api.usdd.io/api/v1/external/earn-apy',
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0xc5d6a7b61d18afa11435a889557b068bb9f29930',
+                            path: '$.data.ethApy',
+                        },
+                    ],
+                },
             ],
             contract: {
                 calls: [
