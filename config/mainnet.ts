@@ -562,7 +562,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            token: '0x936facdf10c8c36294e7b9d28345255539d81bc7',
+                            token: '0xc5d6a7b61d18afa11435a889557b068bb9f29930',
                             path: '$.data.ethApy',
                         },
                     ],
