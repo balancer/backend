@@ -10,6 +10,6 @@ const main = async (_chain: string) => {
 };
 
 main(process.argv[2])
-    .then(console.log)
+    .then((data) => console.log(JSON.stringify(data, null, 2)))
     .catch(console.log)
     .finally(() => process.exit(0));

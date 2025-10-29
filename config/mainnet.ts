@@ -405,6 +405,7 @@ export default <NetworkData>{
                     extractors: [
                         { type: 'path', token: '0x198d7387fa97a73f05b8578cdeff8f2a1f34cd1f', path: '$.wjauraApy' },
                     ],
+                    skipSSL: true,
                 },
                 {
                     url: 'https://universe.staderlabs.com/eth/apy',

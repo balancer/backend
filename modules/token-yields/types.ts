@@ -37,6 +37,7 @@ export interface TokenYieldHttpFetchConfig {
     body?: string;
     scale?: number;
     average?: boolean;
+    skipSSL?: boolean;
     extractors: readonly EntryExtractor[];
 }
 
