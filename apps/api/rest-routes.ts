@@ -68,7 +68,7 @@ export function loadRestRoutes(app: Express) {
         }
 
         // Set caching headers (unchanged)
-        res.set('Cache-Control', 'public, max-age=60, s-maxage=600, stale-while-revalidate=30, stale-if-error=86400');
+        res.set('Cache-Control', 'public, max-age=600, s-maxage=600, stale-while-revalidate=30, stale-if-error=86400');
 
         // Send full response
         res.send(responseBody);
