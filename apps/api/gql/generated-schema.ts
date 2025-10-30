@@ -3083,6 +3083,7 @@ export interface Query {
     tokenGetTokensData: Array<GqlTokenData>;
     /** Returns dynamic data of a set of tokens such as price, market cap, etc. */
     tokenGetTokensDynamicData: Array<GqlTokenDynamicData>;
+    usdPrices: Array<GqlTokenPrice>;
     userGetFbeetsBalance: GqlUserFbeetsBalance;
     userGetPoolBalances: Array<GqlUserPoolBalance>;
     /**
@@ -3261,6 +3262,11 @@ export interface QueryTokenGetTokensDataArgs {
 export interface QueryTokenGetTokensDynamicDataArgs {
     addresses: Array<Scalars['String']>;
     chain?: InputMaybe<GqlChain>;
+}
+
+export interface QueryUsdPricesArgs {
+    chain: GqlChain;
+    tokens: Array<Scalars['String']>;
 }
 
 export interface QueryUserGetPoolBalancesArgs {
@@ -6422,6 +6428,12 @@ export type QueryResolvers<
         ParentType,
         ContextType,
         RequireFields<QueryTokenGetTokensDynamicDataArgs, 'addresses'>
+    >;
+    usdPrices?: Resolver<
+        Array<ResolversTypes['GqlTokenPrice']>,
+        ParentType,
+        ContextType,
+        RequireFields<QueryUsdPricesArgs, 'chain' | 'tokens'>
     >;
     userGetFbeetsBalance?: Resolver<ResolversTypes['GqlUserFbeetsBalance'], ParentType, ContextType>;
     userGetPoolBalances?: Resolver<
