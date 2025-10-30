@@ -100,15 +100,18 @@ export class CoingeckoDataService {
                 .filter(([chain, _]) => chain !== 'SEPOLIA') // Sepolia is not in CG
                 .map(([chain, chainConfig]) => [chainConfig.coingecko.platformId, chain]),
         );
-        const coinMap = coinIds.reduce((acc, coin) => {
-            for (const [platform, address] of Object.entries(coin.platforms)) {
-                if (platformToChain[platform]) {
-                    // tokenAddress-chain
-                    acc[`${address.toLowerCase()}-${platformToChain[platform]}`] = coin.id;
+        const coinMap = coinIds.reduce(
+            (acc, coin) => {
+                for (const [platform, address] of Object.entries(coin.platforms)) {
+                    if (platformToChain[platform]) {
+                        // tokenAddress-chain
+                        acc[`${address.toLowerCase()}-${platformToChain[platform]}`] = coin.id;
+                    }
                 }
-            }
-            return acc;
-        }, {} as Record<string, string>);
+                return acc;
+            },
+            {} as Record<string, string>,
+        );
 
         const updates = allTokens
             .map((token) => {
@@ -154,6 +157,13 @@ export class CoingeckoDataService {
     //     }));
     // }
 
+    async tokenPrice(chain: Chain, tokens: string[]) {
+        const platformId = config[chain].coingecko.platformId;
+        const endpoint = `/simple/token_price/${platformId}?vs_currencies=usd&contract_addresses=${tokens.join(',')}`;
+
+        return this.get<{ [token: string]: { usd: number } }>(endpoint);
+    }
+
     public async getMarketDataForTokenIds(tokenIds: string[]): Promise<CoingeckoTokenMarketData[]> {
         const endpoint = `/coins/markets?vs_currency=${this.fiatParam}&ids=${tokenIds}&per_page=250&page=1&sparkline=false&price_change_percentage=1h%2C24h%2C7d%2C14d%2C30d`;
 
@@ -168,17 +178,17 @@ export class CoingeckoDataService {
     private async get<T>(endpoint: string): Promise<T> {
         const remainingRequests = await requestRateLimiter.removeTokens(1);
         console.log('Remaining coingecko requests', remainingRequests);
-        
+
         const response = await fetch(this.baseUrl + endpoint + this.apiKeyParam);
-        
+
         if (!response.ok) {
             if (response.status === 429) {
                 throw Error(`Coingecko ratelimit: ${response.status} ${response.statusText}`);
             }
             throw Error(`Coingecko API error: ${response.status} ${response.statusText}`);
         }
-        
-        return await response.json() as T;
+
+        return (await response.json()) as T;
     }
 }
 
