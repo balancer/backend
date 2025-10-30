@@ -189,27 +189,8 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
                 next,
             );
             break;
-        case 'sync-snapshots-v2':
-            await runIfNotAlreadyRunning(name, chainId, () => SnapshotsController().syncSnapshotsV2(chain), res, next);
-            break;
-        case 'sync-snapshots-v3':
-            await runIfNotAlreadyRunning(name, chainId, () => SnapshotsController().syncSnapshotsV3(chain), res, next);
-            break;
-        case 'forward-fill-snapshots-v3':
-            await runIfNotAlreadyRunning(
-                name,
-                chainId,
-                () => {
-                    // Run just once per 24h
-                    const now = new Date();
-                    if (now.getUTCHours() !== 0) {
-                        return true;
-                    }
-                    return SnapshotsController().forwardFillSnapshotsForPoolsWithoutUpdatesV3(chain);
-                },
-                res,
-                next,
-            );
+        case 'sync-snapshots':
+            await runIfNotAlreadyRunning(name, chainId, () => SnapshotsController().syncSnapshots(chain), res, next);
             break;
         case 'feed-data-to-datastudio':
             await runIfNotAlreadyRunning(
@@ -377,9 +358,6 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
             break;
         case 'sync-cow-amm-join-exits':
             await runIfNotAlreadyRunning(name, chainId, () => CowAmmController().syncJoinExits(chain), res, next);
-            break;
-        case 'sync-cow-amm-snapshots':
-            await runIfNotAlreadyRunning(name, chainId, () => CowAmmController().syncSnapshots(chain), res, next);
             break;
         case 'sync-categories':
             await runIfNotAlreadyRunning(name, chainId, () => ContentController().syncCategories(), res, next);

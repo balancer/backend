@@ -63,12 +63,14 @@ export const eventsRepository = {
         protocolVersion,
         types,
         timestamp,
+        block,
         poolId,
     }: {
         chain: Chain;
         protocolVersion?: number;
         types?: PoolEventType[];
         timestamp?: number;
+        block?: number;
         poolId?: string;
     }) => {
         if (timestamp && (timestamp < 0 || timestamp > now() || timestamp < now() - 3 * 365 * 24 * 60 * 60)) {
@@ -79,6 +81,7 @@ export const eventsRepository = {
             chain,
             ...(protocolVersion ? { protocolVersion } : {}),
             ...(timestamp ? { blockTimestamp: { lte: timestamp } } : {}),
+            ...(block ? { blockNumber: { lte: block } } : {}),
             ...(poolId ? { poolId } : {}),
         };
 
@@ -112,9 +115,22 @@ export const eventsRepository = {
 
         return latestEvent.type === 'SWAP' ? (latestEvent as SwapEvent) : (latestEvent as JoinExitEvent);
     },
-    getSwapStats: async ({ chain, poolIds, since }: { chain: Chain; poolIds?: string[]; since: number }) => {
+    getSwapStats: async ({
+        chain,
+        poolIds,
+        since,
+        until,
+    }: {
+        chain: Chain;
+        poolIds?: string[];
+        since: number;
+        until?: number;
+    }) => {
         if (since < 0 || since > now() || since < now() - 3 * 365 * 24 * 60 * 60) {
-            throw new Error(`Invalid timestamp ${since}`);
+            throw new Error(`Invalid timestamp for since ${since}`);
+        }
+        if (until && (until < 0 || until > since)) {
+            throw new Error(`Invalid timestamp for until ${until}`);
         }
 
         const query = Prisma.raw(`SELECT
@@ -122,10 +138,12 @@ export const eventsRepository = {
             SUM("valueUSD") AS volume,
             SUM((payload->'fee'->>'valueUSD')::numeric) AS fees,
             SUM((payload->'dynamicFee'->>'valueUSD')::numeric) AS "dynamicFees",
-            SUM((payload->'surplus'->>'valueUSD')::numeric) AS surplus
+            SUM((payload->'surplus'->>'valueUSD')::numeric) AS surplus,
+            MAX("blockNumber") AS "latestBlockNumber"
           FROM "PartitionedPoolEvent"
           WHERE
             "blockTimestamp" >= ${since}
+            ${until ? 'AND "blockTimestamp" <= ${until}' : ''}
             AND chain = '${chain}'
             AND type = 'SWAP'
             ${poolIds && poolIds.length < 30 ? 'AND "poolId" IN (\'' + poolIds.join("','") + "')" : ''}

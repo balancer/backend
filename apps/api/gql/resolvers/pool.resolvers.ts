@@ -119,14 +119,10 @@ const balancerResolvers: Resolvers = {
 
             return 'success';
         },
-        poolLoadSnapshotsForPools: async (parent, { poolIds, reload }, context) => {
+        poolLoadSnapshotsForPools: async (parent, { poolId, chain }, context) => {
             isAdminRoute(context);
 
-            await SnapshotsController().syncSnapshotForPools(
-                poolIds,
-                chainIdToChain[networkContext.chainId],
-                reload || false,
-            );
+            await SnapshotsController().reloadSnapshotsForPool(poolId, chain);
 
             return 'success';
         },
@@ -174,23 +170,6 @@ const balancerResolvers: Resolvers = {
                 } catch (e) {
                     result.push({ type: 'cow', chain, success: false, error: `${e}` });
                     console.log(`Could not reload COW pools for chain ${chain}: ${e}`);
-                }
-            }
-
-            return result;
-        },
-        poolSyncAllCowSnapshots: async (parent, { chains }, context) => {
-            isAdminRoute(context);
-
-            const result: { type: string; chain: GqlChain; success: boolean; error: string | undefined }[] = [];
-
-            for (const chain of chains) {
-                try {
-                    await CowAmmController().syncAllSnapshots(chain);
-                    result.push({ type: 'cow', chain, success: true, error: undefined });
-                } catch (e) {
-                    result.push({ type: 'cow', chain, success: false, error: `${e}` });
-                    console.log(`Could not sync cow amm snapshots for chain ${chain}: ${e}`);
                 }
             }
 

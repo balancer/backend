@@ -1,7 +1,14 @@
 import { Chain, PoolEventType } from '@prisma/client';
 import { JoinExitEvent, SwapEvent } from '../../../prisma/prisma-types';
 
-export type SwapStats = { poolId: string; volume: number; fees: number; dynamicFees?: number; surplus?: number };
+export type SwapStats = {
+    poolId: string;
+    volume: number;
+    fees: number;
+    dynamicFees?: number;
+    surplus?: number;
+    latestBlockNumber: number;
+};
 
 export type TokenAmount = {
     address: string;
@@ -19,6 +26,7 @@ export interface LatestEventRepository {
         protocolVersion?: number;
         types?: PoolEventType[];
         timestamp?: number;
+        block?: number;
         poolId?: string;
     }) => Promise<SwapEvent | JoinExitEvent | null>;
 }

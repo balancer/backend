@@ -111,22 +111,6 @@ export function CowAmmController(tracer?: any) {
 
             return ids;
         },
-        async syncSnapshots(chain: Chain) {
-            const subgraphClient = getSubgraphClient(chain);
-            const ids = await syncSnapshots(subgraphClient, 'SNAPSHOTS_COW_AMM', chain);
-            // update lifetime values based on snapshots
-            await updateLifetimeValues(chain, undefined, 'COW_AMM');
-            return ids;
-        },
-        async syncAllSnapshots(chain: Chain) {
-            // Run in loop until we end up at todays snapshot (also sync todays)
-            const subgraphClient = getSubgraphClient(chain);
-            const ids = await syncSnapshots(subgraphClient, 'SNAPSHOTS_COW_AMM', chain, {
-                startFromLastSyncedBlock: false,
-                syncPoolsWithoutUpdates: true,
-            });
-            return ids;
-        },
         async syncJoinExits(chain: Chain) {
             const subgraphClient = getSubgraphClient(chain);
             const entries = await syncJoinExits(subgraphClient, chain);

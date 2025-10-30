@@ -52,8 +52,8 @@ export const fantomNetworkConfig: NetworkConfig = {
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(4, 'hours') : every(2, 'hours'),
         },
         {
-            name: 'sync-snapshots-v2',
-            interval: every(4, 'hours'),
+            name: 'sync-snapshots',
+            interval: every(15, 'minutes'),
         },
         {
             name: 'sync-changed-pools',

@@ -4200,11 +4200,10 @@ export const schema = gql`
         beetsSyncFbeetsRatio: String!
         createLBP(input: CreateLBPInput!): Boolean!
         poolLoadOnChainDataForAllPools(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
-        poolLoadSnapshotsForPools(poolIds: [String!]!, reload: Boolean): String!
+        poolLoadSnapshotsForPools(chain: GqlChain!, poolId: String!): String!
         poolReloadAllPoolAprs(chain: GqlChain!): String!
         poolReloadPools(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
         poolReloadStakingForAllPools(stakingTypes: [GqlPoolStakingType!]!): String!
-        poolSyncAllCowSnapshots(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
         poolSyncAllPoolsFromSubgraph: [String!]!
         poolSyncFxQuoteTokens(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
         poolUpdateLiquidityValuesForAllPools: String!

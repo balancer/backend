@@ -2893,10 +2893,6 @@ export const aMutation = (overrides?: Partial<Mutation>): Mutation => {
             overrides && overrides.hasOwnProperty('poolReloadStakingForAllPools')
                 ? overrides.poolReloadStakingForAllPools!
                 : 'anser',
-        poolSyncAllCowSnapshots:
-            overrides && overrides.hasOwnProperty('poolSyncAllCowSnapshots')
-                ? overrides.poolSyncAllCowSnapshots!
-                : [aGqlPoolMutationResult()],
         poolSyncAllPoolsFromSubgraph:
             overrides && overrides.hasOwnProperty('poolSyncAllPoolsFromSubgraph')
                 ? overrides.poolSyncAllPoolsFromSubgraph!

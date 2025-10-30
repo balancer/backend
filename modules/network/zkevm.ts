@@ -52,8 +52,8 @@ export const zkevmNetworkConfig: NetworkConfig = {
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(5, 'minutes'),
         },
         {
-            name: 'sync-snapshots-v2',
-            interval: every(90, 'minutes'),
+            name: 'sync-snapshots',
+            interval: every(15, 'minutes'),
         },
         {
             name: 'sync-changed-pools',

@@ -52,14 +52,9 @@ export const hyperevmNetworkConfig: NetworkConfig = {
             interval: every(1, 'minutes'),
         },
         {
-            name: 'sync-snapshots-v3',
-            interval: every(10, 'minutes'),
+            name: 'sync-snapshots',
+            interval: every(15, 'minutes'),
         },
-        {
-            name: 'forward-fill-snapshots-v3',
-            interval: every(1, 'hours'),
-        },
-
         {
             name: 'sync-hook-data',
             interval: every(1, 'hours'),
