@@ -1,5 +1,15 @@
 # backend
 
+## 1.56.0
+
+### Minor Changes
+
+-   845effd: add coingecko pricing call proxy
+
+### Patch Changes
+
+-   8eed23a: option to skip ssl verification for apr sources
+
 ## 1.55.3
 
 ### Patch Changes

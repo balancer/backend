@@ -1,14 +1,26 @@
 import { JSONPath } from 'jsonpath-plus';
 import { TokenYieldHandler, TokenYieldHttpFetchConfig } from '../../types';
 
-const fetchWithTimeout = async (url: string, options: RequestInit = {}, timeoutMs: number = 20000): Promise<any> => {
+const fetchWithTimeout = async (
+    url: string,
+    options: RequestInit = {},
+    skipSSL = false,
+    timeoutMs: number = 20000,
+): Promise<any> => {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
+    let previous_NODE_TLS_REJECT_UNAUTHORIZED = process.env['NODE_TLS_REJECT_UNAUTHORIZED'];
+    if (skipSSL) {
+        process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
+    }
     const fetchPromise = fetch(url, {
         ...options,
         signal: controller.signal,
     });
+    if (skipSSL) {
+        process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = previous_NODE_TLS_REJECT_UNAUTHORIZED;
+    }
 
     // Timeout promise - needed to handle bun edge case that doesn't throw when fetch is aborted
     const timeoutPromise = new Promise((_, reject) => {
@@ -65,11 +77,15 @@ const normalizeValue = (value: any, { url, average, scale }: TokenYieldHttpFetch
 };
 
 export const httpTokenYieldHandler: TokenYieldHandler = async (config: TokenYieldHttpFetchConfig) => {
-    const res = await fetchWithTimeout(config.url, {
-        method: config.method ?? (config.body ? 'POST' : 'GET'),
-        headers: config.headers,
-        ...(config.body && { body: config.body }),
-    });
+    const res = await fetchWithTimeout(
+        config.url,
+        {
+            method: config.method ?? (config.body ? 'POST' : 'GET'),
+            headers: config.headers,
+            ...(config.body && { body: config.body }),
+        },
+        config.skipSSL,
+    );
     const json = await res.json();
 
     return transform(extract(json, config), config);
