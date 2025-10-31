@@ -5,12 +5,7 @@ import _ from 'lodash';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { ReliquarySubgraphService } from '../../subgraphs/reliquary-subgraph/reliquary.service';
 import { oneDayInMinutes } from '../../common/time';
-import {
-    Chain,
-    PrismaReliquaryFarmSnapshot,
-    PrismaReliquaryLevelSnapshot,
-    PrismaReliquaryTokenBalanceSnapshot,
-} from '@prisma/client';
+import { Chain, PrismaReliquaryFarmSnapshot, PrismaReliquaryLevelSnapshot } from '@prisma/client';
 import { networkContext } from '../../network/network-context.service';
 import { blockNumbers } from '../../block-numbers';
 
@@ -21,7 +16,7 @@ export class ReliquarySnapshotService {
         const timestamp = this.getTimestampForRange(range);
         return prisma.prismaReliquaryFarmSnapshot.findMany({
             where: { farmId: `${farmId}`, timestamp: { gte: timestamp }, chain: networkContext.chain },
-            include: { levelBalances: true, tokenBalances: true },
+            include: { levelBalances: true },
             orderBy: { timestamp: 'asc' },
         });
     }

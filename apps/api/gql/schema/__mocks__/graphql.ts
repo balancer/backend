@@ -86,7 +86,6 @@ import {
     GqlRelicSnapshot,
     GqlReliquaryFarmLevelSnapshot,
     GqlReliquaryFarmSnapshot,
-    GqlReliquaryTokenBalanceSnapshot,
     GqlSftmxStakingData,
     GqlSftmxStakingSnapshot,
     GqlSftmxStakingVault,
@@ -2229,27 +2228,10 @@ export const aGqlReliquaryFarmSnapshot = (overrides?: Partial<GqlReliquaryFarmSn
                 : [aGqlReliquaryFarmLevelSnapshot()],
         relicCount: overrides && overrides.hasOwnProperty('relicCount') ? overrides.relicCount! : 'aetas',
         timestamp: overrides && overrides.hasOwnProperty('timestamp') ? overrides.timestamp! : 6195,
-        tokenBalances:
-            overrides && overrides.hasOwnProperty('tokenBalances')
-                ? overrides.tokenBalances!
-                : [aGqlReliquaryTokenBalanceSnapshot()],
         totalBalance: overrides && overrides.hasOwnProperty('totalBalance') ? overrides.totalBalance! : 'carpo',
         totalLiquidity:
             overrides && overrides.hasOwnProperty('totalLiquidity') ? overrides.totalLiquidity! : 'adipisci',
         userCount: overrides && overrides.hasOwnProperty('userCount') ? overrides.userCount! : 'velum',
-    };
-};
-
-export const aGqlReliquaryTokenBalanceSnapshot = (
-    overrides?: Partial<GqlReliquaryTokenBalanceSnapshot>,
-): GqlReliquaryTokenBalanceSnapshot => {
-    return {
-        address: overrides && overrides.hasOwnProperty('address') ? overrides.address! : 'defluo',
-        balance: overrides && overrides.hasOwnProperty('balance') ? overrides.balance! : 'viridis',
-        decimals: overrides && overrides.hasOwnProperty('decimals') ? overrides.decimals! : 5136,
-        id: overrides && overrides.hasOwnProperty('id') ? overrides.id! : '95257ced-da0f-4faa-8de6-843ce417c199',
-        name: overrides && overrides.hasOwnProperty('name') ? overrides.name! : 'concido',
-        symbol: overrides && overrides.hasOwnProperty('symbol') ? overrides.symbol! : 'communis',
     };
 };
 

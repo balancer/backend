@@ -2097,7 +2097,6 @@ type GqlReliquaryFarmSnapshot {
     dailyWithdrawn: String!
     totalLiquidity: String!
     levelBalances: [GqlReliquaryFarmLevelSnapshot!]!
-    tokenBalances: [GqlReliquaryTokenBalanceSnapshot!]!
 }
 
 type GqlReliquaryFarmLevelSnapshot {

@@ -34,7 +34,6 @@ const beetsResolvers: Resolvers = {
                 dailyDeposited: snapshot.dailyDeposited,
                 dailyWithdrawn: snapshot.dailyWithdrawn,
                 levelBalances: snapshot.levelBalances,
-                tokenBalances: snapshot.tokenBalances,
             }));
         },
         userGetFbeetsBalance: async (parent, {}, context) => {

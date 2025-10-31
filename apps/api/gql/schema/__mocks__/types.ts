@@ -1555,9 +1555,11 @@ export type GqlPoolReClamm = GqlPoolBase & {
 
 export type GqlPoolSnapshot = {
     __typename?: 'GqlPoolSnapshot';
+    /** @deprecated Field no longer supported */
     amounts: Array<Scalars['String']>;
     chain: GqlChain;
     fees24h: Scalars['String'];
+    /** @deprecated Field no longer supported */
     holdersCount: Scalars['String'];
     id: Scalars['ID'];
     poolId: Scalars['String'];
@@ -1567,8 +1569,11 @@ export type GqlPoolSnapshot = {
     timestamp: Scalars['Int'];
     totalLiquidity: Scalars['String'];
     totalShares: Scalars['String'];
+    /** @deprecated Field no longer supported */
     totalSurplus: Scalars['String'];
+    /** @deprecated Field no longer supported */
     totalSwapFee: Scalars['String'];
+    /** @deprecated Field no longer supported */
     totalSwapVolume: Scalars['String'];
     volume24h: Scalars['String'];
 };
@@ -2205,20 +2210,9 @@ export type GqlReliquaryFarmSnapshot = {
     levelBalances: Array<GqlReliquaryFarmLevelSnapshot>;
     relicCount: Scalars['String'];
     timestamp: Scalars['Int'];
-    tokenBalances: Array<GqlReliquaryTokenBalanceSnapshot>;
     totalBalance: Scalars['String'];
     totalLiquidity: Scalars['String'];
     userCount: Scalars['String'];
-};
-
-export type GqlReliquaryTokenBalanceSnapshot = {
-    __typename?: 'GqlReliquaryTokenBalanceSnapshot';
-    address: Scalars['String'];
-    balance: Scalars['String'];
-    decimals: Scalars['Int'];
-    id: Scalars['ID'];
-    name: Scalars['String'];
-    symbol: Scalars['String'];
 };
 
 export type GqlSftmxStakingData = {

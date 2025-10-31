@@ -436,7 +436,6 @@ model PrismaReliquaryFarmSnapshot {
     dailyWithdrawn      String
     totalLiquidity      String                          @default("0")
     levelBalances       PrismaReliquaryLevelSnapshot[]
-    tokenBalances       PrismaReliquaryTokenBalanceSnapshot[]
 
     @@index([farmId, chain])
 }
@@ -450,23 +449,6 @@ model PrismaReliquaryLevelSnapshot {
     chain               Chain
 
     level               String
-    balance             String
-
-    @@index([farmSnapshotId, chain])
-}
-
-model PrismaReliquaryTokenBalanceSnapshot {
-    @@id([id, chain])
-
-    id                  String
-    farmSnapshotId      String
-    farmSnapshot        PrismaReliquaryFarmSnapshot @relation(fields:[farmSnapshotId, chain], references: [id, chain])
-    chain               Chain
-
-    address             String
-    symbol              String
-    name                String
-    decimals            Int
     balance             String
 
     @@index([farmSnapshotId, chain])

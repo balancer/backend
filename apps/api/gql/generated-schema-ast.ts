@@ -2171,10 +2171,10 @@ export const schema = gql`
     }
 
     type GqlPoolSnapshot {
-        amounts: [String!]!
+        amounts: [String!]! @deprecated
         chain: GqlChain!
         fees24h: String!
-        holdersCount: String!
+        holdersCount: String! @deprecated
         id: ID!
         poolId: String!
         sharePrice: String!
@@ -2183,9 +2183,9 @@ export const schema = gql`
         timestamp: Int!
         totalLiquidity: String!
         totalShares: String!
-        totalSurplus: String!
-        totalSwapFee: String!
-        totalSwapVolume: String!
+        totalSurplus: String! @deprecated
+        totalSwapFee: String! @deprecated
+        totalSwapVolume: String! @deprecated
         volume24h: String!
     }
 
@@ -3024,19 +3024,9 @@ export const schema = gql`
         levelBalances: [GqlReliquaryFarmLevelSnapshot!]!
         relicCount: String!
         timestamp: Int!
-        tokenBalances: [GqlReliquaryTokenBalanceSnapshot!]!
         totalBalance: String!
         totalLiquidity: String!
         userCount: String!
-    }
-
-    type GqlReliquaryTokenBalanceSnapshot {
-        address: String!
-        balance: String!
-        decimals: Int!
-        id: ID!
-        name: String!
-        symbol: String!
     }
 
     type GqlSftmxStakingData {
