@@ -28,6 +28,7 @@ enum Chain {
     FRAXTAL
     MODE
     SONIC
+    XLAYER
 }
 
 model PrismaLastBlockSynced {

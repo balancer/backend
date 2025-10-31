@@ -14,6 +14,7 @@ import modeConfig from './mode';
 import sonicConfig from './sonic';
 import hyperevmConfig from './hyperevm';
 import plasmaNetworkConfig from './plasma';
+import xlayerNetworkConfig from './xlayer';
 
 export const DAYS_OF_HOURLY_PRICES = 100;
 export const BALANCES_SYNC_BLOCKS_MARGIN = 200;
@@ -34,4 +35,5 @@ export default {
     [Chain.SONIC]: sonicConfig,
     [Chain.HYPEREVM]: hyperevmConfig,
     [Chain.PLASMA]: plasmaNetworkConfig,
+    [Chain.XLAYER]: xlayerNetworkConfig,
 };
