@@ -3124,6 +3124,7 @@ export type Query = {
     tokenGetTokensData: Array<GqlTokenData>;
     /** Returns dynamic data of a set of tokens such as price, market cap, etc. */
     tokenGetTokensDynamicData: Array<GqlTokenDynamicData>;
+    usdPrices: Array<GqlTokenPrice>;
     userGetFbeetsBalance: GqlUserFbeetsBalance;
     userGetPoolBalances: Array<GqlUserPoolBalance>;
     /**
@@ -3302,6 +3303,11 @@ export type QueryTokenGetTokensDataArgs = {
 export type QueryTokenGetTokensDynamicDataArgs = {
     addresses: Array<Scalars['String']>;
     chain?: InputMaybe<GqlChain>;
+};
+
+export type QueryUsdPricesArgs = {
+    chain: GqlChain;
+    tokens: Array<Scalars['String']>;
 };
 
 export type QueryUserGetPoolBalancesArgs = {

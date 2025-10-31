@@ -4502,6 +4502,7 @@ export const schema = gql`
         Returns dynamic data of a set of tokens such as price, market cap, etc.
         """
         tokenGetTokensDynamicData(addresses: [String!]!, chain: GqlChain): [GqlTokenDynamicData!]!
+        usdPrices(chain: GqlChain!, tokens: [String!]!): [GqlTokenPrice!]!
         userGetFbeetsBalance: GqlUserFbeetsBalance!
         userGetPoolBalances(address: String, chains: [GqlChain!]): [GqlUserPoolBalance!]!
 
