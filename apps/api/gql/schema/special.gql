@@ -1,3 +1,0 @@
-extend type Query {
-    usdPrices(chain: GqlChain!, tokens: [String!]!): [GqlTokenPrice!]!
-}

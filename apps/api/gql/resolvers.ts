@@ -11,7 +11,6 @@ import userResolver from './resolvers/user.resolvers';
 import vebalResolver from './resolvers/vebal.resolvers';
 import lbpResolver from './resolvers/lbp.resolvers';
 import loopsResolver from './resolvers/loops.resolvers';
-import specialResolver from './resolvers/special.resolvers';
 
 export const resolvers = {
     Query: {
@@ -28,7 +27,6 @@ export const resolvers = {
         ...vebalResolver.Query,
         ...lbpResolver.Query,
         ...loopsResolver.Query,
-        ...specialResolver.Query,
     },
     Mutation: {
         ...poolResolver.Mutation,
