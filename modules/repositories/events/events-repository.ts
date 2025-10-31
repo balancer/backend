@@ -139,7 +139,8 @@ export const eventsRepository = {
             SUM((payload->'fee'->>'valueUSD')::numeric) AS fees,
             SUM((payload->'dynamicFee'->>'valueUSD')::numeric) AS "dynamicFees",
             SUM((payload->'surplus'->>'valueUSD')::numeric) AS surplus,
-            MAX("blockNumber") AS "latestBlockNumber"
+            MAX("blockNumber") AS "latestBlockNumber" AS,
+            count(*) AS "swapsCount"
           FROM "PartitionedPoolEvent"
           WHERE
             "blockTimestamp" >= ${since}

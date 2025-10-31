@@ -1,5 +1,5 @@
 import { Chain } from '@prisma/client';
-import { reloadSnapshots, syncSnapshots } from '../actions/snapshots/sync-snapshots';
+import { reloadSnapshots, syncSnapshots } from '../actions/pool/sync-snapshots';
 
 export function SnapshotsController() {
     return {

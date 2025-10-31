@@ -17,8 +17,6 @@ import { PoolSnapshotService } from './lib/pool-snapshot.service';
 import { networkContext } from '../network/network-context.service';
 import { ReliquarySubgraphService } from '../subgraphs/reliquary-subgraph/reliquary.service';
 import { ReliquarySnapshotService } from './lib/reliquary-snapshot.service';
-import { coingeckoDataService } from '../token/lib/coingecko-data.service';
-import { syncIncentivizedCategory } from '../actions/pool/sync-incentivized-category';
 import {
     deleteGaugeStakingForAllPools,
     deleteMasterchefStakingForAllPools,
@@ -181,5 +179,5 @@ const optionsResolverForPoolOnChainDataService: () => PoolOnChainDataServiceOpti
 export const poolService = new PoolService(
     new PoolOnChainDataService(optionsResolverForPoolOnChainDataService),
     new PoolGqlLoaderService(),
-    new PoolSnapshotService(coingeckoDataService),
+    new PoolSnapshotService(),
 );

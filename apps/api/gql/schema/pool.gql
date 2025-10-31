@@ -1972,13 +1972,13 @@ type GqlPoolSnapshot {
     fees24h: String!
     surplus24h: String!
     totalShares: String!
-    totalSwapVolume: String!
-    totalSwapFee: String!
-    totalSurplus: String!
+    totalSwapVolume: String! @deprecated
+    totalSwapFee: String! @deprecated
+    totalSurplus: String! @deprecated
     swapsCount: String!
-    holdersCount: String!
+    holdersCount: String! @deprecated
     sharePrice: String!
-    amounts: [String!]!
+    amounts: [String!]! @deprecated
 }
 
 type GqlPoolTokenDisplay {

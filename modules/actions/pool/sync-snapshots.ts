@@ -74,11 +74,13 @@ export async function reloadSnapshots(chain: Chain, poolId: string): Promise<voi
 }
 
 export async function syncSnapshots(chain: Chain): Promise<string[]> {
+    // we only need the latest synced block to understand if we also need to complete yesterdays snapshot
+    // if we crossed midnight since the last synced block, we need to sync yesterday as well to complete the snapshot
     const latestSyncedBlock = await getLastSyncedBlock(chain, 'SNAPSHOTS_FROM_EVENTS');
     const timestampForBlock = (await blockNumbers().getTimestamp(chain, latestSyncedBlock)) ?? 0;
-    // if we crossed midnight since the last synced block, we need to sync yesterday as well to complete the snapshot
     const shouldSyncYesterday = roundToMidnight(timestampForBlock) < roundToMidnight(Math.floor(Date.now() / 1000));
 
+    // we always sync todays snapshot
     const upsertSnapshots: PrismaPoolSnapshot[] = [];
     const snapshotTimestampForToday = roundToMidnight(Math.floor(Date.now() / 1000));
 
@@ -207,7 +209,7 @@ function getPrismaPoolSnapshotFromStats(
         totalSwapVolume: 0,
         totalSwapFee: 0,
         totalSurplus: 0,
-        swapsCount: 0,
+        swapsCount: stats.swapsCount,
         holdersCount: 0,
         amounts: [],
         volume24h: stats.volume,

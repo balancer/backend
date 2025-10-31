@@ -8,6 +8,7 @@ export type SwapStats = {
     dynamicFees?: number;
     surplus?: number;
     latestBlockNumber: number;
+    swapsCount: number;
 };
 
 export type TokenAmount = {

@@ -3,7 +3,7 @@ import { prisma } from '../../prisma/prisma-client';
 import { getViemClient } from '../sources/viem-client';
 import { getCowAmmSubgraphClient } from '../sources/subgraphs';
 import { fetchChangedPools, upsertPools, syncSwaps, syncJoinExits } from '../actions/cow-amm';
-import { syncSnapshots } from '../actions/snapshots/sync-snapshots';
+import { syncSnapshots } from '../actions/pool/sync-snapshots';
 import { Chain, PrismaLastBlockSyncedCategory } from '@prisma/client';
 import { syncBptBalancesFromSubgraph } from '../actions/user/bpt-balances/helpers/sync-bpt-balances-from-subgraph';
 import { getLastSyncedBlock, upsertLastSyncedBlock } from '../actions/last-synced-block';
