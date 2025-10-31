@@ -285,42 +285,6 @@ query BalancerPoolHistoricalLiquidities(
         block
     }
 }
-
-query BalancerPoolSnapshots(
-    $skip: Int
-    $first: Int
-    $orderBy: PoolSnapshot_orderBy
-    $orderDirection: OrderDirection
-    $where: PoolSnapshot_filter
-    $block: Block_height
-) {
-    poolSnapshots(
-        skip: $skip
-        first: $first
-        orderBy: $orderBy
-        orderDirection: $orderDirection
-        where: $where
-        block: $block
-    ) {
-        ...BalancerPoolSnapshot
-    }
-}
-
-fragment BalancerPoolSnapshot on PoolSnapshot {
-    id
-    pool {
-        id
-    }
-    amounts
-    totalShares
-    swapVolume
-    swapFees
-    timestamp
-    liquidity
-    swapsCount
-    holdersCount
-}
-
 query BalancerLatestPrices(
     $skip: Int
     $first: Int
@@ -409,43 +373,6 @@ query BalancerPortfolioPoolsData($previousBlockNumber: Int!) {
 
     previousPools: pools(first: 1000, where: { totalShares_gt: "0" }, block: { number: $previousBlockNumber }) {
         ...BalancerPool
-    }
-}
-
-query BalancerTradePairSnapshots(
-    $skip: Int
-    $first: Int
-    $orderBy: TradePairSnapshot_orderBy
-    $orderDirection: OrderDirection
-    $where: TradePairSnapshot_filter
-    $block: Block_height
-) {
-    tradePairSnapshots(
-        skip: $skip
-        first: $first
-        orderBy: $orderBy
-        orderDirection: $orderDirection
-        where: $where
-        block: $block
-    ) {
-        ...BalancerTradePairSnapshot
-    }
-}
-
-fragment BalancerTradePairSnapshot on TradePairSnapshot {
-    id
-    totalSwapFee
-    totalSwapVolume
-    timestamp
-    pair {
-        token0 {
-            address
-            symbol
-        }
-        token1 {
-            address
-            symbol
-        }
     }
 }
 
