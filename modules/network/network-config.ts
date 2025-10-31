@@ -15,6 +15,7 @@ import { modeNetworkConfig } from './mode';
 import { sonicNetworkConfig } from './sonic';
 import { hyperevmNetworkConfig } from './hyperevm';
 import { plasmaNetworkConfig } from './plasma';
+import { xlayerNetworkConfig } from './xlayer';
 
 export const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
     '250': fantomNetworkConfig,
