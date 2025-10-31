@@ -14,6 +14,7 @@ import {
     mode,
     sonic,
     plasma,
+    xLayer,
 } from 'viem/chains';
 import { Chain } from '@prisma/client';
 import config from '../../config';
@@ -40,6 +41,7 @@ const chain2ViemChain = {
     [Chain.FRAXTAL]: fraxtal,
     [Chain.MODE]: mode,
     [Chain.SONIC]: sonic,
+    [Chain.XLAYER]: xLayer,
     [Chain.HYPEREVM]: defineChain({
         id: 999,
         name: 'hyperevm',

@@ -3160,7 +3160,6 @@ export const aQuery = (overrides?: Partial<Query>): Query => {
             overrides && overrides.hasOwnProperty('tokenGetTokensDynamicData')
                 ? overrides.tokenGetTokensDynamicData!
                 : [aGqlTokenDynamicData()],
-        usdPrices: overrides && overrides.hasOwnProperty('usdPrices') ? overrides.usdPrices! : [aGqlTokenPrice()],
         userGetFbeetsBalance:
             overrides && overrides.hasOwnProperty('userGetFbeetsBalance')
                 ? overrides.userGetFbeetsBalance!
