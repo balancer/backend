@@ -132,26 +132,6 @@ export class ReliquarySnapshotService {
                         }),
                     );
                 }
-
-                for (const token of pool.tokens) {
-                    const data: PrismaReliquaryTokenBalanceSnapshot = {
-                        id: `${token.id}-${snapshot.id}`,
-                        chain: chain,
-                        farmSnapshotId: snapshot.id,
-                        address: token.address,
-                        symbol: token.token.symbol,
-                        name: token.token.name,
-                        decimals: token.token.decimals,
-                        balance: `${parseFloat(mostRecentPoolSnapshot.amounts[token.index]) * sharePercentage}`,
-                    };
-                    farmOperations.push(
-                        prisma.prismaReliquaryTokenBalanceSnapshot.upsert({
-                            where: { id_chain: { id: `${token.id}-${snapshot.id}`, chain: chain } },
-                            create: data,
-                            update: data,
-                        }),
-                    );
-                }
             }
             operations.push(...farmOperations);
         }

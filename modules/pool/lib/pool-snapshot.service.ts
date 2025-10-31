@@ -14,12 +14,6 @@ export class PoolSnapshotService {
         });
     }
 
-    public async getSnapshotForPool(poolId: string, timestamp: number, chain: Chain) {
-        return prisma.prismaPoolSnapshot.findUnique({
-            where: { id_chain: { id: `${poolId}-${timestamp}`, chain } },
-        });
-    }
-
     private getTimestampForRange(range: GqlPoolSnapshotDataRange): number {
         switch (range) {
             case 'THIRTY_DAYS':

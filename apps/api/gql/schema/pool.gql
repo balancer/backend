@@ -2100,14 +2100,6 @@ type GqlReliquaryFarmSnapshot {
     tokenBalances: [GqlReliquaryTokenBalanceSnapshot!]!
 }
 
-type GqlReliquaryTokenBalanceSnapshot {
-    id: ID!
-    address: String!
-    balance: String!
-    symbol: String!
-    name: String!
-    decimals: Int!
-}
 type GqlReliquaryFarmLevelSnapshot {
     id: ID!
     level: String!
