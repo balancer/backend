@@ -201,7 +201,7 @@ export default <NetworkData>{
                     ],
                 },
                 {
-                    url: 'https://api.originprotocol.com/api/v2/os/apr/trailing/7?146',
+                    url: 'https://api.originprotocol.com/api/v2/os/apr/trailing/7',
                     scale: 100,
                     extractors: [{ type: 'path', token: '0x9f0df7799f6fdad409300080cff680f5a23df4b1', path: '$.apr' }],
                 },
