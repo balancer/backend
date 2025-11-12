@@ -72,6 +72,17 @@ export default <NetworkData>{
             },
             http: [
                 {
+                    url: 'https://defi-api.yuzu.money/proxy/apy',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0xd931775d9aca9859c9fdc53c63ae32ef21551492',
+                            path: '$.data.syzusd_apy',
+                        },
+                    ],
+                },
+                {
                     url: 'https://app.avantprotocol.com/api/savusdApy',
                     scale: 100,
                     extractors: [
