@@ -77,7 +77,7 @@ export default <NetworkData>{
                     extractors: [
                         {
                             type: 'path',
-                            token: '0xd931775d9aca9859c9fdc53c63ae32ef21551492',
+                            token: '0xc8a8df9b210243c55d31c73090f06787ad0a1bf6',
                             path: '$.data.syzusd_apy',
                         },
                     ],

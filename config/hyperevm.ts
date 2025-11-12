@@ -110,7 +110,8 @@ export default <NetworkData>{
                     ],
                 },
                 {
-                    url: 'https://backend.nucleusearn.io/v1/vaults/apy?token_address=0x1359b05241cA5076c9F59605214f4F84114c0dE8&lookback_days=14',
+                    url: 'https://api.paxoslabs.com/v1/vaults/apy?token_address=0x1359b05241cA5076c9F59605214f4F84114c0dE8&lookback_days=14',
+                    headers: { 'Content-Type': 'application/json', 'x-api-key': env.PAXOS_APR_KEY },
                     scale: 100,
                     extractors: [
                         {
@@ -121,7 +122,8 @@ export default <NetworkData>{
                     ],
                 },
                 {
-                    url: 'https://backend.nucleusearn.io/v1/vaults/apy?token_address=0x5748ae796AE46A4F1348a1693de4b50560485562&lookback_days=14',
+                    url: 'https://api.paxoslabs.com/v1/vaults/apy?token_address=0x5748ae796AE46A4F1348a1693de4b50560485562&lookback_days=14',
+                    headers: { 'Content-Type': 'application/json', 'x-api-key': env.PAXOS_APR_KEY },
                     scale: 100,
                     extractors: [
                         {

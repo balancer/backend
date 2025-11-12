@@ -1,5 +1,12 @@
 # backend
 
+## 1.56.3
+
+### Patch Changes
+
+-   de43f5a: fix yuzu.money APR token address
+-   919ae59: paxoslabs APRs
+
 ## 1.56.2
 
 ### Patch Changes
