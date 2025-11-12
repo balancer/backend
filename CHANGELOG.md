@@ -1,5 +1,11 @@
 # backend
 
+## 1.56.2
+
+### Patch Changes
+
+-   e35e4a3: syzusd APR
+
 ## 1.56.1
 
 ### Patch Changes
