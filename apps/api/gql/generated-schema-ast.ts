@@ -115,6 +115,7 @@ export const schema = gql`
         POLYGON
         SEPOLIA
         SONIC
+        XLAYER
         ZKEVM
     }
 

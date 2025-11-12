@@ -100,6 +100,7 @@ export enum GqlChain {
     POLYGON = 'POLYGON',
     SEPOLIA = 'SEPOLIA',
     SONIC = 'SONIC',
+    XLAYER = 'XLAYER',
     ZKEVM = 'ZKEVM',
 }
 

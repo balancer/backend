@@ -109,6 +109,7 @@ export type GqlChain =
     | 'POLYGON'
     | 'SEPOLIA'
     | 'SONIC'
+    | 'XLAYER'
     | 'ZKEVM';
 
 export interface GqlFeaturePoolGroupItemExternalLink {
