@@ -1978,7 +1978,7 @@ type GqlPoolSnapshot {
     swapsCount: String!
     holdersCount: String! @deprecated
     sharePrice: String!
-    amounts: [String!]! @deprecated
+    amounts: [String!]!
 }
 
 type GqlPoolTokenDisplay {

@@ -1,7 +1,6 @@
 /*
   Warnings:
 
-  - You are about to drop the column `amounts` on the `PrismaPoolSnapshot` table. All the data in the column will be lost.
   - You are about to drop the column `dailyProtocolSwapFees` on the `PrismaPoolSnapshot` table. All the data in the column will be lost.
   - You are about to drop the column `dailyProtocolYieldFees` on the `PrismaPoolSnapshot` table. All the data in the column will be lost.
   - You are about to drop the column `dailySurpluses` on the `PrismaPoolSnapshot` table. All the data in the column will be lost.
@@ -23,8 +22,7 @@
 ALTER TABLE "PrismaReliquaryTokenBalanceSnapshot" DROP CONSTRAINT "PrismaReliquaryTokenBalanceSnapshot_farmSnapshotId_chain_fkey";
 
 -- AlterTable
-ALTER TABLE "PrismaPoolSnapshot" DROP COLUMN "amounts",
-DROP COLUMN "dailyProtocolSwapFees",
+ALTER TABLE "PrismaPoolSnapshot" DROP COLUMN "dailyProtocolSwapFees",
 DROP COLUMN "dailyProtocolYieldFees",
 DROP COLUMN "dailySurpluses",
 DROP COLUMN "dailySwapFees",

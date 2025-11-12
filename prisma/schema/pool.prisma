@@ -414,6 +414,7 @@ model PrismaPoolSnapshot {
     totalShares         String
     totalSharesNum      Float
     swapsCount          Int
+    amounts             String[]
 
     @@index([protocolVersion])
     @@index([timestamp(sort: Desc)])

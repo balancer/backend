@@ -9,6 +9,8 @@ import { blockNumbers } from '../../block-numbers';
 import { getViemClient } from '../../sources/viem-client';
 import { formatEther, parseAbi } from 'viem/utils';
 import config from '../../../config';
+import { Multicaller3Call } from '../../web3/types';
+import { multicallViem } from '../../web3/multicaller-viem';
 
 export async function reloadSnapshots(chain: Chain, poolId: string): Promise<void> {
     const pool = await prisma.prismaPool.findUniqueOrThrow({
@@ -23,10 +25,15 @@ export async function reloadSnapshots(chain: Chain, poolId: string): Promise<voi
     // for each day, calculate the snapshot
     const upsertSnapshots: PrismaPoolSnapshot[] = [];
 
+    const totalSharesForBlocks: Record<number, string> = await getTotalSharesAtBlocks(pool, dailyBlocks);
+
+    const poolTokensForBlocks: Record<number, { address: string; balance: string; index: number }[]> =
+        await getPoolTokensAtBlocks(pool, dailyBlocks);
+
     for (const block of dailyBlocks) {
         // we need to get totalShares for the specific block on chain and apply BPT pricing to it to calculate TVL and share price
         const blockRoundedTimestamp = roundToMidnight(block.timestamp);
-        const totalShares = await getTotalSharesAtBlock(pool, block.number);
+        const totalShares = totalSharesForBlocks[block.number];
         const bptPriceAtTimestamp = await prisma.prismaTokenPrice.findFirst({
             where: {
                 chain,
@@ -52,6 +59,9 @@ export async function reloadSnapshots(chain: Chain, poolId: string): Promise<voi
             ],
             blockRoundedTimestamp,
             blockRoundedTimestamp + 86400,
+            {
+                [pool.id]: [...poolTokensForBlocks[block.number]],
+            },
         );
         upsertSnapshots.push(...snapshots);
     }
@@ -95,11 +105,29 @@ export async function syncSnapshots(chain: Chain): Promise<string[]> {
         },
     });
 
+    const poolTokens = await prisma.prismaPoolToken.findMany({
+        where: {
+            poolId: { in: poolsDynamicData.map((p) => p.poolId) },
+            chain,
+        },
+        select: { poolId: true, address: true, balance: true, index: true },
+    });
+
+    // create a map of poolId -> poolTokens
+    const poolTokensMap: Record<string, { address: string; balance: string; index: number }[]> = {};
+    poolTokens.forEach((pt) => {
+        if (!poolTokensMap[pt.poolId]) {
+            poolTokensMap[pt.poolId] = [];
+        }
+        poolTokensMap[pt.poolId].push({ address: pt.address, balance: pt.balance, index: pt.index });
+    });
+
     const { upsertSnapshots: snapshotsToday, latestBlock } = await calculatePoolSnapshots(
         chain,
         poolsDynamicData,
         snapshotTimestampForToday,
         now(),
+        poolTokensMap,
     );
 
     upsertSnapshots.push(...snapshotsToday);
@@ -111,6 +139,7 @@ export async function syncSnapshots(chain: Chain): Promise<string[]> {
             poolsDynamicData,
             snapshotTimestampForYesterday,
             snapshotTimestampForToday,
+            poolTokensMap,
         );
         upsertSnapshots.push(...snapshotsYesterday);
     }
@@ -149,6 +178,7 @@ async function calculatePoolSnapshots(
     }[],
     since: number,
     until: number,
+    poolTokensMap: Record<string, { address: string; balance: string; index: number }[]>,
 ) {
     const poolIds = poolsDynamicData.map((p) => p.poolId);
 
@@ -184,6 +214,7 @@ async function calculatePoolSnapshots(
                 statsMap[poolId],
                 poolsDynamicDataMap[poolId].totalLiquidity,
                 poolsDynamicDataMap[poolId].totalShares,
+                poolTokensMap[poolId].sort((a, b) => a.index - b.index).map((pt) => pt.balance),
             ),
         );
     }
@@ -196,6 +227,7 @@ function getPrismaPoolSnapshotFromStats(
     stats: SwapStats,
     totalLiquidity: number,
     totalShares: string,
+    amounts: string[],
 ): PrismaPoolSnapshot {
     return {
         id: `${stats.poolId}-${timestamp}`,
@@ -211,7 +243,76 @@ function getPrismaPoolSnapshotFromStats(
         fees24h: stats.fees,
         surplus24h: stats.surplus || 0,
         sharePrice: totalLiquidity > 0 && parseFloat(totalShares) > 0 ? totalLiquidity / parseFloat(totalShares) : 0,
+        amounts: amounts,
     };
+}
+
+async function getTotalSharesAtBlocks(
+    pool: {
+        id: string;
+        chain: Chain;
+        address: string;
+        type: $Enums.PrismaPoolType;
+        version: number;
+        protocolVersion: number;
+    },
+    blocks: { number: number; timestamp: number }[],
+): Promise<Record<string, string>> {
+    const calls = blocks.map((block) => {
+        if (pool.protocolVersion === 2 || pool.protocolVersion === 1) {
+            let supplyFunction: 'getVirtualSupply' | 'getActualSupply' | 'totalSupply' = 'totalSupply';
+
+            if (pool.type === 'COMPOSABLE_STABLE' && pool.version === 0) {
+                supplyFunction = 'getVirtualSupply';
+            } else if (
+                pool.type === 'COMPOSABLE_STABLE' ||
+                (pool.type === 'WEIGHTED' && pool.version > 1) ||
+                (pool.type === 'UNKNOWN' && pool.version > 1)
+            ) {
+                supplyFunction = 'getActualSupply';
+            } else {
+                supplyFunction = 'totalSupply';
+            }
+            return {
+                path: `${block.number}`,
+                address: pool.address as `0x${string}`,
+                abi: parseAbi([
+                    'function getActualSupply() view returns (uint256)',
+                    'function totalSupply() view returns (uint256)',
+                    'function getVirtualSupply() view returns (uint256)',
+                ]),
+                functionName: supplyFunction,
+                blockNumber: BigInt(block.number),
+                parser: (result: bigint) => formatEther(result),
+            };
+        } else {
+            return {
+                path: `${block.number}`,
+                address: config[pool.chain].balancer.v3.vaultAddress as `0x${string}`,
+                abi: parseAbi(['function totalSupply(address) view returns (uint256)']),
+                functionName: 'totalSupply',
+                blockNumber: BigInt(block.number),
+                args: [pool.address as `0x${string}`],
+                parser: (result: bigint) => formatEther(result),
+            };
+        }
+    });
+
+    return await multicallViem<Record<string, string>>(getViemClient(pool.chain), calls);
+}
+
+async function getPoolTokensAtBlocks(
+    pool: {
+        id: string;
+        chain: Chain;
+        address: string;
+        type: $Enums.PrismaPoolType;
+        version: number;
+        protocolVersion: number;
+    },
+    blocks: { number: number; timestamp: number }[],
+): Promise<Record<number, { address: string; balance: string; index: number }[]>> {
+    // const calls: Multicaller3Call[] = blocks.map((block) => ({
 }
 
 async function getTotalSharesAtBlock(
