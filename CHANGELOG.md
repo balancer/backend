@@ -1,5 +1,14 @@
 # backend
 
+## 1.56.1
+
+### Patch Changes
+
+-   2a2ea8a: SOR - Fix unwrapRates scaling
+-   4c84676: move pricing query to graphql
+-   f9a6468: pricing query cleanup
+-   36aa8c9: add xlayer support
+
 ## 1.56.0
 
 ### Minor Changes
