@@ -14,6 +14,7 @@ import { TokenHistoricalPrices } from '../../token/lib/coingecko-data.service';
 import { V2SubgraphClient } from '../../subgraphs/balancer-subgraph';
 import { blockNumbers } from '../../block-numbers';
 import { roundToMidnight } from '../../common/time';
+import { getSnapshotData } from './v2-snapshot-query';
 
 export class PoolSnapshotService {
     constructor(
@@ -39,7 +40,7 @@ export class PoolSnapshotService {
 
     /*
     Per default, this method syncs the snapshot from today and from yesterday (daysTosync=2). It is important to also sync the snapshot from
-    yesterday in the cron-job to capture all the changes between when it last ran and midnight. 
+    yesterday in the cron-job to capture all the changes between when it last ran and midnight.
     */
     public async syncLatestSnapshotsForAllPools(daysToSync = 2) {
         let operations: any[] = [];
@@ -86,6 +87,13 @@ export class PoolSnapshotService {
             const startTotalSwapVolume = `${latestSyncedSnapshot?.totalSwapVolume || '0'}`;
             const startTotalSwapFee = `${latestSyncedSnapshot?.totalSwapFee || '0'}`;
 
+            // Subgraph data is broken for AAVE pool
+            let aavePoolData = await getSnapshotData(
+                3,
+                'MAINNET',
+                '0x3de27efa2f1aa663ae5d458857e731c129069f29000200000000000000000588',
+            );
+
             const poolOperations = await Promise.all(
                 snapshots.map(async (snapshot, index) => {
                     const prevTotalSwapVolume = index === 0 ? startTotalSwapVolume : snapshots[index - 1].swapVolume;
@@ -97,6 +105,17 @@ export class PoolSnapshotService {
                         prevTotalSwapFee,
                         pool.tokens,
                     );
+
+                    // Subgraph data is off, handling from events
+                    if (snapshot.pool.id === '0x3de27efa2f1aa663ae5d458857e731c129069f29000200000000000000000588') {
+                        const dbData = aavePoolData.find((d) => d.timestamp === snapshot.timestamp);
+                        if (dbData) {
+                            data.fees24h = dbData.fees24h;
+                            data.volume24h = dbData.volume24h;
+                            data.totalSwapVolume = dbData.totalSwapVolume;
+                            data.totalSwapFee = dbData.totalSwapFee;
+                        }
+                    }
 
                     return prisma.prismaPoolSnapshot.upsert({
                         where: { id_chain: { id: snapshot.id, chain: this.chain } },
@@ -315,10 +334,13 @@ export class PoolSnapshotService {
                     },
                 })
                 .then((prices) => {
-                    return prices.reduce((acc, price) => {
-                        acc[price.tokenAddress] = price.price;
-                        return acc;
-                    }, {} as { [address: string]: number });
+                    return prices.reduce(
+                        (acc, price) => {
+                            acc[price.tokenAddress] = price.price;
+                            return acc;
+                        },
+                        {} as { [address: string]: number },
+                    );
                 });
         }
 
