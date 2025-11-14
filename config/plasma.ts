@@ -177,6 +177,18 @@ export default <NetworkData>{
                     ],
                 },
                 {
+                    name: '246USDT0',
+                    url: 'https://indexer-main.euler.finance/v1/earn/vault?chainId=9745&vaultAddress=0x9c46ee1f01d2b551048f5ff99a4659d98d04bed1',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x9c46ee1f01d2b551048f5ff99a4659d98d04bed1',
+                            path: '$.vault.apyCurrent',
+                        },
+                    ],
+                },
+                {
                     url: 'https://apr-api-plasma-earn.trevee.xyz/apy/current',
                     scale: 100,
                     extractors: [
