@@ -115,6 +115,44 @@ export const eventsRepository = {
 
         return latestEvent.type === 'SWAP' ? (latestEvent as SwapEvent) : (latestEvent as JoinExitEvent);
     },
+    getDailySwapsStats: async (chain: Chain, since: number, until?: number, poolIds?: string[]) => {
+        if (since < 0 || since > now() || since < now() - 3 * 365 * 24 * 60 * 60) {
+            throw new Error(`Invalid timestamp for since ${since}`);
+        }
+        if (until && (until < 0 || until > since)) {
+            throw new Error(`Invalid timestamp for until ${until}`);
+        }
+
+        const query = Prisma.sql`
+        SELECT
+            date_trunc('day', to_timestamp("blockTimestamp")) AS timestamp,
+            "poolId",
+            SUM("valueUSD") AS volume24h,
+            SUM((payload->'fee'->>'valueUSD')::numeric) AS fees24h,
+            SUM((payload->'surplus'->>'valueUSD')::numeric) AS surplus24h,
+            MAX("blockNumber") AS "latestBlockNumber" AS,
+            count(*) AS "swapsCount"
+          FROM "PartitionedPoolEvent"
+          WHERE
+            "blockTimestamp" >= ${since}
+            ${until ? 'AND "blockTimestamp" <= ${until}' : ''}
+            AND chain = '${chain}'
+            AND type = 'SWAP'
+            ${poolIds && poolIds.length < 30 ? 'AND "poolId" IN (\'' + poolIds.join("','") + "')" : ''}
+          GROUP BY 1, 2`;
+
+        const result = await prisma.$queryRaw(query);
+
+        return result as {
+            timestamp: number;
+            poolId: string;
+            volume24h: number;
+            fees24h: number;
+            surplus24h: number;
+            swapsCount: number;
+            latestBlockNumber: number;
+        }[];
+    },
     getSwapStats: async ({
         chain,
         poolIds,

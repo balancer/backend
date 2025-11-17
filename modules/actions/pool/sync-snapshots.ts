@@ -1,15 +1,13 @@
-import { $Enums, Chain, PrismaPoolSnapshot } from '@prisma/client';
+import { Chain, PrismaPoolSnapshot, PrismaPoolType } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
 import _ from 'lodash';
 import { getLastSyncedBlock } from '../last-synced-block';
-import { SwapStats } from '../../repositories/events/types';
 import { eventsRepository } from '../../repositories/events';
 import { now, roundToMidnight } from '../../common/time';
 import { blockNumbers } from '../../block-numbers';
 import { getViemClient } from '../../sources/viem-client';
 import { formatEther, parseAbi } from 'viem/utils';
 import config from '../../../config';
-import { Multicaller3Call } from '../../web3/types';
 import { multicallViem } from '../../web3/multicaller-viem';
 
 export async function reloadSnapshots(chain: Chain, poolId: string): Promise<void> {
@@ -30,40 +28,57 @@ export async function reloadSnapshots(chain: Chain, poolId: string): Promise<voi
     const poolTokensForBlocks: Record<number, { address: string; balance: string; index: number }[]> =
         await getPoolTokensAtBlocks(pool, dailyBlocks);
 
-    for (const block of dailyBlocks) {
-        // we need to get totalShares for the specific block on chain and apply BPT pricing to it to calculate TVL and share price
-        const blockRoundedTimestamp = roundToMidnight(block.timestamp);
-        const totalShares = totalSharesForBlocks[block.number];
-        const bptPriceAtTimestamp = await prisma.prismaTokenPrice.findFirst({
-            where: {
-                chain,
-                tokenAddress: pool.address,
-                timestamp: {
-                    gte: blockRoundedTimestamp,
-                },
-            },
-            select: { price: true },
-            orderBy: {
-                timestamp: 'desc',
-            },
-        });
+    const dailySwapsData = await eventsRepository.getDailySwapsStats(chain, firstSnapshotTimestamp, now(), [poolId]);
+    // convert to map for easier access
+    const swapsDataMap: Record<number, (typeof dailySwapsData)[0]> = {};
+    dailySwapsData.forEach((data) => {
+        swapsDataMap[data.timestamp] = data;
+    });
 
-        const { upsertSnapshots: snapshots } = await calculatePoolSnapshots(
+    const bptPriceSinceFirstSnapshot = await prisma.prismaTokenPrice.findMany({
+        where: {
             chain,
-            [
-                {
-                    poolId: pool.id,
-                    totalLiquidity: parseFloat(totalShares) * (bptPriceAtTimestamp?.price ?? 0),
-                    totalShares: totalShares,
-                },
-            ],
-            blockRoundedTimestamp,
-            blockRoundedTimestamp + 86400,
-            {
-                [pool.id]: [...poolTokensForBlocks[block.number]],
+            tokenAddress: pool.address,
+            timestamp: {
+                gte: firstSnapshotTimestamp,
             },
-        );
-        upsertSnapshots.push(...snapshots);
+        },
+        select: { price: true, timestamp: true },
+        orderBy: {
+            timestamp: 'asc',
+        },
+    });
+
+    for (const block of dailyBlocks) {
+        const currentTimestamp = roundToMidnight(block.timestamp);
+        const totalShares = totalSharesForBlocks[block.number] ?? '0';
+
+        // find closest bpt price, array is sorted timestamp asc
+        const bptPriceAtTimestamp = bptPriceSinceFirstSnapshot.find(
+            (price) => price.timestamp >= currentTimestamp,
+        )?.price;
+
+        const totalLiquidity = parseFloat(totalShares) * (bptPriceAtTimestamp ?? 0);
+
+        upsertSnapshots.push({
+            id: `${poolId}-${currentTimestamp}`,
+            chain: chain,
+            poolId: poolId,
+            timestamp: currentTimestamp,
+            protocolVersion: pool.protocolVersion,
+            totalLiquidity: totalLiquidity,
+            totalShares: totalShares ?? '0',
+            totalSharesNum: parseFloat(totalShares ?? '0'),
+            swapsCount: dailySwapsData[currentTimestamp]?.swapsCount ?? 0,
+            volume24h: dailySwapsData[currentTimestamp]?.volume24h ?? 0,
+            fees24h: dailySwapsData[currentTimestamp]?.fees24h ?? 0,
+            surplus24h: dailySwapsData[currentTimestamp]?.surplus24h ?? 0,
+            sharePrice:
+                totalLiquidity > 0 && parseFloat(totalShares ?? '0') > 0
+                    ? totalLiquidity / parseFloat(totalShares ?? '0')
+                    : 0,
+            amounts: poolTokensForBlocks[block.number]?.sort((a, b) => a.index - b.index).map((pt) => pt.balance) || [],
+        });
     }
 
     // Use upserts to sync snapshots into the DB
@@ -102,6 +117,11 @@ export async function syncSnapshots(chain: Chain): Promise<string[]> {
             poolId: true,
             totalLiquidity: true,
             totalShares: true,
+            pool: {
+                select: {
+                    protocolVersion: true,
+                },
+            },
         },
     });
 
@@ -175,6 +195,9 @@ async function calculatePoolSnapshots(
         poolId: string;
         totalLiquidity: number;
         totalShares: string;
+        pool: {
+            protocolVersion: number;
+        };
     }[],
     since: number,
     until: number,
@@ -188,12 +211,7 @@ async function calculatePoolSnapshots(
         poolsDynamicDataMap[data.poolId] = data;
     });
 
-    const swapStats = await eventsRepository.getSwapStats({
-        chain,
-        poolIds,
-        since,
-        until,
-    });
+    const swapStats = await eventsRepository.getDailySwapsStats(chain, since, until, poolIds);
 
     let latestBlock = 0;
     // convert stats to map for easier access
@@ -207,44 +225,29 @@ async function calculatePoolSnapshots(
 
     for (const poolId of poolIds) {
         if (!poolsDynamicDataMap[poolId] || !statsMap[poolId]) continue; // skip if no dynamic data or no stats
-        upsertSnapshots.push(
-            getPrismaPoolSnapshotFromStats(
-                chain,
-                since,
-                statsMap[poolId],
-                poolsDynamicDataMap[poolId].totalLiquidity,
-                poolsDynamicDataMap[poolId].totalShares,
-                poolTokensMap[poolId].sort((a, b) => a.index - b.index).map((pt) => pt.balance),
-            ),
-        );
+        upsertSnapshots.push({
+            id: `${poolId}-${since}`,
+            chain: chain,
+            poolId: poolId,
+            timestamp: since,
+            protocolVersion: poolsDynamicDataMap[poolId].pool.protocolVersion ?? 2,
+            totalLiquidity: poolsDynamicDataMap[poolId].totalLiquidity ?? 0,
+            totalShares: poolsDynamicDataMap[poolId].totalShares ?? '0',
+            totalSharesNum: parseFloat(poolsDynamicDataMap[poolId].totalShares ?? '0'),
+            swapsCount: statsMap[poolId].swapsCount ?? 0,
+            volume24h: statsMap[poolId].volume24h ?? 0,
+            fees24h: statsMap[poolId].fees24h ?? 0,
+            surplus24h: statsMap[poolId].surplus24h ?? 0,
+            sharePrice:
+                (poolsDynamicDataMap[poolId].totalLiquidity ?? 0) > 0 &&
+                parseFloat(poolsDynamicDataMap[poolId].totalShares ?? '0') > 0
+                    ? poolsDynamicDataMap[poolId].totalLiquidity /
+                      parseFloat(poolsDynamicDataMap[poolId].totalShares ?? '0')
+                    : 0,
+            amounts: poolTokensMap[poolId]?.sort((a, b) => a.index - b.index).map((pt) => pt.balance) || [],
+        });
     }
     return { upsertSnapshots, latestBlock };
-}
-
-function getPrismaPoolSnapshotFromStats(
-    chain: Chain,
-    timestamp: number,
-    stats: SwapStats,
-    totalLiquidity: number,
-    totalShares: string,
-    amounts: string[],
-): PrismaPoolSnapshot {
-    return {
-        id: `${stats.poolId}-${timestamp}`,
-        chain: chain,
-        poolId: stats.poolId,
-        timestamp: timestamp,
-        protocolVersion: 2,
-        totalLiquidity: totalLiquidity,
-        totalShares: totalShares,
-        totalSharesNum: parseFloat(totalShares),
-        swapsCount: stats.swapsCount,
-        volume24h: stats.volume,
-        fees24h: stats.fees,
-        surplus24h: stats.surplus || 0,
-        sharePrice: totalLiquidity > 0 && parseFloat(totalShares) > 0 ? totalLiquidity / parseFloat(totalShares) : 0,
-        amounts: amounts,
-    };
 }
 
 async function getTotalSharesAtBlocks(
@@ -252,7 +255,7 @@ async function getTotalSharesAtBlocks(
         id: string;
         chain: Chain;
         address: string;
-        type: $Enums.PrismaPoolType;
+        type: PrismaPoolType;
         version: number;
         protocolVersion: number;
     },
@@ -274,7 +277,7 @@ async function getTotalSharesAtBlocks(
                 supplyFunction = 'totalSupply';
             }
             return {
-                path: `${block.number}`,
+                path: `${block.timestamp}`,
                 address: pool.address as `0x${string}`,
                 abi: parseAbi([
                     'function getActualSupply() view returns (uint256)',
@@ -287,7 +290,7 @@ async function getTotalSharesAtBlocks(
             };
         } else {
             return {
-                path: `${block.number}`,
+                path: `${block.timestamp}`,
                 address: config[pool.chain].balancer.v3.vaultAddress as `0x${string}`,
                 abi: parseAbi(['function totalSupply(address) view returns (uint256)']),
                 functionName: 'totalSupply',
@@ -306,13 +309,13 @@ async function getPoolTokensAtBlocks(
         id: string;
         chain: Chain;
         address: string;
-        type: $Enums.PrismaPoolType;
+        type: PrismaPoolType;
         version: number;
         protocolVersion: number;
     },
     blocks: { number: number; timestamp: number }[],
 ): Promise<Record<number, { address: string; balance: string; index: number }[]>> {
-    // const calls: Multicaller3Call[] = blocks.map((block) => ({
+    return {};
 }
 
 async function getTotalSharesAtBlock(
@@ -320,7 +323,7 @@ async function getTotalSharesAtBlock(
         id: string;
         chain: Chain;
         address: string;
-        type: $Enums.PrismaPoolType;
+        type: PrismaPoolType;
         version: number;
         protocolVersion: number;
     },
