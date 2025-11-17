@@ -2,8 +2,8 @@ import { AprService } from '../';
 import { Chain } from '@prisma/client';
 
 async function calculationExample(
-    chain: Chain = 'MAINNET',
-    poolId = '0x3de27efa2f1aa663ae5d458857e731c129069f29000200000000000000000588',
+    chain: Chain = 'POLYGON',
+    poolId = '0xe2f706ef1f7240b803aae877c9c762644bb808d80002000000000000000008c2',
 ) {
     const service = new AprService();
 
