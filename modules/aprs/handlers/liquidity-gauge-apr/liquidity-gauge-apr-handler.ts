@@ -32,7 +32,7 @@ export class LiquidityGaugeAprHandler implements AprHandler {
 
         for (const pool of pools) {
             const gauges = pool.staking.filter((s) => s.type === 'GAUGE').map((s) => s.gauge);
-            const gauge = gauges.sort((a, b) => (a?.status === 'PREFERRED' ? -1 : 1))[0];
+            const gauge = gauges.sort((a, b) => (a?.status === 'PREFERRED' ? -1 : 1))?.[0];
 
             if (!gauge || !gauge.rewards || !pool.dynamicData || pool.dynamicData.totalShares === '0') {
                 continue;
