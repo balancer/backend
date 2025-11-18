@@ -6,13 +6,26 @@ import { eventsRepository } from '../../repositories/events';
 import { now, roundToMidnight } from '../../common/time';
 import { blockNumbers } from '../../block-numbers';
 import { getViemClient } from '../../sources/viem-client';
-import { formatEther, parseAbi } from 'viem/utils';
+import { formatEther, formatUnits, parseAbi } from 'viem/utils';
 import config from '../../../config';
 import { multicallViem } from '../../web3/multicaller-viem';
+import { Multicaller3Call } from '../../web3/types';
 
 export async function reloadSnapshots(chain: Chain, poolId: string): Promise<void> {
     const pool = await prisma.prismaPool.findUniqueOrThrow({
         where: { id_chain: { id: poolId, chain } },
+        select: {
+            id: true,
+            chain: true,
+            createTime: true,
+            protocolVersion: true,
+            address: true,
+            type: true,
+            version: true,
+            tokens: {
+                select: { address: true, token: { select: { address: true, decimals: true } } },
+            },
+        },
     });
 
     const firstSnapshotTimestamp = roundToMidnight(pool.createTime) + 86400; // we take the day after creation
@@ -26,9 +39,10 @@ export async function reloadSnapshots(chain: Chain, poolId: string): Promise<voi
     const totalSharesForBlocks: Record<number, string> = await getTotalSharesAtBlocks(pool, dailyBlocks);
 
     const poolTokensForBlocks: Record<number, { address: string; balance: string; index: number }[]> =
-        await getPoolTokensAtBlocks(pool, dailyBlocks);
+        await getPoolTokenBalancesAtBlocks(pool, dailyBlocks);
 
     const dailySwapsData = await eventsRepository.getDailySwapsStats(chain, firstSnapshotTimestamp, now(), [poolId]);
+
     // convert to map for easier access
     const swapsDataMap: Record<number, (typeof dailySwapsData)[0]> = {};
     dailySwapsData.forEach((data) => {
@@ -304,7 +318,7 @@ async function getTotalSharesAtBlocks(
     return await multicallViem<Record<string, string>>(getViemClient(pool.chain), calls);
 }
 
-async function getPoolTokensAtBlocks(
+async function getPoolTokenBalancesAtBlocks(
     pool: {
         id: string;
         chain: Chain;
@@ -312,8 +326,109 @@ async function getPoolTokensAtBlocks(
         type: PrismaPoolType;
         version: number;
         protocolVersion: number;
+        tokens: { address: string; token: { address: string; decimals: number } }[];
     },
     blocks: { number: number; timestamp: number }[],
 ): Promise<Record<number, { address: string; balance: string; index: number }[]>> {
-    return {};
+    // build decimals map
+    const decimalsMap: Record<string, number> = {};
+    for (const token of pool.tokens) {
+        decimalsMap[token.address.toLowerCase()] = token.token.decimals;
+    }
+
+    let calls: Multicaller3Call[] = [];
+
+    if (pool.protocolVersion === 2) {
+        calls = blocks.map((block) => {
+            return {
+                path: `${block.timestamp}`,
+                address: config[pool.chain].balancer.v2.vaultAddress as `0x${string}`,
+                abi: parseAbi([
+                    'function getPoolTokens(bytes32 poolId) view returns (address[] tokens, uint256[] balances, uint256 lastChangeBlock)',
+                ]),
+                functionName: 'getPoolTokens',
+                args: [pool.id as `0x${string}`],
+                blockNumber: BigInt(block.number),
+                parser: (result: { tokens: string[]; balances: bigint[]; lastChangeBlock: bigint }) => {
+                    return result.tokens.map((address, index) => ({
+                        address,
+                        balance: formatUnits(result.balances[index], decimalsMap[address.toLowerCase()]),
+                        index,
+                    }));
+                },
+            };
+        });
+    } else if (pool.protocolVersion === 3) {
+        calls = blocks.map((block) => {
+            return {
+                path: `${block.timestamp}`,
+                address: config[pool.chain].balancer.v3.vaultAddress as `0x${string}`,
+                abi: parseAbi([
+                    'function getPoolTokenInfo(address pool) external view returns (IERC20[] memory tokens, TokenInfo[] memory tokenInfo, uint256[] memory balancesRaw, uint256[] memory lastBalancesLiveScaled18)',
+                ]),
+                functionName: 'getPoolTokenInfo',
+                blockNumber: BigInt(block.number),
+                args: [pool.address as `0x${string}`],
+                parser: (result: {
+                    tokens: string[];
+                    tokenInfo: any[];
+                    balancesRaw: bigint[];
+                    lastBalancesLiveScaled18: bigint[];
+                }) => {
+                    return result.tokens.map((address, index) => ({
+                        address,
+                        balance: formatUnits(result.balancesRaw[index], decimalsMap[address.toLowerCase()]),
+                        index,
+                    }));
+                },
+            };
+        });
+    } else if (pool.protocolVersion === 1) {
+        const cowCalls = blocks
+            .map((block) => {
+                return pool.tokens
+                    .map((token, index) => [
+                        {
+                            path: `${block.timestamp}.${token.address}`,
+                            address: pool.address as `0x${string}`,
+                            abi: parseAbi(['function getBalance(address) view returns (uint256)']),
+                            functionName: 'getBalance',
+                            blockNumber: BigInt(block.number),
+                            args: [token.address as `0x${string}`],
+                            parser: (result: bigint) => {
+                                return {
+                                    address: token.address,
+                                    balance: formatUnits(result, decimalsMap[token.address.toLowerCase()]),
+                                    index: index,
+                                };
+                            },
+                        },
+                    ])
+                    .flat();
+            })
+            .flat();
+
+        const result = (await multicallViem(getViemClient(pool.chain), cowCalls)) as Record<
+            number,
+            {
+                [tokenAddress: string]: {
+                    address: string;
+                    balance: string;
+                    index: number;
+                };
+            }
+        >;
+
+        // parse to result and return
+        const balancesAtBlocks: Record<number, { address: string; balance: string; index: number }[]> = {};
+        for (const block of blocks) {
+            balancesAtBlocks[block.number] = Object.values(result[block.number]);
+        }
+        return balancesAtBlocks;
+    }
+
+    return await multicallViem<Record<number, { address: string; balance: string; index: number }[]>>(
+        getViemClient(pool.chain),
+        calls,
+    );
 }
