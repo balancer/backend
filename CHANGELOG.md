@@ -1,5 +1,12 @@
 # backend
 
+## 1.56.6
+
+### Patch Changes
+
+-   1b9df4f: fix handling preferred gauge APRs
+-   2768be6: fix handling PREFERRED gauge
+
 ## 1.56.5
 
 ### Patch Changes
