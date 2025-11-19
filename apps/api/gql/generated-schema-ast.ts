@@ -2171,7 +2171,7 @@ export const schema = gql`
     }
 
     type GqlPoolSnapshot {
-        amounts: [String!]! @deprecated
+        amounts: [String!]!
         chain: GqlChain!
         fees24h: String!
         holdersCount: String! @deprecated

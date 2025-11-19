@@ -1555,7 +1555,6 @@ export type GqlPoolReClamm = GqlPoolBase & {
 
 export type GqlPoolSnapshot = {
     __typename?: 'GqlPoolSnapshot';
-    /** @deprecated Field no longer supported */
     amounts: Array<Scalars['String']>;
     chain: GqlChain;
     fees24h: Scalars['String'];

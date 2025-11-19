@@ -1535,7 +1535,6 @@ export interface GqlPoolReClamm extends GqlPoolBase {
 
 export interface GqlPoolSnapshot {
     __typename?: 'GqlPoolSnapshot';
-    /** @deprecated Field no longer supported */
     amounts: Array<Scalars['String']>;
     chain: GqlChain;
     fees24h: Scalars['String'];

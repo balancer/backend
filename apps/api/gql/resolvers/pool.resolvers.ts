@@ -82,7 +82,6 @@ const balancerResolvers: Resolvers = {
                 totalSwapFee: `0`,
                 totalSurplus: `0`,
                 holdersCount: `0`,
-                amounts: [],
             }));
         },
     },
