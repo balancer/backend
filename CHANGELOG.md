@@ -1,5 +1,11 @@
 # backend
 
+## 1.56.7
+
+### Patch Changes
+
+-   93563a5: fix APRs using killed gauges
+
 ## 1.56.6
 
 ### Patch Changes
