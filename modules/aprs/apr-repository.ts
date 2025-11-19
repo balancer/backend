@@ -23,7 +23,17 @@ export class AprRepository {
                 where: { chain, ...(poolIds ? { id: { in: poolIds } } : {}) },
                 include: {
                     staking: {
-                        include: { gauge: { include: { rewards: true } }, reliquary: { include: { levels: true } } },
+                        include: {
+                            gauge: {
+                                where: {
+                                    status: {
+                                        not: 'KILLED',
+                                    },
+                                },
+                                include: { rewards: true },
+                            },
+                            reliquary: { include: { levels: true } },
+                        },
                     },
                 },
             }),
