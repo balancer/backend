@@ -395,20 +395,15 @@ async function getPoolTokenBalancesAtBlocks(
                 path: `${block.timestamp}`,
                 address: config[pool.chain].balancer.v3.vaultAddress as `0x${string}`,
                 abi: parseAbi([
-                    'function getPoolTokenInfo(address pool) external view returns (IERC20[] memory tokens, TokenInfo[] memory tokenInfo, uint256[] memory balancesRaw, uint256[] memory lastBalancesLiveScaled18)',
+                    'function getPoolTokenInfo(address pool) external view returns (address[] memory tokens, uint256[] memory tokenInfo, uint256[] memory balancesRaw, uint256[] memory lastBalancesLiveScaled18)',
                 ]),
                 functionName: 'getPoolTokenInfo',
                 blockNumber: BigInt(block.number),
                 args: [pool.address as `0x${string}`],
-                parser: (result: {
-                    tokens: string[];
-                    tokenInfo: any[];
-                    balancesRaw: bigint[];
-                    lastBalancesLiveScaled18: bigint[];
-                }) => {
-                    return result.tokens.map((address, index) => ({
+                parser: (result: any) => {
+                    return result[0].map((address: string, index: number) => ({
                         address,
-                        balance: formatUnits(result.balancesRaw[index], decimalsMap[address.toLowerCase()]),
+                        balance: formatUnits(result[2][index], decimalsMap[address.toLowerCase()]),
                         index,
                     }));
                 },
@@ -420,7 +415,7 @@ async function getPoolTokenBalancesAtBlocks(
                 return pool.tokens
                     .map((token, index) => [
                         {
-                            path: `${block.timestamp}.${token.address}`,
+                            path: `${block.number}.${token.address}`,
                             address: pool.address as `0x${string}`,
                             abi: parseAbi(['function getBalance(address) view returns (uint256)']),
                             functionName: 'getBalance',
