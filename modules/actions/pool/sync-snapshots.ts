@@ -1,4 +1,4 @@
-import { Chain, PrismaPoolSnapshot, PrismaPoolType } from '@prisma/client';
+import { Chain, Prisma, PrismaPool, PrismaPoolSnapshot, PrismaPoolType } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
 import _ from 'lodash';
 import { getLastSyncedBlock } from '../last-synced-block';
@@ -34,7 +34,7 @@ export async function reloadSnapshots(chain: Chain, poolId: string): Promise<voi
     const dailyBlocks = await blockNumbers().getDailyBlocks(chain, daysSinceFirstSnapshot);
 
     // for each day, calculate the snapshot
-    const upsertSnapshots: PrismaPoolSnapshot[] = [];
+    const upsertSnapshots: Prisma.PrismaPoolSnapshotCreateInput[] = [];
 
     const totalSharesForBlocks: Record<number, string> = await getTotalSharesAtBlocks(pool, dailyBlocks);
 
@@ -75,30 +75,45 @@ export async function reloadSnapshots(chain: Chain, poolId: string): Promise<voi
         const totalLiquidity = parseFloat(totalShares) * (bptPriceAtTimestamp ?? 0);
 
         upsertSnapshots.push({
+            pool: {
+                connect: { id_chain: { id: pool.id, chain } },
+            },
             id: `${poolId}-${currentTimestamp}`,
-            chain: chain,
-            poolId: poolId,
             timestamp: currentTimestamp,
             protocolVersion: pool.protocolVersion,
             totalLiquidity: totalLiquidity,
-            totalShares: totalShares ?? '0',
-            totalSharesNum: parseFloat(totalShares ?? '0'),
-            swapsCount: dailySwapsData[currentTimestamp]?.swapsCount ?? 0,
-            volume24h: dailySwapsData[currentTimestamp]?.volume24h ?? 0,
-            fees24h: dailySwapsData[currentTimestamp]?.fees24h ?? 0,
-            surplus24h: dailySwapsData[currentTimestamp]?.surplus24h ?? 0,
+            totalShares: totalShares || '0',
+            totalSharesNum: parseFloat(totalShares || '0'),
+            swapsCount: parseFloat(dailySwapsData[currentTimestamp]?.swapsCount?.toString()) || 0,
+            volume24h: dailySwapsData[currentTimestamp]?.volume24h || 0,
+            fees24h: dailySwapsData[currentTimestamp]?.fees24h || 0,
+            surplus24h: dailySwapsData[currentTimestamp]?.surplus24h || 0,
             sharePrice:
-                totalLiquidity > 0 && parseFloat(totalShares ?? '0') > 0
-                    ? totalLiquidity / parseFloat(totalShares ?? '0')
+                totalLiquidity > 0 && parseFloat(totalShares || '0') > 0
+                    ? totalLiquidity / parseFloat(totalShares || '0')
                     : 0,
             amounts: poolTokensForBlocks[block.number]?.sort((a, b) => a.index - b.index).map((pt) => pt.balance) || [],
+            holdersCount: 0, // deprecated field
+            totalSwapFee: 0, // deprecated field
+            totalSwapVolume: 0, // deprecated field
+            totalSurplus: 0, // deprecated field
+            totalVolumes: [], // deprecated field
+            dailyVolumes: [], // deprecated field
+            totalSwapFees: [], // deprecated field
+            totalSurpluses: [], // deprecated field
+            dailySwapFees: [], // deprecated field
+            dailySurpluses: [], // deprecated field
+            totalProtocolSwapFees: [], // deprecated field
+            dailyProtocolSwapFees: [], // deprecated field
+            totalProtocolYieldFees: [], // deprecated field
+            dailyProtocolYieldFees: [], // deprecated field
         });
     }
 
     // Use upserts to sync snapshots into the DB
     const upserts = upsertSnapshots.map((snapshot) =>
         prisma.prismaPoolSnapshot.upsert({
-            where: { id_chain: { id: snapshot.id, chain: snapshot.chain } },
+            where: { id_chain: { id: snapshot.id, chain } },
             create: snapshot,
             update: snapshot,
         }),
@@ -115,12 +130,13 @@ export async function reloadSnapshots(chain: Chain, poolId: string): Promise<voi
 export async function syncSnapshots(chain: Chain): Promise<string[]> {
     // we only need the latest synced block to understand if we also need to complete yesterdays snapshot
     // if we crossed midnight since the last synced block, we need to sync yesterday as well to complete the snapshot
-    const latestSyncedBlock = await getLastSyncedBlock(chain, 'SNAPSHOTS_FROM_EVENTS');
+    // const latestSyncedBlock = await getLastSyncedBlock(chain, 'SNAPSHOTS_FROM_EVENTS');
+    const latestSyncedBlock = await getLastSyncedBlock(chain, 'SNAPSHOTS_V3'); // change before pushing
     const timestampForBlock = (await blockNumbers().getTimestamp(chain, latestSyncedBlock)) ?? 0;
     const shouldSyncYesterday = roundToMidnight(timestampForBlock) < roundToMidnight(Math.floor(Date.now() / 1000));
 
     // we always sync todays snapshot
-    const upsertSnapshots: PrismaPoolSnapshot[] = [];
+    const upsertSnapshots: Prisma.PrismaPoolSnapshotCreateInput[] = [];
     const snapshotTimestampForToday = roundToMidnight(Math.floor(Date.now() / 1000));
 
     const poolsDynamicData = await prisma.prismaPoolDynamicData.findMany({
@@ -181,7 +197,7 @@ export async function syncSnapshots(chain: Chain): Promise<string[]> {
     // Use upserts to sync snapshots into the DB
     const upserts = upsertSnapshots.map((snapshot) =>
         prisma.prismaPoolSnapshot.upsert({
-            where: { id_chain: { id: snapshot.id, chain: snapshot.chain } },
+            where: { id_chain: { id: snapshot.id, chain: chain } },
             create: snapshot,
             update: snapshot,
         }),
@@ -194,13 +210,13 @@ export async function syncSnapshots(chain: Chain): Promise<string[]> {
         await prisma.$transaction(batch);
     }
 
-    await prisma.prismaLastBlockSynced.upsert({
-        where: { category_chain: { chain, category: 'SNAPSHOTS_FROM_EVENTS' } },
-        create: { chain, category: 'SNAPSHOTS_FROM_EVENTS', blockNumber: latestBlock },
-        update: { blockNumber: latestBlock },
-    });
+    // await prisma.prismaLastBlockSynced.upsert({
+    //     where: { category_chain: { chain, category: 'SNAPSHOTS_FROM_EVENTS' } },
+    //     create: { chain, category: 'SNAPSHOTS_FROM_EVENTS', blockNumber: latestBlock },
+    //     update: { blockNumber: latestBlock },
+    // });
 
-    return upsertSnapshots.map((snapshot) => snapshot.poolId);
+    return upsertSnapshots.map((snapshot) => snapshot.id);
 }
 
 async function calculatePoolSnapshots(
@@ -235,30 +251,45 @@ async function calculatePoolSnapshots(
         latestBlock = Math.max(latestBlock, stat.latestBlockNumber);
     });
 
-    const upsertSnapshots: PrismaPoolSnapshot[] = [];
+    const upsertSnapshots: Prisma.PrismaPoolSnapshotCreateInput[] = [];
 
     for (const poolId of poolIds) {
-        if (!poolsDynamicDataMap[poolId] || !statsMap[poolId]) continue; // skip if no dynamic data or no stats
+        if (!poolsDynamicDataMap[poolId]) continue; // skip if no dynamic data
         upsertSnapshots.push({
+            pool: {
+                connect: { id_chain: { id: poolId, chain } },
+            },
             id: `${poolId}-${since}`,
-            chain: chain,
-            poolId: poolId,
             timestamp: since,
-            protocolVersion: poolsDynamicDataMap[poolId].pool.protocolVersion ?? 2,
-            totalLiquidity: poolsDynamicDataMap[poolId].totalLiquidity ?? 0,
-            totalShares: poolsDynamicDataMap[poolId].totalShares ?? '0',
-            totalSharesNum: parseFloat(poolsDynamicDataMap[poolId].totalShares ?? '0'),
-            swapsCount: statsMap[poolId].swapsCount ?? 0,
-            volume24h: statsMap[poolId].volume24h ?? 0,
-            fees24h: statsMap[poolId].fees24h ?? 0,
-            surplus24h: statsMap[poolId].surplus24h ?? 0,
+            protocolVersion: poolsDynamicDataMap[poolId].pool.protocolVersion || 2,
+            totalLiquidity: poolsDynamicDataMap[poolId].totalLiquidity || 0,
+            totalShares: poolsDynamicDataMap[poolId].totalShares || '0',
+            totalSharesNum: parseFloat(poolsDynamicDataMap[poolId].totalShares || '0'),
+            swapsCount: parseFloat(statsMap[poolId]?.swapsCount?.toString()) || 0,
+            volume24h: statsMap[poolId]?.volume24h || 0,
+            fees24h: statsMap[poolId]?.fees24h || 0,
+            surplus24h: statsMap[poolId]?.surplus24h || 0,
             sharePrice:
-                (poolsDynamicDataMap[poolId].totalLiquidity ?? 0) > 0 &&
-                parseFloat(poolsDynamicDataMap[poolId].totalShares ?? '0') > 0
+                (poolsDynamicDataMap[poolId].totalLiquidity || 0) > 0 &&
+                parseFloat(poolsDynamicDataMap[poolId].totalShares || '0') > 0
                     ? poolsDynamicDataMap[poolId].totalLiquidity /
-                      parseFloat(poolsDynamicDataMap[poolId].totalShares ?? '0')
+                      parseFloat(poolsDynamicDataMap[poolId].totalShares || '0')
                     : 0,
             amounts: poolTokensMap[poolId]?.sort((a, b) => a.index - b.index).map((pt) => pt.balance) || [],
+            holdersCount: 0, // deprecated field
+            totalSwapFee: 0, // deprecated field
+            totalSwapVolume: 0, // deprecated field
+            totalSurplus: 0, // deprecated field
+            totalVolumes: [], // deprecated field
+            dailyVolumes: [], // deprecated field
+            totalSwapFees: [], // deprecated field
+            totalSurpluses: [], // deprecated field
+            dailySwapFees: [], // deprecated field
+            dailySurpluses: [], // deprecated field
+            totalProtocolSwapFees: [], // deprecated field
+            dailyProtocolSwapFees: [], // deprecated field
+            totalProtocolYieldFees: [], // deprecated field
+            dailyProtocolYieldFees: [], // deprecated field
         });
     }
     return { upsertSnapshots, latestBlock };
@@ -349,10 +380,10 @@ async function getPoolTokenBalancesAtBlocks(
                 functionName: 'getPoolTokens',
                 args: [pool.id as `0x${string}`],
                 blockNumber: BigInt(block.number),
-                parser: (result: { tokens: string[]; balances: bigint[]; lastChangeBlock: bigint }) => {
-                    return result.tokens.map((address, index) => ({
+                parser: (result: any) => {
+                    return result[0].map((address: string, index: number) => ({
                         address,
-                        balance: formatUnits(result.balances[index], decimalsMap[address.toLowerCase()]),
+                        balance: formatUnits(result[1][index], decimalsMap[address.toLowerCase()]),
                         index,
                     }));
                 },

@@ -119,27 +119,27 @@ export const eventsRepository = {
         if (since < 0 || since > now() || since < now() - 3 * 365 * 24 * 60 * 60) {
             throw new Error(`Invalid timestamp for since ${since}`);
         }
-        if (until && (until < 0 || until > since)) {
+        if (until && (until < 0 || until < since)) {
             throw new Error(`Invalid timestamp for until ${until}`);
         }
 
-        const query = Prisma.sql`
+        const query = Prisma.raw(`
         SELECT
             date_trunc('day', to_timestamp("blockTimestamp")) AS timestamp,
             "poolId",
             SUM("valueUSD") AS volume24h,
             SUM((payload->'fee'->>'valueUSD')::numeric) AS fees24h,
             SUM((payload->'surplus'->>'valueUSD')::numeric) AS surplus24h,
-            MAX("blockNumber") AS "latestBlockNumber" AS,
+            MAX("blockNumber") AS "latestBlockNumber",
             count(*) AS "swapsCount"
           FROM "PartitionedPoolEvent"
           WHERE
             "blockTimestamp" >= ${since}
-            ${until ? 'AND "blockTimestamp" <= ${until}' : ''}
+            ${until ? 'AND "blockTimestamp" <= ' + until : ''}
             AND chain = '${chain}'
             AND type = 'SWAP'
             ${poolIds && poolIds.length < 30 ? 'AND "poolId" IN (\'' + poolIds.join("','") + "')" : ''}
-          GROUP BY 1, 2`;
+          GROUP BY 1, 2`);
 
         const result = await prisma.$queryRaw(query);
 
@@ -149,7 +149,7 @@ export const eventsRepository = {
             volume24h: number;
             fees24h: number;
             surplus24h: number;
-            swapsCount: number;
+            swapsCount: bigint;
             latestBlockNumber: number;
         }[];
     },
@@ -167,7 +167,7 @@ export const eventsRepository = {
         if (since < 0 || since > now() || since < now() - 3 * 365 * 24 * 60 * 60) {
             throw new Error(`Invalid timestamp for since ${since}`);
         }
-        if (until && (until < 0 || until > since)) {
+        if (until && (until < 0 || until < since)) {
             throw new Error(`Invalid timestamp for until ${until}`);
         }
 
@@ -177,12 +177,12 @@ export const eventsRepository = {
             SUM((payload->'fee'->>'valueUSD')::numeric) AS fees,
             SUM((payload->'dynamicFee'->>'valueUSD')::numeric) AS "dynamicFees",
             SUM((payload->'surplus'->>'valueUSD')::numeric) AS surplus,
-            MAX("blockNumber") AS "latestBlockNumber" AS,
+            MAX("blockNumber") AS "latestBlockNumber",
             count(*) AS "swapsCount"
           FROM "PartitionedPoolEvent"
           WHERE
             "blockTimestamp" >= ${since}
-            ${until ? 'AND "blockTimestamp" <= ${until}' : ''}
+            ${until ? 'AND "blockTimestamp" <= ' + until : ''}
             AND chain = '${chain}'
             AND type = 'SWAP'
             ${poolIds && poolIds.length < 30 ? 'AND "poolId" IN (\'' + poolIds.join("','") + "')" : ''}

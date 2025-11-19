@@ -183,10 +183,14 @@ const defaultWeightedPoolSnapshot: Prisma.PrismaPoolSnapshotCreateInput = {
     fees24h: 2515,
     volume24h: 1006335,
     swapsCount: 760976,
+    holdersCount: 100,
     sharePrice: 74.3,
     totalLiquidity: 7824300.8,
     totalShares: '105175.6',
     totalSharesNum: 105175.6,
+    totalSwapFee: 1698548.418925,
+    totalSwapVolume: 1066689432.036545,
+    amounts: ['2168756.502379', '4663180.282740217636656087', '79.26189779', '1022.899752557829627982'],
 };
 
 export async function createWeightedPoolSnapshotFromDefault(
@@ -216,10 +220,14 @@ export async function createRandomSnapshotsForPoolForTimestamp(poolId: string, t
             fees24h: randomNumberFromInterval(100, 5000),
             volume24h: randomNumberFromInterval(1000, 50000),
             swapsCount: randomNumberFromInterval(1000, 50000),
+            holdersCount: randomNumberFromInterval(10, 500),
             sharePrice: randomNumberFromInterval(100, 500),
             totalLiquidity: randomNumberFromInterval(10000, 500000),
             totalShares: totlaShares.toString(),
             totalSharesNum: totlaShares,
+            totalSwapFee: randomNumberFromInterval(10000, 500000),
+            totalSwapVolume: randomNumberFromInterval(100000, 5000000),
+            amounts,
         },
     });
 }
@@ -241,10 +249,14 @@ export async function createRandomSnapshotsForPool(poolId: string, tokenCount: n
                 fees24h: randomNumberFromInterval(100, 5000),
                 volume24h: randomNumberFromInterval(1000, 50000),
                 swapsCount: randomNumberFromInterval(1000, 50000),
+                holdersCount: randomNumberFromInterval(10, 500),
                 sharePrice: randomNumberFromInterval(100, 500),
                 totalLiquidity: randomNumberFromInterval(10000, 500000),
                 totalShares: totlaShares.toString(),
                 totalSharesNum: totlaShares,
+                totalSwapFee: randomNumberFromInterval(10000, 500000),
+                totalSwapVolume: randomNumberFromInterval(100000, 5000000),
+                amounts,
             },
         });
     }
