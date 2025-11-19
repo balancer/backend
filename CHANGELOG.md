@@ -1,5 +1,53 @@
 # backend
 
+## 1.56.7
+
+### Patch Changes
+
+-   93563a5: fix APRs using killed gauges
+
+## 1.56.6
+
+### Patch Changes
+
+-   1b9df4f: fix handling preferred gauge APRs
+-   2768be6: fix handling PREFERRED gauge
+
+## 1.56.5
+
+### Patch Changes
+
+-   1fa4b34: stathyWHYPE APR
+
+## 1.56.4
+
+### Patch Changes
+
+-   6a770ec: 246USDT0 APR
+-   00ab5ea: patch subgraph snapshots for aave
+
+## 1.56.3
+
+### Patch Changes
+
+-   de43f5a: fix yuzu.money APR token address
+-   919ae59: paxoslabs APRs
+
+## 1.56.2
+
+### Patch Changes
+
+-   e35e4a3: syzusd APR
+
+## 1.56.1
+
+### Patch Changes
+
+-   2a2ea8a: SOR - Fix unwrapRates scaling
+-   4c84676: move pricing query to graphql
+-   f9a6468: pricing query cleanup
+-   36aa8c9: add xlayer support
+
 ## 1.56.0
 
 ### Minor Changes

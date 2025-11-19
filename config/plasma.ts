@@ -72,6 +72,17 @@ export default <NetworkData>{
             },
             http: [
                 {
+                    url: 'https://defi-api.yuzu.money/proxy/apy',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0xc8a8df9b210243c55d31c73090f06787ad0a1bf6',
+                            path: '$.data.syzusd_apy',
+                        },
+                    ],
+                },
+                {
                     url: 'https://app.avantprotocol.com/api/savusdApy',
                     scale: 100,
                     extractors: [
@@ -161,6 +172,18 @@ export default <NetworkData>{
                         {
                             type: 'path',
                             token: '0xa9c251f8304b1b3fc2b9e8fcae78d94eff82ac66',
+                            path: '$.vault.apyCurrent',
+                        },
+                    ],
+                },
+                {
+                    name: '246USDT0',
+                    url: 'https://indexer-main.euler.finance/v1/earn/vault?chainId=9745&vaultAddress=0x9c46ee1f01d2b551048f5ff99a4659d98d04bed1',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x9c46ee1f01d2b551048f5ff99a4659d98d04bed1',
                             path: '$.vault.apyCurrent',
                         },
                     ],

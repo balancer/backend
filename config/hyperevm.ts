@@ -110,7 +110,8 @@ export default <NetworkData>{
                     ],
                 },
                 {
-                    url: 'https://backend.nucleusearn.io/v1/vaults/apy?token_address=0x1359b05241cA5076c9F59605214f4F84114c0dE8&lookback_days=14',
+                    url: 'https://api.paxoslabs.com/v1/vaults/apy?token_address=0x1359b05241cA5076c9F59605214f4F84114c0dE8&lookback_days=14',
+                    headers: { 'Content-Type': 'application/json', 'x-api-key': env.PAXOS_APR_KEY },
                     scale: 100,
                     extractors: [
                         {
@@ -121,7 +122,8 @@ export default <NetworkData>{
                     ],
                 },
                 {
-                    url: 'https://backend.nucleusearn.io/v1/vaults/apy?token_address=0x5748ae796AE46A4F1348a1693de4b50560485562&lookback_days=14',
+                    url: 'https://api.paxoslabs.com/v1/vaults/apy?token_address=0x5748ae796AE46A4F1348a1693de4b50560485562&lookback_days=14',
+                    headers: { 'Content-Type': 'application/json', 'x-api-key': env.PAXOS_APR_KEY },
                     scale: 100,
                     extractors: [
                         {
@@ -162,6 +164,15 @@ export default <NetworkData>{
                         functionName: 'getReserveData',
                         token: '0xdc6f4239c1d8d3b955c06cb8f1a6cf18effc5bfe', // stataToken
                         args: ['0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb'], // USD₮0 market
+                        parser: (data: any) => Number(data[5]) / 1e27, // liquidityRate
+                    },
+                    {
+                        chain: 'HYPEREVM',
+                        contract: '0x895C799a5bbdCb63B80bEE5BD94E7b9138D977d6', // ProtocolDataProvider
+                        abi: 'function getReserveData(address) view returns (uint256 unbacked, uint256 accruedToTreasuryScaled, uint256 totalAToken, uint256 totalStableDebt, uint256 totalVariableDebt, uint256 liquidityRate, uint256 variableBorrowRate, uint256 stableBorrowRate, uint256 averageStableBorrowRate, uint256 liquidityIndex, uint256 variableBorrowIndex, uint40 lastUpdateTimestamp)',
+                        functionName: 'getReserveData',
+                        token: '0x3df418be6dad3f824d00a7c516dad3ea2a5a79c6', // stataToken
+                        args: ['0x5555555555555555555555555555555555555555'], // asset
                         parser: (data: any) => Number(data[5]) / 1e27, // liquidityRate
                     },
                 ],
