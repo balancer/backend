@@ -1,5 +1,5 @@
 import { prisma } from '../../../../prisma/prisma-client';
-import { EventController, SnapshotsController } from '../../../controllers';
+import { CowAmmController, EventController, SnapshotsController } from '../../../controllers';
 import { roundToMidnight } from '../../../common/time';
 
 describe('sync snapshot debug', () => {
@@ -33,19 +33,50 @@ describe('sync snapshot debug', () => {
         // update swap events
         await EventController().syncSwapsV3(chain);
         await EventController().syncSwapsUpdateVolumeAndFeesV2(chain);
-
+        await CowAmmController().syncSwaps(chain);
         await SnapshotsController().syncSnapshots(chain);
 
-        const dbPool = await prisma.prismaPool.findFirst({
+        let dbPool = await prisma.prismaPool.findFirst({
             where: {
                 chain,
+                protocolVersion: 3,
             },
             select: {
                 snapshots: true,
             },
         });
 
-        const latestSnapshot = (dbPool?.snapshots as any[]).sort((a, b) => b.timestamp - a.timestamp)[0];
+        let latestSnapshot = (dbPool?.snapshots as any[]).sort((a, b) => b.timestamp - a.timestamp)[0];
+
+        expect(latestSnapshot).toBeDefined();
+        expect(latestSnapshot.timestamp).toBe(roundToMidnight(Math.floor(Date.now() / 1000)));
+
+        dbPool = await prisma.prismaPool.findFirst({
+            where: {
+                chain,
+                protocolVersion: 2,
+            },
+            select: {
+                snapshots: true,
+            },
+        });
+
+        latestSnapshot = (dbPool?.snapshots as any[]).sort((a, b) => b.timestamp - a.timestamp)[0];
+
+        expect(latestSnapshot).toBeDefined();
+        expect(latestSnapshot.timestamp).toBe(roundToMidnight(Math.floor(Date.now() / 1000)));
+
+        dbPool = await prisma.prismaPool.findFirst({
+            where: {
+                chain,
+                protocolVersion: 1,
+            },
+            select: {
+                snapshots: true,
+            },
+        });
+
+        latestSnapshot = (dbPool?.snapshots as any[]).sort((a, b) => b.timestamp - a.timestamp)[0];
 
         expect(latestSnapshot).toBeDefined();
         expect(latestSnapshot.timestamp).toBe(roundToMidnight(Math.floor(Date.now() / 1000)));

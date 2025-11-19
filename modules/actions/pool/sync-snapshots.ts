@@ -93,20 +93,6 @@ export async function reloadSnapshots(chain: Chain, poolId: string): Promise<voi
                     ? totalLiquidity / parseFloat(totalShares || '0')
                     : 0,
             amounts: poolTokensForBlocks[block.number]?.sort((a, b) => a.index - b.index).map((pt) => pt.balance) || [],
-            holdersCount: 0, // deprecated field
-            totalSwapFee: 0, // deprecated field
-            totalSwapVolume: 0, // deprecated field
-            totalSurplus: 0, // deprecated field
-            totalVolumes: [], // deprecated field
-            dailyVolumes: [], // deprecated field
-            totalSwapFees: [], // deprecated field
-            totalSurpluses: [], // deprecated field
-            dailySwapFees: [], // deprecated field
-            dailySurpluses: [], // deprecated field
-            totalProtocolSwapFees: [], // deprecated field
-            dailyProtocolSwapFees: [], // deprecated field
-            totalProtocolYieldFees: [], // deprecated field
-            dailyProtocolYieldFees: [], // deprecated field
         });
     }
 
@@ -130,8 +116,7 @@ export async function reloadSnapshots(chain: Chain, poolId: string): Promise<voi
 export async function syncSnapshots(chain: Chain): Promise<string[]> {
     // we only need the latest synced block to understand if we also need to complete yesterdays snapshot
     // if we crossed midnight since the last synced block, we need to sync yesterday as well to complete the snapshot
-    // const latestSyncedBlock = await getLastSyncedBlock(chain, 'SNAPSHOTS_FROM_EVENTS');
-    const latestSyncedBlock = await getLastSyncedBlock(chain, 'SNAPSHOTS_V3'); // change before pushing
+    const latestSyncedBlock = await getLastSyncedBlock(chain, 'SNAPSHOTS');
     const timestampForBlock = (await blockNumbers().getTimestamp(chain, latestSyncedBlock)) ?? 0;
     const shouldSyncYesterday = roundToMidnight(timestampForBlock) < roundToMidnight(Math.floor(Date.now() / 1000));
 
@@ -210,11 +195,11 @@ export async function syncSnapshots(chain: Chain): Promise<string[]> {
         await prisma.$transaction(batch);
     }
 
-    // await prisma.prismaLastBlockSynced.upsert({
-    //     where: { category_chain: { chain, category: 'SNAPSHOTS_FROM_EVENTS' } },
-    //     create: { chain, category: 'SNAPSHOTS_FROM_EVENTS', blockNumber: latestBlock },
-    //     update: { blockNumber: latestBlock },
-    // });
+    await prisma.prismaLastBlockSynced.upsert({
+        where: { category_chain: { chain, category: 'SNAPSHOTS' } },
+        create: { chain, category: 'SNAPSHOTS', blockNumber: latestBlock },
+        update: { blockNumber: latestBlock },
+    });
 
     return upsertSnapshots.map((snapshot) => snapshot.id);
 }
@@ -276,20 +261,6 @@ async function calculatePoolSnapshots(
                       parseFloat(poolsDynamicDataMap[poolId].totalShares || '0')
                     : 0,
             amounts: poolTokensMap[poolId]?.sort((a, b) => a.index - b.index).map((pt) => pt.balance) || [],
-            holdersCount: 0, // deprecated field
-            totalSwapFee: 0, // deprecated field
-            totalSwapVolume: 0, // deprecated field
-            totalSurplus: 0, // deprecated field
-            totalVolumes: [], // deprecated field
-            dailyVolumes: [], // deprecated field
-            totalSwapFees: [], // deprecated field
-            totalSurpluses: [], // deprecated field
-            dailySwapFees: [], // deprecated field
-            dailySurpluses: [], // deprecated field
-            totalProtocolSwapFees: [], // deprecated field
-            dailyProtocolSwapFees: [], // deprecated field
-            totalProtocolYieldFees: [], // deprecated field
-            dailyProtocolYieldFees: [], // deprecated field
         });
     }
     return { upsertSnapshots, latestBlock };
