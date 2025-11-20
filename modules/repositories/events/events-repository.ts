@@ -116,7 +116,7 @@ export const eventsRepository = {
         return latestEvent.type === 'SWAP' ? (latestEvent as SwapEvent) : (latestEvent as JoinExitEvent);
     },
     getDailySwapsStats: async (chain: Chain, since: number, until?: number, poolIds?: string[]) => {
-        if (since < 0 || since > now() || since < now() - 3 * 365 * 24 * 60 * 60) {
+        if (since < 0 || since > now()) {
             throw new Error(`Invalid timestamp for since ${since}`);
         }
         if (until && (until < 0 || until < since)) {
