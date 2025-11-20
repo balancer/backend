@@ -226,7 +226,7 @@ async function calculatePoolSnapshots(
         poolsDynamicDataMap[data.poolId] = data;
     });
 
-    const swapStats = await eventsRepository.getDailySwapsStats(chain, since, until, poolIds);
+    const swapStats = await eventsRepository.getDailySwapsStats(chain, since, until);
 
     let latestBlock = 0;
     // convert stats to map for easier access
