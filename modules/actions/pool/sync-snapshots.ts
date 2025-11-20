@@ -8,8 +8,6 @@ import { blockNumbers } from '../../block-numbers';
 import { getViemClient } from '../../sources/viem-client';
 import { formatEther, formatUnits, parseAbi } from 'viem/utils';
 import config from '../../../config';
-import { multicallViem } from '../../web3/multicaller-viem';
-import { Multicaller3Call } from '../../web3/types';
 
 export async function reloadSnapshots(chain: Chain, poolId: string): Promise<void> {
     const pool = await prisma.prismaPool.findUniqueOrThrow({
@@ -66,6 +64,10 @@ export async function reloadSnapshots(chain: Chain, poolId: string): Promise<voi
     for (const block of dailyBlocks) {
         const currentTimestamp = roundToMidnight(block.timestamp);
         const totalShares = totalSharesForBlocks[block.timestamp] ?? '0';
+
+        if (currentTimestamp > 1756425600) {
+            console.log('Debug here');
+        }
 
         // find closest bpt price, array is sorted timestamp asc
         const bptPriceAtTimestamp = bptPriceSinceFirstSnapshot.find(
@@ -278,47 +280,84 @@ async function getTotalSharesAtBlocks(
     },
     blocks: { number: number; timestamp: number }[],
 ): Promise<Record<string, string>> {
-    const calls = blocks.map((block) => {
-        if (pool.protocolVersion === 2 || pool.protocolVersion === 1) {
-            let supplyFunction: 'getVirtualSupply' | 'getActualSupply' | 'totalSupply' = 'totalSupply';
+    const client = getViemClient(pool.chain);
+    const BATCH_SIZE = 100;
 
-            if (pool.type === 'COMPOSABLE_STABLE' && pool.version === 0) {
-                supplyFunction = 'getVirtualSupply';
-            } else if (
-                pool.type === 'COMPOSABLE_STABLE' ||
-                (pool.type === 'WEIGHTED' && pool.version > 1) ||
-                (pool.type === 'UNKNOWN' && pool.version > 1)
-            ) {
-                supplyFunction = 'getActualSupply';
-            } else {
-                supplyFunction = 'totalSupply';
+    const totalSharesMap: Record<string, string> = {};
+
+    // Process blocks in batches
+    for (let i = 0; i < blocks.length; i += BATCH_SIZE) {
+        const batch = blocks.slice(i, i + BATCH_SIZE);
+
+        // Create a promise for each block in the batch
+        const promises = batch.map(async (block) => {
+            try {
+                if (pool.protocolVersion === 2 || pool.protocolVersion === 1) {
+                    let supplyFunction: 'getVirtualSupply' | 'getActualSupply' | 'totalSupply' = 'totalSupply';
+
+                    if (pool.type === 'COMPOSABLE_STABLE' && pool.version === 0) {
+                        supplyFunction = 'getVirtualSupply';
+                    } else if (
+                        pool.type === 'COMPOSABLE_STABLE' ||
+                        (pool.type === 'WEIGHTED' && pool.version > 1) ||
+                        (pool.type === 'UNKNOWN' && pool.version > 1)
+                    ) {
+                        supplyFunction = 'getActualSupply';
+                    } else {
+                        supplyFunction = 'totalSupply';
+                    }
+
+                    const result = await client.readContract({
+                        address: pool.address as `0x${string}`,
+                        abi: parseAbi([
+                            'function getActualSupply() view returns (uint256)',
+                            'function totalSupply() view returns (uint256)',
+                            'function getVirtualSupply() view returns (uint256)',
+                        ]),
+                        functionName: supplyFunction,
+                        blockNumber: BigInt(block.number),
+                    });
+
+                    return {
+                        timestamp: block.timestamp,
+                        value: formatEther(result as bigint),
+                    };
+                } else {
+                    const result = await client.readContract({
+                        address: config[pool.chain].balancer.v3.vaultAddress as `0x${string}`,
+                        abi: parseAbi(['function totalSupply(address) view returns (uint256)']),
+                        functionName: 'totalSupply',
+                        blockNumber: BigInt(block.number),
+                        args: [pool.address as `0x${string}`],
+                    });
+
+                    return {
+                        timestamp: block.timestamp,
+                        value: formatEther(result as bigint),
+                    };
+                }
+            } catch (error) {
+                console.error(
+                    `Failed to get total shares for pool ${pool.id} at block ${block.number} (timestamp: ${block.timestamp}):`,
+                    error,
+                );
+                return {
+                    timestamp: block.timestamp,
+                    value: '0',
+                };
             }
-            return {
-                path: `${block.timestamp}`,
-                address: pool.address as `0x${string}`,
-                abi: parseAbi([
-                    'function getActualSupply() view returns (uint256)',
-                    'function totalSupply() view returns (uint256)',
-                    'function getVirtualSupply() view returns (uint256)',
-                ]),
-                functionName: supplyFunction,
-                blockNumber: BigInt(block.number),
-                parser: (result: bigint) => formatEther(result),
-            };
-        } else {
-            return {
-                path: `${block.timestamp}`,
-                address: config[pool.chain].balancer.v3.vaultAddress as `0x${string}`,
-                abi: parseAbi(['function totalSupply(address) view returns (uint256)']),
-                functionName: 'totalSupply',
-                blockNumber: BigInt(block.number),
-                args: [pool.address as `0x${string}`],
-                parser: (result: bigint) => formatEther(result),
-            };
-        }
-    });
+        });
 
-    return await multicallViem<Record<string, string>>(getViemClient(pool.chain), calls);
+        // Wait for all promises in this batch to resolve
+        const results = await Promise.all(promises);
+
+        // Add results to the map
+        for (const result of results) {
+            totalSharesMap[result.timestamp] = result.value;
+        }
+    }
+
+    return totalSharesMap;
 }
 
 async function getPoolTokenBalancesAtBlocks(
@@ -333,100 +372,181 @@ async function getPoolTokenBalancesAtBlocks(
     },
     blocks: { number: number; timestamp: number }[],
 ): Promise<Record<number, { address: string; balance: string; index: number }[]>> {
+    const client = getViemClient(pool.chain);
+    const BATCH_SIZE = 100;
+
     // build decimals map
     const decimalsMap: Record<string, number> = {};
     for (const token of pool.tokens) {
         decimalsMap[token.address.toLowerCase()] = token.token.decimals;
     }
 
-    let calls: Multicaller3Call[] = [];
+    const balancesMap: Record<number, { address: string; balance: string; index: number }[]> = {};
 
     if (pool.protocolVersion === 2) {
-        calls = blocks.map((block) => {
-            return {
-                path: `${block.timestamp}`,
-                address: config[pool.chain].balancer.v2.vaultAddress as `0x${string}`,
-                abi: parseAbi([
-                    'function getPoolTokens(bytes32 poolId) view returns (address[] tokens, uint256[] balances, uint256 lastChangeBlock)',
-                ]),
-                functionName: 'getPoolTokens',
-                args: [pool.id as `0x${string}`],
-                blockNumber: BigInt(block.number),
-                parser: (result: any) => {
-                    return result[0].map((address: string, index: number) => ({
-                        address,
-                        balance: formatUnits(result[1][index], decimalsMap[address.toLowerCase()]),
-                        index,
-                    }));
-                },
-            };
-        });
-    } else if (pool.protocolVersion === 3) {
-        calls = blocks.map((block) => {
-            return {
-                path: `${block.timestamp}`,
-                address: config[pool.chain].balancer.v3.vaultAddress as `0x${string}`,
-                abi: parseAbi([
-                    'function getPoolTokenInfo(address pool) external view returns (address[] memory tokens, uint256[] memory tokenInfo, uint256[] memory balancesRaw, uint256[] memory lastBalancesLiveScaled18)',
-                ]),
-                functionName: 'getPoolTokenInfo',
-                blockNumber: BigInt(block.number),
-                args: [pool.address as `0x${string}`],
-                parser: (result: any) => {
-                    return result[0].map((address: string, index: number) => ({
-                        address,
-                        balance: formatUnits(result[2][index], decimalsMap[address.toLowerCase()]),
-                        index,
-                    }));
-                },
-            };
-        });
-    } else if (pool.protocolVersion === 1) {
-        const cowCalls = blocks
-            .map((block) => {
-                return pool.tokens
-                    .map((token, index) => [
-                        {
-                            path: `${block.number}.${token.address}`,
-                            address: pool.address as `0x${string}`,
-                            abi: parseAbi(['function getBalance(address) view returns (uint256)']),
-                            functionName: 'getBalance',
-                            blockNumber: BigInt(block.number),
-                            args: [token.address as `0x${string}`],
-                            parser: (result: bigint) => {
-                                return {
-                                    address: token.address,
-                                    balance: formatUnits(result, decimalsMap[token.address.toLowerCase()]),
-                                    index: index,
-                                };
-                            },
-                        },
-                    ])
-                    .flat();
-            })
-            .flat();
+        // Process blocks in batches
+        for (let i = 0; i < blocks.length; i += BATCH_SIZE) {
+            const batch = blocks.slice(i, i + BATCH_SIZE);
 
-        const result = (await multicallViem(getViemClient(pool.chain), cowCalls)) as Record<
-            number,
-            {
-                [tokenAddress: string]: {
-                    address: string;
-                    balance: string;
-                    index: number;
-                };
+            // Create a promise for each block in the batch
+            const promises = batch.map(async (block) => {
+                try {
+                    const result = await client.readContract({
+                        address: config[pool.chain].balancer.v2.vaultAddress as `0x${string}`,
+                        abi: parseAbi([
+                            'function getPoolTokens(bytes32 poolId) view returns (address[] tokens, uint256[] balances, uint256 lastChangeBlock)',
+                        ]),
+                        functionName: 'getPoolTokens',
+                        args: [pool.id as `0x${string}`],
+                        blockNumber: BigInt(block.number),
+                    });
+
+                    const tokens = (result as any)[0].map((address: string, index: number) => ({
+                        address,
+                        balance: formatUnits((result as any)[1][index], decimalsMap[address.toLowerCase()]),
+                        index,
+                    }));
+
+                    return {
+                        timestamp: block.timestamp,
+                        tokens,
+                    };
+                } catch (error) {
+                    console.error(
+                        `Failed to get pool token balances for pool ${pool.id} at block ${block.number} (timestamp: ${block.timestamp}):`,
+                    );
+                    return {
+                        timestamp: block.timestamp,
+                        tokens: [],
+                    };
+                }
+            });
+
+            // Wait for all promises in this batch to resolve
+            const results = await Promise.all(promises);
+
+            // Add results to the map
+            for (const result of results) {
+                balancesMap[result.timestamp] = result.tokens;
             }
-        >;
-
-        // parse to result and return
-        const balancesAtBlocks: Record<number, { address: string; balance: string; index: number }[]> = {};
-        for (const block of blocks) {
-            balancesAtBlocks[block.timestamp] = Object.values(result[block.number]);
         }
-        return balancesAtBlocks;
+
+        return balancesMap;
+    } else if (pool.protocolVersion === 3) {
+        // Process blocks in batches
+        for (let i = 0; i < blocks.length; i += BATCH_SIZE) {
+            const batch = blocks.slice(i, i + BATCH_SIZE);
+
+            // Create a promise for each block in the batch
+            const promises = batch.map(async (block) => {
+                try {
+                    const result = await client.readContract({
+                        address: config[pool.chain].balancer.v3.vaultAddress as `0x${string}`,
+                        abi: parseAbi([
+                            'function getPoolTokenInfo(address pool) external view returns (address[] memory tokens, uint256[] memory tokenInfo, uint256[] memory balancesRaw, uint256[] memory lastBalancesLiveScaled18)',
+                        ]),
+                        functionName: 'getPoolTokenInfo',
+                        blockNumber: BigInt(block.number),
+                        args: [pool.address as `0x${string}`],
+                    });
+
+                    const tokens = (result as any)[0].map((address: string, index: number) => ({
+                        address,
+                        balance: formatUnits((result as any)[2][index], decimalsMap[address.toLowerCase()]),
+                        index,
+                    }));
+
+                    return {
+                        timestamp: block.timestamp,
+                        tokens,
+                    };
+                } catch (error) {
+                    console.error(
+                        `Failed to get pool token balances for pool ${pool.id} at block ${block.number} (timestamp: ${block.timestamp}):`,
+                        error,
+                    );
+                    return {
+                        timestamp: block.timestamp,
+                        tokens: [],
+                    };
+                }
+            });
+
+            // Wait for all promises in this batch to resolve
+            const results = await Promise.all(promises);
+
+            // Add results to the map
+            for (const result of results) {
+                balancesMap[result.timestamp] = result.tokens;
+            }
+        }
+
+        return balancesMap;
+    } else if (pool.protocolVersion === 1) {
+        // Process blocks in batches
+        for (let i = 0; i < blocks.length; i += BATCH_SIZE) {
+            const batch = blocks.slice(i, i + BATCH_SIZE);
+
+            // For protocol v1, we need to query each token balance separately for each block
+            const promises = batch.map(async (block) => {
+                try {
+                    // For each block, query all token balances in parallel
+                    const tokenPromises = pool.tokens.map(async (token, index) => {
+                        try {
+                            const result = await client.readContract({
+                                address: pool.address as `0x${string}`,
+                                abi: parseAbi(['function getBalance(address) view returns (uint256)']),
+                                functionName: 'getBalance',
+                                blockNumber: BigInt(block.number),
+                                args: [token.address as `0x${string}`],
+                            });
+
+                            return {
+                                address: token.address,
+                                balance: formatUnits(result as bigint, decimalsMap[token.address.toLowerCase()]),
+                                index: index,
+                            };
+                        } catch (error) {
+                            console.error(
+                                `Failed to get balance for token ${token.address} in pool ${pool.id} at block ${block.number}:`,
+                                error,
+                            );
+                            return {
+                                address: token.address,
+                                balance: '0',
+                                index: index,
+                            };
+                        }
+                    });
+
+                    const tokens = await Promise.all(tokenPromises);
+
+                    return {
+                        timestamp: block.timestamp,
+                        tokens,
+                    };
+                } catch (error) {
+                    console.error(
+                        `Failed to get pool token balances for pool ${pool.id} at block ${block.number} (timestamp: ${block.timestamp}):`,
+                    );
+                    return {
+                        timestamp: block.timestamp,
+                        tokens: [],
+                    };
+                }
+            });
+
+            // Wait for all block promises in this batch to resolve
+            const results = await Promise.all(promises);
+
+            // Add results to the map
+            for (const result of results) {
+                balancesMap[result.timestamp] = result.tokens;
+            }
+        }
+
+        return balancesMap;
     }
 
-    return await multicallViem<Record<number, { address: string; balance: string; index: number }[]>>(
-        getViemClient(pool.chain),
-        calls,
-    );
+    return {};
 }
