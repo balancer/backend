@@ -102,16 +102,8 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         return EventController().syncJoinExitsV2(chain);
     } else if (job === 'sync-swaps-v2') {
         return EventController().syncSwapsUpdateVolumeAndFeesV2(chain);
-    } else if (job === 'sync-snapshots-v2') {
-        return SnapshotsController().syncSnapshotsV2(chain);
-    } else if (job === 'fill-missing-snapshots-v2') {
-        return SnapshotsController().fillMissingSnapshotsV2(chain);
-    } else if (job === 'sync-snapshots-v3') {
-        return SnapshotsController().syncSnapshotsV3(chain);
-    } else if (job === 'sync-all-snapshots-v3') {
-        return SnapshotsController().syncAllSnapshotsV3(chain);
-    } else if (job === 'forward-fill-snapshots-v3') {
-        return SnapshotsController().forwardFillSnapshotsForPoolsWithoutUpdatesV3(chain);
+    } else if (job === 'sync-snapshots') {
+        return SnapshotsController().syncSnapshots(chain);
     } else if (job === 'sync-swaps-v3') {
         return EventController().syncSwapsV3(chain);
     } else if (job === 'update-volume-and-fees') {
@@ -135,10 +127,6 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
     } else if (job === 'reload-cow-amm-pools') {
         await upsertLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.COW_AMM_POOLS, 0);
         return CowAmmController().syncPools(chain);
-    } else if (job === 'sync-cow-amm-snapshots') {
-        return CowAmmController().syncSnapshots(chain);
-    } else if (job === 'sync-all-cow-amm-snapshots') {
-        return CowAmmController().syncAllSnapshots(chain);
     } else if (job === 'sync-cow-amm-swaps') {
         return CowAmmController().syncSwaps(chain);
     } else if (job === 'sync-cow-amm-join-exits') {

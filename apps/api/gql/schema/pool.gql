@@ -44,10 +44,9 @@ extend type Mutation {
     poolUpdateLiquidityValuesForAllPools: String!
     poolReloadAllPoolAprs(chain: GqlChain!): String!
     poolReloadStakingForAllPools(stakingTypes: [GqlPoolStakingType!]!): String!
-    poolLoadSnapshotsForPools(poolIds: [String!]!, reload: Boolean): String!
+    poolLoadSnapshotsForPools(poolId: String!, chain: GqlChain!): String!
     poolLoadOnChainDataForAllPools(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
     poolReloadPools(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
-    poolSyncAllCowSnapshots(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
     poolSyncFxQuoteTokens(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
 }
 
@@ -1973,11 +1972,11 @@ type GqlPoolSnapshot {
     fees24h: String!
     surplus24h: String!
     totalShares: String!
-    totalSwapVolume: String!
-    totalSwapFee: String!
-    totalSurplus: String!
+    totalSwapVolume: String! @deprecated
+    totalSwapFee: String! @deprecated
+    totalSurplus: String! @deprecated
     swapsCount: String!
-    holdersCount: String!
+    holdersCount: String! @deprecated
     sharePrice: String!
     amounts: [String!]!
 }
@@ -2098,17 +2097,8 @@ type GqlReliquaryFarmSnapshot {
     dailyWithdrawn: String!
     totalLiquidity: String!
     levelBalances: [GqlReliquaryFarmLevelSnapshot!]!
-    tokenBalances: [GqlReliquaryTokenBalanceSnapshot!]!
 }
 
-type GqlReliquaryTokenBalanceSnapshot {
-    id: ID!
-    address: String!
-    balance: String!
-    symbol: String!
-    name: String!
-    decimals: Int!
-}
 type GqlReliquaryFarmLevelSnapshot {
     id: ID!
     level: String!

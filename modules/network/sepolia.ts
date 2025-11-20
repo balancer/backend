@@ -51,8 +51,8 @@ export const sepoliaNetworkConfig: NetworkConfig = {
             interval: every(20, 'minutes'),
         },
         {
-            name: 'sync-snapshots-v2',
-            interval: every(180, 'minutes'),
+            name: 'sync-snapshots',
+            interval: every(15, 'minutes'),
         },
         {
             name: 'sync-changed-pools',
@@ -104,10 +104,6 @@ export const sepoliaNetworkConfig: NetworkConfig = {
             interval: every(10, 'minutes'),
         },
         {
-            name: 'sync-snapshots-v3',
-            interval: every(90, 'minutes'),
-        },
-        {
             name: 'sync-hook-data',
             interval: every(1, 'hours'),
         },
@@ -124,7 +120,6 @@ export const sepoliaNetworkConfig: NetworkConfig = {
             name: 'sync-cow-amm-join-exits',
             interval: every(10, 'minutes'),
         },
-        { name: 'sync-cow-amm-snapshots', interval: every(90, 'minutes') },
         {
             name: 'sync-erc4626-onchain-data',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(60, 'minutes') : every(20, 'minutes'),

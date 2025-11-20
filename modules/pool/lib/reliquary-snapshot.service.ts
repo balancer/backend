@@ -5,12 +5,7 @@ import _ from 'lodash';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { ReliquarySubgraphService } from '../../subgraphs/reliquary-subgraph/reliquary.service';
 import { oneDayInMinutes } from '../../common/time';
-import {
-    Chain,
-    PrismaReliquaryFarmSnapshot,
-    PrismaReliquaryLevelSnapshot,
-    PrismaReliquaryTokenBalanceSnapshot,
-} from '@prisma/client';
+import { Chain, PrismaReliquaryFarmSnapshot, PrismaReliquaryLevelSnapshot } from '@prisma/client';
 import { networkContext } from '../../network/network-context.service';
 import { blockNumbers } from '../../block-numbers';
 
@@ -21,7 +16,7 @@ export class ReliquarySnapshotService {
         const timestamp = this.getTimestampForRange(range);
         return prisma.prismaReliquaryFarmSnapshot.findMany({
             where: { farmId: `${farmId}`, timestamp: { gte: timestamp }, chain: networkContext.chain },
-            include: { levelBalances: true, tokenBalances: true },
+            include: { levelBalances: true },
             orderBy: { timestamp: 'asc' },
         });
     }
@@ -127,26 +122,6 @@ export class ReliquarySnapshotService {
                     farmOperations.push(
                         prisma.prismaReliquaryLevelSnapshot.upsert({
                             where: { id_chain: { id: `${level.id}-${snapshot.id}`, chain: chain } },
-                            create: data,
-                            update: data,
-                        }),
-                    );
-                }
-
-                for (const token of pool.tokens) {
-                    const data: PrismaReliquaryTokenBalanceSnapshot = {
-                        id: `${token.id}-${snapshot.id}`,
-                        chain: chain,
-                        farmSnapshotId: snapshot.id,
-                        address: token.address,
-                        symbol: token.token.symbol,
-                        name: token.token.name,
-                        decimals: token.token.decimals,
-                        balance: `${parseFloat(mostRecentPoolSnapshot.amounts[token.index]) * sharePercentage}`,
-                    };
-                    farmOperations.push(
-                        prisma.prismaReliquaryTokenBalanceSnapshot.upsert({
-                            where: { id_chain: { id: `${token.id}-${snapshot.id}`, chain: chain } },
                             create: data,
                             update: data,
                         }),

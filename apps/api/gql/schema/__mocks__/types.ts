@@ -1558,6 +1558,7 @@ export type GqlPoolSnapshot = {
     amounts: Array<Scalars['String']>;
     chain: GqlChain;
     fees24h: Scalars['String'];
+    /** @deprecated Field no longer supported */
     holdersCount: Scalars['String'];
     id: Scalars['ID'];
     poolId: Scalars['String'];
@@ -1567,8 +1568,11 @@ export type GqlPoolSnapshot = {
     timestamp: Scalars['Int'];
     totalLiquidity: Scalars['String'];
     totalShares: Scalars['String'];
+    /** @deprecated Field no longer supported */
     totalSurplus: Scalars['String'];
+    /** @deprecated Field no longer supported */
     totalSwapFee: Scalars['String'];
+    /** @deprecated Field no longer supported */
     totalSwapVolume: Scalars['String'];
     volume24h: Scalars['String'];
 };
@@ -2205,20 +2209,9 @@ export type GqlReliquaryFarmSnapshot = {
     levelBalances: Array<GqlReliquaryFarmLevelSnapshot>;
     relicCount: Scalars['String'];
     timestamp: Scalars['Int'];
-    tokenBalances: Array<GqlReliquaryTokenBalanceSnapshot>;
     totalBalance: Scalars['String'];
     totalLiquidity: Scalars['String'];
     userCount: Scalars['String'];
-};
-
-export type GqlReliquaryTokenBalanceSnapshot = {
-    __typename?: 'GqlReliquaryTokenBalanceSnapshot';
-    address: Scalars['String'];
-    balance: Scalars['String'];
-    decimals: Scalars['Int'];
-    id: Scalars['ID'];
-    name: Scalars['String'];
-    symbol: Scalars['String'];
 };
 
 export type GqlSftmxStakingData = {
@@ -2911,7 +2904,6 @@ export type Mutation = {
     poolReloadAllPoolAprs: Scalars['String'];
     poolReloadPools: Array<GqlPoolMutationResult>;
     poolReloadStakingForAllPools: Scalars['String'];
-    poolSyncAllCowSnapshots: Array<GqlPoolMutationResult>;
     poolSyncAllPoolsFromSubgraph: Array<Scalars['String']>;
     poolSyncFxQuoteTokens: Array<GqlPoolMutationResult>;
     poolUpdateLiquidityValuesForAllPools: Scalars['String'];
@@ -2948,8 +2940,8 @@ export type MutationPoolLoadOnChainDataForAllPoolsArgs = {
 };
 
 export type MutationPoolLoadSnapshotsForPoolsArgs = {
-    poolIds: Array<Scalars['String']>;
-    reload?: InputMaybe<Scalars['Boolean']>;
+    chain: GqlChain;
+    poolId: Scalars['String'];
 };
 
 export type MutationPoolReloadAllPoolAprsArgs = {
@@ -2962,10 +2954,6 @@ export type MutationPoolReloadPoolsArgs = {
 
 export type MutationPoolReloadStakingForAllPoolsArgs = {
     stakingTypes: Array<GqlPoolStakingType>;
-};
-
-export type MutationPoolSyncAllCowSnapshotsArgs = {
-    chains: Array<GqlChain>;
 };
 
 export type MutationPoolSyncFxQuoteTokensArgs = {

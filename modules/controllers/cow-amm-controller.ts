@@ -3,7 +3,7 @@ import { prisma } from '../../prisma/prisma-client';
 import { getViemClient } from '../sources/viem-client';
 import { getCowAmmSubgraphClient } from '../sources/subgraphs';
 import { fetchChangedPools, upsertPools, syncSwaps, syncJoinExits } from '../actions/cow-amm';
-import { syncSnapshots } from '../actions/snapshots/sync-snapshots';
+import { syncSnapshots } from '../actions/pool/sync-snapshots';
 import { Chain, PrismaLastBlockSyncedCategory } from '@prisma/client';
 import { syncBptBalancesFromSubgraph } from '../actions/user/bpt-balances/helpers/sync-bpt-balances-from-subgraph';
 import { getLastSyncedBlock, upsertLastSyncedBlock } from '../actions/last-synced-block';
@@ -109,22 +109,6 @@ export function CowAmmController(tracer?: any) {
 
             await upsertLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.COW_AMM_POOLS, toBlock);
 
-            return ids;
-        },
-        async syncSnapshots(chain: Chain) {
-            const subgraphClient = getSubgraphClient(chain);
-            const ids = await syncSnapshots(subgraphClient, 'SNAPSHOTS_COW_AMM', chain);
-            // update lifetime values based on snapshots
-            await updateLifetimeValues(chain, undefined, 'COW_AMM');
-            return ids;
-        },
-        async syncAllSnapshots(chain: Chain) {
-            // Run in loop until we end up at todays snapshot (also sync todays)
-            const subgraphClient = getSubgraphClient(chain);
-            const ids = await syncSnapshots(subgraphClient, 'SNAPSHOTS_COW_AMM', chain, {
-                startFromLastSyncedBlock: false,
-                syncPoolsWithoutUpdates: true,
-            });
             return ids;
         },
         async syncJoinExits(chain: Chain) {
