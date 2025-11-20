@@ -65,7 +65,7 @@ export async function reloadSnapshots(chain: Chain, poolId: string): Promise<voi
 
     for (const block of dailyBlocks) {
         const currentTimestamp = roundToMidnight(block.timestamp);
-        const totalShares = totalSharesForBlocks[block.number] ?? '0';
+        const totalShares = totalSharesForBlocks[block.timestamp] ?? '0';
 
         // find closest bpt price, array is sorted timestamp asc
         const bptPriceAtTimestamp = bptPriceSinceFirstSnapshot.find(
@@ -84,15 +84,16 @@ export async function reloadSnapshots(chain: Chain, poolId: string): Promise<voi
             totalLiquidity: totalLiquidity,
             totalShares: totalShares || '0',
             totalSharesNum: parseFloat(totalShares || '0'),
-            swapsCount: parseFloat(dailySwapsData[currentTimestamp]?.swapsCount?.toString()) || 0,
-            volume24h: dailySwapsData[currentTimestamp]?.volume24h || 0,
-            fees24h: dailySwapsData[currentTimestamp]?.fees24h || 0,
-            surplus24h: dailySwapsData[currentTimestamp]?.surplus24h || 0,
+            swapsCount: parseFloat(swapsDataMap[currentTimestamp]?.swapsCount?.toString()) || 0,
+            volume24h: swapsDataMap[currentTimestamp]?.volume24h || 0,
+            fees24h: swapsDataMap[currentTimestamp]?.fees24h || 0,
+            surplus24h: swapsDataMap[currentTimestamp]?.surplus24h || 0,
             sharePrice:
                 totalLiquidity > 0 && parseFloat(totalShares || '0') > 0
                     ? totalLiquidity / parseFloat(totalShares || '0')
                     : 0,
-            amounts: poolTokensForBlocks[block.number]?.sort((a, b) => a.index - b.index).map((pt) => pt.balance) || [],
+            amounts:
+                poolTokensForBlocks[block.timestamp]?.sort((a, b) => a.index - b.index).map((pt) => pt.balance) || [],
         });
     }
 
@@ -419,7 +420,7 @@ async function getPoolTokenBalancesAtBlocks(
         // parse to result and return
         const balancesAtBlocks: Record<number, { address: string; balance: string; index: number }[]> = {};
         for (const block of blocks) {
-            balancesAtBlocks[block.number] = Object.values(result[block.number]);
+            balancesAtBlocks[block.timestamp] = Object.values(result[block.number]);
         }
         return balancesAtBlocks;
     }

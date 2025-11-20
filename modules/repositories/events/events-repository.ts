@@ -125,7 +125,7 @@ export const eventsRepository = {
 
         const query = Prisma.raw(`
         SELECT
-            date_trunc('day', to_timestamp("blockTimestamp")) AS timestamp,
+            extract(epoch from date_trunc('day', to_timestamp("blockTimestamp")))::int AS timestamp,
             "poolId",
             SUM("valueUSD") AS volume24h,
             SUM((payload->'fee'->>'valueUSD')::numeric) AS fees24h,

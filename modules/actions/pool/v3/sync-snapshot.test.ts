@@ -83,21 +83,21 @@ describe('sync snapshot debug', () => {
     }, 5000000);
 
     test('reload snapshot v2', async () => {
-        const chain = 'SONIC';
+        const chain = 'MAINNET';
 
         // update swap events
         await EventController().syncSwapsV3(chain);
         await EventController().syncSwapsUpdateVolumeAndFeesV2(chain);
 
         await SnapshotsController().reloadSnapshotsForPool(
-            '0x10ac2f9dae6539e77e372adb14b1bf8fbd16b3e8000200000000000000000005',
+            '0x3de27efa2f1aa663ae5d458857e731c129069f29000200000000000000000588',
             chain,
         );
 
         const dbPool = await prisma.prismaPool.findFirst({
             where: {
                 chain,
-                id: '0x10ac2f9dae6539e77e372adb14b1bf8fbd16b3e8000200000000000000000005',
+                id: '0x3de27efa2f1aa663ae5d458857e731c129069f29000200000000000000000588',
             },
             select: {
                 snapshots: true,
@@ -108,6 +108,7 @@ describe('sync snapshot debug', () => {
 
         expect(latestSnapshot).toBeDefined();
         expect(latestSnapshot.timestamp).toBe(roundToMidnight(Math.floor(Date.now() / 1000)));
+        expect(latestSnapshot.fees24h).toBeGreaterThan(0);
     }, 5000000);
     test('reload snapshot v3', async () => {
         const chain = 'SONIC';
