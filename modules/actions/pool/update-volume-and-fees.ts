@@ -136,14 +136,8 @@ export async function updateVolumeAndFees(
             protocolYieldCapture48h = yieldCapture48h - yieldForUser48h;
 
             if (protocolYieldCapture24h < 0) {
-                console.error(`Negative protocolYieldCapture24h`, {
-                    pool: pool.id,
-                    chain: pool.chain,
-                    protocolYieldCapture24h,
-                    yieldCapture24h,
-                    yieldForUser24h,
-                });
-            }
+                protocolYieldCapture24h = 0;
+                protocolYieldCapture48h = 0;
         }
 
         if (
