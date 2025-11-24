@@ -233,6 +233,15 @@ export class PoolAggregatorLoader {
                 }
             }
 
+            // filter out pools that have a rateprovider without or unsafe rateprovider info
+            if (
+                mappedPool.poolTokens.some(
+                    (token) => token.priceRateProvider && token.priceRateProviderData?.summary !== 'safe',
+                )
+            ) {
+                continue;
+            }
+
             filteredPools.push(mappedPool);
         }
         console.timeEnd('poolsMapping');
