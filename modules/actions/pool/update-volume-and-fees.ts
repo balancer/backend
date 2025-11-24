@@ -138,6 +138,7 @@ export async function updateVolumeAndFees(
             if (protocolYieldCapture24h < 0) {
                 protocolYieldCapture24h = 0;
                 protocolYieldCapture48h = 0;
+            }
         }
 
         if (
