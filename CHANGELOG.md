@@ -1,5 +1,11 @@
 # backend
 
+## 1.57.1
+
+### Patch Changes
+
+-   8ffb66e: filter unverified rateproviders for agg query
+
 ## 1.57.0
 
 ### Minor Changes
