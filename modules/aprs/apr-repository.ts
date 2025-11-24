@@ -155,27 +155,23 @@ export class AprRepository {
 
         await prisma.$executeRaw`
           UPDATE "PrismaPoolDynamicData" AS dyn
-          SET apr = COALESCE(sub.total_apr, 0)
-          FROM (
-            SELECT
-              "poolId",
-              "chain",
-              SUM("apr") AS total_apr
-            FROM "PrismaPoolAprItem"
-            WHERE "type" NOT IN (
-              'SURPLUS',
-              'SURPLUS_30D',
-              'SURPLUS_7D',
-              'SWAP_FEE_30D',
-              'SWAP_FEE_7D',
-              'DYNAMIC_SWAP_FEE_24H'
-            )
-            GROUP BY "poolId", "chain"
-          ) AS sub
-          WHERE dyn."poolId" = sub."poolId"
-            AND dyn."chain" = sub."chain"
-            AND dyn."chain" = ${chain}::"Chain"
-            AND dyn."poolId" = ANY(${poolIds});
+          SET apr = COALESCE(
+            (
+              SELECT SUM(item."apr")
+              FROM "PrismaPoolAprItem" AS item
+              WHERE item."poolId" = dyn."poolId"
+                AND item."chain"  = dyn."chain"
+                AND item."type" NOT IN (
+                  'SURPLUS',
+                  'SURPLUS_30D',
+                  'SURPLUS_7D',
+                  'SWAP_FEE_30D',
+                  'SWAP_FEE_7D',
+                  'DYNAMIC_SWAP_FEE_24H'
+                )
+            ),
+            0
+          );
         `;
 
         return true;

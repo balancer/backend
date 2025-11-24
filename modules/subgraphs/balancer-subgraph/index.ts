@@ -1,6 +1,5 @@
 import { GraphQLClient } from 'graphql-request';
 import {
-    BalancerPoolSnapshotFragment,
     getSdk,
     OrderDirection,
     Pool_OrderBy,
@@ -9,7 +8,6 @@ import {
     BalancerSwapFragment,
     Swap_Filter,
     Swap_OrderBy,
-    PoolSnapshot_OrderBy,
     BalancerJoinExitFragment,
     JoinExit_OrderBy,
 } from './generated/balancer-subgraph-types';
@@ -27,33 +25,7 @@ export function getV2SubgraphClient(url: string, chain: Chain) {
         chain: chain,
         legacyService,
         lastSyncedBlock: legacyService.lastSyncedBlock.bind(legacyService),
-        getAllPoolSnapshots: legacyService.getAllPoolSnapshots.bind(legacyService),
         getAllPoolSharesWithBalance: legacyService.getAllPoolSharesWithBalance.bind(legacyService),
-        async getSnapshotsForTimestamp(timestamp: number): Promise<BalancerPoolSnapshotFragment[]> {
-            const limit = 1000;
-            let hasMore = true;
-            let id = `0x`;
-            let snapshots: BalancerPoolSnapshotFragment[] = [];
-
-            while (hasMore) {
-                const response = await sdk.BalancerPoolSnapshots({
-                    where: { timestamp, id_gt: id },
-                    orderBy: PoolSnapshot_OrderBy.Id,
-                    orderDirection: OrderDirection.Asc,
-                    first: limit,
-                });
-
-                snapshots = [...snapshots, ...response.poolSnapshots];
-
-                if (response.poolSnapshots.length < limit) {
-                    hasMore = false;
-                } else {
-                    id = snapshots[snapshots.length - 1].id;
-                }
-            }
-
-            return snapshots;
-        },
         async getAllPoolBalances({ where, block }: PoolBalancesQueryVariables): Promise<PoolBalancesFragment[]> {
             const limit = 1000;
             let hasMore = true;

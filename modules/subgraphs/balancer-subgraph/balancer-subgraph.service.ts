@@ -1,7 +1,5 @@
 import {
     getSdk,
-    BalancerPoolSnapshotsQueryVariables,
-    BalancerPoolSnapshotFragment,
     BalancerPoolsQueryVariables,
     BalancerSwapsQueryVariables,
     BalancerSwapsQuery,
@@ -35,12 +33,6 @@ export class BalancerSubgraphService {
         }
 
         return Number(meta.block.number);
-    }
-
-    public async getAllPoolSnapshots(
-        args: BalancerPoolSnapshotsQueryVariables,
-    ): Promise<BalancerPoolSnapshotFragment[]> {
-        return subgraphLoadAll<BalancerPoolSnapshotFragment>(this.sdk.BalancerPoolSnapshots, 'poolSnapshots', args);
     }
 
     public async getSwaps(args: BalancerSwapsQueryVariables): Promise<BalancerSwapsQuery> {

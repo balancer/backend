@@ -2970,58 +2970,6 @@ export type PoolSharesQuery = {
     poolShares: Array<{ __typename?: 'PoolShare'; id: string; balance: string }>;
 };
 
-export type PoolSnapshotFragment = {
-    __typename?: 'PoolSnapshot';
-    id: string;
-    timestamp: number;
-    balances: Array<string>;
-    totalShares: string;
-    swapsCount: string;
-    holdersCount: string;
-    totalSwapVolumes: Array<string>;
-    totalSwapFees: Array<string>;
-    totalProtocolSwapFees: Array<string>;
-    totalProtocolYieldFees: Array<string>;
-    pool: {
-        __typename?: 'Pool';
-        id: string;
-        swapFee: string;
-        tokens: Array<{ __typename?: 'PoolToken'; index: number; address: string }>;
-    };
-};
-
-export type PoolSnapshotsQueryVariables = Exact<{
-    skip?: InputMaybe<Scalars['Int']>;
-    first?: InputMaybe<Scalars['Int']>;
-    orderBy?: InputMaybe<PoolSnapshot_OrderBy>;
-    orderDirection?: InputMaybe<OrderDirection>;
-    where?: InputMaybe<PoolSnapshot_Filter>;
-    block?: InputMaybe<Block_Height>;
-}>;
-
-export type PoolSnapshotsQuery = {
-    __typename?: 'Query';
-    poolSnapshots: Array<{
-        __typename?: 'PoolSnapshot';
-        id: string;
-        timestamp: number;
-        balances: Array<string>;
-        totalShares: string;
-        swapsCount: string;
-        holdersCount: string;
-        totalSwapVolumes: Array<string>;
-        totalSwapFees: Array<string>;
-        totalProtocolSwapFees: Array<string>;
-        totalProtocolYieldFees: Array<string>;
-        pool: {
-            __typename?: 'Pool';
-            id: string;
-            swapFee: string;
-            tokens: Array<{ __typename?: 'PoolToken'; index: number; address: string }>;
-        };
-    }>;
-};
-
 export type VaultPoolFragment = {
     __typename?: 'Pool';
     id: string;
@@ -3325,28 +3273,6 @@ export const PoolShareFragmentDoc = gql`
         balance
     }
 `;
-export const PoolSnapshotFragmentDoc = gql`
-    fragment PoolSnapshot on PoolSnapshot {
-        id
-        pool {
-            id
-            swapFee
-            tokens {
-                index
-                address
-            }
-        }
-        timestamp
-        balances
-        totalShares
-        swapsCount
-        holdersCount
-        totalSwapVolumes
-        totalSwapFees
-        totalProtocolSwapFees
-        totalProtocolYieldFees
-    }
-`;
 export const VaultPoolFragmentDoc = gql`
     fragment VaultPool on Pool {
         id
@@ -3546,28 +3472,6 @@ export const PoolSharesDocument = gql`
     }
     ${PoolShareFragmentDoc}
 `;
-export const PoolSnapshotsDocument = gql`
-    query PoolSnapshots(
-        $skip: Int
-        $first: Int
-        $orderBy: PoolSnapshot_orderBy
-        $orderDirection: OrderDirection
-        $where: PoolSnapshot_filter
-        $block: Block_height
-    ) {
-        poolSnapshots(
-            skip: $skip
-            first: $first
-            orderBy: $orderBy
-            orderDirection: $orderDirection
-            where: $where
-            block: $block
-        ) {
-            ...PoolSnapshot
-        }
-    }
-    ${PoolSnapshotFragmentDoc}
-`;
 export const PoolsDocument = gql`
     query Pools(
         $skip: Int
@@ -3712,20 +3616,6 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
                         ...wrappedRequestHeaders,
                     }),
                 'PoolShares',
-                'query',
-            );
-        },
-        PoolSnapshots(
-            variables?: PoolSnapshotsQueryVariables,
-            requestHeaders?: Dom.RequestInit['headers'],
-        ): Promise<PoolSnapshotsQuery> {
-            return withWrapper(
-                (wrappedRequestHeaders) =>
-                    client.request<PoolSnapshotsQuery>(PoolSnapshotsDocument, variables, {
-                        ...requestHeaders,
-                        ...wrappedRequestHeaders,
-                    }),
-                'PoolSnapshots',
                 'query',
             );
         },

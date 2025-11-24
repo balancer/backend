@@ -89,7 +89,7 @@ export default <NetworkData>{
                         {
                             type: 'path',
                             token: '0xdbdc1ef57537e34680b898e1febd3d68c7389bcb',
-                            path: '$.data.stats.siusd.lastWeekAPY',
+                            path: '$.data.stats.siUSD.lastWeekAPY',
                         },
                     ],
                 },

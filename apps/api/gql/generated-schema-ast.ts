@@ -2174,7 +2174,7 @@ export const schema = gql`
         amounts: [String!]!
         chain: GqlChain!
         fees24h: String!
-        holdersCount: String!
+        holdersCount: String! @deprecated
         id: ID!
         poolId: String!
         sharePrice: String!
@@ -2183,9 +2183,9 @@ export const schema = gql`
         timestamp: Int!
         totalLiquidity: String!
         totalShares: String!
-        totalSurplus: String!
-        totalSwapFee: String!
-        totalSwapVolume: String!
+        totalSurplus: String! @deprecated
+        totalSwapFee: String! @deprecated
+        totalSwapVolume: String! @deprecated
         volume24h: String!
     }
 
@@ -3024,19 +3024,9 @@ export const schema = gql`
         levelBalances: [GqlReliquaryFarmLevelSnapshot!]!
         relicCount: String!
         timestamp: Int!
-        tokenBalances: [GqlReliquaryTokenBalanceSnapshot!]!
         totalBalance: String!
         totalLiquidity: String!
         userCount: String!
-    }
-
-    type GqlReliquaryTokenBalanceSnapshot {
-        address: String!
-        balance: String!
-        decimals: Int!
-        id: ID!
-        name: String!
-        symbol: String!
     }
 
     type GqlSftmxStakingData {
@@ -4201,11 +4191,10 @@ export const schema = gql`
         beetsSyncFbeetsRatio: String!
         createLBP(input: CreateLBPInput!): Boolean!
         poolLoadOnChainDataForAllPools(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
-        poolLoadSnapshotsForPools(poolIds: [String!]!, reload: Boolean): String!
+        poolLoadSnapshotsForPools(chain: GqlChain!, poolId: String!): String!
         poolReloadAllPoolAprs(chain: GqlChain!): String!
         poolReloadPools(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
         poolReloadStakingForAllPools(stakingTypes: [GqlPoolStakingType!]!): String!
-        poolSyncAllCowSnapshots(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
         poolSyncAllPoolsFromSubgraph: [String!]!
         poolSyncFxQuoteTokens(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
         poolUpdateLiquidityValuesForAllPools: String!

@@ -59,8 +59,8 @@ export const mainnetNetworkConfig: NetworkConfig = {
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(5, 'minutes'),
         },
         {
-            name: 'sync-snapshots-v2',
-            interval: every(90, 'minutes'),
+            name: 'sync-snapshots',
+            interval: every(15, 'minutes'),
         },
         {
             name: 'sync-changed-pools',
@@ -148,7 +148,6 @@ export const mainnetNetworkConfig: NetworkConfig = {
             name: 'sync-cow-amm-join-exits',
             interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(1, 'minutes'),
         },
-        { name: 'sync-cow-amm-snapshots', interval: every(90, 'minutes') },
         // V3 jobs
         {
             name: 'add-pools-v3',
@@ -165,14 +164,6 @@ export const mainnetNetworkConfig: NetworkConfig = {
         {
             name: 'sync-swaps-v3',
             interval: every(1, 'minutes'),
-        },
-        {
-            name: 'sync-snapshots-v3',
-            interval: every(10, 'minutes'),
-        },
-        {
-            name: 'forward-fill-snapshots-v3',
-            interval: every(1, 'hours'),
         },
         {
             name: 'sync-hook-data',

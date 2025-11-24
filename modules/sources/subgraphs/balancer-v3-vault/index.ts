@@ -2,7 +2,6 @@ import { GraphQLClient } from 'graphql-request';
 import {
     OrderDirection,
     Pool_OrderBy,
-    PoolSnapshot_OrderBy,
     PoolsQueryVariables,
     SwapFragment,
     Swap_OrderBy,
@@ -12,14 +11,11 @@ import {
     getSdk,
     PoolBalancesFragment,
     PoolBalancesQueryVariables,
-    PoolSnapshotFragment,
-    PoolSnapshot_Filter,
     SwapsQueryVariables,
     AddRemoveFragment,
     AddRemove_OrderBy,
 } from './generated/types';
 import { Chain, Prisma } from '@prisma/client';
-import { snapshotToDb } from './transformers/snapshotToDb';
 
 export function getVaultSubgraphClient(url: string, chain: Chain) {
     const sdk = getSdk(new GraphQLClient(url));
@@ -113,56 +109,6 @@ export function getVaultSubgraphClient(url: string, chain: Chain) {
             }
 
             return pools;
-        },
-        async getSnapshotsForTimestamp(timestamp: number): Promise<PoolSnapshotFragment[]> {
-            const limit = 1000;
-            let hasMore = true;
-            let id = `0x`;
-            let snapshots: PoolSnapshotFragment[] = [];
-
-            while (hasMore) {
-                const response = await sdk.PoolSnapshots({
-                    where: { timestamp, id_gt: id },
-                    orderBy: PoolSnapshot_OrderBy.Id,
-                    orderDirection: OrderDirection.Asc,
-                    first: limit,
-                });
-
-                snapshots = [...snapshots, ...response.poolSnapshots];
-
-                if (response.poolSnapshots.length < limit) {
-                    hasMore = false;
-                } else {
-                    id = snapshots[snapshots.length - 1].id;
-                }
-            }
-
-            return snapshots;
-        },
-        async getAllSnapshots(where: PoolSnapshot_Filter): Promise<Prisma.PrismaPoolSnapshotUncheckedCreateInput[]> {
-            const limit = 1000;
-            let hasMore = true;
-            let id = `0x`;
-            let snapshots: PoolSnapshotFragment[] = [];
-
-            while (hasMore) {
-                const response = await sdk.PoolSnapshots({
-                    where: { ...where, id_gt: id },
-                    orderBy: PoolSnapshot_OrderBy.Id,
-                    orderDirection: OrderDirection.Asc,
-                    first: limit,
-                });
-
-                snapshots = [...snapshots, ...response.poolSnapshots];
-
-                if (response.poolSnapshots.length < limit) {
-                    hasMore = false;
-                } else {
-                    id = snapshots[snapshots.length - 1].id;
-                }
-            }
-
-            return snapshots.map((s) => snapshotToDb(chain, 3, s));
         },
         async getSwapsSince(timestamp: number): Promise<SwapFragment[]> {
             const limit = 1000;
