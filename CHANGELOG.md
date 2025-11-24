@@ -1,5 +1,18 @@
 # backend
 
+## 1.57.0
+
+### Minor Changes
+
+-   75bf3c4: sync all snapshots from events and onchain instead of subgraph
+
+### Patch Changes
+
+-   61b203a: update all total APRs after calculation
+-   3bf3b44: reload snapshots cant use multicall
+-   ce5c8f2: fix snapshots reload
+-   cd29bdf: allow negative aprs
+
 ## 1.56.7
 
 ### Patch Changes
