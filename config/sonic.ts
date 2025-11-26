@@ -200,31 +200,10 @@ export default <NetworkData>{
                     extractors: [{ type: 'path', token: '0xe8a41c62bb4d5863c6eadc96792cfe90a1f37c47', path: '$.apy' }],
                 },
                 {
-                    url: 'https://v2.silo.finance/api/detailed-vault/sonic-0xf6f87073cf8929c206a77b0694619dc776f89885',
-                    scale: 1e18,
-                    extractors: [
-                        { type: 'path', token: '0xf6f87073cf8929c206a77b0694619dc776f89885', path: '$.supplyApr' },
-                    ],
-                },
-                {
                     url: 'https://v2.silo.finance/api/detailed-vault/sonic-0xded4ac8645619334186f28b8798e07ca354cfa0e',
                     scale: 1e18,
                     extractors: [
                         { type: 'path', token: '0xded4ac8645619334186f28b8798e07ca354cfa0e', path: '$.supplyApr' },
-                    ],
-                },
-                {
-                    url: 'https://v2.silo.finance/api/detailed-vault/sonic-0xb6a23cb29e512df41876b28d7a848bd831f9c5ba',
-                    scale: 1e18,
-                    extractors: [
-                        { type: 'path', token: '0xb6a23cb29e512df41876b28d7a848bd831f9c5ba', path: '$.supplyApr' },
-                    ],
-                },
-                {
-                    url: 'https://v2.silo.finance/api/detailed-vault/sonic-0x9a1bf5365edbb99c2c61ca6d9ffad0b705acfc6f',
-                    scale: 1e18,
-                    extractors: [
-                        { type: 'path', token: '0x9a1bf5365edbb99c2c61ca6d9ffad0b705acfc6f', path: '$.supplyApr' },
                     ],
                 },
                 {
@@ -240,25 +219,6 @@ export default <NetworkData>{
                     extractors: [
                         { type: 'path', token: '0x92ebf5a1fb4061b45222a6d76accf4698bde4b95', path: '$.supplyApr' },
                     ],
-                },
-                {
-                    url: 'https://v2.silo.finance/api/detailed-vault/sonic-0xf6bc16b79c469b94cdd25f3e2334dd4fee47a581',
-                    scale: 1e18,
-                    extractors: [
-                        { type: 'path', token: '0xf6bc16b79c469b94cdd25f3e2334dd4fee47a581', path: '$.supplyApr' },
-                    ],
-                },
-                {
-                    url: 'https://v2.silo.finance/api/detailed-vault/sonic-0x391b3f70e254d582588b27e97e48d1cfcdf0be7e',
-                    scale: 1e18,
-                    extractors: [
-                        { type: 'path', token: '0x391b3f70e254d582588b27e97e48d1cfcdf0be7e', path: '$.supplyApr' },
-                    ],
-                },
-                {
-                    url: 'https://api-v2.streamprotocol.money/vaults/xUSD/apy',
-                    scale: 100,
-                    extractors: [{ type: 'path', token: '0x6202b9f02e30e5e1c62cc01e4305450e5d83b926', path: '$.apy' }],
                 },
             ],
         },
