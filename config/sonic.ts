@@ -106,9 +106,7 @@ export default <NetworkData>{
                     '0x52fc9e0a68b6a4c9b57b9d1d99fb71449a99dcd8', // solvbtc.bbn market 13
                     '0x016c306e103fbf48ec24810d078c65ad13c5f11b', // wS market 25
                     '0x219656f33c58488d09d518badf50aa8cdcaca2aa', // wETH market 26
-                    '0x5954ce6671d97d24b782920ddcdbb4b1e63ab2de', // usdc market 23
                     '0x6c49b18333a1135e9a376560c07e6d1fd0350eaf', // Ws market 28
-                    '0xda14a41dbda731f03a94cb722191639dd22b35b2', // frxUSD market 37
                     '0x0a94e18bdbccd048198806d7ff28a1b1d2590724', // scbtc market 32
                     '0x42ce2234fd5a26bf161477a996961c4d01f466a3', // usdc 33
                     '0xe6605932e4a686534d19005bb9db0fba1f101272', // scusdc 46
