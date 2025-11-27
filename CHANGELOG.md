@@ -1,5 +1,12 @@
 # backend
 
+## 1.57.2
+
+### Patch Changes
+
+-   4a868a2: infinifi.xyz APR fix
+-   aca8da5: patch rate provider filter in AggregatorPool query
+
 ## 1.57.1
 
 ### Patch Changes
