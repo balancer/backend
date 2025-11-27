@@ -10,6 +10,7 @@ import _ from 'lodash';
 import { FxData, GyroData, StableData, QuantAmmWeightedData, ReclammData } from '../subgraph-mapper';
 import { mapHookToGqlHook } from '../../sources/transformers';
 import { chainToChainId } from '../../network/chain-id-to-chain';
+import { zeroAddress } from 'viem';
 
 const aggregatorPrismaValidator = Prisma.validator<Prisma.PrismaPoolDefaultArgs>()({
     include: {
@@ -136,11 +137,14 @@ export class PoolAggregatorLoader {
             }),
         ]);
 
-        const typesMap = dbTypes.reduce((agg, item) => {
-            agg[`${item.chain}-${item.tokenAddress}`] ||= [];
-            agg[`${item.chain}-${item.tokenAddress}`].push(item);
-            return agg;
-        }, {} as Record<string, PrismaTokenType[]>);
+        const typesMap = dbTypes.reduce(
+            (agg, item) => {
+                agg[`${item.chain}-${item.tokenAddress}`] ||= [];
+                agg[`${item.chain}-${item.tokenAddress}`].push(item);
+                return agg;
+            },
+            {} as Record<string, PrismaTokenType[]>,
+        );
 
         const tokensMap = Object.fromEntries(
             dbTokens.map((token) => [
@@ -250,7 +254,10 @@ export class PoolAggregatorLoader {
             // filter out pools that have a rateprovider without or unsafe rateprovider info
             if (
                 mappedPool.poolTokens.some(
-                    (token) => token.priceRateProvider && token.priceRateProviderData?.summary !== 'safe',
+                    (token) =>
+                        token.priceRateProvider &&
+                        token.priceRateProvider !== zeroAddress &&
+                        token.priceRateProviderData?.summary !== 'safe',
                 )
             ) {
                 continue;
