@@ -121,10 +121,6 @@ export const deprecatedChainWorkerJobs: WorkerJob[] = [
         interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(60, 'minutes') : every(20, 'minutes'),
     },
     {
-        name: 'sync-snapshots',
-        interval: every(15, 'minutes'),
-    },
-    {
         name: 'sync-changed-pools',
         interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(4, 'hours') : every(1, 'hours'),
     },
