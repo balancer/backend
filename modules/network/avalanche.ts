@@ -8,7 +8,6 @@ import {
     activeChainWorkerJobsGeneric,
     activeChainWorkerJobsV2,
     activeChainWorkerJobsV3,
-    cowAmmWorkerJobs,
     lbpWorkerJobs,
     vebalWorkerJobs,
     fxWorkerJobs,

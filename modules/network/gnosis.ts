@@ -10,7 +10,6 @@ import {
     activeChainWorkerJobsV3,
     vebalWorkerJobs,
     cowAmmWorkerJobs,
-    quantAmmWorkerJobs,
     lbpWorkerJobs,
 } from './worker-jobs';
 

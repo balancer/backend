@@ -4,13 +4,7 @@ import { UserSyncGaugeBalanceService } from '../user/lib/user-sync-gauge-balance
 import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import config from '../../config';
 import { UserSyncAuraBalanceService } from '../user/lib/user-sync-aura-balance.service';
-import {
-    activeChainWorkerJobsGeneric,
-    activeChainWorkerJobsV2,
-    vebalWorkerJobs,
-    lbpWorkerJobs,
-    fxWorkerJobs,
-} from './worker-jobs';
+import { activeChainWorkerJobsGeneric, activeChainWorkerJobsV2, vebalWorkerJobs, fxWorkerJobs } from './worker-jobs';
 
 const polygonNetworkData: NetworkData = config.POLYGON;
 
