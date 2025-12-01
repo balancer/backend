@@ -6,14 +6,6 @@ import { syncBptBalancesFromSubgraph } from './helpers/sync-bpt-balances-from-su
 import { syncBptBalancesFromRpc } from './helpers/sync-bpt-balances-from-rpc';
 
 export const syncBptBalancesV2 = async (chain: Chain, subgraphUrl?: string) => {
-    if (!subgraphUrl) {
-        console.log(`syncBptBalancesV2 on ${chain} missing subgraphUrls`);
-        return;
-    }
-
-    const subgraphClient = getV2SubgraphClient(subgraphUrl, chain);
-    const viemClient = getViemClient(chain);
-
     const poolIds = await prisma.prismaPool
         .findMany({
             where: {
@@ -28,9 +20,17 @@ export const syncBptBalancesV2 = async (chain: Chain, subgraphUrl?: string) => {
 
     let syncedRange = 0;
     try {
-        syncedRange = await syncBptBalancesFromSubgraph(poolIds, subgraphClient, chain, 'BPT_BALANCES_V2');
+        if (subgraphUrl) {
+            const subgraphClient = getV2SubgraphClient(subgraphUrl, chain);
+            syncedRange = await syncBptBalancesFromSubgraph(poolIds, subgraphClient, chain, 'BPT_BALANCES_V2');
+        } else {
+            console.log(`syncBptBalancesFromSubgraph BPT_BALANCES_V2 on ${chain} has no Subgraph URL, using RPC`);
+            const viemClient = getViemClient(chain);
+            syncedRange = await syncBptBalancesFromRpc(poolIds, viemClient, chain, 'BPT_BALANCES_V2');
+        }
     } catch (e: any) {
         console.log(`syncBptBalancesFromSubgraph BPT_BALANCES_V2 on ${chain} failed, trying RPC`, e.message);
+        const viemClient = getViemClient(chain);
         syncedRange = await syncBptBalancesFromRpc(poolIds, viemClient, chain, 'BPT_BALANCES_V2');
     }
 

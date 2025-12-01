@@ -38,7 +38,7 @@ export class TokenService {
         this.cache = new Cache<string, any>();
     }
 
-    public async syncTokenContentData(chain: Chain, deploymentEnv = process.env.DEPLOYMENT_ENV) {
+    public async syncTokenContentData(deploymentEnv = process.env.DEPLOYMENT_ENV) {
         //sync coingecko Ids first, then override Ids from the content service
         const chains = Object.keys(config).filter(
             (chain) => (deploymentEnv === 'production' && chain !== 'SEPOLIA') || true,
@@ -133,14 +133,11 @@ export class TokenService {
                     },
                 })
                 .then((types) =>
-                    types.reduce(
-                        (agg, item) => {
-                            agg[`${item.chain}-${item.tokenAddress}`] ||= [];
-                            agg[`${item.chain}-${item.tokenAddress}`].push(item.type);
-                            return agg;
-                        },
-                        {} as Record<string, PrismaTokenTypeOption[]>,
-                    ),
+                    types.reduce((agg, item) => {
+                        agg[`${item.chain}-${item.tokenAddress}`] ||= [];
+                        agg[`${item.chain}-${item.tokenAddress}`].push(item.type);
+                        return agg;
+                    }, {} as Record<string, PrismaTokenTypeOption[]>),
                 ),
         ]);
 
