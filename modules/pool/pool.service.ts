@@ -96,15 +96,6 @@ export class PoolService {
         await this.syncStakingForPools([this.chain]);
     }
 
-    public async loadOnChainDataForPoolsWithActiveUpdates() {
-        const blockNumber = await networkContext.provider.getBlockNumber();
-        const timestamp = moment().subtract(5, 'minutes').unix();
-        const poolIds = await this.balancerSubgraphService.getPoolsWithActiveUpdates(timestamp);
-        const tokenPrices = await tokenService.getTokenPrices(this.chain);
-
-        await this.poolOnChainDataService.updateOnChainData(this.chain, blockNumber, tokenPrices, poolIds);
-    }
-
     /**
      * Deprecated in favor of StakingController().syncStaking(chain)
      */

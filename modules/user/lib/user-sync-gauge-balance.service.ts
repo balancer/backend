@@ -32,9 +32,13 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
         const acceptableSGLag = config[chain].acceptableSGLag ?? 0;
         const client = getViemClient(chain);
         const latestBlock = await client.getBlockNumber().then(Number);
-        const gaugeSubgraphService = new GaugeSubgraphService(config[chain].subgraphs.gauge!);
-        const sgBlock = await gaugeSubgraphService.lastSyncedBlock();
         const lastSyncedBlock = await getLastSyncedBlock(chain, 'GAUGE_BALANCES');
+
+        let sgBlock = 0;
+        if (config[chain].subgraphs.gauge) {
+            const gaugeSubgraphService = new GaugeSubgraphService(config[chain].subgraphs.gauge!);
+            sgBlock = await gaugeSubgraphService.lastSyncedBlock();
+        }
         const { balances, blockNumber } =
             latestBlock - sgBlock > acceptableSGLag
                 ? await this.balancesFromRPC(chain, client, lastSyncedBlock)

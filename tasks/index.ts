@@ -75,7 +75,7 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         await ContentController().syncCategories();
 
         console.log('Syncing Erc4626');
-        await tokenService.syncTokenContentData(chain);
+        await tokenService.syncTokenContentData();
         await ContentController().syncErc4626Data();
         await TokenController().syncErc4626OnChainData(chain);
 
@@ -89,7 +89,7 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
     } else if (job === 'add-pools-v3') {
         return PoolController().addPoolsV3(chain);
     } else if (job === 'sync-token-content-data') {
-        await tokenService.syncTokenContentData(chain);
+        await tokenService.syncTokenContentData();
     } else if (job === 'sync-pools-v3') {
         return PoolController().syncPoolsV3(chain);
     } else if (job === 'update-liquidity-for-inactive-pools') {
@@ -114,8 +114,6 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         return SftmxController().syncSftmxStakingData(chain);
     } else if (job === 'sync-sftmx-withdrawal') {
         return SftmxController().syncSftmxWithdrawalrequests(chain);
-    } else if (job === 'sync-sftmx-staking-snapshots') {
-        return SftmxController().syncSftmxStakingSnapshots(chain);
     } else if (job === 'sync-bpt-balances') {
         return UserBalancesController().syncBalances(chain);
     } else if (job === 'sync-user-balances-v2') {
