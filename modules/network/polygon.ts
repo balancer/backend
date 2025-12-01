@@ -24,11 +24,5 @@ export const polygonNetworkConfig: NetworkConfig = {
             polygonNetworkData.chain.prismaId,
         ),
     },
-    workerJobs: [
-        ...activeChainWorkerJobsGeneric,
-        ...activeChainWorkerJobsV2,
-        ...vebalWorkerJobs,
-        ...lbpWorkerJobs,
-        ...fxWorkerJobs,
-    ],
+    workerJobs: [...activeChainWorkerJobsGeneric, ...activeChainWorkerJobsV2, ...vebalWorkerJobs, ...fxWorkerJobs],
 };

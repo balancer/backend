@@ -32,7 +32,6 @@ export const gnosisNetworkConfig: NetworkConfig = {
         ...activeChainWorkerJobsV3,
         ...vebalWorkerJobs,
         ...cowAmmWorkerJobs,
-        ...quantAmmWorkerJobs,
         ...lbpWorkerJobs,
     ],
 };

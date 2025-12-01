@@ -30,7 +30,6 @@ export const avalancheNetworkConfig: NetworkConfig = {
         ...activeChainWorkerJobsGeneric,
         ...activeChainWorkerJobsV2,
         ...activeChainWorkerJobsV3,
-        ...cowAmmWorkerJobs,
         ...lbpWorkerJobs,
         ...fxWorkerJobs,
         ...vebalWorkerJobs,
