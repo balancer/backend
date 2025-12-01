@@ -8,9 +8,11 @@ import {
     activeChainWorkerJobsGeneric,
     activeChainWorkerJobsV2,
     activeChainWorkerJobsV3,
+    datastudioWorkerJobs,
     lbpWorkerJobs,
     loopsWorkerJobs,
     quantAmmWorkerJobs,
+    reliquaryWorkerJobs,
     stsWorkerJobs,
 } from './worker-jobs';
 
@@ -37,5 +39,7 @@ export const sonicNetworkConfig: NetworkConfig = {
         ...lbpWorkerJobs,
         ...stsWorkerJobs,
         ...loopsWorkerJobs,
+        ...datastudioWorkerJobs,
+        ...reliquaryWorkerJobs,
     ],
 };

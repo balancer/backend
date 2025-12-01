@@ -171,15 +171,6 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
         case 'sync-staking-for-pools':
             await runIfNotAlreadyRunning(name, chainId, () => StakingController().syncStaking(chain), res, next);
             break;
-        case 'cache-protocol-data':
-            await runIfNotAlreadyRunning(
-                name,
-                chainId,
-                () => protocolService.cacheProtocolMetrics(networkContext.chain),
-                res,
-                next,
-            );
-            break;
         case 'sync-snapshots':
             await runIfNotAlreadyRunning(name, chainId, () => SnapshotsController().syncSnapshots(chain), res, next);
             break;

@@ -172,11 +172,7 @@ export const activeChainWorkerJobsGlobal: WorkerJob[] = [
         interval: every(30, 'minutes'),
     },
     {
-        name: 'cache-protocol-data',
-        interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(4, 'hours') : every(2, 'hours'),
-    },
-    {
-        name: 'sync-token-content-data', // also add to deprecated?
+        name: 'sync-token-content-data',
         interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(5, 'minutes'),
     },
 ];
