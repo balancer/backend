@@ -12,10 +12,10 @@ import { blockNumbers } from '../../block-numbers';
 export class ReliquarySnapshotService {
     constructor(private readonly reliquarySubgraphService: ReliquarySubgraphService) {}
 
-    public async getSnapshotsForFarm(farmId: number, range: GqlPoolSnapshotDataRange) {
+    public async getSnapshotsForFarm(farmId: number, range: GqlPoolSnapshotDataRange, chain: Chain) {
         const timestamp = this.getTimestampForRange(range);
         return prisma.prismaReliquaryFarmSnapshot.findMany({
-            where: { farmId: `${farmId}`, timestamp: { gte: timestamp }, chain: networkContext.chain },
+            where: { farmId: `${farmId}`, timestamp: { gte: timestamp }, chain: chain },
             include: { levelBalances: true },
             orderBy: { timestamp: 'asc' },
         });

@@ -77,7 +77,7 @@ export class PoolService {
                 new ReliquarySubgraphService(config[chain].subgraphs.reliquary),
             );
 
-            return reliquarySnapshotService.getSnapshotsForFarm(id, range);
+            return reliquarySnapshotService.getSnapshotsForFarm(id, range, chain);
         }
         return [];
     }
