@@ -106,6 +106,8 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         return SnapshotsController().syncSnapshots(chain);
     } else if (job === 'sync-swaps-v3') {
         return EventController().syncSwapsV3(chain);
+    } else if (job === 'sync-events') {
+        return EventController().syncEvents(chain);
     } else if (job === 'update-volume-and-fees') {
         return EventController().updateVolumeAndFees(chain);
     } else if (job === 'update-liquidity-24h-ago-v3') {

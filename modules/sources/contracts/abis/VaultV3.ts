@@ -1079,6 +1079,32 @@ export default [
     {
         anonymous: false,
         inputs: [
+            { indexed: true, internalType: 'address', name: 'pool', type: 'address' },
+            { indexed: true, internalType: 'address', name: 'liquidityProvider', type: 'address' },
+            { indexed: true, internalType: 'enum AddLiquidityKind', name: 'kind', type: 'uint8' },
+            { indexed: false, internalType: 'uint256', name: 'totalSupply', type: 'uint256' },
+            { indexed: false, internalType: 'uint256[]', name: 'amountsAddedRaw', type: 'uint256[]' },
+            { indexed: false, internalType: 'uint256[]', name: 'swapFeeAmountsRaw', type: 'uint256[]' },
+        ],
+        name: 'LiquidityAdded',
+        type: 'event',
+    },
+    {
+        anonymous: false,
+        inputs: [
+            { indexed: true, internalType: 'address', name: 'pool', type: 'address' },
+            { indexed: true, internalType: 'address', name: 'liquidityProvider', type: 'address' },
+            { indexed: true, internalType: 'enum RemoveLiquidityKind', name: 'kind', type: 'uint8' },
+            { indexed: false, internalType: 'uint256', name: 'totalSupply', type: 'uint256' },
+            { indexed: false, internalType: 'uint256[]', name: 'amountsRemovedRaw', type: 'uint256[]' },
+            { indexed: false, internalType: 'uint256[]', name: 'swapFeeAmountsRaw', type: 'uint256[]' },
+        ],
+        name: 'LiquidityRemoved',
+        type: 'event',
+    },
+    {
+        anonymous: false,
+        inputs: [
             {
                 indexed: true,
                 internalType: 'contract IERC4626',

@@ -9,9 +9,24 @@ import { Chain } from '@prisma/client';
 import { updateVolumeAndFees } from '../actions/pool/update-volume-and-fees';
 import { getVaultSubgraphClient } from '../sources/subgraphs/balancer-v3-vault';
 import { syncLastSwaps } from '../actions/pool/v3/sync-last-swaps';
+import { eventsIngestion } from '../events';
+import { eventsRepository } from '../repositories/events';
+import { getViemClient } from '../sources/viem-client';
 
 export function EventController() {
     return {
+        async syncEvents(chain: Chain) {
+            const {
+                balancer: {
+                    v3: { vaultAddress },
+                },
+            } = config[chain];
+
+            const viemClient = getViemClient(chain);
+            const result = await eventsIngestion(viemClient, eventsRepository, vaultAddress);
+
+            return result;
+        },
         async syncJoinExitsV2(chain: Chain) {
             const {
                 subgraphs: { balancer },
