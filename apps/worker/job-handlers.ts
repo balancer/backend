@@ -150,15 +150,6 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
                 next,
             );
             break;
-        case 'load-on-chain-data-for-pools-with-active-updates':
-            await runIfNotAlreadyRunning(
-                name,
-                chainId,
-                () => poolService.loadOnChainDataForPoolsWithActiveUpdates(),
-                res,
-                next,
-            );
-            break;
         case 'sync-new-pools-from-subgraph':
             await runIfNotAlreadyRunning(name, chainId, () => PoolController().addPoolsV2(chain), res, next);
             break;
@@ -166,7 +157,7 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
             await runIfNotAlreadyRunning(name, chainId, () => EventController().syncJoinExitsV2(chain), res, next);
             break;
         case 'sync-token-content-data':
-            await runIfNotAlreadyRunning(name, chainId, () => tokenService.syncTokenContentData(chain), res, next);
+            await runIfNotAlreadyRunning(name, chainId, () => tokenService.syncTokenContentData(), res, next);
             break;
         case 'update-liquidity-24h-ago-v2':
             await runIfNotAlreadyRunning(
@@ -179,15 +170,6 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
             break;
         case 'sync-staking-for-pools':
             await runIfNotAlreadyRunning(name, chainId, () => StakingController().syncStaking(chain), res, next);
-            break;
-        case 'cache-protocol-data':
-            await runIfNotAlreadyRunning(
-                name,
-                chainId,
-                () => protocolService.cacheProtocolMetrics(networkContext.chain),
-                res,
-                next,
-            );
             break;
         case 'sync-snapshots':
             await runIfNotAlreadyRunning(name, chainId, () => SnapshotsController().syncSnapshots(chain), res, next);
@@ -283,15 +265,6 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
                 name,
                 chainId,
                 () => sftmxController.syncSftmxWithdrawalrequests(chainId),
-                res,
-                next,
-            );
-            break;
-        case 'sync-sftmx-staking-snapshots':
-            await runIfNotAlreadyRunning(
-                name,
-                chainId,
-                () => sftmxController.syncSftmxStakingSnapshots(chainId),
                 res,
                 next,
             );

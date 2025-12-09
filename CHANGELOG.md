@@ -1,5 +1,14 @@
 # backend
 
+## 1.57.3
+
+### Patch Changes
+
+-   0b4d4e4: handle multichain gas limit in hyperevm
+-   801cbfa: define worker jobs in central place
+-   6773bc8: handle missing pool onchain data
+-   32aac95: rollback handling of missing data in pool syncs
+
 ## 1.57.2
 
 ### Patch Changes
