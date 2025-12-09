@@ -191,22 +191,13 @@ export default <NetworkData>{
                     ],
                 },
                 {
-                    url: 'https://ded76165a2fb6f7887260a3a0f626de7.thegraph.chainnodes.org/subgraphs/name/etherfi/etherfi-subgraph-v0-8-2',
-                    body: JSON.stringify({
-                        query: `{
-                      rebaseEventLinkedLists {
-                        latest_aprs
-                      }
-                    }`,
-                    }),
-                    headers: { 'Content-Type': 'application/json' },
-                    average: true,
-                    scale: 10000,
+                    url: 'https://www.ether.fi/api/dapp/protocol/protocol-detail',
+                    scale: 100,
                     extractors: [
                         {
                             type: 'path',
                             token: '0xcd5fe23c85820f7b72d0926fc9b05b43e359b7ee',
-                            path: '$.data.rebaseEventLinkedLists[0].latest_aprs',
+                            path: '$.7_day_apr',
                         },
                     ],
                 },
