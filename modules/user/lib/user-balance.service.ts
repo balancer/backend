@@ -4,7 +4,7 @@ import _ from 'lodash';
 import { parseUnits } from 'ethers/lib/utils';
 import { formatFixed } from '@ethersproject/bignumber';
 import { Chain, PrismaPoolStaking } from '@prisma/client';
-import { networkContext } from '../../network/network-context.service';
+import { AllNetworkConfigs } from '../../network/network-config';
 
 export class UserBalanceService {
     constructor() {}
@@ -86,14 +86,14 @@ export class UserBalanceService {
     }
 
     public async getUserFbeetsBalance(address: string): Promise<Omit<UserPoolBalance, 'poolId'>> {
-        const fbeetsAddress = networkContext.data.fbeets?.address || '';
+        const fbeetsAddress = AllNetworkConfigs['250'].data.fbeets?.address || '';
 
         const userWalletBalances = await prisma.prismaUserWalletBalance.findMany({
-            where: { userAddress: address.toLowerCase(), chain: networkContext.chain, tokenAddress: fbeetsAddress },
+            where: { userAddress: address.toLowerCase(), chain: 'FANTOM', tokenAddress: fbeetsAddress },
         });
 
         const userStakedBalances = await prisma.prismaUserStakedBalance.findMany({
-            where: { userAddress: address.toLowerCase(), chain: networkContext.chain, tokenAddress: fbeetsAddress },
+            where: { userAddress: address.toLowerCase(), chain: 'FANTOM', tokenAddress: fbeetsAddress },
         });
 
         // this seems to cause heavy load
@@ -115,7 +115,7 @@ export class UserBalanceService {
             totalBalance: formatFixed(stakedNum.add(walletNum), 18),
             stakedBalance: stakedBalance?.balance || '0',
             walletBalance: walletBalance?.balance || '0',
-            chain: networkContext.chain,
+            chain: 'FANTOM',
         };
     }
 
