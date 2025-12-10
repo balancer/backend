@@ -1,7 +1,5 @@
-import { Chain, PrismaPoolFilter, PrismaPoolStakingType } from '@prisma/client';
+import { Chain, PrismaPoolStakingType } from '@prisma/client';
 import _ from 'lodash';
-import moment from 'moment-timezone';
-import { prisma } from '../../prisma/prisma-client';
 import {
     GqlChain,
     GqlPoolFeaturedPool,
@@ -10,11 +8,8 @@ import {
     GqlPoolUnion,
     QueryPoolGetPoolsArgs,
 } from '../../apps/api/gql/generated-schema';
-import { tokenService } from '../token/token.service';
 import { PoolGqlLoaderService } from './lib/pool-gql-loader.service';
-import { PoolOnChainDataService, PoolOnChainDataServiceOptions } from './lib/pool-on-chain-data.service';
 import { PoolSnapshotService } from './lib/pool-snapshot.service';
-import { networkContext } from '../network/network-context.service';
 import { ReliquarySubgraphService } from '../subgraphs/reliquary-subgraph/reliquary.service';
 import { ReliquarySnapshotService } from './lib/reliquary-snapshot.service';
 import {
@@ -35,17 +30,9 @@ import config from '../../config';
 
 export class PoolService {
     constructor(
-        private readonly poolOnChainDataService: PoolOnChainDataService,
         private readonly poolGqlLoaderService: PoolGqlLoaderService,
         private readonly poolSnapshotService: PoolSnapshotService,
     ) {}
-
-    private get chain() {
-        return networkContext.chain;
-    }
-    private get balancerSubgraphService() {
-        return networkContext.services.balancerSubgraphService;
-    }
 
     public async getGqlPool(fields: any, id: string, chain: GqlChain, userAddress?: string): Promise<GqlPoolUnion> {
         return this.poolGqlLoaderService.getPool(fields, id, chain, userAddress);
@@ -57,10 +44,6 @@ export class PoolService {
 
     public async getPoolsCount(args: QueryPoolGetPoolsArgs): Promise<number> {
         return this.poolGqlLoaderService.getPoolsCount(args);
-    }
-
-    public async getPoolFilters(): Promise<PrismaPoolFilter[]> {
-        return prisma.prismaPoolFilter.findMany({ where: { chain: this.chain } });
     }
 
     public async getFeaturedPools(chains: Chain[]): Promise<GqlPoolFeaturedPool[]> {
@@ -93,7 +76,7 @@ export class PoolService {
             this.loadReliquarySnapshotsForAllFarms(chain);
         }
         // reload it for all pools
-        await this.syncStakingForPools([this.chain]);
+        await this.syncStakingForPools([chain]);
     }
 
     /**
@@ -156,19 +139,4 @@ export class PoolService {
     }
 }
 
-const optionsResolverForPoolOnChainDataService: () => PoolOnChainDataServiceOptions = () => {
-    return {
-        chain: networkContext.chain,
-        vaultAddress: networkContext.data.balancer.v2.vaultAddress,
-        balancerQueriesAddress: networkContext.data.balancer.v2.balancerQueriesAddress,
-        yieldProtocolFeePercentage: networkContext.data.balancer.v2.defaultSwapFeePercentage,
-        swapProtocolFeePercentage: networkContext.data.balancer.v2.defaultSwapFeePercentage,
-        gyroConfig: networkContext.data.gyro?.config,
-    };
-};
-
-export const poolService = new PoolService(
-    new PoolOnChainDataService(optionsResolverForPoolOnChainDataService),
-    new PoolGqlLoaderService(),
-    new PoolSnapshotService(),
-);
+export const poolService = new PoolService(new PoolGqlLoaderService(), new PoolSnapshotService());
