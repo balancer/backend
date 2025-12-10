@@ -219,12 +219,6 @@ export const schema = gql`
         value: String!
     }
 
-    type GqlLatestSyncedBlocks {
-        poolSyncBlock: BigInt!
-        userStakeSyncBlock: BigInt!
-        userWalletSyncBlock: BigInt!
-    }
-
     type GqlLoopsData {
         """
         Actual TotalSupply of LoopS.
@@ -4272,7 +4266,6 @@ export const schema = gql`
         blocksGetBlocksPerDay: Float! @deprecated
         blocksGetBlocksPerSecond: Float! @deprecated
         blocksGetBlocksPerYear: Float! @deprecated
-        latestSyncedBlocks: GqlLatestSyncedBlocks!
         lbpPriceChart(chain: GqlChain!, dataPoints: Int, id: String!, interval: Int @deprecated): [LBPPriceChartData!]
 
         """

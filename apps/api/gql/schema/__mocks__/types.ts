@@ -205,13 +205,6 @@ export type GqlLbpTopTrade = {
     value: Scalars['String'];
 };
 
-export type GqlLatestSyncedBlocks = {
-    __typename?: 'GqlLatestSyncedBlocks';
-    poolSyncBlock: Scalars['BigInt'];
-    userStakeSyncBlock: Scalars['BigInt'];
-    userWalletSyncBlock: Scalars['BigInt'];
-};
-
 export type GqlLoopsData = {
     __typename?: 'GqlLoopsData';
     /** Actual TotalSupply of LoopS. */
@@ -3040,7 +3033,6 @@ export type Query = {
     blocksGetBlocksPerSecond: Scalars['Float'];
     /** @deprecated Field no longer supported */
     blocksGetBlocksPerYear: Scalars['Float'];
-    latestSyncedBlocks: GqlLatestSyncedBlocks;
     lbpPriceChart?: Maybe<Array<LbpPriceChartData>>;
     /** Get the LoopS data */
     loopsGetData: GqlLoopsData;
