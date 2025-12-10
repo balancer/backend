@@ -126,7 +126,7 @@ export class PoolService {
             const reliquarySnapshotService = new ReliquarySnapshotService(
                 new ReliquarySubgraphService(config[chain].subgraphs.reliquary),
             );
-            await reliquarySnapshotService.syncLatestSnapshotsForAllFarms();
+            await reliquarySnapshotService.syncLatestSnapshotsForAllFarms(chain);
         }
     }
 
