@@ -2,7 +2,6 @@ import { poolService } from '../../../../modules/pool/pool.service';
 import { PoolAggregatorLoader } from '../../../../modules/pool/lib/pool-aggregator-loader';
 import { GqlChain, Resolvers } from '../generated-schema';
 import { isAdminRoute } from '../../../../modules/auth/auth-context';
-import { networkContext } from '../../../../modules/network/network-context.service';
 import { headerChain } from '../../../../modules/context/header-chain';
 import {
     CowAmmController,
@@ -11,7 +10,6 @@ import {
     PoolController,
     FXPoolsController,
 } from '../../../../modules/controllers';
-import { chainIdToChain } from '../../../../modules/network/chain-id-to-chain';
 import { GraphQLError } from 'graphql';
 import { upsertLastSyncedBlock } from '../../../../modules/actions/last-synced-block';
 import { PrismaLastBlockSyncedCategory } from '@prisma/client';

@@ -6,8 +6,8 @@ import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { ReliquarySubgraphService } from '../../subgraphs/reliquary-subgraph/reliquary.service';
 import { oneDayInMinutes } from '../../common/time';
 import { Chain, PrismaReliquaryFarmSnapshot, PrismaReliquaryLevelSnapshot } from '@prisma/client';
-import { networkContext } from '../../network/network-context.service';
 import { blockNumbers } from '../../block-numbers';
+import { AllNetworkConfigs, AllNetworkConfigsKeyedOnChain } from '../../network/network-config';
 
 export class ReliquarySnapshotService {
     constructor(private readonly reliquarySubgraphService: ReliquarySubgraphService) {}
@@ -21,7 +21,7 @@ export class ReliquarySnapshotService {
         });
     }
 
-    public async syncLatestSnapshotsForAllFarms() {
+    public async syncLatestSnapshotsForAllFarms(chain: Chain) {
         const yesterdayMorning = moment().utc().subtract(1, 'day').startOf('day').unix();
 
         // this returns the last two snapshot per farm, if there are any
@@ -29,11 +29,12 @@ export class ReliquarySnapshotService {
             where: { snapshotTimestamp_gte: yesterdayMorning },
         });
         const filteredSnapshots = allSnapshots.filter(
-            (farm) => !networkContext.data.reliquary!.excludedFarmIds.includes(farm.farmId.toString()),
+            (farm) =>
+                !AllNetworkConfigsKeyedOnChain[chain].data.reliquary!.excludedFarmIds.includes(farm.farmId.toString()),
         );
         const farmIdsInSubgraphSnapshots = _.uniq(filteredSnapshots.map((snapshot) => snapshot.farmId));
 
-        await this.upsertFarmSnapshots(farmIdsInSubgraphSnapshots, filteredSnapshots, networkContext.chain);
+        await this.upsertFarmSnapshots(farmIdsInSubgraphSnapshots, filteredSnapshots, chain);
     }
 
     public async loadAllSnapshotsForFarm(farmId: number, excludedFarmIds: string[], chain: Chain) {

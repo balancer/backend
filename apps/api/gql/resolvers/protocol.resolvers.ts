@@ -1,6 +1,5 @@
-import { GqlLatestSyncedBlocks, Resolvers } from '../generated-schema';
+import { Resolvers } from '../generated-schema';
 import { protocolService } from '../../../../modules/protocol/protocol.service';
-import { networkContext } from '../../../../modules/network/network-context.service';
 import { headerChain } from '../../../../modules/context/header-chain';
 import { GraphQLError } from 'graphql';
 
@@ -28,13 +27,18 @@ const protocolResolvers: Resolvers = {
             }
             return protocolService.getAggregatedMetrics(chains);
         },
-        latestSyncedBlocks: async (): Promise<GqlLatestSyncedBlocks> => {
-            return protocolService.getLatestSyncedBlocks();
-        },
     },
     Mutation: {
         protocolCacheMetrics: async (): Promise<string> => {
-            await protocolService.cacheProtocolMetrics(networkContext.chain);
+            const chain = headerChain();
+
+            if (!chain) {
+                throw new GraphQLError('Provide "chainId" header', {
+                    extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
+                });
+            }
+
+            await protocolService.cacheProtocolMetrics(chain);
             return 'success';
         },
     },

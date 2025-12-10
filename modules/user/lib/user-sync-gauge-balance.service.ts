@@ -1,15 +1,12 @@
-import { UserStakedBalanceService, UserSyncUserBalanceInput } from '../user-types';
+import { UserStakedBalanceService } from '../user-types';
 import { prisma } from '../../../prisma/prisma-client';
 import _ from 'lodash';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
-import RewardsOnlyGaugeAbi from './abi/RewardsOnlyGauge.json';
-import { formatFixed } from '@ethersproject/bignumber';
 import { Chain, PrismaPoolStakingType } from '@prisma/client';
 import ERC20Abi from '../../web3/abi/ERC20.json';
 import { formatEther, parseAbi, zeroAddress } from 'viem';
 import { getEvents } from '../../web3/events';
 import { GaugeSubgraphService } from '../../subgraphs/gauge-subgraph/gauge-subgraph.service';
-import { BALANCES_SYNC_BLOCKS_MARGIN } from '../../../config';
 import { getViemClient, ViemClient } from '../../sources/viem-client';
 import config from '../../../config';
 import { getLastSyncedBlock } from '../../actions/last-synced-block';
@@ -263,43 +260,5 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
             ],
             true,
         );
-    }
-
-    public async syncUserBalance({ userAddress, poolId, chain, poolAddress, staking }: UserSyncUserBalanceInput) {
-        const client = getViemClient(staking.chain);
-        const balance = (await client.readContract({
-            address: staking.address as `0x{string}`,
-            abi: RewardsOnlyGaugeAbi,
-            functionName: 'balanceOf',
-            args: [userAddress],
-        })) as bigint;
-        const amount = formatFixed(balance, 18);
-
-        if (amount != '0') {
-            await prisma.prismaUserStakedBalance.upsert({
-                where: { id_chain: { id: `${staking.address}-${userAddress}`, chain } },
-                update: {
-                    balance: amount,
-                    balanceNum: parseFloat(amount),
-                },
-                create: {
-                    id: `${staking.address}-${userAddress}`,
-                    chain,
-                    balance: amount,
-                    balanceNum: parseFloat(amount),
-                    userAddress: userAddress,
-                    poolId: poolId,
-                    tokenAddress: poolAddress,
-                    stakingId: staking.address,
-                },
-            });
-        } else {
-            await prisma.prismaUserStakedBalance.deleteMany({
-                where: {
-                    id: `${staking.address}-${userAddress}`,
-                    chain,
-                },
-            });
-        }
     }
 }

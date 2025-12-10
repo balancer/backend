@@ -212,13 +212,6 @@ export interface GqlLbpTopTrade {
     value: Scalars['String'];
 }
 
-export interface GqlLatestSyncedBlocks {
-    __typename?: 'GqlLatestSyncedBlocks';
-    poolSyncBlock: Scalars['BigInt'];
-    userStakeSyncBlock: Scalars['BigInt'];
-    userWalletSyncBlock: Scalars['BigInt'];
-}
-
 export interface GqlLoopsData {
     __typename?: 'GqlLoopsData';
     /** Actual TotalSupply of LoopS. */
@@ -2873,8 +2866,6 @@ export interface Mutation {
     userInitStakedBalances: Scalars['String'];
     userInitWalletBalancesForAllPools: Scalars['String'];
     userInitWalletBalancesForPool: Scalars['String'];
-    userSyncBalance: Scalars['String'];
-    userSyncBalanceAllPools: Scalars['String'];
     userSyncChangedStakedBalances: Scalars['String'];
     userSyncChangedWalletBalancesForAllPools: Scalars['String'];
     veBalSyncAllUserBalances: Scalars['String'];
@@ -2943,10 +2934,6 @@ export interface MutationUserInitWalletBalancesForPoolArgs {
     poolId: Scalars['String'];
 }
 
-export interface MutationUserSyncBalanceArgs {
-    poolId: Scalars['String'];
-}
-
 export interface PoolForBatchSwap {
     __typename?: 'PoolForBatchSwap';
     allTokens?: Maybe<Array<TokenForBatchSwapPool>>;
@@ -3000,7 +2987,6 @@ export interface Query {
     blocksGetBlocksPerSecond: Scalars['Float'];
     /** @deprecated Field no longer supported */
     blocksGetBlocksPerYear: Scalars['Float'];
-    latestSyncedBlocks: GqlLatestSyncedBlocks;
     lbpPriceChart?: Maybe<Array<LbpPriceChartData>>;
     /** Get the LoopS data */
     loopsGetData: GqlLoopsData;
@@ -3425,7 +3411,6 @@ export type ResolversTypes = ResolversObject<{
     GqlHookReviewData: ResolverTypeWrapper<GqlHookReviewData>;
     GqlHookType: GqlHookType;
     GqlLBPTopTrade: ResolverTypeWrapper<GqlLbpTopTrade>;
-    GqlLatestSyncedBlocks: ResolverTypeWrapper<GqlLatestSyncedBlocks>;
     GqlLoopsData: ResolverTypeWrapper<GqlLoopsData>;
     GqlNestedPool: ResolverTypeWrapper<GqlNestedPool>;
     GqlPoolAddRemoveEventV3: ResolverTypeWrapper<GqlPoolAddRemoveEventV3>;
@@ -3656,7 +3641,6 @@ export type ResolversParentTypes = ResolversObject<{
     GqlHookData: GqlHookData;
     GqlHookReviewData: GqlHookReviewData;
     GqlLBPTopTrade: GqlLbpTopTrade;
-    GqlLatestSyncedBlocks: GqlLatestSyncedBlocks;
     GqlLoopsData: GqlLoopsData;
     GqlNestedPool: GqlNestedPool;
     GqlPoolAddRemoveEventV3: GqlPoolAddRemoveEventV3;
@@ -3998,16 +3982,6 @@ export type GqlLbpTopTradeResolvers<
     address?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     timestamp?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     value?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-}>;
-
-export type GqlLatestSyncedBlocksResolvers<
-    ContextType = ResolverContext,
-    ParentType extends ResolversParentTypes['GqlLatestSyncedBlocks'] = ResolversParentTypes['GqlLatestSyncedBlocks'],
-> = ResolversObject<{
-    poolSyncBlock?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
-    userStakeSyncBlock?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
-    userWalletSyncBlock?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
     __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -6151,13 +6125,6 @@ export type MutationResolvers<
         ContextType,
         RequireFields<MutationUserInitWalletBalancesForPoolArgs, 'poolId'>
     >;
-    userSyncBalance?: Resolver<
-        ResolversTypes['String'],
-        ParentType,
-        ContextType,
-        RequireFields<MutationUserSyncBalanceArgs, 'poolId'>
-    >;
-    userSyncBalanceAllPools?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     userSyncChangedStakedBalances?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     userSyncChangedWalletBalancesForAllPools?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     veBalSyncAllUserBalances?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -6236,7 +6203,6 @@ export type QueryResolvers<
     blocksGetBlocksPerDay?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
     blocksGetBlocksPerSecond?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
     blocksGetBlocksPerYear?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
-    latestSyncedBlocks?: Resolver<ResolversTypes['GqlLatestSyncedBlocks'], ParentType, ContextType>;
     lbpPriceChart?: Resolver<
         Maybe<Array<ResolversTypes['LBPPriceChartData']>>,
         ParentType,
@@ -6495,7 +6461,6 @@ export type Resolvers<ContextType = ResolverContext> = ResolversObject<{
     GqlHookData?: GqlHookDataResolvers<ContextType>;
     GqlHookReviewData?: GqlHookReviewDataResolvers<ContextType>;
     GqlLBPTopTrade?: GqlLbpTopTradeResolvers<ContextType>;
-    GqlLatestSyncedBlocks?: GqlLatestSyncedBlocksResolvers<ContextType>;
     GqlLoopsData?: GqlLoopsDataResolvers<ContextType>;
     GqlNestedPool?: GqlNestedPoolResolvers<ContextType>;
     GqlPoolAddRemoveEventV3?: GqlPoolAddRemoveEventV3Resolvers<ContextType>;

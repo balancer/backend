@@ -205,13 +205,6 @@ export type GqlLbpTopTrade = {
     value: Scalars['String'];
 };
 
-export type GqlLatestSyncedBlocks = {
-    __typename?: 'GqlLatestSyncedBlocks';
-    poolSyncBlock: Scalars['BigInt'];
-    userStakeSyncBlock: Scalars['BigInt'];
-    userWalletSyncBlock: Scalars['BigInt'];
-};
-
 export type GqlLoopsData = {
     __typename?: 'GqlLoopsData';
     /** Actual TotalSupply of LoopS. */
@@ -2919,8 +2912,6 @@ export type Mutation = {
     userInitStakedBalances: Scalars['String'];
     userInitWalletBalancesForAllPools: Scalars['String'];
     userInitWalletBalancesForPool: Scalars['String'];
-    userSyncBalance: Scalars['String'];
-    userSyncBalanceAllPools: Scalars['String'];
     userSyncChangedStakedBalances: Scalars['String'];
     userSyncChangedWalletBalancesForAllPools: Scalars['String'];
     veBalSyncAllUserBalances: Scalars['String'];
@@ -2989,10 +2980,6 @@ export type MutationUserInitWalletBalancesForPoolArgs = {
     poolId: Scalars['String'];
 };
 
-export type MutationUserSyncBalanceArgs = {
-    poolId: Scalars['String'];
-};
-
 export type PoolForBatchSwap = {
     __typename?: 'PoolForBatchSwap';
     allTokens?: Maybe<Array<TokenForBatchSwapPool>>;
@@ -3046,7 +3033,6 @@ export type Query = {
     blocksGetBlocksPerSecond: Scalars['Float'];
     /** @deprecated Field no longer supported */
     blocksGetBlocksPerYear: Scalars['Float'];
-    latestSyncedBlocks: GqlLatestSyncedBlocks;
     lbpPriceChart?: Maybe<Array<LbpPriceChartData>>;
     /** Get the LoopS data */
     loopsGetData: GqlLoopsData;

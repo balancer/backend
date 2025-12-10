@@ -13,7 +13,6 @@ import {
     GqlHookData,
     GqlHookReviewData,
     GqlLbpTopTrade,
-    GqlLatestSyncedBlocks,
     GqlLoopsData,
     GqlNestedPool,
     GqlPoolAddRemoveEventV3,
@@ -356,16 +355,6 @@ export const aGqlLbpTopTrade = (overrides?: Partial<GqlLbpTopTrade>): GqlLbpTopT
         address: overrides && overrides.hasOwnProperty('address') ? overrides.address! : 'denique',
         timestamp: overrides && overrides.hasOwnProperty('timestamp') ? overrides.timestamp! : 'centum',
         value: overrides && overrides.hasOwnProperty('value') ? overrides.value! : 'stips',
-    };
-};
-
-export const aGqlLatestSyncedBlocks = (overrides?: Partial<GqlLatestSyncedBlocks>): GqlLatestSyncedBlocks => {
-    return {
-        poolSyncBlock: overrides && overrides.hasOwnProperty('poolSyncBlock') ? overrides.poolSyncBlock! : 'admiratio',
-        userStakeSyncBlock:
-            overrides && overrides.hasOwnProperty('userStakeSyncBlock') ? overrides.userStakeSyncBlock! : 'currus',
-        userWalletSyncBlock:
-            overrides && overrides.hasOwnProperty('userWalletSyncBlock') ? overrides.userWalletSyncBlock! : 'valde',
     };
 };
 
@@ -2929,12 +2918,6 @@ export const aMutation = (overrides?: Partial<Mutation>): Mutation => {
             overrides && overrides.hasOwnProperty('userInitWalletBalancesForPool')
                 ? overrides.userInitWalletBalancesForPool!
                 : 'censura',
-        userSyncBalance:
-            overrides && overrides.hasOwnProperty('userSyncBalance') ? overrides.userSyncBalance! : 'appono',
-        userSyncBalanceAllPools:
-            overrides && overrides.hasOwnProperty('userSyncBalanceAllPools')
-                ? overrides.userSyncBalanceAllPools!
-                : 'acervus',
         userSyncChangedStakedBalances:
             overrides && overrides.hasOwnProperty('userSyncChangedStakedBalances')
                 ? overrides.userSyncChangedStakedBalances!
@@ -3041,10 +3024,6 @@ export const aQuery = (overrides?: Partial<Query>): Query => {
                 : 5.9,
         blocksGetBlocksPerYear:
             overrides && overrides.hasOwnProperty('blocksGetBlocksPerYear') ? overrides.blocksGetBlocksPerYear! : 7.4,
-        latestSyncedBlocks:
-            overrides && overrides.hasOwnProperty('latestSyncedBlocks')
-                ? overrides.latestSyncedBlocks!
-                : aGqlLatestSyncedBlocks(),
         lbpPriceChart:
             overrides && overrides.hasOwnProperty('lbpPriceChart') ? overrides.lbpPriceChart! : [aLbpPriceChartData()],
         loopsGetData: overrides && overrides.hasOwnProperty('loopsGetData') ? overrides.loopsGetData! : aGqlLoopsData(),
