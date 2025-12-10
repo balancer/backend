@@ -21,7 +21,7 @@ export class DatastudioService {
             return;
         }
         const privateKey = await this.secretsManager.getSecret('backend-v3-datafeed-privatekey');
-        const jwtClient = await this.jwtClientHelper.getAuthorizedSheetsClient(privateKey);
+        const jwtClient = await this.jwtClientHelper.getAuthorizedSheetsClient(privateKey, chain);
 
         const databaseTabName =
             AllNetworkConfigsKeyedOnChain[chain].data.datastudio![env.DEPLOYMENT_ENV as DeploymentEnv].databaseTabName;
