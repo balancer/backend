@@ -40,43 +40,6 @@ export class UserService {
     public async syncChangedStakedBalances(chain: Chain) {
         await Promise.all(this.stakedSyncServices.map((service) => service.syncChangedStakedBalances(chain)));
     }
-
-    public async syncUserBalanceAllPools(userAddress: string) {
-        const allBalances = await this.userBalanceService.getUserPoolBalances(userAddress, [networkContext.chain]);
-        for (const userPoolBalance of allBalances) {
-            await this.syncUserBalance(userAddress, userPoolBalance.poolId);
-        }
-    }
-
-    public async syncUserBalance(userAddress: string, poolId: string) {
-        const pool = await prisma.prismaPool.findUniqueOrThrow({
-            where: { id_chain: { id: poolId, chain: networkContext.chain } },
-            include: { staking: true },
-        });
-
-        // we make sure the user exists
-        await prisma.prismaUser.upsert({
-            where: { address: userAddress },
-            update: {},
-            create: { address: userAddress },
-        });
-
-        await this.walletSyncService.syncUserBalance(userAddress, pool.id, pool.address);
-
-        for (const stake of pool.staking) {
-            await Promise.all(
-                this.stakedSyncServices.map((service) =>
-                    service.syncUserBalance({
-                        userAddress,
-                        poolId: pool.id,
-                        chain: pool.chain,
-                        poolAddress: pool.address,
-                        staking: stake,
-                    }),
-                ),
-            );
-        }
-    }
 }
 
 export const userService = new UserService(new UserBalanceService(), new UserSyncWalletBalanceService());

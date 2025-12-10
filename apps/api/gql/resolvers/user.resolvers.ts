@@ -101,22 +101,6 @@ const resolvers: Resolvers = {
 
             return 'success';
         },
-        userSyncBalance: async (parent, { poolId }, context) => {
-            const accountAddress = getRequiredAccountAddress(context);
-
-            await userService.syncUserBalance(accountAddress, poolId);
-
-            return 'success';
-        },
-        userSyncBalanceAllPools: async (parent, {}, context) => {
-            isAdminRoute(context);
-
-            const accountAddress = getRequiredAccountAddress(context);
-
-            await userService.syncUserBalanceAllPools(accountAddress);
-
-            return 'success';
-        },
     },
 };
 
