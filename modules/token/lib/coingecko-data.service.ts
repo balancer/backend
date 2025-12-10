@@ -1,5 +1,5 @@
 import { prisma } from '../../../prisma/prisma-client';
-import _, { add } from 'lodash';
+import _ from 'lodash';
 import { env } from '../../../apps/env';
 import { RateLimiter } from 'limiter';
 import config from '../../../config';
@@ -100,18 +100,15 @@ export class CoingeckoDataService {
                 .filter(([chain, _]) => chain !== 'SEPOLIA') // Sepolia is not in CG
                 .map(([chain, chainConfig]) => [chainConfig.coingecko.platformId, chain]),
         );
-        const coinMap = coinIds.reduce(
-            (acc, coin) => {
-                for (const [platform, address] of Object.entries(coin.platforms)) {
-                    if (platformToChain[platform]) {
-                        // tokenAddress-chain
-                        acc[`${address.toLowerCase()}-${platformToChain[platform]}`] = coin.id;
-                    }
+        const coinMap = coinIds.reduce((acc, coin) => {
+            for (const [platform, address] of Object.entries(coin.platforms)) {
+                if (platformToChain[platform]) {
+                    // tokenAddress-chain
+                    acc[`${address.toLowerCase()}-${platformToChain[platform]}`] = coin.id;
                 }
-                return acc;
-            },
-            {} as Record<string, string>,
-        );
+            }
+            return acc;
+        }, {} as Record<string, string>);
 
         const updates = allTokens
             .map((token) => {
@@ -134,28 +131,6 @@ export class CoingeckoDataService {
 
         await prisma.$transaction(updates);
     }
-
-    // public async getTokenHistoricalPrices(address: string, days: number): Promise<HistoricalPrice[]> {
-    //     const now = Math.floor(Date.now() / 1000);
-    //     const end = now;
-    //     const start = end - days * twentyFourHoursInSecs;
-    //     const tokenDefinitions = await tokenService.getTokenDefinitions([networkContext.chain]);
-    //     const mapped = this.getMappedTokenDetails(address, tokenDefinitions);
-
-    //     const endpoint = `/coins/${mapped.platform}/contract/${mapped.address}/market_chart/range?vs_currency=${this.fiatParam}&from=${start}&to=${end}`;
-
-    //     const result = await this.get<HistoricalPriceResponse>(endpoint);
-
-    //     return result.prices.map((item) => ({
-    //         //anchor to the start of the hour
-    //         timestamp:
-    //             moment
-    //                 .unix(item[0] / 1000)
-    //                 .startOf('hour')
-    //                 .unix() * 1000,
-    //         price: item[1],
-    //     }));
-    // }
 
     async tokenPrice(chain: Chain, tokens: string[]) {
         const platformId = config[chain].coingecko.platformId;
