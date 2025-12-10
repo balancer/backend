@@ -22,8 +22,8 @@ export class UserService {
         return this.userBalanceService.getUserStaking(address, chains);
     }
 
-    public async initWalletBalancesForPool(poolId: string) {
-        await this.walletSyncService.initBalancesForPool(poolId);
+    public async initWalletBalancesForPool(poolId: string, chain: Chain) {
+        await this.walletSyncService.initBalancesForPool(poolId, chain);
     }
 
     public async initStakedBalances(stakingTypes: PrismaPoolStakingType[], chain: Chain) {
