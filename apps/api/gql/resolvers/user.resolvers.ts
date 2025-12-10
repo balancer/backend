@@ -83,6 +83,12 @@ const resolvers: Resolvers = {
 
             const chain = headerChain();
 
+            if (!chain) {
+                throw new GraphQLError('Provide "chainId" header', {
+                    extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
+                });
+            }
+
             await userService.initWalletBalancesForPool(poolId, chain);
 
             return 'success';

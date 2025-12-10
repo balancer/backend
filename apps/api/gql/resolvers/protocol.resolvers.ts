@@ -31,7 +31,15 @@ const protocolResolvers: Resolvers = {
     },
     Mutation: {
         protocolCacheMetrics: async (): Promise<string> => {
-            await protocolService.cacheProtocolMetrics(networkContext.chain);
+            const chain = headerChain();
+
+            if (!chain) {
+                throw new GraphQLError('Provide "chainId" header', {
+                    extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
+                });
+            }
+
+            await protocolService.cacheProtocolMetrics(chain);
             return 'success';
         },
     },
