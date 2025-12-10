@@ -1,21 +1,14 @@
 import { Chain, PrismaPoolStaking, PrismaPoolStakingType } from '@prisma/client';
-import { prisma } from '../../prisma/prisma-client';
-import { GqlPoolJoinExit, GqlPoolSwap } from '../../apps/api/gql/generated-schema';
-import { tokenService } from '../token/token.service';
 import { UserBalanceService } from './lib/user-balance.service';
 import { UserSyncWalletBalanceService } from './lib/user-sync-wallet-balance.service';
-import { UserPoolBalance, UserStakedBalanceService } from './user-types';
-import { networkContext } from '../network/network-context.service';
+import { UserPoolBalance } from './user-types';
+import { AllNetworkConfigsKeyedOnChain } from '../network/network-config';
 
 export class UserService {
     constructor(
         private readonly userBalanceService: UserBalanceService,
         private readonly walletSyncService: UserSyncWalletBalanceService,
     ) {}
-
-    private get stakedSyncServices(): UserStakedBalanceService[] {
-        return networkContext.config.userStakedBalanceServices;
-    }
 
     public async getUserPoolBalances(address: string, chains: Chain[]): Promise<UserPoolBalance[]> {
         return this.userBalanceService.getUserPoolBalances(address, chains);
@@ -34,11 +27,19 @@ export class UserService {
     }
 
     public async initStakedBalances(stakingTypes: PrismaPoolStakingType[], chain: Chain) {
-        await Promise.all(this.stakedSyncServices.map((service) => service.initStakedBalances(stakingTypes, chain)));
+        await Promise.all(
+            AllNetworkConfigsKeyedOnChain[chain].userStakedBalanceServices.map((service) =>
+                service.initStakedBalances(stakingTypes, chain),
+            ),
+        );
     }
 
     public async syncChangedStakedBalances(chain: Chain) {
-        await Promise.all(this.stakedSyncServices.map((service) => service.syncChangedStakedBalances(chain)));
+        await Promise.all(
+            AllNetworkConfigsKeyedOnChain[chain].userStakedBalanceServices.map((service) =>
+                service.syncChangedStakedBalances(chain),
+            ),
+        );
     }
 }
 
