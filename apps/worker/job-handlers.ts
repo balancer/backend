@@ -207,13 +207,13 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
             await runIfNotAlreadyRunning(name, chainId, () => updateVolumeAndFees(chain), res, next);
             break;
         case 'sync-vebal-balances':
-            await runIfNotAlreadyRunning(name, chainId, () => veBalService.syncVeBalBalances(), res, next);
+            await runIfNotAlreadyRunning(name, chainId, () => veBalService.syncVeBalBalances(chain), res, next);
             break;
         case 'sync-vebal-snapshots':
             await runIfNotAlreadyRunning(name, chainId, () => veBalService.syncVeBalUserBalanceSnapshots(), res, next);
             break;
         case 'sync-vebal-totalSupply':
-            await runIfNotAlreadyRunning(name, chainId, () => veBalService.syncVeBalTotalSupply(), res, next);
+            await runIfNotAlreadyRunning(name, chainId, () => veBalService.syncVeBalTotalSupply(chain), res, next);
             break;
         case 'sync-vebal-voting-gauges':
             await runIfNotAlreadyRunning(name, chainId, () => veBalVotingListService.syncVotingGauges(), res, next);

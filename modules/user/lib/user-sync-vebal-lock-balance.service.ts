@@ -12,7 +12,6 @@ import { Multicaller3Viem } from '../../web3/multicaller-viem';
 
 export class UserSyncVebalLockBalanceService implements UserStakedBalanceService {
     private readonly veBalPoolId = '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014';
-    private chain: Chain = 'MAINNET';
 
     public async initStakedBalances(stakingTypes: PrismaPoolStakingType[]): Promise<void> {
         if (!stakingTypes.includes('VEBAL')) {
