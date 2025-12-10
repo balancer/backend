@@ -2,18 +2,14 @@ import { BigNumber } from 'ethers';
 import { oldBnumFromBnum } from '../../big-number/old-big-number';
 import { prisma } from '../../../prisma/prisma-client';
 import { getContractAtForNetwork } from '../../web3/contract';
-import { networkContext } from '../../network/network-context.service';
 import FreshBeetsAbi from '../abi/FreshBeets.json';
 import ERC20 from '../abi/ERC20.json';
+import { AllNetworkConfigsKeyedOnChain } from '../../network/network-config';
 
 export class FbeetsService {
     constructor() {}
 
     public async getRatio(): Promise<string> {
-        if (!networkContext.isFantomNetwork) {
-            return '1.0';
-        }
-
         const fbeets = await prisma.prismaFbeets.findFirst({});
         if (!fbeets) {
             throw new Error('Fbeets data has not yet been synced');
@@ -23,19 +19,20 @@ export class FbeetsService {
     }
 
     public async syncRatio() {
-        if (!networkContext.data.fbeets) {
+        const fantomNetworkConfig = AllNetworkConfigsKeyedOnChain['FANTOM'];
+        if (!fantomNetworkConfig.data.fbeets) {
             return;
         }
 
         const fBeetsContract = getContractAtForNetwork(
-            networkContext.data.fbeets.address,
+            fantomNetworkConfig.data.fbeets.address,
             FreshBeetsAbi,
-            networkContext.provider,
+            fantomNetworkConfig.provider,
         );
         const fBeetsPoolContract = getContractAtForNetwork(
-            networkContext.data.fbeets.poolAddress,
+            fantomNetworkConfig.data.fbeets.poolAddress,
             ERC20,
-            networkContext.provider,
+            fantomNetworkConfig.provider,
         );
 
         const totalSupply: BigNumber = await fBeetsContract.totalSupply();
