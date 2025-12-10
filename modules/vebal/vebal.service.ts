@@ -6,7 +6,7 @@ import { prismaBulkExecuteOperations } from '../../prisma/prisma-util';
 import { veBalLocksSubgraphService } from '../subgraphs/veBal-locks-subgraph/veBal-locks-subgraph.service';
 import { Multicaller } from '../web3/multicaller';
 import VeDelegationAbi from './abi/VotingEscrowDelegationProxy.json';
-import { getContractAt } from '../web3/contract';
+import { getContractAtForNetwork } from '../web3/contract';
 import { AmountHumanReadable } from '../common/global-types';
 import { GqlVeBalBalance, GqlVeBalUserData } from '../../apps/api/gql/generated-schema';
 import mainnet from '../../config/mainnet';
@@ -231,7 +231,11 @@ export class VeBalService {
                     ? AllNetworkConfigsKeyedOnChain[chain].data.veBal.address
                     : AllNetworkConfigsKeyedOnChain[chain].data.veBal.delegationProxy;
 
-            const veBal = getContractAt(veBalAddress, VeBalABI);
+            const veBal = getContractAtForNetwork(
+                veBalAddress,
+                VeBalABI,
+                AllNetworkConfigsKeyedOnChain[chain].provider,
+            );
             const totalSupply: BigNumber = await veBal.totalSupply();
 
             await prisma.prismaVeBalTotalSupply.upsert({

@@ -1,7 +1,7 @@
 import { BigNumber } from 'ethers';
 import { oldBnumFromBnum } from '../../big-number/old-big-number';
 import { prisma } from '../../../prisma/prisma-client';
-import { getContractAt } from '../../web3/contract';
+import { getContractAtForNetwork } from '../../web3/contract';
 import { networkContext } from '../../network/network-context.service';
 import FreshBeetsAbi from '../abi/FreshBeets.json';
 import ERC20 from '../abi/ERC20.json';
@@ -27,8 +27,16 @@ export class FbeetsService {
             return;
         }
 
-        const fBeetsContract = getContractAt(networkContext.data.fbeets.address, FreshBeetsAbi);
-        const fBeetsPoolContract = getContractAt(networkContext.data.fbeets.poolAddress, ERC20);
+        const fBeetsContract = getContractAtForNetwork(
+            networkContext.data.fbeets.address,
+            FreshBeetsAbi,
+            networkContext.provider,
+        );
+        const fBeetsPoolContract = getContractAtForNetwork(
+            networkContext.data.fbeets.poolAddress,
+            ERC20,
+            networkContext.provider,
+        );
 
         const totalSupply: BigNumber = await fBeetsContract.totalSupply();
         const bptBalance: BigNumber = await fBeetsPoolContract.balanceOf(fBeetsContract.address);

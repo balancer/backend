@@ -9,7 +9,7 @@ import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { bn } from '../../big-number/big-number';
 import { AmountHumanReadable } from '../../common/global-types';
 import ReliquaryAbi from '../../web3/abi/Reliquary.json';
-import { getContractAt } from '../../web3/contract';
+import { getContractAtForNetwork } from '../../web3/contract';
 import { Multicaller } from '../../web3/multicaller';
 import { Reliquary } from '../../web3/types/Reliquary';
 import { UserStakedBalanceService, UserSyncUserBalanceInput } from '../user-types';
@@ -233,7 +233,11 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
         if (staking.type !== 'RELIQUARY') {
             return;
         }
-        const reliquary: Reliquary = getContractAt(this.reliquaryAddress, ReliquaryAbi);
+        const reliquary: Reliquary = getContractAtForNetwork(
+            this.reliquaryAddress,
+            ReliquaryAbi,
+            networkContext.provider,
+        );
         const relicPositions = await reliquary.relicPositionsOfOwner(userAddress);
 
         const positions = relicPositions[1];
@@ -269,8 +273,11 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
         startBlock: number,
         endBlock: number,
     ): Promise<{ farmId: string; userAddress: string; amount: AmountHumanReadable }[]> {
-        const reliquaryContract: Reliquary = getContractAt(reliquaryAddress, ReliquaryAbi);
-
+        const reliquaryContract: Reliquary = getContractAtForNetwork(
+            reliquaryAddress,
+            ReliquaryAbi,
+            networkContext.provider,
+        );
         const events = await reliquaryContract.queryFilter({ address: reliquaryAddress }, startBlock, endBlock);
         const balanceChangedEvents = events.filter(
             (event) =>

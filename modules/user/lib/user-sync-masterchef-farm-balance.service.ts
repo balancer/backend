@@ -9,7 +9,7 @@ import {
     OrderDirection,
     User_OrderBy,
 } from '../../subgraphs/masterchef-subgraph/generated/masterchef-subgraph-types';
-import { getContractAt } from '../../web3/contract';
+import { getContractAtForNetwork } from '../../web3/contract';
 import { Multicaller } from '../../web3/multicaller';
 import { BeethovenxMasterChef } from '../../web3/types/BeethovenxMasterChef';
 import MasterChefAbi from '../../web3/abi/MasterChef.json';
@@ -191,7 +191,11 @@ export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceSe
         if (staking.type !== 'MASTER_CHEF' && staking.type !== 'FRESH_BEETS') {
             return;
         }
-        const masterchef: BeethovenxMasterChef = getContractAt(this.masterchefAddress, MasterChefAbi);
+        const masterchef: BeethovenxMasterChef = getContractAtForNetwork(
+            this.masterchefAddress,
+            MasterChefAbi,
+            networkContext.provider,
+        );
         const userInfo = await masterchef.userInfo(staking.id, userAddress);
         const amountStaked = formatFixed(userInfo[0], 18);
 
@@ -219,7 +223,11 @@ export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceSe
         startBlock: number,
         endBlock: number,
     ): Promise<{ farmId: string; userAddress: string; amount: AmountHumanReadable }[]> {
-        const contract: BeethovenxMasterChef = getContractAt(masterChefAddress, MasterChefAbi);
+        const contract: BeethovenxMasterChef = getContractAtForNetwork(
+            masterChefAddress,
+            MasterChefAbi,
+            networkContext.provider,
+        );
         const events = await contract.queryFilter({ address: masterChefAddress }, startBlock, endBlock);
         const filteredEvents = events.filter((event) =>
             ['Deposit', 'Withdraw', 'EmergencyWithdraw'].includes(event.event!),

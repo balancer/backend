@@ -1,6 +1,6 @@
 import { utils } from 'ethers';
 import beetsAbi from '../abi/BeethovenxToken.json';
-import { getContractAt, getContractAtForNetwork } from '../../web3/contract';
+import { getContractAtForNetwork } from '../../web3/contract';
 import { networkContext } from '../../network/network-context.service';
 import { AllNetworkConfigs } from '../../network/network-config';
 
@@ -22,7 +22,11 @@ const NON_CIRCULATING_ADDRESSES_SONIC = [
 ];
 
 export async function beetsGetCirculatingSupply() {
-    const beetsContract = getContractAt(networkContext.data.beets!.address, beetsAbi);
+    const beetsContract = getContractAtForNetwork(
+        networkContext.data.beets!.address,
+        beetsAbi,
+        networkContext.provider,
+    );
 
     let totalSupply = await beetsContract.totalSupply();
 
