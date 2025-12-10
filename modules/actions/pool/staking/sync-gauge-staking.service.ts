@@ -305,7 +305,7 @@ const getOnchainRewardTokensData = async (
     const rewardsDataV2 = (await rewardsMulticallerV2.execute()) as GaugeRewardData;
     const rewardsData = { ...rewardsDataV1, ...rewardsDataV2 };
 
-    const totalBalRate = parseFloat(formatUnits(await getInflationRate()));
+    const totalBalRate = parseFloat(formatUnits(await getInflationRate(chain)));
     const now = Math.floor(Date.now() / 1000);
 
     // Format onchain rates for all the rewards

@@ -13,7 +13,7 @@ import { getContractAtForNetwork } from '../../web3/contract';
 import { Multicaller } from '../../web3/multicaller';
 import { BeethovenxMasterChef } from '../../web3/types/BeethovenxMasterChef';
 import MasterChefAbi from '../../web3/abi/MasterChef.json';
-import { UserStakedBalanceService, UserSyncUserBalanceInput } from '../user-types';
+import { UserStakedBalanceService } from '../user-types';
 import { PrismaPoolStakingType } from '@prisma/client';
 import { MasterchefSubgraphService } from '../../subgraphs/masterchef-subgraph/masterchef.service';
 import { BALANCES_SYNC_BLOCKS_MARGIN } from '../../../config';
@@ -191,41 +191,6 @@ export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceSe
         );
 
         console.log('initStakedBalances: finished...');
-    }
-
-    public async syncUserBalance({ userAddress, poolId, poolAddress, staking }: UserSyncUserBalanceInput) {
-        if (staking.type !== 'MASTER_CHEF' && staking.type !== 'FRESH_BEETS') {
-            return;
-        }
-
-        const chain = 'FANTOM';
-        const networkConfig = AllNetworkConfigsKeyedOnChain[chain];
-
-        const masterchef: BeethovenxMasterChef = getContractAtForNetwork(
-            this.masterchefAddress,
-            MasterChefAbi,
-            networkConfig.provider,
-        );
-        const userInfo = await masterchef.userInfo(staking.id, userAddress);
-        const amountStaked = formatFixed(userInfo[0], 18);
-
-        await prisma.prismaUserStakedBalance.upsert({
-            where: { id_chain: { id: `${staking.id}-${userAddress}`, chain } },
-            update: {
-                balance: amountStaked,
-                balanceNum: parseFloat(amountStaked),
-            },
-            create: {
-                id: `${staking.id}-${userAddress}`,
-                chain,
-                balance: amountStaked,
-                balanceNum: parseFloat(amountStaked),
-                userAddress,
-                poolId: staking.type !== 'FRESH_BEETS' ? poolId : null,
-                tokenAddress: staking.type === 'FRESH_BEETS' ? this.fbeetsAddress : poolAddress,
-                stakingId: staking.id,
-            },
-        });
     }
 
     private async getAmountsForUsersWithBalanceChangesSinceStartBlock(

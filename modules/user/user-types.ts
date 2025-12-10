@@ -1,11 +1,9 @@
 import { AmountHumanReadable } from '../common/global-types';
-import { Chain, PrismaPoolStaking, PrismaPoolStakingType } from '@prisma/client';
-import { Relic } from '../subgraphs/reliquary-subgraph/generated/reliquary-subgraph-types';
+import { Chain, PrismaPoolStakingType } from '@prisma/client';
 
 export interface UserStakedBalanceService {
     syncChangedStakedBalances(chain: Chain): Promise<void>;
     initStakedBalances(stakingTypes: PrismaPoolStakingType[], chain: Chain): Promise<void>;
-    syncUserBalance(input: UserSyncUserBalanceInput): Promise<void>;
 }
 
 export interface UserPoolBalance {
@@ -15,14 +13,6 @@ export interface UserPoolBalance {
     walletBalance: AmountHumanReadable;
     stakedBalance: AmountHumanReadable;
     chain: Chain;
-}
-
-export interface UserSyncUserBalanceInput {
-    userAddress: string;
-    poolId: string;
-    chain: Chain;
-    poolAddress: string;
-    staking: PrismaPoolStaking;
 }
 
 export interface UserRelicSnapshot {

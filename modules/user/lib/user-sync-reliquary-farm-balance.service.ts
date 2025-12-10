@@ -1,7 +1,7 @@
 import { addressesMatch } from '../../web3/addresses';
 import { formatFixed } from '@ethersproject/bignumber';
 import { zeroAddress as ZERO_ADDRESS } from 'viem';
-import { PrismaPoolStakingType } from '@prisma/client';
+import { Chain, PrismaPoolStakingType } from '@prisma/client';
 import { BigNumber, Event } from 'ethers';
 import _ from 'lodash';
 import { prisma } from '../../../prisma/prisma-client';
@@ -12,11 +12,11 @@ import ReliquaryAbi from '../../web3/abi/Reliquary.json';
 import { getContractAtForNetwork } from '../../web3/contract';
 import { Multicaller } from '../../web3/multicaller';
 import { Reliquary } from '../../web3/types/Reliquary';
-import { UserStakedBalanceService, UserSyncUserBalanceInput } from '../user-types';
-import { networkContext } from '../../network/network-context.service';
+import { UserStakedBalanceService } from '../user-types';
 import { ReliquarySubgraphService } from '../../subgraphs/reliquary-subgraph/reliquary.service';
 import { BALANCES_SYNC_BLOCKS_MARGIN } from '../../../config';
 import { floatToExactString } from '../../common/numbers';
+import { AllNetworkConfigsKeyedOnChain } from '../../network/network-config';
 
 type ReliquaryPosition = {
     amount: BigNumber;
@@ -55,13 +55,12 @@ type TransferEvent = Event & {
 export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceService {
     constructor(private readonly reliquaryAddress: string) {}
 
-    get reliquarySubgraphService() {
-        return new ReliquarySubgraphService(networkContext.data.subgraphs.reliquary!);
-    }
+    public async syncChangedStakedBalances(chain: Chain): Promise<void> {
+        const networkConfig = AllNetworkConfigsKeyedOnChain[chain];
+        const reliquarySubgraphService = new ReliquarySubgraphService(networkConfig.data.subgraphs.reliquary!);
 
-    public async syncChangedStakedBalances(): Promise<void> {
         const status = await prisma.prismaUserBalanceSyncStatus.findUnique({
-            where: { type_chain: { type: 'RELIQUARY', chain: networkContext.chain } },
+            where: { type_chain: { type: 'RELIQUARY', chain } },
         });
 
         if (!status) {
@@ -75,26 +74,27 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
                         type: 'RELIQUARY',
                     },
                 },
-                chain: networkContext.chain,
+                chain,
             },
             include: { staking: true },
         });
-        const latestBlock = await networkContext.provider.getBlockNumber();
-        const farms = await this.reliquarySubgraphService.getAllFarms({});
+        const latestBlock = await networkConfig.provider.getBlockNumber();
+        const farms = await reliquarySubgraphService.getAllFarms({});
         const filteredFarms = farms.filter(
-            (farm) => !networkContext.data.reliquary!.excludedFarmIds.includes(farm.pid.toString()),
+            (farm) => !networkConfig.data.reliquary!.excludedFarmIds.includes(farm.pid.toString()),
         );
 
         const startBlock = status.blockNumber - BALANCES_SYNC_BLOCKS_MARGIN;
         const endBlock =
-            latestBlock - startBlock > networkContext.data.rpcMaxBlockRange
-                ? startBlock + networkContext.data.rpcMaxBlockRange
+            latestBlock - startBlock > networkConfig.data.rpcMaxBlockRange
+                ? startBlock + networkConfig.data.rpcMaxBlockRange
                 : latestBlock;
 
         const amountUpdates = await this.getAmountsForUsersWithBalanceChangesSinceStartBlock(
             this.reliquaryAddress,
             startBlock,
             endBlock,
+            networkConfig,
         );
 
         // no new blocks have been minted, needed for slow networks
@@ -105,7 +105,7 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
 
         const filteredAmountUpdates = amountUpdates.filter(
             (update) =>
-                !networkContext.data.reliquary!.excludedFarmIds.includes(update.farmId.toString()) &&
+                !networkConfig.data.reliquary!.excludedFarmIds.includes(update.farmId.toString()) &&
                 update.amount !== '0.0',
         );
 
@@ -118,7 +118,7 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
                 prisma.prismaUserStakedBalance.deleteMany({
                     where: {
                         staking: { type: 'RELIQUARY' },
-                        chain: networkContext.chain,
+                        chain,
                         userAddress: { in: userAddresses },
                     },
                 }),
@@ -133,7 +133,7 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
                         where: {
                             id_chain: {
                                 id: `reliquary-${update.farmId}-${userAddress}`,
-                                chain: networkContext.chain,
+                                chain,
                             },
                         },
                         update: {
@@ -143,7 +143,7 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
                         },
                         create: {
                             id: `reliquary-${update.farmId}-${userAddress}`,
-                            chain: networkContext.chain,
+                            chain,
                             balance: floatToExactString(update.amount),
                             balanceNum: parseFloat(update.amount),
                             userAddress: userAddress,
@@ -154,7 +154,7 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
                     });
                 }),
                 prisma.prismaUserBalanceSyncStatus.update({
-                    where: { type_chain: { type: 'RELIQUARY', chain: networkContext.chain } },
+                    where: { type_chain: { type: 'RELIQUARY', chain } },
                     data: { blockNumber: endBlock },
                 }),
             ],
@@ -162,21 +162,25 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
         );
     }
 
-    public async initStakedBalances(stakingTypes: PrismaPoolStakingType[]): Promise<void> {
+    public async initStakedBalances(stakingTypes: PrismaPoolStakingType[], chain: Chain): Promise<void> {
         if (!stakingTypes.includes('RELIQUARY')) {
             return;
         }
-        const blockNumber = await this.reliquarySubgraphService.lastSyncedBlock();
+
+        const networkConfig = AllNetworkConfigsKeyedOnChain[chain];
+        const reliquarySubgraphService = new ReliquarySubgraphService(networkConfig.data.subgraphs.reliquary!);
+
+        const blockNumber = await reliquarySubgraphService.lastSyncedBlock();
         console.log('initStakedReliquaryBalances: loading subgraph relics...');
-        const relics = await this.reliquarySubgraphService.getAllRelicsWithPaging({});
+        const relics = await reliquarySubgraphService.getAllRelicsWithPaging({});
         const filteredRelics = relics.filter(
-            (relic) => !networkContext.data.reliquary?.excludedFarmIds.includes(`${relic.pid}`),
+            (relic) => !networkConfig.data.reliquary?.excludedFarmIds.includes(`${relic.pid}`),
         );
         console.log('initStakedReliquaryBalances: finished loading subgraph relics...');
         console.log('initStakedReliquaryBalances: loading pools...');
         const pools = await prisma.prismaPool.findMany({
             select: { id: true, address: true },
-            where: { chain: networkContext.chain },
+            where: { chain },
         });
         console.log('initStakedReliquaryBalances: finished loading pools...');
         // we have to group all relics for the same pool
@@ -194,7 +198,7 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
                     skipDuplicates: true,
                 }),
                 prisma.prismaUserStakedBalance.deleteMany({
-                    where: { staking: { type: 'RELIQUARY' }, chain: networkContext.chain },
+                    where: { staking: { type: 'RELIQUARY' }, chain },
                 }),
 
                 prisma.prismaUserStakedBalance.createMany({
@@ -207,7 +211,7 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
 
                         return {
                             id: `reliquary-${relic.pid}-${userAddress}`,
-                            chain: networkContext.chain,
+                            chain,
                             balance: totalBalance.toFixed(18).replace(/(?:\.0+|(\.\d*?)0+)$/, '$1'),
                             balanceNum: totalBalance,
                             userAddress: userAddress,
@@ -218,8 +222,8 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
                     }),
                 }),
                 prisma.prismaUserBalanceSyncStatus.upsert({
-                    where: { type_chain: { type: 'RELIQUARY', chain: networkContext.chain } },
-                    create: { type: 'RELIQUARY', chain: networkContext.chain, blockNumber },
+                    where: { type_chain: { type: 'RELIQUARY', chain } },
+                    create: { type: 'RELIQUARY', chain, blockNumber },
                     update: { blockNumber },
                 }),
             ],
@@ -229,54 +233,16 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
         console.log('initStakedReliquaryBalances: finished...');
     }
 
-    public async syncUserBalance({ userAddress, poolId, poolAddress, staking }: UserSyncUserBalanceInput) {
-        if (staking.type !== 'RELIQUARY') {
-            return;
-        }
-        const reliquary: Reliquary = getContractAtForNetwork(
-            this.reliquaryAddress,
-            ReliquaryAbi,
-            networkContext.provider,
-        );
-        const relicPositions = await reliquary.relicPositionsOfOwner(userAddress);
-
-        const positions = relicPositions[1];
-
-        const balance = positions
-            .filter((position) => position.poolId.toString() === staking.id.split('-')[1])
-            .reduce((total, position) => total.add(position.amount), bn(0));
-        const balanceFormatted = formatFixed(balance, 18);
-
-        await prisma.prismaUserStakedBalance.upsert({
-            where: {
-                id_chain: { id: `reliquary-${staking.id}-${userAddress.toLowerCase()}`, chain: networkContext.chain },
-            },
-            update: {
-                balance: balanceFormatted,
-                balanceNum: parseFloat(balanceFormatted),
-            },
-            create: {
-                id: `reliquary-${staking.id}-${userAddress.toLowerCase()}`,
-                chain: networkContext.chain,
-                balance: balanceFormatted,
-                balanceNum: parseFloat(balanceFormatted),
-                userAddress: userAddress.toLowerCase(),
-                poolId: poolId,
-                tokenAddress: poolAddress,
-                stakingId: staking.id,
-            },
-        });
-    }
-
     private async getAmountsForUsersWithBalanceChangesSinceStartBlock(
         reliquaryAddress: string,
         startBlock: number,
         endBlock: number,
+        networkConfig: (typeof AllNetworkConfigsKeyedOnChain)[Chain],
     ): Promise<{ farmId: string; userAddress: string; amount: AmountHumanReadable }[]> {
         const reliquaryContract: Reliquary = getContractAtForNetwork(
             reliquaryAddress,
             ReliquaryAbi,
-            networkContext.provider,
+            networkConfig.provider,
         );
         const events = await reliquaryContract.queryFilter({ address: reliquaryAddress }, startBlock, endBlock);
         const balanceChangedEvents = events.filter(
@@ -305,7 +271,7 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
         ) as RelicManagementEvent[];
         const transferEvents = events.filter((event) => event.event === 'Transfer') as TransferEvent[];
 
-        const multicall = new Multicaller(networkContext.data.multicall, networkContext.provider, ReliquaryAbi);
+        const multicall = new Multicaller(networkConfig.data.multicall, networkConfig.provider, ReliquaryAbi);
 
         // for the transfer events, we know which users are affected
         let affectedUsers = transferEvents.flatMap((event) => [event.args.from, event.args.to]);

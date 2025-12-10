@@ -1,9 +1,9 @@
-import { UserStakedBalanceService, UserSyncUserBalanceInput } from '../user-types';
+import { UserStakedBalanceService } from '../user-types';
 import { prisma } from '../../../prisma/prisma-client';
 import _ from 'lodash';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { formatFixed } from '@ethersproject/bignumber';
-import { Chain, PrismaPoolStakingType } from '@prisma/client';
+import { PrismaPoolStakingType } from '@prisma/client';
 import { veBalLocksSubgraphService } from '../../subgraphs/veBal-locks-subgraph/veBal-locks-subgraph.service';
 import { BigNumber } from 'ethers';
 import VeBalABI from '../../vebal/abi/vebal.json';
@@ -103,6 +103,4 @@ export class UserSyncVebalLockBalanceService implements UserStakedBalanceService
         );
         await prismaBulkExecuteOperations(operations, true, undefined);
     }
-
-    public async syncUserBalance({ userAddress, poolId, poolAddress, staking }: UserSyncUserBalanceInput) {}
 }
