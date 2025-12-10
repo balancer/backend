@@ -44,9 +44,9 @@ import { mapHookToGqlHook } from '../../sources/transformers';
 import { GraphQLError } from 'graphql';
 import { isWeightedPoolV2 } from './pool-utils';
 import { addressesMatch } from '../../web3/addresses';
-import { networkContext } from '../../network/network-context.service';
 import { getWeightSnapshots } from '../../actions/quant-amm/get-weight-snapshots';
 import { mapPoolToken, enrichWithErc4626Data, mapAprItems } from './pool-gql-mapper-helper';
+import { AllNetworkConfigsKeyedOnChain } from '../../network/network-config';
 
 const isToken = (text: string) => text.match(/^0x[0-9a-fA-F]{40}$/);
 const isPoolId = (text: string) => isToken(text) || text.match(/^0x[0-9a-fA-F]{64}$/);
@@ -214,8 +214,8 @@ export class PoolGqlLoaderService {
             const query =
                 Prisma.raw(`SELECT p.id, p.chain FROM "PrismaPool" p LEFT JOIN "PrismaPoolDynamicData" d on (p.id = d."poolId") WHERE p.search_vector @@ websearch_to_tsquery('simple', '${searchQuery}') AND d."totalSharesNum" > 0.000000000001 AND NOT ('BLACK_LISTED' = ANY(p.categories)) AND ${filters}
             ORDER BY d."${orderColumn}" ${
-                args.orderDirection && args.orderDirection === 'asc' ? 'ASC' : 'DESC'
-            } LIMIT ${limit} OFFSET ${offset}`);
+                    args.orderDirection && args.orderDirection === 'asc' ? 'ASC' : 'DESC'
+                } LIMIT ${limit} OFFSET ${offset}`);
 
             const searchResults = await prisma.$queryRaw<{ id: string }[]>(query);
 
@@ -474,8 +474,8 @@ export class PoolGqlLoaderService {
             ...(where?.hasHook !== undefined && where.hasHook
                 ? { hook: { path: ['address'], string_starts_with: '0x' } }
                 : where?.hasHook !== undefined && !where.hasHook
-                  ? { hook: { equals: Prisma.DbNull } }
-                  : {}),
+                ? { hook: { equals: Prisma.DbNull } }
+                : {}),
         };
 
         if (!textSearch) {
@@ -947,6 +947,7 @@ export class PoolGqlLoaderService {
         supportsNativeAsset: boolean,
         isWithdraw?: boolean,
     ): { poolTokenAddress: string; poolTokenIndex: number; tokenOptions: GqlPoolToken[] }[] {
+        const networkconfig = AllNetworkConfigsKeyedOnChain[pool.chain];
         const nestedPool = poolToken.nestedPool;
         const options: GqlPoolInvestOption[] = [];
 
@@ -975,7 +976,7 @@ export class PoolGqlLoaderService {
                 });
             }
         } else {
-            const isWrappedNativeAsset = addressesMatch(poolToken.address, networkContext.data.weth.address);
+            const isWrappedNativeAsset = addressesMatch(poolToken.address, networkconfig.data.weth.address);
 
             options.push({
                 poolTokenIndex: poolToken.index,
@@ -988,11 +989,11 @@ export class PoolGqlLoaderService {
                                   ...poolToken,
                                   token: {
                                       ...poolToken.token,
-                                      symbol: networkContext.data.eth.symbol,
-                                      address: networkContext.data.eth.address,
-                                      name: networkContext.data.eth.name,
+                                      symbol: networkconfig.data.eth.symbol,
+                                      address: networkconfig.data.eth.address,
+                                      name: networkconfig.data.eth.name,
                                   },
-                                  id: `${pool.id}-${networkContext.data.eth.address}`,
+                                  id: `${pool.id}-${networkconfig.data.eth.address}`,
                               }),
                           ]
                         : [this.mapPoolTokenToGql(poolToken)],
