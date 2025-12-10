@@ -1,6 +1,5 @@
-import { GqlLatestSyncedBlocks, Resolvers } from '../generated-schema';
+import { Resolvers } from '../generated-schema';
 import { protocolService } from '../../../../modules/protocol/protocol.service';
-import { networkContext } from '../../../../modules/network/network-context.service';
 import { headerChain } from '../../../../modules/context/header-chain';
 import { GraphQLError } from 'graphql';
 
