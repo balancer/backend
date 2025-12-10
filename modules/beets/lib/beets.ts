@@ -1,8 +1,8 @@
 import { utils } from 'ethers';
 import beetsAbi from '../abi/BeethovenxToken.json';
 import { getContractAtForNetwork } from '../../web3/contract';
-import { networkContext } from '../../network/network-context.service';
-import { AllNetworkConfigs } from '../../network/network-config';
+import { AllNetworkConfigs, AllNetworkConfigsKeyedOnChain } from '../../network/network-config';
+import { Chain } from '@prisma/client';
 
 const NON_CIRCULATING_ADDRESSES = [
     '0xa2503804ec837d1e4699932d58a3bdb767dea505', //team linear vesting
@@ -21,11 +21,11 @@ const NON_CIRCULATING_ADDRESSES_SONIC = [
     '0x5f9a5CD0B77155AC1814EF6Cd9D82dA53d05E386', //beets migration contract
 ];
 
-export async function beetsGetCirculatingSupply() {
+export async function beetsGetCirculatingSupply(chain: Chain) {
     const beetsContract = getContractAtForNetwork(
-        networkContext.data.beets!.address,
+        AllNetworkConfigsKeyedOnChain[chain].data.beets!.address,
         beetsAbi,
-        networkContext.provider,
+        AllNetworkConfigsKeyedOnChain[chain].provider,
     );
 
     let totalSupply = await beetsContract.totalSupply();
@@ -38,8 +38,8 @@ export async function beetsGetCirculatingSupply() {
     return utils.formatUnits(totalSupply);
 }
 
-export async function beetsGetCirculatingSupplySonic() {
-    const sonicNetworkConfig = AllNetworkConfigs['146'];
+export async function beetsGetCirculatingSupplySonic(chain: Chain) {
+    const sonicNetworkConfig = AllNetworkConfigsKeyedOnChain[chain];
     const beetsContract = getContractAtForNetwork(
         sonicNetworkConfig.data.beets!.address,
         beetsAbi,
@@ -56,8 +56,8 @@ export async function beetsGetCirculatingSupplySonic() {
     return utils.formatUnits(totalSupply);
 }
 
-export async function beetsGetTotalSupplySonic() {
-    const sonicNetworkConfig = AllNetworkConfigs['146'];
+export async function beetsGetTotalSupplySonic(chain: Chain) {
+    const sonicNetworkConfig = AllNetworkConfigsKeyedOnChain[chain];
     const beetsContract = getContractAtForNetwork(
         sonicNetworkConfig.data.beets!.address,
         beetsAbi,

@@ -8,17 +8,17 @@ import {
 export function loadRestRoutes(app: Express) {
     app.use('/health', (_, res) => res.sendStatus(200));
     app.use('/circulating_supply', (_, res) => {
-        beetsGetCirculatingSupply().then((result) => {
+        beetsGetCirculatingSupply('FANTOM').then((result) => {
             res.send(result);
         });
     });
     app.use('/circulating_supply_sonic', (_, res) => {
-        beetsGetCirculatingSupplySonic().then((result) => {
+        beetsGetCirculatingSupplySonic('SONIC').then((result) => {
             res.send(result);
         });
     });
     app.use('/total_supply_sonic', (_, res) => {
-        beetsGetTotalSupplySonic().then((result) => {
+        beetsGetTotalSupplySonic('SONIC').then((result) => {
             res.send(result);
         });
     });
