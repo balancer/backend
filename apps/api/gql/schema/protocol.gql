@@ -1,7 +1,6 @@
 extend type Query {
     protocolMetricsChain(chain: GqlChain): GqlProtocolMetricsChain!
     protocolMetricsAggregated(chains: [GqlChain!]): GqlProtocolMetricsAggregated!
-    latestSyncedBlocks: GqlLatestSyncedBlocks!
 }
 
 extend type Mutation {
@@ -32,10 +31,4 @@ type GqlProtocolMetricsChain {
     yieldCapture24h: BigDecimal!
     surplus24h: BigDecimal!
     numLiquidityProviders: BigInt!
-}
-
-type GqlLatestSyncedBlocks {
-    userWalletSyncBlock: BigInt!
-    userStakeSyncBlock: BigInt!
-    poolSyncBlock: BigInt!
 }

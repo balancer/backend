@@ -28,9 +28,6 @@ const protocolResolvers: Resolvers = {
             }
             return protocolService.getAggregatedMetrics(chains);
         },
-        latestSyncedBlocks: async (): Promise<GqlLatestSyncedBlocks> => {
-            return protocolService.getLatestSyncedBlocks();
-        },
     },
     Mutation: {
         protocolCacheMetrics: async (): Promise<string> => {

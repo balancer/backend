@@ -1,17 +1,10 @@
 import moment from 'moment-timezone';
 import { prisma } from '../../prisma/prisma-client';
 import { Cache } from 'memory-cache';
-import { Chain, PrismaLastBlockSyncedCategory, PrismaUserBalanceType } from '@prisma/client';
+import { Chain } from '@prisma/client';
 import _ from 'lodash';
-import { networkContext } from '../network/network-context.service';
 import { GqlProtocolMetricsAggregated, GqlProtocolMetricsChain } from '../../apps/api/gql/generated-schema';
 import config from '../../config';
-
-interface LatestSyncedBlocks {
-    userWalletSyncBlock: string;
-    userStakeSyncBlock: string;
-    poolSyncBlock: string;
-}
 
 export const PROTOCOL_METRICS_CACHE_KEY = `protocol:metrics`;
 
@@ -138,26 +131,6 @@ export class ProtocolService {
         this.cache.put(`${PROTOCOL_METRICS_CACHE_KEY}:${chain}`, protocolData, 60 * 30 * 1000);
 
         return protocolData;
-    }
-
-    public async getLatestSyncedBlocks(): Promise<LatestSyncedBlocks> {
-        const userStakeSyncBlock = await prisma.prismaUserBalanceSyncStatus.findUnique({
-            where: { type_chain: { type: PrismaUserBalanceType.STAKED, chain: networkContext.chain } },
-        });
-
-        const userWalletSyncBlock = await prisma.prismaUserBalanceSyncStatus.findUnique({
-            where: { type_chain: { type: PrismaUserBalanceType.WALLET, chain: networkContext.chain } },
-        });
-
-        const poolSyncBlock = await prisma.prismaLastBlockSynced.findUnique({
-            where: { category_chain: { category: PrismaLastBlockSyncedCategory.POOLS, chain: networkContext.chain } },
-        });
-
-        return {
-            userWalletSyncBlock: `${userWalletSyncBlock?.blockNumber}`,
-            userStakeSyncBlock: `${userStakeSyncBlock?.blockNumber}`,
-            poolSyncBlock: `${poolSyncBlock?.blockNumber}`,
-        };
     }
 
     private async getSftmXTVL(chain: Chain): Promise<number> {
