@@ -4210,8 +4210,6 @@ export const schema = gql`
         userInitStakedBalances(stakingTypes: [GqlPoolStakingType!]!): String!
         userInitWalletBalancesForAllPools(chain: GqlChain): String!
         userInitWalletBalancesForPool(poolId: String!): String!
-        userSyncBalance(poolId: String!): String!
-        userSyncBalanceAllPools: String!
         userSyncChangedStakedBalances: String!
         userSyncChangedWalletBalancesForAllPools: String!
         veBalSyncAllUserBalances: String!

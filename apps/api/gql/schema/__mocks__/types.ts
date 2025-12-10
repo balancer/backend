@@ -2919,8 +2919,6 @@ export type Mutation = {
     userInitStakedBalances: Scalars['String'];
     userInitWalletBalancesForAllPools: Scalars['String'];
     userInitWalletBalancesForPool: Scalars['String'];
-    userSyncBalance: Scalars['String'];
-    userSyncBalanceAllPools: Scalars['String'];
     userSyncChangedStakedBalances: Scalars['String'];
     userSyncChangedWalletBalancesForAllPools: Scalars['String'];
     veBalSyncAllUserBalances: Scalars['String'];
@@ -2986,10 +2984,6 @@ export type MutationUserInitWalletBalancesForAllPoolsArgs = {
 };
 
 export type MutationUserInitWalletBalancesForPoolArgs = {
-    poolId: Scalars['String'];
-};
-
-export type MutationUserSyncBalanceArgs = {
     poolId: Scalars['String'];
 };
 

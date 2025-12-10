@@ -2873,8 +2873,6 @@ export interface Mutation {
     userInitStakedBalances: Scalars['String'];
     userInitWalletBalancesForAllPools: Scalars['String'];
     userInitWalletBalancesForPool: Scalars['String'];
-    userSyncBalance: Scalars['String'];
-    userSyncBalanceAllPools: Scalars['String'];
     userSyncChangedStakedBalances: Scalars['String'];
     userSyncChangedWalletBalancesForAllPools: Scalars['String'];
     veBalSyncAllUserBalances: Scalars['String'];
@@ -2940,10 +2938,6 @@ export interface MutationUserInitWalletBalancesForAllPoolsArgs {
 }
 
 export interface MutationUserInitWalletBalancesForPoolArgs {
-    poolId: Scalars['String'];
-}
-
-export interface MutationUserSyncBalanceArgs {
     poolId: Scalars['String'];
 }
 
@@ -6151,13 +6145,6 @@ export type MutationResolvers<
         ContextType,
         RequireFields<MutationUserInitWalletBalancesForPoolArgs, 'poolId'>
     >;
-    userSyncBalance?: Resolver<
-        ResolversTypes['String'],
-        ParentType,
-        ContextType,
-        RequireFields<MutationUserSyncBalanceArgs, 'poolId'>
-    >;
-    userSyncBalanceAllPools?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     userSyncChangedStakedBalances?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     userSyncChangedWalletBalancesForAllPools?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     veBalSyncAllUserBalances?: Resolver<ResolversTypes['String'], ParentType, ContextType>;

@@ -2929,12 +2929,6 @@ export const aMutation = (overrides?: Partial<Mutation>): Mutation => {
             overrides && overrides.hasOwnProperty('userInitWalletBalancesForPool')
                 ? overrides.userInitWalletBalancesForPool!
                 : 'censura',
-        userSyncBalance:
-            overrides && overrides.hasOwnProperty('userSyncBalance') ? overrides.userSyncBalance! : 'appono',
-        userSyncBalanceAllPools:
-            overrides && overrides.hasOwnProperty('userSyncBalanceAllPools')
-                ? overrides.userSyncBalanceAllPools!
-                : 'acervus',
         userSyncChangedStakedBalances:
             overrides && overrides.hasOwnProperty('userSyncChangedStakedBalances')
                 ? overrides.userSyncChangedStakedBalances!
