@@ -96,15 +96,6 @@ export class UserBalanceService {
             where: { userAddress: address.toLowerCase(), chain: 'FANTOM', tokenAddress: fbeetsAddress },
         });
 
-        // this seems to cause heavy load
-        // const user = await prisma.prismaUser.findUnique({
-        //     where: { address: address.toLowerCase() },
-        //     include: {
-        //         walletBalances: { where: { chain: networkContext.chain, tokenAddress: fbeetsAddress } },
-        //         stakedBalances: { where: { chain: networkContext.chain, tokenAddress: fbeetsAddress } },
-        //     },
-        // });
-
         const stakedBalance = userWalletBalances[0];
         const walletBalance = userStakedBalances[0];
         const stakedNum = parseUnits(stakedBalance?.balance || '0', 18);
