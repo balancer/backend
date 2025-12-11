@@ -86,7 +86,11 @@ export const httpTokenYieldHandler: TokenYieldHandler = async (config: TokenYiel
         },
         config.skipSSL,
     );
-    const json = await res.json();
+    try {
+        const json = await res.json();
 
-    return transform(extract(json, config), config);
+        return transform(extract(json, config), config);
+    } catch (e: any) {
+        throw `http-yield-handler ${e.message} ${config.url}`;
+    }
 };
