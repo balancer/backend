@@ -68,16 +68,6 @@ export default <NetworkData>{
                         parser: (rate) => Number(rate) * 10 ** -27,
                         token: '0x76309a9a56309104518847bba321c261b7b4a43f',
                     },
-                    {
-                        name: 'eUSDT0-30 euler Yuzu Money Cluster',
-                        chain: 'PLASMA',
-                        contract: '0xc55f6e262FE21Da068ece5D3fa015D8451bAf625',
-                        abi: 'function getAPYs(address) view returns(uint256, uint256)',
-                        functionName: 'getAPYs',
-                        args: ['0x9d86b4fc23d8438fc4aba58642dc35d5f64fe941'],
-                        parser: ([_, rate]) => Number(rate) * 10 ** -27,
-                        token: '0x9d86b4fc23d8438fc4aba58642dc35d5f64fe941',
-                    },
                 ],
             },
             http: [
@@ -199,6 +189,11 @@ export default <NetworkData>{
             ],
             aave: {
                 markets: [AaveV3Plasma],
+            },
+            euler: {
+                chain: 'PLASMA',
+                url: 'https://raw.githubusercontent.com/euler-xyz/euler-labels/refs/heads/master/9745/vaults.json',
+                lens: '0xc55f6e262FE21Da068ece5D3fa015D8451bAf625',
             },
         },
     },
