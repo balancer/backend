@@ -1,5 +1,13 @@
 # backend
 
+## 1.57.6
+
+### Patch Changes
+
+-   f771fed: cleanup networkcontext
+-   6e95d8f: euler APRs on Plasma
+-   5ba0bb1: eUSDT0-30 euler Yuzu Money Cluster APR
+
 ## 1.57.5
 
 ### Patch Changes
