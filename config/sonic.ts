@@ -189,14 +189,14 @@ export default <NetworkData>{
                     scale: 100,
                     extractors: [{ type: 'path', token: '0xfa85fe5a8f5560e9039c04f2b0a90de1415abd70', path: '$.apy' }],
                 },
-                {
-                    url: 'https://locks-usd-api-sonic-earn.trevee.xyz/wrapper/apy',
-                    extractors: [{ type: 'path', token: '0x9fb76f7ce5fceaa2c42887ff441d46095e494206', path: '$.apy' }],
-                },
-                {
-                    url: 'https://locks-eth-api-sonic-earn.trevee.xyz/wrapper/apy',
-                    extractors: [{ type: 'path', token: '0xe8a41c62bb4d5863c6eadc96792cfe90a1f37c47', path: '$.apy' }],
-                },
+                // {
+                //     url: 'https://locks-usd-api-sonic-earn.trevee.xyz/wrapper/apy',
+                //     extractors: [{ type: 'path', token: '0x9fb76f7ce5fceaa2c42887ff441d46095e494206', path: '$.apy' }],
+                // },
+                // {
+                //     url: 'https://locks-eth-api-sonic-earn.trevee.xyz/wrapper/apy',
+                //     extractors: [{ type: 'path', token: '0xe8a41c62bb4d5863c6eadc96792cfe90a1f37c47', path: '$.apy' }],
+                // },
                 {
                     url: 'https://v2.silo.finance/api/detailed-vault/sonic-0xded4ac8645619334186f28b8798e07ca354cfa0e',
                     scale: 1e18,

@@ -3,10 +3,11 @@ import { prisma } from '../../../../prisma/prisma-client';
 import { prismaBulkExecuteOperations } from '../../../../prisma/prisma-util';
 import { oldBnum } from '../../../big-number/old-big-number';
 import { formatFixed } from '@ethersproject/bignumber';
-import { getContractAt } from '../../../web3/contract';
 import ERC20Abi from '../../../web3/abi/ERC20.json';
 import { BigNumber } from 'ethers';
 import { Chain, PrismaPoolStakingType } from '@prisma/client';
+import { AllNetworkConfigs } from '../../../network/network-config';
+import { getContractAtForNetwork } from '../../../web3/contract';
 
 const FARM_EMISSIONS_PERCENT = 0.872;
 
@@ -77,7 +78,11 @@ export const syncMasterchefStakingForPools = async (
         if (farm.rewarder) {
             for (const rewardToken of farm.rewarder.rewardTokens || []) {
                 const id = `${farmId}-${farm.rewarder.id}-${rewardToken.token}`;
-                const erc20Token = await getContractAt(rewardToken.token, ERC20Abi);
+                const erc20Token = await getContractAtForNetwork(
+                    rewardToken.token,
+                    ERC20Abi,
+                    AllNetworkConfigs[chain].provider,
+                );
                 const rewardBalance: BigNumber = await erc20Token.balanceOf(farm.rewarder.id);
                 const rewardPerSecond = rewardBalance.gt(0)
                     ? formatFixed(rewardToken.rewardPerSecond, rewardToken.decimals)

@@ -1,11 +1,16 @@
 import { Contract } from '@ethersproject/contracts';
 import { BigNumber } from '@ethersproject/bignumber';
 import abi from './abi/balancerTokenAdmin.json';
-import { networkContext } from '../network/network-context.service';
+import { Chain } from '@prisma/client';
+import { AllNetworkConfigsKeyedOnChain } from '../network/network-config';
 
-export async function getInflationRate(): Promise<BigNumber> {
-    if (networkContext.isMainnet) {
-        const tokenAdmin = new Contract(networkContext.data.balancer.v2.tokenAdmin!, abi, networkContext.provider);
+export async function getInflationRate(chain: Chain): Promise<BigNumber> {
+    if (chain === 'MAINNET') {
+        const tokenAdmin = new Contract(
+            AllNetworkConfigsKeyedOnChain[chain].data.balancer.v2.tokenAdmin!,
+            abi,
+            AllNetworkConfigsKeyedOnChain[chain].provider,
+        );
         const inflationRate = await tokenAdmin.getInflationRate();
         return inflationRate;
     } else {

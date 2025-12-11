@@ -190,6 +190,11 @@ export default <NetworkData>{
             aave: {
                 markets: [AaveV3Plasma],
             },
+            euler: {
+                chain: 'PLASMA',
+                url: 'https://raw.githubusercontent.com/euler-xyz/euler-labels/refs/heads/master/9745/vaults.json',
+                lens: '0xc55f6e262FE21Da068ece5D3fa015D8451bAf625',
+            },
         },
     },
     multicall: '0xca11bde05977b3631167028862be2a173976ca11',

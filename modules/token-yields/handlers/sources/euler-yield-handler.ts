@@ -51,7 +51,7 @@ export const eulerYieldHandler: TokenYieldHandler = async (config: { chain: Chai
                 },
                 select: { address: true },
             })
-            .then((pts) => pts.map((pt) => pt.address));
+            .then((pts) => [...new Set(pts.map((pt) => pt.address))]);
 
         // query the required data for each vault on chain
         const calls: Multicaller3Call[] = [];

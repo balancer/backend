@@ -7,7 +7,6 @@ import {
 import { env } from '../env';
 import { AllNetworkConfigs } from '../../modules/network/network-config';
 import { DeploymentEnv, WorkerJob } from '../../modules/network/network-config-types';
-import { networkContext } from '../../modules/network/network-context.service';
 import { secondsPerDay } from '../../modules/common/time';
 import { sleep } from '../../modules/common/promise';
 import { cronsMetricPublisher, subgraphMetricPublisher } from '../../modules/metrics/metrics.client';
@@ -104,8 +103,10 @@ async function createCronAlertsIfNotExist(chainId: string, jobs: WorkerJob[]): P
                 periodInSeconds * evaluationPeriods
             } seconds.`,
             ActionsEnabled: true,
-            AlarmActions: [networkContext.data.monitoring[env.DEPLOYMENT_ENV as DeploymentEnv].alarmTopicArn],
-            OKActions: [networkContext.data.monitoring[env.DEPLOYMENT_ENV as DeploymentEnv].alarmTopicArn],
+            AlarmActions: [
+                AllNetworkConfigs[chainId].data.monitoring[env.DEPLOYMENT_ENV as DeploymentEnv].alarmTopicArn,
+            ],
+            OKActions: [AllNetworkConfigs[chainId].data.monitoring[env.DEPLOYMENT_ENV as DeploymentEnv].alarmTopicArn],
             MetricName: `${cronJob.name}-${chainId}-done`,
             Statistic: 'Sum',
             Dimensions: [{ Name: 'Environment', Value: env.DEPLOYMENT_ENV }],
@@ -178,8 +179,10 @@ async function createSubgraphLagAlertsIfNotExist(
                 (EVALUATION_PERIOD * EVALUATION_PERIODS) / 60
             } minutes`,
             ActionsEnabled: true,
-            AlarmActions: [networkContext.data.monitoring[env.DEPLOYMENT_ENV as DeploymentEnv].alarmTopicArn],
-            OKActions: [networkContext.data.monitoring[env.DEPLOYMENT_ENV as DeploymentEnv].alarmTopicArn],
+            AlarmActions: [
+                AllNetworkConfigs[chainId].data.monitoring[env.DEPLOYMENT_ENV as DeploymentEnv].alarmTopicArn,
+            ],
+            OKActions: [AllNetworkConfigs[chainId].data.monitoring[env.DEPLOYMENT_ENV as DeploymentEnv].alarmTopicArn],
             MetricName: metricName,
             Statistic: 'Maximum',
             Dimensions: [{ Name: 'Environment', Value: env.DEPLOYMENT_ENV }],
