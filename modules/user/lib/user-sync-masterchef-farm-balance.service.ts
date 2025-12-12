@@ -4,7 +4,7 @@ import _ from 'lodash';
 import { prisma } from '../../../prisma/prisma-client';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { AmountHumanReadable } from '../../common/global-types';
-import MasterChefAbi from '../../web3/abi/MasterChef.json';
+import MasterChefAbi from '../../web3/abi/MasterChef';
 import { UserStakedBalanceService } from '../user-types';
 import { PrismaPoolStakingType } from '@prisma/client';
 import { BALANCES_SYNC_BLOCKS_MARGIN } from '../../../config';

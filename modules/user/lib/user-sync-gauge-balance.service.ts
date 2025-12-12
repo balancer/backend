@@ -3,7 +3,7 @@ import { prisma } from '../../../prisma/prisma-client';
 import _ from 'lodash';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { Chain, PrismaPoolStakingType } from '@prisma/client';
-import ERC20Abi from '../../web3/abi/ERC20.json';
+import ERC20Abi from '../../web3/abi/ERC20';
 import { formatEther, parseAbi, zeroAddress } from 'viem';
 import { getEvents } from '../../web3/events';
 import { GaugeSubgraphService } from '../../subgraphs/gauge-subgraph/gauge-subgraph.service';
