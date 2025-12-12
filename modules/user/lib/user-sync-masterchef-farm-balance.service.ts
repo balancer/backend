@@ -4,11 +4,6 @@ import _ from 'lodash';
 import { prisma } from '../../../prisma/prisma-client';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { AmountHumanReadable } from '../../common/global-types';
-import {
-    FarmUserFragment,
-    OrderDirection,
-    User_OrderBy,
-} from '../../subgraphs/masterchef-subgraph/generated/masterchef-subgraph-types';
 import { getContractAtForNetwork } from '../../web3/contract';
 import { Multicaller } from '../../web3/multicaller';
 import { BeethovenxMasterChef } from '../../web3/types/BeethovenxMasterChef';
