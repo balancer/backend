@@ -20,7 +20,6 @@ extend type Query {
 
 extend type Mutation {
     userInitWalletBalancesForAllPools(chain: GqlChain): String!
-    userInitWalletBalancesForPool(poolId: String!): String!
     userSyncChangedWalletBalancesForAllPools: String!
 
     userInitStakedBalances(stakingTypes: [GqlPoolStakingType!]!): String!

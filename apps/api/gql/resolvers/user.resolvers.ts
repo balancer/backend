@@ -78,21 +78,6 @@ const resolvers: Resolvers = {
 
             return 'success';
         },
-        userInitWalletBalancesForPool: async (parent, { poolId }, context) => {
-            isAdminRoute(context);
-
-            const chain = headerChain();
-
-            if (!chain) {
-                throw new GraphQLError('Provide "chainId" header', {
-                    extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
-                });
-            }
-
-            await userService.initWalletBalancesForPool(poolId, chain);
-
-            return 'success';
-        },
         userInitStakedBalances: async (parent, { stakingTypes }, context) => {
             isAdminRoute(context);
             const chain = headerChain() || 'MAINNET';
