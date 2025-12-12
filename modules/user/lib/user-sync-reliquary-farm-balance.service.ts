@@ -2,7 +2,7 @@ import { addressesMatch } from '../../web3/addresses';
 import { formatFixed } from '@ethersproject/bignumber';
 import { zeroAddress as ZERO_ADDRESS } from 'viem';
 import { Chain, PrismaPoolStakingType } from '@prisma/client';
-import { BigNumber, Event } from 'ethers';
+import { Event } from 'ethers';
 import _ from 'lodash';
 import { prisma } from '../../../prisma/prisma-client';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
@@ -18,28 +18,28 @@ import { getViemClient } from '../../sources/viem-client';
 import { Multicaller3Viem } from '../../web3/multicaller-viem';
 
 type ReliquaryPosition = {
-    amount: BigNumber;
-    rewardDebt: BigNumber;
-    rewardCredit: BigNumber;
-    entry: BigNumber;
-    poolId: BigNumber;
-    level: BigNumber;
+    amount: bigint;
+    rewardDebt: bigint;
+    rewardCredit: bigint;
+    entry: bigint;
+    poolId: bigint;
+    level: bigint;
 };
 
 type BalanceChangedEvent = Event & {
     args: {
-        pid: BigNumber;
-        amount: BigNumber;
+        pid: bigint;
+        amount: bigint;
         to: string;
-        relicId: BigNumber;
+        relicId: bigint;
     };
 };
 
 type RelicManagementEvent = Event & {
     args: {
-        fromId: BigNumber;
+        fromId: bigint;
         toId: string;
-        amount: BigNumber;
+        amount: bigint;
     };
 };
 
@@ -47,7 +47,7 @@ type TransferEvent = Event & {
     args: {
         from: string;
         to: string;
-        tokenId: BigNumber;
+        tokenId: bigint;
     };
 };
 
@@ -245,13 +245,7 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
             startBlock,
             endBlock,
             [reliquaryAddress],
-            [
-                '0x9a2a1e97e6d641080089aafc36750cfdef4c79f8b3ace6fa4c384fa2f0476959',
-                '0x191a58d19a6a9b76e2e91bdc04ecbe7553dc094a5ad7af78175a0d9f884e264a',
-                '0x6aaee64d11e8979fa392cd6388058c820f43709933f6a297e6e1005dddca62d6',
-                '0xda2a03409498a5fe8db3da030754afa618bc2228c0517ec5fa8c9b052979e9ea',
-                'Transfer',
-            ],
+            ['Transfer', 'Deposit', 'Withdraw', 'EmergencyWithdraw', 'Shift'],
             networkConfig.data.rpcUrl,
             networkConfig.data.rpcMaxBlockRange,
             ReliquaryAbi,
@@ -274,13 +268,9 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
             (event) =>
                 event.topics.length > 0 &&
                 [
-                    //split topic is not needed, we find the affected user in the transfer events
-                    // '0xcf0974dfd867840133a0d4b02f1672f24017796fb8892d1e0d587692e4da90ab',
-                    //merge topic is not needed, we find the affected user in the transfer events
-                    // '0x285dbc28e663286c77e3cd79d1cf1525744b4dfe015f41295fe5ae2858880bdf',
                     //shift topic needs to be inspected since we only now sender and the two relic ids, could be different receiving user
                     '0xda2a03409498a5fe8db3da030754afa618bc2228c0517ec5fa8c9b052979e9ea',
-                ].includes(event.event!),
+                ].includes(event.topics[0]),
         ) as RelicManagementEvent[];
 
         const transferEvents = viemEvents.filter((event) => event.event === 'Transfer') as TransferEvent[];
@@ -326,11 +316,10 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
         });
 
         // we get a tuple with an array of relicIds and the corresponding positions array
-        const updatedPositions: { [userAddress: string]: [BigNumber[], ReliquaryPosition[]] } =
-            await multicall3.execute();
+        const updatedPositions: { [userAddress: string]: [bigint[], ReliquaryPosition[]] } = await multicall3.execute();
         // for each user we have to sum up all balances of a specific farm, so we key on user + farmId
         const userFarmBalances: {
-            [userFarm: string]: { userAddress: string; farmId: string; amount: BigNumber };
+            [userFarm: string]: { userAddress: string; farmId: string; amount: bigint };
         } = {};
 
         // we only care for the user address and all positions, we can ignore the relicIds array
@@ -339,13 +328,13 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
                 userFarmBalances[userAddress] = {
                     userAddress,
                     farmId: '0',
-                    amount: BigNumber.from(0),
+                    amount: 0n,
                 };
             }
             positions.forEach((position) => {
                 const key = `${userAddress}-${position.poolId}`;
                 if (key in userFarmBalances) {
-                    userFarmBalances[key].amount = userFarmBalances[key].amount.add(position.amount);
+                    userFarmBalances[key].amount = userFarmBalances[key].amount + position.amount;
                 } else {
                     userFarmBalances[key] = {
                         userAddress,
