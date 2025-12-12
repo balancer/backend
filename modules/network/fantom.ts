@@ -1,4 +1,3 @@
-import { ethers } from 'ethers';
 import { NetworkConfig, NetworkData } from './network-config-types';
 import { UserSyncMasterchefFarmBalanceService } from '../user/lib/user-sync-masterchef-farm-balance.service';
 import { UserSyncReliquaryFarmBalanceService } from '../user/lib/user-sync-reliquary-farm-balance.service';
@@ -9,7 +8,6 @@ const fantomNetworkData: NetworkData = config.FANTOM;
 
 export const fantomNetworkConfig: NetworkConfig = {
     data: fantomNetworkData,
-    provider: new ethers.providers.JsonRpcProvider({ url: fantomNetworkData.rpcUrl, timeout: 60000 }),
     userStakedBalanceServices: [
         new UserSyncMasterchefFarmBalanceService(
             fantomNetworkData.masterchef!.address,
