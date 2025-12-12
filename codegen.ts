@@ -40,11 +40,6 @@ const files = {
         documents: 'modules/subgraphs/balancer-subgraph/balancer-subgraph-queries.graphql',
         ...defaults.types,
     },
-    ['modules/subgraphs/masterchef-subgraph/generated/masterchef-subgraph-types.ts']: {
-        schema: config.FANTOM.subgraphs.masterchef,
-        documents: 'modules/subgraphs/masterchef-subgraph/masterchef-subgraph-queries.graphql',
-        ...defaults.types,
-    },
     ['modules/subgraphs/reliquary-subgraph/generated/reliquary-subgraph-types.ts']: {
         schema: config.FANTOM.subgraphs.reliquary,
         documents: 'modules/subgraphs/reliquary-subgraph/reliquary-subgraph-queries.graphql',

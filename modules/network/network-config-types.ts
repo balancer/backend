@@ -1,13 +1,11 @@
 import type { Chain } from '@prisma/client';
 import type { UserStakedBalanceService } from '../user/user-types';
-import type { BaseProvider } from '@ethersproject/providers';
 import type { GqlChain, GqlHookType } from '../../apps/api/gql/generated-schema';
 import { AprHandlerConfigs } from '../aprs/handlers/types';
 
 export interface NetworkConfig {
     data: NetworkData;
     userStakedBalanceServices: UserStakedBalanceService[];
-    provider: BaseProvider;
     workerJobs: WorkerJob[];
 }
 
@@ -50,7 +48,6 @@ export interface NetworkData {
         balancer: string;
         balancerV3?: string;
         balancerPoolsV3?: string;
-        masterchef?: string;
         reliquary?: string;
         sftmx?: string;
         sts?: string;

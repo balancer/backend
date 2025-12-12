@@ -6,10 +6,6 @@ export class BeetsService {
     public async getFbeetsRatio(): Promise<string> {
         return this.fBeetsService.getRatio();
     }
-
-    public async syncFbeetsRatio(): Promise<void> {
-        return this.fBeetsService.syncRatio();
-    }
 }
 
 export const beetsService = new BeetsService(new FbeetsService());

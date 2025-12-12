@@ -1,19 +1,19 @@
-import { Contract } from '@ethersproject/contracts';
-import { BigNumber } from '@ethersproject/bignumber';
-import abi from './abi/balancerTokenAdmin.json';
+import abi from './abi/balancerTokenAdmin';
 import { Chain } from '@prisma/client';
 import { AllNetworkConfigsKeyedOnChain } from '../network/network-config';
+import { getViemClient } from '../sources/viem-client';
 
-export async function getInflationRate(chain: Chain): Promise<BigNumber> {
+export async function getInflationRate(chain: Chain): Promise<bigint> {
     if (chain === 'MAINNET') {
-        const tokenAdmin = new Contract(
-            AllNetworkConfigsKeyedOnChain[chain].data.balancer.v2.tokenAdmin!,
-            abi,
-            AllNetworkConfigsKeyedOnChain[chain].provider,
-        );
-        const inflationRate = await tokenAdmin.getInflationRate();
+        const viemClient = getViemClient(chain);
+        const inflationRate = await viemClient.readContract({
+            address: AllNetworkConfigsKeyedOnChain[chain].data.balancer.v2.tokenAdmin! as `0x${string}`,
+            abi: abi,
+            functionName: 'getInflationRate',
+        });
+
         return inflationRate;
     } else {
-        return BigNumber.from(0);
+        return 0n;
     }
 }

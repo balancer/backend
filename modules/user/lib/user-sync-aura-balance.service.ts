@@ -4,7 +4,7 @@ import _, { add } from 'lodash';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { formatFixed } from '@ethersproject/bignumber';
 import { Chain, PrismaPoolStakingType } from '@prisma/client';
-import ERC20Abi from '../../web3/abi/ERC20.json';
+import ERC20Abi from '../../web3/abi/ERC20';
 import { AuraSubgraphService } from '../../sources/subgraphs/aura/aura.service';
 import { formatEther, hexToBigInt } from 'viem';
 import { getViemClient } from '../../sources/viem-client';

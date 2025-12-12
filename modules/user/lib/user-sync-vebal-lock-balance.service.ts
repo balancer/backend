@@ -6,7 +6,7 @@ import { formatFixed } from '@ethersproject/bignumber';
 import { PrismaPoolStakingType } from '@prisma/client';
 import { veBalLocksSubgraphService } from '../../subgraphs/veBal-locks-subgraph/veBal-locks-subgraph.service';
 import { BigNumber } from 'ethers';
-import VeBalABI from '../../vebal/abi/vebal.json';
+import VeBalABI from '../../vebal/abi/vebal';
 import mainnet from '../../../config/mainnet';
 import { Multicaller3Viem } from '../../web3/multicaller-viem';
 

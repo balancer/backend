@@ -48,13 +48,6 @@ const beetsResolvers: Resolvers = {
         },
     },
     Mutation: {
-        beetsSyncFbeetsRatio: async (parent, {}, context) => {
-            isAdminRoute(context);
-
-            await beetsService.syncFbeetsRatio();
-
-            return 'success';
-        },
         beetsPoolLoadReliquarySnapshotsForAllFarms: async (parent, { chain }, context) => {
             isAdminRoute(context);
 

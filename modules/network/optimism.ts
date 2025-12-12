@@ -1,4 +1,3 @@
-import { ethers } from 'ethers';
 import { NetworkConfig, NetworkData } from './network-config-types';
 import { UserSyncGaugeBalanceService } from '../user/lib/user-sync-gauge-balance.service';
 import config from '../../config';
@@ -16,7 +15,6 @@ const optimismNetworkData: NetworkData = config.OPTIMISM;
 
 export const optimismNetworkConfig: NetworkConfig = {
     data: optimismNetworkData,
-    provider: new ethers.providers.JsonRpcProvider({ url: optimismNetworkData.rpcUrl, timeout: 60000 }),
     userStakedBalanceServices: [new UserSyncGaugeBalanceService(), new UserSyncAuraBalanceService()],
     workerJobs: [
         ...activeChainWorkerJobsGeneric,
