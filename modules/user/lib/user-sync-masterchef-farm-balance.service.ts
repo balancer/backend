@@ -13,6 +13,9 @@ import { PrismaPoolStakingType } from '@prisma/client';
 import { BALANCES_SYNC_BLOCKS_MARGIN } from '../../../config';
 import { AllNetworkConfigsKeyedOnChain } from '../../network/network-config';
 import { getViemClient } from '../../sources/viem-client';
+import { getEvents } from '../../web3/events';
+import { ne } from '@faker-js/faker';
+import { Multicaller3Viem } from '../../web3/multicaller-viem';
 
 export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceService {
     constructor(private readonly masterchefAddress: string, private readonly excludedFarmIds: string[]) {}
@@ -115,42 +118,43 @@ export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceSe
         const chain = 'FANTOM';
         const networkConfig = AllNetworkConfigsKeyedOnChain[chain];
 
-        const contract: BeethovenxMasterChef = getContractAtForNetwork(
-            masterChefAddress,
-            MasterChefAbi,
-            networkConfig.provider,
-        );
-        const events = await contract.queryFilter({ address: masterChefAddress }, startBlock, endBlock);
-        const filteredEvents = events.filter((event) =>
-            ['Deposit', 'Withdraw', 'EmergencyWithdraw'].includes(event.event!),
-        );
-
-        const multicall = new Multicaller(networkConfig.data.multicall, networkConfig.provider, MasterChefAbi);
         let response: {
             [farmId: string]: { [userAddress: string]: [BigNumber, BigNumber] };
         } = {};
 
-        for (const event of filteredEvents) {
-            multicall.call(`${event.args?.pid}.${event.args?.user}`, masterChefAddress, 'userInfo', [
+        const viemEvents = await getEvents(
+            startBlock,
+            endBlock,
+            [masterChefAddress],
+            ['Deposit', 'Withdraw', 'EmergencyWithdraw'],
+            networkConfig.data.rpcUrl,
+            networkConfig.data.rpcMaxBlockRange,
+            MasterChefAbi,
+        );
+
+        const multicall3 = new Multicaller3Viem(chain, MasterChefAbi);
+
+        for (const event of viemEvents) {
+            multicall3.call(`${event.args?.pid}.${event.args?.user}`, masterChefAddress, 'userInfo', [
                 event.args?.pid,
                 event.args?.user,
             ]);
 
             if (event.args?.user !== event.args?.to) {
                 //need to also update the amount for the to address
-                multicall.call(`${event.args?.pid}.${event.args?.to}`, masterChefAddress, 'userInfo', [
+                multicall3.call(`${event.args?.pid}.${event.args?.to}`, masterChefAddress, 'userInfo', [
                     event.args?.pid,
                     event.args?.to,
                 ]);
             }
 
-            if (multicall.numCalls >= 100) {
-                response = _.merge(response, await multicall.execute());
+            if (multicall3.numCalls >= 100) {
+                response = _.merge(response, await multicall3.execute());
             }
         }
 
-        if (multicall.numCalls > 0) {
-            response = _.merge(response, await multicall.execute());
+        if (multicall3.numCalls > 0) {
+            response = _.merge(response, await multicall3.execute());
         }
 
         return _.map(response, (farmData, farmId) => {
