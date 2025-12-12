@@ -10,9 +10,10 @@ import { getContractAtForNetwork } from '../web3/contract';
 import { AmountHumanReadable } from '../common/global-types';
 import { GqlVeBalBalance, GqlVeBalUserData } from '../../apps/api/gql/generated-schema';
 import mainnet from '../../config/mainnet';
-import VeBalABI from './abi/vebal.json';
+import VeBalABI from './abi/vebal';
 import { Chain } from '@prisma/client';
 import { AllNetworkConfigsKeyedOnChain } from '../network/network-config';
+import { Multicaller3Viem } from '../web3/multicaller-viem';
 
 export class VeBalService {
     public async getVeBalUserBalance(chain: Chain, userAddress: string): Promise<AmountHumanReadable> {
@@ -112,11 +113,7 @@ export class VeBalService {
         let operations: any[] = [];
         // for mainnet, we get the vebal balance form the vebal contract
         if (chain === 'MAINNET') {
-            const multicall = new Multicaller(
-                AllNetworkConfigsKeyedOnChain[chain].data.multicall,
-                AllNetworkConfigsKeyedOnChain[chain].provider,
-                VeBalABI,
-            );
+            const multicall3 = new Multicaller3Viem('MAINNET', VeBalABI);
 
             let response = {} as {
                 [userAddress: string]: {
@@ -126,13 +123,13 @@ export class VeBalService {
             };
 
             for (const holder of subgraphVeBalHolders) {
-                multicall.call(
+                multicall3.call(
                     `${holder.user}.balance`,
                     AllNetworkConfigsKeyedOnChain[chain].data.veBal!.address,
                     'balanceOf',
                     [holder.user],
                 );
-                multicall.call(
+                multicall3.call(
                     `${holder.user}.locked`,
                     AllNetworkConfigsKeyedOnChain[chain].data.veBal!.address,
                     'locked',
@@ -140,13 +137,13 @@ export class VeBalService {
                 );
 
                 // so if we scheduled more than 100 calls, we execute the batch
-                if (multicall.numCalls >= 100) {
-                    response = _.merge(response, await multicall.execute());
+                if (multicall3.numCalls >= 100) {
+                    response = _.merge(response, await multicall3.execute());
                 }
             }
 
-            if (multicall.numCalls > 0) {
-                response = _.merge(response, await multicall.execute());
+            if (multicall3.numCalls > 0) {
+                response = _.merge(response, await multicall3.execute());
             }
 
             for (const veBalHolder in response) {
