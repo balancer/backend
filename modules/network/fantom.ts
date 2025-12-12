@@ -12,8 +12,6 @@ export const fantomNetworkConfig: NetworkConfig = {
     provider: new ethers.providers.JsonRpcProvider({ url: fantomNetworkData.rpcUrl, timeout: 60000 }),
     userStakedBalanceServices: [
         new UserSyncMasterchefFarmBalanceService(
-            fantomNetworkData.fbeets!.address,
-            fantomNetworkData.fbeets!.farmId,
             fantomNetworkData.masterchef!.address,
             fantomNetworkData.masterchef!.excludedFarmIds,
         ),
