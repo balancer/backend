@@ -2,7 +2,6 @@ import { ethers } from 'ethers';
 import { NetworkConfig, NetworkData } from './network-config-types';
 import { UserSyncMasterchefFarmBalanceService } from '../user/lib/user-sync-masterchef-farm-balance.service';
 import { UserSyncReliquaryFarmBalanceService } from '../user/lib/user-sync-reliquary-farm-balance.service';
-import { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
 import config from '../../config';
 import { deprecatedChainWorkerJobs, sftmxWorkerJobs } from './worker-jobs';
 
@@ -20,11 +19,5 @@ export const fantomNetworkConfig: NetworkConfig = {
         ),
         new UserSyncReliquaryFarmBalanceService(fantomNetworkData.reliquary!.address),
     ],
-    services: {
-        balancerSubgraphService: new BalancerSubgraphService(
-            fantomNetworkData.subgraphs.balancer,
-            fantomNetworkData.chain.prismaId,
-        ),
-    },
     workerJobs: [...deprecatedChainWorkerJobs, ...sftmxWorkerJobs],
 };
