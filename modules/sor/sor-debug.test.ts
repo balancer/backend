@@ -9,7 +9,7 @@ import { formatUnits } from 'viem';
 describe('sor debugging', () => {
     it('sor v2', async () => {
         const useProtocolVersion = 2;
-        const chain = Chain.SONIC;
+        const chain = Chain.BASE;
 
         const chainId = Object.keys(chainIdToChain).find((key) => chainIdToChain[key] === chain) as string;
         initRequestScopedContext();
@@ -18,22 +18,26 @@ describe('sor debugging', () => {
         // only do once before starting to debug
         // bun task sor-sync-v2 {chainId}
 
-        const swapType = 'EXACT_OUT';
-        const swapKind: SwapKind = SwapKind.GivenOut;
+        const swapType = 'EXACT_IN';
+        const swapKind: SwapKind = SwapKind.GivenIn;
 
         const swaps = await sorService.getSorSwapPaths({
             chain,
-            tokenIn: '0x039e2fb66102314ce7b64ce5ce3e5183bc94ad38', // wS
-            tokenOut: '0xe5da20f15420ad15de0fa650600afc998bbe3955', // stS
+            tokenIn: '0x4200000000000000000000000000000000000006', // wETH
+            tokenOut: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913', // USDC
             swapType,
-            swapAmount: '100000',
+            swapAmount: '0.009',
             useProtocolVersion,
             // callDataInput: {
             //     receiver: '0xb5e6b895734409Df411a052195eb4EE7e40d8696',
             //     sender: '0xb5e6b895734409Df411a052195eb4EE7e40d8696',
             //     slippagePercentage: '0.1',
             // },
-            // poolIds: ['0x40d2cbc586dd8df50001cdba3f65cd4bbc32d596000200000000000000000154'],
+            poolIds: [
+                        "0x2db50a0e0310723ef0c2a165cb9a9f80d772ba2f00020000000000000000000d",
+                        "0x6fbfcf88db1aada31f34215b2a1df7fafb4883e900000000000000000000000c",
+                        "0x8f360baf899845441eccdc46525e26bb8860752a0002000000000000000001cd"
+                    ],
         });
 
         console.log('protocol version', swaps.protocolVersion);
