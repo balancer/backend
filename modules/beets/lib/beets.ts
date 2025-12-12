@@ -1,8 +1,8 @@
-import { utils } from 'ethers';
-import beetsAbi from '../abi/BeethovenxToken.json';
-import { getContractAtForNetwork } from '../../web3/contract';
-import { AllNetworkConfigs, AllNetworkConfigsKeyedOnChain } from '../../network/network-config';
+import beetsAbi from '../../sources/contracts/abis/ERC20';
+import { AllNetworkConfigsKeyedOnChain } from '../../network/network-config';
 import { Chain } from '@prisma/client';
+import { getViemClient } from '../../sources/viem-client';
+import { formatEther, parseEther } from 'viem';
 
 const NON_CIRCULATING_ADDRESSES = [
     '0xa2503804ec837d1e4699932d58a3bdb767dea505', //team linear vesting
@@ -22,49 +22,44 @@ const NON_CIRCULATING_ADDRESSES_SONIC = [
 ];
 
 export async function beetsGetCirculatingSupply(chain: Chain) {
-    const beetsContract = getContractAtForNetwork(
-        AllNetworkConfigsKeyedOnChain[chain].data.beets!.address,
-        beetsAbi,
-        AllNetworkConfigsKeyedOnChain[chain].provider,
-    );
+    const viemClient = getViemClient(chain);
 
-    let totalSupply = await beetsContract.totalSupply();
+    let totalSupply = parseEther(await beetsGetTotalSupply(chain));
 
-    for (const address of NON_CIRCULATING_ADDRESSES) {
-        const balance = await beetsContract.balanceOf(address);
-        totalSupply = totalSupply.sub(balance);
+    if (chain === 'FANTOM') {
+        for (const address of NON_CIRCULATING_ADDRESSES) {
+            const balance = await viemClient.readContract({
+                address: AllNetworkConfigsKeyedOnChain[chain].data.beets!.address as `0x${string}`,
+                abi: beetsAbi,
+                functionName: 'balanceOf',
+                args: [address as `0x${string}`],
+            });
+            totalSupply = totalSupply - balance;
+        }
+    } else {
+        for (const address of NON_CIRCULATING_ADDRESSES_SONIC) {
+            const balance = await viemClient.readContract({
+                address: AllNetworkConfigsKeyedOnChain[chain].data.beets!.address as `0x${string}`,
+                abi: beetsAbi,
+                functionName: 'balanceOf',
+                args: [address as `0x${string}`],
+            });
+            totalSupply = totalSupply - balance;
+        }
     }
 
-    return utils.formatUnits(totalSupply);
+    return formatEther(totalSupply);
 }
 
-export async function beetsGetCirculatingSupplySonic(chain: Chain) {
-    const sonicNetworkConfig = AllNetworkConfigsKeyedOnChain[chain];
-    const beetsContract = getContractAtForNetwork(
-        sonicNetworkConfig.data.beets!.address,
-        beetsAbi,
-        sonicNetworkConfig.provider,
-    );
+export async function beetsGetTotalSupply(chain: Chain) {
+    const viemClient = getViemClient(chain);
+    const address = AllNetworkConfigsKeyedOnChain[chain].data.beets!.address as `0x${string}`;
 
-    let totalSupply = await beetsContract.totalSupply();
+    let totalSupply = await viemClient.readContract({
+        address: address,
+        abi: beetsAbi,
+        functionName: 'totalSupply',
+    });
 
-    for (const address of NON_CIRCULATING_ADDRESSES_SONIC) {
-        const balance = await beetsContract.balanceOf(address);
-        totalSupply = totalSupply.sub(balance);
-    }
-
-    return utils.formatUnits(totalSupply);
-}
-
-export async function beetsGetTotalSupplySonic(chain: Chain) {
-    const sonicNetworkConfig = AllNetworkConfigsKeyedOnChain[chain];
-    const beetsContract = getContractAtForNetwork(
-        sonicNetworkConfig.data.beets!.address,
-        beetsAbi,
-        sonicNetworkConfig.provider,
-    );
-
-    let totalSupply = await beetsContract.totalSupply();
-
-    return utils.formatUnits(totalSupply);
+    return formatEther(totalSupply);
 }
