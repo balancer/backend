@@ -128,13 +128,11 @@ export class ComposableStablePool implements BasePool {
 
         let tokenOutScale18: bigint;
         if (tIn.index === this.bptIndex) {
-            const amountInWithRate = swapAmount.mulDownFixed(tIn.rate);
-
             tokenOutScale18 = _calcTokenOutGivenExactBptIn(
                 this.amp,
                 [...balancesNoBpt],
                 this.skipBptIndex(tOut.index),
-                amountInWithRate.scale18,
+                swapAmount.scale18,
                 this.totalShares,
                 invariant,
                 this.swapFee,
