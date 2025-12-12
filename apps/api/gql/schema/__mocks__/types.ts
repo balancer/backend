@@ -592,43 +592,6 @@ export type GqlPoolBase = {
     withdrawConfig: GqlPoolWithdrawConfig;
 };
 
-export type GqlPoolBatchSwap = {
-    __typename?: 'GqlPoolBatchSwap';
-    chain: GqlChain;
-    id: Scalars['ID'];
-    swaps: Array<GqlPoolBatchSwapSwap>;
-    timestamp: Scalars['Int'];
-    tokenAmountIn: Scalars['String'];
-    tokenAmountOut: Scalars['String'];
-    tokenIn: Scalars['String'];
-    tokenInPrice: Scalars['Float'];
-    tokenOut: Scalars['String'];
-    tokenOutPrice: Scalars['Float'];
-    tx: Scalars['String'];
-    userAddress: Scalars['String'];
-    valueUSD: Scalars['Float'];
-};
-
-export type GqlPoolBatchSwapPool = {
-    __typename?: 'GqlPoolBatchSwapPool';
-    id: Scalars['ID'];
-    tokens: Array<Scalars['String']>;
-};
-
-export type GqlPoolBatchSwapSwap = {
-    __typename?: 'GqlPoolBatchSwapSwap';
-    id: Scalars['ID'];
-    pool: PoolForBatchSwap;
-    timestamp: Scalars['Int'];
-    tokenAmountIn: Scalars['String'];
-    tokenAmountOut: Scalars['String'];
-    tokenIn: Scalars['String'];
-    tokenOut: Scalars['String'];
-    tx: Scalars['String'];
-    userAddress: Scalars['String'];
-    valueUSD: Scalars['Float'];
-};
-
 export type GqlPoolComposableStable = GqlPoolBase & {
     __typename?: 'GqlPoolComposableStable';
     address: Scalars['Bytes'];
@@ -1120,11 +1083,6 @@ export type GqlPoolJoinExitAmount = {
     __typename?: 'GqlPoolJoinExitAmount';
     address: Scalars['String'];
     amount: Scalars['String'];
-};
-
-export type GqlPoolJoinExitFilter = {
-    chainIn?: InputMaybe<Array<GqlChain>>;
-    poolIdIn?: InputMaybe<Array<Scalars['String']>>;
 };
 
 export enum GqlPoolJoinExitType {
@@ -1818,13 +1776,6 @@ export type GqlPoolSwapEventV3 = GqlPoolEvent & {
     userAddress: Scalars['String'];
     /** The value of the event in USD. */
     valueUSD: Scalars['Float'];
-};
-
-export type GqlPoolSwapFilter = {
-    chainIn?: InputMaybe<Array<GqlChain>>;
-    poolIdIn?: InputMaybe<Array<Scalars['String']>>;
-    tokenInIn?: InputMaybe<Array<Scalars['String']>>;
-    tokenOutIn?: InputMaybe<Array<Scalars['String']>>;
 };
 
 export type GqlPoolTimePeriod = {
@@ -2911,7 +2862,6 @@ export type Mutation = {
     tokenSyncTokenDefinitions: Scalars['String'];
     userInitStakedBalances: Scalars['String'];
     userInitWalletBalancesForAllPools: Scalars['String'];
-    userInitWalletBalancesForPool: Scalars['String'];
     userSyncChangedStakedBalances: Scalars['String'];
     userSyncChangedWalletBalancesForAllPools: Scalars['String'];
     veBalSyncAllUserBalances: Scalars['String'];
@@ -2974,19 +2924,6 @@ export type MutationUserInitStakedBalancesArgs = {
 
 export type MutationUserInitWalletBalancesForAllPoolsArgs = {
     chain?: InputMaybe<GqlChain>;
-};
-
-export type MutationUserInitWalletBalancesForPoolArgs = {
-    poolId: Scalars['String'];
-};
-
-export type PoolForBatchSwap = {
-    __typename?: 'PoolForBatchSwap';
-    allTokens?: Maybe<Array<TokenForBatchSwapPool>>;
-    id: Scalars['String'];
-    name: Scalars['String'];
-    symbol: Scalars['String'];
-    type: GqlPoolType;
 };
 
 export type QuantAmmWeightedDetail = {
@@ -3344,12 +3281,4 @@ export type Token = {
     __typename?: 'Token';
     address: Scalars['String'];
     decimals: Scalars['Int'];
-};
-
-export type TokenForBatchSwapPool = {
-    __typename?: 'TokenForBatchSwapPool';
-    address: Scalars['String'];
-    isNested: Scalars['Boolean'];
-    isPhantomBpt: Scalars['Boolean'];
-    weight?: Maybe<Scalars['BigDecimal']>;
 };

@@ -1033,40 +1033,6 @@ export const schema = gql`
         withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
     }
 
-    type GqlPoolBatchSwap {
-        chain: GqlChain!
-        id: ID!
-        swaps: [GqlPoolBatchSwapSwap!]!
-        timestamp: Int!
-        tokenAmountIn: String!
-        tokenAmountOut: String!
-        tokenIn: String!
-        tokenInPrice: Float!
-        tokenOut: String!
-        tokenOutPrice: Float!
-        tx: String!
-        userAddress: String!
-        valueUSD: Float!
-    }
-
-    type GqlPoolBatchSwapPool {
-        id: ID!
-        tokens: [String!]!
-    }
-
-    type GqlPoolBatchSwapSwap {
-        id: ID!
-        pool: PoolForBatchSwap!
-        timestamp: Int!
-        tokenAmountIn: String!
-        tokenAmountOut: String!
-        tokenIn: String!
-        tokenOut: String!
-        tx: String!
-        userAddress: String!
-        valueUSD: Float!
-    }
-
     type GqlPoolComposableStable implements GqlPoolBase {
         address: Bytes!
         allTokens: [GqlPoolTokenExpanded!]! @deprecated(reason: "Use poolTokens instead")
@@ -1604,11 +1570,6 @@ export const schema = gql`
     type GqlPoolJoinExitAmount {
         address: String!
         amount: String!
-    }
-
-    input GqlPoolJoinExitFilter {
-        chainIn: [GqlChain!]
-        poolIdIn: [String!]
     }
 
     enum GqlPoolJoinExitType {
@@ -2515,13 +2476,6 @@ export const schema = gql`
         The value of the event in USD.
         """
         valueUSD: Float!
-    }
-
-    input GqlPoolSwapFilter {
-        chainIn: [GqlChain!]
-        poolIdIn: [String!]
-        tokenInIn: [String!]
-        tokenOutIn: [String!]
     }
 
     input GqlPoolTimePeriod {
@@ -4203,19 +4157,10 @@ export const schema = gql`
         tokenSyncTokenDefinitions: String!
         userInitStakedBalances(stakingTypes: [GqlPoolStakingType!]!): String!
         userInitWalletBalancesForAllPools(chain: GqlChain): String!
-        userInitWalletBalancesForPool(poolId: String!): String!
         userSyncChangedStakedBalances: String!
         userSyncChangedWalletBalancesForAllPools: String!
         veBalSyncAllUserBalances: String!
         veBalSyncTotalSupply: String!
-    }
-
-    type PoolForBatchSwap {
-        allTokens: [TokenForBatchSwapPool!]
-        id: String!
-        name: String!
-        symbol: String!
-        type: GqlPoolType!
     }
 
     type QuantAMMWeightedDetail {
@@ -4531,12 +4476,5 @@ export const schema = gql`
     type Token {
         address: String!
         decimals: Int!
-    }
-
-    type TokenForBatchSwapPool {
-        address: String!
-        isNested: Boolean!
-        isPhantomBpt: Boolean!
-        weight: BigDecimal
     }
 `;

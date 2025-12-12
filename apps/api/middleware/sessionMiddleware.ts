@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
-import { networkContext } from '../../../modules/network/network-context.service';
 import {
     initRequestScopedContext,
     setRequestScopedContextValue,
 } from '../../../modules/context/request-scoped-context';
+import { AllNetworkConfigs } from '../../../modules/network/network-config';
 
 function getHeader(req: Request, key: string): string | undefined {
     const value = req.headers[key.toLowerCase()];
@@ -13,7 +13,7 @@ function getHeader(req: Request, key: string): string | undefined {
 export async function sessionMiddleware(req: Request, res: Response, next: NextFunction) {
     const chainId = getHeader(req, 'ChainId');
 
-    if (chainId && networkContext.isValidChainId(chainId)) {
+    if (chainId && isValidChainId(chainId)) {
         initRequestScopedContext();
         setRequestScopedContextValue('chainId', chainId);
 
@@ -21,4 +21,8 @@ export async function sessionMiddleware(req: Request, res: Response, next: NextF
     } else {
         next();
     }
+}
+
+function isValidChainId(chainId: string) {
+    return !!AllNetworkConfigs[chainId];
 }

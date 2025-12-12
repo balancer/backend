@@ -1,10 +1,7 @@
 import type { Chain } from '@prisma/client';
-import type { PoolAprService } from '../pool/pool-types';
 import type { UserStakedBalanceService } from '../user/user-types';
 import type { BaseProvider } from '@ethersproject/providers';
 import type { GqlChain, GqlHookType } from '../../apps/api/gql/generated-schema';
-import type { BalancerSubgraphService } from '../subgraphs/balancer-subgraph/balancer-subgraph.service';
-import { SftmxSubgraphService } from '../sources/subgraphs/sftmx-subgraph/sftmx.service';
 import { AprHandlerConfigs } from '../aprs/handlers/types';
 
 export interface NetworkConfig {
@@ -12,12 +9,6 @@ export interface NetworkConfig {
     userStakedBalanceServices: UserStakedBalanceService[];
     provider: BaseProvider;
     workerJobs: WorkerJob[];
-    services: NetworkServices;
-}
-
-interface NetworkServices {
-    balancerSubgraphService: BalancerSubgraphService;
-    sftmxSubgraphService?: SftmxSubgraphService;
 }
 
 export interface WorkerJob {
