@@ -111,12 +111,13 @@ export class VeBalService {
         let operations: any[] = [];
         // for mainnet, we get the vebal balance form the vebal contract
         if (chain === 'MAINNET') {
+            console.log(`Fetching veBal balances from mainnet contract for ${subgraphVeBalHolders.length} holders`);
             const multicall3 = new Multicaller3Viem('MAINNET', VeBalABI);
 
             let response = {} as {
                 [userAddress: string]: {
                     balance: bigint;
-                    locked: bigint[];
+                    locked: { amount: bigint };
                 };
             };
 
@@ -135,7 +136,7 @@ export class VeBalService {
                 );
 
                 // so if we scheduled more than 100 calls, we execute the batch
-                if (multicall3.numCalls >= 100) {
+                if (multicall3.numCalls >= 500) {
                     response = _.merge(response, await multicall3.execute());
                 }
             }
@@ -148,7 +149,7 @@ export class VeBalService {
                 veBalHolders.push({
                     address: veBalHolder.toLowerCase(),
                     balance: formatEther(response[veBalHolder].balance),
-                    locked: formatEther(response[veBalHolder].locked[0]),
+                    locked: formatEther(response[veBalHolder].locked.amount),
                 });
             }
         } else {
