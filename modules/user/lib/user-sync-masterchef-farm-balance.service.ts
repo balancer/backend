@@ -4,9 +4,6 @@ import _ from 'lodash';
 import { prisma } from '../../../prisma/prisma-client';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { AmountHumanReadable } from '../../common/global-types';
-import { getContractAtForNetwork } from '../../web3/contract';
-import { Multicaller } from '../../web3/multicaller';
-import { BeethovenxMasterChef } from '../../web3/types/BeethovenxMasterChef';
 import MasterChefAbi from '../../web3/abi/MasterChef.json';
 import { UserStakedBalanceService } from '../user-types';
 import { PrismaPoolStakingType } from '@prisma/client';
@@ -14,7 +11,6 @@ import { BALANCES_SYNC_BLOCKS_MARGIN } from '../../../config';
 import { AllNetworkConfigsKeyedOnChain } from '../../network/network-config';
 import { getViemClient } from '../../sources/viem-client';
 import { getEvents } from '../../web3/events';
-import { ne } from '@faker-js/faker';
 import { Multicaller3Viem } from '../../web3/multicaller-viem';
 
 export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceService {
