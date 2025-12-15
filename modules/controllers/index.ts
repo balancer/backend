@@ -5,7 +5,7 @@ export * from './pool-mutation-controller';
 export * from './user-balances-controller';
 export * from './cow-amm-controller';
 export * from './event-query-controller';
-export * from './content-controller';
+export * from '../content/content-controller';
 export * from './fx-pools-controller';
 export * from './pool-controller';
 export * from './event-controller';

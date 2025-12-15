@@ -1,6 +1,5 @@
 import { prisma } from '../../../prisma/prisma-client';
 import { chainIdToChain } from '../../network/chain-id-to-chain';
-import { getBlockedBuffers } from '../../sources/github/pool-erc4626-buffer-blocklist';
 
 export const syncBlockedBuffers = async (): Promise<void> => {
     const blockedBuffers = await getBlockedBuffers();
@@ -24,4 +23,18 @@ export const syncBlockedBuffers = async (): Promise<void> => {
             }),
         ]);
     }
+};
+
+const ERC4626TAGS_URL =
+    'https://raw.githubusercontent.com/balancer/metadata/refs/heads/main/erc4626/bufferblocklist.json';
+
+type BufferBlocklist = {
+    [chainId: string]: string[];
+};
+
+const getBlockedBuffers = async (): Promise<BufferBlocklist> => {
+    const response = await fetch(ERC4626TAGS_URL);
+    const bufferBlocklist = (await response.json()) as BufferBlocklist;
+
+    return bufferBlocklist;
 };

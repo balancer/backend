@@ -1,7 +1,9 @@
 import { prisma } from '../../../prisma/prisma-client';
-import { getHookReviews } from '../../sources/github/hook-reviews';
 import { HookData } from '../../../prisma/prisma-types';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
+import { Chain } from '@prisma/client';
+import config from '../../../config';
+import { githubChainToChain } from './github-helper';
 
 export const syncHookReviews = async (): Promise<void> => {
     const hookReviews = await getHookReviews();
@@ -43,4 +45,34 @@ export const syncHookReviews = async (): Promise<void> => {
     }
 
     await prismaBulkExecuteOperations(operations, false);
+};
+
+const HOOK_REVIEW_URL = 'https://raw.githubusercontent.com/balancer/code-review/refs/heads/main/hooks/registry.json';
+
+interface HookReview {
+    [chain: string]: {
+        [hookAddress: string]: {
+            name: string;
+            description: string;
+            summary: string;
+            review: string;
+            warnings: string[];
+        };
+    };
+}
+
+const getHookReviews = async () => {
+    const response = await fetch(HOOK_REVIEW_URL);
+    const list = (await response.json()) as HookReview;
+
+    // Flatten the list by adding the chain and hook address to the object
+    const hooks = Object.keys(list).flatMap((chain) =>
+        Object.keys(list[chain]).map((hookAddress) => ({
+            ...list[chain][hookAddress],
+            chain: githubChainToChain[chain],
+            hookAddress,
+        })),
+    );
+
+    return hooks;
 };

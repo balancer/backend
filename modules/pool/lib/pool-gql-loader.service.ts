@@ -36,7 +36,6 @@ import _ from 'lodash';
 import { prisma } from '../../../prisma/prisma-client';
 import { Chain, Prisma, PrismaUserStakedBalance, PrismaUserWalletBalance } from '@prisma/client';
 import { fixedNumber } from '../../view-helpers/fixed-number';
-import { GithubContentService } from '../../content/github-content.service';
 import { ElementData, FxData, GyroData, StableData, QuantAmmWeightedData, ReclammData } from '../subgraph-mapper';
 import { LBPoolData } from '../pool-data';
 import { ZERO_ADDRESS } from '@balancer/sdk';
@@ -47,6 +46,7 @@ import { addressesMatch } from '../../web3/addresses';
 import { getWeightSnapshots } from '../../actions/quant-amm/get-weight-snapshots';
 import { mapPoolToken, enrichWithErc4626Data, mapAprItems } from './pool-gql-mapper-helper';
 import { AllNetworkConfigsKeyedOnChain } from '../../network/network-config';
+import { ContentController } from '../../controllers';
 
 const isToken = (text: string) => text.match(/^0x[0-9a-fA-F]{40}$/);
 const isPoolId = (text: string) => isToken(text) || text.match(/^0x[0-9a-fA-F]{64}$/);
@@ -300,8 +300,7 @@ export class PoolGqlLoaderService {
     }
 
     public async getFeaturedPools(chains: Chain[]): Promise<GqlPoolFeaturedPool[]> {
-        const githubContentService = new GithubContentService();
-        const featuredPoolsFromService = await githubContentService.getFeaturedPools(chains);
+        const featuredPoolsFromService = await ContentController().getFeaturedPools(chains);
 
         const featuredPools: GqlPoolFeaturedPool[] = [];
 
