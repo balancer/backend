@@ -3,7 +3,7 @@ import { prisma } from '../../../../../prisma/prisma-client';
 import { zeroAddress } from 'viem';
 import _ from 'lodash';
 import { balancesToDb } from './balances-to-db';
-import { getLastSyncedBlock } from '../../../last-synced-block';
+import { getLastSyncedBlock } from '../../../../actions/last-synced-block';
 import { BALANCES_SYNC_BLOCKS_MARGIN } from '../../../../../config';
 import { UserBalancesSubgraphClient } from '../../../../sources/subgraphs/types';
 import { getViemClient } from '../../../../sources/viem-client';

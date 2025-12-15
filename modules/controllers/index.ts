@@ -1,6 +1,5 @@
 export * from './snapshots-controller';
 export * from './pool-mutation-controller';
-export * from './user-balances-controller';
 export * from './cow-amm-controller';
 export * from './event-query-controller';
 export * from './fx-pools-controller';
