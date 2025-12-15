@@ -3,7 +3,6 @@ import { Express, NextFunction } from 'express';
 import { tokenService } from '../../modules/token/token.service';
 import { PricingService } from '../../modules/pricing/pricing-service';
 import { poolService } from '../../modules/pool/pool.service';
-import { userService } from '../../modules/user/user.service';
 import { datastudioService } from '../../modules/datastudio/datastudio.service';
 import { initRequestScopedContext, setRequestScopedContextValue } from '../../modules/context/request-scoped-context';
 import { veBalService } from '../../modules/vebal/vebal.service';
@@ -20,7 +19,6 @@ import {
     PoolController,
     EventController,
     StakingController,
-    UserBalancesController,
     QuantAmmController,
     TokenYieldsController,
 } from '../../modules/controllers';
@@ -34,6 +32,7 @@ import { LoopsService } from '../../modules/loops/service';
 import { ContentController } from '../../modules/content/content-controller';
 import { StakedSonicController } from '../../modules/sts/sts-controller';
 import { SftmxController } from '../../modules/sftmx/sftmx-controller';
+import { UserBalancesController } from '../../modules/user/user-balances-controller';
 
 const runningJobs: Set<string> = new Set();
 
@@ -119,7 +118,13 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
             await runIfNotAlreadyRunning(name, chainId, () => UserBalancesController().syncBalances(chain), res, next);
             break;
         case 'user-sync-staked-balances':
-            await runIfNotAlreadyRunning(name, chainId, () => userService.syncChangedStakedBalances(chain), res, next);
+            await runIfNotAlreadyRunning(
+                name,
+                chainId,
+                () => UserBalancesController().syncChangedStakedBalances(chain),
+                res,
+                next,
+            );
             break;
         case 'update-token-prices':
             await runIfNotAlreadyRunning(

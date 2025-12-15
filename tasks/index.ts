@@ -1,6 +1,5 @@
 import {
     SnapshotsController,
-    UserBalancesController,
     CowAmmController,
     FXPoolsController,
     PoolController,
@@ -21,11 +20,11 @@ import _ from 'lodash';
 import { AprService } from '../modules/aprs';
 import { PricingService } from '../modules/pricing';
 import { LoopsService } from '../modules/loops/service';
-import { userService } from '../modules/user/user.service';
 import { veBalService } from '../modules/vebal/vebal.service';
 import { ContentController } from '../modules/content/content-controller';
 import { SftmxController } from '../modules/sftmx/sftmx-controller';
 import { StakedSonicController } from '../modules/sts/sts-controller';
+import { UserBalancesController } from '../modules/user/user-balances-controller';
 
 /**
  * Used to run jobs or mutations locally from the command line
@@ -189,7 +188,7 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         await TokenYieldsController().fetchAndStoreAllYields();
         return 'OK';
     } else if (job === 'sync-staked-balances') {
-        await userService.syncChangedStakedBalances(chain);
+        await UserBalancesController().syncChangedStakedBalances(chain);
         return 'OK';
     } else if (job === 'sync-vebal-balances') {
         await veBalService.syncVeBalBalances(chain);
