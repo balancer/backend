@@ -1,20 +1,16 @@
 import {
-    SftmxController,
     SnapshotsController,
     UserBalancesController,
     CowAmmController,
-    ContentController,
     FXPoolsController,
     PoolController,
     EventController,
     StakingController,
-    StakedSonicController,
     TokenController,
     QuantAmmController,
     TokenYieldsController,
 } from '../modules/controllers';
 import { chainIdToChain } from '../modules/network/chain-id-to-chain';
-import { tokenService } from '../modules/token/token.service';
 import { VeBalVotingListService } from '../modules/vebal/vebal-voting-list.service';
 import { Chain, PrismaLastBlockSyncedCategory } from '@prisma/client';
 import { upsertLastSyncedBlock } from '../modules/actions/last-synced-block';
@@ -27,6 +23,9 @@ import { PricingService } from '../modules/pricing';
 import { LoopsService } from '../modules/loops/service';
 import { userService } from '../modules/user/user.service';
 import { veBalService } from '../modules/vebal/vebal.service';
+import { ContentController } from '../modules/content/content-controller';
+import { SftmxController } from '../modules/sftmx/sftmx-controller';
+import { StakedSonicController } from '../modules/sts/sts-controller';
 
 /**
  * Used to run jobs or mutations locally from the command line

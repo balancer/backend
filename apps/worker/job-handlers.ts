@@ -15,14 +15,11 @@ import { syncLatestFXPrices } from '../../modules/token/latest-fx-price';
 import { chainIdToChain } from '../../modules/network/chain-id-to-chain';
 import { Chain } from '@prisma/client';
 import {
-    SftmxController,
     CowAmmController,
     SnapshotsController,
-    ContentController,
     PoolController,
     EventController,
     StakingController,
-    StakedSonicController,
     UserBalancesController,
     QuantAmmController,
     TokenYieldsController,
@@ -34,10 +31,11 @@ import config from '../../config';
 import { LBPController } from '../../modules/controllers/lbp-controller';
 import { AprsController } from '../../modules/controllers/aprs-controller';
 import { LoopsService } from '../../modules/loops/service';
+import { ContentController } from '../../modules/content/content-controller';
+import { StakedSonicController } from '../../modules/sts/sts-controller';
+import { SftmxController } from '../../modules/sftmx/sftmx-controller';
 
 const runningJobs: Set<string> = new Set();
-
-const sftmxController = SftmxController();
 
 async function runIfNotAlreadyRunning(
     id: string,
@@ -256,13 +254,19 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
             );
             break;
         case 'sync-sftmx-staking-data':
-            await runIfNotAlreadyRunning(name, chainId, () => sftmxController.syncSftmxStakingData(chainId), res, next);
+            await runIfNotAlreadyRunning(
+                name,
+                chainId,
+                () => SftmxController().syncSftmxStakingData(chainId),
+                res,
+                next,
+            );
             break;
         case 'sync-sftmx-withdrawal-requests':
             await runIfNotAlreadyRunning(
                 name,
                 chainId,
-                () => sftmxController.syncSftmxWithdrawalrequests(chainId),
+                () => SftmxController().syncSftmxWithdrawalrequests(chainId),
                 res,
                 next,
             );

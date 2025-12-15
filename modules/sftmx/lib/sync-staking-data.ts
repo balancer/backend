@@ -1,7 +1,7 @@
-import { prisma } from '../../../prisma/prisma-client';
-import { fetchSftmxStakingData } from '../../sources/contracts/fetch-sftmx-staking-data';
 import { Address, formatEther } from 'viem';
 import { ViemClient } from '../../sources/viem-client';
+import { prisma } from '../../../prisma/prisma-client';
+import { fetchSftmxStakingData } from './fetch-sftmx-staking-data';
 
 export async function syncStakingData(stakingContractAddress: Address, viemClient: ViemClient) {
     const stakingData = await fetchSftmxStakingData(stakingContractAddress, viemClient);

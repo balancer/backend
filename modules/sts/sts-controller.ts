@@ -7,9 +7,9 @@ import {
     GqlStakedSonicSnapshot,
     GqlStakedSonicSnapshotDataRange,
 } from '../../apps/api/gql/generated-schema';
-import { syncStakingData } from '../actions/sts/sync-staking-data';
+import { syncStakingData } from './lib/sync-staking-data';
 import { StsSubgraphService } from '../sources/subgraphs/sts-subgraph/sts.service';
-import { syncSonicStakingSnapshots } from '../actions/sts/sync-staking-snapshots';
+import { syncSonicStakingSnapshots } from './lib/sync-staking-snapshots';
 import moment from 'moment';
 
 const getTimestampForRange = (range: GqlStakedSonicSnapshotDataRange): number => {

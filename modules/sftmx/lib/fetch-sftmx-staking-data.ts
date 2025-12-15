@@ -1,9 +1,9 @@
 import { Address, formatEther } from 'viem';
-import FTMStaking from './abis/FTMStaking';
-import SftmxVault from './abis/SftmxVault';
-import SFC from './abis/SFC';
-import { ViemClient } from '../types';
+import FTMStaking from '../../sources/contracts/abis/FTMStaking';
+import SftmxVault from '../../sources/contracts/abis/SftmxVault';
+import SFC from '../../sources/contracts/abis/SFC';
 import { ZERO_ADDRESS } from '@balancer/sdk';
+import { ViemClient } from '../../sources/viem-client';
 
 export interface OnchainSftmxStakingData {
     totalFtmStaked: bigint;
