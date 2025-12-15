@@ -1,5 +1,13 @@
 # backend
 
+## 1.57.7
+
+### Patch Changes
+
+-   b0842dd: remove provider from config
+-   b058441: SOR - Fix BPT rates on swap with add/remove liquidity step
+-   5e16aaf: remove unused service code
+
 ## 1.57.6
 
 ### Patch Changes
