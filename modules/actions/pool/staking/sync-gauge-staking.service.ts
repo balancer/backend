@@ -22,6 +22,7 @@ import type { JsonFragment } from '@ethersproject/abi';
 import { getInflationRate } from '../../../vebal/balancer-token-admin.service';
 import _ from 'lodash';
 import { Multicaller3Viem } from '../../../web3/multicaller-viem';
+import { formatEther } from 'viem';
 
 interface GaugeRewardData {
     [address: string]: {
@@ -305,7 +306,7 @@ const getOnchainRewardTokensData = async (
     const rewardsDataV2 = (await rewardsMulticallerV2.execute()) as GaugeRewardData;
     const rewardsData = { ...rewardsDataV1, ...rewardsDataV2 };
 
-    const totalBalRate = parseFloat(formatUnits(await getInflationRate(chain)));
+    const totalBalRate = parseFloat(formatEther(await getInflationRate(chain)));
     const now = Math.floor(Date.now() / 1000);
 
     // Format onchain rates for all the rewards

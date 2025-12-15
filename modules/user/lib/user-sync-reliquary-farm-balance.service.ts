@@ -2,45 +2,44 @@ import { addressesMatch } from '../../web3/addresses';
 import { formatFixed } from '@ethersproject/bignumber';
 import { zeroAddress as ZERO_ADDRESS } from 'viem';
 import { Chain, PrismaPoolStakingType } from '@prisma/client';
-import { BigNumber, Event } from 'ethers';
+import { Event } from 'ethers';
 import _ from 'lodash';
 import { prisma } from '../../../prisma/prisma-client';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
-import { bn } from '../../big-number/big-number';
 import { AmountHumanReadable } from '../../common/global-types';
-import ReliquaryAbi from '../../web3/abi/Reliquary.json';
-import { getContractAtForNetwork } from '../../web3/contract';
-import { Multicaller } from '../../web3/multicaller';
-import { Reliquary } from '../../web3/types/Reliquary';
+import ReliquaryAbi from '../../web3/abi/Reliquary';
 import { UserStakedBalanceService } from '../user-types';
 import { ReliquarySubgraphService } from '../../subgraphs/reliquary-subgraph/reliquary.service';
 import { BALANCES_SYNC_BLOCKS_MARGIN } from '../../../config';
 import { floatToExactString } from '../../common/numbers';
 import { AllNetworkConfigsKeyedOnChain } from '../../network/network-config';
+import { getEvents } from '../../web3/events';
+import { getViemClient } from '../../sources/viem-client';
+import { Multicaller3Viem } from '../../web3/multicaller-viem';
 
 type ReliquaryPosition = {
-    amount: BigNumber;
-    rewardDebt: BigNumber;
-    rewardCredit: BigNumber;
-    entry: BigNumber;
-    poolId: BigNumber;
-    level: BigNumber;
+    amount: bigint;
+    rewardDebt: bigint;
+    rewardCredit: bigint;
+    entry: bigint;
+    poolId: bigint;
+    level: bigint;
 };
 
 type BalanceChangedEvent = Event & {
     args: {
-        pid: BigNumber;
-        amount: BigNumber;
+        pid: bigint;
+        amount: bigint;
         to: string;
-        relicId: BigNumber;
+        relicId: bigint;
     };
 };
 
 type RelicManagementEvent = Event & {
     args: {
-        fromId: BigNumber;
+        fromId: bigint;
         toId: string;
-        amount: BigNumber;
+        amount: bigint;
     };
 };
 
@@ -48,7 +47,7 @@ type TransferEvent = Event & {
     args: {
         from: string;
         to: string;
-        tokenId: BigNumber;
+        tokenId: bigint;
     };
 };
 
@@ -58,6 +57,7 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
     public async syncChangedStakedBalances(chain: Chain): Promise<void> {
         const networkConfig = AllNetworkConfigsKeyedOnChain[chain];
         const reliquarySubgraphService = new ReliquarySubgraphService(networkConfig.data.subgraphs.reliquary!);
+        const viemClient = getViemClient(chain);
 
         const status = await prisma.prismaUserBalanceSyncStatus.findUnique({
             where: { type_chain: { type: 'RELIQUARY', chain } },
@@ -78,7 +78,7 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
             },
             include: { staking: true },
         });
-        const latestBlock = await networkConfig.provider.getBlockNumber();
+        const latestBlock = (await viemClient.getBlockNumber()).toString();
         const farms = await reliquarySubgraphService.getAllFarms({});
         const filteredFarms = farms.filter(
             (farm) => !networkConfig.data.reliquary!.excludedFarmIds.includes(farm.pid.toString()),
@@ -86,15 +86,15 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
 
         const startBlock = status.blockNumber - BALANCES_SYNC_BLOCKS_MARGIN;
         const endBlock =
-            latestBlock - startBlock > networkConfig.data.rpcMaxBlockRange
+            parseFloat(latestBlock) - startBlock > networkConfig.data.rpcMaxBlockRange
                 ? startBlock + networkConfig.data.rpcMaxBlockRange
-                : latestBlock;
+                : parseFloat(latestBlock);
 
         const amountUpdates = await this.getAmountsForUsersWithBalanceChangesSinceStartBlock(
             this.reliquaryAddress,
             startBlock,
             endBlock,
-            networkConfig,
+            chain,
         );
 
         // no new blocks have been minted, needed for slow networks
@@ -237,15 +237,21 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
         reliquaryAddress: string,
         startBlock: number,
         endBlock: number,
-        networkConfig: (typeof AllNetworkConfigsKeyedOnChain)[Chain],
+        chain: Chain,
     ): Promise<{ farmId: string; userAddress: string; amount: AmountHumanReadable }[]> {
-        const reliquaryContract: Reliquary = getContractAtForNetwork(
-            reliquaryAddress,
+        const networkConfig = AllNetworkConfigsKeyedOnChain[chain];
+
+        const viemEvents = await getEvents(
+            startBlock,
+            endBlock,
+            [reliquaryAddress],
+            ['Transfer', 'Deposit', 'Withdraw', 'EmergencyWithdraw', 'Shift'],
+            networkConfig.data.rpcUrl,
+            networkConfig.data.rpcMaxBlockRange,
             ReliquaryAbi,
-            networkConfig.provider,
         );
-        const events = await reliquaryContract.queryFilter({ address: reliquaryAddress }, startBlock, endBlock);
-        const balanceChangedEvents = events.filter(
+
+        const balanceChangedEvents = viemEvents.filter(
             (event) =>
                 event.topics.length > 0 &&
                 [
@@ -257,21 +263,20 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
                     '0x6aaee64d11e8979fa392cd6388058c820f43709933f6a297e6e1005dddca62d6',
                 ].includes(event.topics[0]),
         ) as BalanceChangedEvent[];
-        const relicManagementEvents = events.filter(
+
+        const relicManagementEvents = viemEvents.filter(
             (event) =>
                 event.topics.length > 0 &&
                 [
-                    //split topic is not needed, we find the affected user in the transfer events
-                    // '0xcf0974dfd867840133a0d4b02f1672f24017796fb8892d1e0d587692e4da90ab',
-                    //merge topic is not needed, we find the affected user in the transfer events
-                    // '0x285dbc28e663286c77e3cd79d1cf1525744b4dfe015f41295fe5ae2858880bdf',
                     //shift topic needs to be inspected since we only now sender and the two relic ids, could be different receiving user
                     '0xda2a03409498a5fe8db3da030754afa618bc2228c0517ec5fa8c9b052979e9ea',
-                ].includes(event.event!),
+                ].includes(event.topics[0]),
         ) as RelicManagementEvent[];
-        const transferEvents = events.filter((event) => event.event === 'Transfer') as TransferEvent[];
 
-        const multicall = new Multicaller(networkConfig.data.multicall, networkConfig.provider, ReliquaryAbi);
+        const transferEvents = viemEvents.filter((event) => event.event === 'Transfer') as TransferEvent[];
+
+        const viemClient = getViemClient(chain);
+        const multicall3 = new Multicaller3Viem(chain, ReliquaryAbi);
 
         // for the transfer events, we know which users are affected
         let affectedUsers = transferEvents.flatMap((event) => [event.args.from, event.args.to]);
@@ -291,7 +296,12 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
         const relicOwners: string[] = [];
         for (const relicId of filteredAffectedRelicIds) {
             try {
-                const owner = await reliquaryContract.ownerOf(relicId);
+                const owner = await viemClient.readContract({
+                    address: reliquaryAddress as `0x${string}`,
+                    abi: ReliquaryAbi,
+                    functionName: 'ownerOf',
+                    args: [BigInt(relicId)],
+                });
                 relicOwners.push(owner);
             } catch (e) {
                 console.log(`Could not get owner of relic. Skipping.`);
@@ -302,15 +312,14 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
         );
 
         affectedUsers.forEach((userAddress) => {
-            multicall.call(userAddress, reliquaryAddress, 'relicPositionsOfOwner', [userAddress]);
+            multicall3.call(userAddress, reliquaryAddress, 'relicPositionsOfOwner', [userAddress]);
         });
 
         // we get a tuple with an array of relicIds and the corresponding positions array
-        const updatedPositions: { [userAddress: string]: [BigNumber[], ReliquaryPosition[]] } =
-            await multicall.execute();
+        const updatedPositions: { [userAddress: string]: [bigint[], ReliquaryPosition[]] } = await multicall3.execute();
         // for each user we have to sum up all balances of a specific farm, so we key on user + farmId
         const userFarmBalances: {
-            [userFarm: string]: { userAddress: string; farmId: string; amount: BigNumber };
+            [userFarm: string]: { userAddress: string; farmId: string; amount: bigint };
         } = {};
 
         // we only care for the user address and all positions, we can ignore the relicIds array
@@ -319,13 +328,13 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
                 userFarmBalances[userAddress] = {
                     userAddress,
                     farmId: '0',
-                    amount: BigNumber.from(0),
+                    amount: 0n,
                 };
             }
             positions.forEach((position) => {
                 const key = `${userAddress}-${position.poolId}`;
                 if (key in userFarmBalances) {
-                    userFarmBalances[key].amount = userFarmBalances[key].amount.add(position.amount);
+                    userFarmBalances[key].amount = userFarmBalances[key].amount + position.amount;
                 } else {
                     userFarmBalances[key] = {
                         userAddress,

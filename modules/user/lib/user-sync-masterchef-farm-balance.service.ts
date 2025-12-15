@@ -4,32 +4,17 @@ import _ from 'lodash';
 import { prisma } from '../../../prisma/prisma-client';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { AmountHumanReadable } from '../../common/global-types';
-import {
-    FarmUserFragment,
-    OrderDirection,
-    User_OrderBy,
-} from '../../subgraphs/masterchef-subgraph/generated/masterchef-subgraph-types';
-import { getContractAtForNetwork } from '../../web3/contract';
-import { Multicaller } from '../../web3/multicaller';
-import { BeethovenxMasterChef } from '../../web3/types/BeethovenxMasterChef';
-import MasterChefAbi from '../../web3/abi/MasterChef.json';
+import MasterChefAbi from '../../web3/abi/MasterChef';
 import { UserStakedBalanceService } from '../user-types';
 import { PrismaPoolStakingType } from '@prisma/client';
-import { MasterchefSubgraphService } from '../../subgraphs/masterchef-subgraph/masterchef.service';
 import { BALANCES_SYNC_BLOCKS_MARGIN } from '../../../config';
 import { AllNetworkConfigsKeyedOnChain } from '../../network/network-config';
+import { getViemClient } from '../../sources/viem-client';
+import { getEvents } from '../../web3/events';
+import { Multicaller3Viem } from '../../web3/multicaller-viem';
 
 export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceService {
-    constructor(
-        private readonly fbeetsAddress: string,
-        private readonly fbeetsFarmId: string,
-        private readonly masterchefAddress: string,
-        private readonly excludedFarmIds: string[],
-    ) {}
-
-    get masterchefService() {
-        return new MasterchefSubgraphService(AllNetworkConfigsKeyedOnChain['FANTOM'].data.subgraphs.masterchef!);
-    }
+    constructor(private readonly masterchefAddress: string, private readonly excludedFarmIds: string[]) {}
 
     public async syncChangedStakedBalances(): Promise<void> {
         const chain = 'FANTOM';
@@ -52,14 +37,14 @@ export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceSe
             },
             include: { staking: true },
         });
-        const latestBlock = await networkconfig.provider.getBlockNumber();
-        const farms = await this.masterchefService.getAllFarms({});
+        const viemClient = getViemClient(chain);
+        const latestBlock = (await viemClient.getBlockNumber()).toString();
 
         const startBlock = status.blockNumber - BALANCES_SYNC_BLOCKS_MARGIN;
         const endBlock =
-            latestBlock - startBlock > networkconfig.data.rpcMaxBlockRange
+            parseFloat(latestBlock) - startBlock > networkconfig.data.rpcMaxBlockRange
                 ? startBlock + networkconfig.data.rpcMaxBlockRange
-                : latestBlock;
+                : parseFloat(latestBlock);
 
         // no new blocks have been minted, needed for slow networks
         if (startBlock > endBlock) {
@@ -89,9 +74,6 @@ export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceSe
                     skipDuplicates: true,
                 }),
                 ...amountUpdates.map((update) => {
-                    const pool = pools.find((pool) => pool.staking.some((stake) => stake.id === update.farmId));
-                    const farm = farms.find((farm) => farm.id === update.farmId);
-
                     if (update.amount === '0') {
                         return prisma.prismaUserStakedBalance.deleteMany({
                             where: {
@@ -100,23 +82,13 @@ export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceSe
                             },
                         });
                     } else {
-                        return prisma.prismaUserStakedBalance.upsert({
+                        return prisma.prismaUserStakedBalance.update({
                             where: {
                                 id_chain: { id: `${update.farmId}-${update.userAddress}`, chain },
                             },
-                            update: {
+                            data: {
                                 balance: update.amount,
                                 balanceNum: parseFloat(update.amount),
-                            },
-                            create: {
-                                id: `${update.farmId}-${update.userAddress}`,
-                                chain,
-                                balance: update.amount,
-                                balanceNum: parseFloat(update.amount),
-                                userAddress: update.userAddress,
-                                poolId: update.farmId !== this.fbeetsFarmId ? pool?.id : null,
-                                tokenAddress: farm!.pair,
-                                stakingId: update.farmId,
                             },
                         });
                     }
@@ -131,66 +103,7 @@ export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceSe
     }
 
     public async initStakedBalances(stakingTypes: PrismaPoolStakingType[]): Promise<void> {
-        if (!stakingTypes.includes('MASTER_CHEF')) {
-            return;
-        }
-
-        const chain = 'FANTOM';
-
-        const blockNumber = await this.masterchefService.lastSyncedBlock();
-        console.log('initStakedBalances: loading subgraph users...');
-        const farmUsers = await this.loadAllSubgraphUsers();
-        console.log('initStakedBalances: finished loading subgraph users...');
-        console.log('initStakedBalances: loading pools...');
-        const pools = await prisma.prismaPool.findMany({
-            select: { id: true, address: true },
-            where: { chain },
-        });
-        console.log('initStakedBalances: finished loading pools...');
-        const userAddresses = _.uniq(farmUsers.map((farmUser) => farmUser.address));
-
-        console.log('initStakedBalances: performing db operations...');
-
-        await prismaBulkExecuteOperations(
-            [
-                prisma.prismaUser.createMany({
-                    data: userAddresses.map((userAddress) => ({ address: userAddress })),
-                    skipDuplicates: true,
-                }),
-                prisma.prismaUserStakedBalance.deleteMany({
-                    where: { staking: { type: 'MASTER_CHEF' }, chain },
-                }),
-                prisma.prismaUserStakedBalance.deleteMany({
-                    where: { staking: { type: 'FRESH_BEETS' }, chain },
-                }),
-                prisma.prismaUserStakedBalance.createMany({
-                    data: farmUsers
-                        .filter((farmUser) => !this.excludedFarmIds.includes(farmUser.pool!.id))
-                        .map((farmUser) => {
-                            const pool = pools.find((pool) => pool.address === farmUser.pool?.pair);
-
-                            return {
-                                id: farmUser.id,
-                                chain,
-                                balance: formatFixed(farmUser.amount, 18),
-                                balanceNum: parseFloat(formatFixed(farmUser.amount, 18)),
-                                userAddress: farmUser.address,
-                                poolId: pool?.id,
-                                tokenAddress: farmUser.pool!.pair,
-                                stakingId: farmUser.pool!.id,
-                            };
-                        }),
-                }),
-                prisma.prismaUserBalanceSyncStatus.upsert({
-                    where: { type_chain: { type: 'STAKED', chain } },
-                    create: { type: 'STAKED', chain, blockNumber },
-                    update: { blockNumber },
-                }),
-            ],
-            true,
-        );
-
-        console.log('initStakedBalances: finished...');
+        return;
     }
 
     private async getAmountsForUsersWithBalanceChangesSinceStartBlock(
@@ -201,42 +114,43 @@ export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceSe
         const chain = 'FANTOM';
         const networkConfig = AllNetworkConfigsKeyedOnChain[chain];
 
-        const contract: BeethovenxMasterChef = getContractAtForNetwork(
-            masterChefAddress,
-            MasterChefAbi,
-            networkConfig.provider,
-        );
-        const events = await contract.queryFilter({ address: masterChefAddress }, startBlock, endBlock);
-        const filteredEvents = events.filter((event) =>
-            ['Deposit', 'Withdraw', 'EmergencyWithdraw'].includes(event.event!),
-        );
-
-        const multicall = new Multicaller(networkConfig.data.multicall, networkConfig.provider, MasterChefAbi);
         let response: {
             [farmId: string]: { [userAddress: string]: [BigNumber, BigNumber] };
         } = {};
 
-        for (const event of filteredEvents) {
-            multicall.call(`${event.args?.pid}.${event.args?.user}`, masterChefAddress, 'userInfo', [
+        const viemEvents = await getEvents(
+            startBlock,
+            endBlock,
+            [masterChefAddress],
+            ['Deposit', 'Withdraw', 'EmergencyWithdraw'],
+            networkConfig.data.rpcUrl,
+            networkConfig.data.rpcMaxBlockRange,
+            MasterChefAbi,
+        );
+
+        const multicall3 = new Multicaller3Viem(chain, MasterChefAbi);
+
+        for (const event of viemEvents) {
+            multicall3.call(`${event.args?.pid}.${event.args?.user}`, masterChefAddress, 'userInfo', [
                 event.args?.pid,
                 event.args?.user,
             ]);
 
             if (event.args?.user !== event.args?.to) {
                 //need to also update the amount for the to address
-                multicall.call(`${event.args?.pid}.${event.args?.to}`, masterChefAddress, 'userInfo', [
+                multicall3.call(`${event.args?.pid}.${event.args?.to}`, masterChefAddress, 'userInfo', [
                     event.args?.pid,
                     event.args?.to,
                 ]);
             }
 
-            if (multicall.numCalls >= 100) {
-                response = _.merge(response, await multicall.execute());
+            if (multicall3.numCalls >= 100) {
+                response = _.merge(response, await multicall3.execute());
             }
         }
 
-        if (multicall.numCalls > 0) {
-            response = _.merge(response, await multicall.execute());
+        if (multicall3.numCalls > 0) {
+            response = _.merge(response, await multicall3.execute());
         }
 
         return _.map(response, (farmData, farmId) => {
@@ -248,36 +162,5 @@ export class UserSyncMasterchefFarmBalanceService implements UserStakedBalanceSe
         })
             .flat()
             .filter((item) => !this.excludedFarmIds.includes(item.farmId));
-    }
-
-    private async loadAllSubgraphUsers(): Promise<FarmUserFragment[]> {
-        const pageSize = 1000;
-        const MAX_SKIP = 5000;
-        let users: FarmUserFragment[] = [];
-        let timestamp = '0';
-        let hasMore = true;
-        let skip = 0;
-
-        while (hasMore) {
-            const { farmUsers } = await this.masterchefService.getFarmUsers({
-                where: { timestamp_gte: timestamp, amount_not: '0' },
-                first: pageSize,
-                skip,
-                orderBy: User_OrderBy.Timestamp,
-                orderDirection: OrderDirection.Asc,
-            });
-
-            users = [...users, ...farmUsers];
-            hasMore = farmUsers.length >= pageSize;
-
-            skip += pageSize;
-
-            if (skip > MAX_SKIP) {
-                timestamp = users[users.length - 1].timestamp;
-                skip = 0;
-            }
-        }
-
-        return _.uniqBy(users, (user) => user.id);
     }
 }

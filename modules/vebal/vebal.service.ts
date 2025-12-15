@@ -1,18 +1,17 @@
-import { formatFixed } from '@ethersproject/bignumber';
 import { prisma } from '../../prisma/prisma-client';
-import { BigNumber } from 'ethers';
 import _ from 'lodash';
 import { prismaBulkExecuteOperations } from '../../prisma/prisma-util';
 import { veBalLocksSubgraphService } from '../subgraphs/veBal-locks-subgraph/veBal-locks-subgraph.service';
-import { Multicaller } from '../web3/multicaller';
-import VeDelegationAbi from './abi/VotingEscrowDelegationProxy.json';
-import { getContractAtForNetwork } from '../web3/contract';
+import VeDelegationAbi from './abi/VotingEscrowDelegationProxy';
 import { AmountHumanReadable } from '../common/global-types';
 import { GqlVeBalBalance, GqlVeBalUserData } from '../../apps/api/gql/generated-schema';
 import mainnet from '../../config/mainnet';
-import VeBalABI from './abi/vebal.json';
+import VeBalABI from './abi/vebal';
 import { Chain } from '@prisma/client';
 import { AllNetworkConfigsKeyedOnChain } from '../network/network-config';
+import { Multicaller3Viem } from '../web3/multicaller-viem';
+import { getViemClient } from '../sources/viem-client';
+import { formatEther } from 'viem';
 
 export class VeBalService {
     public async getVeBalUserBalance(chain: Chain, userAddress: string): Promise<AmountHumanReadable> {
@@ -112,27 +111,24 @@ export class VeBalService {
         let operations: any[] = [];
         // for mainnet, we get the vebal balance form the vebal contract
         if (chain === 'MAINNET') {
-            const multicall = new Multicaller(
-                AllNetworkConfigsKeyedOnChain[chain].data.multicall,
-                AllNetworkConfigsKeyedOnChain[chain].provider,
-                VeBalABI,
-            );
+            console.log(`Fetching veBal balances from mainnet contract for ${subgraphVeBalHolders.length} holders`);
+            const multicall3 = new Multicaller3Viem('MAINNET', VeBalABI);
 
             let response = {} as {
                 [userAddress: string]: {
-                    balance: BigNumber;
-                    locked: BigNumber[];
+                    balance: bigint;
+                    locked: { amount: bigint };
                 };
             };
 
             for (const holder of subgraphVeBalHolders) {
-                multicall.call(
+                multicall3.call(
                     `${holder.user}.balance`,
                     AllNetworkConfigsKeyedOnChain[chain].data.veBal!.address,
                     'balanceOf',
                     [holder.user],
                 );
-                multicall.call(
+                multicall3.call(
                     `${holder.user}.locked`,
                     AllNetworkConfigsKeyedOnChain[chain].data.veBal!.address,
                     'locked',
@@ -140,36 +136,32 @@ export class VeBalService {
                 );
 
                 // so if we scheduled more than 100 calls, we execute the batch
-                if (multicall.numCalls >= 100) {
-                    response = _.merge(response, await multicall.execute());
+                if (multicall3.numCalls >= 500) {
+                    response = _.merge(response, await multicall3.execute());
                 }
             }
 
-            if (multicall.numCalls > 0) {
-                response = _.merge(response, await multicall.execute());
+            if (multicall3.numCalls > 0) {
+                response = _.merge(response, await multicall3.execute());
             }
 
             for (const veBalHolder in response) {
                 veBalHolders.push({
                     address: veBalHolder.toLowerCase(),
-                    balance: formatFixed(response[veBalHolder].balance, 18),
-                    locked: formatFixed(response[veBalHolder].locked[0], 18),
+                    balance: formatEther(response[veBalHolder].balance),
+                    locked: formatEther(response[veBalHolder].locked.amount),
                 });
             }
         } else {
             //for L2, we get the vebal balance from the delegation proxy
-            const multicall = new Multicaller(
-                AllNetworkConfigsKeyedOnChain[chain].data.multicall,
-                AllNetworkConfigsKeyedOnChain[chain].provider,
-                VeDelegationAbi,
-            );
+            const multicall3 = new Multicaller3Viem(chain, VeDelegationAbi);
 
             let response = {} as {
-                [userAddress: string]: BigNumber;
+                [userAddress: string]: bigint;
             };
 
             for (const holder of subgraphVeBalHolders) {
-                multicall.call(
+                multicall3.call(
                     holder.user,
                     AllNetworkConfigsKeyedOnChain[chain].data.veBal!.delegationProxy,
                     'adjustedBalanceOf',
@@ -177,19 +169,19 @@ export class VeBalService {
                 );
 
                 // so if we scheduled more than 50 calls, we execute the batch
-                if (multicall.numCalls >= 50) {
-                    response = _.merge(response, await multicall.execute());
+                if (multicall3.numCalls >= 50) {
+                    response = _.merge(response, await multicall3.execute());
                 }
             }
 
-            if (multicall.numCalls > 0) {
-                response = _.merge(response, await multicall.execute());
+            if (multicall3.numCalls > 0) {
+                response = _.merge(response, await multicall3.execute());
             }
 
             for (const veBalHolder in response) {
                 veBalHolders.push({
                     address: veBalHolder.toLowerCase(),
-                    balance: formatFixed(response[veBalHolder], 18),
+                    balance: formatEther(response[veBalHolder]),
                     locked: '0.0',
                 });
             }
@@ -231,12 +223,12 @@ export class VeBalService {
                     ? AllNetworkConfigsKeyedOnChain[chain].data.veBal.address
                     : AllNetworkConfigsKeyedOnChain[chain].data.veBal.delegationProxy;
 
-            const veBal = getContractAtForNetwork(
-                veBalAddress,
-                VeBalABI,
-                AllNetworkConfigsKeyedOnChain[chain].provider,
-            );
-            const totalSupply: BigNumber = await veBal.totalSupply();
+            const viemClient = getViemClient(chain);
+            const totalSupply = await viemClient.readContract({
+                address: veBalAddress as `0x${string}`,
+                abi: VeBalABI,
+                functionName: 'totalSupply',
+            });
 
             await prisma.prismaVeBalTotalSupply.upsert({
                 where: {
@@ -248,9 +240,9 @@ export class VeBalService {
                 create: {
                     address: veBalAddress,
                     chain: chain,
-                    totalSupply: formatFixed(totalSupply, 18),
+                    totalSupply: formatEther(totalSupply),
                 },
-                update: { totalSupply: formatFixed(totalSupply, 18) },
+                update: { totalSupply: formatEther(totalSupply) },
             });
         }
     }

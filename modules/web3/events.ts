@@ -15,10 +15,17 @@ export const getEvents = async (
     let iEvents: Interface;
     if (abi && abi.length > 0) {
         iEvents = new Interface(abi);
-        // check if topics are event names
-        const alreadyEncoded = topics.every((topic) => topic.startsWith('0x'));
-        if (!alreadyEncoded) topics = topics.map((topic) => iEvents.getEventTopic(topic));
+        // check if topics are event names, if so, encode them
+        topics = topics.map((topic) => {
+            if (topic.startsWith('0x')) {
+                return topic;
+            } else {
+                return iEvents.getEventTopic(topic);
+            }
+        });
     }
+
+    console.log(topics);
 
     const range = toBlock - fromBlock;
     const numBatches = Math.ceil(range / rpcMaxBlockRange);

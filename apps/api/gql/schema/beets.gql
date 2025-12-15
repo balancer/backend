@@ -10,8 +10,6 @@ extend type Query {
 }
 
 extend type Mutation {
-    beetsSyncFbeetsRatio: String!
-
     beetsPoolLoadReliquarySnapshotsForAllFarms(chain: GqlChain!): String!
 }
 

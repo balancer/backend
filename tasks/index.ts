@@ -25,6 +25,8 @@ import _ from 'lodash';
 import { AprService } from '../modules/aprs';
 import { PricingService } from '../modules/pricing';
 import { LoopsService } from '../modules/loops/service';
+import { userService } from '../modules/user/user.service';
+import { veBalService } from '../modules/vebal/vebal.service';
 
 /**
  * Used to run jobs or mutations locally from the command line
@@ -186,6 +188,15 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         return 'OK';
     } else if (job === 'sync-token-yields') {
         await TokenYieldsController().fetchAndStoreAllYields();
+        return 'OK';
+    } else if (job === 'sync-staked-balances') {
+        await userService.syncChangedStakedBalances(chain);
+        return 'OK';
+    } else if (job === 'sync-vebal-balances') {
+        await veBalService.syncVeBalBalances(chain);
+        return 'OK';
+    } else if (job === 'sync-vebal-totalsupply') {
+        await veBalService.syncVeBalTotalSupply(chain);
         return 'OK';
     }
     // Maintenance

@@ -14,14 +14,11 @@ import { ReliquarySubgraphService } from '../subgraphs/reliquary-subgraph/reliqu
 import { ReliquarySnapshotService } from './lib/reliquary-snapshot.service';
 import {
     deleteGaugeStakingForAllPools,
-    deleteMasterchefStakingForAllPools,
     deleteReliquaryStakingForAllPools,
     loadReliquarySnapshotsForAllFarms,
     syncGaugeStakingForPools,
-    syncMasterchefStakingForPools,
     syncReliquaryStakingForPools,
 } from '../actions/pool/staking';
-import { MasterchefSubgraphService } from '../subgraphs/masterchef-subgraph/masterchef.service';
 import { GaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
 import { deleteAuraStakingForAllPools, syncAuraStakingForPools } from '../actions/pool/staking/sync-aura-staking';
 import { AuraSubgraphService } from '../sources/subgraphs/aura/aura.service';
@@ -66,7 +63,6 @@ export class PoolService {
     }
 
     public async reloadStakingForAllPools(stakingTypes: PrismaPoolStakingType[], chain: Chain): Promise<void> {
-        await deleteMasterchefStakingForAllPools(stakingTypes, chain);
         await deleteReliquaryStakingForAllPools(stakingTypes, chain);
         await deleteGaugeStakingForAllPools(stakingTypes, chain);
         await deleteAuraStakingForAllPools(stakingTypes, chain);
@@ -85,16 +81,6 @@ export class PoolService {
     public async syncStakingForPools(chains: Chain[]) {
         for (const chain of chains) {
             const networkconfig = config[chain];
-            if (networkconfig.subgraphs.masterchef) {
-                await syncMasterchefStakingForPools(
-                    chain,
-                    new MasterchefSubgraphService(networkconfig.subgraphs.masterchef),
-                    networkconfig.masterchef?.excludedFarmIds || [],
-                    networkconfig.fbeets?.address || '',
-                    networkconfig.fbeets?.farmId || '',
-                    networkconfig.fbeets?.poolId || '',
-                );
-            }
             if (networkconfig.subgraphs.reliquary) {
                 await syncReliquaryStakingForPools(
                     chain,
