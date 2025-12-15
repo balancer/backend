@@ -1,8 +1,32 @@
-import { Chain } from '@prisma/client';
-import config from '../../../config';
+import { prisma } from '../../../prisma/prisma-client';
+import { githubChainToChain } from './github-helper';
 
 const RATEPROVIDER_REVIEW_URL =
     'https://raw.githubusercontent.com/balancer/code-review/main/rate-providers/registry.json';
+
+export const syncRateProviderReviews = async (): Promise<void> => {
+    const rateProviders = await getRateProviderReviews();
+
+    const data = rateProviders.map((item) => ({
+        reviewed: true,
+        name: item.name,
+        chain: item.chain,
+        summary: item.summary,
+        tokenAddress: item.asset.toLowerCase(),
+        rateProviderAddress: item.rateProviderAddress.toLowerCase(),
+        reviewUrl: item.review,
+        warnings: item.warnings.join(','),
+        upgradableComponents: item.upgradeableComponents.map((component) => ({
+            entryPoint: component.entrypoint,
+            implementationReviewed: component.implementationReviewed,
+        })),
+    }));
+
+    await prisma.$transaction([
+        prisma.prismaPriceRateProviderData.deleteMany(),
+        prisma.prismaPriceRateProviderData.createMany({ data, skipDuplicates: true }),
+    ]);
+};
 
 interface RateProviderReview {
     [chain: string]: {
@@ -21,12 +45,7 @@ interface RateProviderReview {
     };
 }
 
-const githubChainToChain: { [chain: string]: Chain } = {
-    ethereum: Chain.MAINNET,
-    ...Object.fromEntries(Object.keys(config).map((chain) => [chain.toLowerCase(), chain])),
-};
-
-export const getRateProviderReviews = async () => {
+const getRateProviderReviews = async () => {
     const response = await fetch(RATEPROVIDER_REVIEW_URL);
     const list = (await response.json()) as RateProviderReview;
 

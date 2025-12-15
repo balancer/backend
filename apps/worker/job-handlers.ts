@@ -155,7 +155,7 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
             await runIfNotAlreadyRunning(name, chainId, () => EventController().syncJoinExitsV2(chain), res, next);
             break;
         case 'sync-token-content-data':
-            await runIfNotAlreadyRunning(name, chainId, () => tokenService.syncTokenContentData(), res, next);
+            await runIfNotAlreadyRunning(name, chainId, () => ContentController().syncTokenContentData(), res, next);
             break;
         case 'update-liquidity-24h-ago-v2':
             await runIfNotAlreadyRunning(

@@ -77,7 +77,7 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         await ContentController().syncCategories();
 
         console.log('Syncing Erc4626');
-        await tokenService.syncTokenContentData();
+        await ContentController().syncTokenContentData();
         await ContentController().syncErc4626Data();
         await TokenController().syncErc4626OnChainData(chain);
 
@@ -91,7 +91,7 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
     } else if (job === 'add-pools-v3') {
         return PoolController().addPoolsV3(chain);
     } else if (job === 'sync-token-content-data') {
-        await tokenService.syncTokenContentData();
+        await ContentController().syncTokenContentData();
     } else if (job === 'sync-pools-v3') {
         return PoolController().syncPoolsV3(chain);
     } else if (job === 'update-liquidity-for-inactive-pools') {
