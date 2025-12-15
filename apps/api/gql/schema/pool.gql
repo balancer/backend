@@ -509,7 +509,7 @@ type GqlPoolDynamicData {
     lifetimeVolume: BigDecimal!
     lifetimeSwapFees: BigDecimal!
     holdersCount: BigInt!
-    swapsCount: BigInt!
+    swapsCount: BigInt! @deprecated
 
     sharePriceAth: BigDecimal! @deprecated
     sharePriceAthTimestamp: Int! @deprecated

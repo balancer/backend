@@ -382,6 +382,9 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
                 next,
             );
             break;
+        case 'update-lifetime-values':
+            await runIfNotAlreadyRunning(name, chainId, () => PoolController().updateLifeTimeValues(chain), res, next);
+            break;
         default:
             res.sendStatus(400);
             // throw new Error(`Unhandled job type ${name}`);
