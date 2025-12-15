@@ -1,5 +1,5 @@
+import { StakedSonicController } from '../../../../modules/sts/sts-controller';
 import { Resolvers } from '../generated-schema';
-import { StakedSonicController } from '../../../../modules/controllers';
 
 const resolvers: Resolvers = {
     Query: {

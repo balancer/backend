@@ -46,7 +46,7 @@ import { addressesMatch } from '../../web3/addresses';
 import { getWeightSnapshots } from '../../actions/quant-amm/get-weight-snapshots';
 import { mapPoolToken, enrichWithErc4626Data, mapAprItems } from './pool-gql-mapper-helper';
 import { AllNetworkConfigsKeyedOnChain } from '../../network/network-config';
-import { ContentController } from '../../controllers';
+import { ContentController } from '../../content/content-controller';
 
 const isToken = (text: string) => text.match(/^0x[0-9a-fA-F]{40}$/);
 const isPoolId = (text: string) => isToken(text) || text.match(/^0x[0-9a-fA-F]{64}$/);

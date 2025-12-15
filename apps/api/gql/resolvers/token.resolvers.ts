@@ -9,7 +9,7 @@ import { TokenController } from '../../../../modules/controllers/token-controlle
 import config from '../../../../config';
 import { GraphQLError } from 'graphql';
 import { PricingService } from '../../../../modules/pricing';
-import { ContentController } from '../../../../modules/controllers';
+import { ContentController } from '../../../../modules/content/content-controller';
 
 const resolvers: Resolvers = {
     Query: {

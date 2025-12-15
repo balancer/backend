@@ -2,6 +2,7 @@ import { StakedSonicController } from './sts-controller';
 import { protocolService } from '../protocol/protocol.service';
 import { poolService } from '../pool/pool.service';
 import { initRequestScopedContext, setRequestScopedContextValue } from '../context/request-scoped-context';
+import { AprService } from '../aprs';
 
 describe('sts controller debugging', () => {
     it('sync and get sts data', async () => {
@@ -21,7 +22,7 @@ describe('sts controller debugging', () => {
     it('sync and get sts apr', async () => {
         initRequestScopedContext();
         setRequestScopedContextValue('chainId', '146');
-        await poolService.updatePoolAprs('SONIC');
+        await new AprService().updateAprs('SONIC');
         let pools = await poolService.getGqlPools({ where: { chainIn: ['SONIC'] } });
 
         console.log(pools.length);

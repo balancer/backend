@@ -1,5 +1,5 @@
 import { prisma } from '../../../prisma/prisma-client';
-import { fetchSonicStakingData } from '../../sources/contracts/fetch-sts-staking-data';
+import { fetchSonicStakingData } from './fetch-sts-staking-data';
 import { StsSubgraphService } from '../../sources/subgraphs/sts-subgraph/sts.service';
 import { Address } from 'viem';
 import { ViemClient } from '../../sources/viem-client';

@@ -1,11 +1,11 @@
 import config from '../../config';
 import { chainIdToChain } from '../network/chain-id-to-chain';
 import { getViemClient } from '../sources/viem-client';
-import { syncStakingData as syncSftmxStakingData } from '../actions/sftmx/sync-staking-data';
+import { syncStakingData as syncSftmxStakingData } from './lib/sync-staking-data';
 import { Address } from 'viem';
-import { syncWithdrawalRequests as syncSftmxWithdrawalRequests } from '../actions/sftmx/sync-withdrawal-requests';
+import { syncWithdrawalRequests as syncSftmxWithdrawalRequests } from './lib/sync-withdrawal-requests';
 import { SftmxSubgraphService } from '../sources/subgraphs/sftmx-subgraph/sftmx.service';
-import { syncSftmxStakingSnapshots } from '../actions/sftmx/sync-staking-snapshots';
+import { syncSftmxStakingSnapshots } from './lib/sync-staking-snapshots';
 import moment from 'moment';
 import { prisma } from '../../prisma/prisma-client';
 import {
