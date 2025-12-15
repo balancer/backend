@@ -95,7 +95,7 @@ export const activeChainWorkerJobsGeneric: WorkerJob[] = [
     },
     {
         name: 'update-lifetime-values',
-        interval: every(30, 'minutes'),
+        interval: every(60, 'minutes'),
     },
 ];
 
