@@ -122,6 +122,24 @@ export default <NetworkData>{
                     ],
                 },
                 {
+                    name: 'Gami USDC',
+                    url: 'https://app.silo.finance/api/earn',
+                    body: JSON.stringify({
+                        chainKeys: ['avalanche'],
+                        type: 'vault',
+                        limit: 100,
+                        offset: 0,
+                    }),
+                    scale: 1e18,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x1f0570a081fee0e4df6eac470f9d2d53cdeda1c5',
+                            path: '$.pools[?(@.vaultAddress=="0x1F0570a081FeE0e4dF6eAC470f9d2D53CDEDa1c5")].supplyApr',
+                        },
+                    ],
+                },
+                {
                     url: 'https://www.ether.fi/api/dapp/protocol/protocol-detail',
                     scale: 100,
                     extractors: [
