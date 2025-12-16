@@ -1,5 +1,14 @@
 # backend
 
+## 1.57.8
+
+### Patch Changes
+
+-   38f9505: refactor sts and sftmx module
+-   f0baad9: refactor user module
+-   4c1c293: add lifetime values to dynamic data
+-   0183327: move content to module
+
 ## 1.57.7
 
 ### Patch Changes
