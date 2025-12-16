@@ -1,4 +1,4 @@
-import { Prisma, PrismaErc4626ReviewData, PrismaTokenType } from '@prisma/client';
+import { Prisma, PrismaErc4626ReviewData, PrismaPriceRateProviderData, PrismaTokenType } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
 import { HookData } from '../../../prisma/prisma-types';
 import {
@@ -10,6 +10,7 @@ import _ from 'lodash';
 import { FxData, GyroData, StableData, QuantAmmWeightedData, ReclammData } from '../subgraph-mapper';
 import { mapHookToGqlHook } from '../../sources/transformers';
 import { chainToChainId } from '../../network/chain-id-to-chain';
+import { zeroAddress } from 'viem';
 
 const aggregatorPrismaValidator = Prisma.validator<Prisma.PrismaPoolDefaultArgs>()({
     include: {
@@ -109,7 +110,7 @@ export class PoolAggregatorLoader {
 
         // Get all the tokens for the chain - most likely scenario is client is fetching the chain information
         console.time('dbTokens');
-        const [dbTokens, dbTypes, erc4626ReviewData] = await Promise.all([
+        const [dbTokens, dbTypes, erc4626ReviewData, rateProviderData] = await Promise.all([
             prisma.prismaToken.findMany({
                 where: {
                     ...(args.where?.chainIn ? { chain: { in: args.where?.chainIn } } : {}),
@@ -127,13 +128,23 @@ export class PoolAggregatorLoader {
                     },
                 },
             }),
+            prisma.prismaPriceRateProviderData.findMany({
+                where: {
+                    chain: {
+                        in: args.where?.chainIn || undefined,
+                    },
+                },
+            }),
         ]);
 
-        const typesMap = dbTypes.reduce((agg, item) => {
-            agg[`${item.chain}-${item.tokenAddress}`] ||= [];
-            agg[`${item.chain}-${item.tokenAddress}`].push(item);
-            return agg;
-        }, {} as Record<string, PrismaTokenType[]>);
+        const typesMap = dbTypes.reduce(
+            (agg, item) => {
+                agg[`${item.chain}-${item.tokenAddress}`] ||= [];
+                agg[`${item.chain}-${item.tokenAddress}`].push(item);
+                return agg;
+            },
+            {} as Record<string, PrismaTokenType[]>,
+        );
 
         const tokensMap = Object.fromEntries(
             dbTokens.map((token) => [
@@ -220,8 +231,15 @@ export class PoolAggregatorLoader {
         // Get review data
         const erc4626ReviewDataMap = Object.fromEntries(erc4626ReviewData.map((data) => [data.erc4626Address, data]));
 
+        // Get rateproviderdata data
+        const rateproviderDataMap = Object.fromEntries(
+            rateProviderData.map((data) => [data.rateProviderAddress, data]),
+        );
+
         console.time('poolsMapping');
-        const gqlPools = pools.map((pool) => this.mapPoolToAggregatorPool(pool, tokensMap, erc4626ReviewDataMap));
+        const gqlPools = pools.map((pool) =>
+            this.mapPoolToAggregatorPool(pool, tokensMap, erc4626ReviewDataMap, rateproviderDataMap),
+        );
         const filteredPools = [];
 
         for (const mappedPool of gqlPools) {
@@ -231,6 +249,18 @@ export class PoolAggregatorLoader {
                 if (!args.where?.includeHooks || !args.where.includeHooks.includes(mappedPool.hook.type)) {
                     continue;
                 }
+            }
+
+            // filter out pools that have a rateprovider without or unsafe rateprovider info
+            if (
+                mappedPool.poolTokens.some(
+                    (token) =>
+                        token.priceRateProvider &&
+                        token.priceRateProvider !== zeroAddress &&
+                        token.priceRateProviderData?.summary !== 'safe',
+                )
+            ) {
+                continue;
             }
 
             filteredPools.push(mappedPool);
@@ -243,7 +273,8 @@ export class PoolAggregatorLoader {
     private mapPoolToAggregatorPool(
         pool: AggregatorPrismaSchema,
         underlyingMap: Record<string, TokenWithTypes>,
-        reviewMap: Record<string, PrismaErc4626ReviewData>,
+        erc4626ReviewMap: Record<string, PrismaErc4626ReviewData>,
+        rateproviderDataMap: Record<string, PrismaPriceRateProviderData>,
     ): GqlPoolAggregator {
         const { typeData, ...poolWithoutTypeData } = pool;
 
@@ -320,7 +351,8 @@ export class PoolAggregatorLoader {
                     ? underlyingMap[`${token.chain}-${token.token.underlyingTokenAddress}`]
                     : null;
                 const underlyingTypes = underlying?.types?.map((t) => t.type) || [];
-                const review = reviewMap[token.address] || {};
+                const erc4626Review = erc4626ReviewMap[token.address] || {};
+                const rateProviderData = rateproviderDataMap[token.priceRateProvider || ''] || {};
                 const types = token.token.types?.map((t) => t.type) || [];
                 return {
                     address: token.address,
@@ -337,11 +369,22 @@ export class PoolAggregatorLoader {
                     isAllowed: types.includes('BLOCKED_V2') || types.includes('BLOCKED_V3'),
                     isBufferAllowed: token.token.isBufferAllowed,
                     isExemptFromProtocolYieldFee: token.exemptFromProtocolYieldFee,
-                    canUseBufferForSwaps: review.canUseBufferForSwaps,
-                    useUnderlyingForAddRemove: review.useUnderlyingForAddRemove,
-                    useWrappedForAddRemove: review.useWrappedForAddRemove,
+                    canUseBufferForSwaps: erc4626Review.canUseBufferForSwaps,
+                    useUnderlyingForAddRemove: erc4626Review.useUnderlyingForAddRemove,
+                    useWrappedForAddRemove: erc4626Review.useWrappedForAddRemove,
                     priceRate: token.priceRate,
                     priceRateProvider: token.priceRateProvider,
+                    priceRateProviderData: {
+                        ...rateProviderData,
+                        warnings: rateProviderData.warnings?.split(',') || [],
+                        upgradeableComponents:
+                            (rateProviderData.upgradableComponents as {
+                                implementationReviewed: string;
+                                entryPoint: string;
+                            }[]) || [],
+                        address: rateProviderData.rateProviderAddress,
+                        reviewFile: rateProviderData.reviewUrl,
+                    },
                     maxDeposit: token.token.maxDeposit === '0' ? undefined : token.token.maxDeposit,
                     maxWithdraw: token.token.maxWithdraw === '0' ? undefined : token.token.maxWithdraw,
                     scalingFactor: token.scalingFactor,

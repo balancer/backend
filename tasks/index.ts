@@ -1,20 +1,15 @@
 import {
-    SftmxController,
     SnapshotsController,
-    UserBalancesController,
     CowAmmController,
-    ContentController,
     FXPoolsController,
     PoolController,
     EventController,
     StakingController,
-    StakedSonicController,
     TokenController,
     QuantAmmController,
     TokenYieldsController,
 } from '../modules/controllers';
 import { chainIdToChain } from '../modules/network/chain-id-to-chain';
-import { tokenService } from '../modules/token/token.service';
 import { VeBalVotingListService } from '../modules/vebal/vebal-voting-list.service';
 import { Chain, PrismaLastBlockSyncedCategory } from '@prisma/client';
 import { upsertLastSyncedBlock } from '../modules/actions/last-synced-block';
@@ -25,6 +20,11 @@ import _ from 'lodash';
 import { AprService } from '../modules/aprs';
 import { PricingService } from '../modules/pricing';
 import { LoopsService } from '../modules/loops/service';
+import { veBalService } from '../modules/vebal/vebal.service';
+import { ContentController } from '../modules/content/content-controller';
+import { SftmxController } from '../modules/sftmx/sftmx-controller';
+import { StakedSonicController } from '../modules/sts/sts-controller';
+import { UserBalancesController } from '../modules/user/user-balances-controller';
 
 /**
  * Used to run jobs or mutations locally from the command line
@@ -75,7 +75,7 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         await ContentController().syncCategories();
 
         console.log('Syncing Erc4626');
-        await tokenService.syncTokenContentData(chain);
+        await ContentController().syncTokenContentData();
         await ContentController().syncErc4626Data();
         await TokenController().syncErc4626OnChainData(chain);
 
@@ -89,7 +89,7 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
     } else if (job === 'add-pools-v3') {
         return PoolController().addPoolsV3(chain);
     } else if (job === 'sync-token-content-data') {
-        await tokenService.syncTokenContentData(chain);
+        await ContentController().syncTokenContentData();
     } else if (job === 'sync-pools-v3') {
         return PoolController().syncPoolsV3(chain);
     } else if (job === 'update-liquidity-for-inactive-pools') {
@@ -102,16 +102,8 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         return EventController().syncJoinExitsV2(chain);
     } else if (job === 'sync-swaps-v2') {
         return EventController().syncSwapsUpdateVolumeAndFeesV2(chain);
-    } else if (job === 'sync-snapshots-v2') {
-        return SnapshotsController().syncSnapshotsV2(chain);
-    } else if (job === 'fill-missing-snapshots-v2') {
-        return SnapshotsController().fillMissingSnapshotsV2(chain);
-    } else if (job === 'sync-snapshots-v3') {
-        return SnapshotsController().syncSnapshotsV3(chain);
-    } else if (job === 'sync-all-snapshots-v3') {
-        return SnapshotsController().syncAllSnapshotsV3(chain);
-    } else if (job === 'forward-fill-snapshots-v3') {
-        return SnapshotsController().forwardFillSnapshotsForPoolsWithoutUpdatesV3(chain);
+    } else if (job === 'sync-snapshots') {
+        return SnapshotsController().syncSnapshots(chain);
     } else if (job === 'sync-swaps-v3') {
         return EventController().syncSwapsV3(chain);
     } else if (job === 'update-volume-and-fees') {
@@ -122,8 +114,6 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         return SftmxController().syncSftmxStakingData(chain);
     } else if (job === 'sync-sftmx-withdrawal') {
         return SftmxController().syncSftmxWithdrawalrequests(chain);
-    } else if (job === 'sync-sftmx-staking-snapshots') {
-        return SftmxController().syncSftmxStakingSnapshots(chain);
     } else if (job === 'sync-bpt-balances') {
         return UserBalancesController().syncBalances(chain);
     } else if (job === 'sync-user-balances-v2') {
@@ -135,10 +125,6 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
     } else if (job === 'reload-cow-amm-pools') {
         await upsertLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.COW_AMM_POOLS, 0);
         return CowAmmController().syncPools(chain);
-    } else if (job === 'sync-cow-amm-snapshots') {
-        return CowAmmController().syncSnapshots(chain);
-    } else if (job === 'sync-all-cow-amm-snapshots') {
-        return CowAmmController().syncAllSnapshots(chain);
     } else if (job === 'sync-cow-amm-swaps') {
         return CowAmmController().syncSwaps(chain);
     } else if (job === 'sync-cow-amm-join-exits') {
@@ -200,6 +186,15 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         return 'OK';
     } else if (job === 'sync-token-yields') {
         await TokenYieldsController().fetchAndStoreAllYields();
+        return 'OK';
+    } else if (job === 'sync-staked-balances') {
+        await UserBalancesController().syncChangedStakedBalances(chain);
+        return 'OK';
+    } else if (job === 'sync-vebal-balances') {
+        await veBalService.syncVeBalBalances(chain);
+        return 'OK';
+    } else if (job === 'sync-vebal-totalsupply') {
+        await veBalService.syncVeBalTotalSupply(chain);
         return 'OK';
     }
     // Maintenance

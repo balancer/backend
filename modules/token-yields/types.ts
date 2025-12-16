@@ -21,6 +21,15 @@ type EntryExtractor =
     | { readonly type: 'path'; readonly token: string; readonly path: string }
     | { readonly type: 'enumerate'; readonly path: string; readonly entries: (item: any) => [string, number] };
 
+export interface RateProviderYieldConfig {
+    chain: Chain;
+    intervalInDays: number;
+    rateProviders: {
+        tokenAddress: string;
+        rateProviderAddress: string;
+    }[];
+}
+
 export interface TokenYieldHttpFetchConfig {
     url: string;
     method?: 'GET' | 'POST';
@@ -28,6 +37,7 @@ export interface TokenYieldHttpFetchConfig {
     body?: string;
     scale?: number;
     average?: boolean;
+    skipSSL?: boolean;
     extractors: readonly EntryExtractor[];
 }
 
@@ -81,4 +91,5 @@ export interface TokenYieldConfig {
     morphoVaultHyperevm?: {
         vaults: string[];
     };
+    rateProvider?: RateProviderYieldConfig;
 }

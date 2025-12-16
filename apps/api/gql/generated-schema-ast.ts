@@ -115,6 +115,7 @@ export const schema = gql`
         POLYGON
         SEPOLIA
         SONIC
+        XLAYER
         ZKEVM
     }
 
@@ -218,12 +219,6 @@ export const schema = gql`
         value: String!
     }
 
-    type GqlLatestSyncedBlocks {
-        poolSyncBlock: BigInt!
-        userStakeSyncBlock: BigInt!
-        userWalletSyncBlock: BigInt!
-    }
-
     type GqlLoopsData {
         """
         Actual TotalSupply of LoopS.
@@ -271,11 +266,6 @@ export const schema = gql`
         rate: String!
 
         """
-        The current Sonic points multiplier for LoopS
-        """
-        sonicPointsMultiplier: String!
-
-        """
         The current amount of stS supplied to the Aave market
         """
         stSAaveMarketSupply: String!
@@ -284,11 +274,6 @@ export const schema = gql`
         The current cap on the stS market on Aave
         """
         stSAaveMarketSupplyCap: String!
-
-        """
-        The health factor that the Aave position should have
-        """
-        targetHealthFactor: String!
 
         """
         Net Asset Value in USD.
@@ -1048,40 +1033,6 @@ export const schema = gql`
         withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
     }
 
-    type GqlPoolBatchSwap {
-        chain: GqlChain!
-        id: ID!
-        swaps: [GqlPoolBatchSwapSwap!]!
-        timestamp: Int!
-        tokenAmountIn: String!
-        tokenAmountOut: String!
-        tokenIn: String!
-        tokenInPrice: Float!
-        tokenOut: String!
-        tokenOutPrice: Float!
-        tx: String!
-        userAddress: String!
-        valueUSD: Float!
-    }
-
-    type GqlPoolBatchSwapPool {
-        id: ID!
-        tokens: [String!]!
-    }
-
-    type GqlPoolBatchSwapSwap {
-        id: ID!
-        pool: PoolForBatchSwap!
-        timestamp: Int!
-        tokenAmountIn: String!
-        tokenAmountOut: String!
-        tokenIn: String!
-        tokenOut: String!
-        tx: String!
-        userAddress: String!
-        valueUSD: Float!
-    }
-
     type GqlPoolComposableStable implements GqlPoolBase {
         address: Bytes!
         allTokens: [GqlPoolTokenExpanded!]! @deprecated(reason: "Use poolTokens instead")
@@ -1619,11 +1570,6 @@ export const schema = gql`
     type GqlPoolJoinExitAmount {
         address: String!
         amount: String!
-    }
-
-    input GqlPoolJoinExitFilter {
-        chainIn: [GqlChain!]
-        poolIdIn: [String!]
     }
 
     enum GqlPoolJoinExitType {
@@ -2183,7 +2129,7 @@ export const schema = gql`
         amounts: [String!]!
         chain: GqlChain!
         fees24h: String!
-        holdersCount: String!
+        holdersCount: String! @deprecated
         id: ID!
         poolId: String!
         sharePrice: String!
@@ -2192,9 +2138,9 @@ export const schema = gql`
         timestamp: Int!
         totalLiquidity: String!
         totalShares: String!
-        totalSurplus: String!
-        totalSwapFee: String!
-        totalSwapVolume: String!
+        totalSurplus: String! @deprecated
+        totalSwapFee: String! @deprecated
+        totalSwapVolume: String! @deprecated
         volume24h: String!
     }
 
@@ -2530,13 +2476,6 @@ export const schema = gql`
         The value of the event in USD.
         """
         valueUSD: Float!
-    }
-
-    input GqlPoolSwapFilter {
-        chainIn: [GqlChain!]
-        poolIdIn: [String!]
-        tokenInIn: [String!]
-        tokenOutIn: [String!]
     }
 
     input GqlPoolTimePeriod {
@@ -3033,19 +2972,9 @@ export const schema = gql`
         levelBalances: [GqlReliquaryFarmLevelSnapshot!]!
         relicCount: String!
         timestamp: Int!
-        tokenBalances: [GqlReliquaryTokenBalanceSnapshot!]!
         totalBalance: String!
         totalLiquidity: String!
         userCount: String!
-    }
-
-    type GqlReliquaryTokenBalanceSnapshot {
-        address: String!
-        balance: String!
-        decimals: Int!
-        id: ID!
-        name: String!
-        symbol: String!
     }
 
     type GqlSftmxStakingData {
@@ -4210,11 +4139,10 @@ export const schema = gql`
         beetsSyncFbeetsRatio: String!
         createLBP(input: CreateLBPInput!): Boolean!
         poolLoadOnChainDataForAllPools(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
-        poolLoadSnapshotsForPools(poolIds: [String!]!, reload: Boolean): String!
+        poolLoadSnapshotsForPools(chain: GqlChain!, poolId: String!): String!
         poolReloadAllPoolAprs(chain: GqlChain!): String!
         poolReloadPools(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
         poolReloadStakingForAllPools(stakingTypes: [GqlPoolStakingType!]!): String!
-        poolSyncAllCowSnapshots(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
         poolSyncAllPoolsFromSubgraph: [String!]!
         poolSyncFxQuoteTokens(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
         poolUpdateLiquidityValuesForAllPools: String!
@@ -4229,21 +4157,10 @@ export const schema = gql`
         tokenSyncTokenDefinitions: String!
         userInitStakedBalances(stakingTypes: [GqlPoolStakingType!]!): String!
         userInitWalletBalancesForAllPools(chain: GqlChain): String!
-        userInitWalletBalancesForPool(poolId: String!): String!
-        userSyncBalance(poolId: String!): String!
-        userSyncBalanceAllPools: String!
         userSyncChangedStakedBalances: String!
         userSyncChangedWalletBalancesForAllPools: String!
         veBalSyncAllUserBalances: String!
         veBalSyncTotalSupply: String!
-    }
-
-    type PoolForBatchSwap {
-        allTokens: [TokenForBatchSwapPool!]
-        id: String!
-        name: String!
-        symbol: String!
-        type: GqlPoolType!
     }
 
     type QuantAMMWeightedDetail {
@@ -4294,7 +4211,6 @@ export const schema = gql`
         blocksGetBlocksPerDay: Float! @deprecated
         blocksGetBlocksPerSecond: Float! @deprecated
         blocksGetBlocksPerYear: Float! @deprecated
-        latestSyncedBlocks: GqlLatestSyncedBlocks!
         lbpPriceChart(chain: GqlChain!, dataPoints: Int, id: String!, interval: Int @deprecated): [LBPPriceChartData!]
 
         """
@@ -4560,12 +4476,5 @@ export const schema = gql`
     type Token {
         address: String!
         decimals: Int!
-    }
-
-    type TokenForBatchSwapPool {
-        address: String!
-        isNested: Boolean!
-        isPhantomBpt: Boolean!
-        weight: BigDecimal
     }
 `;

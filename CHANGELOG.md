@@ -1,5 +1,172 @@
 # backend
 
+## 1.57.8
+
+### Patch Changes
+
+-   38f9505: refactor sts and sftmx module
+-   f0baad9: refactor user module
+-   4c1c293: add lifetime values to dynamic data
+-   0183327: move content to module
+
+## 1.57.7
+
+### Patch Changes
+
+-   b0842dd: remove provider from config
+-   ddd555f: gami vault avax
+-   b058441: SOR - Fix BPT rates on swap with add/remove liquidity step
+-   5e16aaf: remove unused service code
+
+## 1.57.6
+
+### Patch Changes
+
+-   f771fed: cleanup networkcontext
+-   6e95d8f: euler APRs on Plasma
+-   5ba0bb1: eUSDT0-30 euler Yuzu Money Cluster APR
+
+## 1.57.5
+
+### Patch Changes
+
+-   96ec3f9: change mabeets subgraph
+
+## 1.57.4
+
+### Patch Changes
+
+-   2783c4e: change etherfi apr source
+
+## 1.57.3
+
+### Patch Changes
+
+-   0b4d4e4: handle multichain gas limit in hyperevm
+-   801cbfa: define worker jobs in central place
+-   6773bc8: handle missing pool onchain data
+-   32aac95: rollback handling of missing data in pool syncs
+
+## 1.57.2
+
+### Patch Changes
+
+-   4a868a2: infinifi.xyz APR fix
+-   aca8da5: patch rate provider filter in AggregatorPool query
+
+## 1.57.1
+
+### Patch Changes
+
+-   8ffb66e: filter unverified rateproviders for agg query
+
+## 1.57.0
+
+### Minor Changes
+
+-   75bf3c4: sync all snapshots from events and onchain instead of subgraph
+
+### Patch Changes
+
+-   61b203a: update all total APRs after calculation
+-   3bf3b44: reload snapshots cant use multicall
+-   ce5c8f2: fix snapshots reload
+-   cd29bdf: allow negative aprs
+
+## 1.56.7
+
+### Patch Changes
+
+-   93563a5: fix APRs using killed gauges
+
+## 1.56.6
+
+### Patch Changes
+
+-   1b9df4f: fix handling preferred gauge APRs
+-   2768be6: fix handling PREFERRED gauge
+
+## 1.56.5
+
+### Patch Changes
+
+-   1fa4b34: stathyWHYPE APR
+
+## 1.56.4
+
+### Patch Changes
+
+-   6a770ec: 246USDT0 APR
+-   00ab5ea: patch subgraph snapshots for aave
+
+## 1.56.3
+
+### Patch Changes
+
+-   de43f5a: fix yuzu.money APR token address
+-   919ae59: paxoslabs APRs
+
+## 1.56.2
+
+### Patch Changes
+
+-   e35e4a3: syzusd APR
+
+## 1.56.1
+
+### Patch Changes
+
+-   2a2ea8a: SOR - Fix unwrapRates scaling
+-   4c84676: move pricing query to graphql
+-   f9a6468: pricing query cleanup
+-   36aa8c9: add xlayer support
+
+## 1.56.0
+
+### Minor Changes
+
+-   845effd: add coingecko pricing call proxy
+
+### Patch Changes
+
+-   8eed23a: option to skip ssl verification for apr sources
+
+## 1.55.3
+
+### Patch Changes
+
+-   c5d20e9: SOR separate sentry
+
+## 1.55.2
+
+### Patch Changes
+
+-   b3ad094: adding poolRoleAccounts to LBP initial data sync
+-   06d754f: savUSD APR on plasma
+-   33b4ce4: gearbox usdt0 APR plasma
+-   72a9e62: handle boostedpools for merkl
+
+## 1.55.1
+
+### Patch Changes
+
+-   5c1c24c: add support for fragments
+
+## 1.55.0
+
+### Minor Changes
+
+-   b0f3c5a: handle SOR closed conn and timeout
+
+### Patch Changes
+
+-   d030e91: enable lbp sync
+-   c66e8f8: SOR: handle query alias
+-   37510e2: rate provider APRs based on config
+-   964aae0: enable sor proxy on prod
+-   e18677c: route canary sor to dedicated env
+-   fe05ac7: APRs use safe rate providers only
+
 ## 1.54.11
 
 ### Patch Changes

@@ -75,14 +75,30 @@ const resolvers: Resolvers = {
         veBalSyncAllUserBalances: async (parent, {}, context) => {
             isAdminRoute(context);
 
-            await veBalService.syncVeBalBalances();
+            const chain = headerChain();
+
+            if (!chain) {
+                throw new GraphQLError('Provide "chainId" header', {
+                    extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
+                });
+            }
+
+            await veBalService.syncVeBalBalances(chain);
 
             return 'success';
         },
         veBalSyncTotalSupply: async (parent, {}, context) => {
             isAdminRoute(context);
 
-            await veBalService.syncVeBalTotalSupply();
+            const chain = headerChain();
+
+            if (!chain) {
+                throw new GraphQLError('Provide "chainId" header', {
+                    extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
+                });
+            }
+
+            await veBalService.syncVeBalTotalSupply(chain);
 
             return 'success';
         },

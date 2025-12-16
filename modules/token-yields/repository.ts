@@ -17,18 +17,7 @@ export class TokenYieldRepository {
      * Store token yields in database
      */
     async storeTokenYields(chain: Chain, tokenAprs: YieldToken[]): Promise<void> {
-        // Report negative APRs - data below that threshold isn't accepted
-        const negativeAprReportingThreshold = -0.01;
-
-        tokenAprs
-            .filter((t) => t.apr < negativeAprReportingThreshold)
-            .map((t) => {
-                console.error(`Negative APR`, t.address, t.chain, t.apr, t.source);
-            });
-
-        const positiveAprs = tokenAprs.filter((t) => t.apr > negativeAprReportingThreshold);
-
-        const operations = positiveAprs.map((tokenApr) => ({
+        const operations = tokenAprs.map((tokenApr) => ({
             where: {
                 address_chain: {
                     address: tokenApr.address.toLowerCase(),

@@ -76,12 +76,10 @@ export class LoopsService {
             collateralAmountInEth: dbData.collateralAmountInEth,
             debtAmount: dbData.debtAmount,
             healthFactor: dbData.healthFactor,
-            targetHealthFactor: '1.3', // hardcoded for now, we can store it in the db later if needed
             stSAaveMarketSupplyCap: dbData.stsAaveMarketSupplyCap,
             stSAaveMarketSupply: dbData.stsAaveMarketSupply,
             apr: dbData.totalApr,
             leverage: dbData.leverage,
-            sonicPointsMultiplier: `${(parseFloat(dbData.collateralAmount) / parseFloat(dbData.actualSupply)) * 12}`,
         };
     }
 }

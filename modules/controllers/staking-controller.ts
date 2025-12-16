@@ -1,11 +1,6 @@
 import config from '../../config';
 import { Chain } from '@prisma/client';
-import {
-    syncGaugeStakingForPools,
-    syncMasterchefStakingForPools,
-    syncReliquaryStakingForPools,
-} from '../actions/pool/staking';
-import { MasterchefSubgraphService } from '../subgraphs/masterchef-subgraph/masterchef.service';
+import { syncGaugeStakingForPools, syncReliquaryStakingForPools } from '../actions/pool/staking';
 import { ReliquarySubgraphService } from '../subgraphs/reliquary-subgraph/reliquary.service';
 import { GaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
 import { syncAuraStakingForPools } from '../actions/pool/staking/sync-aura-staking';
@@ -16,16 +11,6 @@ export function StakingController() {
     return {
         async syncStaking(chain: Chain) {
             const networkconfig = config[chain];
-            if (networkconfig.subgraphs.masterchef) {
-                await syncMasterchefStakingForPools(
-                    chain,
-                    new MasterchefSubgraphService(networkconfig.subgraphs.masterchef),
-                    networkconfig.masterchef?.excludedFarmIds || [],
-                    networkconfig.fbeets?.address || '',
-                    networkconfig.fbeets?.farmId || '',
-                    networkconfig.fbeets?.poolId || '',
-                );
-            }
             if (networkconfig.subgraphs.reliquary) {
                 await syncReliquaryStakingForPools(
                     chain,

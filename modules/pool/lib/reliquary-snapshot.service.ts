@@ -5,28 +5,23 @@ import _ from 'lodash';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { ReliquarySubgraphService } from '../../subgraphs/reliquary-subgraph/reliquary.service';
 import { oneDayInMinutes } from '../../common/time';
-import {
-    Chain,
-    PrismaReliquaryFarmSnapshot,
-    PrismaReliquaryLevelSnapshot,
-    PrismaReliquaryTokenBalanceSnapshot,
-} from '@prisma/client';
-import { networkContext } from '../../network/network-context.service';
+import { Chain, PrismaReliquaryFarmSnapshot, PrismaReliquaryLevelSnapshot } from '@prisma/client';
 import { blockNumbers } from '../../block-numbers';
+import { AllNetworkConfigs, AllNetworkConfigsKeyedOnChain } from '../../network/network-config';
 
 export class ReliquarySnapshotService {
     constructor(private readonly reliquarySubgraphService: ReliquarySubgraphService) {}
 
-    public async getSnapshotsForFarm(farmId: number, range: GqlPoolSnapshotDataRange) {
+    public async getSnapshotsForFarm(farmId: number, range: GqlPoolSnapshotDataRange, chain: Chain) {
         const timestamp = this.getTimestampForRange(range);
         return prisma.prismaReliquaryFarmSnapshot.findMany({
-            where: { farmId: `${farmId}`, timestamp: { gte: timestamp }, chain: networkContext.chain },
-            include: { levelBalances: true, tokenBalances: true },
+            where: { farmId: `${farmId}`, timestamp: { gte: timestamp }, chain: chain },
+            include: { levelBalances: true },
             orderBy: { timestamp: 'asc' },
         });
     }
 
-    public async syncLatestSnapshotsForAllFarms() {
+    public async syncLatestSnapshotsForAllFarms(chain: Chain) {
         const yesterdayMorning = moment().utc().subtract(1, 'day').startOf('day').unix();
 
         // this returns the last two snapshot per farm, if there are any
@@ -34,11 +29,12 @@ export class ReliquarySnapshotService {
             where: { snapshotTimestamp_gte: yesterdayMorning },
         });
         const filteredSnapshots = allSnapshots.filter(
-            (farm) => !networkContext.data.reliquary!.excludedFarmIds.includes(farm.farmId.toString()),
+            (farm) =>
+                !AllNetworkConfigsKeyedOnChain[chain].data.reliquary!.excludedFarmIds.includes(farm.farmId.toString()),
         );
         const farmIdsInSubgraphSnapshots = _.uniq(filteredSnapshots.map((snapshot) => snapshot.farmId));
 
-        await this.upsertFarmSnapshots(farmIdsInSubgraphSnapshots, filteredSnapshots, networkContext.chain);
+        await this.upsertFarmSnapshots(farmIdsInSubgraphSnapshots, filteredSnapshots, chain);
     }
 
     public async loadAllSnapshotsForFarm(farmId: number, excludedFarmIds: string[], chain: Chain) {
@@ -127,26 +123,6 @@ export class ReliquarySnapshotService {
                     farmOperations.push(
                         prisma.prismaReliquaryLevelSnapshot.upsert({
                             where: { id_chain: { id: `${level.id}-${snapshot.id}`, chain: chain } },
-                            create: data,
-                            update: data,
-                        }),
-                    );
-                }
-
-                for (const token of pool.tokens) {
-                    const data: PrismaReliquaryTokenBalanceSnapshot = {
-                        id: `${token.id}-${snapshot.id}`,
-                        chain: chain,
-                        farmSnapshotId: snapshot.id,
-                        address: token.address,
-                        symbol: token.token.symbol,
-                        name: token.token.name,
-                        decimals: token.token.decimals,
-                        balance: `${parseFloat(mostRecentPoolSnapshot.amounts[token.index]) * sharePercentage}`,
-                    };
-                    farmOperations.push(
-                        prisma.prismaReliquaryTokenBalanceSnapshot.upsert({
-                            where: { id_chain: { id: `${token.id}-${snapshot.id}`, chain: chain } },
                             create: data,
                             update: data,
                         }),

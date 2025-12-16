@@ -15,6 +15,18 @@ export const blockNumbers = (repo: BlockNumbersRepository = eventsRepository) =>
         return event?.blockNumber;
     },
     /**
+     * Get the timestamp for a given block number
+     *
+     * @param chain
+     * @param block
+     * @returns
+     */
+    async getTimestamp(chain: Chain, block: number) {
+        const event = await repo.getLatestEvent({ chain, block });
+
+        return event?.blockTimestamp;
+    },
+    /**
      * Block numbers for the last n days closest to 00:00:00 (UTC)
      *
      * @param chain

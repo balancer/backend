@@ -1,22 +1,21 @@
-import { formatFixed } from '@ethersproject/bignumber';
 import { prisma } from '../../prisma/prisma-client';
-import { BigNumber } from 'ethers';
 import _ from 'lodash';
 import { prismaBulkExecuteOperations } from '../../prisma/prisma-util';
-import { networkContext } from '../network/network-context.service';
 import { veBalLocksSubgraphService } from '../subgraphs/veBal-locks-subgraph/veBal-locks-subgraph.service';
-import { Multicaller } from '../web3/multicaller';
-import VeDelegationAbi from './abi/VotingEscrowDelegationProxy.json';
-import { getContractAt } from '../web3/contract';
+import VeDelegationAbi from './abi/VotingEscrowDelegationProxy';
 import { AmountHumanReadable } from '../common/global-types';
 import { GqlVeBalBalance, GqlVeBalUserData } from '../../apps/api/gql/generated-schema';
 import mainnet from '../../config/mainnet';
-import VeBalABI from './abi/vebal.json';
+import VeBalABI from './abi/vebal';
 import { Chain } from '@prisma/client';
+import { AllNetworkConfigsKeyedOnChain } from '../network/network-config';
+import { Multicaller3Viem } from '../web3/multicaller-viem';
+import { getViemClient } from '../sources/viem-client';
+import { formatEther } from 'viem';
 
 export class VeBalService {
     public async getVeBalUserBalance(chain: Chain, userAddress: string): Promise<AmountHumanReadable> {
-        if (networkContext.data.veBal) {
+        if (AllNetworkConfigsKeyedOnChain[chain].data.veBal) {
             const veBalUser = await prisma.prismaVeBalUserBalance.findFirst({
                 where: { chain: chain, userAddress: userAddress.toLowerCase() },
             });
@@ -46,7 +45,7 @@ export class VeBalService {
         let rank = 1;
         let balance = '0.0';
         let locked = '0.0';
-        if (networkContext.data.veBal) {
+        if (AllNetworkConfigsKeyedOnChain[chain].data.veBal) {
             const veBalUsers = await prisma.prismaVeBalUserBalance.findMany({
                 where: { chain: chain },
             });
@@ -92,7 +91,7 @@ export class VeBalService {
     }
 
     public async getVeBalTotalSupply(chain: Chain): Promise<AmountHumanReadable> {
-        if (networkContext.data.veBal) {
+        if (AllNetworkConfigsKeyedOnChain[chain].data.veBal) {
             const veBal = await prisma.prismaVeBalTotalSupply.findFirst({
                 where: { chain: chain },
             });
@@ -103,7 +102,7 @@ export class VeBalService {
         return '0.0';
     }
 
-    async syncVeBalBalances() {
+    async syncVeBalBalances(chain: Chain): Promise<void> {
         const subgraphVeBalHolders = await veBalLocksSubgraphService.getAllveBalHolders();
 
         // we query all balances fresh from chain
@@ -111,66 +110,78 @@ export class VeBalService {
 
         let operations: any[] = [];
         // for mainnet, we get the vebal balance form the vebal contract
-        if (networkContext.isMainnet) {
-            const multicall = new Multicaller(networkContext.data.multicall, networkContext.provider, VeBalABI);
+        if (chain === 'MAINNET') {
+            console.log(`Fetching veBal balances from mainnet contract for ${subgraphVeBalHolders.length} holders`);
+            const multicall3 = new Multicaller3Viem('MAINNET', VeBalABI);
 
             let response = {} as {
                 [userAddress: string]: {
-                    balance: BigNumber;
-                    locked: BigNumber[];
+                    balance: bigint;
+                    locked: { amount: bigint };
                 };
             };
 
             for (const holder of subgraphVeBalHolders) {
-                multicall.call(`${holder.user}.balance`, networkContext.data.veBal!.address, 'balanceOf', [
-                    holder.user,
-                ]);
-                multicall.call(`${holder.user}.locked`, networkContext.data.veBal!.address, 'locked', [holder.user]);
+                multicall3.call(
+                    `${holder.user}.balance`,
+                    AllNetworkConfigsKeyedOnChain[chain].data.veBal!.address,
+                    'balanceOf',
+                    [holder.user],
+                );
+                multicall3.call(
+                    `${holder.user}.locked`,
+                    AllNetworkConfigsKeyedOnChain[chain].data.veBal!.address,
+                    'locked',
+                    [holder.user],
+                );
 
                 // so if we scheduled more than 100 calls, we execute the batch
-                if (multicall.numCalls >= 100) {
-                    response = _.merge(response, await multicall.execute());
+                if (multicall3.numCalls >= 500) {
+                    response = _.merge(response, await multicall3.execute());
                 }
             }
 
-            if (multicall.numCalls > 0) {
-                response = _.merge(response, await multicall.execute());
+            if (multicall3.numCalls > 0) {
+                response = _.merge(response, await multicall3.execute());
             }
 
             for (const veBalHolder in response) {
                 veBalHolders.push({
                     address: veBalHolder.toLowerCase(),
-                    balance: formatFixed(response[veBalHolder].balance, 18),
-                    locked: formatFixed(response[veBalHolder].locked[0], 18),
+                    balance: formatEther(response[veBalHolder].balance),
+                    locked: formatEther(response[veBalHolder].locked.amount),
                 });
             }
         } else {
             //for L2, we get the vebal balance from the delegation proxy
-            const multicall = new Multicaller(networkContext.data.multicall, networkContext.provider, VeDelegationAbi);
+            const multicall3 = new Multicaller3Viem(chain, VeDelegationAbi);
 
             let response = {} as {
-                [userAddress: string]: BigNumber;
+                [userAddress: string]: bigint;
             };
 
             for (const holder of subgraphVeBalHolders) {
-                multicall.call(holder.user, networkContext.data.veBal!.delegationProxy, 'adjustedBalanceOf', [
+                multicall3.call(
                     holder.user,
-                ]);
+                    AllNetworkConfigsKeyedOnChain[chain].data.veBal!.delegationProxy,
+                    'adjustedBalanceOf',
+                    [holder.user],
+                );
 
                 // so if we scheduled more than 50 calls, we execute the batch
-                if (multicall.numCalls >= 50) {
-                    response = _.merge(response, await multicall.execute());
+                if (multicall3.numCalls >= 50) {
+                    response = _.merge(response, await multicall3.execute());
                 }
             }
 
-            if (multicall.numCalls > 0) {
-                response = _.merge(response, await multicall.execute());
+            if (multicall3.numCalls > 0) {
+                response = _.merge(response, await multicall3.execute());
             }
 
             for (const veBalHolder in response) {
                 veBalHolders.push({
                     address: veBalHolder.toLowerCase(),
-                    balance: formatFixed(response[veBalHolder], 18),
+                    balance: formatEther(response[veBalHolder]),
                     locked: '0.0',
                 });
             }
@@ -187,10 +198,10 @@ export class VeBalService {
         for (const veBalHolder of veBalHolders) {
             operations.push(
                 prisma.prismaVeBalUserBalance.upsert({
-                    where: { id_chain: { id: `veBal-${veBalHolder.address}`, chain: networkContext.chain } },
+                    where: { id_chain: { id: `veBal-${veBalHolder.address}`, chain: chain } },
                     create: {
                         id: `veBal-${veBalHolder.address}`,
-                        chain: networkContext.chain,
+                        chain: chain,
                         balance: veBalHolder.balance,
                         locked: veBalHolder.locked,
                         userAddress: veBalHolder.address,
@@ -205,28 +216,33 @@ export class VeBalService {
         await prismaBulkExecuteOperations(operations, true, undefined);
     }
 
-    public async syncVeBalTotalSupply(): Promise<void> {
-        if (networkContext.data.veBal) {
-            const veBalAddress = networkContext.isMainnet
-                ? networkContext.data.veBal.address
-                : networkContext.data.veBal.delegationProxy;
+    public async syncVeBalTotalSupply(chain: Chain): Promise<void> {
+        if (AllNetworkConfigsKeyedOnChain[chain].data.veBal) {
+            const veBalAddress =
+                chain === 'MAINNET'
+                    ? AllNetworkConfigsKeyedOnChain[chain].data.veBal.address
+                    : AllNetworkConfigsKeyedOnChain[chain].data.veBal.delegationProxy;
 
-            const veBal = getContractAt(veBalAddress, VeBalABI);
-            const totalSupply: BigNumber = await veBal.totalSupply();
+            const viemClient = getViemClient(chain);
+            const totalSupply = await viemClient.readContract({
+                address: veBalAddress as `0x${string}`,
+                abi: VeBalABI,
+                functionName: 'totalSupply',
+            });
 
             await prisma.prismaVeBalTotalSupply.upsert({
                 where: {
                     address_chain: {
                         address: veBalAddress,
-                        chain: networkContext.chain,
+                        chain: chain,
                     },
                 },
                 create: {
                     address: veBalAddress,
-                    chain: networkContext.chain,
-                    totalSupply: formatFixed(totalSupply, 18),
+                    chain: chain,
+                    totalSupply: formatEther(totalSupply),
                 },
-                update: { totalSupply: formatFixed(totalSupply, 18) },
+                update: { totalSupply: formatEther(totalSupply) },
             });
         }
     }

@@ -13,15 +13,13 @@ const sourceToHandler = {
     http: sources.httpTokenYieldHandler,
     contract: sources.contractTokenYieldHandler,
     rateProvider: sources.rateProviderHandler,
+    loops: sources.loopsYieldHandler,
 };
 
 export class TokenYieldAprHandlers {
     private config: TokenYieldConfig;
 
-    constructor(
-        aprConfig: TokenYieldConfig,
-        private chain: Chain,
-    ) {
+    constructor(aprConfig: TokenYieldConfig, private chain: Chain) {
         const { ...config } = aprConfig;
         this.config = config;
     }
@@ -29,20 +27,15 @@ export class TokenYieldAprHandlers {
     async fetchAprsFromAllHandlers(): Promise<YieldToken[]> {
         let aprs: YieldToken[] = [];
 
-        const results = await Promise.allSettled([
-            // Rate providers are fetched first, so they can be overwritten by other sources
-            this.callHandler('rateProvider', {
-                chain: this.chain,
-                intervalInDays: 7,
-            }),
-            ...Object.entries(this.config).flatMap(([source, config]) => {
+        const results = await Promise.allSettled(
+            Object.entries(this.config).flatMap(([source, config]) => {
                 if (Array.isArray(config)) {
                     return config.map((c) => this.callHandler(source as keyof typeof sourceToHandler, c));
                 }
 
                 return [this.callHandler(source as keyof typeof sourceToHandler, config)];
             }),
-        ]);
+        );
 
         const failedReasons: string[] = [];
 

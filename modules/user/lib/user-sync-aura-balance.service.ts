@@ -1,10 +1,10 @@
-import { UserStakedBalanceService, UserSyncUserBalanceInput } from '../user-types';
+import { UserStakedBalanceService } from '../user-types';
 import { prisma } from '../../../prisma/prisma-client';
 import _, { add } from 'lodash';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { formatFixed } from '@ethersproject/bignumber';
 import { Chain, PrismaPoolStakingType } from '@prisma/client';
-import ERC20Abi from '../../web3/abi/ERC20.json';
+import ERC20Abi from '../../web3/abi/ERC20';
 import { AuraSubgraphService } from '../../sources/subgraphs/aura/aura.service';
 import { formatEther, hexToBigInt } from 'viem';
 import { getViemClient } from '../../sources/viem-client';
@@ -129,34 +129,5 @@ export class UserSyncAuraBalanceService implements UserStakedBalanceService {
 
     public async syncChangedStakedBalances(chain: Chain): Promise<void> {
         await this.initStakedBalances(['AURA'], chain);
-    }
-
-    public async syncUserBalance({ userAddress, poolId, chain, poolAddress, staking }: UserSyncUserBalanceInput) {
-        const client = getViemClient(staking.chain);
-        const balance = (await client.readContract({
-            address: staking.address as `0x{string}`,
-            abi: ERC20Abi,
-            functionName: 'balanceOf',
-            args: [userAddress],
-        })) as bigint;
-        const amount = formatFixed(balance, 18);
-
-        await prisma.prismaUserStakedBalance.upsert({
-            where: { id_chain: { id: `${staking.address}-${userAddress}`, chain: chain } },
-            update: {
-                balance: amount,
-                balanceNum: parseFloat(amount),
-            },
-            create: {
-                id: `${staking.address}-${userAddress}`,
-                chain: chain,
-                balance: amount,
-                balanceNum: parseFloat(amount),
-                userAddress: userAddress,
-                poolId: poolId,
-                tokenAddress: poolAddress,
-                stakingId: staking.address,
-            },
-        });
     }
 }

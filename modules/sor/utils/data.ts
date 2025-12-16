@@ -1,5 +1,5 @@
 import { Cache } from 'memory-cache';
-import { Address, parseUnits } from 'viem';
+import { Address, parseEther, parseUnits } from 'viem';
 import { Chain, PrismaPoolType, PrismaToken } from '@prisma/client';
 
 import { prisma } from '../../../prisma/prisma-client';
@@ -253,7 +253,6 @@ export async function getBufferPoolsFromDBPools(pools: SORDbPool[], chain: Chain
                 // check if underlying token exists in the database
                 const underlyingToken = tokensMap[poolToken.token.underlyingTokenAddress];
                 if (underlyingToken) {
-                    const unwrapRateDecimals = 18 - poolToken.token.decimals + underlyingToken.decimals;
                     bufferPools.push({
                         poolId: pool.id,
                         address: poolToken.address.toLowerCase() as Address,
@@ -269,7 +268,7 @@ export async function getBufferPoolsFromDBPools(pools: SORDbPool[], chain: Chain
                             balance: parseUnits(poolToken.token.bufferBalanceUnderlying, underlyingToken.decimals),
                         },
                         poolType: 'Buffer',
-                        unwrapRate: parseUnits(poolToken.token.unwrapRate, unwrapRateDecimals),
+                        unwrapRate: parseEther(poolToken.token.unwrapRate), // the way we store rates already takes into account main/underlying decimals differences
                         maxWithdraw: parseUnits(poolToken.token.maxWithdraw, poolToken.token.decimals),
                         maxDeposit: parseUnits(poolToken.token.maxDeposit, poolToken.token.decimals),
                     });

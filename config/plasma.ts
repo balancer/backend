@@ -50,14 +50,49 @@ export default <NetworkData>{
         v3: {
             vaultAddress: '0xba1333333333a1ba1108e8412f11850a5c319ba9',
             protocolFeeController: '0xcacc7e1efeea8bb3af6d5720d12c1876aa6ee76b',
-            routerAddress: '0xa8920455934da4d853faac1f94fe7bef72943ef1',
+            routerAddress: '0x9da18982a33fd0c7051b19f0d7c76f2d5e7e017c',
             defaultSwapFeePercentage: '0.5',
             defaultYieldFeePercentage: '0.1',
         },
     },
     aprHandlers: {
         ybAprHandler: {
+            contract: {
+                calls: [
+                    {
+                        name: 'gearbox usdt0 pool',
+                        chain: 'PLASMA',
+                        contract: '0x76309a9a56309104518847bba321c261b7b4a43f',
+                        abi: 'function supplyRate() view returns(uint256)',
+                        functionName: 'supplyRate',
+                        parser: (rate) => Number(rate) * 10 ** -27,
+                        token: '0x76309a9a56309104518847bba321c261b7b4a43f',
+                    },
+                ],
+            },
             http: [
+                {
+                    url: 'https://defi-api.yuzu.money/proxy/apy',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0xc8a8df9b210243c55d31c73090f06787ad0a1bf6',
+                            path: '$.data.syzusd_apy',
+                        },
+                    ],
+                },
+                {
+                    url: 'https://app.avantprotocol.com/api/savusdApy',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0xa29420057f3e3b9512d4786df135da1674bd74d4',
+                            path: '$.savusdApy',
+                        },
+                    ],
+                },
                 {
                     url: 'https://api.maple.finance/v2/graphql',
                     body: JSON.stringify({
@@ -89,22 +124,13 @@ export default <NetworkData>{
                     ],
                 },
                 {
-                    url: 'https://ded76165a2fb6f7887260a3a0f626de7.thegraph.chainnodes.org/subgraphs/name/etherfi/etherfi-subgraph-v0-8-2',
-                    body: JSON.stringify({
-                        query: `{
-                      rebaseEventLinkedLists {
-                        latest_aprs
-                      }
-                    }`,
-                    }),
-                    headers: { 'Content-Type': 'application/json' },
-                    average: true,
-                    scale: 10000,
+                    url: 'https://www.ether.fi/api/dapp/protocol/protocol-detail',
+                    scale: 100,
                     extractors: [
                         {
                             type: 'path',
                             token: '0xa3d68b74bf0528fdd07263c60d6488749044914b',
-                            path: '$.data.rebaseEventLinkedLists[0].latest_aprs',
+                            path: '$.7_day_apr',
                         },
                     ],
                 },
@@ -141,9 +167,33 @@ export default <NetworkData>{
                         },
                     ],
                 },
+                {
+                    name: '246USDT0',
+                    url: 'https://indexer-main.euler.finance/v1/earn/vault?chainId=9745&vaultAddress=0x9c46ee1f01d2b551048f5ff99a4659d98d04bed1',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x9c46ee1f01d2b551048f5ff99a4659d98d04bed1',
+                            path: '$.vault.apyCurrent',
+                        },
+                    ],
+                },
+                {
+                    url: 'https://apr-api-plasma-earn.trevee.xyz/apy/current',
+                    scale: 100,
+                    extractors: [
+                        { type: 'path', token: '0x616185600989bf8339b58ac9e539d49536598343', path: '$.staking' },
+                    ],
+                },
             ],
             aave: {
                 markets: [AaveV3Plasma],
+            },
+            euler: {
+                chain: 'PLASMA',
+                url: 'https://raw.githubusercontent.com/euler-xyz/euler-labels/refs/heads/master/9745/vaults.json',
+                lens: '0xc55f6e262FE21Da068ece5D3fa015D8451bAf625',
             },
         },
     },

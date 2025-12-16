@@ -17,7 +17,7 @@ export default <NetworkData>{
         balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmUgRWkb5JUocGkVidpKtZFMHjexJzkBiSbjufURsXwn9X`,
         balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/Qmf61sxkSwc1x15jfonJeoYzHWWR8WJFqhWzgtVPNtar6H`,
         gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmPvzExEGhqUYBB1oVLdQDXoHWUxuBJ8Sb3Dowx5qt5xze`,
-        reliquary: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmUM8aU6H3gFx6JL65GQV5baPPjczU9hUb6VRiDQ1jEp3B`,
+        reliquary: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmYMfxyt92RnjG28gQJWjef3ziRzY1jkeBuqCoMixh1wy6`,
         sts: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmYmPEGqVZPyJKRah4NVbCYtxkHrXq3QzqBrnVQYBt15MU`,
     },
     eth: {
@@ -86,6 +86,9 @@ export default <NetworkData>{
             beetsAddress: '0x2d0e0814e62d80056181f5cd932274405966e4f0',
         },
         ybAprHandler: {
+            loops: {
+                token: '0xc76995054ce51dfbbc954840d699b2f33d2538ee',
+            },
             aave: {
                 markets: [AaveV3Sonic],
             },
@@ -103,9 +106,7 @@ export default <NetworkData>{
                     '0x52fc9e0a68b6a4c9b57b9d1d99fb71449a99dcd8', // solvbtc.bbn market 13
                     '0x016c306e103fbf48ec24810d078c65ad13c5f11b', // wS market 25
                     '0x219656f33c58488d09d518badf50aa8cdcaca2aa', // wETH market 26
-                    '0x5954ce6671d97d24b782920ddcdbb4b1e63ab2de', // usdc market 23
                     '0x6c49b18333a1135e9a376560c07e6d1fd0350eaf', // Ws market 28
-                    '0xda14a41dbda731f03a94cb722191639dd22b35b2', // frxUSD market 37
                     '0x0a94e18bdbccd048198806d7ff28a1b1d2590724', // scbtc market 32
                     '0x42ce2234fd5a26bf161477a996961c4d01f466a3', // usdc 33
                     '0xe6605932e4a686534d19005bb9db0fba1f101272', // scusdc 46
@@ -168,25 +169,6 @@ export default <NetworkData>{
                     ],
                 },
                 {
-                    url: 'https://api.goldsky.com/api/public/project_cmcccb4vz1nhh01x888di8lgk/subgraphs/mainstreet/0.0.1/gn',
-                    body: JSON.stringify({
-                        query: `{
-                    smsUsdStats(id: "statsSmsUsd") {
-                      apy
-                    }
-                  }`,
-                    }),
-                    headers: { 'Content-Type': 'application/json' },
-                    scale: 100,
-                    extractors: [
-                        {
-                            type: 'path',
-                            token: '0xc7990369da608c2f4903715e3bd22f2970536c29',
-                            path: '$.data.smsUsdStats.apy',
-                        },
-                    ],
-                },
-                {
                     url: 'https://yields.llama.fi/chart/104b3467-bba3-4923-851d-aa9e6ff47611',
                     scale: 100,
                     extractors: [
@@ -198,7 +180,7 @@ export default <NetworkData>{
                     ],
                 },
                 {
-                    url: 'https://api.originprotocol.com/api/v2/os/apr/trailing/7?146',
+                    url: 'https://api.originprotocol.com/api/v2/os/apr/trailing/7',
                     scale: 100,
                     extractors: [{ type: 'path', token: '0x9f0df7799f6fdad409300080cff680f5a23df4b1', path: '$.apr' }],
                 },
@@ -207,40 +189,19 @@ export default <NetworkData>{
                     scale: 100,
                     extractors: [{ type: 'path', token: '0xfa85fe5a8f5560e9039c04f2b0a90de1415abd70', path: '$.apy' }],
                 },
-                {
-                    url: 'https://usd-locks-api.rings.money/wrapper/apy',
-                    extractors: [{ type: 'path', token: '0x9fb76f7ce5fceaa2c42887ff441d46095e494206', path: '$.apy' }],
-                },
-                {
-                    url: 'https://eth-locks-api.rings.money/wrapper/apy',
-                    extractors: [{ type: 'path', token: '0xe8a41c62bb4d5863c6eadc96792cfe90a1f37c47', path: '$.apy' }],
-                },
-                {
-                    url: 'https://v2.silo.finance/api/detailed-vault/sonic-0xf6f87073cf8929c206a77b0694619dc776f89885',
-                    scale: 1e18,
-                    extractors: [
-                        { type: 'path', token: '0xf6f87073cf8929c206a77b0694619dc776f89885', path: '$.supplyApr' },
-                    ],
-                },
+                // {
+                //     url: 'https://locks-usd-api-sonic-earn.trevee.xyz/wrapper/apy',
+                //     extractors: [{ type: 'path', token: '0x9fb76f7ce5fceaa2c42887ff441d46095e494206', path: '$.apy' }],
+                // },
+                // {
+                //     url: 'https://locks-eth-api-sonic-earn.trevee.xyz/wrapper/apy',
+                //     extractors: [{ type: 'path', token: '0xe8a41c62bb4d5863c6eadc96792cfe90a1f37c47', path: '$.apy' }],
+                // },
                 {
                     url: 'https://v2.silo.finance/api/detailed-vault/sonic-0xded4ac8645619334186f28b8798e07ca354cfa0e',
                     scale: 1e18,
                     extractors: [
                         { type: 'path', token: '0xded4ac8645619334186f28b8798e07ca354cfa0e', path: '$.supplyApr' },
-                    ],
-                },
-                {
-                    url: 'https://v2.silo.finance/api/detailed-vault/sonic-0xb6a23cb29e512df41876b28d7a848bd831f9c5ba',
-                    scale: 1e18,
-                    extractors: [
-                        { type: 'path', token: '0xb6a23cb29e512df41876b28d7a848bd831f9c5ba', path: '$.supplyApr' },
-                    ],
-                },
-                {
-                    url: 'https://v2.silo.finance/api/detailed-vault/sonic-0x9a1bf5365edbb99c2c61ca6d9ffad0b705acfc6f',
-                    scale: 1e18,
-                    extractors: [
-                        { type: 'path', token: '0x9a1bf5365edbb99c2c61ca6d9ffad0b705acfc6f', path: '$.supplyApr' },
                     ],
                 },
                 {
@@ -256,25 +217,6 @@ export default <NetworkData>{
                     extractors: [
                         { type: 'path', token: '0x92ebf5a1fb4061b45222a6d76accf4698bde4b95', path: '$.supplyApr' },
                     ],
-                },
-                {
-                    url: 'https://v2.silo.finance/api/detailed-vault/sonic-0xf6bc16b79c469b94cdd25f3e2334dd4fee47a581',
-                    scale: 1e18,
-                    extractors: [
-                        { type: 'path', token: '0xf6bc16b79c469b94cdd25f3e2334dd4fee47a581', path: '$.supplyApr' },
-                    ],
-                },
-                {
-                    url: 'https://v2.silo.finance/api/detailed-vault/sonic-0x391b3f70e254d582588b27e97e48d1cfcdf0be7e',
-                    scale: 1e18,
-                    extractors: [
-                        { type: 'path', token: '0x391b3f70e254d582588b27e97e48d1cfcdf0be7e', path: '$.supplyApr' },
-                    ],
-                },
-                {
-                    url: 'https://api-v2.streamprotocol.money/vaults/xUSD/apy',
-                    scale: 100,
-                    extractors: [{ type: 'path', token: '0x6202b9f02e30e5e1c62cc01e4305450e5d83b926', path: '$.apy' }],
                 },
             ],
         },

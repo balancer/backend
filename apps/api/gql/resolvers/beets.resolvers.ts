@@ -1,10 +1,10 @@
 import { Resolvers } from '../generated-schema';
 import { beetsService } from '../../../../modules/beets/beets.service';
 import { getRequiredAccountAddress, isAdminRoute } from '../../../../modules/auth/auth-context';
-import { userService } from '../../../../modules/user/user.service';
 import { poolService } from '../../../../modules/pool/pool.service';
 import { headerChain } from '../../../../modules/context/header-chain';
 import { GraphQLError } from 'graphql';
+import { UserBalancesController } from '../../../../modules/user/user-balances-controller';
 
 const beetsResolvers: Resolvers = {
     Query: {
@@ -34,13 +34,12 @@ const beetsResolvers: Resolvers = {
                 dailyDeposited: snapshot.dailyDeposited,
                 dailyWithdrawn: snapshot.dailyWithdrawn,
                 levelBalances: snapshot.levelBalances,
-                tokenBalances: snapshot.tokenBalances,
             }));
         },
         userGetFbeetsBalance: async (parent, {}, context) => {
             const accountAddress = getRequiredAccountAddress(context);
 
-            const balance = await userService.getUserFbeetsBalance(accountAddress);
+            const balance = await UserBalancesController().getUserFbeetsBalance(accountAddress);
 
             return {
                 id: balance.tokenAddress,
@@ -49,13 +48,6 @@ const beetsResolvers: Resolvers = {
         },
     },
     Mutation: {
-        beetsSyncFbeetsRatio: async (parent, {}, context) => {
-            isAdminRoute(context);
-
-            await beetsService.syncFbeetsRatio();
-
-            return 'success';
-        },
         beetsPoolLoadReliquarySnapshotsForAllFarms: async (parent, { chain }, context) => {
             isAdminRoute(context);
 

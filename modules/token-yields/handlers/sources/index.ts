@@ -8,3 +8,4 @@ export * from './sts-yield-handler';
 export * from './hypurrfi-yield-handler';
 export * from './morpho-hyperevm-yield-handler';
 export * from './rate-provider-handler';
+export * from './loops-yield-handler';

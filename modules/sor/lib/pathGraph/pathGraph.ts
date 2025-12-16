@@ -3,6 +3,7 @@ import { PathGraphEdgeData, PathGraphTraversalConfig } from './pathGraphTypes';
 import { BasePool } from '../poolsV2/basePool';
 import { PathLocal } from '../path';
 import { formatUnits } from 'viem';
+import { SorAbortError } from '../../errors';
 
 const DEFAULT_MAX_PATHS_PER_TOKEN_PAIR = 4;
 
@@ -72,13 +73,20 @@ export class PathGraph {
         swapAmount,
         swapKind,
         graphTraversalConfig,
+        signal,
     }: {
         tokenIn: Token;
         tokenOut: Token;
         swapAmount: TokenAmount;
         swapKind: SwapKind;
         graphTraversalConfig?: Partial<PathGraphTraversalConfig>;
+        signal?: AbortSignal;
     }): PathLocal[] {
+        // Check if already aborted
+        if (signal?.aborted) {
+            throw new SorAbortError();
+        }
+
         const isHyperEvm = tokenIn.chainId === 999;
 
         // apply defaults, allowing caller override whatever they'd like
@@ -100,7 +108,13 @@ export class PathGraph {
             tokenIn: tokenIn.address,
             tokenOut: tokenOut.address,
             config,
+            signal,
         });
+
+        // Check if aborted after finding token paths
+        if (signal?.aborted) {
+            throw new SorAbortError();
+        }
 
         // Step 1: Generate all candidate combinations across all token paths
         const allCandidates: Array<{
@@ -110,6 +124,11 @@ export class PathGraph {
         }> = [];
 
         for (const tokenPath of tokenPaths) {
+            // Check for abort periodically
+            if (signal?.aborted) {
+                throw new SorAbortError();
+            }
+
             const segmentCount = tokenPath.length - 1;
             if (segmentCount <= 0) continue;
 
@@ -139,8 +158,19 @@ export class PathGraph {
             })),
         );
 
+        // Check if aborted before validation
+        if (signal?.aborted) {
+            throw new SorAbortError();
+        }
+
         // Step 2: Expand and validate the selected candidates
-        const paths = this.expandAndValidateCandidates(flattenedCandidates, swapKind, minLimitThreshold, config);
+        const paths = this.expandAndValidateCandidates(
+            flattenedCandidates,
+            swapKind,
+            minLimitThreshold,
+            config,
+            signal,
+        );
 
         return paths.map((path) => {
             const pathTokens: Token[] = path.map((segment) => segment.tokenOut);
@@ -300,15 +330,22 @@ export class PathGraph {
         tokenIn,
         tokenOut,
         config,
+        signal,
     }: {
         tokenIn: string;
         tokenOut: string;
         config: PathGraphTraversalConfig;
+        signal?: AbortSignal;
     }): string[][] {
         const results: string[][] = [];
         const queue: { node: string; path: string[] }[] = [{ node: tokenIn, path: [tokenIn] }];
 
         while (queue.length > 0 && results.length < config.maxTokenPaths && queue.length < config.maxQueue) {
+            // Check for abort in the main loop
+            if (signal?.aborted) {
+                throw new SorAbortError();
+            }
+
             const { node, path } = queue.shift()!;
 
             const neighbors = this.edges.get(node);
@@ -503,6 +540,7 @@ export class PathGraph {
      * @param swapKind - Type of swap (exact input or exact output)
      * @param minLimitThreshold - Minimum swap limit threshold
      * @param config - Path graph traversal configuration
+     * @param signal - AbortSignal for cancellation
      * @returns Array of valid paths that meet the criteria
      */
     private expandAndValidateCandidates(
@@ -514,10 +552,16 @@ export class PathGraph {
         swapKind: SwapKind,
         minLimitThreshold: bigint,
         config: PathGraphTraversalConfig,
+        signal?: AbortSignal,
     ): PathGraphEdgeData[][] {
         const validPaths: PathGraphEdgeData[][] = [];
 
         for (const { perSegmentEdges, candidate } of topCandidates) {
+            // Check for abort periodically
+            if (signal?.aborted) {
+                throw new SorAbortError();
+            }
+
             try {
                 const path = this.expandTokenPathWithRanks({ perSegmentEdges, ranks: candidate.ranks });
                 if (this.isValidPath({ path, config, swapKind, minLimitThreshold })) {

@@ -109,6 +109,7 @@ export type GqlChain =
     | 'POLYGON'
     | 'SEPOLIA'
     | 'SONIC'
+    | 'XLAYER'
     | 'ZKEVM';
 
 export interface GqlFeaturePoolGroupItemExternalLink {
@@ -211,13 +212,6 @@ export interface GqlLbpTopTrade {
     value: Scalars['String'];
 }
 
-export interface GqlLatestSyncedBlocks {
-    __typename?: 'GqlLatestSyncedBlocks';
-    poolSyncBlock: Scalars['BigInt'];
-    userStakeSyncBlock: Scalars['BigInt'];
-    userWalletSyncBlock: Scalars['BigInt'];
-}
-
 export interface GqlLoopsData {
     __typename?: 'GqlLoopsData';
     /** Actual TotalSupply of LoopS. */
@@ -238,14 +232,10 @@ export interface GqlLoopsData {
     nav: Scalars['String'];
     /** The current rate of LoopS against S. */
     rate: Scalars['String'];
-    /** The current Sonic points multiplier for LoopS */
-    sonicPointsMultiplier: Scalars['String'];
     /** The current amount of stS supplied to the Aave market */
     stSAaveMarketSupply: Scalars['String'];
     /** The current cap on the stS market on Aave */
     stSAaveMarketSupplyCap: Scalars['String'];
-    /** The health factor that the Aave position should have */
-    targetHealthFactor: Scalars['String'];
     /** Net Asset Value in USD. */
     tvl: Scalars['String'];
 }
@@ -606,43 +596,6 @@ export interface GqlPoolBase {
      * @deprecated Removed without replacement
      */
     withdrawConfig: GqlPoolWithdrawConfig;
-}
-
-export interface GqlPoolBatchSwap {
-    __typename?: 'GqlPoolBatchSwap';
-    chain: GqlChain;
-    id: Scalars['ID'];
-    swaps: Array<GqlPoolBatchSwapSwap>;
-    timestamp: Scalars['Int'];
-    tokenAmountIn: Scalars['String'];
-    tokenAmountOut: Scalars['String'];
-    tokenIn: Scalars['String'];
-    tokenInPrice: Scalars['Float'];
-    tokenOut: Scalars['String'];
-    tokenOutPrice: Scalars['Float'];
-    tx: Scalars['String'];
-    userAddress: Scalars['String'];
-    valueUSD: Scalars['Float'];
-}
-
-export interface GqlPoolBatchSwapPool {
-    __typename?: 'GqlPoolBatchSwapPool';
-    id: Scalars['ID'];
-    tokens: Array<Scalars['String']>;
-}
-
-export interface GqlPoolBatchSwapSwap {
-    __typename?: 'GqlPoolBatchSwapSwap';
-    id: Scalars['ID'];
-    pool: PoolForBatchSwap;
-    timestamp: Scalars['Int'];
-    tokenAmountIn: Scalars['String'];
-    tokenAmountOut: Scalars['String'];
-    tokenIn: Scalars['String'];
-    tokenOut: Scalars['String'];
-    tx: Scalars['String'];
-    userAddress: Scalars['String'];
-    valueUSD: Scalars['Float'];
 }
 
 export interface GqlPoolComposableStable extends GqlPoolBase {
@@ -1129,11 +1082,6 @@ export interface GqlPoolJoinExitAmount {
     amount: Scalars['String'];
 }
 
-export interface GqlPoolJoinExitFilter {
-    chainIn?: InputMaybe<Array<GqlChain>>;
-    poolIdIn?: InputMaybe<Array<Scalars['String']>>;
-}
-
 export type GqlPoolJoinExitType = 'Exit' | 'Join';
 
 export interface GqlPoolLiquidityBootstrapping extends GqlPoolBase {
@@ -1541,6 +1489,7 @@ export interface GqlPoolSnapshot {
     amounts: Array<Scalars['String']>;
     chain: GqlChain;
     fees24h: Scalars['String'];
+    /** @deprecated Field no longer supported */
     holdersCount: Scalars['String'];
     id: Scalars['ID'];
     poolId: Scalars['String'];
@@ -1550,8 +1499,11 @@ export interface GqlPoolSnapshot {
     timestamp: Scalars['Int'];
     totalLiquidity: Scalars['String'];
     totalShares: Scalars['String'];
+    /** @deprecated Field no longer supported */
     totalSurplus: Scalars['String'];
+    /** @deprecated Field no longer supported */
     totalSwapFee: Scalars['String'];
+    /** @deprecated Field no longer supported */
     totalSwapVolume: Scalars['String'];
     volume24h: Scalars['String'];
 }
@@ -1792,13 +1744,6 @@ export interface GqlPoolSwapEventV3 extends GqlPoolEvent {
     userAddress: Scalars['String'];
     /** The value of the event in USD. */
     valueUSD: Scalars['Float'];
-}
-
-export interface GqlPoolSwapFilter {
-    chainIn?: InputMaybe<Array<GqlChain>>;
-    poolIdIn?: InputMaybe<Array<Scalars['String']>>;
-    tokenInIn?: InputMaybe<Array<Scalars['String']>>;
-    tokenOutIn?: InputMaybe<Array<Scalars['String']>>;
 }
 
 export interface GqlPoolTimePeriod {
@@ -2175,20 +2120,9 @@ export interface GqlReliquaryFarmSnapshot {
     levelBalances: Array<GqlReliquaryFarmLevelSnapshot>;
     relicCount: Scalars['String'];
     timestamp: Scalars['Int'];
-    tokenBalances: Array<GqlReliquaryTokenBalanceSnapshot>;
     totalBalance: Scalars['String'];
     totalLiquidity: Scalars['String'];
     userCount: Scalars['String'];
-}
-
-export interface GqlReliquaryTokenBalanceSnapshot {
-    __typename?: 'GqlReliquaryTokenBalanceSnapshot';
-    address: Scalars['String'];
-    balance: Scalars['String'];
-    decimals: Scalars['Int'];
-    id: Scalars['ID'];
-    name: Scalars['String'];
-    symbol: Scalars['String'];
 }
 
 export interface GqlSftmxStakingData {
@@ -2868,7 +2802,6 @@ export interface Mutation {
     poolReloadAllPoolAprs: Scalars['String'];
     poolReloadPools: Array<GqlPoolMutationResult>;
     poolReloadStakingForAllPools: Scalars['String'];
-    poolSyncAllCowSnapshots: Array<GqlPoolMutationResult>;
     poolSyncAllPoolsFromSubgraph: Array<Scalars['String']>;
     poolSyncFxQuoteTokens: Array<GqlPoolMutationResult>;
     poolUpdateLiquidityValuesForAllPools: Scalars['String'];
@@ -2883,9 +2816,6 @@ export interface Mutation {
     tokenSyncTokenDefinitions: Scalars['String'];
     userInitStakedBalances: Scalars['String'];
     userInitWalletBalancesForAllPools: Scalars['String'];
-    userInitWalletBalancesForPool: Scalars['String'];
-    userSyncBalance: Scalars['String'];
-    userSyncBalanceAllPools: Scalars['String'];
     userSyncChangedStakedBalances: Scalars['String'];
     userSyncChangedWalletBalancesForAllPools: Scalars['String'];
     veBalSyncAllUserBalances: Scalars['String'];
@@ -2905,8 +2835,8 @@ export interface MutationPoolLoadOnChainDataForAllPoolsArgs {
 }
 
 export interface MutationPoolLoadSnapshotsForPoolsArgs {
-    poolIds: Array<Scalars['String']>;
-    reload?: InputMaybe<Scalars['Boolean']>;
+    chain: GqlChain;
+    poolId: Scalars['String'];
 }
 
 export interface MutationPoolReloadAllPoolAprsArgs {
@@ -2919,10 +2849,6 @@ export interface MutationPoolReloadPoolsArgs {
 
 export interface MutationPoolReloadStakingForAllPoolsArgs {
     stakingTypes: Array<GqlPoolStakingType>;
-}
-
-export interface MutationPoolSyncAllCowSnapshotsArgs {
-    chains: Array<GqlChain>;
 }
 
 export interface MutationPoolSyncFxQuoteTokensArgs {
@@ -2952,23 +2878,6 @@ export interface MutationUserInitStakedBalancesArgs {
 
 export interface MutationUserInitWalletBalancesForAllPoolsArgs {
     chain?: InputMaybe<GqlChain>;
-}
-
-export interface MutationUserInitWalletBalancesForPoolArgs {
-    poolId: Scalars['String'];
-}
-
-export interface MutationUserSyncBalanceArgs {
-    poolId: Scalars['String'];
-}
-
-export interface PoolForBatchSwap {
-    __typename?: 'PoolForBatchSwap';
-    allTokens?: Maybe<Array<TokenForBatchSwapPool>>;
-    id: Scalars['String'];
-    name: Scalars['String'];
-    symbol: Scalars['String'];
-    type: GqlPoolType;
 }
 
 export interface QuantAmmWeightedDetail {
@@ -3015,7 +2924,6 @@ export interface Query {
     blocksGetBlocksPerSecond: Scalars['Float'];
     /** @deprecated Field no longer supported */
     blocksGetBlocksPerYear: Scalars['Float'];
-    latestSyncedBlocks: GqlLatestSyncedBlocks;
     lbpPriceChart?: Maybe<Array<LbpPriceChartData>>;
     /** Get the LoopS data */
     loopsGetData: GqlLoopsData;
@@ -3329,14 +3237,6 @@ export interface Token {
     decimals: Scalars['Int'];
 }
 
-export interface TokenForBatchSwapPool {
-    __typename?: 'TokenForBatchSwapPool';
-    address: Scalars['String'];
-    isNested: Scalars['Boolean'];
-    isPhantomBpt: Scalars['Boolean'];
-    weight?: Maybe<Scalars['BigDecimal']>;
-}
-
 export type WithIndex<TObject> = TObject & Record<string, any>;
 export type ResolversObject<TObject> = WithIndex<TObject>;
 
@@ -3440,7 +3340,6 @@ export type ResolversTypes = ResolversObject<{
     GqlHookReviewData: ResolverTypeWrapper<GqlHookReviewData>;
     GqlHookType: GqlHookType;
     GqlLBPTopTrade: ResolverTypeWrapper<GqlLbpTopTrade>;
-    GqlLatestSyncedBlocks: ResolverTypeWrapper<GqlLatestSyncedBlocks>;
     GqlLoopsData: ResolverTypeWrapper<GqlLoopsData>;
     GqlNestedPool: ResolverTypeWrapper<GqlNestedPool>;
     GqlPoolAddRemoveEventV3: ResolverTypeWrapper<GqlPoolAddRemoveEventV3>;
@@ -3469,9 +3368,6 @@ export type ResolversTypes = ResolversObject<{
         | ResolversTypes['GqlPoolReClamm']
         | ResolversTypes['GqlPoolStable']
         | ResolversTypes['GqlPoolWeighted'];
-    GqlPoolBatchSwap: ResolverTypeWrapper<GqlPoolBatchSwap>;
-    GqlPoolBatchSwapPool: ResolverTypeWrapper<GqlPoolBatchSwapPool>;
-    GqlPoolBatchSwapSwap: ResolverTypeWrapper<GqlPoolBatchSwapSwap>;
     GqlPoolComposableStable: ResolverTypeWrapper<
         Omit<GqlPoolComposableStable, 'tokens'> & { tokens: Array<ResolversTypes['GqlPoolTokenUnion']> }
     >;
@@ -3507,7 +3403,6 @@ export type ResolversTypes = ResolversObject<{
     GqlPoolInvestOption: ResolverTypeWrapper<GqlPoolInvestOption>;
     GqlPoolJoinExit: ResolverTypeWrapper<GqlPoolJoinExit>;
     GqlPoolJoinExitAmount: ResolverTypeWrapper<GqlPoolJoinExitAmount>;
-    GqlPoolJoinExitFilter: GqlPoolJoinExitFilter;
     GqlPoolJoinExitType: GqlPoolJoinExitType;
     GqlPoolLiquidityBootstrapping: ResolverTypeWrapper<
         Omit<GqlPoolLiquidityBootstrapping, 'tokens'> & { tokens: Array<ResolversTypes['GqlPoolTokenUnion']> }
@@ -3544,7 +3439,6 @@ export type ResolversTypes = ResolversObject<{
     GqlPoolSwap: ResolverTypeWrapper<GqlPoolSwap>;
     GqlPoolSwapEventCowAmm: ResolverTypeWrapper<GqlPoolSwapEventCowAmm>;
     GqlPoolSwapEventV3: ResolverTypeWrapper<GqlPoolSwapEventV3>;
-    GqlPoolSwapFilter: GqlPoolSwapFilter;
     GqlPoolTimePeriod: GqlPoolTimePeriod;
     GqlPoolToken: ResolverTypeWrapper<GqlPoolToken>;
     GqlPoolTokenBase: ResolversTypes['GqlPoolToken'] | ResolversTypes['GqlPoolTokenComposableStable'];
@@ -3582,7 +3476,6 @@ export type ResolversTypes = ResolversObject<{
     GqlRelicSnapshot: ResolverTypeWrapper<GqlRelicSnapshot>;
     GqlReliquaryFarmLevelSnapshot: ResolverTypeWrapper<GqlReliquaryFarmLevelSnapshot>;
     GqlReliquaryFarmSnapshot: ResolverTypeWrapper<GqlReliquaryFarmSnapshot>;
-    GqlReliquaryTokenBalanceSnapshot: ResolverTypeWrapper<GqlReliquaryTokenBalanceSnapshot>;
     GqlSftmxStakingData: ResolverTypeWrapper<GqlSftmxStakingData>;
     GqlSftmxStakingSnapshot: ResolverTypeWrapper<GqlSftmxStakingSnapshot>;
     GqlSftmxStakingSnapshotDataRange: GqlSftmxStakingSnapshotDataRange;
@@ -3637,7 +3530,6 @@ export type ResolversTypes = ResolversObject<{
     LiquidityManagement: ResolverTypeWrapper<LiquidityManagement>;
     MevTaxHookParams: ResolverTypeWrapper<MevTaxHookParams>;
     Mutation: ResolverTypeWrapper<{}>;
-    PoolForBatchSwap: ResolverTypeWrapper<PoolForBatchSwap>;
     QuantAMMWeightedDetail: ResolverTypeWrapper<QuantAmmWeightedDetail>;
     QuantAmmWeightSnapshot: ResolverTypeWrapper<QuantAmmWeightSnapshot>;
     QuantAmmWeightedParams: ResolverTypeWrapper<QuantAmmWeightedParams>;
@@ -3645,7 +3537,6 @@ export type ResolversTypes = ResolversObject<{
     StableSurgeHookParams: ResolverTypeWrapper<StableSurgeHookParams>;
     String: ResolverTypeWrapper<Scalars['String']>;
     Token: ResolverTypeWrapper<Token>;
-    TokenForBatchSwapPool: ResolverTypeWrapper<TokenForBatchSwapPool>;
 }>;
 
 /** Mapping between all available schema types and the resolvers parents */
@@ -3672,7 +3563,6 @@ export type ResolversParentTypes = ResolversObject<{
     GqlHookData: GqlHookData;
     GqlHookReviewData: GqlHookReviewData;
     GqlLBPTopTrade: GqlLbpTopTrade;
-    GqlLatestSyncedBlocks: GqlLatestSyncedBlocks;
     GqlLoopsData: GqlLoopsData;
     GqlNestedPool: GqlNestedPool;
     GqlPoolAddRemoveEventV3: GqlPoolAddRemoveEventV3;
@@ -3698,9 +3588,6 @@ export type ResolversParentTypes = ResolversObject<{
         | ResolversParentTypes['GqlPoolReClamm']
         | ResolversParentTypes['GqlPoolStable']
         | ResolversParentTypes['GqlPoolWeighted'];
-    GqlPoolBatchSwap: GqlPoolBatchSwap;
-    GqlPoolBatchSwapPool: GqlPoolBatchSwapPool;
-    GqlPoolBatchSwapSwap: GqlPoolBatchSwapSwap;
     GqlPoolComposableStable: Omit<GqlPoolComposableStable, 'tokens'> & {
         tokens: Array<ResolversParentTypes['GqlPoolTokenUnion']>;
     };
@@ -3729,7 +3616,6 @@ export type ResolversParentTypes = ResolversObject<{
     GqlPoolInvestOption: GqlPoolInvestOption;
     GqlPoolJoinExit: GqlPoolJoinExit;
     GqlPoolJoinExitAmount: GqlPoolJoinExitAmount;
-    GqlPoolJoinExitFilter: GqlPoolJoinExitFilter;
     GqlPoolLiquidityBootstrapping: Omit<GqlPoolLiquidityBootstrapping, 'tokens'> & {
         tokens: Array<ResolversParentTypes['GqlPoolTokenUnion']>;
     };
@@ -3757,7 +3643,6 @@ export type ResolversParentTypes = ResolversObject<{
     GqlPoolSwap: GqlPoolSwap;
     GqlPoolSwapEventCowAmm: GqlPoolSwapEventCowAmm;
     GqlPoolSwapEventV3: GqlPoolSwapEventV3;
-    GqlPoolSwapFilter: GqlPoolSwapFilter;
     GqlPoolTimePeriod: GqlPoolTimePeriod;
     GqlPoolToken: GqlPoolToken;
     GqlPoolTokenBase: ResolversParentTypes['GqlPoolToken'] | ResolversParentTypes['GqlPoolTokenComposableStable'];
@@ -3792,7 +3677,6 @@ export type ResolversParentTypes = ResolversObject<{
     GqlRelicSnapshot: GqlRelicSnapshot;
     GqlReliquaryFarmLevelSnapshot: GqlReliquaryFarmLevelSnapshot;
     GqlReliquaryFarmSnapshot: GqlReliquaryFarmSnapshot;
-    GqlReliquaryTokenBalanceSnapshot: GqlReliquaryTokenBalanceSnapshot;
     GqlSftmxStakingData: GqlSftmxStakingData;
     GqlSftmxStakingSnapshot: GqlSftmxStakingSnapshot;
     GqlSftmxStakingVault: GqlSftmxStakingVault;
@@ -3842,7 +3726,6 @@ export type ResolversParentTypes = ResolversObject<{
     LiquidityManagement: LiquidityManagement;
     MevTaxHookParams: MevTaxHookParams;
     Mutation: {};
-    PoolForBatchSwap: PoolForBatchSwap;
     QuantAMMWeightedDetail: QuantAmmWeightedDetail;
     QuantAmmWeightSnapshot: QuantAmmWeightSnapshot;
     QuantAmmWeightedParams: QuantAmmWeightedParams;
@@ -3850,7 +3733,6 @@ export type ResolversParentTypes = ResolversObject<{
     StableSurgeHookParams: StableSurgeHookParams;
     String: Scalars['String'];
     Token: Token;
-    TokenForBatchSwapPool: TokenForBatchSwapPool;
 }>;
 
 export interface AmountHumanReadableScalarConfig
@@ -4018,16 +3900,6 @@ export type GqlLbpTopTradeResolvers<
     __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type GqlLatestSyncedBlocksResolvers<
-    ContextType = ResolverContext,
-    ParentType extends ResolversParentTypes['GqlLatestSyncedBlocks'] = ResolversParentTypes['GqlLatestSyncedBlocks'],
-> = ResolversObject<{
-    poolSyncBlock?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
-    userStakeSyncBlock?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
-    userWalletSyncBlock?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
-    __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-}>;
-
 export type GqlLoopsDataResolvers<
     ContextType = ResolverContext,
     ParentType extends ResolversParentTypes['GqlLoopsData'] = ResolversParentTypes['GqlLoopsData'],
@@ -4041,10 +3913,8 @@ export type GqlLoopsDataResolvers<
     leverage?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
     nav?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     rate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    sonicPointsMultiplier?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     stSAaveMarketSupply?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     stSAaveMarketSupplyCap?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    targetHealthFactor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     tvl?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
@@ -4254,52 +4124,6 @@ export type GqlPoolBaseResolvers<
     vaultVersion?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     version?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     withdrawConfig?: Resolver<ResolversTypes['GqlPoolWithdrawConfig'], ParentType, ContextType>;
-}>;
-
-export type GqlPoolBatchSwapResolvers<
-    ContextType = ResolverContext,
-    ParentType extends ResolversParentTypes['GqlPoolBatchSwap'] = ResolversParentTypes['GqlPoolBatchSwap'],
-> = ResolversObject<{
-    chain?: Resolver<ResolversTypes['GqlChain'], ParentType, ContextType>;
-    id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-    swaps?: Resolver<Array<ResolversTypes['GqlPoolBatchSwapSwap']>, ParentType, ContextType>;
-    timestamp?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-    tokenAmountIn?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    tokenAmountOut?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    tokenIn?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    tokenInPrice?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
-    tokenOut?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    tokenOutPrice?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
-    tx?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    userAddress?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    valueUSD?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
-    __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-}>;
-
-export type GqlPoolBatchSwapPoolResolvers<
-    ContextType = ResolverContext,
-    ParentType extends ResolversParentTypes['GqlPoolBatchSwapPool'] = ResolversParentTypes['GqlPoolBatchSwapPool'],
-> = ResolversObject<{
-    id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-    tokens?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
-    __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-}>;
-
-export type GqlPoolBatchSwapSwapResolvers<
-    ContextType = ResolverContext,
-    ParentType extends ResolversParentTypes['GqlPoolBatchSwapSwap'] = ResolversParentTypes['GqlPoolBatchSwapSwap'],
-> = ResolversObject<{
-    id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-    pool?: Resolver<ResolversTypes['PoolForBatchSwap'], ParentType, ContextType>;
-    timestamp?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-    tokenAmountIn?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    tokenAmountOut?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    tokenIn?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    tokenOut?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    tx?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    userAddress?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    valueUSD?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
-    __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type GqlPoolComposableStableResolvers<
@@ -5550,23 +5374,9 @@ export type GqlReliquaryFarmSnapshotResolvers<
     levelBalances?: Resolver<Array<ResolversTypes['GqlReliquaryFarmLevelSnapshot']>, ParentType, ContextType>;
     relicCount?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     timestamp?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-    tokenBalances?: Resolver<Array<ResolversTypes['GqlReliquaryTokenBalanceSnapshot']>, ParentType, ContextType>;
     totalBalance?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     totalLiquidity?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     userCount?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-}>;
-
-export type GqlReliquaryTokenBalanceSnapshotResolvers<
-    ContextType = ResolverContext,
-    ParentType extends ResolversParentTypes['GqlReliquaryTokenBalanceSnapshot'] = ResolversParentTypes['GqlReliquaryTokenBalanceSnapshot'],
-> = ResolversObject<{
-    address?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    balance?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    decimals?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-    id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-    name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    symbol?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -6109,7 +5919,7 @@ export type MutationResolvers<
         ResolversTypes['String'],
         ParentType,
         ContextType,
-        RequireFields<MutationPoolLoadSnapshotsForPoolsArgs, 'poolIds'>
+        RequireFields<MutationPoolLoadSnapshotsForPoolsArgs, 'chain' | 'poolId'>
     >;
     poolReloadAllPoolAprs?: Resolver<
         ResolversTypes['String'],
@@ -6128,12 +5938,6 @@ export type MutationResolvers<
         ParentType,
         ContextType,
         RequireFields<MutationPoolReloadStakingForAllPoolsArgs, 'stakingTypes'>
-    >;
-    poolSyncAllCowSnapshots?: Resolver<
-        Array<ResolversTypes['GqlPoolMutationResult']>,
-        ParentType,
-        ContextType,
-        RequireFields<MutationPoolSyncAllCowSnapshotsArgs, 'chains'>
     >;
     poolSyncAllPoolsFromSubgraph?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
     poolSyncFxQuoteTokens?: Resolver<
@@ -6184,35 +5988,10 @@ export type MutationResolvers<
         ContextType,
         RequireFields<MutationUserInitWalletBalancesForAllPoolsArgs, never>
     >;
-    userInitWalletBalancesForPool?: Resolver<
-        ResolversTypes['String'],
-        ParentType,
-        ContextType,
-        RequireFields<MutationUserInitWalletBalancesForPoolArgs, 'poolId'>
-    >;
-    userSyncBalance?: Resolver<
-        ResolversTypes['String'],
-        ParentType,
-        ContextType,
-        RequireFields<MutationUserSyncBalanceArgs, 'poolId'>
-    >;
-    userSyncBalanceAllPools?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     userSyncChangedStakedBalances?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     userSyncChangedWalletBalancesForAllPools?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     veBalSyncAllUserBalances?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     veBalSyncTotalSupply?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-}>;
-
-export type PoolForBatchSwapResolvers<
-    ContextType = ResolverContext,
-    ParentType extends ResolversParentTypes['PoolForBatchSwap'] = ResolversParentTypes['PoolForBatchSwap'],
-> = ResolversObject<{
-    allTokens?: Resolver<Maybe<Array<ResolversTypes['TokenForBatchSwapPool']>>, ParentType, ContextType>;
-    id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    symbol?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    type?: Resolver<ResolversTypes['GqlPoolType'], ParentType, ContextType>;
-    __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type QuantAmmWeightedDetailResolvers<
@@ -6275,7 +6054,6 @@ export type QueryResolvers<
     blocksGetBlocksPerDay?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
     blocksGetBlocksPerSecond?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
     blocksGetBlocksPerYear?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
-    latestSyncedBlocks?: Resolver<ResolversTypes['GqlLatestSyncedBlocks'], ParentType, ContextType>;
     lbpPriceChart?: Resolver<
         Maybe<Array<ResolversTypes['LBPPriceChartData']>>,
         ParentType,
@@ -6504,17 +6282,6 @@ export type TokenResolvers<
     __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type TokenForBatchSwapPoolResolvers<
-    ContextType = ResolverContext,
-    ParentType extends ResolversParentTypes['TokenForBatchSwapPool'] = ResolversParentTypes['TokenForBatchSwapPool'],
-> = ResolversObject<{
-    address?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    isNested?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-    isPhantomBpt?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-    weight?: Resolver<Maybe<ResolversTypes['BigDecimal']>, ParentType, ContextType>;
-    __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-}>;
-
 export type Resolvers<ContextType = ResolverContext> = ResolversObject<{
     AmountHumanReadable?: GraphQLScalarType;
     BigDecimal?: GraphQLScalarType;
@@ -6534,7 +6301,6 @@ export type Resolvers<ContextType = ResolverContext> = ResolversObject<{
     GqlHookData?: GqlHookDataResolvers<ContextType>;
     GqlHookReviewData?: GqlHookReviewDataResolvers<ContextType>;
     GqlLBPTopTrade?: GqlLbpTopTradeResolvers<ContextType>;
-    GqlLatestSyncedBlocks?: GqlLatestSyncedBlocksResolvers<ContextType>;
     GqlLoopsData?: GqlLoopsDataResolvers<ContextType>;
     GqlNestedPool?: GqlNestedPoolResolvers<ContextType>;
     GqlPoolAddRemoveEventV3?: GqlPoolAddRemoveEventV3Resolvers<ContextType>;
@@ -6545,9 +6311,6 @@ export type Resolvers<ContextType = ResolverContext> = ResolversObject<{
     GqlPoolAprTotal?: GqlPoolAprTotalResolvers<ContextType>;
     GqlPoolAprValue?: GqlPoolAprValueResolvers<ContextType>;
     GqlPoolBase?: GqlPoolBaseResolvers<ContextType>;
-    GqlPoolBatchSwap?: GqlPoolBatchSwapResolvers<ContextType>;
-    GqlPoolBatchSwapPool?: GqlPoolBatchSwapPoolResolvers<ContextType>;
-    GqlPoolBatchSwapSwap?: GqlPoolBatchSwapSwapResolvers<ContextType>;
     GqlPoolComposableStable?: GqlPoolComposableStableResolvers<ContextType>;
     GqlPoolComposableStableNested?: GqlPoolComposableStableNestedResolvers<ContextType>;
     GqlPoolDynamicData?: GqlPoolDynamicDataResolvers<ContextType>;
@@ -6608,7 +6371,6 @@ export type Resolvers<ContextType = ResolverContext> = ResolversObject<{
     GqlRelicSnapshot?: GqlRelicSnapshotResolvers<ContextType>;
     GqlReliquaryFarmLevelSnapshot?: GqlReliquaryFarmLevelSnapshotResolvers<ContextType>;
     GqlReliquaryFarmSnapshot?: GqlReliquaryFarmSnapshotResolvers<ContextType>;
-    GqlReliquaryTokenBalanceSnapshot?: GqlReliquaryTokenBalanceSnapshotResolvers<ContextType>;
     GqlSftmxStakingData?: GqlSftmxStakingDataResolvers<ContextType>;
     GqlSftmxStakingSnapshot?: GqlSftmxStakingSnapshotResolvers<ContextType>;
     GqlSftmxStakingVault?: GqlSftmxStakingVaultResolvers<ContextType>;
@@ -6646,12 +6408,10 @@ export type Resolvers<ContextType = ResolverContext> = ResolversObject<{
     LiquidityManagement?: LiquidityManagementResolvers<ContextType>;
     MevTaxHookParams?: MevTaxHookParamsResolvers<ContextType>;
     Mutation?: MutationResolvers<ContextType>;
-    PoolForBatchSwap?: PoolForBatchSwapResolvers<ContextType>;
     QuantAMMWeightedDetail?: QuantAmmWeightedDetailResolvers<ContextType>;
     QuantAmmWeightSnapshot?: QuantAmmWeightSnapshotResolvers<ContextType>;
     QuantAmmWeightedParams?: QuantAmmWeightedParamsResolvers<ContextType>;
     Query?: QueryResolvers<ContextType>;
     StableSurgeHookParams?: StableSurgeHookParamsResolvers<ContextType>;
     Token?: TokenResolvers<ContextType>;
-    TokenForBatchSwapPool?: TokenForBatchSwapPoolResolvers<ContextType>;
 }>;

@@ -10,7 +10,6 @@ import {
     PrismaTokenPrice,
     PrismaTokenTypeOption,
 } from '@prisma/client';
-import { CoingeckoDataService } from './lib/coingecko-data.service';
 import { Cache, CacheClass } from 'memory-cache';
 import {
     Erc4626ReviewData,
@@ -21,7 +20,6 @@ import {
     QueryTokenGetTokensArgs,
 } from '../../apps/api/gql/generated-schema';
 import { Dictionary } from 'lodash';
-import { GithubContentService } from '../content/github-content.service';
 import config from '../../config';
 import murmurhash from 'murmurhash';
 
@@ -31,21 +29,8 @@ const ALL_TOKENS_CACHE_KEY = `tokens:all`;
 
 export class TokenService {
     cache: CacheClass<string, any>;
-    constructor(
-        private readonly tokenPriceService: TokenPriceService,
-        private readonly coingeckoDataService: CoingeckoDataService,
-    ) {
+    constructor(private readonly tokenPriceService: TokenPriceService) {
         this.cache = new Cache<string, any>();
-    }
-
-    public async syncTokenContentData(chain: Chain, deploymentEnv = process.env.DEPLOYMENT_ENV) {
-        //sync coingecko Ids first, then override Ids from the content service
-        const chains = Object.keys(config).filter(
-            (chain) => (deploymentEnv === 'production' && chain !== 'SEPOLIA') || true,
-        ) as Chain[];
-
-        await this.coingeckoDataService.syncCoingeckoIds();
-        await new GithubContentService().syncTokenContentData(chains);
     }
 
     public async getToken(address: string, chain: Chain): Promise<PrismaToken | null> {
@@ -133,14 +118,11 @@ export class TokenService {
                     },
                 })
                 .then((types) =>
-                    types.reduce(
-                        (agg, item) => {
-                            agg[`${item.chain}-${item.tokenAddress}`] ||= [];
-                            agg[`${item.chain}-${item.tokenAddress}`].push(item.type);
-                            return agg;
-                        },
-                        {} as Record<string, PrismaTokenTypeOption[]>,
-                    ),
+                    types.reduce((agg, item) => {
+                        agg[`${item.chain}-${item.tokenAddress}`] ||= [];
+                        agg[`${item.chain}-${item.tokenAddress}`].push(item.type);
+                        return agg;
+                    }, {} as Record<string, PrismaTokenTypeOption[]>),
                 ),
         ]);
 
@@ -439,14 +421,6 @@ export class TokenService {
             },
         });
     }
-    public async reloadAllTokenTypes(chain: Chain) {
-        await prisma.prismaTokenType.deleteMany({
-            where: { chain },
-        });
-
-        const githubContentService = new GithubContentService();
-        await githubContentService.syncTokenContentData([chain]);
-    }
 }
 
-export const tokenService = new TokenService(new TokenPriceService(), new CoingeckoDataService());
+export const tokenService = new TokenService(new TokenPriceService());

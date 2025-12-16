@@ -1,5 +1,5 @@
 import { prisma } from '../../../prisma/prisma-client';
-import _, { add } from 'lodash';
+import _ from 'lodash';
 import { env } from '../../../apps/env';
 import { RateLimiter } from 'limiter';
 import config from '../../../config';
@@ -132,27 +132,12 @@ export class CoingeckoDataService {
         await prisma.$transaction(updates);
     }
 
-    // public async getTokenHistoricalPrices(address: string, days: number): Promise<HistoricalPrice[]> {
-    //     const now = Math.floor(Date.now() / 1000);
-    //     const end = now;
-    //     const start = end - days * twentyFourHoursInSecs;
-    //     const tokenDefinitions = await tokenService.getTokenDefinitions([networkContext.chain]);
-    //     const mapped = this.getMappedTokenDetails(address, tokenDefinitions);
+    async tokenPrice(chain: Chain, tokens: string[]) {
+        const platformId = config[chain].coingecko.platformId;
+        const endpoint = `/simple/token_price/${platformId}?vs_currencies=usd&contract_addresses=${tokens.join(',')}`;
 
-    //     const endpoint = `/coins/${mapped.platform}/contract/${mapped.address}/market_chart/range?vs_currency=${this.fiatParam}&from=${start}&to=${end}`;
-
-    //     const result = await this.get<HistoricalPriceResponse>(endpoint);
-
-    //     return result.prices.map((item) => ({
-    //         //anchor to the start of the hour
-    //         timestamp:
-    //             moment
-    //                 .unix(item[0] / 1000)
-    //                 .startOf('hour')
-    //                 .unix() * 1000,
-    //         price: item[1],
-    //     }));
-    // }
+        return this.get<{ [token: string]: { usd: number } }>(endpoint);
+    }
 
     public async getMarketDataForTokenIds(tokenIds: string[]): Promise<CoingeckoTokenMarketData[]> {
         const endpoint = `/coins/markets?vs_currency=${this.fiatParam}&ids=${tokenIds}&per_page=250&page=1&sparkline=false&price_change_percentage=1h%2C24h%2C7d%2C14d%2C30d`;
@@ -168,17 +153,17 @@ export class CoingeckoDataService {
     private async get<T>(endpoint: string): Promise<T> {
         const remainingRequests = await requestRateLimiter.removeTokens(1);
         console.log('Remaining coingecko requests', remainingRequests);
-        
+
         const response = await fetch(this.baseUrl + endpoint + this.apiKeyParam);
-        
+
         if (!response.ok) {
             if (response.status === 429) {
                 throw Error(`Coingecko ratelimit: ${response.status} ${response.statusText}`);
             }
             throw Error(`Coingecko API error: ${response.status} ${response.statusText}`);
         }
-        
-        return await response.json() as T;
+
+        return (await response.json()) as T;
     }
 }
 

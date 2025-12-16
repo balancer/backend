@@ -8,7 +8,7 @@ import { tokenService } from '../token/token.service';
 import mainnet from '../../config/mainnet';
 import { prisma } from '../../prisma/prisma-client';
 import { CowAmmController } from '../controllers/cow-amm-controller';
-import { ContentController } from '../controllers/content-controller';
+import { ContentController } from '../content/content-controller';
 import { PoolController } from '../controllers';
 import { Prisma, PrismaLastBlockSyncedCategory } from '@prisma/client';
 import { tokensTransformer } from '../sources/transformers';

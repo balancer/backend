@@ -1,10 +1,9 @@
 import { Resolvers } from '../generated-schema';
-import { userService } from '../../../../modules/user/user.service';
 import { getRequiredAccountAddress, isAdminRoute } from '../../../../modules/auth/auth-context';
 import { tokenService } from '../../../../modules/token/token.service';
 import { headerChain } from '../../../../modules/context/header-chain';
-import { UserBalancesController } from '../../../../modules/controllers';
 import { GraphQLError } from 'graphql';
+import { UserBalancesController } from '../../../../modules/user/user-balances-controller';
 
 const resolvers: Resolvers = {
     Query: {
@@ -19,7 +18,7 @@ const resolvers: Resolvers = {
             }
             const accountAddress = address || getRequiredAccountAddress(context);
             const tokenPrices = await tokenService.getTokenPricesForChains(chains);
-            const balances = await userService.getUserPoolBalances(accountAddress, chains);
+            const balances = await UserBalancesController().getUserPoolBalances(accountAddress, chains);
 
             return balances.map((balance) => ({
                 ...balance,
@@ -47,7 +46,7 @@ const resolvers: Resolvers = {
             }
             const accountAddress = address || getRequiredAccountAddress(context);
 
-            return userService.getUserStaking(accountAddress, chains);
+            return UserBalancesController().getUserStaking(accountAddress, chains);
         },
     },
     Mutation: {
@@ -78,18 +77,11 @@ const resolvers: Resolvers = {
 
             return 'success';
         },
-        userInitWalletBalancesForPool: async (parent, { poolId }, context) => {
-            isAdminRoute(context);
-
-            await userService.initWalletBalancesForPool(poolId);
-
-            return 'success';
-        },
         userInitStakedBalances: async (parent, { stakingTypes }, context) => {
             isAdminRoute(context);
             const chain = headerChain() || 'MAINNET';
 
-            await userService.initStakedBalances(stakingTypes, chain);
+            await UserBalancesController().initStakedBalances(stakingTypes, chain);
 
             return 'success';
         },
@@ -97,23 +89,7 @@ const resolvers: Resolvers = {
             isAdminRoute(context);
             const chain = headerChain() || 'MAINNET';
 
-            await userService.syncChangedStakedBalances(chain);
-
-            return 'success';
-        },
-        userSyncBalance: async (parent, { poolId }, context) => {
-            const accountAddress = getRequiredAccountAddress(context);
-
-            await userService.syncUserBalance(accountAddress, poolId);
-
-            return 'success';
-        },
-        userSyncBalanceAllPools: async (parent, {}, context) => {
-            isAdminRoute(context);
-
-            const accountAddress = getRequiredAccountAddress(context);
-
-            await userService.syncUserBalanceAllPools(accountAddress);
+            await UserBalancesController().syncChangedStakedBalances(chain);
 
             return 'success';
         },

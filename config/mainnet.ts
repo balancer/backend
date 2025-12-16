@@ -102,6 +102,16 @@ export default <NetworkData>{
         morphoRewardsAprHandler: true,
         aaveRewardsAprHandler: true,
         ybAprHandler: {
+            rateProvider: {
+                chain: 'MAINNET',
+                intervalInDays: 30,
+                rateProviders: [
+                    {
+                        tokenAddress: '0xd11c452fc99cf405034ee446803b6f6c1f6d5ed8',
+                        rateProviderAddress: '0x7aee5f039da2891bf02414bc6ada1b53c0c3902a',
+                    },
+                ],
+            },
             aave: {
                 markets: [AaveV3Ethereum, AaveV3EthereumLido],
             },
@@ -181,22 +191,13 @@ export default <NetworkData>{
                     ],
                 },
                 {
-                    url: 'https://ded76165a2fb6f7887260a3a0f626de7.thegraph.chainnodes.org/subgraphs/name/etherfi/etherfi-subgraph-v0-8-2',
-                    body: JSON.stringify({
-                        query: `{
-                      rebaseEventLinkedLists {
-                        latest_aprs
-                      }
-                    }`,
-                    }),
-                    headers: { 'Content-Type': 'application/json' },
-                    average: true,
-                    scale: 10000,
+                    url: 'https://www.ether.fi/api/dapp/protocol/protocol-detail',
+                    scale: 100,
                     extractors: [
                         {
                             type: 'path',
                             token: '0xcd5fe23c85820f7b72d0926fc9b05b43e359b7ee',
-                            path: '$.data.rebaseEventLinkedLists[0].latest_aprs',
+                            path: '$.7_day_apr',
                         },
                     ],
                 },
@@ -308,7 +309,7 @@ export default <NetworkData>{
                         {
                             type: 'path',
                             token: '0xdbdc1ef57537e34680b898e1febd3d68c7389bcb',
-                            path: '$.data.stats.siusd.lastWeekAPY',
+                            path: '$.data.stats.staked.lastWeekAPY',
                         },
                     ],
                 },
@@ -395,6 +396,7 @@ export default <NetworkData>{
                     extractors: [
                         { type: 'path', token: '0x198d7387fa97a73f05b8578cdeff8f2a1f34cd1f', path: '$.wjauraApy' },
                     ],
+                    skipSSL: true,
                 },
                 {
                     url: 'https://universe.staderlabs.com/eth/apy',
@@ -514,24 +516,6 @@ export default <NetworkData>{
                     ],
                 },
                 {
-                    name: 'Varlamore USDC Growth',
-                    url: 'https://app.silo.finance/api/earn',
-                    body: JSON.stringify({
-                        chainKeys: ['ethereum'],
-                        type: 'vault',
-                        limit: 100,
-                        offset: 0,
-                    }),
-                    scale: 1e18,
-                    extractors: [
-                        {
-                            type: 'path',
-                            token: '0x8399c8fc273bd165c346af74a02e65f10e4fd78f',
-                            path: '$.pools[?(@.vaultAddress=="0x8399C8Fc273bD165C346Af74A02e65f10e4FD78F")].supplyApr',
-                        },
-                    ],
-                },
-                {
                     url: 'https://api-v2.streamprotocol.money/vaults/xUSD/apy',
                     scale: 100,
                     extractors: [{ type: 'path', token: '0xe2fc85bfb48c4cf147921fbe110cf92ef9f26f94', path: '$.apy' }],
@@ -544,6 +528,16 @@ export default <NetworkData>{
                             type: 'path',
                             token: '0x936facdf10c8c36294e7b9d28345255539d81bc7',
                             path: '$.totalAprAgainstEth',
+                        },
+                    ],
+                },
+                {
+                    url: 'https://app-api.usdd.io/api/v1/external/earn-apy',
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0xc5d6a7b61d18afa11435a889557b068bb9f29930',
+                            path: '$.data.ethApy',
                         },
                     ],
                 },

@@ -122,22 +122,31 @@ export default <NetworkData>{
                     ],
                 },
                 {
-                    url: 'https://ded76165a2fb6f7887260a3a0f626de7.thegraph.chainnodes.org/subgraphs/name/etherfi/etherfi-subgraph-v0-8-2',
+                    name: 'Gami USDC',
+                    url: 'https://app.silo.finance/api/earn',
                     body: JSON.stringify({
-                        query: `{
-                    rebaseEventLinkedLists {
-                      latest_aprs
-                    }
-                  }`,
+                        chainKeys: ['avalanche'],
+                        type: 'vault',
+                        limit: 100,
+                        offset: 0,
                     }),
-                    headers: { 'Content-Type': 'application/json' },
-                    average: true,
-                    scale: 10000,
+                    scale: 1e18,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x1f0570a081fee0e4df6eac470f9d2d53cdeda1c5',
+                            path: '$.pools[?(@.vaultAddress=="0x1F0570a081FeE0e4dF6eAC470f9d2D53CDEDa1c5")].supplyApr',
+                        },
+                    ],
+                },
+                {
+                    url: 'https://www.ether.fi/api/dapp/protocol/protocol-detail',
+                    scale: 100,
                     extractors: [
                         {
                             type: 'path',
                             token: '0xa3d68b74bf0528fdd07263c60d6488749044914b',
-                            path: '$.data.rebaseEventLinkedLists[0].latest_aprs',
+                            path: '$.7_day_apr',
                         },
                     ],
                 },

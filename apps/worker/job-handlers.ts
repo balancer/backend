@@ -3,11 +3,8 @@ import { Express, NextFunction } from 'express';
 import { tokenService } from '../../modules/token/token.service';
 import { PricingService } from '../../modules/pricing/pricing-service';
 import { poolService } from '../../modules/pool/pool.service';
-import { userService } from '../../modules/user/user.service';
-import { protocolService } from '../../modules/protocol/protocol.service';
 import { datastudioService } from '../../modules/datastudio/datastudio.service';
 import { initRequestScopedContext, setRequestScopedContextValue } from '../../modules/context/request-scoped-context';
-import { networkContext } from '../../modules/network/network-context.service';
 import { veBalService } from '../../modules/vebal/vebal.service';
 import { veBalVotingListService } from '../../modules/vebal/vebal-voting-list.service';
 import { cronsMetricPublisher } from '../../modules/metrics/metrics.client';
@@ -17,15 +14,11 @@ import { syncLatestFXPrices } from '../../modules/token/latest-fx-price';
 import { chainIdToChain } from '../../modules/network/chain-id-to-chain';
 import { Chain } from '@prisma/client';
 import {
-    SftmxController,
     CowAmmController,
     SnapshotsController,
-    ContentController,
     PoolController,
     EventController,
     StakingController,
-    StakedSonicController,
-    UserBalancesController,
     QuantAmmController,
     TokenYieldsController,
 } from '../../modules/controllers';
@@ -36,10 +29,12 @@ import config from '../../config';
 import { LBPController } from '../../modules/controllers/lbp-controller';
 import { AprsController } from '../../modules/controllers/aprs-controller';
 import { LoopsService } from '../../modules/loops/service';
+import { ContentController } from '../../modules/content/content-controller';
+import { StakedSonicController } from '../../modules/sts/sts-controller';
+import { SftmxController } from '../../modules/sftmx/sftmx-controller';
+import { UserBalancesController } from '../../modules/user/user-balances-controller';
 
 const runningJobs: Set<string> = new Set();
-
-const sftmxController = SftmxController();
 
 async function runIfNotAlreadyRunning(
     id: string,
@@ -123,7 +118,13 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
             await runIfNotAlreadyRunning(name, chainId, () => UserBalancesController().syncBalances(chain), res, next);
             break;
         case 'user-sync-staked-balances':
-            await runIfNotAlreadyRunning(name, chainId, () => userService.syncChangedStakedBalances(chain), res, next);
+            await runIfNotAlreadyRunning(
+                name,
+                chainId,
+                () => UserBalancesController().syncChangedStakedBalances(chain),
+                res,
+                next,
+            );
             break;
         case 'update-token-prices':
             await runIfNotAlreadyRunning(
@@ -150,15 +151,6 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
                 next,
             );
             break;
-        case 'load-on-chain-data-for-pools-with-active-updates':
-            await runIfNotAlreadyRunning(
-                name,
-                chainId,
-                () => poolService.loadOnChainDataForPoolsWithActiveUpdates(),
-                res,
-                next,
-            );
-            break;
         case 'sync-new-pools-from-subgraph':
             await runIfNotAlreadyRunning(name, chainId, () => PoolController().addPoolsV2(chain), res, next);
             break;
@@ -166,7 +158,7 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
             await runIfNotAlreadyRunning(name, chainId, () => EventController().syncJoinExitsV2(chain), res, next);
             break;
         case 'sync-token-content-data':
-            await runIfNotAlreadyRunning(name, chainId, () => tokenService.syncTokenContentData(chain), res, next);
+            await runIfNotAlreadyRunning(name, chainId, () => ContentController().syncTokenContentData(), res, next);
             break;
         case 'update-liquidity-24h-ago-v2':
             await runIfNotAlreadyRunning(
@@ -180,36 +172,8 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
         case 'sync-staking-for-pools':
             await runIfNotAlreadyRunning(name, chainId, () => StakingController().syncStaking(chain), res, next);
             break;
-        case 'cache-protocol-data':
-            await runIfNotAlreadyRunning(
-                name,
-                chainId,
-                () => protocolService.cacheProtocolMetrics(networkContext.chain),
-                res,
-                next,
-            );
-            break;
-        case 'sync-snapshots-v2':
-            await runIfNotAlreadyRunning(name, chainId, () => SnapshotsController().syncSnapshotsV2(chain), res, next);
-            break;
-        case 'sync-snapshots-v3':
-            await runIfNotAlreadyRunning(name, chainId, () => SnapshotsController().syncSnapshotsV3(chain), res, next);
-            break;
-        case 'forward-fill-snapshots-v3':
-            await runIfNotAlreadyRunning(
-                name,
-                chainId,
-                () => {
-                    // Run just once per 24h
-                    const now = new Date();
-                    if (now.getUTCHours() !== 0) {
-                        return true;
-                    }
-                    return SnapshotsController().forwardFillSnapshotsForPoolsWithoutUpdatesV3(chain);
-                },
-                res,
-                next,
-            );
+        case 'sync-snapshots':
+            await runIfNotAlreadyRunning(name, chainId, () => SnapshotsController().syncSnapshots(chain), res, next);
             break;
         case 'feed-data-to-datastudio':
             await runIfNotAlreadyRunning(
@@ -244,13 +208,13 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
             await runIfNotAlreadyRunning(name, chainId, () => updateVolumeAndFees(chain), res, next);
             break;
         case 'sync-vebal-balances':
-            await runIfNotAlreadyRunning(name, chainId, () => veBalService.syncVeBalBalances(), res, next);
+            await runIfNotAlreadyRunning(name, chainId, () => veBalService.syncVeBalBalances(chain), res, next);
             break;
         case 'sync-vebal-snapshots':
             await runIfNotAlreadyRunning(name, chainId, () => veBalService.syncVeBalUserBalanceSnapshots(), res, next);
             break;
         case 'sync-vebal-totalSupply':
-            await runIfNotAlreadyRunning(name, chainId, () => veBalService.syncVeBalTotalSupply(), res, next);
+            await runIfNotAlreadyRunning(name, chainId, () => veBalService.syncVeBalTotalSupply(chain), res, next);
             break;
         case 'sync-vebal-voting-gauges':
             await runIfNotAlreadyRunning(name, chainId, () => veBalVotingListService.syncVotingGauges(), res, next);
@@ -295,22 +259,19 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
             );
             break;
         case 'sync-sftmx-staking-data':
-            await runIfNotAlreadyRunning(name, chainId, () => sftmxController.syncSftmxStakingData(chainId), res, next);
+            await runIfNotAlreadyRunning(
+                name,
+                chainId,
+                () => SftmxController().syncSftmxStakingData(chainId),
+                res,
+                next,
+            );
             break;
         case 'sync-sftmx-withdrawal-requests':
             await runIfNotAlreadyRunning(
                 name,
                 chainId,
-                () => sftmxController.syncSftmxWithdrawalrequests(chainId),
-                res,
-                next,
-            );
-            break;
-        case 'sync-sftmx-staking-snapshots':
-            await runIfNotAlreadyRunning(
-                name,
-                chainId,
-                () => sftmxController.syncSftmxStakingSnapshots(chainId),
+                () => SftmxController().syncSftmxWithdrawalrequests(chainId),
                 res,
                 next,
             );
@@ -378,9 +339,6 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
         case 'sync-cow-amm-join-exits':
             await runIfNotAlreadyRunning(name, chainId, () => CowAmmController().syncJoinExits(chain), res, next);
             break;
-        case 'sync-cow-amm-snapshots':
-            await runIfNotAlreadyRunning(name, chainId, () => CowAmmController().syncSnapshots(chain), res, next);
-            break;
         case 'sync-categories':
             await runIfNotAlreadyRunning(name, chainId, () => ContentController().syncCategories(), res, next);
             break;
@@ -428,6 +386,9 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
                 res,
                 next,
             );
+            break;
+        case 'update-lifetime-values':
+            await runIfNotAlreadyRunning(name, chainId, () => PoolController().updateLifeTimeValues(chain), res, next);
             break;
         default:
             res.sendStatus(400);

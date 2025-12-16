@@ -1,9 +1,7 @@
 import { Chain, PrismaPoolStakingType } from '@prisma/client';
-import { MasterchefSubgraphService } from '../../../subgraphs/masterchef-subgraph/masterchef.service';
 import { ReliquarySubgraphService } from '../../../subgraphs/reliquary-subgraph/reliquary.service';
 import { GaugeSubgraphService } from '../../../subgraphs/gauge-subgraph/gauge-subgraph.service';
 import { AuraSubgraphService } from '../../../sources/subgraphs/aura/aura.service';
-import { deleteMasterchefStakingForAllPools, syncMasterchefStakingForPools } from './sync-master-chef-staking.service';
 import {
     deleteReliquaryStakingForAllPools,
     syncReliquaryStakingForPools,
@@ -17,16 +15,6 @@ import config from '../../../../config';
 export const syncStaking = async (chains: Chain[]) => {
     for (const chain of chains) {
         const networkconfig = config[chain];
-        if (networkconfig.subgraphs.masterchef) {
-            await syncMasterchefStakingForPools(
-                chain,
-                new MasterchefSubgraphService(networkconfig.subgraphs.masterchef),
-                networkconfig.masterchef?.excludedFarmIds || [],
-                networkconfig.fbeets?.address || '',
-                networkconfig.fbeets?.farmId || '',
-                networkconfig.fbeets?.poolId || '',
-            );
-        }
         if (networkconfig.subgraphs.reliquary) {
             await syncReliquaryStakingForPools(
                 chain,
@@ -55,7 +43,6 @@ export const syncStaking = async (chains: Chain[]) => {
 
 export const reloadStakingForAllPools = async (stakingTypes: PrismaPoolStakingType[], chain: Chain): Promise<void> => {
     const networkconfig = config[chain];
-    await deleteMasterchefStakingForAllPools(stakingTypes, chain);
     await deleteReliquaryStakingForAllPools(stakingTypes, chain);
     await deleteGaugeStakingForAllPools(stakingTypes, chain);
     await deleteAuraStakingForAllPools(stakingTypes, chain);

@@ -11,7 +11,7 @@ import {
     _calcTokenOutGivenExactBptIn,
     _calculateInvariant,
 } from './stableMath';
-import { PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
+import { PoolType, SwapKind, Token, TokenAmount, WAD } from '@balancer/sdk';
 import { chainToChainId as chainToIdMap } from '../../../../network/chain-id-to-chain';
 import { StableData } from '../../../../pool/subgraph-mapper';
 import { TokenPairData } from '../../../../pool/lib/pool-on-chain-tokenpair-data';
@@ -51,9 +51,10 @@ export class ComposableStablePool implements BasePool {
             const scale18 = parseEther(poolToken.balance);
             const tokenAmount = TokenAmount.fromScale18Amount(token, scale18);
 
-            poolTokens.push(
-                new PoolTokenWithRate(token, tokenAmount.amount, poolToken.index, parseEther(poolToken.priceRate)),
-            );
+            // BPT shouldn't take priceRate into account when comparing against pool tokens
+            const tokenRate = token.isSameAddress(pool.address as Address) ? WAD : parseEther(poolToken.priceRate);
+
+            poolTokens.push(new PoolTokenWithRate(token, tokenAmount.amount, poolToken.index, tokenRate));
         }
 
         const totalShares = parseEther(pool.dynamicData.totalShares);

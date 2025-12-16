@@ -44,10 +44,9 @@ extend type Mutation {
     poolUpdateLiquidityValuesForAllPools: String!
     poolReloadAllPoolAprs(chain: GqlChain!): String!
     poolReloadStakingForAllPools(stakingTypes: [GqlPoolStakingType!]!): String!
-    poolLoadSnapshotsForPools(poolIds: [String!]!, reload: Boolean): String!
+    poolLoadSnapshotsForPools(poolId: String!, chain: GqlChain!): String!
     poolLoadOnChainDataForAllPools(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
     poolReloadPools(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
-    poolSyncAllCowSnapshots(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
     poolSyncFxQuoteTokens(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
 }
 
@@ -510,7 +509,7 @@ type GqlPoolDynamicData {
     lifetimeVolume: BigDecimal!
     lifetimeSwapFees: BigDecimal!
     holdersCount: BigInt!
-    swapsCount: BigInt!
+    swapsCount: BigInt! @deprecated
 
     sharePriceAth: BigDecimal! @deprecated
     sharePriceAthTimestamp: Int! @deprecated
@@ -1702,67 +1701,6 @@ type GqlPoolSwap {
     valueUSD: Float!
 }
 
-type GqlPoolBatchSwap {
-    id: ID!
-    chain: GqlChain!
-    userAddress: String!
-    tokenIn: String!
-    tokenOut: String!
-    tokenAmountIn: String!
-    tokenAmountOut: String!
-    tokenInPrice: Float!
-    tokenOutPrice: Float!
-    timestamp: Int!
-    tx: String!
-    valueUSD: Float!
-    swaps: [GqlPoolBatchSwapSwap!]!
-}
-
-type TokenForBatchSwapPool {
-    address: String!
-    isNested: Boolean!
-    isPhantomBpt: Boolean!
-    weight: BigDecimal
-}
-
-type PoolForBatchSwap {
-    id: String!
-    name: String!
-    type: GqlPoolType!
-    symbol: String!
-    allTokens: [TokenForBatchSwapPool!]
-}
-
-type GqlPoolBatchSwapSwap {
-    id: ID!
-    pool: PoolForBatchSwap!
-    userAddress: String!
-    tokenIn: String!
-    tokenOut: String!
-    tokenAmountIn: String!
-    tokenAmountOut: String!
-    timestamp: Int!
-    tx: String!
-    valueUSD: Float!
-}
-
-type GqlPoolBatchSwapPool {
-    id: ID!
-    tokens: [String!]!
-}
-
-input GqlPoolSwapFilter {
-    tokenInIn: [String!]
-    tokenOutIn: [String!]
-    poolIdIn: [String!]
-    chainIn: [GqlChain!]
-}
-
-input GqlPoolJoinExitFilter {
-    poolIdIn: [String!]
-    chainIn: [GqlChain!]
-}
-
 type GqlPoolJoinExit {
     id: ID!
     chain: GqlChain!
@@ -1973,11 +1911,11 @@ type GqlPoolSnapshot {
     fees24h: String!
     surplus24h: String!
     totalShares: String!
-    totalSwapVolume: String!
-    totalSwapFee: String!
-    totalSurplus: String!
+    totalSwapVolume: String! @deprecated
+    totalSwapFee: String! @deprecated
+    totalSurplus: String! @deprecated
     swapsCount: String!
-    holdersCount: String!
+    holdersCount: String! @deprecated
     sharePrice: String!
     amounts: [String!]!
 }
@@ -2098,17 +2036,8 @@ type GqlReliquaryFarmSnapshot {
     dailyWithdrawn: String!
     totalLiquidity: String!
     levelBalances: [GqlReliquaryFarmLevelSnapshot!]!
-    tokenBalances: [GqlReliquaryTokenBalanceSnapshot!]!
 }
 
-type GqlReliquaryTokenBalanceSnapshot {
-    id: ID!
-    address: String!
-    balance: String!
-    symbol: String!
-    name: String!
-    decimals: Int!
-}
 type GqlReliquaryFarmLevelSnapshot {
     id: ID!
     level: String!
