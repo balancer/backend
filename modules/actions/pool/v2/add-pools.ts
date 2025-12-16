@@ -4,7 +4,7 @@ import { nestedPoolWithSingleLayerNesting } from '../../../../prisma/prisma-type
 import { V2SubgraphClient } from '../../../subgraphs/balancer-subgraph';
 import { BalancerPoolFragment } from '../../../subgraphs/balancer-subgraph/generated/balancer-subgraph-types';
 import { subgraphToPrismaCreate } from '../../../pool/subgraph-mapper';
-import { syncBptBalancesFromSubgraph } from '../../user/bpt-balances/helpers/sync-bpt-balances-from-subgraph';
+import { syncBptBalancesFromSubgraph } from '../../../user/lib/bpt-balances/helpers/sync-bpt-balances-from-subgraph';
 import _ from 'lodash';
 import { syncPoolTypeOnchainData } from './sync-pool-type-onchain-data';
 

@@ -3,7 +3,6 @@ import { Express, NextFunction } from 'express';
 import { tokenService } from '../../modules/token/token.service';
 import { PricingService } from '../../modules/pricing/pricing-service';
 import { poolService } from '../../modules/pool/pool.service';
-import { userService } from '../../modules/user/user.service';
 import { datastudioService } from '../../modules/datastudio/datastudio.service';
 import { initRequestScopedContext, setRequestScopedContextValue } from '../../modules/context/request-scoped-context';
 import { veBalService } from '../../modules/vebal/vebal.service';
@@ -15,15 +14,11 @@ import { syncLatestFXPrices } from '../../modules/token/latest-fx-price';
 import { chainIdToChain } from '../../modules/network/chain-id-to-chain';
 import { Chain } from '@prisma/client';
 import {
-    SftmxController,
     CowAmmController,
     SnapshotsController,
-    ContentController,
     PoolController,
     EventController,
     StakingController,
-    StakedSonicController,
-    UserBalancesController,
     QuantAmmController,
     TokenYieldsController,
 } from '../../modules/controllers';
@@ -34,10 +29,12 @@ import config from '../../config';
 import { LBPController } from '../../modules/controllers/lbp-controller';
 import { AprsController } from '../../modules/controllers/aprs-controller';
 import { LoopsService } from '../../modules/loops/service';
+import { ContentController } from '../../modules/content/content-controller';
+import { StakedSonicController } from '../../modules/sts/sts-controller';
+import { SftmxController } from '../../modules/sftmx/sftmx-controller';
+import { UserBalancesController } from '../../modules/user/user-balances-controller';
 
 const runningJobs: Set<string> = new Set();
-
-const sftmxController = SftmxController();
 
 async function runIfNotAlreadyRunning(
     id: string,
@@ -121,7 +118,13 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
             await runIfNotAlreadyRunning(name, chainId, () => UserBalancesController().syncBalances(chain), res, next);
             break;
         case 'user-sync-staked-balances':
-            await runIfNotAlreadyRunning(name, chainId, () => userService.syncChangedStakedBalances(chain), res, next);
+            await runIfNotAlreadyRunning(
+                name,
+                chainId,
+                () => UserBalancesController().syncChangedStakedBalances(chain),
+                res,
+                next,
+            );
             break;
         case 'update-token-prices':
             await runIfNotAlreadyRunning(
@@ -155,7 +158,7 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
             await runIfNotAlreadyRunning(name, chainId, () => EventController().syncJoinExitsV2(chain), res, next);
             break;
         case 'sync-token-content-data':
-            await runIfNotAlreadyRunning(name, chainId, () => tokenService.syncTokenContentData(), res, next);
+            await runIfNotAlreadyRunning(name, chainId, () => ContentController().syncTokenContentData(), res, next);
             break;
         case 'update-liquidity-24h-ago-v2':
             await runIfNotAlreadyRunning(
@@ -256,13 +259,19 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
             );
             break;
         case 'sync-sftmx-staking-data':
-            await runIfNotAlreadyRunning(name, chainId, () => sftmxController.syncSftmxStakingData(chainId), res, next);
+            await runIfNotAlreadyRunning(
+                name,
+                chainId,
+                () => SftmxController().syncSftmxStakingData(chainId),
+                res,
+                next,
+            );
             break;
         case 'sync-sftmx-withdrawal-requests':
             await runIfNotAlreadyRunning(
                 name,
                 chainId,
-                () => sftmxController.syncSftmxWithdrawalrequests(chainId),
+                () => SftmxController().syncSftmxWithdrawalrequests(chainId),
                 res,
                 next,
             );
@@ -377,6 +386,9 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
                 res,
                 next,
             );
+            break;
+        case 'update-lifetime-values':
+            await runIfNotAlreadyRunning(name, chainId, () => PoolController().updateLifeTimeValues(chain), res, next);
             break;
         default:
             res.sendStatus(400);

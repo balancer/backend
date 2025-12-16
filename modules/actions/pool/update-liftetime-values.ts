@@ -1,10 +1,9 @@
 import { Chain, PrismaPoolType } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
 
-// This is a helper for V3 and CowAmm pools only. V2 is already handled and concidered legacy.
-export const updateLifetimeValues = async (chain: Chain, protocolVersion?: number, type?: PrismaPoolType) => {
-    const holders = await getHoldersCount(chain, protocolVersion, type);
-    const lifetime = await getSwapLifetimeValues(chain, protocolVersion, type);
+export const updateLifetimeValues = async (chain: Chain) => {
+    const holders = await getHoldersCount(chain);
+    const lifetime = await getSwapLifetimeValues(chain);
 
     // Merge all keys into an unique list
     const allKeys = [...Object.keys(holders), ...Object.keys(lifetime)].reduce((acc, key) => {
@@ -45,16 +44,12 @@ export const updateLifetimeValues = async (chain: Chain, protocolVersion?: numbe
     return prisma.$transaction(updates);
 };
 
-const getHoldersCount = async (chain: Chain, protocolVersion?: number, type?: PrismaPoolType) => {
+const getHoldersCount = async (chain: Chain) => {
     const holders = await prisma.prismaUserWalletBalance.groupBy({
         by: ['poolId', 'chain'],
         _count: { userAddress: true },
         where: {
             chain,
-            pool: {
-                protocolVersion,
-                type,
-            },
         },
     });
     // This is overfetching, because of V2 pools
@@ -63,10 +58,6 @@ const getHoldersCount = async (chain: Chain, protocolVersion?: number, type?: Pr
         _count: { userAddress: true },
         where: {
             chain,
-            pool: {
-                protocolVersion,
-                type,
-            },
         },
     });
 
@@ -82,7 +73,7 @@ const getHoldersCount = async (chain: Chain, protocolVersion?: number, type?: Pr
     return pools;
 };
 
-const getSwapLifetimeValues = async (chain: Chain, protocolVersion?: number, type?: PrismaPoolType) => {
+const getSwapLifetimeValues = async (chain: Chain) => {
     // Get latest snapshots for each pool
     const swapLifetimeValues = await prisma.prismaPoolSnapshot.groupBy({
         by: ['poolId', 'chain'],
@@ -92,10 +83,6 @@ const getSwapLifetimeValues = async (chain: Chain, protocolVersion?: number, typ
         },
         where: {
             chain,
-            protocolVersion,
-            pool: {
-                type,
-            },
         },
     });
 

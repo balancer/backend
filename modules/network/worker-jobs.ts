@@ -93,6 +93,10 @@ export const activeChainWorkerJobsGeneric: WorkerJob[] = [
         name: 'sync-erc4626-onchain-data',
         interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(60, 'minutes') : every(20, 'minutes'),
     },
+    {
+        name: 'update-lifetime-values',
+        interval: every(60, 'minutes'),
+    },
 ];
 
 export const deprecatedChainWorkerJobs: WorkerJob[] = [

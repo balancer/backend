@@ -22,11 +22,12 @@ import { syncTokenPairs } from '../actions/pool/v3/sync-tokenpairs';
 import { syncHookData } from '../actions/pool/v3/sync-hook-data';
 import { getLastSyncedBlock, upsertLastSyncedBlock } from '../actions/last-synced-block';
 import { getChangedPoolsV3 } from '../sources/logs';
-import { syncBptBalancesFromSubgraph } from '../actions/user/bpt-balances/helpers/sync-bpt-balances-from-subgraph';
-import { syncHookReviews } from '../actions/content/sync-hook-reviews';
+import { syncBptBalancesFromSubgraph } from '../user/lib/bpt-balances/helpers/sync-bpt-balances-from-subgraph';
+import { syncHookReviews } from '../content/lib/sync-hook-reviews';
 import { syncErc4626Tokens } from '../actions/token/sync-erc4626-tokens';
-import { syncRateProviderReviews } from '../actions/content/sync-rate-provider-reviews';
+import { syncRateProviderReviews } from '../content/lib/sync-rate-provider-reviews';
 import { PoolWithMappedJsonFields } from '../../prisma/prisma-types';
+import { updateLifetimeValues } from '../actions/pool/update-liftetime-values';
 
 export function PoolController(tracer?: any) {
     return {
@@ -111,7 +112,6 @@ export function PoolController(tracer?: any) {
 
             return updates;
         },
-
         async updateLiquidityValuesForInactivePools(chain: Chain) {
             const poolTokens = await prisma.prismaPoolToken.findMany({
                 where: {
@@ -128,6 +128,10 @@ export function PoolController(tracer?: any) {
             await updateLiquidityValuesForPools(chain, ids);
 
             return ids;
+        },
+        async updateLifeTimeValues(chain: Chain) {
+            const updates = await updateLifetimeValues(chain);
+            return updates;
         },
         async addPoolsV3(chain: Chain, syncNewPoolsOnly = true) {
             const {

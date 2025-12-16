@@ -1,5 +1,5 @@
+import { SftmxController } from '../../../../modules/sftmx/sftmx-controller';
 import { Resolvers } from '../generated-schema';
-import { SftmxController } from '../../../../modules/controllers';
 
 const resolvers: Resolvers = {
     Query: {

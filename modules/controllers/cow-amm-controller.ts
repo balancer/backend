@@ -5,9 +5,8 @@ import { getCowAmmSubgraphClient } from '../sources/subgraphs';
 import { fetchChangedPools, upsertPools, syncSwaps, syncJoinExits } from '../actions/cow-amm';
 import { syncSnapshots } from '../actions/pool/sync-snapshots';
 import { Chain, PrismaLastBlockSyncedCategory } from '@prisma/client';
-import { syncBptBalancesFromSubgraph } from '../actions/user/bpt-balances/helpers/sync-bpt-balances-from-subgraph';
+import { syncBptBalancesFromSubgraph } from '../user/lib/bpt-balances/helpers/sync-bpt-balances-from-subgraph';
 import { getLastSyncedBlock, upsertLastSyncedBlock } from '../actions/last-synced-block';
-import { updateLifetimeValues } from '../actions/pool/update-liftetime-values';
 import { syncTokenPairs } from '../actions/pool/v3/sync-tokenpairs';
 
 export function CowAmmController(tracer?: any) {

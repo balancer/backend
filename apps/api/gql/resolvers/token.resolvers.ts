@@ -9,6 +9,7 @@ import { TokenController } from '../../../../modules/controllers/token-controlle
 import config from '../../../../config';
 import { GraphQLError } from 'graphql';
 import { PricingService } from '../../../../modules/pricing';
+import { ContentController } from '../../../../modules/content/content-controller';
 
 const resolvers: Resolvers = {
     Query: {
@@ -205,9 +206,8 @@ const resolvers: Resolvers = {
         },
         tokenSyncTokenDefinitions: async (parent, {}, context) => {
             isAdminRoute(context);
-            const chain = headerChain() || 'MAINNET';
 
-            await tokenService.syncTokenContentData(chain);
+            await ContentController().syncTokenContentData();
 
             return 'success';
         },
@@ -231,7 +231,7 @@ const resolvers: Resolvers = {
             isAdminRoute(context);
             const chain = headerChain() || 'MAINNET';
 
-            await tokenService.reloadAllTokenTypes(chain);
+            await ContentController().reloadAllTokenTypes(chain);
 
             return 'success';
         },
