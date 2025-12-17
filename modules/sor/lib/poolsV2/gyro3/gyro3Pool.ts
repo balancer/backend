@@ -172,8 +172,8 @@ export class Gyro3Pool implements BasePool {
     }
 
     public getPoolTokens(tokenIn: Token, tokenOut: Token): { tIn: BasePoolToken; tOut: BasePoolToken } {
-        const tIn = this.tokenMap.get(tokenIn.wrapped);
-        const tOut = this.tokenMap.get(tokenOut.wrapped);
+        const tIn = this.tokenMap.get(tokenIn.address);
+        const tOut = this.tokenMap.get(tokenOut.address);
 
         if (!tIn || !tOut) {
             throw new Error('Pool does not contain the tokens provided');
@@ -193,8 +193,8 @@ export class Gyro3Pool implements BasePool {
         const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
 
         const tertiaryAddress = this.tokens
-            .map((t) => t.token.wrapped)
-            .find((a) => a !== tokenIn.wrapped && a !== tokenOut.wrapped);
+            .map((t) => t.token.address)
+            .find((a) => a !== tokenIn.address && a !== tokenOut.address);
         const tertiary = this.tokenMap.get(tertiaryAddress as string);
 
         if (!tertiary) {

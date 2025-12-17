@@ -46,7 +46,7 @@ export class PathWithAmount extends PathLocal {
         this.mutateBalances = Boolean(mutateBalances);
 
         //call to super ensures this array access is safe
-        if (tokens[0].isUnderlyingEqual(swapAmount.token)) {
+        if (tokens[0].isSameAddress(swapAmount.token.address)) {
             this.swapKind = SwapKind.GivenIn;
         } else {
             this.swapKind = SwapKind.GivenOut;
