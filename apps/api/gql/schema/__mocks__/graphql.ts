@@ -2777,8 +2777,6 @@ export const aMutation = (overrides?: Partial<Mutation>): Mutation => {
             overrides && overrides.hasOwnProperty('beetsPoolLoadReliquarySnapshotsForAllFarms')
                 ? overrides.beetsPoolLoadReliquarySnapshotsForAllFarms!
                 : 'culpo',
-        beetsSyncFbeetsRatio:
-            overrides && overrides.hasOwnProperty('beetsSyncFbeetsRatio') ? overrides.beetsSyncFbeetsRatio! : 'audax',
         createLBP: overrides && overrides.hasOwnProperty('createLBP') ? overrides.createLBP! : true,
         poolLoadOnChainDataForAllPools:
             overrides && overrides.hasOwnProperty('poolLoadOnChainDataForAllPools')

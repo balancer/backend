@@ -1183,7 +1183,7 @@ export const schema = gql`
         """
         swapEnabled: Boolean!
         swapFee: BigDecimal!
-        swapsCount: BigInt!
+        swapsCount: BigInt! @deprecated
         totalLiquidity: BigDecimal!
         totalLiquidity24hAgo: BigDecimal!
         totalLiquidityAth: BigDecimal! @deprecated
@@ -4136,7 +4136,6 @@ export const schema = gql`
 
     type Mutation {
         beetsPoolLoadReliquarySnapshotsForAllFarms(chain: GqlChain!): String!
-        beetsSyncFbeetsRatio: String!
         createLBP(input: CreateLBPInput!): Boolean!
         poolLoadOnChainDataForAllPools(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
         poolLoadSnapshotsForPools(chain: GqlChain!, poolId: String!): String!
