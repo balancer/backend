@@ -4,8 +4,9 @@ import _ from 'lodash';
 import { chainIdToChain } from '../../network/chain-id-to-chain';
 import { HookData } from '../../../prisma/prisma-types';
 
-const TAGS_URL = 'https://raw.githubusercontent.com/balancer/metadata/refs/heads/main/pools/tags/index.json';
-const ERC4626TAGS_URL = 'https://raw.githubusercontent.com/balancer/metadata/refs/heads/main/erc4626/index.json';
+const POOL_TAGS_URL = 'https://raw.githubusercontent.com/balancer/metadata/refs/heads/main/pools/tags/index.json';
+const HOOKS_TAGS_URL = 'https://raw.githubusercontent.com/balancer/metadata/refs/heads/main/hooks/index.json';
+const ERC4626_TAGS_URL = 'https://raw.githubusercontent.com/balancer/metadata/refs/heads/main/erc4626/index.json';
 
 type TagItem = {
     id: string;
@@ -130,7 +131,7 @@ export const syncTags = async (): Promise<void> => {
 };
 
 const getPoolMetadataTags = async (existingTags: Record<string, Set<string>>): Promise<Record<string, Set<string>>> => {
-    const response = await fetch(TAGS_URL);
+    const response = await fetch(POOL_TAGS_URL);
     const tagsList = (await response.json()) as TagItem[];
 
     for (const tag of tagsList) {
@@ -235,7 +236,7 @@ type HooksMetadata = {
 };
 
 const getPoolHookTags = async (existingTags: Record<string, Set<string>>): Promise<Record<string, Set<string>>> => {
-    const response = await fetch(TAGS_URL);
+    const response = await fetch(HOOKS_TAGS_URL);
     const hooksMetadataList = (await response.json()) as HooksMetadata[];
 
     // Get hook addresses from the database
@@ -261,7 +262,7 @@ const getPoolHookTags = async (existingTags: Record<string, Set<string>>): Promi
 };
 
 const getErc4626Tags = async (existingTags: Record<string, Set<string>>): Promise<Record<string, Set<string>>> => {
-    const response = await fetch(ERC4626TAGS_URL);
+    const response = await fetch(ERC4626_TAGS_URL);
     const erc4626MetadataList = (await response.json()) as ERC4626Metadata[];
 
     for (const erc4626Metadata of erc4626MetadataList) {
