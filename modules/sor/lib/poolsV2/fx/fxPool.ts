@@ -147,8 +147,8 @@ export class FxPool implements BasePool {
         const amountOut = TokenAmount.fromRawAmount(fxAmountOut.token, fxAmountOut.amount);
 
         if (mutateBalances) {
-            poolPairData.tIn.increase(swapAmount.amount);
-            poolPairData.tOut.decrease(amountOut.amount);
+            poolPairData.tIn.add(swapAmount);
+            poolPairData.tOut.sub(amountOut);
         }
 
         return amountOut;
@@ -172,8 +172,8 @@ export class FxPool implements BasePool {
         const amountIn = TokenAmount.fromRawAmount(fxAmountIn.token, fxAmountIn.amount);
 
         if (mutateBalances) {
-            poolPairData.tIn.decrease(amountIn.amount);
-            poolPairData.tOut.increase(swapAmount.amount);
+            poolPairData.tIn.sub(amountIn);
+            poolPairData.tOut.add(swapAmount);
         }
 
         return amountIn;

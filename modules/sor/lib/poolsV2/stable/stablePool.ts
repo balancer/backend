@@ -118,8 +118,8 @@ export class StablePool implements BasePool {
         if (amountOut.amount < 0n) throw new Error('Swap output negative');
 
         if (mutateBalances) {
-            tIn.increase(swapAmount.amount);
-            tOut.decrease(amountOut.amount);
+            tIn.add(swapAmount);
+            tOut.sub(amountOut);
         }
 
         return amountOut;
@@ -156,8 +156,8 @@ export class StablePool implements BasePool {
         if (amountInWithFee.amount < 0n) throw new Error('Swap output negative');
 
         if (mutateBalances) {
-            tIn.increase(amountInWithFee.amount);
-            tOut.decrease(swapAmount.amount);
+            tIn.add(amountInWithFee);
+            tOut.sub(swapAmount);
         }
 
         return amountInWithFee;

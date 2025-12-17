@@ -28,8 +28,8 @@ export class FxPoolToken extends BasePoolToken {
         this.numeraire = truncatedNumeraire * this.scalar36;
     }
 
-    public increase(amount: bigint): TokenAmount {
-        this.amount = this.amount + amount;
+    public add(amount: TokenAmount): TokenAmount {
+        this.amount = this.amount + amount.amount;
         this.scale18 = this.amount * this.scalar;
         const truncatedNumeraire = MathFx.mulDownFixed(
             this.amount,
@@ -40,8 +40,8 @@ export class FxPoolToken extends BasePoolToken {
         return this;
     }
 
-    public decrease(amount: bigint): TokenAmount {
-        this.amount = this.amount - amount;
+    public sub(amount: TokenAmount): TokenAmount {
+        this.amount = this.amount - amount.amount;
         this.scale18 = this.amount * this.scalar;
         const truncatedNumeraire = MathFx.mulDownFixed(
             this.amount,
