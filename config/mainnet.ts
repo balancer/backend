@@ -541,6 +541,25 @@ export default <NetworkData>{
                         },
                     ],
                 },
+                {
+                    name: 'msYUsd',
+                    url: 'https://api.goldsky.com/api/public/project_cmcccb4vz1nhh01x888di8lgk/subgraphs/mainstreet-mainnet/0.0.2/gn',
+                    body: JSON.stringify({
+                        query: `{
+                        msYUsdStats(id: "statsmsYUsd") {
+                            apy
+                        }
+                    }`,
+                    }),
+                    headers: { 'Content-Type': 'application/json' },
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x890a5122aa1da30fec4286de7904ff808f0bd74a',
+                            path: '$.data.msYUsdStats.apy',
+                        },
+                    ],
+                },
             ],
             contract: {
                 calls: [
