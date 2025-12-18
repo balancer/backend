@@ -543,6 +543,7 @@ export default <NetworkData>{
                 },
                 {
                     name: 'msYUsd',
+                    scale: 100,
                     url: 'https://api.goldsky.com/api/public/project_cmcccb4vz1nhh01x888di8lgk/subgraphs/mainstreet-mainnet/0.0.2/gn',
                     body: JSON.stringify({
                         query: `{
