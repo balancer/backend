@@ -125,8 +125,8 @@ export class MetaStablePool implements BasePool {
         if (amountOutWithRate.amount < 0n) throw new Error('Swap output negative');
 
         if (mutateBalances) {
-            tIn.increase(swapAmount.amount);
-            tOut.decrease(amountOutWithRate.amount);
+            tIn.add(swapAmount);
+            tOut.sub(amountOutWithRate);
         }
 
         return amountOutWithRate;
@@ -166,8 +166,8 @@ export class MetaStablePool implements BasePool {
         if (amountInWithRate.amount < 0n) throw new Error('Swap output negative');
 
         if (mutateBalances) {
-            tIn.increase(amountInWithRate.amount);
-            tOut.decrease(swapAmount.amount);
+            tIn.add(amountInWithRate);
+            tOut.sub(swapAmount);
         }
 
         return amountInWithRate;

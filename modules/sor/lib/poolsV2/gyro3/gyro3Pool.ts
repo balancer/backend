@@ -116,8 +116,8 @@ export class Gyro3Pool implements BasePool {
         const outAmount = TokenAmount.fromScale18Amount(tokenOut, outAmountScale18);
 
         if (mutateBalances) {
-            tIn.increase(swapAmount.amount);
-            tOut.decrease(outAmount.amount);
+            tIn.add(swapAmount);
+            tOut.sub(outAmount);
         }
 
         return outAmount;
@@ -141,8 +141,8 @@ export class Gyro3Pool implements BasePool {
         const inAmount = this.addSwapFeeAmount(TokenAmount.fromScale18Amount(tokenIn, inAmountLessFee, true));
 
         if (mutateBalances) {
-            tIn.decrease(inAmount.amount);
-            tOut.increase(swapAmount.amount);
+            tIn.sub(inAmount);
+            tOut.add(swapAmount);
         }
 
         return inAmount;

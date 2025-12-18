@@ -167,8 +167,8 @@ export class GyroEPool implements BasePool {
         );
 
         if (mutateBalances) {
-            tIn.increase(inAmountLive.amount);
-            tOut.decrease(outAmount.amount);
+            tIn.add(inAmountLive);
+            tOut.sub(outAmount);
         }
 
         return outAmount;
@@ -208,8 +208,8 @@ export class GyroEPool implements BasePool {
         );
 
         if (mutateBalances) {
-            tIn.decrease(inAmount.amount);
-            tOut.increase(outAmountLive.amount);
+            tIn.sub(inAmount);
+            tOut.add(outAmountLive);
         }
 
         return inAmount;

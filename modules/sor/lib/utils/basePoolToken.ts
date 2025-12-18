@@ -8,14 +8,14 @@ export class BasePoolToken extends TokenAmount {
         this.index = index;
     }
 
-    public increase(amount: bigint): TokenAmount {
-        this.amount = this.amount + amount;
+    public add(amount: TokenAmount): TokenAmount {
+        this.amount = this.amount + amount.amount;
         this.scale18 = this.amount * this.scalar;
         return this;
     }
 
-    public decrease(amount: bigint): TokenAmount {
-        this.amount = this.amount - amount;
+    public sub(amount: TokenAmount): TokenAmount {
+        this.amount = this.amount - amount.amount;
         this.scale18 = this.amount * this.scalar;
         return this;
     }

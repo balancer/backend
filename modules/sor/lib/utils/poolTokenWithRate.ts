@@ -10,14 +10,14 @@ export class PoolTokenWithRate extends BasePoolToken {
         this.scale18 = (this.amount * this.scalar * this.rate) / WAD;
     }
 
-    public increase(amount: bigint): TokenAmount {
-        this.amount = this.amount + amount;
+    public add(amount: TokenAmount): TokenAmount {
+        this.amount = this.amount + amount.amount;
         this.scale18 = (this.amount * this.scalar * this.rate) / WAD;
         return this;
     }
 
-    public decrease(amount: bigint): TokenAmount {
-        this.amount = this.amount - amount;
+    public sub(amount: TokenAmount): TokenAmount {
+        this.amount = this.amount - amount.amount;
         this.scale18 = (this.amount * this.scalar * this.rate) / WAD;
         return this;
     }

@@ -174,8 +174,8 @@ export class ComposableStablePool implements BasePool {
         if (amountOutWithRate.amount < 0n) throw new Error('Swap output negative');
 
         if (mutateBalances) {
-            tIn.increase(swapAmount.amount);
-            tOut.decrease(amountOutWithRate.amount);
+            tIn.add(swapAmount);
+            tOut.sub(amountOutWithRate);
 
             if (tIn.index === this.bptIndex) {
                 this.totalShares = this.totalShares - swapAmount.amount;
@@ -252,8 +252,8 @@ export class ComposableStablePool implements BasePool {
         if (amountIn.amount < 0n) throw new Error('Swap output negative');
 
         if (mutateBalances) {
-            tIn.increase(amountIn.amount);
-            tIn.decrease(swapAmount.amount);
+            tIn.add(amountIn);
+            tIn.sub(swapAmount);
 
             if (tIn.index === this.bptIndex) {
                 this.totalShares = this.totalShares - amountIn.amount;
