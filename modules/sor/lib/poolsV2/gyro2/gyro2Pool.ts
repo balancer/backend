@@ -143,8 +143,8 @@ export class Gyro2Pool implements BasePool {
         const outAmount = TokenAmount.fromScale18Amount(tokenOut, outAmountScale18).divDownFixed(tOut.rate);
 
         if (mutateBalances) {
-            tIn.increase(swapAmount.amount);
-            tOut.decrease(outAmount.amount);
+            tIn.add(swapAmount);
+            tOut.sub(outAmount);
         }
 
         return outAmount;
@@ -190,8 +190,8 @@ export class Gyro2Pool implements BasePool {
         const inAmount = this.addSwapFeeAmount(TokenAmount.fromScale18Amount(tokenIn, inAmountLessSwapFeeRateUndone));
 
         if (mutateBalances) {
-            tIn.decrease(inAmount.amount);
-            tOut.increase(swapAmount.amount);
+            tIn.sub(inAmount);
+            tOut.add(swapAmount);
         }
 
         return inAmount;
@@ -222,8 +222,8 @@ export class Gyro2Pool implements BasePool {
     }
 
     public getPoolTokens(tokenIn: Token, tokenOut: Token): { tIn: PoolTokenWithRate; tOut: PoolTokenWithRate } {
-        const tIn = this.tokenMap.get(tokenIn.wrapped);
-        const tOut = this.tokenMap.get(tokenOut.wrapped);
+        const tIn = this.tokenMap.get(tokenIn.address);
+        const tOut = this.tokenMap.get(tokenOut.address);
 
         if (!tIn || !tOut) {
             throw new Error('Pool does not contain the tokens provided');

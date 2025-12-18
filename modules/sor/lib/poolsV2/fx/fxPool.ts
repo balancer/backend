@@ -147,8 +147,8 @@ export class FxPool implements BasePool {
         const amountOut = TokenAmount.fromRawAmount(fxAmountOut.token, fxAmountOut.amount);
 
         if (mutateBalances) {
-            poolPairData.tIn.increase(swapAmount.amount);
-            poolPairData.tOut.decrease(amountOut.amount);
+            poolPairData.tIn.add(swapAmount);
+            poolPairData.tOut.sub(amountOut);
         }
 
         return amountOut;
@@ -172,8 +172,8 @@ export class FxPool implements BasePool {
         const amountIn = TokenAmount.fromRawAmount(fxAmountIn.token, fxAmountIn.amount);
 
         if (mutateBalances) {
-            poolPairData.tIn.decrease(amountIn.amount);
-            poolPairData.tOut.increase(swapAmount.amount);
+            poolPairData.tIn.sub(amountIn);
+            poolPairData.tOut.add(swapAmount);
         }
 
         return amountIn;
@@ -195,8 +195,8 @@ export class FxPool implements BasePool {
     }
 
     public getPoolTokens(tokenIn: Token, tokenOut: Token): { tIn: FxPoolToken; tOut: FxPoolToken } {
-        const tIn = this.tokenMap.get(tokenIn.wrapped);
-        const tOut = this.tokenMap.get(tokenOut.wrapped);
+        const tIn = this.tokenMap.get(tokenIn.address);
+        const tOut = this.tokenMap.get(tokenOut.address);
 
         if (!tIn || !tOut) {
             throw new Error('Token not found');

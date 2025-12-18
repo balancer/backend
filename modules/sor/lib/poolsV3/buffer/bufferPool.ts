@@ -190,8 +190,8 @@ export class BufferPool implements BasePoolMethodsV3 {
     // Helper methods
 
     public getPoolTokens(tokenIn: Token, tokenOut: Token): { tIn: BasePoolToken; tOut: BasePoolToken } {
-        const tIn = this.tokenMap.get(tokenIn.wrapped);
-        const tOut = this.tokenMap.get(tokenOut.wrapped);
+        const tIn = this.tokenMap.get(tokenIn.address);
+        const tOut = this.tokenMap.get(tokenOut.address);
 
         if (!tIn || !tOut) {
             throw new Error('Pool does not contain the tokens provided');

@@ -118,8 +118,8 @@ export class StablePool implements BasePool {
         if (amountOut.amount < 0n) throw new Error('Swap output negative');
 
         if (mutateBalances) {
-            tIn.increase(swapAmount.amount);
-            tOut.decrease(amountOut.amount);
+            tIn.add(swapAmount);
+            tOut.sub(amountOut);
         }
 
         return amountOut;
@@ -156,8 +156,8 @@ export class StablePool implements BasePool {
         if (amountInWithFee.amount < 0n) throw new Error('Swap output negative');
 
         if (mutateBalances) {
-            tIn.increase(amountInWithFee.amount);
-            tOut.decrease(swapAmount.amount);
+            tIn.add(amountInWithFee);
+            tOut.sub(swapAmount);
         }
 
         return amountInWithFee;
@@ -185,8 +185,8 @@ export class StablePool implements BasePool {
     }
 
     public getPoolTokens(tokenIn: Token, tokenOut: Token): { tIn: BasePoolToken; tOut: BasePoolToken } {
-        const tIn = this.tokenMap.get(tokenIn.wrapped);
-        const tOut = this.tokenMap.get(tokenOut.wrapped);
+        const tIn = this.tokenMap.get(tokenIn.address);
+        const tOut = this.tokenMap.get(tokenOut.address);
 
         if (!tIn || !tOut) {
             throw new Error('Pool does not contain the tokens provided');

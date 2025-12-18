@@ -1,4 +1,4 @@
-import { Address, SwapKind, Token, TokenAmount } from '@balancer/sdk';
+import { Address, SwapKind, TokenAmount, Token } from '@balancer/sdk';
 import { PathGraphEdgeData, PathGraphTraversalConfig } from './pathGraphTypes';
 import { BasePool } from '../poolsV2/basePool';
 import { PathLocal } from '../path';
@@ -105,8 +105,8 @@ export class PathGraph {
         const minLimitThreshold = (swapAmount.amount * BigInt(Math.floor(config.minSwapAmountRatio * 100))) / 100n;
 
         const tokenPaths = this.findAllValidTokenPaths({
-            tokenIn: tokenIn.wrapped,
-            tokenOut: tokenOut.wrapped,
+            tokenIn: tokenIn.address,
+            tokenOut: tokenOut.address,
             config,
             signal,
         });
@@ -204,7 +204,7 @@ export class PathGraph {
                 tokens.push(new Token(pool.tokens[0].token.chainId, pool.address.toLowerCase() as Address, 18)); // Add BPT as token nodes
             }
             for (const token of tokens) {
-                if (!this.nodes.has(token.wrapped)) {
+                if (!this.nodes.has(token.address)) {
                     this.addNode(token);
                 }
             }
@@ -271,7 +271,7 @@ export class PathGraph {
         if (swapKind !== undefined && tokenPrices) {
             const limit = pool.getLimitAmountSwap(tokenIn, tokenOut, swapKind);
             const priceToken = (swapKind as SwapKind) === SwapKind.GivenIn ? tokenIn : tokenOut;
-            const price = tokenPrices.get(priceToken.wrapped.toLowerCase());
+            const price = tokenPrices.get(priceToken.address.toLowerCase());
             if (price !== undefined) {
                 const amount = Number(formatUnits(limit, priceToken.decimals));
                 limitUSD = amount * price;
@@ -289,10 +289,10 @@ export class PathGraph {
     }
 
     private addNode(token: Token): void {
-        this.nodes.add(token.wrapped);
+        this.nodes.add(token.address);
 
-        if (!this.edges.has(token.wrapped)) {
-            this.edges.set(token.wrapped, new Map());
+        if (!this.edges.has(token.address)) {
+            this.edges.set(token.address, new Map());
         }
     }
 
@@ -306,22 +306,22 @@ export class PathGraph {
         edgeProps: PathGraphEdgeData;
         maxPathsPerTokenPair: number;
     }): void {
-        const tokenInVertex = this.nodes.has(edgeProps.tokenIn.wrapped);
-        const tokenOutVertex = this.nodes.has(edgeProps.tokenOut.wrapped);
-        const tokenInNode = this.edges.get(edgeProps.tokenIn.wrapped);
+        const tokenInVertex = this.nodes.has(edgeProps.tokenIn.address);
+        const tokenOutVertex = this.nodes.has(edgeProps.tokenOut.address);
+        const tokenInNode = this.edges.get(edgeProps.tokenIn.address);
 
         if (!tokenInVertex || !tokenOutVertex || !tokenInNode) {
             throw new Error('Attempting to add invalid edge');
         }
 
-        const existingEdges = tokenInNode.get(edgeProps.tokenOut.wrapped) || [];
+        const existingEdges = tokenInNode.get(edgeProps.tokenOut.address) || [];
 
         const sorted = [...existingEdges, edgeProps].sort((a, b) =>
             a.normalizedLiquidity > b.normalizedLiquidity ? -1 : 1,
         );
 
         tokenInNode.set(
-            edgeProps.tokenOut.wrapped,
+            edgeProps.tokenOut.address,
             sorted.length > maxPathsPerTokenPair ? sorted.slice(0, maxPathsPerTokenPair) : sorted,
         );
     }

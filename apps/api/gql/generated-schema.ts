@@ -733,6 +733,7 @@ export interface GqlPoolDynamicData {
     /** Disabled for bricked pools */
     swapEnabled: Scalars['Boolean'];
     swapFee: Scalars['BigDecimal'];
+    /** @deprecated Field no longer supported */
     swapsCount: Scalars['BigInt'];
     totalLiquidity: Scalars['BigDecimal'];
     totalLiquidity24hAgo: Scalars['BigDecimal'];
@@ -2795,7 +2796,6 @@ export interface MevTaxHookParams {
 export interface Mutation {
     __typename?: 'Mutation';
     beetsPoolLoadReliquarySnapshotsForAllFarms: Scalars['String'];
-    beetsSyncFbeetsRatio: Scalars['String'];
     createLBP: Scalars['Boolean'];
     poolLoadOnChainDataForAllPools: Array<GqlPoolMutationResult>;
     poolLoadSnapshotsForPools: Scalars['String'];
@@ -5902,7 +5902,6 @@ export type MutationResolvers<
         ContextType,
         RequireFields<MutationBeetsPoolLoadReliquarySnapshotsForAllFarmsArgs, 'chain'>
     >;
-    beetsSyncFbeetsRatio?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     createLBP?: Resolver<
         ResolversTypes['Boolean'],
         ParentType,

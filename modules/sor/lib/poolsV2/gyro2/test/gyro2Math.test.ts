@@ -1,7 +1,7 @@
 import { _calculateInvariant, _calcOutGivenIn, _findVirtualParams } from "../gyro2Math";
 import { Gyro2Pool, Gyro2PoolToken } from "../gyro2Pool"; 
 
-import { Token, TokenAmount } from '@balancer/sdk'
+import { Token, TokenAmount, NativeToken } from '@balancer/sdk'
 
 import { parseEther } from 'viem';
 
@@ -45,22 +45,22 @@ describe('gyro2Math', () => {
             [{ tokenA: '0xTokenInAddress', tokenB: '0xTokenOutAddress', normalizedLiquidity: '1000000', spotPrice: '1.5' }]
         );
 
-        const tIn = new Token(
+        const tIn = new NativeToken(
             42161,
             "0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9",
             6,
+            "0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9",
             "USDT",
             "Tether USD",
-            "0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9",
           )
 
-        const tOut = new Token(
+        const tOut = new NativeToken(
             42161,
             "0xb165a74407fe1e519d6bcbdec1ed3202b35a4140",
             6,
+            "0xb165a74407fe1e519d6bcbdec1ed3202b35a4140",
             "stataArbUSDT",
             "Static Aave Arbitrum USDT",
-            "0xb165a74407fe1e519d6bcbdec1ed3202b35a4140",
         )
         
         const swapAmount = TokenAmount.fromHumanAmount(tIn, '1');
@@ -104,22 +104,22 @@ describe('gyro2Math', () => {
             [{ tokenA: '0xTokenInAddress', tokenB: '0xTokenOutAddress', normalizedLiquidity: '1000000', spotPrice: '1.5' }]
         );
 
-        const tIn = new Token(
+        const tIn = new NativeToken(
             42161,
             "0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9",
             6,
+            "0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9",
             "USDT",
             "Tether USD",
-            "0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9",
           )
 
-        const tOut = new Token(
+        const tOut = new NativeToken(
             42161,
             "0xb165a74407fe1e519d6bcbdec1ed3202b35a4140",
             6,
+            "0xb165a74407fe1e519d6bcbdec1ed3202b35a4140",
             "stataArbUSDT",
             "Static Aave Arbitrum USDT",
-            "0xb165a74407fe1e519d6bcbdec1ed3202b35a4140",
         )
         const swapAmount = TokenAmount.fromHumanAmount(tIn, '0.879697');
 

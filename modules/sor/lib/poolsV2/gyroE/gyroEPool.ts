@@ -167,8 +167,8 @@ export class GyroEPool implements BasePool {
         );
 
         if (mutateBalances) {
-            tIn.increase(inAmountLive.amount);
-            tOut.decrease(outAmount.amount);
+            tIn.add(inAmountLive);
+            tOut.sub(outAmount);
         }
 
         return outAmount;
@@ -208,8 +208,8 @@ export class GyroEPool implements BasePool {
         );
 
         if (mutateBalances) {
-            tIn.decrease(inAmount.amount);
-            tOut.increase(outAmountLive.amount);
+            tIn.sub(inAmount);
+            tOut.add(outAmountLive);
         }
 
         return inAmount;
@@ -255,8 +255,8 @@ export class GyroEPool implements BasePool {
         tIn: PoolTokenWithRate;
         tOut: PoolTokenWithRate;
     } {
-        const tIn = this.tokenMap.get(tokenIn.wrapped);
-        const tOut = this.tokenMap.get(tokenOut.wrapped);
+        const tIn = this.tokenMap.get(tokenIn.address);
+        const tOut = this.tokenMap.get(tokenOut.address);
 
         if (!tIn || !tOut) {
             throw new Error('Pool does not contain the tokens provided');

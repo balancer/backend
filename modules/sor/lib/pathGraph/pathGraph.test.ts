@@ -80,19 +80,19 @@ describe('PathGraph search algorithms', () => {
 
     test('finds direct path', () => {
         const paths = graph['findAllValidTokenPaths']({
-            tokenIn: tokenA.wrapped,
-            tokenOut: tokenB.wrapped,
+            tokenIn: tokenA.address,
+            tokenOut: tokenB.address,
             config: { ...baseConfig },
         });
 
-        expect(paths).toContainEqual([tokenA.wrapped, tokenB.wrapped]);
+        expect(paths).toContainEqual([tokenA.address, tokenB.address]);
     });
 
     test('avoids revisiting tokens (no cycles)', () => {
         // path A -> B -> A -> B should not appear
         const paths = graph['findAllValidTokenPaths']({
-            tokenIn: tokenA.wrapped,
-            tokenOut: tokenC.wrapped,
+            tokenIn: tokenA.address,
+            tokenOut: tokenC.address,
             config: { ...baseConfig },
         });
 
@@ -104,14 +104,14 @@ describe('PathGraph search algorithms', () => {
 
     test('respects maxDepth limit', () => {
         const paths = graph['findAllValidTokenPaths']({
-            tokenIn: tokenA.wrapped,
-            tokenOut: tokenD.wrapped,
+            tokenIn: tokenA.address,
+            tokenOut: tokenD.address,
             config: { ...baseConfig, maxDepth: 2, maxDepthFallback: 2 },
         });
 
         // Only A -> D (buffer pool) should be valid, not A -> B -> C -> D
-        expect(paths).toContainEqual([tokenA.wrapped, tokenD.wrapped]);
-        expect(paths).not.toContainEqual([tokenA.wrapped, tokenB.wrapped, tokenC.wrapped, tokenD.wrapped]);
+        expect(paths).toContainEqual([tokenA.address, tokenD.address]);
+        expect(paths).not.toContainEqual([tokenA.address, tokenB.address, tokenC.address, tokenD.address]);
     });
 
     test('algorithm explores longer paths in queue before finding shorter optimal ones', () => {
@@ -155,28 +155,28 @@ describe('PathGraph search algorithms', () => {
         // - Once found, switches to maxDepth=3
         // - Longer path (5 nodes) gets cut off because 5 > 3
         const pathsRestrictive = g['findAllValidTokenPaths']({
-            tokenIn: tokenA.wrapped,
-            tokenOut: tokenD.wrapped,
+            tokenIn: tokenA.address,
+            tokenOut: tokenD.address,
             config: { ...baseConfig, maxDepth: 3, maxDepthFallback: 5 },
         });
         expect(pathsRestrictive.length).toBe(1); // Only short path found
-        expect(pathsRestrictive).toContainEqual([tokenA.wrapped, tokenB.wrapped, tokenD.wrapped]);
+        expect(pathsRestrictive).toContainEqual([tokenA.address, tokenB.address, tokenD.address]);
 
         // Scenario 2: maxDepth=5, maxDepthFallback=5
         // - Both paths can be found because maxDepth doesn't restrict after switch
         const pathsPermissive = g['findAllValidTokenPaths']({
-            tokenIn: tokenA.wrapped,
-            tokenOut: tokenD.wrapped,
+            tokenIn: tokenA.address,
+            tokenOut: tokenD.address,
             config: { ...baseConfig, maxDepth: 5, maxDepthFallback: 5 },
         });
         expect(pathsPermissive.length).toBe(2); // Both paths found
-        expect(pathsPermissive).toContainEqual([tokenA.wrapped, tokenB.wrapped, tokenD.wrapped]);
+        expect(pathsPermissive).toContainEqual([tokenA.address, tokenB.address, tokenD.address]);
         expect(pathsPermissive).toContainEqual([
-            tokenA.wrapped,
-            tokenE.wrapped,
-            tokenF.wrapped,
-            tokenG.wrapped,
-            tokenD.wrapped,
+            tokenA.address,
+            tokenE.address,
+            tokenF.address,
+            tokenG.address,
+            tokenD.address,
         ]);
 
         // This demonstrates why you might need maxDepth=9 to find a 5-node path:
@@ -185,8 +185,8 @@ describe('PathGraph search algorithms', () => {
     });
 
     test('expandTokenPathWithRanks expands a simple path', () => {
-        const edgesAB = (graph as any).edges.get(tokenA.wrapped).get(tokenB.wrapped);
-        const edgesBC = (graph as any).edges.get(tokenB.wrapped).get(tokenC.wrapped);
+        const edgesAB = (graph as any).edges.get(tokenA.address).get(tokenB.address);
+        const edgesBC = (graph as any).edges.get(tokenB.address).get(tokenC.address);
 
         const result = graph['expandTokenPathWithRanks']({
             perSegmentEdges: [edgesAB, edgesBC],
@@ -215,14 +215,14 @@ describe('PathGraph search algorithms', () => {
         });
 
         const paths = g['findAllValidTokenPaths']({
-            tokenIn: tokenA.wrapped,
-            tokenOut: tokenD.wrapped,
+            tokenIn: tokenA.address,
+            tokenOut: tokenD.address,
             config: { ...baseConfig },
         });
 
         // Expect BFS-like order
-        expect(paths[0]).toEqual([tokenA.wrapped, tokenB.wrapped, tokenD.wrapped]);
-        expect(paths[1]).toEqual([tokenA.wrapped, tokenC.wrapped, tokenD.wrapped]);
+        expect(paths[0]).toEqual([tokenA.address, tokenB.address, tokenD.address]);
+        expect(paths[1]).toEqual([tokenA.address, tokenC.address, tokenD.address]);
     });
 
     test('isValidPath rejects paths that reuse the same pool within a single path', () => {
@@ -324,13 +324,13 @@ describe('PathGraph search algorithms', () => {
             minLimitThresholdUSD: 0,
         });
 
-        const edges = (g as any).edges.get(tokenA.wrapped).get(tokenB.wrapped);
+        const edges = (g as any).edges.get(tokenA.address).get(tokenB.address);
         expect(edges.length).toBe(2);
         expect(edges.map((e: any) => e.pool.id)).toEqual(['pAB1', 'pAB2']);
     });
 
     test('expandTokenPathWithRanks throws on invalid rank', () => {
-        const edgesAB = (graph as any).edges.get(tokenA.wrapped).get(tokenB.wrapped);
+        const edgesAB = (graph as any).edges.get(tokenA.address).get(tokenB.address);
         expect(() => {
             graph['expandTokenPathWithRanks']({
                 perSegmentEdges: [edgesAB],
@@ -410,8 +410,8 @@ describe('PathGraph search algorithms', () => {
 
         // This should generate 10 possible token paths: hub -> spoke[i] -> target
         const paths = g['findAllValidTokenPaths']({
-            tokenIn: hub.wrapped,
-            tokenOut: target.wrapped,
+            tokenIn: hub.address,
+            tokenOut: target.address,
             config: { ...baseConfig, maxTokenPaths: 5 }, // limit to 5
         });
 
@@ -501,8 +501,8 @@ describe('PathGraph search algorithms', () => {
         });
 
         const tokenPrices = new Map<string, number>();
-        tokenPrices.set(tokenA.wrapped.toLowerCase(), 1.5);
-        tokenPrices.set(tokenB.wrapped.toLowerCase(), 1.0);
+        tokenPrices.set(tokenA.address.toLowerCase(), 1.5);
+        tokenPrices.set(tokenB.address.toLowerCase(), 1.0);
 
         // swapKind = GivenIn
         // A->B: priceToken=A, price=1.5, limitUSD=1500
@@ -516,12 +516,12 @@ describe('PathGraph search algorithms', () => {
         });
 
         // A->B should be created (1500 > 1200)
-        const edgesAB = graph['edges'].get(tokenA.wrapped)?.get(tokenB.wrapped);
+        const edgesAB = graph['edges'].get(tokenA.address)?.get(tokenB.address);
         expect(edgesAB?.length).toBe(1);
         expect(edgesAB && edgesAB[0].limitUSD).toBe(1500);
 
         // B->A should NOT be created (1000 < 1200)
-        const edgesBA = graph['edges'].get(tokenB.wrapped)?.get(tokenA.wrapped);
+        const edgesBA = graph['edges'].get(tokenB.address)?.get(tokenA.address);
         expect(edgesBA).toBeUndefined();
     });
 
@@ -534,7 +534,7 @@ describe('PathGraph search algorithms', () => {
 
         // Price map only has tokenA, missing tokenB
         const tokenPrices = new Map<string, number>();
-        tokenPrices.set(tokenA.wrapped.toLowerCase(), 2.0);
+        tokenPrices.set(tokenA.address.toLowerCase(), 2.0);
 
         g.buildGraph({
             pools: [pAB],
@@ -546,7 +546,7 @@ describe('PathGraph search algorithms', () => {
 
         // For GivenOut swap, priceToken = tokenOut = tokenB, but
         // we *did not* provide price for tokenB. So limitUSD should be undefined.
-        const edges = (g as any).edges.get(tokenA.wrapped).get(tokenB.wrapped);
+        const edges = (g as any).edges.get(tokenA.address).get(tokenB.address);
         expect(edges.length).toBe(1);
         expect(edges[0].limitUSD).toBeUndefined();
     });
@@ -819,7 +819,7 @@ describe('PathGraph search algorithms', () => {
             minLimitThresholdUSD: 0,
         });
 
-        const edgesAB = (g as any).edges.get(tokenA.wrapped).get(tokenB.wrapped);
+        const edgesAB = (g as any).edges.get(tokenA.address).get(tokenB.address);
         const result = (g as any).selectTopCandidatesPerTokenPath(
             [edgesAB, []], // second segment has no edges
             5,
@@ -911,7 +911,7 @@ describe('PathGraph search algorithms', () => {
                 minLimitThresholdUSD: 0,
             });
 
-            const edges = (g as any).edges.get(tokenA.wrapped).get(tokenB.wrapped);
+            const edges = (g as any).edges.get(tokenA.address).get(tokenB.address);
             const liqs = edges.map((e: any) => e.normalizedLiquidity);
 
             expect(edges.length).toBe(3);
@@ -937,8 +937,8 @@ describe('PathGraph search algorithms', () => {
                 minLimitThresholdUSD: 0,
             });
 
-            const edgesAB = (g as any).edges.get(tokenA.wrapped).get(tokenB.wrapped);
-            const edgesBC = (g as any).edges.get(tokenB.wrapped).get(tokenC.wrapped);
+            const edgesAB = (g as any).edges.get(tokenA.address).get(tokenB.address);
+            const edgesBC = (g as any).edges.get(tokenB.address).get(tokenC.address);
 
             const result = (g as any).selectTopCandidatesPerTokenPath(
                 [edgesAB, edgesBC],

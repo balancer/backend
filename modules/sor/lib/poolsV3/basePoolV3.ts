@@ -97,7 +97,7 @@ export class BasePoolV3 {
     ): TokenAmount {
         const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
 
-        let calculatedAmount: bigint;
+        let amountOut: TokenAmount;
 
         if (tIn.token.isSameAddress(this.id)) {
             // if liquidityManagement.disableUnbalancedLiquidity is true return 0
@@ -118,7 +118,7 @@ export class BasePoolV3 {
                 this.poolState,
                 this.hookState,
             );
-            calculatedAmount = amountsOutRaw[tOut.index];
+            amountOut = TokenAmount.fromRawAmount(tOut.token, amountsOutRaw[tOut.index]);
         } else if (tOut.token.isSameAddress(this.id)) {
             // if liquidityManagement.disableUnbalancedLiquidity is true return 0
             // as the pool does not allow unbalanced operations. 0 return marks the
@@ -138,10 +138,10 @@ export class BasePoolV3 {
                 this.poolState,
                 this.hookState,
             );
-            calculatedAmount = bptAmountOutRaw;
+            amountOut = TokenAmount.fromRawAmount(tOut.token, bptAmountOutRaw);
         } else {
             // swap
-            calculatedAmount = this.vault.swap(
+            const calculatedAmount = this.vault.swap(
                 {
                     amountRaw: swapAmount.amount,
                     tokenIn: tIn.token.address,
@@ -151,15 +151,16 @@ export class BasePoolV3 {
                 this.poolState,
                 this.hookState,
             );
+            amountOut = TokenAmount.fromRawAmount(tOut.token, calculatedAmount);
         }
 
         if (mutateBalances) {
-            tIn.increase(swapAmount.amount);
-            tOut.decrease(calculatedAmount);
+            tIn.add(swapAmount);
+            tOut.sub(amountOut);
             this.poolState.balancesLiveScaled18 = this.tokens.map((t) => t.scale18);
         }
 
-        return TokenAmount.fromRawAmount(tOut.token, calculatedAmount);
+        return amountOut;
     }
 
     public swapGivenOut(
@@ -170,7 +171,7 @@ export class BasePoolV3 {
     ): TokenAmount {
         const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
 
-        let calculatedAmount: bigint;
+        let amountIn: TokenAmount;
 
         if (tIn.token.isSameAddress(this.id)) {
             // if liquidityManagement.disableUnbalancedLiquidity is true return 0
@@ -191,7 +192,7 @@ export class BasePoolV3 {
                 this.poolState,
                 this.hookState,
             );
-            calculatedAmount = bptAmountInRaw;
+            amountIn = TokenAmount.fromRawAmount(tIn.token, bptAmountInRaw);
         } else if (tOut.token.isSameAddress(this.id)) {
             // if liquidityManagement.disableUnbalancedLiquidity is true return 0
             // as the pool does not allow unbalanced operations. 0 return marks the
@@ -211,10 +212,10 @@ export class BasePoolV3 {
                 this.poolState,
                 this.hookState,
             );
-            calculatedAmount = amountsInRaw[tIn.index];
+            amountIn = TokenAmount.fromRawAmount(tIn.token, amountsInRaw[tIn.index]);
         } else {
             // swap
-            calculatedAmount = this.vault.swap(
+            const calculatedAmount = this.vault.swap(
                 {
                     amountRaw: swapAmount.amount,
                     tokenIn: tIn.token.address,
@@ -224,15 +225,16 @@ export class BasePoolV3 {
                 this.poolState,
                 this.hookState,
             );
+            amountIn = TokenAmount.fromRawAmount(tIn.token, calculatedAmount);
         }
 
         if (mutateBalances) {
-            tIn.increase(calculatedAmount);
-            tOut.decrease(swapAmount.amount);
+            tIn.add(amountIn);
+            tOut.sub(swapAmount);
             this.poolState.balancesLiveScaled18 = this.tokens.map((t) => t.scale18);
         }
 
-        return TokenAmount.fromRawAmount(tIn.token, calculatedAmount);
+        return amountIn;
     }
 
     public getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint {
