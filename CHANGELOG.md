@@ -1,5 +1,16 @@
 # backend
 
+## 1.58.0
+
+### Minor Changes
+
+-   eeafe7c: replace wrapped functionality with accessing address & refactor to use scoped down Token functionality (removal of isUnderlyingEqual)
+
+### Patch Changes
+
+-   a12c692: SOR - Rename increase/decrease as add/sub
+-   188c75d: SOR - Remove redundant or unnecessary tests
+
 ## 1.57.8
 
 ### Patch Changes
