@@ -61,6 +61,7 @@ export const syncData = async (
         // Check if the weights are different
         .filter((update) => {
             const token = tokens[update.id];
+            if (!token) return false;
             return update.weight ? token.weight !== update.weight : false;
         })
         .flatMap((update) =>
