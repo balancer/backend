@@ -39,13 +39,10 @@ export const syncData = async (
                 },
             })
             .then((records) =>
-                records.reduce(
-                    (acc, token) => {
-                        acc[token.id] = token;
-                        return acc;
-                    },
-                    {} as Record<string, (typeof records)[0]>,
-                ),
+                records.reduce((acc, token) => {
+                    acc[token.id] = token;
+                    return acc;
+                }, {} as Record<string, (typeof records)[0]>),
             ),
         prisma.prismaPoolDynamicData
             .findMany({
@@ -64,6 +61,7 @@ export const syncData = async (
         // Check if the weights are different
         .filter((update) => {
             const token = tokens[update.id];
+            if (!token) return false;
             return token.weight !== update.weight;
         })
         .flatMap((update) =>

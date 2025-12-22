@@ -41,7 +41,7 @@ export const lbPoolInputToDB = async (input: CreateLbpInput) => {
 
     const poolTokensData: Prisma.PrismaPoolTokenCreateManyPoolInput[] = rpcData.pool.tokens.map((token, idx) => ({
         ...token,
-        id: `${input.poolContract.address}-${token.address}`,
+        id: `${input.poolContract.address}-${token.address}`.toLowerCase(),
         balanceUSD: Number(token.balance) * prices[idx],
         priceRate: '1',
     }));
@@ -66,7 +66,7 @@ export const lbPoolInputToDB = async (input: CreateLbpInput) => {
         dynamicData: {
             create: {
                 ...rpcData.dynamicData,
-                id: input.poolContract.address,
+                id: input.poolContract.address.toLowerCase(),
                 totalLiquidity: poolTokensData.reduce((acc, token) => acc + Number(token.balanceUSD), 0),
             },
         },
