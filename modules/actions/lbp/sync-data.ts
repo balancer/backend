@@ -62,7 +62,7 @@ export const syncData = async (
         .filter((update) => {
             const token = tokens[update.id];
             if (!token) return false;
-            return update.weight ? token.weight !== update.weight : false;
+            return token.weight !== update.weight;
         })
         .flatMap((update) =>
             prisma.prismaPoolToken.update({
