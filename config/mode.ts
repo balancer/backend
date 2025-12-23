@@ -12,8 +12,8 @@ export default <NetworkData>{
     },
     subgraphs: {
         startDate: '2024-05-22',
-        balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmSV7RXmuSxNm7NyAVYPqbkB9rfPPRiL4ANgr7iTxuW8Vu`,
-        gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmRmDxf7L6L1aYY9uv58PGRooB9cLLNkUTPME3n8fTCkWc`,
+        balancer: ``,
+        gauge: ``,
     },
     eth: {
         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
