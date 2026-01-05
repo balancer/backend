@@ -7,6 +7,8 @@ import { SorAbortError } from '../../errors';
 
 const DEFAULT_MAX_PATH_SEGMENTS_PER_TOKEN_PAIR = 4;
 
+type PathCandidateProps = { ranks: number[]; boundNL: bigint };
+
 export class PathGraph {
     private nodes: Set<string>;
     private edges: Map<string, Map<string, PathGraphEdgeData[]>>;
@@ -137,7 +139,7 @@ export class PathGraph {
         const allPathCandidates: Array<{
             tokenPath: string[];
             perSegmentEdges: PathGraphEdgeData[][];
-            candidates: { ranks: number[]; boundNL: bigint }[];
+            pathCandidateProps: PathCandidateProps;
         }> = [];
 
         for (const tokenPath of tokenPaths) {
@@ -156,24 +158,19 @@ export class PathGraph {
             );
 
             // Generate all combinations for this token path using beam search
-            const candidates = this.selectTopCandidatesPerTokenPath(perSegmentEdges, config.maxCandidatesPerTokenPath);
+            const topCandidates = this.selectTopCandidatesPerTokenPath(
+                perSegmentEdges,
+                config.maxCandidatesPerTokenPath,
+            );
 
-            if (candidates.length > 0) {
+            for (const pathCandidateProps of topCandidates) {
                 allPathCandidates.push({
                     tokenPath,
                     perSegmentEdges,
-                    candidates,
+                    pathCandidateProps,
                 });
             }
         }
-
-        const flattenedPathCandidates = allPathCandidates.flatMap(({ tokenPath, perSegmentEdges, candidates }) =>
-            candidates.map((candidate) => ({
-                tokenPath,
-                perSegmentEdges,
-                candidate,
-            })),
-        );
 
         // Check if aborted before validation
         if (signal?.aborted) {
@@ -181,13 +178,7 @@ export class PathGraph {
         }
 
         // Step 2: Expand and validate the selected candidates
-        const paths = this.expandAndValidateCandidates(
-            flattenedPathCandidates,
-            swapKind,
-            minLimitThreshold,
-            config,
-            signal,
-        );
+        const paths = this.expandAndValidateCandidates(allPathCandidates, swapKind, minLimitThreshold, config, signal);
 
         return paths.map((path) => {
             const pathTokens: Token[] = path.map((segment) => segment.tokenOut);
@@ -480,14 +471,13 @@ export class PathGraph {
         if (segmentCount <= 0) return [];
 
         // Beam search: keep only the top K partial combos by bottleneck normalizedLiquidity
-        type Partial = { ranks: number[]; boundNL: bigint };
-        let partials: Partial[] = [{ ranks: [], boundNL: 0n }];
+        let pathCandidateProps: PathCandidateProps[] = [{ ranks: [], boundNL: 0n }];
 
         for (let seg = 0; seg < segmentCount; seg++) {
             const edges = perSegmentEdges[seg];
-            const next: Partial[] = [];
+            const next: PathCandidateProps[] = [];
 
-            for (const p of partials) {
+            for (const p of pathCandidateProps) {
                 for (let r = 0; r < edges.length; r++) {
                     const edge = edges[r];
 
@@ -504,10 +494,10 @@ export class PathGraph {
 
             // Keep only the best by bottleneck NL (desc)
             next.sort((a, b) => (a.boundNL < b.boundNL ? 1 : -1));
-            partials = next.slice(0, beamWidth);
+            pathCandidateProps = next.slice(0, beamWidth);
         }
 
-        return partials;
+        return pathCandidateProps;
     }
 
     /**
@@ -564,7 +554,7 @@ export class PathGraph {
         topCandidates: Array<{
             tokenPath: string[];
             perSegmentEdges: PathGraphEdgeData[][];
-            candidate: { ranks: number[]; boundNL: bigint };
+            pathCandidateProps: PathCandidateProps;
         }>,
         swapKind: SwapKind,
         minLimitThreshold: bigint,
@@ -573,14 +563,14 @@ export class PathGraph {
     ): PathGraphEdgeData[][] {
         const validPaths: PathGraphEdgeData[][] = [];
 
-        for (const { perSegmentEdges, candidate } of topCandidates) {
+        for (const { perSegmentEdges, pathCandidateProps } of topCandidates) {
             // Check for abort periodically
             if (signal?.aborted) {
                 throw new SorAbortError();
             }
 
             try {
-                const path = this.expandTokenPathWithRanks({ perSegmentEdges, ranks: candidate.ranks });
+                const path = this.expandTokenPathWithRanks({ perSegmentEdges, ranks: pathCandidateProps.ranks });
                 if (this.isValidPath({ path, config, swapKind, minLimitThreshold })) {
                     validPaths.push(path);
                 }
