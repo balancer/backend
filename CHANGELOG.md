@@ -1,5 +1,11 @@
 # backend
 
+## 1.58.1
+
+### Patch Changes
+
+-   8fb07d6: APR USDf
+
 ## 1.58.0
 
 ### Minor Changes
