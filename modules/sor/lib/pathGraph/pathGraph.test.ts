@@ -64,7 +64,7 @@ describe('PathGraph search algorithms', () => {
             minLimitThresholdUSD: 0,
         });
 
-        const edgeProps = {
+        const pathSegment = {
             pool: createMockPool('test', [tokenA, tokenB]),
             tokenIn: tokenA,
             tokenOut: orphanToken,
@@ -74,7 +74,7 @@ describe('PathGraph search algorithms', () => {
         };
 
         expect(() => {
-            g['addEdge']({ edgeProps, maxPathSegmentsPerTokenPair: 2 });
+            g['addEdge']({ pathSegment, maxPathSegmentsPerTokenPair: 2 });
         }).toThrow('Attempting to add invalid edge');
     });
 
@@ -525,7 +525,7 @@ describe('PathGraph search algorithms', () => {
         expect(edgesBA).toBeUndefined();
     });
 
-    test('buildEdgeProps sets limitUSD as undefined when tokenPrices is missing an entry', () => {
+    test('buildPathSegment sets limitUSD as undefined when tokenPrices is missing an entry', () => {
         const g = new PathGraph();
 
         const pAB = createMockPool('pAB', [tokenA, tokenB], {

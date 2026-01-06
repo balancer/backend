@@ -243,16 +243,16 @@ export class PathGraph {
                 for (const tokenOut of tokens) {
                     if (tokenIn === tokenOut) continue;
                     try {
-                        const edgeProps = this.buildEdgeProps({ pool, tokenIn, tokenOut, swapKind, tokenPrices });
+                        const pathSegment = this.buildPathSegment({ pool, tokenIn, tokenOut, swapKind, tokenPrices });
                         // Skip edges whose USD limit is known and below threshold; allow undefined to pass
                         if (
                             minLimitThresholdUSD !== undefined &&
-                            edgeProps.limitUSD !== undefined &&
-                            edgeProps.limitUSD < minLimitThresholdUSD
+                            pathSegment.limitUSD !== undefined &&
+                            pathSegment.limitUSD < minLimitThresholdUSD
                         ) {
                             continue;
                         }
-                        this.addEdge({ edgeProps, maxPathSegmentsPerTokenPair });
+                        this.addEdge({ pathSegment, maxPathSegmentsPerTokenPair });
                     } catch {
                         // leave edge undefined if anything fails
                     }
@@ -262,7 +262,7 @@ export class PathGraph {
     }
 
     // Build edge properties including optional limitUSD using tokenPrices for the given swapKind
-    private buildEdgeProps({
+    private buildPathSegment({
         pool,
         tokenIn,
         tokenOut,
@@ -308,28 +308,28 @@ export class PathGraph {
      * Adds a directed edge from a source vertex to a destination
      */
     private addEdge({
-        edgeProps,
+        pathSegment,
         maxPathSegmentsPerTokenPair,
     }: {
-        edgeProps: PathSegment;
+        pathSegment: PathSegment;
         maxPathSegmentsPerTokenPair: number;
     }): void {
-        const tokenInVertex = this.nodes.has(edgeProps.tokenIn.address);
-        const tokenOutVertex = this.nodes.has(edgeProps.tokenOut.address);
-        const tokenInNode = this.edges.get(edgeProps.tokenIn.address);
+        const tokenInVertex = this.nodes.has(pathSegment.tokenIn.address);
+        const tokenOutVertex = this.nodes.has(pathSegment.tokenOut.address);
+        const tokenInNode = this.edges.get(pathSegment.tokenIn.address);
 
         if (!tokenInVertex || !tokenOutVertex || !tokenInNode) {
             throw new Error('Attempting to add invalid edge');
         }
 
-        const existingEdgeProps = tokenInNode.get(edgeProps.tokenOut.address) || [];
+        const existingPathSegment = tokenInNode.get(pathSegment.tokenOut.address) || [];
 
-        const sorted = [...existingEdgeProps, edgeProps].sort((a, b) =>
+        const sorted = [...existingPathSegment, pathSegment].sort((a, b) =>
             a.normalizedLiquidity > b.normalizedLiquidity ? -1 : 1,
         );
 
         tokenInNode.set(
-            edgeProps.tokenOut.address,
+            pathSegment.tokenOut.address,
             sorted.length > maxPathSegmentsPerTokenPair ? sorted.slice(0, maxPathSegmentsPerTokenPair) : sorted,
         );
     }
