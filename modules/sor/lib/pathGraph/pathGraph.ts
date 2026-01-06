@@ -1,5 +1,5 @@
 import { Address, SwapKind, TokenAmount, Token } from '@balancer/sdk';
-import { PathGraphEdgeData, PathGraphTraversalConfig } from './pathGraphTypes';
+import { PathSegment, PathGraphTraversalConfig } from './pathGraphTypes';
 import { BasePool } from '../poolsV2/basePool';
 import { PathLocal } from '../path';
 import { formatUnits } from 'viem';
@@ -11,7 +11,7 @@ type PathCandidateProps = { ranks: number[]; boundNL: bigint };
 
 export class PathGraph {
     private nodes: Set<string>;
-    private edges: Map<string, Map<string, PathGraphEdgeData[]>>;
+    private edges: Map<string, Map<string, PathSegment[]>>;
     private poolAddressMap: Map<string, BasePool>;
 
     /**
@@ -138,7 +138,7 @@ export class PathGraph {
         // Step 1: Generate all candidate combinations across all token paths
         const allPathCandidates: Array<{
             tokenPath: string[];
-            perSegmentEdges: PathGraphEdgeData[][];
+            pathSegmentsPerTokenPair: PathSegment[][];
             pathCandidateProps: PathCandidateProps;
         }> = [];
 
@@ -152,21 +152,21 @@ export class PathGraph {
             if (segmentCount <= 0) continue;
 
             // Gather candidate edges per segment (already sorted by normalizedLiquidity desc)
-            const perSegmentEdges: PathGraphEdgeData[][] = Array.from(
+            const pathSegmentsPerTokenPair: PathSegment[][] = Array.from(
                 { length: segmentCount },
                 (_, i) => this.edges.get(tokenPath[i])?.get(tokenPath[i + 1]) || [],
             );
 
             // Generate all combinations for this token path using beam search
-            const topCandidates = this.selectTopCandidatesPerTokenPath(
-                perSegmentEdges,
+            const pathCandidates = this.selectTopCandidatesPerTokenPath(
+                pathSegmentsPerTokenPair,
                 config.maxCandidatesPerTokenPath,
             );
 
-            for (const pathCandidateProps of topCandidates) {
+            for (const pathCandidateProps of pathCandidates) {
                 allPathCandidates.push({
                     tokenPath,
-                    perSegmentEdges,
+                    pathSegmentsPerTokenPair,
                     pathCandidateProps,
                 });
             }
@@ -274,7 +274,7 @@ export class PathGraph {
         tokenOut: Token;
         swapKind?: SwapKind;
         tokenPrices?: Map<string, number>;
-    }): PathGraphEdgeData {
+    }): PathSegment {
         let limitUSD: number | undefined = undefined;
         if (swapKind !== undefined && tokenPrices) {
             const limit = pool.getLimitAmountSwap(tokenIn, tokenOut, swapKind);
@@ -311,7 +311,7 @@ export class PathGraph {
         edgeProps,
         maxPathSegmentsPerTokenPair,
     }: {
-        edgeProps: PathGraphEdgeData;
+        edgeProps: PathSegment;
         maxPathSegmentsPerTokenPair: number;
     }): void {
         const tokenInVertex = this.nodes.has(edgeProps.tokenIn.address);
@@ -387,7 +387,7 @@ export class PathGraph {
         swapKind,
         minLimitThreshold,
     }: {
-        path: PathGraphEdgeData[];
+        path: PathSegment[];
         config: PathGraphTraversalConfig;
         swapKind: SwapKind;
         minLimitThreshold: bigint;
@@ -421,7 +421,7 @@ export class PathGraph {
         return true;
     }
 
-    private getLimitAmountSwapForPath(path: PathGraphEdgeData[], swapKind: SwapKind): bigint {
+    private getLimitAmountSwapForPath(path: PathSegment[], swapKind: SwapKind): bigint {
         let limit = path[path.length - 1].pool.getLimitAmountSwap(
             path[path.length - 1].tokenIn,
             path[path.length - 1].tokenOut,
@@ -459,22 +459,22 @@ export class PathGraph {
     /**
      * Generates candidate combinations for a single token path using beam search.
      *
-     * @param perSegmentEdges - Array of edge arrays for each segment
+     * @param pathSegmentsPerTokenPair - Array of edge arrays for each segment
      * @param beamWidth - Maximum number of candidates to keep
      * @returns Array of candidate rank combinations
      */
     private selectTopCandidatesPerTokenPath(
-        perSegmentEdges: PathGraphEdgeData[][],
+        pathSegmentsPerTokenPair: PathSegment[][],
         beamWidth: number,
-    ): { ranks: number[]; boundNL: bigint }[] {
-        const segmentCount = perSegmentEdges.length;
+    ): PathCandidateProps[] {
+        const segmentCount = pathSegmentsPerTokenPair.length;
         if (segmentCount <= 0) return [];
 
         // Beam search: keep only the top K partial combos by bottleneck normalizedLiquidity
         let pathCandidateProps: PathCandidateProps[] = [{ ranks: [], boundNL: 0n }];
 
         for (let seg = 0; seg < segmentCount; seg++) {
-            const edges = perSegmentEdges[seg];
+            const edges = pathSegmentsPerTokenPair[seg];
             const next: PathCandidateProps[] = [];
 
             for (const p of pathCandidateProps) {
@@ -513,20 +513,20 @@ export class PathGraph {
     private selectTopCandidatesGlobally(
         allCandidates: Array<{
             tokenPath: string[];
-            perSegmentEdges: PathGraphEdgeData[][];
+            pathSegmentsPerTokenPair: PathSegment[][];
             candidates: { ranks: number[]; boundNL: bigint }[];
         }>,
         beamWidth: number,
     ): Array<{
         tokenPath: string[];
-        perSegmentEdges: PathGraphEdgeData[][];
+        pathSegmentsPerTokenPair: PathSegment[][];
         candidate: { ranks: number[]; boundNL: bigint };
     }> {
         // Flatten all candidates with their associated data
-        const flattenedCandidates = allCandidates.flatMap(({ tokenPath, perSegmentEdges, candidates }) =>
+        const flattenedCandidates = allCandidates.flatMap(({ tokenPath, pathSegmentsPerTokenPair, candidates }) =>
             candidates.map((candidate) => ({
                 tokenPath,
-                perSegmentEdges,
+                pathSegmentsPerTokenPair,
                 candidate,
             })),
         );
@@ -543,7 +543,7 @@ export class PathGraph {
      * This method takes the top candidates selected by global beam search and performs
      * the expensive path expansion and validation only for these candidates.
      *
-     * @param topCandidates - Array of top candidates with their associated data
+     * @param pathCandidates - Array of top candidates with their associated data
      * @param swapKind - Type of swap (exact input or exact output)
      * @param minLimitThreshold - Minimum swap limit threshold
      * @param config - Path graph traversal configuration
@@ -551,26 +551,29 @@ export class PathGraph {
      * @returns Array of valid paths that meet the criteria
      */
     private expandAndValidateCandidates(
-        topCandidates: Array<{
+        pathCandidates: Array<{
             tokenPath: string[];
-            perSegmentEdges: PathGraphEdgeData[][];
+            pathSegmentsPerTokenPair: PathSegment[][];
             pathCandidateProps: PathCandidateProps;
         }>,
         swapKind: SwapKind,
         minLimitThreshold: bigint,
         config: PathGraphTraversalConfig,
         signal?: AbortSignal,
-    ): PathGraphEdgeData[][] {
-        const validPaths: PathGraphEdgeData[][] = [];
+    ): PathSegment[][] {
+        const validPaths: PathSegment[][] = [];
 
-        for (const { perSegmentEdges, pathCandidateProps } of topCandidates) {
+        for (const { pathSegmentsPerTokenPair, pathCandidateProps } of pathCandidates) {
             // Check for abort periodically
             if (signal?.aborted) {
                 throw new SorAbortError();
             }
 
             try {
-                const path = this.expandTokenPathWithRanks({ perSegmentEdges, ranks: pathCandidateProps.ranks });
+                const path = this.expandTokenPathWithRanks({
+                    pathSegmentsPerTokenPair,
+                    ranks: pathCandidateProps.ranks,
+                });
                 if (this.isValidPath({ path, config, swapKind, minLimitThreshold })) {
                     validPaths.push(path);
                 }
@@ -590,16 +593,16 @@ export class PathGraph {
      * @param ranks - Array of liquidity ranks to use for each segment (must match path length - 1)
      */
     private expandTokenPathWithRanks({
-        perSegmentEdges,
+        pathSegmentsPerTokenPair,
         ranks,
     }: {
-        perSegmentEdges: PathGraphEdgeData[][];
+        pathSegmentsPerTokenPair: PathSegment[][];
         ranks: number[];
     }) {
-        const segments: PathGraphEdgeData[] = [];
+        const segments: PathSegment[] = [];
 
-        for (let i = 0; i < perSegmentEdges.length; i++) {
-            const edgeChoices = perSegmentEdges[i];
+        for (let i = 0; i < pathSegmentsPerTokenPair.length; i++) {
+            const edgeChoices = pathSegmentsPerTokenPair[i];
             const rank = ranks[i];
             if (!edgeChoices[rank]) {
                 throw new Error('Missing rank on edge for segment');

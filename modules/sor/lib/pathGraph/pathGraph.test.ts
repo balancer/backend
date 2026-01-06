@@ -189,7 +189,7 @@ describe('PathGraph search algorithms', () => {
         const edgesBC = (graph as any).edges.get(tokenB.address).get(tokenC.address);
 
         const result = graph['expandTokenPathWithRanks']({
-            perSegmentEdges: [edgesAB, edgesBC],
+            pathSegmentsPerTokenPair: [edgesAB, edgesBC],
             ranks: [0, 0],
         });
 
@@ -333,7 +333,7 @@ describe('PathGraph search algorithms', () => {
         const edgesAB = (graph as any).edges.get(tokenA.address).get(tokenB.address);
         expect(() => {
             graph['expandTokenPathWithRanks']({
-                perSegmentEdges: [edgesAB],
+                pathSegmentsPerTokenPair: [edgesAB],
                 ranks: [10], // rank 10 does not exist
             });
         }).toThrow('Missing rank on edge for segment');
