@@ -172,6 +172,17 @@ export default <NetworkData>{
                     ],
                 },
                 {
+                    url: 'https://yields.llama.fi/chart/0f67a08c-3f24-4a4b-963e-541f5a5c0364',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0xc8cf6d7991f15525488b2a83df53468d682ba4b0',
+                            path: '$.data[-1:].apyBase',
+                        },
+                    ],
+                },
+                {
                     url: 'https://graphs.stakewise.io/mainnet/subgraphs/name/stakewise/prod',
                     body: JSON.stringify({
                         query: `{
