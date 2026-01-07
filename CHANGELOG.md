@@ -1,5 +1,12 @@
 # backend
 
+## 1.58.2
+
+### Patch Changes
+
+-   7064a94: SOR - Rename variables to improve readability and maintainability
+-   7bcf824: move vebal voting apr to stakedao
+
 ## 1.58.1
 
 ### Patch Changes

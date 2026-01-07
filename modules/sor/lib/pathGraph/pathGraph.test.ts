@@ -64,7 +64,7 @@ describe('PathGraph search algorithms', () => {
             minLimitThresholdUSD: 0,
         });
 
-        const edgeProps = {
+        const pathSegment = {
             pool: createMockPool('test', [tokenA, tokenB]),
             tokenIn: tokenA,
             tokenOut: orphanToken,
@@ -74,7 +74,7 @@ describe('PathGraph search algorithms', () => {
         };
 
         expect(() => {
-            g['addEdge']({ edgeProps, maxPathsPerTokenPair: 2 });
+            g['addEdge']({ pathSegment, maxPathSegmentsPerTokenPair: 2 });
         }).toThrow('Attempting to add invalid edge');
     });
 
@@ -189,7 +189,7 @@ describe('PathGraph search algorithms', () => {
         const edgesBC = (graph as any).edges.get(tokenB.address).get(tokenC.address);
 
         const result = graph['expandTokenPathWithRanks']({
-            perSegmentEdges: [edgesAB, edgesBC],
+            pathSegmentsPerTokenPair: [edgesAB, edgesBC],
             ranks: [0, 0],
         });
 
@@ -308,7 +308,7 @@ describe('PathGraph search algorithms', () => {
         expect(paths.length).toBe(0);
     });
 
-    test('respects maxPathsPerTokenPair (keeps only top-K ranked edges for a pair)', () => {
+    test('respects maxPathSegmentsPerTokenPair (keeps only top-K ranked edges for a pair)', () => {
         const g = new PathGraph();
 
         const pAB1 = createMockPool('pAB1', [tokenA, tokenB], { getNormalizedLiquidity: () => 300n });
@@ -318,7 +318,7 @@ describe('PathGraph search algorithms', () => {
         g.buildGraph({
             pools: [pAB1, pAB2, pAB3],
             enableAddRemoveLiquidityPaths: false,
-            maxPathsPerTokenPair: 2,
+            maxPathSegmentsPerTokenPair: 2,
             swapKind: SwapKind.GivenIn,
             tokenPrices: new Map<string, number>(),
             minLimitThresholdUSD: 0,
@@ -333,7 +333,7 @@ describe('PathGraph search algorithms', () => {
         const edgesAB = (graph as any).edges.get(tokenA.address).get(tokenB.address);
         expect(() => {
             graph['expandTokenPathWithRanks']({
-                perSegmentEdges: [edgesAB],
+                pathSegmentsPerTokenPair: [edgesAB],
                 ranks: [10], // rank 10 does not exist
             });
         }).toThrow('Missing rank on edge for segment');
@@ -470,7 +470,7 @@ describe('PathGraph search algorithms', () => {
         g.buildGraph({
             pools: [highLiquidityPool, lowLiquidityPool],
             enableAddRemoveLiquidityPaths: false,
-            maxPathsPerTokenPair: 2,
+            maxPathSegmentsPerTokenPair: 2,
             swapKind: SwapKind.GivenIn,
             tokenPrices: new Map<string, number>(),
             minLimitThresholdUSD: 0,
@@ -525,7 +525,7 @@ describe('PathGraph search algorithms', () => {
         expect(edgesBA).toBeUndefined();
     });
 
-    test('buildEdgeProps sets limitUSD as undefined when tokenPrices is missing an entry', () => {
+    test('buildPathSegment sets limitUSD as undefined when tokenPrices is missing an entry', () => {
         const g = new PathGraph();
 
         const pAB = createMockPool('pAB', [tokenA, tokenB], {
@@ -576,7 +576,7 @@ describe('PathGraph search algorithms', () => {
         g.buildGraph({
             pools: [highFirst, lowSecond, medFirst, highSecond],
             enableAddRemoveLiquidityPaths: false,
-            maxPathsPerTokenPair: 2,
+            maxPathSegmentsPerTokenPair: 2,
             swapKind: SwapKind.GivenIn,
             tokenPrices: new Map<string, number>(),
             minLimitThresholdUSD: 0,
@@ -757,7 +757,7 @@ describe('PathGraph search algorithms', () => {
         g.buildGraph({
             pools: [flakyPool, goodPool],
             enableAddRemoveLiquidityPaths: false,
-            maxPathsPerTokenPair: 2,
+            maxPathSegmentsPerTokenPair: 2,
             swapKind: SwapKind.GivenIn,
             tokenPrices: new Map<string, number>(),
             minLimitThresholdUSD: 0,
@@ -905,7 +905,7 @@ describe('PathGraph search algorithms', () => {
             g.buildGraph({
                 pools: [pAB1, pAB2, pAB3, pAB4],
                 enableAddRemoveLiquidityPaths: false,
-                maxPathsPerTokenPair: 3,
+                maxPathSegmentsPerTokenPair: 3,
                 swapKind: SwapKind.GivenIn,
                 tokenPrices: new Map<string, number>(),
                 minLimitThresholdUSD: 0,
@@ -931,7 +931,7 @@ describe('PathGraph search algorithms', () => {
             g.buildGraph({
                 pools: [...abPools, ...bcPools],
                 enableAddRemoveLiquidityPaths: false,
-                maxPathsPerTokenPair: 5,
+                maxPathSegmentsPerTokenPair: 5,
                 swapKind: SwapKind.GivenIn,
                 tokenPrices: new Map<string, number>(),
                 minLimitThresholdUSD: 0,
@@ -961,7 +961,7 @@ describe('PathGraph search algorithms', () => {
             g.buildGraph({
                 pools: [...abPools, ...bcPools],
                 enableAddRemoveLiquidityPaths: false,
-                maxPathsPerTokenPair: 6,
+                maxPathSegmentsPerTokenPair: 6,
                 swapKind: SwapKind.GivenIn,
                 tokenPrices: new Map<string, number>(),
                 minLimitThresholdUSD: 0,
