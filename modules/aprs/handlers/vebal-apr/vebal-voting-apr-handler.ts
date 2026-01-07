@@ -2,66 +2,43 @@ import { Chain, PrismaPoolAprItem, PrismaPoolAprType } from '@prisma/client';
 import { prisma } from '../../../../prisma/prisma-client';
 import { AprHandler, PoolAPRData } from '../../types';
 
-const HIDDEN_HAND_API_URL = 'https://api.hiddenhand.finance/proposal/balancer';
+const STAKEDAO_METADATA =
+    'https://raw.githubusercontent.com/stake-dao/votemarket-analytics/refs/heads/main/analytics/votemarket-analytics/balancer/rounds-metadata.json';
+const STAKE_DAO_ANALYTICS_BASE_URL =
+    'https://raw.githubusercontent.com/stake-dao/votemarket-analytics/refs/heads/main/analytics/votemarket-analytics/balancer/';
 const veBalPoolAddress = '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56';
 
 const veBalPoolId = '0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014';
 const aprItemId = `${veBalPoolId}-voting-apr`;
 const chain = 'MAINNET';
 
-type HiddenHandResponse = {
-    error: boolean;
-    data: {
-        poolId: string;
-        proposal: string;
-        proposalHash: string;
-        title: string;
-        proposalDeadline: number;
-        totalValue: number;
-        maxTotalValue: number;
-        voteCount: number;
-        valuePerVote: number;
-        maxValuePerVote: number;
-        bribes: {
-            token: string;
-            symbol: string;
-            decimals: number;
-            value: number;
-            maxValue: number;
-            amount: number;
-            maxTokensPerVote: number;
-            briber: string;
-            periodIndex: number;
-            chainId: number;
-        }[];
-    }[];
+type StakeDaoMetadataResponse = {
+    id: string;
+    endVoting: number;
+}[];
+
+type StakeDaoAlyticsResponse = {
+    globalAverageDollarPerVote: number;
 };
 
-const fetchHiddenHandRound = async (timestamp?: number) => {
-    const response = await fetch(`${HIDDEN_HAND_API_URL}/${timestamp || ''}`);
-    const data = (await response.json()) as HiddenHandResponse;
-    if (data.error) {
+const fetchLatestStakeDaoRound = async () => {
+    const response = await fetch(`${STAKEDAO_METADATA}`);
+    const data = (await response.json()) as StakeDaoMetadataResponse;
+    if (!data) {
         throw new Error('Failed to fetch voting APR');
     }
 
-    // Get sum of all incentivized votes and total value
-    const total = data.data.reduce((acc, proposal) => acc + proposal.totalValue, 0);
-    const votes = data.data
-        .filter((proposal) => proposal.totalValue > 0)
-        .reduce((acc, proposal) => acc + proposal.voteCount, 0);
-
-    return { total, votes, timestamp: data.data[0].proposalDeadline };
+    return data[data.length - 1];
 };
 
-export const getHiddenHandAPR = async (timestamp: number) => {
-    const round = await fetchHiddenHandRound(timestamp);
+const fetchStakeDaoValuePerVote = async (roundNumber: number) => {
+    const response = await fetch(`${STAKE_DAO_ANALYTICS_BASE_URL}/${roundNumber}.json`);
+    const data = (await response.json()) as StakeDaoAlyticsResponse;
+    return data.globalAverageDollarPerVote;
+};
 
-    // Debugging purposes
-    console.log('Hiddenhand round', timestamp, round.timestamp, round.total, round.votes);
-
-    timestamp = round.timestamp;
-
-    const avgValuePerVote = round.total / round.votes;
+export const getStakeDaoApr = async (roundNumber: number, timestamp: number) => {
+    const avgValuePerVote = await fetchStakeDaoValuePerVote(roundNumber);
 
     let veBalPrice;
     // When the timestamp is older than 24 hours, we can fetch the historical price
@@ -70,7 +47,7 @@ export const getHiddenHandAPR = async (timestamp: number) => {
             where: {
                 tokenAddress: veBalPoolAddress,
                 chain: Chain.MAINNET,
-                timestamp,
+                timestamp: timestamp,
             },
         });
     }
@@ -100,12 +77,12 @@ export class VeBalVotingAprHandler implements AprHandler {
 
     async getApr(): Promise<number> {
         // Get APRs for last 3 weeks, if available
-        const timestamp = (await fetchHiddenHandRound()).timestamp;
+        const round = await fetchLatestStakeDaoRound();
 
         const aprs = await Promise.allSettled([
-            getHiddenHandAPR(timestamp - 1 * 604800),
-            getHiddenHandAPR(timestamp - 2 * 604800),
-            getHiddenHandAPR(timestamp - 3 * 604800),
+            getStakeDaoApr(parseFloat(round.id), round.endVoting),
+            getStakeDaoApr(parseFloat(round.id) - 1, round.endVoting),
+            getStakeDaoApr(parseFloat(round.id) - 2, round.endVoting),
         ]);
 
         // Average successfully fetched APRs
