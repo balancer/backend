@@ -19,19 +19,6 @@ export type PoolPairMap = {
     }[];
 };
 
-export interface PathGraphEdgeLabel {
-    poolId: string;
-    poolAddress: string;
-    normalizedLiquidity: bigint;
-    poolPair: PoolTokenPair;
-    isPhantomBptHop: boolean;
-}
-
-export interface PathGraphEdge extends PathGraphEdgeLabel {
-    tokenIn: string;
-    tokenOut: string;
-}
-
 export interface PathGraphTraversalConfig {
     maxDepth: number;
     maxDepthFallback: number;
@@ -43,7 +30,7 @@ export interface PathGraphTraversalConfig {
     poolIdsToInclude?: string[];
 }
 
-export interface PathGraphEdgeData {
+export interface PathSegment {
     pool: BasePool;
     normalizedLiquidity: bigint;
     tokenIn: Token;
