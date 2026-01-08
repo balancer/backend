@@ -487,13 +487,6 @@ export default <NetworkData>{
                     ],
                 },
                 {
-                    url: 'https://api-deusd-prod-public.elixir.xyz/public/deusd_apy',
-                    scale: 100,
-                    extractors: [
-                        { type: 'path', token: '0x5c5b196abe0d54485975d1ec29617d42d9198326', path: '$.deusd_apy' },
-                    ],
-                },
-                {
                     url: 'https://app.usdx.money/v1/base/apyInfo',
                     scale: 1,
                     extractors: [

@@ -210,17 +210,6 @@ export default <NetworkData>{
                     ],
                 },
                 {
-                    url: 'https://api-deusd-prod-public.elixir.xyz/public/deusd_apy',
-                    scale: 100,
-                    extractors: [
-                        {
-                            type: 'path',
-                            token: '0x68088c91446c7bea49ea7dbd3b96ce62b272dc96',
-                            path: '$.deusd_apy',
-                        },
-                    ],
-                },
-                {
                     url: 'https://app.avantprotocol.com/api/savusdApy',
                     scale: 100,
                     extractors: [
