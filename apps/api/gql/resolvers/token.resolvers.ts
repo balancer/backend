@@ -103,23 +103,6 @@ const resolvers: Resolvers = {
                 updatedAt: item.updatedAt.toUTCString(),
             }));
         },
-        tokenGetPriceChartData: async (parent, { address, range, chain }, context) => {
-            const currentChain = headerChain();
-            if (!chain && currentChain) {
-                chain = currentChain;
-            } else if (!chain) {
-                throw new GraphQLError('Provide "chain" param', {
-                    extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
-                });
-            }
-            const data = await tokenService.getTokenPriceForRange(address, range, chain);
-
-            return data.map((item) => ({
-                id: `${address}-${item.timestamp}`,
-                timestamp: item.timestamp,
-                price: `${item.price}`,
-            }));
-        },
         tokenGetRelativePriceChartData: async (parent, { tokenIn, tokenOut, range, chain }, context) => {
             const currentChain = headerChain();
             if (!chain && currentChain) {
@@ -136,61 +119,6 @@ const resolvers: Resolvers = {
                 timestamp: item.timestamp,
                 price: `${item.price}`,
             }));
-        },
-        tokenGetCandlestickChartData: async (parent, { address, range, chain }, context) => {
-            const currentChain = headerChain();
-            if (!chain && currentChain) {
-                chain = currentChain;
-            } else if (!chain) {
-                throw new GraphQLError('Provide "chain" param', {
-                    extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
-                });
-            }
-            const data = await tokenService.getTokenPriceForRange(address, range, chain);
-
-            return data.map((item) => ({
-                id: `${address}-${item.timestamp}`,
-                timestamp: item.timestamp,
-                open: `${item.open}`,
-                high: `${item.high}`,
-                low: `${item.low}`,
-                close: `${item.close}`,
-            }));
-        },
-        tokenGetTokenData: async (parent, { address, chain }, context) => {
-            const currentChain = headerChain();
-            if (!chain && currentChain) {
-                chain = currentChain;
-            } else if (!chain) {
-                throw new GraphQLError('Provide "chain" param', {
-                    extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
-                });
-            }
-            const token = await tokenService.getToken(address, chain);
-            if (token) {
-                return {
-                    ...token,
-                    id: token.address,
-                    tokenAddress: token.address,
-                };
-            }
-            return null;
-        },
-        tokenGetTokensData: async (parent, { addresses }, context) => {
-            const chain = headerChain() || 'MAINNET';
-            const tokens = await tokenService.getTokens(chain, addresses);
-            return tokens.map((token) => ({ ...token, id: token.address, tokenAddress: token.address }));
-        },
-        tokenGetProtocolTokenPrice: async (parent, { chain }, context) => {
-            const currentChain = headerChain();
-            if (!chain && currentChain) {
-                chain = currentChain;
-            } else if (!chain) {
-                throw new GraphQLError('Provide "chain" param', {
-                    extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
-                });
-            }
-            return tokenService.getProtocolTokenPrice(chain);
         },
     },
     Mutation: {

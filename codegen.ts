@@ -62,17 +62,6 @@ const files = {
             },
         },
     },
-    ['modules/sources/subgraphs/sftmx-subgraph/generated/sftmx-subgraph-types.ts']: {
-        schema: config.FANTOM.subgraphs.sftmx,
-        documents: 'modules/sources/subgraphs/sftmx-subgraph/sftmx-subgraph-queries.graphql',
-        ...defaults.types,
-        config: {
-            ...defaults.types.config,
-            namingConvention: {
-                enumValues: 'keep',
-            },
-        },
-    },
     ['modules/sources/subgraphs/sts-subgraph/generated/sts-subgraph-types.ts']: {
         schema: config.SONIC.subgraphs.sts,
         documents: 'modules/sources/subgraphs/sts-subgraph/sts-subgraph-queries.graphql',
@@ -83,11 +72,6 @@ const files = {
                 enumValues: 'keep',
             },
         },
-    },
-    ['modules/subgraphs/beets-bar-subgraph/generated/beets-bar-subgraph-types.ts']: {
-        schema: config.FANTOM.subgraphs.beetsBar,
-        documents: 'modules/subgraphs/beets-bar-subgraph/beets-bar-subgraph-queries.graphql',
-        ...defaults.types,
     },
     ['modules/subgraphs/gauge-subgraph/generated/gauge-subgraph-types.ts']: {
         schema: config.MAINNET.subgraphs.gauge,

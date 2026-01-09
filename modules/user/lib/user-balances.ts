@@ -4,7 +4,6 @@ import _ from 'lodash';
 import { parseUnits } from 'ethers/lib/utils';
 import { formatFixed } from '@ethersproject/bignumber';
 import { Chain, PrismaPoolStaking } from '@prisma/client';
-import { AllNetworkConfigs } from '../../network/network-config';
 
 // This is legacy code, needed for ftm.beets.fi. New UI uses the pool endpoint directly with the useraddress param.
 
@@ -82,31 +81,6 @@ export async function getUserPoolBalances(address: string, chains: Chain[]): Pro
             chain: (stakedBalance?.chain || walletBalance?.chain)!,
         };
     });
-}
-
-export async function getUserFbeetsBalance(address: string): Promise<Omit<UserPoolBalance, 'poolId'>> {
-    const fbeetsAddress = AllNetworkConfigs['250'].data.fbeets?.address || '';
-
-    const userWalletBalances = await prisma.prismaUserWalletBalance.findMany({
-        where: { userAddress: address.toLowerCase(), chain: 'FANTOM', tokenAddress: fbeetsAddress },
-    });
-
-    const userStakedBalances = await prisma.prismaUserStakedBalance.findMany({
-        where: { userAddress: address.toLowerCase(), chain: 'FANTOM', tokenAddress: fbeetsAddress },
-    });
-
-    const stakedBalance = userWalletBalances[0];
-    const walletBalance = userStakedBalances[0];
-    const stakedNum = parseUnits(stakedBalance?.balance || '0', 18);
-    const walletNum = parseUnits(walletBalance?.balance || '0', 18);
-
-    return {
-        tokenAddress: fbeetsAddress,
-        totalBalance: formatFixed(stakedNum.add(walletNum), 18),
-        stakedBalance: stakedBalance?.balance || '0',
-        walletBalance: walletBalance?.balance || '0',
-        chain: 'FANTOM',
-    };
 }
 
 export async function getUserStaking(address: string, chains: Chain[]): Promise<PrismaPoolStaking[]> {

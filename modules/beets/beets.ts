@@ -1,7 +1,7 @@
-import beetsAbi from '../../sources/contracts/abis/ERC20';
-import { AllNetworkConfigsKeyedOnChain } from '../../network/network-config';
+import beetsAbi from '../sources/contracts/abis/ERC20';
+import { AllNetworkConfigsKeyedOnChain } from '../network/network-config';
 import { Chain } from '@prisma/client';
-import { getViemClient } from '../../sources/viem-client';
+import { getViemClient } from '../sources/viem-client';
 import { formatEther, parseEther } from 'viem';
 
 const NON_CIRCULATING_ADDRESSES = [

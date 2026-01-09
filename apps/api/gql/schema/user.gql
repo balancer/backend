@@ -1,21 +1,6 @@
 extend type Query {
     userGetPoolBalances(chains: [GqlChain!], address: String): [GqlUserPoolBalance!]!
     userGetStaking(chains: [GqlChain!], address: String): [GqlPoolStaking!]!
-    """
-    Will de deprecated in favor of poolGetEvents
-    """
-    userGetPoolJoinExits(
-        first: Int = 10
-        skip: Int = 0
-        poolId: String!
-        chain: GqlChain
-        address: String
-    ): [GqlPoolJoinExit!]! @deprecated(reason: "Use poolEvents instead")
-    """
-    Will de deprecated in favor of poolGetEvents
-    """
-    userGetSwaps(first: Int = 10, skip: Int = 0, poolId: String!, chain: GqlChain, address: String): [GqlPoolSwap!]!
-        @deprecated(reason: "Use poolEvents instead")
 }
 
 extend type Mutation {

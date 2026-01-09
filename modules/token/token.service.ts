@@ -316,16 +316,6 @@ export class TokenService {
         return this.tokenPriceService.getCurrentTokenPrices(chains);
     }
 
-    public async getProtocolTokenPrice(chain: Chain): Promise<string> {
-        const tokenPrices = await tokenService.getTokenPrices(chain);
-
-        if (config[chain].protocolToken === 'bal') {
-            return tokenService.getPriceForToken(tokenPrices, config[chain].bal!.address, chain).toString();
-        } else {
-            return tokenService.getPriceForToken(tokenPrices, config[chain].beets!.address, chain).toString();
-        }
-    }
-
     public getPriceForToken(tokenPrices: PrismaTokenCurrentPrice[], tokenAddress: string, chain: Chain): number {
         return this.tokenPriceService.getPriceForToken(tokenPrices, tokenAddress, chain);
     }
@@ -380,14 +370,6 @@ export class TokenService {
         return this.tokenPriceService.getTokenPricesForRange(tokenAddress, range, chain);
     }
 
-    public async getTokenPriceForRange(
-        tokenAddress: string,
-        range: GqlTokenChartDataRange,
-        chain: Chain,
-    ): Promise<PrismaTokenPrice[]> {
-        return this.tokenPriceService.getTokenPricesForRange([tokenAddress], range, chain);
-    }
-
     public async getRelativeDataForRange(
         tokenIn: string,
         tokenOut: string,
@@ -395,15 +377,6 @@ export class TokenService {
         chain: Chain,
     ): Promise<TokenPriceItem[]> {
         return this.tokenPriceService.getRelativeDataForRange(tokenIn, tokenOut, range, chain);
-    }
-
-    public async getTokenPriceFrom24hAgo(chain: Chain): Promise<PrismaTokenCurrentPrice[]> {
-        let tokenPrices24hAgo = this.cache.get(`${TOKEN_PRICES_24H_AGO_CACHE_KEY}:${chain}`);
-        if (!tokenPrices24hAgo) {
-            tokenPrices24hAgo = await this.tokenPriceService.getTokenPricesFrom24hAgo([chain]);
-            this.cache.put(`${TOKEN_PRICES_24H_AGO_CACHE_KEY}:${chain}`, tokenPrices24hAgo, 60 * 15 * 1000);
-        }
-        return tokenPrices24hAgo;
     }
 
     public async purgeOldTokenPricesForAllChains() {

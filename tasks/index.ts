@@ -22,7 +22,6 @@ import { PricingService } from '../modules/pricing';
 import { LoopsService } from '../modules/loops/service';
 import { veBalService } from '../modules/vebal/vebal.service';
 import { ContentController } from '../modules/content/content-controller';
-import { SftmxController } from '../modules/sftmx/sftmx-controller';
 import { StakedSonicController } from '../modules/sts/sts-controller';
 import { UserBalancesController } from '../modules/user/user-balances-controller';
 
@@ -110,10 +109,6 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         return EventController().updateVolumeAndFees(chain);
     } else if (job === 'update-liquidity-24h-ago-v3') {
         return PoolController().updateLiquidity24hAgoV3(chain);
-    } else if (job === 'sync-sftmx-staking') {
-        return SftmxController().syncSftmxStakingData(chain);
-    } else if (job === 'sync-sftmx-withdrawal') {
-        return SftmxController().syncSftmxWithdrawalrequests(chain);
     } else if (job === 'sync-bpt-balances') {
         return UserBalancesController().syncBalances(chain);
     } else if (job === 'sync-user-balances-v2') {

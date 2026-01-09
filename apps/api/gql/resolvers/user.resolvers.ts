@@ -29,12 +29,6 @@ const resolvers: Resolvers = {
                 ),
             }));
         },
-        userGetPoolJoinExits: async (parent, { first, skip, poolId, chain, address }, context) => {
-            return [];
-        },
-        userGetSwaps: async (parent, { first, skip, poolId, chain, address }, context) => {
-            return [];
-        },
         userGetStaking: async (parent, { chains, address }, context) => {
             const currentChain = headerChain();
             if (!chains && currentChain) {

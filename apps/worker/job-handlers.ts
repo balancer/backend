@@ -31,7 +31,6 @@ import { AprsController } from '../../modules/controllers/aprs-controller';
 import { LoopsService } from '../../modules/loops/service';
 import { ContentController } from '../../modules/content/content-controller';
 import { StakedSonicController } from '../../modules/sts/sts-controller';
-import { SftmxController } from '../../modules/sftmx/sftmx-controller';
 import { UserBalancesController } from '../../modules/user/user-balances-controller';
 
 const runningJobs: Set<string> = new Set();
@@ -254,24 +253,6 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
                 name,
                 chainId,
                 () => new LoopsService().fetchAndStoreLoopsData(chain),
-                res,
-                next,
-            );
-            break;
-        case 'sync-sftmx-staking-data':
-            await runIfNotAlreadyRunning(
-                name,
-                chainId,
-                () => SftmxController().syncSftmxStakingData(chainId),
-                res,
-                next,
-            );
-            break;
-        case 'sync-sftmx-withdrawal-requests':
-            await runIfNotAlreadyRunning(
-                name,
-                chainId,
-                () => SftmxController().syncSftmxWithdrawalrequests(chainId),
                 res,
                 next,
             );

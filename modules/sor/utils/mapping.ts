@@ -146,7 +146,6 @@ function mapBatchSwap(path: PathWithAmount): GqlSorSwapRoute {
                 pool: aGqlPoolMinimal({
                     symbol: '',
                     address: pool.address,
-                    displayTokens: [],
                     poolTokens: [],
                 }),
             });
@@ -179,7 +178,6 @@ function mapSingleSwap(path: PathWithAmount): GqlSorSwapRoute {
         pool: aGqlPoolMinimal({
             symbol: '',
             address: path.pools[0].address,
-            displayTokens: [],
             poolTokens: [],
         }),
     };

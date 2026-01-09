@@ -32,35 +32,6 @@ extend type Query {
         range: GqlTokenChartDataRange!
         chain: GqlChain
     ): [GqlTokenPriceChartDataItem!]!
-    """
-    DEPRECATED: Returns pricing data for a given token for a given range
-    """
-    tokenGetPriceChartData(
-        address: String!
-        range: GqlTokenChartDataRange!
-        chain: GqlChain
-    ): [GqlTokenPriceChartDataItem!]! @deprecated(reason: "Use tokenGetHistoricalPrices instead")
-    """
-    Returns the candlestick chart data for a token for a given range.
-    """
-    tokenGetCandlestickChartData(
-        address: String!
-        range: GqlTokenChartDataRange!
-        chain: GqlChain
-    ): [GqlTokenCandlestickChartDataItem!]! @deprecated(reason: "Use tokenGetHistoricalPrices instead")
-    """
-    Returns meta data for a given token such as description, website, etc.
-    """
-    tokenGetTokenData(address: String!, chain: GqlChain): GqlTokenData @deprecated(reason: "Use tokenGetTokens instead")
-    """
-    Returns meta data for a given set of tokens such as description, website, etc.
-    """
-    tokenGetTokensData(addresses: [String!]!): [GqlTokenData!]! @deprecated(reason: "Use tokenGetTokens instead")
-    """
-    Returns the price of either BAL or BEETS depending on chain
-    """
-    tokenGetProtocolTokenPrice(chain: GqlChain): AmountHumanReadable!
-        @deprecated(reason: "Use tokenGetTokensDynamicData instead")
 }
 
 extend type Mutation {
@@ -352,29 +323,10 @@ enum GqlTokenChartDataRange {
     ALL
 }
 
-type GqlTokenCandlestickChartDataItem {
-    id: ID!
-    timestamp: Int!
-    open: AmountHumanReadable!
-    high: AmountHumanReadable!
-    low: AmountHumanReadable!
-    close: AmountHumanReadable!
-}
-
 type GqlTokenPriceChartDataItem {
     id: ID!
     timestamp: Int!
     price: AmountHumanReadable!
-}
-
-type GqlTokenData {
-    id: ID!
-    tokenAddress: String!
-    description: String
-    websiteUrl: String
-    discordUrl: String
-    telegramUrl: String
-    twitterUsername: String
 }
 
 enum GqlTokenType {

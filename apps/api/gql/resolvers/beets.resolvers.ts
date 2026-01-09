@@ -1,16 +1,11 @@
 import { Resolvers } from '../generated-schema';
-import { beetsService } from '../../../../modules/beets/beets.service';
-import { getRequiredAccountAddress, isAdminRoute } from '../../../../modules/auth/auth-context';
+import { isAdminRoute } from '../../../../modules/auth/auth-context';
 import { poolService } from '../../../../modules/pool/pool.service';
 import { headerChain } from '../../../../modules/context/header-chain';
 import { GraphQLError } from 'graphql';
-import { UserBalancesController } from '../../../../modules/user/user-balances-controller';
 
 const beetsResolvers: Resolvers = {
     Query: {
-        beetsGetFbeetsRatio: async (parent, {}, context) => {
-            return beetsService.getFbeetsRatio();
-        },
         beetsPoolGetReliquaryFarmSnapshots: async (parent, { id, range, chain }, context) => {
             const currentChain = headerChain();
             if (!chain && currentChain) {
@@ -35,16 +30,6 @@ const beetsResolvers: Resolvers = {
                 dailyWithdrawn: snapshot.dailyWithdrawn,
                 levelBalances: snapshot.levelBalances,
             }));
-        },
-        userGetFbeetsBalance: async (parent, {}, context) => {
-            const accountAddress = getRequiredAccountAddress(context);
-
-            const balance = await UserBalancesController().getUserFbeetsBalance(accountAddress);
-
-            return {
-                id: balance.tokenAddress,
-                ...balance,
-            };
         },
     },
     Mutation: {
