@@ -57,9 +57,9 @@ const extract = (json: any, config: TokenYieldHttpFetchConfig) =>
     });
 
 const transform = (entries: [string, number][], config: TokenYieldHttpFetchConfig) =>
-    entries.map(([key, value]) => ({ address: key, apr: normalizeValue(value, config) }));
+    Promise.all(entries.map(async ([key, value]) => ({ address: key, apr: await normalizeValue(value, config) })));
 
-const normalizeValue = (value: any, { url, average, scale }: TokenYieldHttpFetchConfig) => {
+const normalizeValue = async (value: any, { url, average, scale, convert }: TokenYieldHttpFetchConfig) => {
     if (value === undefined) {
         throw `value parsing error ${url}`;
     }
@@ -73,6 +73,9 @@ const normalizeValue = (value: any, { url, average, scale }: TokenYieldHttpFetch
     }
 
     if (scale) value = value / scale;
+
+    if (convert) value = await convert(parseFloat(value));
+
     return parseFloat(value);
 };
 
