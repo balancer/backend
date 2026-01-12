@@ -2057,17 +2057,6 @@ export interface GqlTokenPriceChartDataItem {
 
 export type GqlTokenType = 'BLOCKED_V2' | 'BLOCKED_V3' | 'BPT' | 'ERC4626' | 'PHANTOM_BPT' | 'WHITE_LISTED';
 
-export interface GqlUserPoolBalance {
-    __typename?: 'GqlUserPoolBalance';
-    chain: GqlChain;
-    poolId: Scalars['String'];
-    stakedBalance: Scalars['AmountHumanReadable'];
-    tokenAddress: Scalars['String'];
-    tokenPrice: Scalars['Float'];
-    totalBalance: Scalars['AmountHumanReadable'];
-    walletBalance: Scalars['AmountHumanReadable'];
-}
-
 export interface GqlUserStakedBalance {
     __typename?: 'GqlUserStakedBalance';
     /** The staked BPT balance as float. */
@@ -2422,8 +2411,6 @@ export interface Query {
     tokenGetTokens: Array<GqlToken>;
     /** Returns dynamic data of a set of tokens such as price, market cap, etc. */
     tokenGetTokensDynamicData: Array<GqlTokenDynamicData>;
-    userGetPoolBalances: Array<GqlUserPoolBalance>;
-    userGetStaking: Array<GqlPoolStaking>;
     veBalGetTotalSupply: Scalars['AmountHumanReadable'];
     veBalGetUser: GqlVeBalUserData;
     veBalGetUserBalance: Scalars['AmountHumanReadable'];
@@ -2556,16 +2543,6 @@ export interface QueryTokenGetTokensArgs {
 export interface QueryTokenGetTokensDynamicDataArgs {
     addresses: Array<Scalars['String']>;
     chain?: InputMaybe<GqlChain>;
-}
-
-export interface QueryUserGetPoolBalancesArgs {
-    address?: InputMaybe<Scalars['String']>;
-    chains?: InputMaybe<Array<GqlChain>>;
-}
-
-export interface QueryUserGetStakingArgs {
-    address?: InputMaybe<Scalars['String']>;
-    chains?: InputMaybe<Array<GqlChain>>;
 }
 
 export interface QueryVeBalGetTotalSupplyArgs {
@@ -2805,7 +2782,6 @@ export type ResolversTypes = ResolversObject<{
     GqlTokenPrice: ResolverTypeWrapper<GqlTokenPrice>;
     GqlTokenPriceChartDataItem: ResolverTypeWrapper<GqlTokenPriceChartDataItem>;
     GqlTokenType: GqlTokenType;
-    GqlUserPoolBalance: ResolverTypeWrapper<GqlUserPoolBalance>;
     GqlUserStakedBalance: ResolverTypeWrapper<GqlUserStakedBalance>;
     GqlVeBalBalance: ResolverTypeWrapper<GqlVeBalBalance>;
     GqlVeBalLockSnapshot: ResolverTypeWrapper<GqlVeBalLockSnapshot>;
@@ -2951,7 +2927,6 @@ export type ResolversParentTypes = ResolversObject<{
     GqlTokenMutationResult: GqlTokenMutationResult;
     GqlTokenPrice: GqlTokenPrice;
     GqlTokenPriceChartDataItem: GqlTokenPriceChartDataItem;
-    GqlUserPoolBalance: GqlUserPoolBalance;
     GqlUserStakedBalance: GqlUserStakedBalance;
     GqlVeBalBalance: GqlVeBalBalance;
     GqlVeBalLockSnapshot: GqlVeBalLockSnapshot;
@@ -4462,20 +4437,6 @@ export type GqlTokenPriceChartDataItemResolvers<
     __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type GqlUserPoolBalanceResolvers<
-    ContextType = ResolverContext,
-    ParentType extends ResolversParentTypes['GqlUserPoolBalance'] = ResolversParentTypes['GqlUserPoolBalance'],
-> = ResolversObject<{
-    chain?: Resolver<ResolversTypes['GqlChain'], ParentType, ContextType>;
-    poolId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    stakedBalance?: Resolver<ResolversTypes['AmountHumanReadable'], ParentType, ContextType>;
-    tokenAddress?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    tokenPrice?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
-    totalBalance?: Resolver<ResolversTypes['AmountHumanReadable'], ParentType, ContextType>;
-    walletBalance?: Resolver<ResolversTypes['AmountHumanReadable'], ParentType, ContextType>;
-    __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-}>;
-
 export type GqlUserStakedBalanceResolvers<
     ContextType = ResolverContext,
     ParentType extends ResolversParentTypes['GqlUserStakedBalance'] = ResolversParentTypes['GqlUserStakedBalance'],
@@ -4928,18 +4889,6 @@ export type QueryResolvers<
         ContextType,
         RequireFields<QueryTokenGetTokensDynamicDataArgs, 'addresses'>
     >;
-    userGetPoolBalances?: Resolver<
-        Array<ResolversTypes['GqlUserPoolBalance']>,
-        ParentType,
-        ContextType,
-        RequireFields<QueryUserGetPoolBalancesArgs, never>
-    >;
-    userGetStaking?: Resolver<
-        Array<ResolversTypes['GqlPoolStaking']>,
-        ParentType,
-        ContextType,
-        RequireFields<QueryUserGetStakingArgs, never>
-    >;
     veBalGetTotalSupply?: Resolver<
         ResolversTypes['AmountHumanReadable'],
         ParentType,
@@ -5067,7 +5016,6 @@ export type Resolvers<ContextType = ResolverContext> = ResolversObject<{
     GqlTokenMutationResult?: GqlTokenMutationResultResolvers<ContextType>;
     GqlTokenPrice?: GqlTokenPriceResolvers<ContextType>;
     GqlTokenPriceChartDataItem?: GqlTokenPriceChartDataItemResolvers<ContextType>;
-    GqlUserPoolBalance?: GqlUserPoolBalanceResolvers<ContextType>;
     GqlUserStakedBalance?: GqlUserStakedBalanceResolvers<ContextType>;
     GqlVeBalBalance?: GqlVeBalBalanceResolvers<ContextType>;
     GqlVeBalLockSnapshot?: GqlVeBalLockSnapshotResolvers<ContextType>;

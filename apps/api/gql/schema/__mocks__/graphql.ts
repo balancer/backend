@@ -76,7 +76,6 @@ import {
     GqlTokenMutationResult,
     GqlTokenPrice,
     GqlTokenPriceChartDataItem,
-    GqlUserPoolBalance,
     GqlUserStakedBalance,
     GqlVeBalBalance,
     GqlVeBalLockSnapshot,
@@ -1925,18 +1924,6 @@ export const aGqlTokenPriceChartDataItem = (
     };
 };
 
-export const aGqlUserPoolBalance = (overrides?: Partial<GqlUserPoolBalance>): GqlUserPoolBalance => {
-    return {
-        chain: overrides && overrides.hasOwnProperty('chain') ? overrides.chain! : GqlChain.ARBITRUM,
-        poolId: overrides && overrides.hasOwnProperty('poolId') ? overrides.poolId! : 'vado',
-        stakedBalance: overrides && overrides.hasOwnProperty('stakedBalance') ? overrides.stakedBalance! : 'cui',
-        tokenAddress: overrides && overrides.hasOwnProperty('tokenAddress') ? overrides.tokenAddress! : 'decretum',
-        tokenPrice: overrides && overrides.hasOwnProperty('tokenPrice') ? overrides.tokenPrice! : 9.8,
-        totalBalance: overrides && overrides.hasOwnProperty('totalBalance') ? overrides.totalBalance! : 'tempora',
-        walletBalance: overrides && overrides.hasOwnProperty('walletBalance') ? overrides.walletBalance! : 'aperio',
-    };
-};
-
 export const aGqlUserStakedBalance = (overrides?: Partial<GqlUserStakedBalance>): GqlUserStakedBalance => {
     return {
         balance: overrides && overrides.hasOwnProperty('balance') ? overrides.balance! : 'iusto',
@@ -2387,12 +2374,6 @@ export const aQuery = (overrides?: Partial<Query>): Query => {
             overrides && overrides.hasOwnProperty('tokenGetTokensDynamicData')
                 ? overrides.tokenGetTokensDynamicData!
                 : [aGqlTokenDynamicData()],
-        userGetPoolBalances:
-            overrides && overrides.hasOwnProperty('userGetPoolBalances')
-                ? overrides.userGetPoolBalances!
-                : [aGqlUserPoolBalance()],
-        userGetStaking:
-            overrides && overrides.hasOwnProperty('userGetStaking') ? overrides.userGetStaking! : [aGqlPoolStaking()],
         veBalGetTotalSupply:
             overrides && overrides.hasOwnProperty('veBalGetTotalSupply') ? overrides.veBalGetTotalSupply! : 'quis',
         veBalGetUser:

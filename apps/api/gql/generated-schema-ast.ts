@@ -3286,16 +3286,6 @@ export const schema = gql`
         WHITE_LISTED @deprecated(reason: "Use BLOCKED instead")
     }
 
-    type GqlUserPoolBalance {
-        chain: GqlChain!
-        poolId: String!
-        stakedBalance: AmountHumanReadable!
-        tokenAddress: String!
-        tokenPrice: Float!
-        totalBalance: AmountHumanReadable!
-        walletBalance: AmountHumanReadable!
-    }
-
     type GqlUserStakedBalance {
         """
         The staked BPT balance as float.
@@ -3816,8 +3806,6 @@ export const schema = gql`
         Returns dynamic data of a set of tokens such as price, market cap, etc.
         """
         tokenGetTokensDynamicData(addresses: [String!]!, chain: GqlChain): [GqlTokenDynamicData!]!
-        userGetPoolBalances(address: String, chains: [GqlChain!]): [GqlUserPoolBalance!]!
-        userGetStaking(address: String, chains: [GqlChain!]): [GqlPoolStaking!]!
         veBalGetTotalSupply(chain: GqlChain): AmountHumanReadable!
         veBalGetUser(address: String!, chain: GqlChain): GqlVeBalUserData!
         veBalGetUserBalance(address: String, chain: GqlChain): AmountHumanReadable!

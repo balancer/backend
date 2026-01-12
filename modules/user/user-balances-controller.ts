@@ -1,11 +1,9 @@
-import { Chain, PrismaPoolStaking, PrismaPoolStakingType } from '@prisma/client';
+import { Chain, PrismaPoolStakingType } from '@prisma/client';
 import config from '../../config';
 import { syncBptBalancesCowAmm } from './lib/bpt-balances/sync-bpt-balances-cow-amm';
 import { syncBptBalancesV2 } from './lib/bpt-balances/sync-bpt-balances-v2';
 import { AllNetworkConfigsKeyedOnChain } from '../network/network-config';
 import { syncBptBalancesV3 } from './lib/bpt-balances/sync-bpt-balances-v3';
-import { UserPoolBalance } from './user-types';
-import { getUserPoolBalances, getUserStaking } from './lib/user-balances';
 
 export function UserBalancesController() {
     return {
@@ -48,14 +46,6 @@ export function UserBalancesController() {
 
             const syncedBlocks = await syncBptBalancesV3(chain, balancerV3);
             return syncedBlocks;
-        },
-
-        async getUserPoolBalances(address: string, chains: Chain[]): Promise<UserPoolBalance[]> {
-            return getUserPoolBalances(address, chains);
-        },
-
-        async getUserStaking(address: string, chains: Chain[]): Promise<PrismaPoolStaking[]> {
-            return getUserStaking(address, chains);
         },
 
         async initStakedBalances(stakingTypes: PrismaPoolStakingType[], chain: Chain) {

@@ -2091,17 +2091,6 @@ export enum GqlTokenType {
     WHITE_LISTED = 'WHITE_LISTED',
 }
 
-export type GqlUserPoolBalance = {
-    __typename?: 'GqlUserPoolBalance';
-    chain: GqlChain;
-    poolId: Scalars['String'];
-    stakedBalance: Scalars['AmountHumanReadable'];
-    tokenAddress: Scalars['String'];
-    tokenPrice: Scalars['Float'];
-    totalBalance: Scalars['AmountHumanReadable'];
-    walletBalance: Scalars['AmountHumanReadable'];
-};
-
 export type GqlUserStakedBalance = {
     __typename?: 'GqlUserStakedBalance';
     /** The staked BPT balance as float. */
@@ -2456,8 +2445,6 @@ export type Query = {
     tokenGetTokens: Array<GqlToken>;
     /** Returns dynamic data of a set of tokens such as price, market cap, etc. */
     tokenGetTokensDynamicData: Array<GqlTokenDynamicData>;
-    userGetPoolBalances: Array<GqlUserPoolBalance>;
-    userGetStaking: Array<GqlPoolStaking>;
     veBalGetTotalSupply: Scalars['AmountHumanReadable'];
     veBalGetUser: GqlVeBalUserData;
     veBalGetUserBalance: Scalars['AmountHumanReadable'];
@@ -2590,16 +2577,6 @@ export type QueryTokenGetTokensArgs = {
 export type QueryTokenGetTokensDynamicDataArgs = {
     addresses: Array<Scalars['String']>;
     chain?: InputMaybe<GqlChain>;
-};
-
-export type QueryUserGetPoolBalancesArgs = {
-    address?: InputMaybe<Scalars['String']>;
-    chains?: InputMaybe<Array<GqlChain>>;
-};
-
-export type QueryUserGetStakingArgs = {
-    address?: InputMaybe<Scalars['String']>;
-    chains?: InputMaybe<Array<GqlChain>>;
 };
 
 export type QueryVeBalGetTotalSupplyArgs = {

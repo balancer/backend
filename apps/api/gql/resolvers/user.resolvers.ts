@@ -1,48 +1,11 @@
 import { Resolvers } from '../generated-schema';
-import { getRequiredAccountAddress, isAdminRoute } from '../../../../modules/auth/auth-context';
-import { tokenService } from '../../../../modules/token/token.service';
+import { isAdminRoute } from '../../../../modules/auth/auth-context';
 import { headerChain } from '../../../../modules/context/header-chain';
 import { GraphQLError } from 'graphql';
 import { UserBalancesController } from '../../../../modules/user/user-balances-controller';
 
 const resolvers: Resolvers = {
-    Query: {
-        userGetPoolBalances: async (parent, { chains, address }, context) => {
-            const currentChain = headerChain();
-            if (!chains && currentChain) {
-                chains = [currentChain];
-            } else if (!chains) {
-                throw new GraphQLError('Provide "chains" param', {
-                    extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
-                });
-            }
-            const accountAddress = address || getRequiredAccountAddress(context);
-            const tokenPrices = await tokenService.getTokenPricesForChains(chains);
-            const balances = await UserBalancesController().getUserPoolBalances(accountAddress, chains);
-
-            return balances.map((balance) => ({
-                ...balance,
-                tokenPrice: tokenService.getPriceForToken(
-                    tokenPrices[balance.chain] || [],
-                    balance.tokenAddress,
-                    balance.chain,
-                ),
-            }));
-        },
-        userGetStaking: async (parent, { chains, address }, context) => {
-            const currentChain = headerChain();
-            if (!chains && currentChain) {
-                chains = [currentChain];
-            } else if (!chains) {
-                throw new GraphQLError('Provide "chains" param', {
-                    extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
-                });
-            }
-            const accountAddress = address || getRequiredAccountAddress(context);
-
-            return UserBalancesController().getUserStaking(accountAddress, chains);
-        },
-    },
+    Query: {},
     Mutation: {
         userSyncChangedWalletBalancesForAllPools: async (parent, {}, context) => {
             isAdminRoute(context);
