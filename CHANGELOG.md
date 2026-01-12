@@ -1,5 +1,11 @@
 # backend
 
+## 1.58.4
+
+### Patch Changes
+
+-   b55103f: tAVAX APR
+
 ## 1.58.3
 
 ### Patch Changes

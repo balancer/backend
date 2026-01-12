@@ -27,6 +27,7 @@ export class VeBalLocksSubgraphService {
                 orderDirection: OrderDirection.asc,
                 where: {
                     unlockTime_gt: `${now}`,
+                    lockedBalance_gt: '0',
                     id_gt: id,
                 },
             });

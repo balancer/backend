@@ -19,16 +19,16 @@ export class UserSyncVebalLockBalanceService implements UserStakedBalanceService
         }
 
         console.log('initStakedVebalBalances: Starting loading users and onchain balances...');
-        await this.syncBalances(true);
+        await this.syncBalances();
 
         console.log('initStakedVebalBalances: finished...');
     }
 
     public async syncChangedStakedBalances(): Promise<void> {
-        await this.syncBalances(false);
+        await this.syncBalances();
     }
 
-    private async syncBalances(init: boolean): Promise<void> {
+    private async syncBalances(): Promise<void> {
         const subgraphVeBalHolders = await veBalLocksSubgraphService.getAllveBalHolders();
         const blockNumber = await veBalLocksSubgraphService.lastSyncedBlock();
 
@@ -66,11 +66,9 @@ export class UserSyncVebalLockBalanceService implements UserStakedBalanceService
             }),
         );
 
-        if (init) {
-            operations.push(
-                prisma.prismaUserStakedBalance.deleteMany({ where: { staking: { type: 'VEBAL' }, chain: 'MAINNET' } }),
-            );
-        }
+        operations.push(
+            prisma.prismaUserStakedBalance.deleteMany({ where: { staking: { type: 'VEBAL' }, chain: 'MAINNET' } }),
+        );
 
         for (const veBalHolder in response) {
             operations.push(
