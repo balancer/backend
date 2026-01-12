@@ -172,6 +172,24 @@ export default <NetworkData>{
                     ],
                 },
                 {
+                    url: 'https://protocol-api.treehouse.finance/protocol_mey',
+                    scale: 100,
+                    convert: async (val: number) => {
+                        const benqi = (
+                            (await (await fetch('https://api.benqi.fi/liquidstaking/apr')).json()) as { apr: number }
+                        ).apr;
+
+                        return benqi + val;
+                    },
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x14a84f1a61ccd7d1be596a6cc11fe33a36bc1646',
+                            path: '$[?(@.tasset=="tAVAX")].sma_mey',
+                        },
+                    ],
+                },
+                {
                     url: 'https://staging-api.yieldyak.com/yyavax',
                     scale: 100,
                     extractors: [

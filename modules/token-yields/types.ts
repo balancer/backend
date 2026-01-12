@@ -37,6 +37,7 @@ export interface TokenYieldHttpFetchConfig {
     body?: string;
     scale?: number;
     average?: boolean;
+    convert?: (num: number) => number | Promise<number>;
     skipSSL?: boolean;
     extractors: readonly EntryExtractor[];
 }
