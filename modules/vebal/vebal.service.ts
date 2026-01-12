@@ -104,6 +104,10 @@ export class VeBalService {
 
     async syncVeBalBalances(chain: Chain): Promise<void> {
         const subgraphVeBalHolders = await veBalLocksSubgraphService.getAllveBalHolders();
+        const vebalDatabaseHolders = await prisma.prismaVeBalUserBalance.findMany({
+            where: { chain: chain },
+            select: { userAddress: true },
+        });
 
         // we query all balances fresh from chain
         const veBalHolders: { address: string; balance: string; locked: string }[] = [];
@@ -192,6 +196,18 @@ export class VeBalService {
             prisma.prismaUser.createMany({
                 data: veBalHolders.map((user) => ({ address: user.address })),
                 skipDuplicates: true,
+            }),
+        );
+
+        // delete all users that no longer have a lock
+        const veBalHoldersAddresses = veBalHolders.map((holder) => holder.address);
+        const addressesToDelete = vebalDatabaseHolders
+            .map((holder) => holder.userAddress)
+            .filter((address) => !veBalHoldersAddresses.includes(address));
+
+        operations.push(
+            prisma.prismaVeBalUserBalance.deleteMany({
+                where: { chain: chain, userAddress: { in: addressesToDelete } },
             }),
         );
 
