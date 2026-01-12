@@ -310,6 +310,9 @@ export default <NetworkData>{
             aave: {
                 markets: [AaveV3Base],
             },
+            teth: {
+                address: '0xd09acb80c1e8f2291862c4978a008791c9167003',
+            },
         },
     },
     multicall: '0xca11bde05977b3631167028862be2a173976ca11',
