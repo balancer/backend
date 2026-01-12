@@ -4,7 +4,6 @@ import { tokenService } from '../../modules/token/token.service';
 import { PricingService } from '../../modules/pricing/pricing-service';
 import { poolService } from '../../modules/pool/pool.service';
 import { datastudioService } from '../../modules/datastudio/datastudio.service';
-import { initRequestScopedContext, setRequestScopedContextValue } from '../../modules/context/request-scoped-context';
 import { veBalService } from '../../modules/vebal/vebal.service';
 import { veBalVotingListService } from '../../modules/vebal/vebal-voting-list.service';
 import { cronsMetricPublisher } from '../../modules/metrics/metrics.client';
@@ -95,9 +94,6 @@ export function configureWorkerRoutes(app: Express) {
             scope.setTransactionName(sentryTransactionName);
             scope.setTag('job', job.name);
             scope.setTag('chain', job.chain);
-
-            initRequestScopedContext();
-            setRequestScopedContextValue('chainId', job.chain);
 
             // Start profiling span for the job
             Sentry.startSpan({ op: 'job', name: sentryTransactionName }, () => {

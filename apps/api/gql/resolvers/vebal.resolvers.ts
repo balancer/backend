@@ -1,58 +1,20 @@
 import { Resolvers } from '../generated-schema';
-import { getRequiredAccountAddress, isAdminRoute } from '../../../../modules/auth/auth-context';
+import { isAdminRoute } from '../../../../modules/auth/auth-context';
 import { veBalService } from '../../../../modules/vebal/vebal.service';
 import { veBalVotingListService } from '../../../../modules/vebal/vebal-voting-list.service';
-import { headerChain } from '../../../../modules/context/header-chain';
-import { GraphQLError } from 'graphql';
 
 const resolvers: Resolvers = {
     Query: {
         veBalGetUserBalance: async (parent, { chain, address }, context) => {
-            const currentChain = headerChain();
-            if (!chain && currentChain) {
-                chain = currentChain;
-            } else if (!chain) {
-                throw new GraphQLError('Provide "chain" param', {
-                    extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
-                });
-            }
-
-            const accountAddress = address || getRequiredAccountAddress(context);
-            return veBalService.getVeBalUserBalance(chain, accountAddress);
+            return veBalService.getVeBalUserBalance(chain, address);
         },
         veBalGetUserBalances: async (parent, { chains, address }, context) => {
-            if (!address) {
-                return [];
-            }
-
-            if (chains === null || chains?.length === 0) {
-                chains = undefined;
-            }
-
             return veBalService.readBalances(address, chains);
         },
         veBalGetUser: async (parent, { chain, address }, context) => {
-            const currentChain = headerChain();
-            if (!chain && currentChain) {
-                chain = currentChain;
-            } else if (!chain) {
-                throw new GraphQLError('Provide "chain" param', {
-                    extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
-                });
-            }
-
-            const accountAddress = address || getRequiredAccountAddress(context);
-            return veBalService.getVeBalUserData(chain, accountAddress);
+            return veBalService.getVeBalUserData(chain, address);
         },
         veBalGetTotalSupply: async (parent, { chain }, context) => {
-            const currentChain = headerChain();
-            if (!chain && currentChain) {
-                chain = currentChain;
-            } else if (!chain) {
-                throw new GraphQLError('Provide "chain" param', {
-                    extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
-                });
-            }
             return veBalService.getVeBalTotalSupply(chain);
         },
 
@@ -72,31 +34,15 @@ const resolvers: Resolvers = {
         },
     },
     Mutation: {
-        veBalSyncAllUserBalances: async (parent, {}, context) => {
+        veBalSyncAllUserBalances: async (parent, { chain }, context) => {
             isAdminRoute(context);
-
-            const chain = headerChain();
-
-            if (!chain) {
-                throw new GraphQLError('Provide "chainId" header', {
-                    extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
-                });
-            }
 
             await veBalService.syncVeBalBalances(chain);
 
             return 'success';
         },
-        veBalSyncTotalSupply: async (parent, {}, context) => {
+        veBalSyncTotalSupply: async (parent, { chain }, context) => {
             isAdminRoute(context);
-
-            const chain = headerChain();
-
-            if (!chain) {
-                throw new GraphQLError('Provide "chainId" header', {
-                    extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
-                });
-            }
 
             await veBalService.syncVeBalTotalSupply(chain);
 

@@ -1,7 +1,7 @@
 extend type Mutation {
-    userInitWalletBalancesForAllPools(chain: GqlChain): String!
-    userSyncChangedWalletBalancesForAllPools: String!
+    userInitWalletBalancesForAllPools(chain: GqlChain!): String!
+    userSyncChangedWalletBalancesForAllPools(chain: GqlChain!): String!
 
-    userInitStakedBalances(stakingTypes: [GqlPoolStakingType!]!): String!
-    userSyncChangedStakedBalances: String!
+    userInitStakedBalances(stakingTypes: [GqlPoolStakingType!]!, chain: GqlChain!): String!
+    userSyncChangedStakedBalances(chain: GqlChain!): String!
 }

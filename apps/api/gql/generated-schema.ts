@@ -2304,16 +2304,34 @@ export interface MutationPoolReloadPoolsArgs {
 }
 
 export interface MutationPoolReloadStakingForAllPoolsArgs {
+    chain: GqlChain;
     stakingTypes: Array<GqlPoolStakingType>;
+}
+
+export interface MutationPoolSyncAllPoolsFromSubgraphArgs {
+    chain: GqlChain;
 }
 
 export interface MutationPoolSyncFxQuoteTokensArgs {
     chains: Array<GqlChain>;
 }
 
+export interface MutationPoolUpdateLiquidityValuesForAllPoolsArgs {
+    chain: GqlChain;
+}
+
+export interface MutationProtocolCacheMetricsArgs {
+    chain: GqlChain;
+}
+
 export interface MutationTokenDeleteTokenTypeArgs {
+    chain: GqlChain;
     tokenAddress: Scalars['String'];
     type: GqlTokenType;
+}
+
+export interface MutationTokenReloadAllTokenTypesArgs {
+    chain: GqlChain;
 }
 
 export interface MutationTokenReloadErc4626TokensArgs {
@@ -2329,11 +2347,28 @@ export interface MutationTokenSyncLatestFxPricesArgs {
 }
 
 export interface MutationUserInitStakedBalancesArgs {
+    chain: GqlChain;
     stakingTypes: Array<GqlPoolStakingType>;
 }
 
 export interface MutationUserInitWalletBalancesForAllPoolsArgs {
-    chain?: InputMaybe<GqlChain>;
+    chain: GqlChain;
+}
+
+export interface MutationUserSyncChangedStakedBalancesArgs {
+    chain: GqlChain;
+}
+
+export interface MutationUserSyncChangedWalletBalancesForAllPoolsArgs {
+    chain: GqlChain;
+}
+
+export interface MutationVeBalSyncAllUserBalancesArgs {
+    chain: GqlChain;
+}
+
+export interface MutationVeBalSyncTotalSupplyArgs {
+    chain: GqlChain;
 }
 
 export interface QuantAmmWeightedDetail {
@@ -2428,7 +2463,7 @@ export interface QueryAggregatorPoolsArgs {
 }
 
 export interface QueryBeetsPoolGetReliquaryFarmSnapshotsArgs {
-    chain?: InputMaybe<GqlChain>;
+    chain: GqlChain;
     id: Scalars['String'];
     range: GqlPoolSnapshotDataRange;
 }
@@ -2459,7 +2494,7 @@ export interface QueryPoolGetFeaturedPoolsArgs {
 }
 
 export interface QueryPoolGetPoolArgs {
-    chain?: InputMaybe<GqlChain>;
+    chain: GqlChain;
     id: Scalars['String'];
     userAddress?: InputMaybe<Scalars['String']>;
 }
@@ -2483,17 +2518,17 @@ export interface QueryPoolGetPoolsCountArgs {
 }
 
 export interface QueryPoolGetSnapshotsArgs {
-    chain?: InputMaybe<GqlChain>;
+    chain: GqlChain;
     id: Scalars['String'];
     range: GqlPoolSnapshotDataRange;
 }
 
 export interface QueryProtocolMetricsAggregatedArgs {
-    chains?: InputMaybe<Array<GqlChain>>;
+    chains: Array<GqlChain>;
 }
 
 export interface QueryProtocolMetricsChainArgs {
-    chain?: InputMaybe<GqlChain>;
+    chain: GqlChain;
 }
 
 export interface QuerySorGetSwapPathsArgs {
@@ -2514,7 +2549,7 @@ export interface QueryStsGetStakedSonicSnapshotsArgs {
 }
 
 export interface QueryTokenGetCurrentPricesArgs {
-    chains?: InputMaybe<Array<GqlChain>>;
+    chains: Array<GqlChain>;
 }
 
 export interface QueryTokenGetHistoricalPricesArgs {
@@ -2524,7 +2559,7 @@ export interface QueryTokenGetHistoricalPricesArgs {
 }
 
 export interface QueryTokenGetRelativePriceChartDataArgs {
-    chain?: InputMaybe<GqlChain>;
+    chain: GqlChain;
     range: GqlTokenChartDataRange;
     tokenIn: Scalars['String'];
     tokenOut: Scalars['String'];
@@ -2532,36 +2567,36 @@ export interface QueryTokenGetRelativePriceChartDataArgs {
 
 export interface QueryTokenGetTokenDynamicDataArgs {
     address: Scalars['String'];
-    chain?: InputMaybe<GqlChain>;
+    chain: GqlChain;
 }
 
 export interface QueryTokenGetTokensArgs {
-    chains?: InputMaybe<Array<GqlChain>>;
+    chains: Array<GqlChain>;
     where?: InputMaybe<GqlTokenFilter>;
 }
 
 export interface QueryTokenGetTokensDynamicDataArgs {
     addresses: Array<Scalars['String']>;
-    chain?: InputMaybe<GqlChain>;
+    chain: GqlChain;
 }
 
 export interface QueryVeBalGetTotalSupplyArgs {
-    chain?: InputMaybe<GqlChain>;
+    chain: GqlChain;
 }
 
 export interface QueryVeBalGetUserArgs {
     address: Scalars['String'];
-    chain?: InputMaybe<GqlChain>;
+    chain: GqlChain;
 }
 
 export interface QueryVeBalGetUserBalanceArgs {
-    address?: InputMaybe<Scalars['String']>;
-    chain?: InputMaybe<GqlChain>;
+    address: Scalars['String'];
+    chain: GqlChain;
 }
 
 export interface QueryVeBalGetUserBalancesArgs {
     address: Scalars['String'];
-    chains?: InputMaybe<Array<GqlChain>>;
+    chains: Array<GqlChain>;
 }
 
 export interface QueryVeBalGetVotingListArgs {
@@ -4669,24 +4704,44 @@ export type MutationResolvers<
         ResolversTypes['String'],
         ParentType,
         ContextType,
-        RequireFields<MutationPoolReloadStakingForAllPoolsArgs, 'stakingTypes'>
+        RequireFields<MutationPoolReloadStakingForAllPoolsArgs, 'chain' | 'stakingTypes'>
     >;
-    poolSyncAllPoolsFromSubgraph?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
+    poolSyncAllPoolsFromSubgraph?: Resolver<
+        Array<ResolversTypes['String']>,
+        ParentType,
+        ContextType,
+        RequireFields<MutationPoolSyncAllPoolsFromSubgraphArgs, 'chain'>
+    >;
     poolSyncFxQuoteTokens?: Resolver<
         Array<ResolversTypes['GqlPoolMutationResult']>,
         ParentType,
         ContextType,
         RequireFields<MutationPoolSyncFxQuoteTokensArgs, 'chains'>
     >;
-    poolUpdateLiquidityValuesForAllPools?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    protocolCacheMetrics?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+    poolUpdateLiquidityValuesForAllPools?: Resolver<
+        ResolversTypes['String'],
+        ParentType,
+        ContextType,
+        RequireFields<MutationPoolUpdateLiquidityValuesForAllPoolsArgs, 'chain'>
+    >;
+    protocolCacheMetrics?: Resolver<
+        ResolversTypes['String'],
+        ParentType,
+        ContextType,
+        RequireFields<MutationProtocolCacheMetricsArgs, 'chain'>
+    >;
     tokenDeleteTokenType?: Resolver<
         ResolversTypes['String'],
         ParentType,
         ContextType,
-        RequireFields<MutationTokenDeleteTokenTypeArgs, 'tokenAddress' | 'type'>
+        RequireFields<MutationTokenDeleteTokenTypeArgs, 'chain' | 'tokenAddress' | 'type'>
     >;
-    tokenReloadAllTokenTypes?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+    tokenReloadAllTokenTypes?: Resolver<
+        ResolversTypes['String'],
+        ParentType,
+        ContextType,
+        RequireFields<MutationTokenReloadAllTokenTypesArgs, 'chain'>
+    >;
     tokenReloadErc4626Tokens?: Resolver<
         Array<ResolversTypes['GqlTokenMutationResult']>,
         ParentType,
@@ -4710,18 +4765,38 @@ export type MutationResolvers<
         ResolversTypes['String'],
         ParentType,
         ContextType,
-        RequireFields<MutationUserInitStakedBalancesArgs, 'stakingTypes'>
+        RequireFields<MutationUserInitStakedBalancesArgs, 'chain' | 'stakingTypes'>
     >;
     userInitWalletBalancesForAllPools?: Resolver<
         ResolversTypes['String'],
         ParentType,
         ContextType,
-        RequireFields<MutationUserInitWalletBalancesForAllPoolsArgs, never>
+        RequireFields<MutationUserInitWalletBalancesForAllPoolsArgs, 'chain'>
     >;
-    userSyncChangedStakedBalances?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    userSyncChangedWalletBalancesForAllPools?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    veBalSyncAllUserBalances?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    veBalSyncTotalSupply?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+    userSyncChangedStakedBalances?: Resolver<
+        ResolversTypes['String'],
+        ParentType,
+        ContextType,
+        RequireFields<MutationUserSyncChangedStakedBalancesArgs, 'chain'>
+    >;
+    userSyncChangedWalletBalancesForAllPools?: Resolver<
+        ResolversTypes['String'],
+        ParentType,
+        ContextType,
+        RequireFields<MutationUserSyncChangedWalletBalancesForAllPoolsArgs, 'chain'>
+    >;
+    veBalSyncAllUserBalances?: Resolver<
+        ResolversTypes['String'],
+        ParentType,
+        ContextType,
+        RequireFields<MutationVeBalSyncAllUserBalancesArgs, 'chain'>
+    >;
+    veBalSyncTotalSupply?: Resolver<
+        ResolversTypes['String'],
+        ParentType,
+        ContextType,
+        RequireFields<MutationVeBalSyncTotalSupplyArgs, 'chain'>
+    >;
 }>;
 
 export type QuantAmmWeightedDetailResolvers<
@@ -4777,7 +4852,7 @@ export type QueryResolvers<
         Array<ResolversTypes['GqlReliquaryFarmSnapshot']>,
         ParentType,
         ContextType,
-        RequireFields<QueryBeetsPoolGetReliquaryFarmSnapshotsArgs, 'id' | 'range'>
+        RequireFields<QueryBeetsPoolGetReliquaryFarmSnapshotsArgs, 'chain' | 'id' | 'range'>
     >;
     lbpPriceChart?: Resolver<
         Maybe<Array<ResolversTypes['LBPPriceChartData']>>,
@@ -4808,7 +4883,7 @@ export type QueryResolvers<
         ResolversTypes['GqlPoolBase'],
         ParentType,
         ContextType,
-        RequireFields<QueryPoolGetPoolArgs, 'id'>
+        RequireFields<QueryPoolGetPoolArgs, 'chain' | 'id'>
     >;
     poolGetPools?: Resolver<
         Array<ResolversTypes['GqlPoolMinimal']>,
@@ -4826,19 +4901,19 @@ export type QueryResolvers<
         Array<ResolversTypes['GqlPoolSnapshot']>,
         ParentType,
         ContextType,
-        RequireFields<QueryPoolGetSnapshotsArgs, 'id' | 'range'>
+        RequireFields<QueryPoolGetSnapshotsArgs, 'chain' | 'id' | 'range'>
     >;
     protocolMetricsAggregated?: Resolver<
         ResolversTypes['GqlProtocolMetricsAggregated'],
         ParentType,
         ContextType,
-        RequireFields<QueryProtocolMetricsAggregatedArgs, never>
+        RequireFields<QueryProtocolMetricsAggregatedArgs, 'chains'>
     >;
     protocolMetricsChain?: Resolver<
         ResolversTypes['GqlProtocolMetricsChain'],
         ParentType,
         ContextType,
-        RequireFields<QueryProtocolMetricsChainArgs, never>
+        RequireFields<QueryProtocolMetricsChainArgs, 'chain'>
     >;
     sorGetSwapPaths?: Resolver<
         ResolversTypes['GqlSorGetSwapPaths'],
@@ -4857,7 +4932,7 @@ export type QueryResolvers<
         Array<ResolversTypes['GqlTokenPrice']>,
         ParentType,
         ContextType,
-        RequireFields<QueryTokenGetCurrentPricesArgs, never>
+        RequireFields<QueryTokenGetCurrentPricesArgs, 'chains'>
     >;
     tokenGetHistoricalPrices?: Resolver<
         Array<ResolversTypes['GqlHistoricalTokenPrice']>,
@@ -4869,49 +4944,49 @@ export type QueryResolvers<
         Array<ResolversTypes['GqlTokenPriceChartDataItem']>,
         ParentType,
         ContextType,
-        RequireFields<QueryTokenGetRelativePriceChartDataArgs, 'range' | 'tokenIn' | 'tokenOut'>
+        RequireFields<QueryTokenGetRelativePriceChartDataArgs, 'chain' | 'range' | 'tokenIn' | 'tokenOut'>
     >;
     tokenGetTokenDynamicData?: Resolver<
         Maybe<ResolversTypes['GqlTokenDynamicData']>,
         ParentType,
         ContextType,
-        RequireFields<QueryTokenGetTokenDynamicDataArgs, 'address'>
+        RequireFields<QueryTokenGetTokenDynamicDataArgs, 'address' | 'chain'>
     >;
     tokenGetTokens?: Resolver<
         Array<ResolversTypes['GqlToken']>,
         ParentType,
         ContextType,
-        RequireFields<QueryTokenGetTokensArgs, never>
+        RequireFields<QueryTokenGetTokensArgs, 'chains'>
     >;
     tokenGetTokensDynamicData?: Resolver<
         Array<ResolversTypes['GqlTokenDynamicData']>,
         ParentType,
         ContextType,
-        RequireFields<QueryTokenGetTokensDynamicDataArgs, 'addresses'>
+        RequireFields<QueryTokenGetTokensDynamicDataArgs, 'addresses' | 'chain'>
     >;
     veBalGetTotalSupply?: Resolver<
         ResolversTypes['AmountHumanReadable'],
         ParentType,
         ContextType,
-        RequireFields<QueryVeBalGetTotalSupplyArgs, never>
+        RequireFields<QueryVeBalGetTotalSupplyArgs, 'chain'>
     >;
     veBalGetUser?: Resolver<
         ResolversTypes['GqlVeBalUserData'],
         ParentType,
         ContextType,
-        RequireFields<QueryVeBalGetUserArgs, 'address'>
+        RequireFields<QueryVeBalGetUserArgs, 'address' | 'chain'>
     >;
     veBalGetUserBalance?: Resolver<
         ResolversTypes['AmountHumanReadable'],
         ParentType,
         ContextType,
-        RequireFields<QueryVeBalGetUserBalanceArgs, never>
+        RequireFields<QueryVeBalGetUserBalanceArgs, 'address' | 'chain'>
     >;
     veBalGetUserBalances?: Resolver<
         Array<ResolversTypes['GqlVeBalBalance']>,
         ParentType,
         ContextType,
-        RequireFields<QueryVeBalGetUserBalancesArgs, 'address'>
+        RequireFields<QueryVeBalGetUserBalancesArgs, 'address' | 'chains'>
     >;
     veBalGetVotingList?: Resolver<
         Array<ResolversTypes['GqlVotingPool']>,

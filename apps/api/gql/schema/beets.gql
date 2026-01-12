@@ -2,7 +2,7 @@ extend type Query {
     beetsPoolGetReliquaryFarmSnapshots(
         id: String!
         range: GqlPoolSnapshotDataRange!
-        chain: GqlChain
+        chain: GqlChain!
     ): [GqlReliquaryFarmSnapshot!]!
 }
 

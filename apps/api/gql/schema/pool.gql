@@ -2,7 +2,7 @@ extend type Query {
     """
     Returns one pool. If a user address is provided, the user balances for the given pool will also be returned.
     """
-    poolGetPool(id: String!, chain: GqlChain, userAddress: String): GqlPoolBase!
+    poolGetPool(id: String!, chain: GqlChain!, userAddress: String): GqlPoolBase!
     """
     Returns all pools for a given filter
     """
@@ -32,7 +32,7 @@ extend type Query {
     """
     Gets all the snapshots for a given pool on a chain for a certain range
     """
-    poolGetSnapshots(id: String!, chain: GqlChain, range: GqlPoolSnapshotDataRange!): [GqlPoolSnapshot!]!
+    poolGetSnapshots(id: String!, chain: GqlChain!, range: GqlPoolSnapshotDataRange!): [GqlPoolSnapshot!]!
     """
     Getting swap, add and remove events with paging
     """
@@ -40,10 +40,10 @@ extend type Query {
 }
 
 extend type Mutation {
-    poolSyncAllPoolsFromSubgraph: [String!]!
-    poolUpdateLiquidityValuesForAllPools: String!
+    poolSyncAllPoolsFromSubgraph(chain: GqlChain!): [String!]!
+    poolUpdateLiquidityValuesForAllPools(chain: GqlChain!): String!
     poolReloadAllPoolAprs(chain: GqlChain!): String!
-    poolReloadStakingForAllPools(stakingTypes: [GqlPoolStakingType!]!): String!
+    poolReloadStakingForAllPools(stakingTypes: [GqlPoolStakingType!]!, chain: GqlChain!): String!
     poolLoadSnapshotsForPools(poolId: String!, chain: GqlChain!): String!
     poolLoadOnChainDataForAllPools(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
     poolReloadPools(chains: [GqlChain!]!): [GqlPoolMutationResult!]!

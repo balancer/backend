@@ -1,21 +1,10 @@
 import { Resolvers } from '../generated-schema';
 import { isAdminRoute } from '../../../../modules/auth/auth-context';
 import { poolService } from '../../../../modules/pool/pool.service';
-import { headerChain } from '../../../../modules/context/header-chain';
-import { GraphQLError } from 'graphql';
 
 const beetsResolvers: Resolvers = {
     Query: {
         beetsPoolGetReliquaryFarmSnapshots: async (parent, { id, range, chain }, context) => {
-            const currentChain = headerChain();
-            if (!chain && currentChain) {
-                chain = currentChain;
-            } else if (!chain) {
-                throw new GraphQLError('Provide "chain" param', {
-                    extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
-                });
-            }
-
             const snapshots = await poolService.getSnapshotsForReliquaryFarm(parseFloat(id), range, chain);
 
             return snapshots.map((snapshot) => ({

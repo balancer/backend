@@ -3576,23 +3576,23 @@ export const schema = gql`
         poolLoadSnapshotsForPools(chain: GqlChain!, poolId: String!): String!
         poolReloadAllPoolAprs(chain: GqlChain!): String!
         poolReloadPools(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
-        poolReloadStakingForAllPools(stakingTypes: [GqlPoolStakingType!]!): String!
-        poolSyncAllPoolsFromSubgraph: [String!]!
+        poolReloadStakingForAllPools(chain: GqlChain!, stakingTypes: [GqlPoolStakingType!]!): String!
+        poolSyncAllPoolsFromSubgraph(chain: GqlChain!): [String!]!
         poolSyncFxQuoteTokens(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
-        poolUpdateLiquidityValuesForAllPools: String!
-        protocolCacheMetrics: String!
-        tokenDeleteTokenType(tokenAddress: String!, type: GqlTokenType!): String!
-        tokenReloadAllTokenTypes: String!
+        poolUpdateLiquidityValuesForAllPools(chain: GqlChain!): String!
+        protocolCacheMetrics(chain: GqlChain!): String!
+        tokenDeleteTokenType(chain: GqlChain!, tokenAddress: String!, type: GqlTokenType!): String!
+        tokenReloadAllTokenTypes(chain: GqlChain!): String!
         tokenReloadErc4626Tokens(chains: [GqlChain!]!): [GqlTokenMutationResult!]!
         tokenReloadTokenPrices(chains: [GqlChain!]!): Boolean
         tokenSyncLatestFxPrices(chain: GqlChain!): String!
         tokenSyncTokenDefinitions: String!
-        userInitStakedBalances(stakingTypes: [GqlPoolStakingType!]!): String!
-        userInitWalletBalancesForAllPools(chain: GqlChain): String!
-        userSyncChangedStakedBalances: String!
-        userSyncChangedWalletBalancesForAllPools: String!
-        veBalSyncAllUserBalances: String!
-        veBalSyncTotalSupply: String!
+        userInitStakedBalances(chain: GqlChain!, stakingTypes: [GqlPoolStakingType!]!): String!
+        userInitWalletBalancesForAllPools(chain: GqlChain!): String!
+        userSyncChangedStakedBalances(chain: GqlChain!): String!
+        userSyncChangedWalletBalancesForAllPools(chain: GqlChain!): String!
+        veBalSyncAllUserBalances(chain: GqlChain!): String!
+        veBalSyncTotalSupply(chain: GqlChain!): String!
     }
 
     type QuantAMMWeightedDetail {
@@ -3634,7 +3634,7 @@ export const schema = gql`
             where: GqlAggregatorPoolFilter
         ): [GqlPoolAggregator!]!
         beetsPoolGetReliquaryFarmSnapshots(
-            chain: GqlChain
+            chain: GqlChain!
             id: String!
             range: GqlPoolSnapshotDataRange!
         ): [GqlReliquaryFarmSnapshot!]!
@@ -3669,7 +3669,7 @@ export const schema = gql`
         """
         Returns one pool. If a user address is provided, the user balances for the given pool will also be returned.
         """
-        poolGetPool(chain: GqlChain, id: String!, userAddress: String): GqlPoolBase!
+        poolGetPool(chain: GqlChain!, id: String!, userAddress: String): GqlPoolBase!
 
         """
         Returns all pools for a given filter
@@ -3698,9 +3698,9 @@ export const schema = gql`
         """
         Gets all the snapshots for a given pool on a chain for a certain range
         """
-        poolGetSnapshots(chain: GqlChain, id: String!, range: GqlPoolSnapshotDataRange!): [GqlPoolSnapshot!]!
-        protocolMetricsAggregated(chains: [GqlChain!]): GqlProtocolMetricsAggregated!
-        protocolMetricsChain(chain: GqlChain): GqlProtocolMetricsChain!
+        poolGetSnapshots(chain: GqlChain!, id: String!, range: GqlPoolSnapshotDataRange!): [GqlPoolSnapshot!]!
+        protocolMetricsAggregated(chains: [GqlChain!]!): GqlProtocolMetricsAggregated!
+        protocolMetricsChain(chain: GqlChain!): GqlProtocolMetricsChain!
 
         """
         Get swap quote from the SOR v2
@@ -3771,7 +3771,7 @@ export const schema = gql`
         """
         Returns all current prices for allowed tokens for a given chain or chains
         """
-        tokenGetCurrentPrices(chains: [GqlChain!]): [GqlTokenPrice!]!
+        tokenGetCurrentPrices(chains: [GqlChain!]!): [GqlTokenPrice!]!
 
         """
         Returns the historical prices for a given set of tokens for a given chain and range
@@ -3786,7 +3786,7 @@ export const schema = gql`
         Returns the price of a token priced in another token for a given range.
         """
         tokenGetRelativePriceChartData(
-            chain: GqlChain
+            chain: GqlChain!
             range: GqlTokenChartDataRange!
             tokenIn: String!
             tokenOut: String!
@@ -3795,21 +3795,21 @@ export const schema = gql`
         """
         Returns dynamic data of a token such as price, market cap, etc.
         """
-        tokenGetTokenDynamicData(address: String!, chain: GqlChain): GqlTokenDynamicData
+        tokenGetTokenDynamicData(address: String!, chain: GqlChain!): GqlTokenDynamicData
 
         """
         Returns all allowed tokens for a given chain or chains
         """
-        tokenGetTokens(chains: [GqlChain!], where: GqlTokenFilter): [GqlToken!]!
+        tokenGetTokens(chains: [GqlChain!]!, where: GqlTokenFilter): [GqlToken!]!
 
         """
         Returns dynamic data of a set of tokens such as price, market cap, etc.
         """
-        tokenGetTokensDynamicData(addresses: [String!]!, chain: GqlChain): [GqlTokenDynamicData!]!
-        veBalGetTotalSupply(chain: GqlChain): AmountHumanReadable!
-        veBalGetUser(address: String!, chain: GqlChain): GqlVeBalUserData!
-        veBalGetUserBalance(address: String, chain: GqlChain): AmountHumanReadable!
-        veBalGetUserBalances(address: String!, chains: [GqlChain!]): [GqlVeBalBalance!]!
+        tokenGetTokensDynamicData(addresses: [String!]!, chain: GqlChain!): [GqlTokenDynamicData!]!
+        veBalGetTotalSupply(chain: GqlChain!): AmountHumanReadable!
+        veBalGetUser(address: String!, chain: GqlChain!): GqlVeBalUserData!
+        veBalGetUserBalance(address: String!, chain: GqlChain!): AmountHumanReadable!
+        veBalGetUserBalances(address: String!, chains: [GqlChain!]!): [GqlVeBalBalance!]!
 
         """
         Returns all pools with veBAL gauges that can be voted on.

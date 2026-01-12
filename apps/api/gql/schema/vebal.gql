@@ -1,17 +1,17 @@
 extend type Query {
-    veBalGetUserBalance(chain: GqlChain, address: String): AmountHumanReadable!
-    veBalGetUserBalances(chains: [GqlChain!], address: String!): [GqlVeBalBalance!]!
-    veBalGetTotalSupply(chain: GqlChain): AmountHumanReadable!
+    veBalGetUserBalance(chain: GqlChain!, address: String!): AmountHumanReadable!
+    veBalGetUserBalances(chains: [GqlChain!]!, address: String!): [GqlVeBalBalance!]!
+    veBalGetTotalSupply(chain: GqlChain!): AmountHumanReadable!
     """
     Returns all pools with veBAL gauges that can be voted on.
     """
     veBalGetVotingList(includeKilled: Boolean): [GqlVotingPool!]!
-    veBalGetUser(chain: GqlChain, address: String!): GqlVeBalUserData!
+    veBalGetUser(chain: GqlChain!, address: String!): GqlVeBalUserData!
 }
 
 extend type Mutation {
-    veBalSyncAllUserBalances: String!
-    veBalSyncTotalSupply: String!
+    veBalSyncAllUserBalances(chain: GqlChain!): String!
+    veBalSyncTotalSupply(chain: GqlChain!): String!
 }
 
 type GqlVeBalBalance {

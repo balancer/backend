@@ -2338,16 +2338,34 @@ export type MutationPoolReloadPoolsArgs = {
 };
 
 export type MutationPoolReloadStakingForAllPoolsArgs = {
+    chain: GqlChain;
     stakingTypes: Array<GqlPoolStakingType>;
+};
+
+export type MutationPoolSyncAllPoolsFromSubgraphArgs = {
+    chain: GqlChain;
 };
 
 export type MutationPoolSyncFxQuoteTokensArgs = {
     chains: Array<GqlChain>;
 };
 
+export type MutationPoolUpdateLiquidityValuesForAllPoolsArgs = {
+    chain: GqlChain;
+};
+
+export type MutationProtocolCacheMetricsArgs = {
+    chain: GqlChain;
+};
+
 export type MutationTokenDeleteTokenTypeArgs = {
+    chain: GqlChain;
     tokenAddress: Scalars['String'];
     type: GqlTokenType;
+};
+
+export type MutationTokenReloadAllTokenTypesArgs = {
+    chain: GqlChain;
 };
 
 export type MutationTokenReloadErc4626TokensArgs = {
@@ -2363,11 +2381,28 @@ export type MutationTokenSyncLatestFxPricesArgs = {
 };
 
 export type MutationUserInitStakedBalancesArgs = {
+    chain: GqlChain;
     stakingTypes: Array<GqlPoolStakingType>;
 };
 
 export type MutationUserInitWalletBalancesForAllPoolsArgs = {
-    chain?: InputMaybe<GqlChain>;
+    chain: GqlChain;
+};
+
+export type MutationUserSyncChangedStakedBalancesArgs = {
+    chain: GqlChain;
+};
+
+export type MutationUserSyncChangedWalletBalancesForAllPoolsArgs = {
+    chain: GqlChain;
+};
+
+export type MutationVeBalSyncAllUserBalancesArgs = {
+    chain: GqlChain;
+};
+
+export type MutationVeBalSyncTotalSupplyArgs = {
+    chain: GqlChain;
 };
 
 export type QuantAmmWeightedDetail = {
@@ -2462,7 +2497,7 @@ export type QueryAggregatorPoolsArgs = {
 };
 
 export type QueryBeetsPoolGetReliquaryFarmSnapshotsArgs = {
-    chain?: InputMaybe<GqlChain>;
+    chain: GqlChain;
     id: Scalars['String'];
     range: GqlPoolSnapshotDataRange;
 };
@@ -2493,7 +2528,7 @@ export type QueryPoolGetFeaturedPoolsArgs = {
 };
 
 export type QueryPoolGetPoolArgs = {
-    chain?: InputMaybe<GqlChain>;
+    chain: GqlChain;
     id: Scalars['String'];
     userAddress?: InputMaybe<Scalars['String']>;
 };
@@ -2517,17 +2552,17 @@ export type QueryPoolGetPoolsCountArgs = {
 };
 
 export type QueryPoolGetSnapshotsArgs = {
-    chain?: InputMaybe<GqlChain>;
+    chain: GqlChain;
     id: Scalars['String'];
     range: GqlPoolSnapshotDataRange;
 };
 
 export type QueryProtocolMetricsAggregatedArgs = {
-    chains?: InputMaybe<Array<GqlChain>>;
+    chains: Array<GqlChain>;
 };
 
 export type QueryProtocolMetricsChainArgs = {
-    chain?: InputMaybe<GqlChain>;
+    chain: GqlChain;
 };
 
 export type QuerySorGetSwapPathsArgs = {
@@ -2548,7 +2583,7 @@ export type QueryStsGetStakedSonicSnapshotsArgs = {
 };
 
 export type QueryTokenGetCurrentPricesArgs = {
-    chains?: InputMaybe<Array<GqlChain>>;
+    chains: Array<GqlChain>;
 };
 
 export type QueryTokenGetHistoricalPricesArgs = {
@@ -2558,7 +2593,7 @@ export type QueryTokenGetHistoricalPricesArgs = {
 };
 
 export type QueryTokenGetRelativePriceChartDataArgs = {
-    chain?: InputMaybe<GqlChain>;
+    chain: GqlChain;
     range: GqlTokenChartDataRange;
     tokenIn: Scalars['String'];
     tokenOut: Scalars['String'];
@@ -2566,36 +2601,36 @@ export type QueryTokenGetRelativePriceChartDataArgs = {
 
 export type QueryTokenGetTokenDynamicDataArgs = {
     address: Scalars['String'];
-    chain?: InputMaybe<GqlChain>;
+    chain: GqlChain;
 };
 
 export type QueryTokenGetTokensArgs = {
-    chains?: InputMaybe<Array<GqlChain>>;
+    chains: Array<GqlChain>;
     where?: InputMaybe<GqlTokenFilter>;
 };
 
 export type QueryTokenGetTokensDynamicDataArgs = {
     addresses: Array<Scalars['String']>;
-    chain?: InputMaybe<GqlChain>;
+    chain: GqlChain;
 };
 
 export type QueryVeBalGetTotalSupplyArgs = {
-    chain?: InputMaybe<GqlChain>;
+    chain: GqlChain;
 };
 
 export type QueryVeBalGetUserArgs = {
     address: Scalars['String'];
-    chain?: InputMaybe<GqlChain>;
+    chain: GqlChain;
 };
 
 export type QueryVeBalGetUserBalanceArgs = {
-    address?: InputMaybe<Scalars['String']>;
-    chain?: InputMaybe<GqlChain>;
+    address: Scalars['String'];
+    chain: GqlChain;
 };
 
 export type QueryVeBalGetUserBalancesArgs = {
     address: Scalars['String'];
-    chains?: InputMaybe<Array<GqlChain>>;
+    chains: Array<GqlChain>;
 };
 
 export type QueryVeBalGetVotingListArgs = {
