@@ -1,5 +1,11 @@
 # backend
 
+## 1.58.5
+
+### Patch Changes
+
+-   93bd145: remove vebal users if no balance
+
 ## 1.58.4
 
 ### Patch Changes
