@@ -1,5 +1,11 @@
 # backend
 
+## 1.58.7
+
+### Patch Changes
+
+-   4d69527: add swap reload mutation
+
 ## 1.58.6
 
 ### Patch Changes
