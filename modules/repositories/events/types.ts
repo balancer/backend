@@ -51,4 +51,5 @@ export interface TokenFlowsRepository {
 
 export interface EventStoreRepository {
     storeEvents: (events: (SwapEvent | JoinExitEvent)[]) => Promise<boolean>;
+    upsertEvents: (events: (SwapEvent | JoinExitEvent)[]) => Promise<boolean>;
 }

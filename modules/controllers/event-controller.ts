@@ -3,7 +3,7 @@ import config from '../../config';
 import { getV2SubgraphClient } from '../subgraphs/balancer-subgraph';
 import { syncJoinExits as syncJoinExitsV2 } from '../actions/pool/v2/sync-join-exits';
 import { syncJoinExits as syncJoinExitsV3 } from '../actions/pool/v3/sync-join-exits';
-import { syncSwaps as syncSwapsV2 } from '../actions/pool/v2/sync-swaps';
+import { reloadSwapsForPool, syncSwaps as syncSwapsV2 } from '../actions/pool/v2/sync-swaps';
 import { syncSwaps as syncSwapsV3 } from '../actions/pool/v3/sync-swaps';
 import { Chain } from '@prisma/client';
 import { updateVolumeAndFees } from '../actions/pool/update-volume-and-fees';
@@ -103,6 +103,22 @@ export function EventController() {
         },
         async updateVolumeAndFees(chain: Chain) {
             return updateVolumeAndFees(chain);
+        },
+        async reloadAllSwapsForPoolV2(chain: Chain, poolId: string) {
+            const {
+                subgraphs: { balancer },
+            } = config[chain];
+
+            // Guard against unconfigured chains
+            if (!balancer) {
+                throw new Error(`Chain not configured: ${chain}`);
+            }
+
+            const subgraphClient = getV2SubgraphClient(balancer, chain);
+            await reloadSwapsForPool(poolId, subgraphClient, chain);
+            await updateVolumeAndFees(chain, [poolId]);
+
+            return [poolId];
         },
     };
 }
