@@ -377,4 +377,16 @@ export const eventsRepository = {
 
         return true;
     },
+    upsertEvents: async (events: (SwapEvent | JoinExitEvent)[]) => {
+        const operations = events.map((event) =>
+            prisma.prismaPoolEvent.upsert({
+                where: { id_chain: { id: event.id, chain: event.chain } },
+                create: event,
+                update: event,
+            }),
+        );
+
+        await prisma.$transaction(operations);
+        return true;
+    },
 };

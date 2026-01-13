@@ -207,5 +207,34 @@ export function getV2SubgraphClient(url: string, chain: Chain) {
 
             return events;
         },
+        async getAllSwapsForPool(poolId: string): Promise<BalancerSwapFragment[]> {
+            const limit = 1000;
+            let hasMore = true;
+            let events: BalancerSwapFragment[] = [];
+            let where = {
+                id_gt: '0x',
+            };
+
+            while (hasMore) {
+                const { swaps } = await sdk.BalancerSwaps({
+                    where: { ...where, poolId: poolId },
+                    orderBy: Swap_OrderBy.Id,
+                    orderDirection: OrderDirection.Asc,
+                    first: limit,
+                });
+
+                events = [...events, ...swaps];
+
+                if (swaps.length < limit) {
+                    hasMore = false;
+                } else {
+                    where = {
+                        id_gt: swaps[swaps.length - 1].id,
+                    };
+                }
+            }
+
+            return events;
+        },
     };
 }

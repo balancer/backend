@@ -2798,6 +2798,8 @@ export const aMutation = (overrides?: Partial<Mutation>): Mutation => {
             overrides && overrides.hasOwnProperty('poolReloadStakingForAllPools')
                 ? overrides.poolReloadStakingForAllPools!
                 : 'anser',
+        poolReloadSwaps:
+            overrides && overrides.hasOwnProperty('poolReloadSwaps') ? overrides.poolReloadSwaps! : 'cubitum',
         poolSyncAllPoolsFromSubgraph:
             overrides && overrides.hasOwnProperty('poolSyncAllPoolsFromSubgraph')
                 ? overrides.poolSyncAllPoolsFromSubgraph!

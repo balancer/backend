@@ -2802,6 +2802,7 @@ export interface Mutation {
     poolReloadAllPoolAprs: Scalars['String'];
     poolReloadPools: Array<GqlPoolMutationResult>;
     poolReloadStakingForAllPools: Scalars['String'];
+    poolReloadSwaps: Scalars['String'];
     poolSyncAllPoolsFromSubgraph: Array<Scalars['String']>;
     poolSyncFxQuoteTokens: Array<GqlPoolMutationResult>;
     poolUpdateLiquidityValuesForAllPools: Scalars['String'];
@@ -2849,6 +2850,11 @@ export interface MutationPoolReloadPoolsArgs {
 
 export interface MutationPoolReloadStakingForAllPoolsArgs {
     stakingTypes: Array<GqlPoolStakingType>;
+}
+
+export interface MutationPoolReloadSwapsArgs {
+    chain: GqlChain;
+    poolId: Scalars['String'];
 }
 
 export interface MutationPoolSyncFxQuoteTokensArgs {
@@ -5937,6 +5943,12 @@ export type MutationResolvers<
         ParentType,
         ContextType,
         RequireFields<MutationPoolReloadStakingForAllPoolsArgs, 'stakingTypes'>
+    >;
+    poolReloadSwaps?: Resolver<
+        ResolversTypes['String'],
+        ParentType,
+        ContextType,
+        RequireFields<MutationPoolReloadSwapsArgs, 'chain' | 'poolId'>
     >;
     poolSyncAllPoolsFromSubgraph?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
     poolSyncFxQuoteTokens?: Resolver<

@@ -60,3 +60,34 @@ export async function syncSwaps(
 
     return [...new Set(dbEntries.map((entry) => entry.poolId))];
 }
+
+export async function reloadSwapsForPool(
+    poolId: string,
+    subgraphClient: V2SubgraphClient,
+    chain: Chain,
+    eventRepo: LatestEventRepository & EventStoreRepository = eventsRepository,
+): Promise<void> {
+    // Get list of FX pool addresses for the fee calculation
+    const fxPools = (await prisma.prismaPool.findMany({
+        where: {
+            chain: chain,
+            type: 'FX',
+        },
+        select: {
+            id: true,
+            typeData: true, // contains the quote token address
+        },
+    })) as { id: string; typeData: { quoteToken: string } }[];
+
+    // Get events
+    const swaps = await subgraphClient.getAllSwapsForPool(poolId);
+
+    const dbSwaps = swaps.map((swap) => swapV2Transformer(swap, chain, fxPools));
+
+    // Enrich with USD values
+    console.time('swapsUsd');
+    const dbEntries = await swapsUsd(dbSwaps, chain);
+    console.timeEnd('swapsUsd');
+
+    await eventRepo.upsertEvents(dbEntries);
+}

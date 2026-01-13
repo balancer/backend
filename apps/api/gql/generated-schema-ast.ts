@@ -4142,6 +4142,7 @@ export const schema = gql`
         poolReloadAllPoolAprs(chain: GqlChain!): String!
         poolReloadPools(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
         poolReloadStakingForAllPools(stakingTypes: [GqlPoolStakingType!]!): String!
+        poolReloadSwaps(chain: GqlChain!, poolId: String!): String!
         poolSyncAllPoolsFromSubgraph: [String!]!
         poolSyncFxQuoteTokens(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
         poolUpdateLiquidityValuesForAllPools: String!
