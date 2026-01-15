@@ -379,6 +379,16 @@ export default [
     },
     {
         inputs: [],
+        name: 'getReserveTokenVirtualBalance',
+        outputs: [
+            { internalType: 'uint256', name: '', type: 'uint256' },
+            { internalType: 'uint256', name: '', type: 'uint256' },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [],
         stateMutability: 'view',
         type: 'function',
         name: 'getStaticSwapFeePercentage',
