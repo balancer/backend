@@ -223,6 +223,7 @@ export function PoolController(tracer?: any) {
 
             const viemClient = getViemClient(chain);
             const subgraphClient = getVaultSubgraphClient(balancerV3, chain);
+            const poolsSubgraphClient = getPoolsSubgraphClient(balancerPoolsV3, chain);
 
             const fromBlock = await getLastSyncedBlock(chain, PrismaLastBlockSyncedCategory.POOLS_V3);
             const rpcLatestBlock = await viemClient.getBlockNumber().then(Number);
@@ -246,6 +247,8 @@ export function PoolController(tracer?: any) {
             let changedIds: string[] = [];
             if (useSubgraph) {
                 changedIds = await subgraphClient.getChangedPools(fromBlock);
+                const poolsChangedIds = await poolsSubgraphClient.getChangedPools(fromBlock);
+                changedIds = Array.from(new Set([...changedIds, ...poolsChangedIds])).map((id) => id.toLowerCase());
             } else {
                 const rpcMaxBlockRange = config[chain].rpcMaxBlockRange;
                 const range = Number(latestBlock) - fromBlock;
