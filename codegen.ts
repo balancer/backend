@@ -36,7 +36,7 @@ const files = {
         ...defaults.types,
     },
     ['modules/subgraphs/balancer-subgraph/generated/balancer-subgraph-types.ts']: {
-        schema: config.SONIC.subgraphs.balancer,
+        schema: config.MAINNET.subgraphs.balancer,
         documents: 'modules/subgraphs/balancer-subgraph/balancer-subgraph-queries.graphql',
         ...defaults.types,
     },

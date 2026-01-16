@@ -22,7 +22,7 @@ export function swapV2Transformer(swap: BalancerSwapFragment, chain: Chain): Swa
         poolId: swap.poolId.id,
         chain: chain,
         protocolVersion: 2,
-        userAddress: typeof swap.userAddress === 'string' ? swap.userAddress : swap.userAddress.id,
+        userAddress: swap.userAddress.id,
         blockNumber: Number(swap.block ?? 0), // FANTOM is missing block
         blockTimestamp: Number(swap.timestamp),
         logIndex: Number(swap.id.substring(66)),
