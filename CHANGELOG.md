@@ -1,5 +1,14 @@
 # backend
 
+## 1.58.8
+
+### Patch Changes
+
+-   df684c6: also query pools subgraph for changes
+-   b2ed2ab: sonic v2 subgraph to ormi
+-   7d6060c: migrate first subgraphs to ormi
+-   44d074e: reduce canary job schendule
+
 ## 1.58.7
 
 ### Patch Changes
