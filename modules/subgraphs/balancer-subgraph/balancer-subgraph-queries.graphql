@@ -34,10 +34,6 @@ fragment BalancerPool on Pool {
     symbol
     name
     swapFee
-    totalWeight
-    totalSwapVolume
-    totalSwapFee
-    totalLiquidity
     totalShares
     swapsCount
     holdersCount
@@ -129,41 +125,6 @@ query BalancerPool($id: ID!, $block: Block_height) {
     }
 }
 
-query BalancerPoolSnapshots(
-    $skip: Int
-    $first: Int
-    $orderBy: PoolSnapshot_orderBy
-    $orderDirection: OrderDirection
-    $where: PoolSnapshot_filter
-    $block: Block_height
-) {
-    poolSnapshots(
-        skip: $skip
-        first: $first
-        orderBy: $orderBy
-        orderDirection: $orderDirection
-        where: $where
-        block: $block
-    ) {
-        ...BalancerPoolSnapshot
-    }
-}
-
-fragment BalancerPoolSnapshot on PoolSnapshot {
-    id
-    pool {
-        id
-    }
-    amounts
-    totalShares
-    swapVolume
-    swapFees
-    timestamp
-    liquidity
-    swapsCount
-    holdersCount
-}
-
 query BalancerJoinExits(
     $skip: Int
     $first: Int
@@ -196,7 +157,6 @@ fragment BalancerJoinExit on JoinExit {
         id
         tokensList
     }
-    valueUSD
 }
 
 query BalancerSwaps(
@@ -244,17 +204,11 @@ fragment BalancerSwap on Swap {
     }
     timestamp
     tx
-    valueUSD
     block
 }
 
 query BalancerGetPoolsWithActiveUpdates($timestamp: BigInt!) {
     ampUpdates(where: { endTimestamp_gte: $timestamp }) {
-        poolId {
-            id
-        }
-    }
-    gradualWeightUpdates(where: { endTimestamp_gte: $timestamp }) {
         poolId {
             id
         }

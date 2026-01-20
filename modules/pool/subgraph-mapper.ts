@@ -91,7 +91,7 @@ const subgraphMapper = (
         swapEnabled: pool.swapEnabled,
         totalShares: pool.totalShares,
         totalSharesNum: parseFloat(pool.totalShares),
-        totalLiquidity: Math.max(parseFloat(pool.totalLiquidity), 0),
+        totalLiquidity: 0,
     };
 
     const typeData: ReturnType<(typeof typeDataMapper)[keyof typeof typeDataMapper]> | {} = Object.keys(
