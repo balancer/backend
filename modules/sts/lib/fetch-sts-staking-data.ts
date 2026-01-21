@@ -2,7 +2,7 @@ import { Address, formatEther, formatUnits } from 'viem';
 import SonicStaking from '../../sources/contracts/abis/SonicStaking';
 import { ViemClient } from '../../sources/types';
 import ConstantsManager from '../../sources/contracts/abis/ConstantsManager';
-import SFC from '../../sources/contracts/abis/SFC';
+import SFC from '../../sources/contracts/abis/SonicSFC';
 
 export interface OnchainSonicStakingData {
     totalAssets: string;
