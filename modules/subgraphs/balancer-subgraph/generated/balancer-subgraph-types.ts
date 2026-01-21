@@ -5439,10 +5439,6 @@ export type BalancerPoolFragment = {
     symbol?: string | null;
     name?: string | null;
     swapFee: string;
-    totalWeight?: string | null;
-    totalSwapVolume: string;
-    totalSwapFee: string;
-    totalLiquidity: string;
     totalShares: string;
     swapsCount: string;
     holdersCount: string;
@@ -5535,10 +5531,6 @@ export type BalancerPoolsQuery = {
         symbol?: string | null;
         name?: string | null;
         swapFee: string;
-        totalWeight?: string | null;
-        totalSwapVolume: string;
-        totalSwapFee: string;
-        totalLiquidity: string;
         totalShares: string;
         swapsCount: string;
         holdersCount: string;
@@ -5613,10 +5605,6 @@ export type BalancerPoolQuery = {
         symbol?: string | null;
         name?: string | null;
         swapFee: string;
-        totalWeight?: string | null;
-        totalSwapVolume: string;
-        totalSwapFee: string;
-        totalLiquidity: string;
         totalShares: string;
         swapsCount: string;
         holdersCount: string;
@@ -5675,46 +5663,6 @@ export type BalancerPoolQuery = {
     } | null;
 };
 
-export type BalancerPoolSnapshotsQueryVariables = Exact<{
-    skip?: InputMaybe<Scalars['Int']>;
-    first?: InputMaybe<Scalars['Int']>;
-    orderBy?: InputMaybe<PoolSnapshot_OrderBy>;
-    orderDirection?: InputMaybe<OrderDirection>;
-    where?: InputMaybe<PoolSnapshot_Filter>;
-    block?: InputMaybe<Block_Height>;
-}>;
-
-export type BalancerPoolSnapshotsQuery = {
-    __typename?: 'Query';
-    poolSnapshots: Array<{
-        __typename?: 'PoolSnapshot';
-        id: string;
-        amounts: Array<string>;
-        totalShares: string;
-        swapVolume: string;
-        swapFees: string;
-        timestamp: number;
-        liquidity: string;
-        swapsCount: string;
-        holdersCount: string;
-        pool: { __typename?: 'Pool'; id: string };
-    }>;
-};
-
-export type BalancerPoolSnapshotFragment = {
-    __typename?: 'PoolSnapshot';
-    id: string;
-    amounts: Array<string>;
-    totalShares: string;
-    swapVolume: string;
-    swapFees: string;
-    timestamp: number;
-    liquidity: string;
-    swapsCount: string;
-    holdersCount: string;
-    pool: { __typename?: 'Pool'; id: string };
-};
-
 export type BalancerJoinExitsQueryVariables = Exact<{
     skip?: InputMaybe<Scalars['Int']>;
     first?: InputMaybe<Scalars['Int']>;
@@ -5735,7 +5683,6 @@ export type BalancerJoinExitsQuery = {
         timestamp: number;
         tx: string;
         type: InvestType;
-        valueUSD?: string | null;
         pool: { __typename?: 'Pool'; id: string; tokensList: Array<string> };
     }>;
 };
@@ -5749,7 +5696,6 @@ export type BalancerJoinExitFragment = {
     timestamp: number;
     tx: string;
     type: InvestType;
-    valueUSD?: string | null;
     pool: { __typename?: 'Pool'; id: string; tokensList: Array<string> };
 };
 
@@ -5776,7 +5722,6 @@ export type BalancerSwapsQuery = {
         tokenAmountOut: string;
         timestamp: number;
         tx: string;
-        valueUSD: string;
         block?: string | null;
         poolId: {
             __typename?: 'Pool';
@@ -5804,7 +5749,6 @@ export type BalancerSwapFragment = {
     tokenAmountOut: string;
     timestamp: number;
     tx: string;
-    valueUSD: string;
     block?: string | null;
     poolId: {
         __typename?: 'Pool';
@@ -5826,7 +5770,6 @@ export type BalancerGetPoolsWithActiveUpdatesQueryVariables = Exact<{
 export type BalancerGetPoolsWithActiveUpdatesQuery = {
     __typename?: 'Query';
     ampUpdates: Array<{ __typename?: 'AmpUpdate'; poolId: { __typename?: 'Pool'; id: string } }>;
-    gradualWeightUpdates: Array<{ __typename?: 'GradualWeightUpdate'; poolId: { __typename?: 'Pool'; id: string } }>;
 };
 
 export type BalancerGetMetaQueryVariables = Exact<{ [key: string]: never }>;
@@ -5916,10 +5859,6 @@ export const BalancerPoolFragmentDoc = gql`
         symbol
         name
         swapFee
-        totalWeight
-        totalSwapVolume
-        totalSwapFee
-        totalLiquidity
         totalShares
         swapsCount
         holdersCount
@@ -5968,22 +5907,6 @@ export const BalancerPoolFragmentDoc = gql`
     }
     ${BalancerPoolTokenFragmentDoc}
 `;
-export const BalancerPoolSnapshotFragmentDoc = gql`
-    fragment BalancerPoolSnapshot on PoolSnapshot {
-        id
-        pool {
-            id
-        }
-        amounts
-        totalShares
-        swapVolume
-        swapFees
-        timestamp
-        liquidity
-        swapsCount
-        holdersCount
-    }
-`;
 export const BalancerJoinExitFragmentDoc = gql`
     fragment BalancerJoinExit on JoinExit {
         amounts
@@ -5997,7 +5920,6 @@ export const BalancerJoinExitFragmentDoc = gql`
             id
             tokensList
         }
-        valueUSD
     }
 `;
 export const BalancerSwapFragmentDoc = gql`
@@ -6026,7 +5948,6 @@ export const BalancerSwapFragmentDoc = gql`
         }
         timestamp
         tx
-        valueUSD
         block
     }
 `;
@@ -6095,28 +6016,6 @@ export const BalancerPoolDocument = gql`
     }
     ${BalancerPoolFragmentDoc}
 `;
-export const BalancerPoolSnapshotsDocument = gql`
-    query BalancerPoolSnapshots(
-        $skip: Int
-        $first: Int
-        $orderBy: PoolSnapshot_orderBy
-        $orderDirection: OrderDirection
-        $where: PoolSnapshot_filter
-        $block: Block_height
-    ) {
-        poolSnapshots(
-            skip: $skip
-            first: $first
-            orderBy: $orderBy
-            orderDirection: $orderDirection
-            where: $where
-            block: $block
-        ) {
-            ...BalancerPoolSnapshot
-        }
-    }
-    ${BalancerPoolSnapshotFragmentDoc}
-`;
 export const BalancerJoinExitsDocument = gql`
     query BalancerJoinExits(
         $skip: Int
@@ -6164,11 +6063,6 @@ export const BalancerSwapsDocument = gql`
 export const BalancerGetPoolsWithActiveUpdatesDocument = gql`
     query BalancerGetPoolsWithActiveUpdates($timestamp: BigInt!) {
         ampUpdates(where: { endTimestamp_gte: $timestamp }) {
-            poolId {
-                id
-            }
-        }
-        gradualWeightUpdates(where: { endTimestamp_gte: $timestamp }) {
             poolId {
                 id
             }
@@ -6258,20 +6152,6 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
                         ...wrappedRequestHeaders,
                     }),
                 'BalancerPool',
-                'query',
-            );
-        },
-        BalancerPoolSnapshots(
-            variables?: BalancerPoolSnapshotsQueryVariables,
-            requestHeaders?: Dom.RequestInit['headers'],
-        ): Promise<BalancerPoolSnapshotsQuery> {
-            return withWrapper(
-                (wrappedRequestHeaders) =>
-                    client.request<BalancerPoolSnapshotsQuery>(BalancerPoolSnapshotsDocument, variables, {
-                        ...requestHeaders,
-                        ...wrappedRequestHeaders,
-                    }),
-                'BalancerPoolSnapshots',
                 'query',
             );
         },

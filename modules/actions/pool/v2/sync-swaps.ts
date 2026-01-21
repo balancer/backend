@@ -1,4 +1,4 @@
-import { Chain } from '@prisma/client';
+import { Chain, PrismaPoolToken } from '@prisma/client';
 import { prisma } from '../../../../prisma/prisma-client';
 import { V2SubgraphClient } from '../../../subgraphs/balancer-subgraph';
 import _ from 'lodash';
@@ -29,9 +29,10 @@ export async function syncSwaps(
         },
         select: {
             id: true,
-            typeData: true, // contains the quote token address
+            typeData: true, // contains the quote token address'
+            tokens: true,
         },
-    })) as { id: string; typeData: { quoteToken: string } }[];
+    })) as { id: string; typeData: { quoteToken: string }; tokens: PrismaPoolToken[] }[];
 
     // Get events
     console.time('BalancerSwaps');
@@ -39,14 +40,14 @@ export async function syncSwaps(
     console.timeEnd('BalancerSwaps');
 
     console.time('swapV2Transformer');
-    const dbSwaps = swaps.map((swap) => swapV2Transformer(swap, chain, fxPools));
+    const dbSwaps = swaps.map((swap) => swapV2Transformer(swap, chain));
     console.timeEnd('swapV2Transformer');
 
     // TODO: parse batchSwaps, if needed
 
     // Enrich with USD values
     console.time('swapsUsd');
-    const dbEntries = await swapsUsd(dbSwaps, chain);
+    const dbEntries = await swapsUsd(dbSwaps, chain, fxPools);
     console.timeEnd('swapsUsd');
 
     console.time('prismaPoolEvent.createMany');
@@ -76,17 +77,18 @@ export async function reloadSwapsForPool(
         select: {
             id: true,
             typeData: true, // contains the quote token address
+            tokens: true,
         },
-    })) as { id: string; typeData: { quoteToken: string } }[];
+    })) as { id: string; typeData: { quoteToken: string }; tokens: PrismaPoolToken[] }[];
 
     // Get events
     const swaps = await subgraphClient.getAllSwapsForPool(poolId);
 
-    const dbSwaps = swaps.map((swap) => swapV2Transformer(swap, chain, fxPools));
+    const dbSwaps = swaps.map((swap) => swapV2Transformer(swap, chain));
 
     // Enrich with USD values
     console.time('swapsUsd');
-    const dbEntries = await swapsUsd(dbSwaps, chain);
+    const dbEntries = await swapsUsd(dbSwaps, chain, fxPools);
     console.timeEnd('swapsUsd');
 
     await eventRepo.upsertEvents(dbEntries);
