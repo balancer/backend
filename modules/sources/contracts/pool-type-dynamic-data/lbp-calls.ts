@@ -64,7 +64,7 @@ export const lbpCalls = (poolAddress: string, vaultAddress: string): ViemMultica
         abi,
         functionName: 'getLBPoolDynamicData',
         parser: (result: DynamicData, results: any, index: number) => {
-            const immutableData = results[index - 2].result as ImmutableData;
+            const immutableData = results[index - 3].result as ImmutableData;
             const tokens = immutableData.tokens;
 
             const poolToken = tokens.map((token, index) => ({
@@ -115,7 +115,9 @@ export const lbpCalls = (poolAddress: string, vaultAddress: string): ViemMultica
 
             const decimals = decodeDecimalDiffs(BigInt(config.tokenDecimalDiffs), poolTokenInfo[0].length ?? 0);
 
-            const virtualReserveTokenBalanceRaw = results[index - 4].result[0] as bigint;
+            const virtualReserveTokenBalanceRaw = results[index - 4].result
+                ? (results[index - 4].result[0] as bigint)
+                : 0n;
             const reserveTokenAddress = results[index - 3].result as `0x${string}`;
 
             // adjust balance for the reserve token by adding the virtual balance to the pool balance
