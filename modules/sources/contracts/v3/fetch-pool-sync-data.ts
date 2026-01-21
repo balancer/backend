@@ -49,7 +49,7 @@ export const fetchPoolSyncData = async (
     let calls: ViemMulticallCall[] = [];
     for (const pool of pools) {
         const poolCalls = poolDataCalls(pool.id, vault, blockNumber);
-        const typeCalls = poolTypeCalls(pool);
+        const typeCalls = poolTypeCalls(pool, vault);
         const hookCalls = hookDataCalls(pool);
         calls = [...calls, ...poolCalls, ...typeCalls, ...hookCalls];
     }

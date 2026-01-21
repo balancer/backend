@@ -15,7 +15,7 @@ export default <NetworkData>{
         startDate: '2025-10-30',
         balancer: ``,
         balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmX8LawQrPRVywFnjwZG57MomECJRZDw4nNBvwdEHJ3dS3`,
-        balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmQp8YimZAcJTYTv8EASHC4b83U773pWnU9vDxWheDMM78`,
+        balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmU3f263SS7G9vwni529eygiuAN2yWndZvRgnv3r4ZMfRJ`,
         gauge: ``,
     },
     hooks: {

@@ -3,6 +3,7 @@ import { ViemClient } from '../../types';
 import VaultV3Abi from '../abis/VaultV3';
 import { formatEther, formatUnits } from 'viem';
 import { multicallViem } from '../../../web3/multicaller-viem';
+import { decodeDecimalDiffs } from './parse-helper';
 
 // TODO: Find out if we need to do that,
 // or can somehow get the correct type infered automatically from the viem's result set?
@@ -120,17 +121,3 @@ export async function fetchPoolData(
 
     return results;
 }
-
-const DECIMAL_DIFF_BITS = 5;
-
-const decodeDecimalDiffs = (diff: bigint, numTokens: number): number[] => {
-    const result: number[] = [];
-    const mask = (1n << BigInt(DECIMAL_DIFF_BITS)) - 1n;
-
-    for (let i = 0; i < numTokens; i++) {
-        const shift = BigInt(i * DECIMAL_DIFF_BITS);
-        result[i] = Number((diff >> shift) & mask);
-    }
-
-    return result.map((d) => 18 - d);
-};
