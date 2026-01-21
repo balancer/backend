@@ -47,8 +47,9 @@ export default <NetworkData>{
     },
     sts: {
         address: '0xe5da20f15420ad15de0fa650600afc998bbe3955',
-        baseAprUrl: 'https://apr.soniclabs.com/current',
         validatorFee: 0.15,
+        sfcAddress: '0xfc00face00000000000000000000000000000000',
+        constantsManagerAddress: '0xc7262d6cd7d748df8577d29f1e03059ff62b62cc',
     },
     loops: {
         address: '0xc76995054ce51dfbbc954840d699b2f33d2538ee',
