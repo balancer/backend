@@ -1170,6 +1170,7 @@ export type GqlPoolLiquidityBootstrappingV3 = GqlPoolBase & {
     /** @deprecated Removed without replacement */
     investConfig: GqlPoolInvestConfig;
     isProjectTokenSwapInBlocked: Scalars['Boolean'];
+    isSeedless: Scalars['Boolean'];
     lbpName?: Maybe<Scalars['String']>;
     lbpOwner: Scalars['String'];
     liquidityManagement?: Maybe<LiquidityManagement>;
@@ -2801,6 +2802,7 @@ export type LiquidityBootstrappingPoolV3Params = {
     endTime: Scalars['Int'];
     farcaster?: Maybe<Scalars['String']>;
     isProjectTokenSwapInBlocked: Scalars['Boolean'];
+    isSeedless: Scalars['Boolean'];
     lbpName?: Maybe<Scalars['String']>;
     lbpOwner: Scalars['String'];
     projectToken: Scalars['String'];

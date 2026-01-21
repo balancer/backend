@@ -447,6 +447,8 @@ export type LbpParams = {
     reserveTokenEndWeight: Scalars['BigInt'];
     /** Initial weight of the reserve token */
     reserveTokenStartWeight: Scalars['BigInt'];
+    /** The virtual token balance for the reserve token, indicating a seedless LBP if >0 */
+    reserveTokenVirtualBalance: Scalars['BigInt'];
     /** Start time of the LBP */
     startTime: Scalars['BigInt'];
 };
@@ -531,6 +533,14 @@ export type LbpParams_Filter = {
     reserveTokenStartWeight_lte?: InputMaybe<Scalars['BigInt']>;
     reserveTokenStartWeight_not?: InputMaybe<Scalars['BigInt']>;
     reserveTokenStartWeight_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    reserveTokenVirtualBalance?: InputMaybe<Scalars['BigInt']>;
+    reserveTokenVirtualBalance_gt?: InputMaybe<Scalars['BigInt']>;
+    reserveTokenVirtualBalance_gte?: InputMaybe<Scalars['BigInt']>;
+    reserveTokenVirtualBalance_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    reserveTokenVirtualBalance_lt?: InputMaybe<Scalars['BigInt']>;
+    reserveTokenVirtualBalance_lte?: InputMaybe<Scalars['BigInt']>;
+    reserveTokenVirtualBalance_not?: InputMaybe<Scalars['BigInt']>;
+    reserveTokenVirtualBalance_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
     reserveToken_contains?: InputMaybe<Scalars['Bytes']>;
     reserveToken_gt?: InputMaybe<Scalars['Bytes']>;
     reserveToken_gte?: InputMaybe<Scalars['Bytes']>;
@@ -561,6 +571,7 @@ export enum LbpParams_OrderBy {
     ReserveToken = 'reserveToken',
     ReserveTokenEndWeight = 'reserveTokenEndWeight',
     ReserveTokenStartWeight = 'reserveTokenStartWeight',
+    ReserveTokenVirtualBalance = 'reserveTokenVirtualBalance',
     StartTime = 'startTime',
 }
 
@@ -895,6 +906,7 @@ export enum Pool_OrderBy {
     LbpParamsReserveToken = 'lbpParams__reserveToken',
     LbpParamsReserveTokenEndWeight = 'lbpParams__reserveTokenEndWeight',
     LbpParamsReserveTokenStartWeight = 'lbpParams__reserveTokenStartWeight',
+    LbpParamsReserveTokenVirtualBalance = 'lbpParams__reserveTokenVirtualBalance',
     LbpParamsStartTime = 'lbpParams__startTime',
     QuantAmmWeightedParams = 'quantAMMWeightedParams',
     QuantAmmWeightedParamsAbsoluteWeightGuardRail = 'quantAMMWeightedParams__absoluteWeightGuardRail',
@@ -1896,6 +1908,7 @@ export type TypePoolFragment = {
         projectToken: string;
         projectTokenStartWeight: string;
         projectTokenEndWeight: string;
+        reserveTokenVirtualBalance: string;
     } | null;
     reClammParams?: {
         __typename?: 'ReClammParams';
@@ -1982,6 +1995,7 @@ export type PoolsQuery = {
             projectToken: string;
             projectTokenStartWeight: string;
             projectTokenEndWeight: string;
+            reserveTokenVirtualBalance: string;
         } | null;
         reClammParams?: {
             __typename?: 'ReClammParams';
@@ -2078,6 +2092,7 @@ export const TypePoolFragmentDoc = gql`
             projectToken
             projectTokenStartWeight
             projectTokenEndWeight
+            reserveTokenVirtualBalance
         }
         reClammParams {
             lastTimestamp

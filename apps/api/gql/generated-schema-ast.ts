@@ -1654,6 +1654,7 @@ export const schema = gql`
         id: ID!
         investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
         isProjectTokenSwapInBlocked: Boolean!
+        isSeedless: Boolean!
         lbpName: String
         lbpOwner: String!
         liquidityManagement: LiquidityManagement
@@ -4083,6 +4084,7 @@ export const schema = gql`
         endTime: Int!
         farcaster: String
         isProjectTokenSwapInBlocked: Boolean!
+        isSeedless: Boolean!
         lbpName: String
         lbpOwner: String!
         projectToken: String!

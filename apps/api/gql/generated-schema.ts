@@ -1164,6 +1164,7 @@ export interface GqlPoolLiquidityBootstrappingV3 extends GqlPoolBase {
     /** @deprecated Removed without replacement */
     investConfig: GqlPoolInvestConfig;
     isProjectTokenSwapInBlocked: Scalars['Boolean'];
+    isSeedless: Scalars['Boolean'];
     lbpName?: Maybe<Scalars['String']>;
     lbpOwner: Scalars['String'];
     liquidityManagement?: Maybe<LiquidityManagement>;
@@ -2755,6 +2756,7 @@ export interface LiquidityBootstrappingPoolV3Params {
     endTime: Scalars['Int'];
     farcaster?: Maybe<Scalars['String']>;
     isProjectTokenSwapInBlocked: Scalars['Boolean'];
+    isSeedless: Scalars['Boolean'];
     lbpName?: Maybe<Scalars['String']>;
     lbpOwner: Scalars['String'];
     projectToken: Scalars['String'];
@@ -4569,6 +4571,7 @@ export type GqlPoolLiquidityBootstrappingV3Resolvers<
     id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
     investConfig?: Resolver<ResolversTypes['GqlPoolInvestConfig'], ParentType, ContextType>;
     isProjectTokenSwapInBlocked?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+    isSeedless?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
     lbpName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     lbpOwner?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     liquidityManagement?: Resolver<Maybe<ResolversTypes['LiquidityManagement']>, ParentType, ContextType>;
@@ -5859,6 +5862,7 @@ export type LiquidityBootstrappingPoolV3ParamsResolvers<
     endTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     farcaster?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     isProjectTokenSwapInBlocked?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+    isSeedless?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
     lbpName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     lbpOwner?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     projectToken?: Resolver<ResolversTypes['String'], ParentType, ContextType>;

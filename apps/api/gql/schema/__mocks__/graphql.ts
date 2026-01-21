@@ -1223,6 +1223,7 @@ export const aGqlPoolLiquidityBootstrappingV3 = (
             overrides && overrides.hasOwnProperty('isProjectTokenSwapInBlocked')
                 ? overrides.isProjectTokenSwapInBlocked!
                 : false,
+        isSeedless: overrides && overrides.hasOwnProperty('isSeedless') ? overrides.isSeedless! : false,
         lbpName: overrides && overrides.hasOwnProperty('lbpName') ? overrides.lbpName! : 'conscendo',
         lbpOwner: overrides && overrides.hasOwnProperty('lbpOwner') ? overrides.lbpOwner! : 'coma',
         liquidityManagement:
@@ -2716,6 +2717,7 @@ export const aLiquidityBootstrappingPoolV3Params = (
             overrides && overrides.hasOwnProperty('isProjectTokenSwapInBlocked')
                 ? overrides.isProjectTokenSwapInBlocked!
                 : false,
+        isSeedless: overrides && overrides.hasOwnProperty('isSeedless') ? overrides.isSeedless! : false,
         lbpName: overrides && overrides.hasOwnProperty('lbpName') ? overrides.lbpName! : 'consequatur',
         lbpOwner: overrides && overrides.hasOwnProperty('lbpOwner') ? overrides.lbpOwner! : 'culpa',
         projectToken: overrides && overrides.hasOwnProperty('projectToken') ? overrides.projectToken! : 'paulatim',
