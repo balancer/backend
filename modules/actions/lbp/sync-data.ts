@@ -113,9 +113,6 @@ export const syncData = async (
             data: {
                 typeData: {
                     ...(typeDataMap[poolId] as any),
-                    isSeedless: onchainData[poolId].virtualReserveTokenBalanceRaw
-                        ? formatEther(BigInt(onchainData[poolId].virtualReserveTokenBalanceRaw)) !== '0'
-                        : false,
                     topTrades: trades[poolId],
                 },
             },
