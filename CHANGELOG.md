@@ -1,5 +1,12 @@
 # backend
 
+## 1.58.9
+
+### Patch Changes
+
+-   10673db: use onchain data for stS apr
+-   0ffc272: support seedless LBP
+
 ## 1.58.8
 
 ### Patch Changes
