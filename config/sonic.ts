@@ -14,8 +14,8 @@ export default <NetworkData>{
     subgraphs: {
         startDate: '2024-12-12',
         balancer: `https://api.subgraph.ormilabs.com/api/public/717cf785-de57-4761-94dd-9ac51b019902/subgraphs/v2-smol-sonic/latest/gn`,
-        balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmUgRWkb5JUocGkVidpKtZFMHjexJzkBiSbjufURsXwn9X`,
-        balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/Qmf61sxkSwc1x15jfonJeoYzHWWR8WJFqhWzgtVPNtar6H`,
+        balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmUgRWkb5JUocGkVidpKtZFMHjexJzkBiSbjufURsXwn9X`,
+        balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmX6bKCTEHRcuGvuoJJNe4R7BYhbzeGED2G6GbDiHaHLTh`,
         gauge: `https://api.subgraph.ormilabs.com/api/public/717cf785-de57-4761-94dd-9ac51b019902/subgraphs/balancer-gauges-sonic/latest/gn`,
         reliquary: `https://api.subgraph.ormilabs.com/api/public/717cf785-de57-4761-94dd-9ac51b019902/subgraphs/mabeets-sonic/latest/gn`,
         sts: `https://api.subgraph.ormilabs.com/api/public/717cf785-de57-4761-94dd-9ac51b019902/subgraphs/staked-sonic/latest/gn`,
@@ -47,8 +47,9 @@ export default <NetworkData>{
     },
     sts: {
         address: '0xe5da20f15420ad15de0fa650600afc998bbe3955',
-        baseAprUrl: 'https://apr.soniclabs.com/current',
         validatorFee: 0.15,
+        sfcAddress: '0xfc00face00000000000000000000000000000000',
+        constantsManagerAddress: '0xc7262d6cd7d748df8577d29f1e03059ff62b62cc',
     },
     loops: {
         address: '0xc76995054ce51dfbbc954840d699b2f33d2538ee',

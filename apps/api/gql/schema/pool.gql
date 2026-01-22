@@ -228,6 +228,7 @@ type LiquidityBootstrappingPoolV3Params {
     projectTokenEndWeight: Float!
     projectTokenIndex: Int!
     topTrades: [GqlLBPTopTrade!]
+    isSeedless: Boolean!
 }
 
 """
@@ -953,6 +954,7 @@ type GqlPoolLiquidityBootstrappingV3 implements GqlPoolBase {
     projectTokenStartWeight: Float!
     projectTokenEndWeight: Float!
     projectTokenIndex: Int!
+    isSeedless: Boolean!
     topTrades: [GqlLBPTopTrade!]
 
     """

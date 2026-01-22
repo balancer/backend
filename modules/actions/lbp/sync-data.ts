@@ -4,7 +4,7 @@ import { prisma } from '../../../prisma/prisma-client';
 import { multicallViem } from '../../web3/multicaller-viem';
 import { ViemClient } from '../../sources/types';
 import { eventsRepository } from '../../repositories/events/events-repository';
-import { V3VaultSubgraphClient } from '../../sources/subgraphs';
+import { formatEther } from 'viem';
 
 /**
  * Fetches new weights and updates pool tokens
@@ -12,7 +12,7 @@ import { V3VaultSubgraphClient } from '../../sources/subgraphs';
 export const syncData = async (
     chain: Chain,
     client: ViemClient,
-    subgraphClient: V3VaultSubgraphClient,
+    vaultAddress: string,
     eventRepo = eventsRepository,
 ): Promise<void> => {
     const [pools, tokens, dynamicDataMap] = await Promise.all([
@@ -52,7 +52,7 @@ export const syncData = async (
             .then((records) => Object.fromEntries(records.map((dd) => [dd.id, dd]))),
     ]);
 
-    const calls = pools.flatMap(({ id }) => lbpCalls(id));
+    const calls = pools.flatMap(({ id }) => lbpCalls(id, vaultAddress));
     const onchainData = (await multicallViem(client, calls)) as Record<string, LBPCallsOutput>;
 
     const updates = Object.keys(onchainData).flatMap((id) => onchainData[id].poolToken);
@@ -113,6 +113,9 @@ export const syncData = async (
             data: {
                 typeData: {
                     ...(typeDataMap[poolId] as any),
+                    isSeedless: onchainData[poolId].virtualReserveTokenBalanceRaw
+                        ? formatEther(BigInt(onchainData[poolId].virtualReserveTokenBalanceRaw)) !== '0'
+                        : false,
                     topTrades: trades[poolId],
                 },
             },

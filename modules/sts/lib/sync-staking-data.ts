@@ -16,12 +16,18 @@ interface SonicApiResponse {
 
 export async function syncStakingData(
     stakingContractAddress: Address,
+    sfcContractAddress: Address,
+    constantsContractAddress: Address,
     viemClient: ViemClient,
     subgraphService: StsSubgraphService,
-    baseAprUrl: string,
     validatorFee: number,
 ) {
-    const stakingDataOnchain = await fetchSonicStakingData(stakingContractAddress, viemClient);
+    const stakingDataOnchain = await fetchSonicStakingData(
+        stakingContractAddress,
+        constantsContractAddress,
+        sfcContractAddress,
+        viemClient,
+    );
     const validators = await subgraphService.getAllValidators();
     const latestStakingData = await subgraphService.getStakingData();
     const block24HrsAgo = await blockNumbers().getBlock('SONIC', moment().unix() - 24 * 60 * 60);
@@ -46,15 +52,9 @@ export async function syncStakingData(
     protocolFee24hrs = protocolFee24hrs * (sPrice?.price || 0);
     rewardsClaimed24hrs = rewardsClaimed24hrs * (sPrice?.price || 0);
 
-    const response = await fetch(baseAprUrl);
-    const data = (await response.json()) as SonicApiResponse;
-    if (!data.success) {
-        throw new Error('Failed to fetch sonic staking APR');
-    }
-
     const stakingApr =
         (parseFloat(stakingDataOnchain.totalDelegated) / parseFloat(stakingDataOnchain.totalAssets)) *
-        ((data.data.apr / 100) * (1 - validatorFee)) *
+        ((parseFloat(stakingDataOnchain.apr) / 100) * (1 - validatorFee)) *
         (1 - parseFloat(stakingDataOnchain.protocolFee));
 
     await prisma.prismaStakedSonicData.upsert({
