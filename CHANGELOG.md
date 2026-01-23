@@ -1,5 +1,12 @@
 # backend
 
+## 1.58.10
+
+### Patch Changes
+
+-   5037bcb: update new subgraph version
+-   b87980b: remove angles apr
+
 ## 1.58.9
 
 ### Patch Changes

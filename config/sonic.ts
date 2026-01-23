@@ -185,11 +185,11 @@ export default <NetworkData>{
                     scale: 100,
                     extractors: [{ type: 'path', token: '0x9f0df7799f6fdad409300080cff680f5a23df4b1', path: '$.apr' }],
                 },
-                {
-                    url: 'https://be.angles.fi/api/v2/angles/apr/trailing/7',
-                    scale: 100,
-                    extractors: [{ type: 'path', token: '0xfa85fe5a8f5560e9039c04f2b0a90de1415abd70', path: '$.apy' }],
-                },
+                // {
+                //     url: 'https://be.angles.fi/api/v2/angles/apr/trailing/7',
+                //     scale: 100,
+                //     extractors: [{ type: 'path', token: '0xfa85fe5a8f5560e9039c04f2b0a90de1415abd70', path: '$.apy' }],
+                // },
                 // {
                 //     url: 'https://locks-usd-api-sonic-earn.trevee.xyz/wrapper/apy',
                 //     extractors: [{ type: 'path', token: '0x9fb76f7ce5fceaa2c42887ff441d46095e494206', path: '$.apy' }],
