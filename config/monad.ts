@@ -1,4 +1,3 @@
-import { AaveV3Plasma } from '@bgd-labs/aave-address-book';
 import { env } from '../apps/env';
 import { NetworkData } from '../modules/network/network-config-types';
 
