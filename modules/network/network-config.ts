@@ -16,6 +16,7 @@ import { sonicNetworkConfig } from './sonic';
 import { hyperevmNetworkConfig } from './hyperevm';
 import { plasmaNetworkConfig } from './plasma';
 import { xlayerNetworkConfig } from './xlayer';
+import { monadNetworkConfig } from './monad';
 
 export const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
     '250': fantomNetworkConfig,
@@ -34,6 +35,7 @@ export const AllNetworkConfigs: { [chainId: string]: NetworkConfig } = {
     '999': hyperevmNetworkConfig,
     '9745': plasmaNetworkConfig,
     '196': xlayerNetworkConfig,
+    '143': monadNetworkConfig,
 };
 
 export const AllNetworkConfigsKeyedOnChain: { [chain in Chain]: NetworkConfig } = {
@@ -53,6 +55,7 @@ export const AllNetworkConfigsKeyedOnChain: { [chain in Chain]: NetworkConfig } 
     HYPEREVM: hyperevmNetworkConfig,
     PLASMA: plasmaNetworkConfig,
     XLAYER: xlayerNetworkConfig,
+    MONAD: monadNetworkConfig,
 };
 
 export const BalancerChainIds = [
@@ -69,5 +72,6 @@ export const BalancerChainIds = [
     '999',
     '9745',
     '196',
+    '143',
 ];
 export const BeethovenChainIds = ['250', '10', '146'];
