@@ -18,4 +18,5 @@ enum GqlChain {
     MODE
     SONIC
     XLAYER
+    MONAD
 }
