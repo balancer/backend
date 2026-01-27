@@ -17,6 +17,7 @@ export const chainIdToChain: { [id: string]: Chain } = {
     '999': Chain.HYPEREVM,
     '9745': Chain.PLASMA,
     '196': Chain.XLAYER,
+    '143': Chain.MONAD,
     ...(env.DEPLOYMENT_ENV !== 'production' ? { '11155111': Chain.SEPOLIA } : {}),
 };
 
@@ -36,5 +37,6 @@ export const chainToChainId: { [chain: string]: string } = {
     HYPEREVM: '999',
     PLASMA: '9745',
     XLAYER: '196',
+    MONAD: '143',
     ...(env.DEPLOYMENT_ENV !== 'production' ? { SEPOLIA: '11155111' } : {}),
 };

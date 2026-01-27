@@ -1,4 +1,3 @@
-import { Chain } from '@prisma/client';
 import { prisma } from '../../../../prisma/prisma-client';
 import { GraphQLError } from 'graphql';
 import { CreateLbpInput, Resolvers } from '../generated-schema';

@@ -104,6 +104,7 @@ export type GqlChain =
     | 'HYPEREVM'
     | 'MAINNET'
     | 'MODE'
+    | 'MONAD'
     | 'OPTIMISM'
     | 'PLASMA'
     | 'POLYGON'
