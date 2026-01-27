@@ -18,7 +18,7 @@ export default <NetworkData>{
         gauge: ``,
     },
     hooks: {
-        ['0xa523f47a933d5020b23629ddf689695aa94612dc']: 'STABLE_SURGE',
+        ['0x6817149cb753bf529565b4d023d7507ed2ff4bc0']: 'STABLE_SURGE',
     },
     eth: {
         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
