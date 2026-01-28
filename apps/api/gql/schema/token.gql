@@ -2,11 +2,11 @@ extend type Query {
     """
     Returns all allowed tokens for a given chain or chains
     """
-    tokenGetTokens(chains: [GqlChain!], where: GqlTokenFilter): [GqlToken!]!
+    tokenGetTokens(chains: [GqlChain!]!, where: GqlTokenFilter): [GqlToken!]!
     """
     Returns all current prices for allowed tokens for a given chain or chains
     """
-    tokenGetCurrentPrices(chains: [GqlChain!]): [GqlTokenPrice!]!
+    tokenGetCurrentPrices(chains: [GqlChain!]!): [GqlTokenPrice!]!
     """
     Returns the historical prices for a given set of tokens for a given chain and range
     """
@@ -18,11 +18,11 @@ extend type Query {
     """
     Returns dynamic data of a set of tokens such as price, market cap, etc.
     """
-    tokenGetTokensDynamicData(addresses: [String!]!, chain: GqlChain): [GqlTokenDynamicData!]!
+    tokenGetTokensDynamicData(addresses: [String!]!, chain: GqlChain!): [GqlTokenDynamicData!]!
     """
     Returns dynamic data of a token such as price, market cap, etc.
     """
-    tokenGetTokenDynamicData(address: String!, chain: GqlChain): GqlTokenDynamicData
+    tokenGetTokenDynamicData(address: String!, chain: GqlChain!): GqlTokenDynamicData
     """
     Returns the price of a token priced in another token for a given range.
     """
@@ -30,45 +30,16 @@ extend type Query {
         tokenIn: String!
         tokenOut: String!
         range: GqlTokenChartDataRange!
-        chain: GqlChain
+        chain: GqlChain!
     ): [GqlTokenPriceChartDataItem!]!
-    """
-    DEPRECATED: Returns pricing data for a given token for a given range
-    """
-    tokenGetPriceChartData(
-        address: String!
-        range: GqlTokenChartDataRange!
-        chain: GqlChain
-    ): [GqlTokenPriceChartDataItem!]! @deprecated(reason: "Use tokenGetHistoricalPrices instead")
-    """
-    Returns the candlestick chart data for a token for a given range.
-    """
-    tokenGetCandlestickChartData(
-        address: String!
-        range: GqlTokenChartDataRange!
-        chain: GqlChain
-    ): [GqlTokenCandlestickChartDataItem!]! @deprecated(reason: "Use tokenGetHistoricalPrices instead")
-    """
-    Returns meta data for a given token such as description, website, etc.
-    """
-    tokenGetTokenData(address: String!, chain: GqlChain): GqlTokenData @deprecated(reason: "Use tokenGetTokens instead")
-    """
-    Returns meta data for a given set of tokens such as description, website, etc.
-    """
-    tokenGetTokensData(addresses: [String!]!): [GqlTokenData!]! @deprecated(reason: "Use tokenGetTokens instead")
-    """
-    Returns the price of either BAL or BEETS depending on chain
-    """
-    tokenGetProtocolTokenPrice(chain: GqlChain): AmountHumanReadable!
-        @deprecated(reason: "Use tokenGetTokensDynamicData instead")
 }
 
 extend type Mutation {
     tokenReloadTokenPrices(chains: [GqlChain!]!): Boolean
     tokenSyncTokenDefinitions: String!
     tokenSyncLatestFxPrices(chain: GqlChain!): String!
-    tokenDeleteTokenType(tokenAddress: String!, type: GqlTokenType!): String!
-    tokenReloadAllTokenTypes: String!
+    tokenDeleteTokenType(tokenAddress: String!, type: GqlTokenType!, chain: GqlChain!): String!
+    tokenReloadAllTokenTypes(chain: GqlChain!): String!
     tokenReloadErc4626Tokens(chains: [GqlChain!]!): [GqlTokenMutationResult!]!
 }
 
@@ -352,29 +323,10 @@ enum GqlTokenChartDataRange {
     ALL
 }
 
-type GqlTokenCandlestickChartDataItem {
-    id: ID!
-    timestamp: Int!
-    open: AmountHumanReadable!
-    high: AmountHumanReadable!
-    low: AmountHumanReadable!
-    close: AmountHumanReadable!
-}
-
 type GqlTokenPriceChartDataItem {
     id: ID!
     timestamp: Int!
     price: AmountHumanReadable!
-}
-
-type GqlTokenData {
-    id: ID!
-    tokenAddress: String!
-    description: String
-    websiteUrl: String
-    discordUrl: String
-    telegramUrl: String
-    twitterUsername: String
 }
 
 enum GqlTokenType {

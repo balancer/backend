@@ -2,7 +2,6 @@ import { poolService } from '../../../../modules/pool/pool.service';
 import { PoolAggregatorLoader } from '../../../../modules/pool/lib/pool-aggregator-loader';
 import { GqlChain, Resolvers } from '../generated-schema';
 import { isAdminRoute } from '../../../../modules/auth/auth-context';
-import { headerChain } from '../../../../modules/context/header-chain';
 import {
     CowAmmController,
     EventsQueryController,
@@ -11,7 +10,6 @@ import {
     FXPoolsController,
     EventController,
 } from '../../../../modules/controllers';
-import { GraphQLError } from 'graphql';
 import { upsertLastSyncedBlock } from '../../../../modules/actions/last-synced-block';
 import { PrismaLastBlockSyncedCategory } from '@prisma/client';
 import graphqlFields from 'graphql-fields';
@@ -21,14 +19,6 @@ const balancerResolvers: Resolvers = {
     Query: {
         poolGetPool: async (parent, { id, chain, userAddress }, context, info) => {
             const fields = graphqlFields(info);
-            const currentChain = headerChain();
-            if (!chain && currentChain) {
-                chain = currentChain;
-            } else if (!chain) {
-                throw new GraphQLError('Provide "chain" param', {
-                    extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
-                });
-            }
             return poolService.getGqlPool(fields, id, chain, userAddress ? userAddress : undefined);
         },
         poolGetPools: async (parent, args, context) => {
@@ -58,14 +48,6 @@ const balancerResolvers: Resolvers = {
             return poolService.getFeaturedPools(chains);
         },
         poolGetSnapshots: async (parent, { id, chain, range }, context) => {
-            const currentChain = headerChain();
-            if (!chain && currentChain) {
-                chain = currentChain;
-            } else if (!chain) {
-                throw new GraphQLError('Provide "chain" param', {
-                    extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
-                });
-            }
             const snapshots = await poolService.getSnapshotsForPool(id, chain, range);
 
             return snapshots.map((snapshot) => ({
@@ -85,16 +67,8 @@ const balancerResolvers: Resolvers = {
         },
     },
     Mutation: {
-        poolSyncAllPoolsFromSubgraph: async (parent, {}, context) => {
+        poolSyncAllPoolsFromSubgraph: async (parent, { chain }, context) => {
             isAdminRoute(context);
-
-            const chain = headerChain();
-
-            if (!chain) {
-                throw new GraphQLError('Provide "chainId" header', {
-                    extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
-                });
-            }
 
             return PoolController().addPoolsV2(chain);
         },
@@ -105,17 +79,10 @@ const balancerResolvers: Resolvers = {
 
             return 'success';
         },
-        poolReloadStakingForAllPools: async (parent, args, context) => {
+        poolReloadStakingForAllPools: async (parent, { stakingTypes, chain }, context) => {
             isAdminRoute(context);
 
-            const currentChain = headerChain();
-            if (!currentChain) {
-                throw new GraphQLError('Provide "chainId" header', {
-                    extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
-                });
-            }
-
-            await poolService.reloadStakingForAllPools(args.stakingTypes, currentChain);
+            await poolService.reloadStakingForAllPools(stakingTypes, chain);
 
             return 'success';
         },

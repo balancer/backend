@@ -1,21 +1,11 @@
 extend type Query {
-    beetsGetFbeetsRatio: String!
-    userGetFbeetsBalance: GqlUserFbeetsBalance!
-
     beetsPoolGetReliquaryFarmSnapshots(
         id: String!
         range: GqlPoolSnapshotDataRange!
-        chain: GqlChain
+        chain: GqlChain!
     ): [GqlReliquaryFarmSnapshot!]!
 }
 
 extend type Mutation {
     beetsPoolLoadReliquarySnapshotsForAllFarms(chain: GqlChain!): String!
-}
-
-type GqlUserFbeetsBalance {
-    id: String!
-    totalBalance: AmountHumanReadable!
-    walletBalance: AmountHumanReadable!
-    stakedBalance: AmountHumanReadable!
 }

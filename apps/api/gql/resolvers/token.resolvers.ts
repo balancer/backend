@@ -2,37 +2,19 @@ import { GqlChain, GqlHistoricalTokenPrice, Resolvers } from '../generated-schem
 import _ from 'lodash';
 import { isAdminRoute } from '../../../../modules/auth/auth-context';
 import { tokenService } from '../../../../modules/token/token.service';
-import { headerChain } from '../../../../modules/context/header-chain';
 import { syncLatestFXPrices } from '../../../../modules/token/latest-fx-price';
 import moment from 'moment';
 import { TokenController } from '../../../../modules/controllers/token-controller';
 import config from '../../../../config';
-import { GraphQLError } from 'graphql';
 import { PricingService } from '../../../../modules/pricing';
 import { ContentController } from '../../../../modules/content/content-controller';
 
 const resolvers: Resolvers = {
     Query: {
         tokenGetTokens: async (parent, args, context) => {
-            const currentChain = headerChain();
-            if (!args.chains && currentChain) {
-                args.chains = [currentChain];
-            } else if (!args.chains) {
-                throw new GraphQLError('Provide "chains" param', {
-                    extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
-                });
-            }
             return tokenService.getTokenDefinitions(args);
         },
         tokenGetCurrentPrices: async (parent, { chains }, context) => {
-            const currentChain = headerChain();
-            if (!chains && currentChain) {
-                chains = [currentChain];
-            } else if (!chains) {
-                throw new GraphQLError('Provide "chains" param', {
-                    extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
-                });
-            }
             const prices = await tokenService.getCurrentTokenPrices(chains);
 
             return prices.map((price) => ({
@@ -64,14 +46,6 @@ const resolvers: Resolvers = {
             return result;
         },
         tokenGetTokenDynamicData: async (parent, { address, chain }, context) => {
-            const currentChain = headerChain();
-            if (!chain && currentChain) {
-                chain = currentChain;
-            } else if (!chain) {
-                throw new GraphQLError('Provide "chain" param', {
-                    extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
-                });
-            }
             const data = await tokenService.getTokenDynamicData(address, chain);
 
             return data
@@ -85,14 +59,6 @@ const resolvers: Resolvers = {
                 : null;
         },
         tokenGetTokensDynamicData: async (parent, { addresses, chain }, context) => {
-            const currentChain = headerChain();
-            if (!chain && currentChain) {
-                chain = currentChain;
-            } else if (!chain) {
-                throw new GraphQLError('Provide "chain" param', {
-                    extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
-                });
-            }
             const items = await tokenService.getTokensDynamicData(addresses, chain);
 
             return items.map((item) => ({
@@ -103,32 +69,7 @@ const resolvers: Resolvers = {
                 updatedAt: item.updatedAt.toUTCString(),
             }));
         },
-        tokenGetPriceChartData: async (parent, { address, range, chain }, context) => {
-            const currentChain = headerChain();
-            if (!chain && currentChain) {
-                chain = currentChain;
-            } else if (!chain) {
-                throw new GraphQLError('Provide "chain" param', {
-                    extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
-                });
-            }
-            const data = await tokenService.getTokenPriceForRange(address, range, chain);
-
-            return data.map((item) => ({
-                id: `${address}-${item.timestamp}`,
-                timestamp: item.timestamp,
-                price: `${item.price}`,
-            }));
-        },
         tokenGetRelativePriceChartData: async (parent, { tokenIn, tokenOut, range, chain }, context) => {
-            const currentChain = headerChain();
-            if (!chain && currentChain) {
-                chain = currentChain;
-            } else if (!chain) {
-                throw new GraphQLError('Provide "chain" param', {
-                    extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
-                });
-            }
             const data = await tokenService.getRelativeDataForRange(tokenIn, tokenOut, range, chain);
 
             return data.map((item) => ({
@@ -136,61 +77,6 @@ const resolvers: Resolvers = {
                 timestamp: item.timestamp,
                 price: `${item.price}`,
             }));
-        },
-        tokenGetCandlestickChartData: async (parent, { address, range, chain }, context) => {
-            const currentChain = headerChain();
-            if (!chain && currentChain) {
-                chain = currentChain;
-            } else if (!chain) {
-                throw new GraphQLError('Provide "chain" param', {
-                    extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
-                });
-            }
-            const data = await tokenService.getTokenPriceForRange(address, range, chain);
-
-            return data.map((item) => ({
-                id: `${address}-${item.timestamp}`,
-                timestamp: item.timestamp,
-                open: `${item.open}`,
-                high: `${item.high}`,
-                low: `${item.low}`,
-                close: `${item.close}`,
-            }));
-        },
-        tokenGetTokenData: async (parent, { address, chain }, context) => {
-            const currentChain = headerChain();
-            if (!chain && currentChain) {
-                chain = currentChain;
-            } else if (!chain) {
-                throw new GraphQLError('Provide "chain" param', {
-                    extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
-                });
-            }
-            const token = await tokenService.getToken(address, chain);
-            if (token) {
-                return {
-                    ...token,
-                    id: token.address,
-                    tokenAddress: token.address,
-                };
-            }
-            return null;
-        },
-        tokenGetTokensData: async (parent, { addresses }, context) => {
-            const chain = headerChain() || 'MAINNET';
-            const tokens = await tokenService.getTokens(chain, addresses);
-            return tokens.map((token) => ({ ...token, id: token.address, tokenAddress: token.address }));
-        },
-        tokenGetProtocolTokenPrice: async (parent, { chain }, context) => {
-            const currentChain = headerChain();
-            if (!chain && currentChain) {
-                chain = currentChain;
-            } else if (!chain) {
-                throw new GraphQLError('Provide "chain" param', {
-                    extensions: { code: 'GRAPHQL_VALIDATION_FAILED' },
-                });
-            }
-            return tokenService.getProtocolTokenPrice(chain);
         },
     },
     Mutation: {
@@ -221,15 +107,13 @@ const resolvers: Resolvers = {
         },
         tokenDeleteTokenType: async (parent, args, context) => {
             isAdminRoute(context);
-            const chain = headerChain() || 'MAINNET';
 
-            await tokenService.deleteTokenType(args, chain);
+            await tokenService.deleteTokenType(args, args.chain);
 
             return 'success';
         },
-        tokenReloadAllTokenTypes: async (parent, {}, context) => {
+        tokenReloadAllTokenTypes: async (parent, { chain }, context) => {
             isAdminRoute(context);
-            const chain = headerChain() || 'MAINNET';
 
             await ContentController().reloadAllTokenTypes(chain);
 

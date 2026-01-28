@@ -143,12 +143,6 @@ export class ProtocolService {
             where: { tokenAddress, chain: 'FANTOM' },
         });
 
-        if (config[chain].sftmx) {
-            const stakingData = await prisma.prismaSftmxStakingData.findUniqueOrThrow({
-                where: { id: config[chain].sftmx!.stakingContractAddress },
-            });
-            return parseFloat(stakingData.totalFtm) * (ftmPrice?.price || 0);
-        }
         return 0;
     }
 

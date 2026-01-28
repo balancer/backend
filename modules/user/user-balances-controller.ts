@@ -1,18 +1,15 @@
-import { Chain, PrismaPoolStaking, PrismaPoolStakingType } from '@prisma/client';
+import { Chain, PrismaPoolStakingType } from '@prisma/client';
 import config from '../../config';
 import { syncBptBalancesCowAmm } from './lib/bpt-balances/sync-bpt-balances-cow-amm';
-import { syncBptBalancesFbeets } from './lib/bpt-balances/sync-bpt-balances-fbeets';
 import { syncBptBalancesV2 } from './lib/bpt-balances/sync-bpt-balances-v2';
 import { AllNetworkConfigsKeyedOnChain } from '../network/network-config';
 import { syncBptBalancesV3 } from './lib/bpt-balances/sync-bpt-balances-v3';
-import { UserPoolBalance } from './user-types';
-import { getUserFbeetsBalance, getUserPoolBalances, getUserStaking } from './lib/user-balances';
 
 export function UserBalancesController() {
     return {
         async syncBalances(chain: Chain) {
             const {
-                subgraphs: { balancer, balancerV3, cowAmm, beetsBar },
+                subgraphs: { balancer, balancerV3, cowAmm },
             } = config[chain];
 
             // Run all syncs in parallel
@@ -20,7 +17,6 @@ export function UserBalancesController() {
                 syncBptBalancesV2(chain, balancer),
                 syncBptBalancesV3(chain, balancerV3),
                 syncBptBalancesCowAmm(chain, cowAmm),
-                syncBptBalancesFbeets(chain, beetsBar),
             ]);
 
             return true;
@@ -50,18 +46,6 @@ export function UserBalancesController() {
 
             const syncedBlocks = await syncBptBalancesV3(chain, balancerV3);
             return syncedBlocks;
-        },
-
-        async getUserPoolBalances(address: string, chains: Chain[]): Promise<UserPoolBalance[]> {
-            return getUserPoolBalances(address, chains);
-        },
-
-        async getUserFbeetsBalance(address: string): Promise<Omit<UserPoolBalance, 'poolId'>> {
-            return getUserFbeetsBalance(address);
-        },
-
-        async getUserStaking(address: string, chains: Chain[]): Promise<PrismaPoolStaking[]> {
-            return getUserStaking(address, chains);
         },
 
         async initStakedBalances(stakingTypes: PrismaPoolStakingType[], chain: Chain) {

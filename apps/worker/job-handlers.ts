@@ -4,7 +4,6 @@ import { tokenService } from '../../modules/token/token.service';
 import { PricingService } from '../../modules/pricing/pricing-service';
 import { poolService } from '../../modules/pool/pool.service';
 import { datastudioService } from '../../modules/datastudio/datastudio.service';
-import { initRequestScopedContext, setRequestScopedContextValue } from '../../modules/context/request-scoped-context';
 import { veBalService } from '../../modules/vebal/vebal.service';
 import { veBalVotingListService } from '../../modules/vebal/vebal-voting-list.service';
 import { cronsMetricPublisher } from '../../modules/metrics/metrics.client';
@@ -31,7 +30,6 @@ import { AprsController } from '../../modules/controllers/aprs-controller';
 import { LoopsService } from '../../modules/loops/service';
 import { ContentController } from '../../modules/content/content-controller';
 import { StakedSonicController } from '../../modules/sts/sts-controller';
-import { SftmxController } from '../../modules/sftmx/sftmx-controller';
 import { UserBalancesController } from '../../modules/user/user-balances-controller';
 
 const runningJobs: Set<string> = new Set();
@@ -96,9 +94,6 @@ export function configureWorkerRoutes(app: Express) {
             scope.setTransactionName(sentryTransactionName);
             scope.setTag('job', job.name);
             scope.setTag('chain', job.chain);
-
-            initRequestScopedContext();
-            setRequestScopedContextValue('chainId', job.chain);
 
             // Start profiling span for the job
             Sentry.startSpan({ op: 'job', name: sentryTransactionName }, () => {
@@ -254,24 +249,6 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
                 name,
                 chainId,
                 () => new LoopsService().fetchAndStoreLoopsData(chain),
-                res,
-                next,
-            );
-            break;
-        case 'sync-sftmx-staking-data':
-            await runIfNotAlreadyRunning(
-                name,
-                chainId,
-                () => SftmxController().syncSftmxStakingData(chainId),
-                res,
-                next,
-            );
-            break;
-        case 'sync-sftmx-withdrawal-requests':
-            await runIfNotAlreadyRunning(
-                name,
-                chainId,
-                () => SftmxController().syncSftmxWithdrawalrequests(chainId),
                 res,
                 next,
             );

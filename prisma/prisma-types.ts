@@ -180,20 +180,6 @@ export type PrismaNestedPoolWithSingleLayerNesting = Prisma.PrismaPoolGetPayload
     typeof nestedPoolWithSingleLayerNesting
 >;
 
-const nestedPoolWithNoNesting = Prisma.validator<Prisma.PrismaPoolDefaultArgs>()({
-    include: {
-        dynamicData: true,
-        tokens: {
-            orderBy: { index: 'asc' },
-            include: {
-                token: true,
-            },
-        },
-    },
-});
-
-export type PrismaNestedPoolWithNoNesting = Prisma.PrismaPoolGetPayload<typeof nestedPoolWithNoNesting>;
-
 const prismaPoolTokenWithExpandedNesting = Prisma.validator<Prisma.PrismaPool$tokensArgs>()({
     include: {
         token: {
@@ -232,27 +218,6 @@ const prismaPoolTokenWithExpandedNesting = Prisma.validator<Prisma.PrismaPool$to
 
 export type PrismaPoolTokenWithExpandedNesting = Prisma.PrismaPoolTokenGetPayload<
     typeof prismaPoolTokenWithExpandedNesting
->;
-
-const prismaPoolTokenWithSingleLayerNesting = Prisma.validator<Prisma.PrismaPool$tokensArgs>()({
-    include: {
-        token: true,
-        nestedPool: {
-            include: {
-                dynamicData: true,
-                tokens: {
-                    orderBy: { index: 'asc' },
-                    include: {
-                        token: true,
-                    },
-                },
-            },
-        },
-    },
-});
-
-export type PrismaPoolTokenWithSingleLayerNesting = Prisma.PrismaPoolTokenGetPayload<
-    typeof prismaPoolTokenWithSingleLayerNesting
 >;
 
 export type PrismaTokenWithTypes = PrismaToken & {
