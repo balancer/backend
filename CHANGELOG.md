@@ -1,5 +1,11 @@
 # backend
 
+## 1.58.12
+
+### Patch Changes
+
+-   c1b3b5e: add new factories sonic
+
 ## 1.58.11
 
 ### Patch Changes

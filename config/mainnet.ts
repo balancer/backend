@@ -402,7 +402,7 @@ export default <NetworkData>{
                     ],
                 },
                 {
-                    url: 'https://data.jonesdao.io/api/v1/jones/apy-wjaura',
+                    url: 'https://jones-api.vercel.app/api/v1/jones/apy-wjaura',
                     scale: 100,
                     extractors: [
                         { type: 'path', token: '0x198d7387fa97a73f05b8578cdeff8f2a1f34cd1f', path: '$.wjauraApy' },
