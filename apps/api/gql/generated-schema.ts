@@ -2312,6 +2312,11 @@ export interface MutationPoolReloadStakingForAllPoolsArgs {
     stakingTypes: Array<GqlPoolStakingType>;
 }
 
+export interface MutationPoolReloadSwapsArgs {
+    chain: GqlChain;
+    poolId: Scalars['String'];
+}
+
 export interface MutationPoolSyncAllPoolsFromSubgraphArgs {
     chain: GqlChain;
 }

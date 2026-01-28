@@ -30,6 +30,7 @@ export type AprGroupSchema = {
     __typename?: 'APRGroupSchema';
     breakdown: Array<AprSchema>;
     id: Scalars['ID'];
+    market?: Maybe<MarketsAprSchema>;
     projectedBreakdown?: Maybe<Array<AprSchema>>;
     projectedTotal?: Maybe<Scalars['Float']>;
     stakingToken: TokenSchema;
@@ -162,6 +163,12 @@ export type LockerSchema = {
 
 export type LockerSchemaAccountArgs = {
     id: Scalars['String'];
+};
+
+export type MarketsAprSchema = {
+    __typename?: 'MarketsAPRSchema';
+    paladin?: Maybe<VoteMarketAprSchema>;
+    stakeDao?: Maybe<VoteMarketAprSchema>;
 };
 
 export type Mutation = {
@@ -400,6 +407,12 @@ export type VaultSchemaAccountArgs = {
 
 export type VaultSchemaHistoricApRsArgs = {
     range: DateRangeIntervalInput;
+};
+
+export type VoteMarketAprSchema = {
+    __typename?: 'VoteMarketAPRSchema';
+    breakdown?: Maybe<Array<AprSchema>>;
+    total: Scalars['Float'];
 };
 
 export type AllPoolsQueryVariables = Exact<{
