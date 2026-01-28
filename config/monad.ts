@@ -1,44 +1,43 @@
-import { AaveV3Plasma } from '@bgd-labs/aave-address-book';
 import { env } from '../apps/env';
 import { NetworkData } from '../modules/network/network-config-types';
 
 export default <NetworkData>{
     chain: {
-        slug: 'xlayer',
-        id: 196,
+        slug: 'monad',
+        id: 143,
         nativeAssetAddress: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
-        wrappedNativeAssetAddress: '0xe538905cf8410324e03a5a23c1c177a474d59b2b',
-        prismaId: 'XLAYER',
-        gqlId: 'XLAYER',
+        wrappedNativeAssetAddress: '0x3bd359c1119da7da1d913d1c4d2b7c461115433a',
+        prismaId: 'MONAD',
+        gqlId: 'MONAD',
     },
     subgraphs: {
-        startDate: '2025-10-30',
+        startDate: '2025-09-12',
         balancer: ``,
-        balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmX8LawQrPRVywFnjwZG57MomECJRZDw4nNBvwdEHJ3dS3`,
-        balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmUDXYphhmEJJSZij5ZwjgLXfz2bnS4Mwr8ZDhfrvbsBYf`,
+        balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmUjY6FNcecCopHx5sWWMqWCq6yKEXsB2DAPryyBuAYKnT`,
+        balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmcJsNHBKWWBfF4ma8rMKjwBa1bwdsJdjvLEaKFzEdqP2q`,
         gauge: ``,
     },
     hooks: {
-        ['0xa523f47a933d5020b23629ddf689695aa94612dc']: 'STABLE_SURGE',
+        ['0x6817149cb753bf529565b4d023d7507ed2ff4bc0']: 'STABLE_SURGE',
     },
     eth: {
         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
         addressFormatted: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
-        symbol: 'OKB',
-        name: 'OKB',
+        symbol: 'MON',
+        name: 'MON',
     },
     weth: {
-        address: '0xe538905cf8410324e03a5a23c1c177a474d59b2b',
-        addressFormatted: '0xe538905cf8410324e03A5A23C1c177a474D59b2b',
+        address: '0x3bd359c1119da7da1d913d1c4d2b7c461115433a',
+        addressFormatted: '0x3bd359C1119dA7Da1D913D1C4D2B7c461115433A',
     },
     coingecko: {
-        nativeAssetId: 'okb',
-        platformId: 'x-layer',
+        nativeAssetId: 'monad',
+        platformId: 'monad',
         excludedTokenAddresses: [],
     },
-    rpcUrl: env.DRPC_API_KEY ? `https://lb.drpc.live/xlayer/${env.DRPC_API_KEY}` : 'https://rpc.xlayer.tech',
+    rpcUrl: env.DRPC_API_KEY ? `https://lb.drpc.live/monad-mainnet/${env.DRPC_API_KEY}` : 'https://rpc.monad.xyz',
     rpcMaxBlockRange: 1000,
-    acceptableSGLag: 30, // ~1min
+    acceptableSGLag: 30,
     protocolToken: 'bal',
     balancer: {
         v2: {
@@ -50,7 +49,7 @@ export default <NetworkData>{
         v3: {
             vaultAddress: '0xba1333333333a1ba1108e8412f11850a5c319ba9',
             protocolFeeController: '0xcacc7e1efeea8bb3af6d5720d12c1876aa6ee76b',
-            routerAddress: '0xc3ccace87f6d3a81724075adcb5ddd85a8a1bb68',
+            routerAddress: '0x9da18982a33fd0c7051b19f0d7c76f2d5e7e017c',
             defaultSwapFeePercentage: '0.5',
             defaultYieldFeePercentage: '0.1',
         },

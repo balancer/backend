@@ -1,5 +1,58 @@
 # backend
 
+## 1.58.12
+
+### Patch Changes
+
+-   c1b3b5e: add new factories sonic
+
+## 1.58.11
+
+### Patch Changes
+
+-   607ebb0: add monad support
+
+## 1.58.10
+
+### Patch Changes
+
+-   5037bcb: update new subgraph version
+-   b87980b: remove angles apr
+
+## 1.58.9
+
+### Patch Changes
+
+-   10673db: use onchain data for stS apr
+-   0ffc272: support seedless LBP
+
+## 1.58.8
+
+### Patch Changes
+
+-   df684c6: also query pools subgraph for changes
+-   b2ed2ab: sonic v2 subgraph to ormi
+-   7d6060c: migrate first subgraphs to ormi
+-   44d074e: reduce canary job schendule
+
+## 1.58.7
+
+### Patch Changes
+
+-   4d69527: add swap reload mutation
+
+## 1.58.6
+
+### Patch Changes
+
+-   737df48: teth apr base
+
+## 1.58.5
+
+### Patch Changes
+
+-   93bd145: remove vebal users if no balance
+
 ## 1.58.4
 
 ### Patch Changes

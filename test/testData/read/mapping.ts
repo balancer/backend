@@ -312,6 +312,7 @@ export function mapLiquidityBootstrappingPoolStateToPrismaPool(
             reserveTokenIndex: reserveTokenIndex,
             reserveTokenStartWeight: Number(formatEther(poolState.startWeights[reserveTokenIndex])),
             reserveTokenEndWeight: Number(formatEther(poolState.endWeights[reserveTokenIndex])),
+            isSeedless: false,
         })
         .build({
             address: poolState.poolAddress,

@@ -48,6 +48,7 @@ extend type Mutation {
     poolLoadOnChainDataForAllPools(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
     poolReloadPools(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
     poolSyncFxQuoteTokens(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
+    poolReloadSwaps(chain: GqlChain!, poolId: String!): String!
 }
 
 """
@@ -219,6 +220,7 @@ type LiquidityBootstrappingPoolV3Params {
     projectTokenEndWeight: Float!
     projectTokenIndex: Int!
     topTrades: [GqlLBPTopTrade!]
+    isSeedless: Boolean!
 }
 
 """
@@ -843,6 +845,7 @@ type GqlPoolLiquidityBootstrappingV3 implements GqlPoolBase {
     projectTokenStartWeight: Float!
     projectTokenEndWeight: Float!
     projectTokenIndex: Int!
+    isSeedless: Boolean!
     topTrades: [GqlLBPTopTrade!]
 
     """

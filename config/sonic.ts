@@ -13,12 +13,12 @@ export default <NetworkData>{
     },
     subgraphs: {
         startDate: '2024-12-12',
-        balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmPXaLKDvMMZdjD1ZuMpMSkRjKf8ALLVRtjUpTwWdKSvpQ`,
-        balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmUgRWkb5JUocGkVidpKtZFMHjexJzkBiSbjufURsXwn9X`,
-        balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/Qmf61sxkSwc1x15jfonJeoYzHWWR8WJFqhWzgtVPNtar6H`,
-        gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmPvzExEGhqUYBB1oVLdQDXoHWUxuBJ8Sb3Dowx5qt5xze`,
-        reliquary: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmYMfxyt92RnjG28gQJWjef3ziRzY1jkeBuqCoMixh1wy6`,
-        sts: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmYmPEGqVZPyJKRah4NVbCYtxkHrXq3QzqBrnVQYBt15MU`,
+        balancer: `https://api.subgraph.ormilabs.com/api/public/717cf785-de57-4761-94dd-9ac51b019902/subgraphs/v2-smol-sonic/latest/gn`,
+        balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmUgRWkb5JUocGkVidpKtZFMHjexJzkBiSbjufURsXwn9X`,
+        balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmXhuf3ZJn515R1rtvnV9ufwsSZ5j3e2bQnr68GefsJk3K`,
+        gauge: `https://api.subgraph.ormilabs.com/api/public/717cf785-de57-4761-94dd-9ac51b019902/subgraphs/balancer-gauges-sonic/latest/gn`,
+        reliquary: `https://api.subgraph.ormilabs.com/api/public/717cf785-de57-4761-94dd-9ac51b019902/subgraphs/mabeets-sonic/latest/gn`,
+        sts: `https://api.subgraph.ormilabs.com/api/public/717cf785-de57-4761-94dd-9ac51b019902/subgraphs/staked-sonic/latest/gn`,
     },
     eth: {
         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -47,8 +47,9 @@ export default <NetworkData>{
     },
     sts: {
         address: '0xe5da20f15420ad15de0fa650600afc998bbe3955',
-        baseAprUrl: 'https://apr.soniclabs.com/current',
         validatorFee: 0.15,
+        sfcAddress: '0xfc00face00000000000000000000000000000000',
+        constantsManagerAddress: '0xc7262d6cd7d748df8577d29f1e03059ff62b62cc',
     },
     loops: {
         address: '0xc76995054ce51dfbbc954840d699b2f33d2538ee',
@@ -184,11 +185,11 @@ export default <NetworkData>{
                     scale: 100,
                     extractors: [{ type: 'path', token: '0x9f0df7799f6fdad409300080cff680f5a23df4b1', path: '$.apr' }],
                 },
-                {
-                    url: 'https://be.angles.fi/api/v2/angles/apr/trailing/7',
-                    scale: 100,
-                    extractors: [{ type: 'path', token: '0xfa85fe5a8f5560e9039c04f2b0a90de1415abd70', path: '$.apy' }],
-                },
+                // {
+                //     url: 'https://be.angles.fi/api/v2/angles/apr/trailing/7',
+                //     scale: 100,
+                //     extractors: [{ type: 'path', token: '0xfa85fe5a8f5560e9039c04f2b0a90de1415abd70', path: '$.apy' }],
+                // },
                 // {
                 //     url: 'https://locks-usd-api-sonic-earn.trevee.xyz/wrapper/apy',
                 //     extractors: [{ type: 'path', token: '0x9fb76f7ce5fceaa2c42887ff441d46095e494206', path: '$.apy' }],

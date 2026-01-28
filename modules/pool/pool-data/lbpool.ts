@@ -21,5 +21,6 @@ export const lbPool = (pool: TypePoolFragment & VaultPoolFragment) => {
         reserveTokenIndex: tokens.find((token) => token.address === params.reserveToken)!.index,
         reserveTokenStartWeight: Number(formatEther(BigInt(params.reserveTokenStartWeight))),
         reserveTokenEndWeight: Number(formatEther(BigInt(params.reserveTokenEndWeight))),
+        isSeedless: Number(formatEther(BigInt(params.reserveTokenVirtualBalance))) > 0,
     };
 };

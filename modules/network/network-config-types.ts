@@ -60,7 +60,8 @@ export interface NetworkData {
     };
     sts?: {
         address: string;
-        baseAprUrl: string;
+        sfcAddress: string;
+        constantsManagerAddress: string;
         validatorFee: number;
     };
     loops?: {

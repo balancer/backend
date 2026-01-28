@@ -105,6 +105,112 @@ export enum Factory_OrderBy {
     Version = 'version',
 }
 
+export type FixedLbpParams = {
+    __typename?: 'FixedLBPParams';
+    /** End time of the Fixed Price LBP */
+    endTime: Scalars['BigInt'];
+    /** Unique identifier for the FixedLBPParams */
+    id: Scalars['Bytes'];
+    /** Project token swap in blocked */
+    isProjectTokenSwapInBlocked: Scalars['Boolean'];
+    /** Owner of the Fixed Price LBP */
+    owner: Scalars['Bytes'];
+    /** Project token for the Fixed Price LBP */
+    projectToken: Scalars['Bytes'];
+    /** Project token rate (fixed price) */
+    projectTokenRate: Scalars['BigInt'];
+    /** Reserve token for the Fixed Price LBP */
+    reserveToken: Scalars['Bytes'];
+    /** Start time of the Fixed Price LBP */
+    startTime: Scalars['BigInt'];
+};
+
+export type FixedLbpParams_Filter = {
+    /** Filter for the block changed event. */
+    _change_block?: InputMaybe<BlockChangedFilter>;
+    and?: InputMaybe<Array<InputMaybe<FixedLbpParams_Filter>>>;
+    endTime?: InputMaybe<Scalars['BigInt']>;
+    endTime_gt?: InputMaybe<Scalars['BigInt']>;
+    endTime_gte?: InputMaybe<Scalars['BigInt']>;
+    endTime_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    endTime_lt?: InputMaybe<Scalars['BigInt']>;
+    endTime_lte?: InputMaybe<Scalars['BigInt']>;
+    endTime_not?: InputMaybe<Scalars['BigInt']>;
+    endTime_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    id?: InputMaybe<Scalars['Bytes']>;
+    id_contains?: InputMaybe<Scalars['Bytes']>;
+    id_gt?: InputMaybe<Scalars['Bytes']>;
+    id_gte?: InputMaybe<Scalars['Bytes']>;
+    id_in?: InputMaybe<Array<Scalars['Bytes']>>;
+    id_lt?: InputMaybe<Scalars['Bytes']>;
+    id_lte?: InputMaybe<Scalars['Bytes']>;
+    id_not?: InputMaybe<Scalars['Bytes']>;
+    id_not_contains?: InputMaybe<Scalars['Bytes']>;
+    id_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
+    isProjectTokenSwapInBlocked?: InputMaybe<Scalars['Boolean']>;
+    isProjectTokenSwapInBlocked_in?: InputMaybe<Array<Scalars['Boolean']>>;
+    isProjectTokenSwapInBlocked_not?: InputMaybe<Scalars['Boolean']>;
+    isProjectTokenSwapInBlocked_not_in?: InputMaybe<Array<Scalars['Boolean']>>;
+    or?: InputMaybe<Array<InputMaybe<FixedLbpParams_Filter>>>;
+    owner?: InputMaybe<Scalars['Bytes']>;
+    owner_contains?: InputMaybe<Scalars['Bytes']>;
+    owner_gt?: InputMaybe<Scalars['Bytes']>;
+    owner_gte?: InputMaybe<Scalars['Bytes']>;
+    owner_in?: InputMaybe<Array<Scalars['Bytes']>>;
+    owner_lt?: InputMaybe<Scalars['Bytes']>;
+    owner_lte?: InputMaybe<Scalars['Bytes']>;
+    owner_not?: InputMaybe<Scalars['Bytes']>;
+    owner_not_contains?: InputMaybe<Scalars['Bytes']>;
+    owner_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
+    projectToken?: InputMaybe<Scalars['Bytes']>;
+    projectTokenRate?: InputMaybe<Scalars['BigInt']>;
+    projectTokenRate_gt?: InputMaybe<Scalars['BigInt']>;
+    projectTokenRate_gte?: InputMaybe<Scalars['BigInt']>;
+    projectTokenRate_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    projectTokenRate_lt?: InputMaybe<Scalars['BigInt']>;
+    projectTokenRate_lte?: InputMaybe<Scalars['BigInt']>;
+    projectTokenRate_not?: InputMaybe<Scalars['BigInt']>;
+    projectTokenRate_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    projectToken_contains?: InputMaybe<Scalars['Bytes']>;
+    projectToken_gt?: InputMaybe<Scalars['Bytes']>;
+    projectToken_gte?: InputMaybe<Scalars['Bytes']>;
+    projectToken_in?: InputMaybe<Array<Scalars['Bytes']>>;
+    projectToken_lt?: InputMaybe<Scalars['Bytes']>;
+    projectToken_lte?: InputMaybe<Scalars['Bytes']>;
+    projectToken_not?: InputMaybe<Scalars['Bytes']>;
+    projectToken_not_contains?: InputMaybe<Scalars['Bytes']>;
+    projectToken_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
+    reserveToken?: InputMaybe<Scalars['Bytes']>;
+    reserveToken_contains?: InputMaybe<Scalars['Bytes']>;
+    reserveToken_gt?: InputMaybe<Scalars['Bytes']>;
+    reserveToken_gte?: InputMaybe<Scalars['Bytes']>;
+    reserveToken_in?: InputMaybe<Array<Scalars['Bytes']>>;
+    reserveToken_lt?: InputMaybe<Scalars['Bytes']>;
+    reserveToken_lte?: InputMaybe<Scalars['Bytes']>;
+    reserveToken_not?: InputMaybe<Scalars['Bytes']>;
+    reserveToken_not_contains?: InputMaybe<Scalars['Bytes']>;
+    reserveToken_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
+    startTime?: InputMaybe<Scalars['BigInt']>;
+    startTime_gt?: InputMaybe<Scalars['BigInt']>;
+    startTime_gte?: InputMaybe<Scalars['BigInt']>;
+    startTime_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    startTime_lt?: InputMaybe<Scalars['BigInt']>;
+    startTime_lte?: InputMaybe<Scalars['BigInt']>;
+    startTime_not?: InputMaybe<Scalars['BigInt']>;
+    startTime_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+};
+
+export enum FixedLbpParams_OrderBy {
+    EndTime = 'endTime',
+    Id = 'id',
+    IsProjectTokenSwapInBlocked = 'isProjectTokenSwapInBlocked',
+    Owner = 'owner',
+    ProjectToken = 'projectToken',
+    ProjectTokenRate = 'projectTokenRate',
+    ReserveToken = 'reserveToken',
+    StartTime = 'startTime',
+}
+
 export type Gyro2Params = {
     __typename?: 'Gyro2Params';
     /** Unique identifier for the Gyro2Params */
@@ -341,6 +447,8 @@ export type LbpParams = {
     reserveTokenEndWeight: Scalars['BigInt'];
     /** Initial weight of the reserve token */
     reserveTokenStartWeight: Scalars['BigInt'];
+    /** The virtual token balance for the reserve token, indicating a seedless LBP if >0 */
+    reserveTokenVirtualBalance: Scalars['BigInt'];
     /** Start time of the LBP */
     startTime: Scalars['BigInt'];
 };
@@ -425,6 +533,14 @@ export type LbpParams_Filter = {
     reserveTokenStartWeight_lte?: InputMaybe<Scalars['BigInt']>;
     reserveTokenStartWeight_not?: InputMaybe<Scalars['BigInt']>;
     reserveTokenStartWeight_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    reserveTokenVirtualBalance?: InputMaybe<Scalars['BigInt']>;
+    reserveTokenVirtualBalance_gt?: InputMaybe<Scalars['BigInt']>;
+    reserveTokenVirtualBalance_gte?: InputMaybe<Scalars['BigInt']>;
+    reserveTokenVirtualBalance_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    reserveTokenVirtualBalance_lt?: InputMaybe<Scalars['BigInt']>;
+    reserveTokenVirtualBalance_lte?: InputMaybe<Scalars['BigInt']>;
+    reserveTokenVirtualBalance_not?: InputMaybe<Scalars['BigInt']>;
+    reserveTokenVirtualBalance_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
     reserveToken_contains?: InputMaybe<Scalars['Bytes']>;
     reserveToken_gt?: InputMaybe<Scalars['Bytes']>;
     reserveToken_gte?: InputMaybe<Scalars['Bytes']>;
@@ -455,6 +571,7 @@ export enum LbpParams_OrderBy {
     ReserveToken = 'reserveToken',
     ReserveTokenEndWeight = 'reserveTokenEndWeight',
     ReserveTokenStartWeight = 'reserveTokenStartWeight',
+    ReserveTokenVirtualBalance = 'reserveTokenVirtualBalance',
     StartTime = 'startTime',
 }
 
@@ -470,6 +587,8 @@ export type Pool = {
     address: Scalars['Bytes'];
     /** Factory that created this Pool */
     factory: Factory;
+    /** Parameters for Fixed Price LBP pools (null for other pool types) */
+    fixedLBPParams?: Maybe<FixedLbpParams>;
     /** Parameters for Gyro2 pools (null for other pool types) */
     gyro2Params?: Maybe<Gyro2Params>;
     /** Parameters for GyroE pools (null for other pool types) */
@@ -491,6 +610,7 @@ export type Pool = {
 };
 
 export enum PoolType {
+    FixedLbp = 'FixedLBP',
     Gyro2 = 'Gyro2',
     GyroE = 'GyroE',
     Lbp = 'LBP',
@@ -536,6 +656,27 @@ export type Pool_Filter = {
     factory_not_starts_with_nocase?: InputMaybe<Scalars['String']>;
     factory_starts_with?: InputMaybe<Scalars['String']>;
     factory_starts_with_nocase?: InputMaybe<Scalars['String']>;
+    fixedLBPParams?: InputMaybe<Scalars['String']>;
+    fixedLBPParams_?: InputMaybe<FixedLbpParams_Filter>;
+    fixedLBPParams_contains?: InputMaybe<Scalars['String']>;
+    fixedLBPParams_contains_nocase?: InputMaybe<Scalars['String']>;
+    fixedLBPParams_ends_with?: InputMaybe<Scalars['String']>;
+    fixedLBPParams_ends_with_nocase?: InputMaybe<Scalars['String']>;
+    fixedLBPParams_gt?: InputMaybe<Scalars['String']>;
+    fixedLBPParams_gte?: InputMaybe<Scalars['String']>;
+    fixedLBPParams_in?: InputMaybe<Array<Scalars['String']>>;
+    fixedLBPParams_lt?: InputMaybe<Scalars['String']>;
+    fixedLBPParams_lte?: InputMaybe<Scalars['String']>;
+    fixedLBPParams_not?: InputMaybe<Scalars['String']>;
+    fixedLBPParams_not_contains?: InputMaybe<Scalars['String']>;
+    fixedLBPParams_not_contains_nocase?: InputMaybe<Scalars['String']>;
+    fixedLBPParams_not_ends_with?: InputMaybe<Scalars['String']>;
+    fixedLBPParams_not_ends_with_nocase?: InputMaybe<Scalars['String']>;
+    fixedLBPParams_not_in?: InputMaybe<Array<Scalars['String']>>;
+    fixedLBPParams_not_starts_with?: InputMaybe<Scalars['String']>;
+    fixedLBPParams_not_starts_with_nocase?: InputMaybe<Scalars['String']>;
+    fixedLBPParams_starts_with?: InputMaybe<Scalars['String']>;
+    fixedLBPParams_starts_with_nocase?: InputMaybe<Scalars['String']>;
     gyro2Params?: InputMaybe<Scalars['String']>;
     gyro2Params_?: InputMaybe<Gyro2Params_Filter>;
     gyro2Params_contains?: InputMaybe<Scalars['String']>;
@@ -724,6 +865,15 @@ export enum Pool_OrderBy {
     FactoryId = 'factory__id',
     FactoryType = 'factory__type',
     FactoryVersion = 'factory__version',
+    FixedLbpParams = 'fixedLBPParams',
+    FixedLbpParamsEndTime = 'fixedLBPParams__endTime',
+    FixedLbpParamsId = 'fixedLBPParams__id',
+    FixedLbpParamsIsProjectTokenSwapInBlocked = 'fixedLBPParams__isProjectTokenSwapInBlocked',
+    FixedLbpParamsOwner = 'fixedLBPParams__owner',
+    FixedLbpParamsProjectToken = 'fixedLBPParams__projectToken',
+    FixedLbpParamsProjectTokenRate = 'fixedLBPParams__projectTokenRate',
+    FixedLbpParamsReserveToken = 'fixedLBPParams__reserveToken',
+    FixedLbpParamsStartTime = 'fixedLBPParams__startTime',
     Gyro2Params = 'gyro2Params',
     Gyro2ParamsId = 'gyro2Params__id',
     Gyro2ParamsSqrtAlpha = 'gyro2Params__sqrtAlpha',
@@ -756,6 +906,7 @@ export enum Pool_OrderBy {
     LbpParamsReserveToken = 'lbpParams__reserveToken',
     LbpParamsReserveTokenEndWeight = 'lbpParams__reserveTokenEndWeight',
     LbpParamsReserveTokenStartWeight = 'lbpParams__reserveTokenStartWeight',
+    LbpParamsReserveTokenVirtualBalance = 'lbpParams__reserveTokenVirtualBalance',
     LbpParamsStartTime = 'lbpParams__startTime',
     QuantAmmWeightedParams = 'quantAMMWeightedParams',
     QuantAmmWeightedParamsAbsoluteWeightGuardRail = 'quantAMMWeightedParams__absoluteWeightGuardRail',
@@ -766,6 +917,8 @@ export enum Pool_OrderBy {
     QuantAmmWeightedParamsMaxTradeSizeRatio = 'quantAMMWeightedParams__maxTradeSizeRatio',
     QuantAmmWeightedParamsOracleStalenessThreshold = 'quantAMMWeightedParams__oracleStalenessThreshold',
     QuantAmmWeightedParamsPoolRegistry = 'quantAMMWeightedParams__poolRegistry',
+    QuantAmmWeightedParamsRule = 'quantAMMWeightedParams__rule',
+    QuantAmmWeightedParamsRunner = 'quantAMMWeightedParams__runner',
     QuantAmmWeightedParamsUpdateInterval = 'quantAMMWeightedParams__updateInterval',
     ReClammParams = 'reClammParams',
     ReClammParamsCenterednessMargin = 'reClammParams__centerednessMargin',
@@ -931,6 +1084,8 @@ export enum QuantAmmWeightedDetail_OrderBy {
     PoolMaxTradeSizeRatio = 'pool__maxTradeSizeRatio',
     PoolOracleStalenessThreshold = 'pool__oracleStalenessThreshold',
     PoolPoolRegistry = 'pool__poolRegistry',
+    PoolRule = 'pool__rule',
+    PoolRunner = 'pool__runner',
     PoolUpdateInterval = 'pool__updateInterval',
     Type = 'type',
     Value = 'value',
@@ -944,6 +1099,8 @@ export type QuantAmmWeightedParams = {
     details: Array<QuantAmmWeightedDetail>;
     /** Maximum epsilon value */
     epsilonMax: Scalars['BigInt'];
+    /** #int256[] from rule.getIntermediateGradientState(pool, numberOfAssets) */
+    gradientIntermediates?: Maybe<Array<Scalars['BigInt']>>;
     /** Unique identifier for the QuantAMMWeightedParams */
     id: Scalars['Bytes'];
     /** Lambda values */
@@ -954,10 +1111,16 @@ export type QuantAmmWeightedParams = {
     lastUpdateIntervalTime: Scalars['BigInt'];
     /** Maximum trade size ratio */
     maxTradeSizeRatio: Scalars['BigInt'];
+    /** #int256[] from rule.getMovingAverages(pool, numberOfAssets) */
+    movingAverageIntermediates?: Maybe<Array<Scalars['BigInt']>>;
     /** Oracle staleness threshold */
     oracleStalenessThreshold: Scalars['BigInt'];
     /** Pool registry */
     poolRegistry: Scalars['BigInt'];
+    /** address of the active rule (UpdateWeightRunner.getPoolRule(pool)) */
+    rule: Scalars['Bytes'];
+    /** address of UpdateWeightRunner for this pool (pool.updateWeightRunner()) */
+    runner: Scalars['Bytes'];
     /** Update interval */
     updateInterval: Scalars['BigInt'];
     /** Weight block multipliers */
@@ -995,6 +1158,12 @@ export type QuantAmmWeightedParams_Filter = {
     epsilonMax_lte?: InputMaybe<Scalars['BigInt']>;
     epsilonMax_not?: InputMaybe<Scalars['BigInt']>;
     epsilonMax_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    gradientIntermediates?: InputMaybe<Array<Scalars['BigInt']>>;
+    gradientIntermediates_contains?: InputMaybe<Array<Scalars['BigInt']>>;
+    gradientIntermediates_contains_nocase?: InputMaybe<Array<Scalars['BigInt']>>;
+    gradientIntermediates_not?: InputMaybe<Array<Scalars['BigInt']>>;
+    gradientIntermediates_not_contains?: InputMaybe<Array<Scalars['BigInt']>>;
+    gradientIntermediates_not_contains_nocase?: InputMaybe<Array<Scalars['BigInt']>>;
     id?: InputMaybe<Scalars['Bytes']>;
     id_contains?: InputMaybe<Scalars['Bytes']>;
     id_gt?: InputMaybe<Scalars['Bytes']>;
@@ -1035,6 +1204,12 @@ export type QuantAmmWeightedParams_Filter = {
     maxTradeSizeRatio_lte?: InputMaybe<Scalars['BigInt']>;
     maxTradeSizeRatio_not?: InputMaybe<Scalars['BigInt']>;
     maxTradeSizeRatio_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    movingAverageIntermediates?: InputMaybe<Array<Scalars['BigInt']>>;
+    movingAverageIntermediates_contains?: InputMaybe<Array<Scalars['BigInt']>>;
+    movingAverageIntermediates_contains_nocase?: InputMaybe<Array<Scalars['BigInt']>>;
+    movingAverageIntermediates_not?: InputMaybe<Array<Scalars['BigInt']>>;
+    movingAverageIntermediates_not_contains?: InputMaybe<Array<Scalars['BigInt']>>;
+    movingAverageIntermediates_not_contains_nocase?: InputMaybe<Array<Scalars['BigInt']>>;
     or?: InputMaybe<Array<InputMaybe<QuantAmmWeightedParams_Filter>>>;
     oracleStalenessThreshold?: InputMaybe<Scalars['BigInt']>;
     oracleStalenessThreshold_gt?: InputMaybe<Scalars['BigInt']>;
@@ -1052,6 +1227,26 @@ export type QuantAmmWeightedParams_Filter = {
     poolRegistry_lte?: InputMaybe<Scalars['BigInt']>;
     poolRegistry_not?: InputMaybe<Scalars['BigInt']>;
     poolRegistry_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
+    rule?: InputMaybe<Scalars['Bytes']>;
+    rule_contains?: InputMaybe<Scalars['Bytes']>;
+    rule_gt?: InputMaybe<Scalars['Bytes']>;
+    rule_gte?: InputMaybe<Scalars['Bytes']>;
+    rule_in?: InputMaybe<Array<Scalars['Bytes']>>;
+    rule_lt?: InputMaybe<Scalars['Bytes']>;
+    rule_lte?: InputMaybe<Scalars['Bytes']>;
+    rule_not?: InputMaybe<Scalars['Bytes']>;
+    rule_not_contains?: InputMaybe<Scalars['Bytes']>;
+    rule_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
+    runner?: InputMaybe<Scalars['Bytes']>;
+    runner_contains?: InputMaybe<Scalars['Bytes']>;
+    runner_gt?: InputMaybe<Scalars['Bytes']>;
+    runner_gte?: InputMaybe<Scalars['Bytes']>;
+    runner_in?: InputMaybe<Array<Scalars['Bytes']>>;
+    runner_lt?: InputMaybe<Scalars['Bytes']>;
+    runner_lte?: InputMaybe<Scalars['Bytes']>;
+    runner_not?: InputMaybe<Scalars['Bytes']>;
+    runner_not_contains?: InputMaybe<Scalars['Bytes']>;
+    runner_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
     updateInterval?: InputMaybe<Scalars['BigInt']>;
     updateInterval_gt?: InputMaybe<Scalars['BigInt']>;
     updateInterval_gte?: InputMaybe<Scalars['BigInt']>;
@@ -1078,13 +1273,17 @@ export enum QuantAmmWeightedParams_OrderBy {
     AbsoluteWeightGuardRail = 'absoluteWeightGuardRail',
     Details = 'details',
     EpsilonMax = 'epsilonMax',
+    GradientIntermediates = 'gradientIntermediates',
     Id = 'id',
     Lambda = 'lambda',
     LastInterpolationTimePossible = 'lastInterpolationTimePossible',
     LastUpdateIntervalTime = 'lastUpdateIntervalTime',
     MaxTradeSizeRatio = 'maxTradeSizeRatio',
+    MovingAverageIntermediates = 'movingAverageIntermediates',
     OracleStalenessThreshold = 'oracleStalenessThreshold',
     PoolRegistry = 'poolRegistry',
+    Rule = 'rule',
+    Runner = 'runner',
     UpdateInterval = 'updateInterval',
     WeightBlockMultipliers = 'weightBlockMultipliers',
     WeightsAtLastUpdateInterval = 'weightsAtLastUpdateInterval',
@@ -1096,6 +1295,8 @@ export type Query = {
     _meta?: Maybe<_Meta_>;
     factories: Array<Factory>;
     factory?: Maybe<Factory>;
+    fixedLBPParams?: Maybe<FixedLbpParams>;
+    fixedLBPParams_collection: Array<FixedLbpParams>;
     gyro2Params?: Maybe<Gyro2Params>;
     gyro2Params_collection: Array<Gyro2Params>;
     gyroEParams?: Maybe<GyroEParams>;
@@ -1136,6 +1337,22 @@ export type QueryFactoryArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
     subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type QueryFixedLbpParamsArgs = {
+    block?: InputMaybe<Block_Height>;
+    id: Scalars['ID'];
+    subgraphError?: _SubgraphErrorPolicy_;
+};
+
+export type QueryFixedLbpParams_CollectionArgs = {
+    block?: InputMaybe<Block_Height>;
+    first?: InputMaybe<Scalars['Int']>;
+    orderBy?: InputMaybe<FixedLbpParams_OrderBy>;
+    orderDirection?: InputMaybe<OrderDirection>;
+    skip?: InputMaybe<Scalars['Int']>;
+    subgraphError?: _SubgraphErrorPolicy_;
+    where?: InputMaybe<FixedLbpParams_Filter>;
 };
 
 export type QueryGyro2ParamsArgs = {
@@ -1691,6 +1908,7 @@ export type TypePoolFragment = {
         projectToken: string;
         projectTokenStartWeight: string;
         projectTokenEndWeight: string;
+        reserveTokenVirtualBalance: string;
     } | null;
     reClammParams?: {
         __typename?: 'ReClammParams';
@@ -1777,6 +1995,7 @@ export type PoolsQuery = {
             projectToken: string;
             projectTokenStartWeight: string;
             projectTokenEndWeight: string;
+            reserveTokenVirtualBalance: string;
         } | null;
         reClammParams?: {
             __typename?: 'ReClammParams';
@@ -1873,6 +2092,7 @@ export const TypePoolFragmentDoc = gql`
             projectToken
             projectTokenStartWeight
             projectTokenEndWeight
+            reserveTokenVirtualBalance
         }
         reClammParams {
             lastTimestamp

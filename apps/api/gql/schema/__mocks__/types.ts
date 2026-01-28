@@ -80,6 +80,7 @@ export enum GqlChain {
     HYPEREVM = 'HYPEREVM',
     MAINNET = 'MAINNET',
     MODE = 'MODE',
+    MONAD = 'MONAD',
     OPTIMISM = 'OPTIMISM',
     PLASMA = 'PLASMA',
     POLYGON = 'POLYGON',
@@ -940,6 +941,7 @@ export type GqlPoolLiquidityBootstrappingV3 = GqlPoolBase & {
     hook?: Maybe<GqlHook>;
     id: Scalars['ID'];
     isProjectTokenSwapInBlocked: Scalars['Boolean'];
+    isSeedless: Scalars['Boolean'];
     lbpName?: Maybe<Scalars['String']>;
     lbpOwner: Scalars['String'];
     liquidityManagement?: Maybe<LiquidityManagement>;
@@ -2247,6 +2249,7 @@ export type LiquidityBootstrappingPoolV3Params = {
     endTime: Scalars['Int'];
     farcaster?: Maybe<Scalars['String']>;
     isProjectTokenSwapInBlocked: Scalars['Boolean'];
+    isSeedless: Scalars['Boolean'];
     lbpName?: Maybe<Scalars['String']>;
     lbpOwner: Scalars['String'];
     projectToken: Scalars['String'];
@@ -2294,6 +2297,7 @@ export type Mutation = {
     poolReloadAllPoolAprs: Scalars['String'];
     poolReloadPools: Array<GqlPoolMutationResult>;
     poolReloadStakingForAllPools: Scalars['String'];
+    poolReloadSwaps: Scalars['String'];
     poolSyncAllPoolsFromSubgraph: Array<Scalars['String']>;
     poolSyncFxQuoteTokens: Array<GqlPoolMutationResult>;
     poolUpdateLiquidityValuesForAllPools: Scalars['String'];

@@ -12,8 +12,8 @@ export default <NetworkData>{
     },
     subgraphs: {
         startDate: '2021-10-08',
-        balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/Qme9r1RTFZ6hEZ4ebPSmo3J81FNHhjeNZs5nBaSGTzb2hb`,
-        reliquary: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_FANTOM}/deployments/id/QmQB4iZpeX9eYgLUaiBt2HwkobqE3NzVUiupXF6Ha9Nzbk`,
+        balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/Qme9r1RTFZ6hEZ4ebPSmo3J81FNHhjeNZs5nBaSGTzb2hb`,
+        reliquary: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmQB4iZpeX9eYgLUaiBt2HwkobqE3NzVUiupXF6Ha9Nzbk`,
     },
     eth: {
         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',

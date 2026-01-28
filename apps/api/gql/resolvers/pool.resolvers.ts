@@ -8,6 +8,7 @@ import {
     SnapshotsController,
     PoolController,
     FXPoolsController,
+    EventController,
 } from '../../../../modules/controllers';
 import { upsertLastSyncedBlock } from '../../../../modules/actions/last-synced-block';
 import { PrismaLastBlockSyncedCategory } from '@prisma/client';
@@ -157,6 +158,13 @@ const balancerResolvers: Resolvers = {
             }
 
             return result;
+        },
+        poolReloadSwaps: async (parent, { chain, poolId }, context) => {
+            isAdminRoute(context);
+
+            await EventController().reloadAllSwapsForPoolV2(chain, poolId);
+
+            return 'success';
         },
     },
 };

@@ -144,10 +144,10 @@ export class BalancerSubgraphService {
     }
 
     public async getPoolsWithActiveUpdates(timestamp: number): Promise<string[]> {
-        const { ampUpdates, gradualWeightUpdates } = await this.sdk.BalancerGetPoolsWithActiveUpdates({
+        const { ampUpdates } = await this.sdk.BalancerGetPoolsWithActiveUpdates({
             timestamp: `${timestamp}`,
         });
 
-        return [...ampUpdates, ...gradualWeightUpdates].map((item) => item.poolId.id);
+        return ampUpdates.map((item) => item.poolId.id);
     }
 }

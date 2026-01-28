@@ -89,6 +89,7 @@ export type GqlChain =
     | 'HYPEREVM'
     | 'MAINNET'
     | 'MODE'
+    | 'MONAD'
     | 'OPTIMISM'
     | 'PLASMA'
     | 'POLYGON'
@@ -941,6 +942,7 @@ export interface GqlPoolLiquidityBootstrappingV3 extends GqlPoolBase {
     hook?: Maybe<GqlHook>;
     id: Scalars['ID'];
     isProjectTokenSwapInBlocked: Scalars['Boolean'];
+    isSeedless: Scalars['Boolean'];
     lbpName?: Maybe<Scalars['String']>;
     lbpOwner: Scalars['String'];
     liquidityManagement?: Maybe<LiquidityManagement>;
@@ -2213,6 +2215,7 @@ export interface LiquidityBootstrappingPoolV3Params {
     endTime: Scalars['Int'];
     farcaster?: Maybe<Scalars['String']>;
     isProjectTokenSwapInBlocked: Scalars['Boolean'];
+    isSeedless: Scalars['Boolean'];
     lbpName?: Maybe<Scalars['String']>;
     lbpOwner: Scalars['String'];
     projectToken: Scalars['String'];
@@ -2260,6 +2263,7 @@ export interface Mutation {
     poolReloadAllPoolAprs: Scalars['String'];
     poolReloadPools: Array<GqlPoolMutationResult>;
     poolReloadStakingForAllPools: Scalars['String'];
+    poolReloadSwaps: Scalars['String'];
     poolSyncAllPoolsFromSubgraph: Array<Scalars['String']>;
     poolSyncFxQuoteTokens: Array<GqlPoolMutationResult>;
     poolUpdateLiquidityValuesForAllPools: Scalars['String'];
@@ -3626,6 +3630,7 @@ export type GqlPoolLiquidityBootstrappingV3Resolvers<
     hook?: Resolver<Maybe<ResolversTypes['GqlHook']>, ParentType, ContextType>;
     id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
     isProjectTokenSwapInBlocked?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+    isSeedless?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
     lbpName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     lbpOwner?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     liquidityManagement?: Resolver<Maybe<ResolversTypes['LiquidityManagement']>, ParentType, ContextType>;
@@ -4621,6 +4626,7 @@ export type LiquidityBootstrappingPoolV3ParamsResolvers<
     endTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     farcaster?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     isProjectTokenSwapInBlocked?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+    isSeedless?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
     lbpName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     lbpOwner?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     projectToken?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -4705,6 +4711,12 @@ export type MutationResolvers<
         ParentType,
         ContextType,
         RequireFields<MutationPoolReloadStakingForAllPoolsArgs, 'chain' | 'stakingTypes'>
+    >;
+    poolReloadSwaps?: Resolver<
+        ResolversTypes['String'],
+        ParentType,
+        ContextType,
+        RequireFields<MutationPoolReloadSwapsArgs, 'chain' | 'poolId'>
     >;
     poolSyncAllPoolsFromSubgraph?: Resolver<
         Array<ResolversTypes['String']>,

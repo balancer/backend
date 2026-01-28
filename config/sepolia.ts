@@ -14,8 +14,8 @@ export default <NetworkData>{
         startDate: '2023-05-03',
         cowAmm: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmeqeR1YL7xfB2Z7DaykE5Xh1YGGS1AGuoF4qUxSa58K2D`,
         balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmPa1RR8QNnrdR7paNAAf99TcfugmE25kBApBy3Deonz6S`,
-        balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmfAqJY2Rr1o9HXghYDijzYHx57LapS4gYrGiJ5tubTHgb`,
-        balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmRei9SfWH8KsC1Ldf4XPmnyxwQvbgajfEKqEYSMqS2x3n`,
+        balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmQDGZWbqMkjfQeBSCZKcNzGQagoje6BbTdEMESosoTGqq`,
+        balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmUgs7oFMYjrN2pEb7LEBugZBpHwkfPEZMLkK2TFr1GbbY`,
         gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmWZ2zNHK93m4f8SHvhjy2T5x3NxjfZe7z1rGQSwhXH75Q`,
     },
     eth: {

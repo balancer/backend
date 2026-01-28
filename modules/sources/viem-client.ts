@@ -15,6 +15,7 @@ import {
     sonic,
     plasma,
     xLayer,
+    monad,
 } from 'viem/chains';
 import { Chain } from '@prisma/client';
 import config from '../../config';
@@ -92,6 +93,7 @@ const chain2ViemChain = {
             },
         },
     }),
+    [Chain.MONAD]: monad,
 };
 
 export const getViemClient = (chain: Chain, options?: { multicallBatch?: boolean; jsonRpcBatch?: boolean }) => {

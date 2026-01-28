@@ -97,6 +97,7 @@ export const schema = gql`
         HYPEREVM
         MAINNET
         MODE
+        MONAD
         OPTIMISM
         PLASMA
         POLYGON
@@ -1457,6 +1458,7 @@ export const schema = gql`
         hook: GqlHook
         id: ID!
         isProjectTokenSwapInBlocked: Boolean!
+        isSeedless: Boolean!
         lbpName: String
         lbpOwner: String!
         liquidityManagement: LiquidityManagement
@@ -3518,6 +3520,7 @@ export const schema = gql`
         endTime: Int!
         farcaster: String
         isProjectTokenSwapInBlocked: Boolean!
+        isSeedless: Boolean!
         lbpName: String
         lbpOwner: String!
         projectToken: String!
@@ -3577,6 +3580,7 @@ export const schema = gql`
         poolReloadAllPoolAprs(chain: GqlChain!): String!
         poolReloadPools(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
         poolReloadStakingForAllPools(chain: GqlChain!, stakingTypes: [GqlPoolStakingType!]!): String!
+        poolReloadSwaps(chain: GqlChain!, poolId: String!): String!
         poolSyncAllPoolsFromSubgraph(chain: GqlChain!): [String!]!
         poolSyncFxQuoteTokens(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
         poolUpdateLiquidityValuesForAllPools(chain: GqlChain!): String!
