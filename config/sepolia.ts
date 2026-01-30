@@ -16,7 +16,7 @@ export default <NetworkData>{
         balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmPa1RR8QNnrdR7paNAAf99TcfugmE25kBApBy3Deonz6S`,
         balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmQDGZWbqMkjfQeBSCZKcNzGQagoje6BbTdEMESosoTGqq`,
         balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmUgs7oFMYjrN2pEb7LEBugZBpHwkfPEZMLkK2TFr1GbbY`,
-        gauge: `https://api.subgraph.ormilabs.com/api/public/717cf785-de57-4761-94dd-9ac51b019902/subgraphs/balancer-gauges-sepolia/latest/gn`,
+        gauge: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/Qme7qpLpcR6VhzfJrCVsRxxRrLj9TqH6Skrg6EUWnRmTzU`,
     },
     eth: {
         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
