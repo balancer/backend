@@ -199,9 +199,7 @@ fragment BalancerSwap on Swap {
             }
         }
     }
-    userAddress {
-        id
-    }
+    userAddress
     timestamp
     tx
     block

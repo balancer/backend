@@ -12,8 +12,8 @@ export default <NetworkData>{
     },
     subgraphs: {
         startDate: '2024-05-22',
-        balancer: ``,
-        gauge: ``,
+        balancer: `https://api.subgraph.ormilabs.com/api/public/717cf785-de57-4761-94dd-9ac51b019902/subgraphs/v2-mode-smol/latest/gn`,
+        gauge: `https://api.subgraph.ormilabs.com/api/public/717cf785-de57-4761-94dd-9ac51b019902/subgraphs/balancer-gauges-mode/latest/gn`,
     },
     eth: {
         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
