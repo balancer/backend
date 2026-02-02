@@ -12,7 +12,7 @@ export default <NetworkData>{
     },
     subgraphs: {
         startDate: '2023-05-17',
-        balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmVNcphdNjTCaJ4ammPtFzRyD4gmyNBomKcVFZ98RADpS1`,
+        balancer: `https://api.goldsky.com/api/public/project_cmcigparivg3z01yhbv14ddl8/subgraphs/v2-zkevm-smol/latest/gn`,
         gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmbarCL8ofjqRJVAuSvKpd99m9xetBEGixoEQHJx31WEdB`,
         aura: 'https://data.aura.finance/graphql',
     },
