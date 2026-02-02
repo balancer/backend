@@ -1,5 +1,15 @@
 # backend
 
+## 2.0.0
+
+### Major Changes
+
+-   71472ae: remove all legacy code
+
+### Patch Changes
+
+-   b92531c: move v2 subgraphs to ormi
+
 ## 1.58.12
 
 ### Patch Changes
