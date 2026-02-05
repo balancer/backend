@@ -280,33 +280,63 @@ export default [
     },
     {
         inputs: [],
+        stateMutability: 'view',
+        type: 'function',
         name: 'getLBPoolImmutableData',
         outputs: [
             {
-                components: [
-                    { internalType: 'contract IERC20[]', name: 'tokens', type: 'address[]' },
-                    { internalType: 'uint256[]', name: 'decimalScalingFactors', type: 'uint256[]' },
-                    { internalType: 'uint256', name: 'startTime', type: 'uint256' },
-                    { internalType: 'uint256', name: 'endTime', type: 'uint256' },
-                    { internalType: 'uint256', name: 'projectTokenIndex', type: 'uint256' },
-                    { internalType: 'uint256', name: 'reserveTokenIndex', type: 'uint256' },
-                    { internalType: 'bool', name: 'isProjectTokenSwapInBlocked', type: 'bool' },
-                    { internalType: 'uint256[]', name: 'startWeights', type: 'uint256[]' },
-                    { internalType: 'uint256[]', name: 'endWeights', type: 'uint256[]' },
-                    { internalType: 'uint256', name: 'reserveTokenVirtualBalance', type: 'uint256' },
-                    { internalType: 'address', name: 'migrationRouter', type: 'address' },
-                    { internalType: 'uint256', name: 'lockDurationAfterMigration', type: 'uint256' },
-                    { internalType: 'uint256', name: 'bptPercentageToMigrate', type: 'uint256' },
-                    { internalType: 'uint256', name: 'migrationWeightProjectToken', type: 'uint256' },
-                    { internalType: 'uint256', name: 'migrationWeightReserveToken', type: 'uint256' },
-                ],
                 internalType: 'struct LBPoolImmutableData',
                 name: 'data',
                 type: 'tuple',
+                components: [
+                    {
+                        internalType: 'contract IERC20[]',
+                        name: 'tokens',
+                        type: 'address[]',
+                    },
+                    {
+                        internalType: 'uint256[]',
+                        name: 'decimalScalingFactors',
+                        type: 'uint256[]',
+                    },
+                    {
+                        internalType: 'uint256[]',
+                        name: 'startWeights',
+                        type: 'uint256[]',
+                    },
+                    {
+                        internalType: 'uint256[]',
+                        name: 'endWeights',
+                        type: 'uint256[]',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'startTime',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'endTime',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'projectTokenIndex',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'reserveTokenIndex',
+                        type: 'uint256',
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'isProjectTokenSwapInBlocked',
+                        type: 'bool',
+                    },
+                ],
             },
         ],
-        stateMutability: 'view',
-        type: 'function',
     },
     {
         inputs: [],
