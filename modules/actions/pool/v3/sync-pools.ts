@@ -18,7 +18,7 @@ import { mergeArraysById } from '../../../helper/merge-arrays-by-id';
  * @param blockNumber
  */
 export const syncPools = async (
-    dbPools: { id: string; type: PrismaPoolType; hook?: HookData; typeData: any }[],
+    dbPools: { id: string; type: PrismaPoolType; version: number; hook?: HookData; typeData: any }[],
     chain: Chain,
     vault: string,
     viemClient: ViemClient,

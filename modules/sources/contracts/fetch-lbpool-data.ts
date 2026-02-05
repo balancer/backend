@@ -1,4 +1,4 @@
-import abi from './abis/lb-pool';
+import abi from './abis/lb-pool-v3';
 import vaultV3 from '../contracts/abis/VaultV3';
 import { Chain } from '@prisma/client';
 import { getViemClient } from '../viem-client';
