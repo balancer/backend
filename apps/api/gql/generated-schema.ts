@@ -1534,6 +1534,7 @@ export type GqlPoolType =
     | 'COMPOSABLE_STABLE'
     | 'COW_AMM'
     | 'ELEMENT'
+    | 'FIXED_LBP'
     | 'FX'
     | 'GYRO'
     | 'GYRO3'
@@ -2288,6 +2289,7 @@ export interface MutationBeetsPoolLoadReliquarySnapshotsForAllFarmsArgs {
 
 export interface MutationCreateLbpArgs {
     input: CreateLbpInput;
+    type?: InputMaybe<GqlPoolType>;
 }
 
 export interface MutationPoolLoadOnChainDataForAllPoolsArgs {

@@ -78,6 +78,14 @@ fragment TypePool on Pool {
         projectTokenEndWeight
         reserveTokenVirtualBalance
     }
+    fixedLBPParams {
+        startTime
+        endTime
+        owner
+        isProjectTokenSwapInBlocked
+        reserveToken
+        projectToken
+    }
     reClammParams {
         lastTimestamp
         lastVirtualBalances

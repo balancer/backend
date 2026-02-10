@@ -313,6 +313,7 @@ enum GqlPoolType {
     COW_AMM
     QUANT_AMM_WEIGHTED
     RECLAMM
+    FIXED_LBP
 }
 
 """

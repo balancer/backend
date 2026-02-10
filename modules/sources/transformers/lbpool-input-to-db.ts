@@ -1,10 +1,16 @@
 import { Chain, Prisma, PrismaPoolType } from '@prisma/client';
-import { CreateLbpInput } from '../../../apps/api/gql/generated-schema';
-import { fetchLBPoolData } from '../contracts/fetch-lbpool-data';
+import { CreateLbpInput, GqlPoolType } from '../../../apps/api/gql/generated-schema';
+import { fetchLBPoolData, LBPoolData } from '../contracts/fetch-lbpool-data';
 import { prisma } from '../../../prisma/prisma-client';
+import { fetchFixedLBPoolData, FixedLBPoolData } from '../contracts';
 
-export const lbPoolInputToDB = async (input: CreateLbpInput) => {
-    const rpcData = await fetchLBPoolData(input.poolContract.address, input.poolContract.chain as Chain);
+export const lbPoolInputToDB = async (input: CreateLbpInput, type: GqlPoolType) => {
+    let rpcData: FixedLBPoolData | LBPoolData;
+    if (type === 'LIQUIDITY_BOOTSTRAPPING') {
+        rpcData = await fetchLBPoolData(input.poolContract.address, input.poolContract.chain as Chain);
+    } else {
+        rpcData = await fetchFixedLBPoolData(input.poolContract.address, input.poolContract.chain as Chain);
+    }
 
     // Get token prices
     const tokenPrices = await prisma.prismaTokenCurrentPrice.findMany({

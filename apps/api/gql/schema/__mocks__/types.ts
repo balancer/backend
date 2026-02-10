@@ -1555,6 +1555,7 @@ export enum GqlPoolType {
     COMPOSABLE_STABLE = 'COMPOSABLE_STABLE',
     COW_AMM = 'COW_AMM',
     ELEMENT = 'ELEMENT',
+    FIXED_LBP = 'FIXED_LBP',
     FX = 'FX',
     GYRO = 'GYRO',
     GYRO3 = 'GYRO3',
@@ -2322,6 +2323,7 @@ export type MutationBeetsPoolLoadReliquarySnapshotsForAllFarmsArgs = {
 
 export type MutationCreateLbpArgs = {
     input: CreateLbpInput;
+    type?: InputMaybe<GqlPoolType>;
 };
 
 export type MutationPoolLoadOnChainDataForAllPoolsArgs = {

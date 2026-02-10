@@ -1910,6 +1910,15 @@ export type TypePoolFragment = {
         projectTokenEndWeight: string;
         reserveTokenVirtualBalance: string;
     } | null;
+    fixedLBPParams?: {
+        __typename?: 'FixedLBPParams';
+        startTime: string;
+        endTime: string;
+        owner: string;
+        isProjectTokenSwapInBlocked: boolean;
+        reserveToken: string;
+        projectToken: string;
+    } | null;
     reClammParams?: {
         __typename?: 'ReClammParams';
         lastTimestamp: string;
@@ -1996,6 +2005,15 @@ export type PoolsQuery = {
             projectTokenStartWeight: string;
             projectTokenEndWeight: string;
             reserveTokenVirtualBalance: string;
+        } | null;
+        fixedLBPParams?: {
+            __typename?: 'FixedLBPParams';
+            startTime: string;
+            endTime: string;
+            owner: string;
+            isProjectTokenSwapInBlocked: boolean;
+            reserveToken: string;
+            projectToken: string;
         } | null;
         reClammParams?: {
             __typename?: 'ReClammParams';
@@ -2093,6 +2111,14 @@ export const TypePoolFragmentDoc = gql`
             projectTokenStartWeight
             projectTokenEndWeight
             reserveTokenVirtualBalance
+        }
+        fixedLBPParams {
+            startTime
+            endTime
+            owner
+            isProjectTokenSwapInBlocked
+            reserveToken
+            projectToken
         }
         reClammParams {
             lastTimestamp

@@ -2391,6 +2391,7 @@ export const schema = gql`
         COMPOSABLE_STABLE
         COW_AMM
         ELEMENT
+        FIXED_LBP
         FX
         GYRO
         GYRO3
@@ -3574,7 +3575,7 @@ export const schema = gql`
 
     type Mutation {
         beetsPoolLoadReliquarySnapshotsForAllFarms(chain: GqlChain!): String!
-        createLBP(input: CreateLBPInput!): Boolean!
+        createLBP(input: CreateLBPInput!, type: GqlPoolType): Boolean!
         poolLoadOnChainDataForAllPools(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
         poolLoadSnapshotsForPools(chain: GqlChain!, poolId: String!): String!
         poolReloadAllPoolAprs(chain: GqlChain!): String!
