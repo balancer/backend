@@ -1,6 +1,6 @@
 import { prisma } from '../../../../prisma/prisma-client';
 import { GraphQLError } from 'graphql';
-import { CreateLbpInput, Resolvers } from '../generated-schema';
+import { CreateLbpInput, GqlPoolType, Resolvers } from '../generated-schema';
 import { validateLBPoolInput } from '../../../../modules/validators/lbpool-input-validator';
 import { lbPoolInputToDB } from '../../../../modules/sources/transformers/lbpool-input-to-db';
 import { priceChartData } from '../../../../modules/pool/lbp/price-chart-data';
@@ -41,7 +41,7 @@ export default {
         },
     },
     Mutation: {
-        createLBP: async (_: any, { input }: { input: CreateLbpInput }) => {
+        createLBP: async (_: any, { input, type }) => {
             // Validate input
             const parsedInput = await validateLBPoolInput(input);
             if (!parsedInput.success) {
@@ -54,7 +54,7 @@ export default {
             }
 
             // Prepare DB data
-            const { tokenData, poolData } = await lbPoolInputToDB(input);
+            const { tokenData, poolData } = await lbPoolInputToDB(input, type ? type : 'LIQUIDITY_BOOTSTRAPPING');
 
             try {
                 // Create tokens

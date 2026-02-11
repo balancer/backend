@@ -23,7 +23,15 @@ import _ from 'lodash';
 import { prisma } from '../../../prisma/prisma-client';
 import { Chain, Prisma, PrismaUserStakedBalance, PrismaUserWalletBalance } from '@prisma/client';
 import { fixedNumber } from '../../view-helpers/fixed-number';
-import { ElementData, FxData, GyroData, StableData, QuantAmmWeightedData, ReclammData } from '../subgraph-mapper';
+import {
+    ElementData,
+    FxData,
+    GyroData,
+    StableData,
+    QuantAmmWeightedData,
+    ReclammData,
+    FixedLbpData,
+} from '../subgraph-mapper';
 import { LBPoolData } from '../pool-data';
 import { ZERO_ADDRESS } from '@balancer/sdk';
 import { mapHookToGqlHook } from '../../sources/transformers';
@@ -524,7 +532,6 @@ export class PoolGqlLoaderService {
             ),
         };
 
-        //TODO: may need to build out the types here still
         switch (pool.type) {
             case 'STABLE':
                 return {
@@ -577,6 +584,21 @@ export class PoolGqlLoaderService {
                         ...mappedData,
                     };
                 }
+            case 'FIXED_LBP':
+                return {
+                    __typename: 'GqlPoolFixedPriceLBP',
+                    ...poolWithoutTypeData,
+                    ...(typeData as LBPoolData & {
+                        lbpName?: string;
+                        description?: string;
+                        website?: string;
+                        x?: string;
+                        discord?: string;
+                        telegram?: string;
+                        farcaster?: string;
+                    }),
+                    ...mappedData,
+                };
             case 'GYRO':
             case 'GYRO3':
             case 'GYROE':
