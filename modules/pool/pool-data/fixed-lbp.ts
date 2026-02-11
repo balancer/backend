@@ -1,6 +1,5 @@
 import { VaultPoolFragment } from '../../sources/subgraphs/balancer-v3-vault/generated/types';
 import { TypePoolFragment } from '../../sources/subgraphs/balancer-v3-pools/generated/types';
-import { formatEther } from 'viem';
 
 export type FixedLBPData = ReturnType<typeof fixedLBP>;
 

@@ -783,6 +783,61 @@ export enum GqlPoolFilterCategory {
     SUPERFEST = 'SUPERFEST',
 }
 
+export type GqlPoolFixedPriceLbp = GqlPoolBase & {
+    __typename?: 'GqlPoolFixedPriceLBP';
+    address: Scalars['Bytes'];
+    categories?: Maybe<Array<Maybe<GqlPoolFilterCategory>>>;
+    chain: GqlChain;
+    createTime: Scalars['Int'];
+    decimals: Scalars['Int'];
+    description?: Maybe<Scalars['String']>;
+    discord?: Maybe<Scalars['String']>;
+    dynamicData: GqlPoolDynamicData;
+    endTime: Scalars['Int'];
+    factory?: Maybe<Scalars['Bytes']>;
+    farcaster?: Maybe<Scalars['String']>;
+    hasAnyAllowedBuffer: Scalars['Boolean'];
+    hasErc4626: Scalars['Boolean'];
+    hasNestedErc4626: Scalars['Boolean'];
+    hook?: Maybe<GqlHook>;
+    id: Scalars['ID'];
+    lbpName?: Maybe<Scalars['String']>;
+    lbpOwner: Scalars['String'];
+    liquidityManagement?: Maybe<LiquidityManagement>;
+    name: Scalars['String'];
+    /**
+     * The wallet address of the owner of the pool. Pool owners can set certain properties like swapFees or AMP.
+     * @deprecated Use swapFeeManager instead
+     */
+    owner?: Maybe<Scalars['Bytes']>;
+    /** Account empowered to pause/unpause the pool (or 0 to delegate to governance) */
+    pauseManager?: Maybe<Scalars['Bytes']>;
+    /** Account empowered to set the pool creator fee percentage */
+    poolCreator?: Maybe<Scalars['Bytes']>;
+    poolTokens: Array<GqlPoolTokenDetail>;
+    projectToken: Scalars['String'];
+    projectTokenIndex: Scalars['Int'];
+    protocolVersion: Scalars['Int'];
+    reserveToken: Scalars['String'];
+    reserveTokenIndex: Scalars['Int'];
+    /** All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again. */
+    staking?: Maybe<GqlPoolStaking>;
+    startTime: Scalars['Int'];
+    /** Account empowered to set static swap fees for a pool (when 0 on V2 swap fees are immutable, on V3 delegate to governance) */
+    swapFeeManager?: Maybe<Scalars['Bytes']>;
+    symbol: Scalars['String'];
+    tags?: Maybe<Array<Maybe<Scalars['String']>>>;
+    telegram?: Maybe<Scalars['String']>;
+    topTrades?: Maybe<Array<GqlLbpTopTrade>>;
+    type: GqlPoolType;
+    userBalance?: Maybe<GqlPoolUserBalance>;
+    /** @deprecated use protocolVersion instead */
+    vaultVersion: Scalars['Int'];
+    version: Scalars['Int'];
+    website?: Maybe<Scalars['String']>;
+    x?: Maybe<Scalars['String']>;
+};
+
 export type GqlPoolFx = GqlPoolBase & {
     __typename?: 'GqlPoolFx';
     address: Scalars['Bytes'];
@@ -1574,6 +1629,7 @@ export enum GqlPoolType {
 export type GqlPoolUnion =
     | GqlPoolComposableStable
     | GqlPoolElement
+    | GqlPoolFixedPriceLbp
     | GqlPoolFx
     | GqlPoolGyro
     | GqlPoolLiquidityBootstrapping

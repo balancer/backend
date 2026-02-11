@@ -784,6 +784,61 @@ export type GqlPoolFilterCategory =
     | 'POINTS_SWELL'
     | 'SUPERFEST';
 
+export interface GqlPoolFixedPriceLbp extends GqlPoolBase {
+    __typename?: 'GqlPoolFixedPriceLBP';
+    address: Scalars['Bytes'];
+    categories?: Maybe<Array<Maybe<GqlPoolFilterCategory>>>;
+    chain: GqlChain;
+    createTime: Scalars['Int'];
+    decimals: Scalars['Int'];
+    description?: Maybe<Scalars['String']>;
+    discord?: Maybe<Scalars['String']>;
+    dynamicData: GqlPoolDynamicData;
+    endTime: Scalars['Int'];
+    factory?: Maybe<Scalars['Bytes']>;
+    farcaster?: Maybe<Scalars['String']>;
+    hasAnyAllowedBuffer: Scalars['Boolean'];
+    hasErc4626: Scalars['Boolean'];
+    hasNestedErc4626: Scalars['Boolean'];
+    hook?: Maybe<GqlHook>;
+    id: Scalars['ID'];
+    lbpName?: Maybe<Scalars['String']>;
+    lbpOwner: Scalars['String'];
+    liquidityManagement?: Maybe<LiquidityManagement>;
+    name: Scalars['String'];
+    /**
+     * The wallet address of the owner of the pool. Pool owners can set certain properties like swapFees or AMP.
+     * @deprecated Use swapFeeManager instead
+     */
+    owner?: Maybe<Scalars['Bytes']>;
+    /** Account empowered to pause/unpause the pool (or 0 to delegate to governance) */
+    pauseManager?: Maybe<Scalars['Bytes']>;
+    /** Account empowered to set the pool creator fee percentage */
+    poolCreator?: Maybe<Scalars['Bytes']>;
+    poolTokens: Array<GqlPoolTokenDetail>;
+    projectToken: Scalars['String'];
+    projectTokenIndex: Scalars['Int'];
+    protocolVersion: Scalars['Int'];
+    reserveToken: Scalars['String'];
+    reserveTokenIndex: Scalars['Int'];
+    /** All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again. */
+    staking?: Maybe<GqlPoolStaking>;
+    startTime: Scalars['Int'];
+    /** Account empowered to set static swap fees for a pool (when 0 on V2 swap fees are immutable, on V3 delegate to governance) */
+    swapFeeManager?: Maybe<Scalars['Bytes']>;
+    symbol: Scalars['String'];
+    tags?: Maybe<Array<Maybe<Scalars['String']>>>;
+    telegram?: Maybe<Scalars['String']>;
+    topTrades?: Maybe<Array<GqlLbpTopTrade>>;
+    type: GqlPoolType;
+    userBalance?: Maybe<GqlPoolUserBalance>;
+    /** @deprecated use protocolVersion instead */
+    vaultVersion: Scalars['Int'];
+    version: Scalars['Int'];
+    website?: Maybe<Scalars['String']>;
+    x?: Maybe<Scalars['String']>;
+}
+
 export interface GqlPoolFx extends GqlPoolBase {
     __typename?: 'GqlPoolFx';
     address: Scalars['Bytes'];
@@ -1552,6 +1607,7 @@ export type GqlPoolType =
 export type GqlPoolUnion =
     | GqlPoolComposableStable
     | GqlPoolElement
+    | GqlPoolFixedPriceLbp
     | GqlPoolFx
     | GqlPoolGyro
     | GqlPoolLiquidityBootstrapping
@@ -2732,6 +2788,7 @@ export type ResolversTypes = ResolversObject<{
     GqlPoolBase:
         | ResolversTypes['GqlPoolComposableStable']
         | ResolversTypes['GqlPoolElement']
+        | ResolversTypes['GqlPoolFixedPriceLBP']
         | ResolversTypes['GqlPoolFx']
         | ResolversTypes['GqlPoolGyro']
         | ResolversTypes['GqlPoolLiquidityBootstrapping']
@@ -2754,6 +2811,7 @@ export type ResolversTypes = ResolversObject<{
     GqlPoolFeaturedPool: ResolverTypeWrapper<GqlPoolFeaturedPool>;
     GqlPoolFilter: GqlPoolFilter;
     GqlPoolFilterCategory: GqlPoolFilterCategory;
+    GqlPoolFixedPriceLBP: ResolverTypeWrapper<GqlPoolFixedPriceLbp>;
     GqlPoolFx: ResolverTypeWrapper<GqlPoolFx>;
     GqlPoolGyro: ResolverTypeWrapper<GqlPoolGyro>;
     GqlPoolLiquidityBootstrapping: ResolverTypeWrapper<GqlPoolLiquidityBootstrapping>;
@@ -2788,6 +2846,7 @@ export type ResolversTypes = ResolversObject<{
     GqlPoolUnion:
         | ResolversTypes['GqlPoolComposableStable']
         | ResolversTypes['GqlPoolElement']
+        | ResolversTypes['GqlPoolFixedPriceLBP']
         | ResolversTypes['GqlPoolFx']
         | ResolversTypes['GqlPoolGyro']
         | ResolversTypes['GqlPoolLiquidityBootstrapping']
@@ -2889,6 +2948,7 @@ export type ResolversParentTypes = ResolversObject<{
     GqlPoolBase:
         | ResolversParentTypes['GqlPoolComposableStable']
         | ResolversParentTypes['GqlPoolElement']
+        | ResolversParentTypes['GqlPoolFixedPriceLBP']
         | ResolversParentTypes['GqlPoolFx']
         | ResolversParentTypes['GqlPoolGyro']
         | ResolversParentTypes['GqlPoolLiquidityBootstrapping']
@@ -2909,6 +2969,7 @@ export type ResolversParentTypes = ResolversObject<{
     GqlPoolEventsFilter: GqlPoolEventsFilter;
     GqlPoolFeaturedPool: GqlPoolFeaturedPool;
     GqlPoolFilter: GqlPoolFilter;
+    GqlPoolFixedPriceLBP: GqlPoolFixedPriceLbp;
     GqlPoolFx: GqlPoolFx;
     GqlPoolGyro: GqlPoolGyro;
     GqlPoolLiquidityBootstrapping: GqlPoolLiquidityBootstrapping;
@@ -2937,6 +2998,7 @@ export type ResolversParentTypes = ResolversObject<{
     GqlPoolUnion:
         | ResolversParentTypes['GqlPoolComposableStable']
         | ResolversParentTypes['GqlPoolElement']
+        | ResolversParentTypes['GqlPoolFixedPriceLBP']
         | ResolversParentTypes['GqlPoolFx']
         | ResolversParentTypes['GqlPoolGyro']
         | ResolversParentTypes['GqlPoolLiquidityBootstrapping']
@@ -3282,6 +3344,7 @@ export type GqlPoolBaseResolvers<
     __resolveType: TypeResolveFn<
         | 'GqlPoolComposableStable'
         | 'GqlPoolElement'
+        | 'GqlPoolFixedPriceLBP'
         | 'GqlPoolFx'
         | 'GqlPoolGyro'
         | 'GqlPoolLiquidityBootstrapping'
@@ -3489,6 +3552,55 @@ export type GqlPoolFeaturedPoolResolvers<
     pool?: Resolver<ResolversTypes['GqlPoolBase'], ParentType, ContextType>;
     poolId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
     primary?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+    __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type GqlPoolFixedPriceLbpResolvers<
+    ContextType = ResolverContext,
+    ParentType extends ResolversParentTypes['GqlPoolFixedPriceLBP'] = ResolversParentTypes['GqlPoolFixedPriceLBP'],
+> = ResolversObject<{
+    address?: Resolver<ResolversTypes['Bytes'], ParentType, ContextType>;
+    categories?: Resolver<Maybe<Array<Maybe<ResolversTypes['GqlPoolFilterCategory']>>>, ParentType, ContextType>;
+    chain?: Resolver<ResolversTypes['GqlChain'], ParentType, ContextType>;
+    createTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+    decimals?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+    description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    discord?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    dynamicData?: Resolver<ResolversTypes['GqlPoolDynamicData'], ParentType, ContextType>;
+    endTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+    factory?: Resolver<Maybe<ResolversTypes['Bytes']>, ParentType, ContextType>;
+    farcaster?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    hasAnyAllowedBuffer?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+    hasErc4626?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+    hasNestedErc4626?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+    hook?: Resolver<Maybe<ResolversTypes['GqlHook']>, ParentType, ContextType>;
+    id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+    lbpName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    lbpOwner?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+    liquidityManagement?: Resolver<Maybe<ResolversTypes['LiquidityManagement']>, ParentType, ContextType>;
+    name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+    owner?: Resolver<Maybe<ResolversTypes['Bytes']>, ParentType, ContextType>;
+    pauseManager?: Resolver<Maybe<ResolversTypes['Bytes']>, ParentType, ContextType>;
+    poolCreator?: Resolver<Maybe<ResolversTypes['Bytes']>, ParentType, ContextType>;
+    poolTokens?: Resolver<Array<ResolversTypes['GqlPoolTokenDetail']>, ParentType, ContextType>;
+    projectToken?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+    projectTokenIndex?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+    protocolVersion?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+    reserveToken?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+    reserveTokenIndex?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+    staking?: Resolver<Maybe<ResolversTypes['GqlPoolStaking']>, ParentType, ContextType>;
+    startTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+    swapFeeManager?: Resolver<Maybe<ResolversTypes['Bytes']>, ParentType, ContextType>;
+    symbol?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+    tags?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>;
+    telegram?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    topTrades?: Resolver<Maybe<Array<ResolversTypes['GqlLBPTopTrade']>>, ParentType, ContextType>;
+    type?: Resolver<ResolversTypes['GqlPoolType'], ParentType, ContextType>;
+    userBalance?: Resolver<Maybe<ResolversTypes['GqlPoolUserBalance']>, ParentType, ContextType>;
+    vaultVersion?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+    version?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+    website?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+    x?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -4101,6 +4213,7 @@ export type GqlPoolUnionResolvers<
     __resolveType: TypeResolveFn<
         | 'GqlPoolComposableStable'
         | 'GqlPoolElement'
+        | 'GqlPoolFixedPriceLBP'
         | 'GqlPoolFx'
         | 'GqlPoolGyro'
         | 'GqlPoolLiquidityBootstrapping'
@@ -5061,6 +5174,7 @@ export type Resolvers<ContextType = ResolverContext> = ResolversObject<{
     GqlPoolEvent?: GqlPoolEventResolvers<ContextType>;
     GqlPoolEventAmount?: GqlPoolEventAmountResolvers<ContextType>;
     GqlPoolFeaturedPool?: GqlPoolFeaturedPoolResolvers<ContextType>;
+    GqlPoolFixedPriceLBP?: GqlPoolFixedPriceLbpResolvers<ContextType>;
     GqlPoolFx?: GqlPoolFxResolvers<ContextType>;
     GqlPoolGyro?: GqlPoolGyroResolvers<ContextType>;
     GqlPoolLiquidityBootstrapping?: GqlPoolLiquidityBootstrappingResolvers<ContextType>;

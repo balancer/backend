@@ -1,7 +1,7 @@
 import { Chain, PrismaPoolType } from '@prisma/client';
 import { PoolType } from '../subgraphs/balancer-v3-pools/generated/types';
-import { StableData } from '../../pool/subgraph-mapper';
-import { gyro, stable, quantAmmWeighted, lbPool, reclamm, fixedLBP } from '../../pool/pool-data';
+import { StableData, typeDataMapper } from '../../pool/subgraph-mapper';
+import { quantAmmWeighted, lbPool, reclamm, fixedLBP } from '../../pool/pool-data';
 import { V3JoinedSubgraphPool } from '../subgraphs';
 import { parseEther } from 'viem';
 import { PoolUpsertData } from '../../../prisma/prisma-types';
@@ -143,15 +143,4 @@ export const poolUpsertTransformerV3 = (
             nestedPoolId: token.nestedPool?.id.toLowerCase() || null,
         })),
     };
-};
-
-const typeDataMapper = {
-    GYRO: gyro,
-    GYRO3: gyro,
-    GYROE: gyro,
-    STABLE: stable,
-    QUANT_AMM_WEIGHTED: quantAmmWeighted,
-    RECLAMM: reclamm,
-    LIQUIDITY_BOOTSTRAPPING: lbPool,
-    FIXED_LBP: fixedLBP,
 };

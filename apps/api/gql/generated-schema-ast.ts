@@ -1280,6 +1280,71 @@ export const schema = gql`
         SUPERFEST
     }
 
+    type GqlPoolFixedPriceLBP implements GqlPoolBase {
+        address: Bytes!
+        categories: [GqlPoolFilterCategory]
+        chain: GqlChain!
+        createTime: Int!
+        decimals: Int!
+        description: String
+        discord: String
+        dynamicData: GqlPoolDynamicData!
+        endTime: Int!
+        factory: Bytes
+        farcaster: String
+        hasAnyAllowedBuffer: Boolean!
+        hasErc4626: Boolean!
+        hasNestedErc4626: Boolean!
+        hook: GqlHook
+        id: ID!
+        lbpName: String
+        lbpOwner: String!
+        liquidityManagement: LiquidityManagement
+        name: String!
+
+        """
+        The wallet address of the owner of the pool. Pool owners can set certain properties like swapFees or AMP.
+        """
+        owner: Bytes @deprecated(reason: "Use swapFeeManager instead")
+
+        """
+        Account empowered to pause/unpause the pool (or 0 to delegate to governance)
+        """
+        pauseManager: Bytes
+
+        """
+        Account empowered to set the pool creator fee percentage
+        """
+        poolCreator: Bytes
+        poolTokens: [GqlPoolTokenDetail!]!
+        projectToken: String!
+        projectTokenIndex: Int!
+        protocolVersion: Int!
+        reserveToken: String!
+        reserveTokenIndex: Int!
+
+        """
+        All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
+        """
+        staking: GqlPoolStaking
+        startTime: Int!
+
+        """
+        Account empowered to set static swap fees for a pool (when 0 on V2 swap fees are immutable, on V3 delegate to governance)
+        """
+        swapFeeManager: Bytes
+        symbol: String!
+        tags: [String]
+        telegram: String
+        topTrades: [GqlLBPTopTrade!]
+        type: GqlPoolType!
+        userBalance: GqlPoolUserBalance
+        vaultVersion: Int! @deprecated(reason: "use protocolVersion instead")
+        version: Int!
+        website: String
+        x: String
+    }
+
     type GqlPoolFx implements GqlPoolBase {
         address: Bytes!
         alpha: String!
@@ -2410,6 +2475,7 @@ export const schema = gql`
     union GqlPoolUnion =
           GqlPoolComposableStable
         | GqlPoolElement
+        | GqlPoolFixedPriceLBP
         | GqlPoolFx
         | GqlPoolGyro
         | GqlPoolLiquidityBootstrapping
