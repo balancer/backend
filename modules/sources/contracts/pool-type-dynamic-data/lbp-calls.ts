@@ -33,7 +33,7 @@ export const lbpCalls = (poolAddress: string): ViemMulticallCall[] => [
         abi,
         functionName: 'getLBPoolDynamicData',
         parser: (result: DynamicData, results: any, index: number) => {
-            const immutableData = results[index - 3].result as ImmutableData;
+            const immutableData = results[index - 1].result as ImmutableData;
             const tokens = immutableData.tokens;
 
             const poolToken = tokens.map((token, index) => ({
