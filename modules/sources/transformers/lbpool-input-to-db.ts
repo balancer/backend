@@ -40,14 +40,16 @@ export const lbPoolInputToDB = async (input: CreateLbpInput, type: GqlPoolType) 
         },
         ...rpcData.tokens.map((token) => ({
             ...token,
+            address: token.address.toLowerCase(),
             chain: input.poolContract.chain as Chain,
-            logoURI: (token.address === projectToken ? input.metadata.tokenLogo : '') || '',
+            logoURI: (token.address.toLowerCase() === projectToken.toLowerCase() ? input.metadata.tokenLogo : '') || '',
         })),
     ];
 
     const poolTokensData: Prisma.PrismaPoolTokenCreateManyPoolInput[] = rpcData.pool.tokens.map((token, idx) => ({
         ...token,
         id: `${input.poolContract.address}-${token.address}`.toLowerCase(),
+        address: token.address.toLowerCase(),
         balanceUSD: Number(token.balance) * prices[idx],
         priceRate: '1',
     }));
