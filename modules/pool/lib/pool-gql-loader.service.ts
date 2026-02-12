@@ -244,7 +244,7 @@ export class PoolGqlLoaderService {
     ): GqlPoolMinimal {
         return {
             ...pool,
-            ...(pool.protocolVersion === 3 && pool.type === 'LIQUIDITY_BOOTSTRAPPING'
+            ...(pool.protocolVersion === 3 && (pool.type === 'LIQUIDITY_BOOTSTRAPPING' || pool.type === 'FIXED_LBP')
                 ? { lbpParams: pool.typeData as unknown as LiquidityBootstrappingPoolV3Params }
                 : {}),
             liquidityManagement: (pool.liquidityManagement as LiquidityManagement) || undefined,

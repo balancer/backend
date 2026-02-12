@@ -2267,27 +2267,8 @@ export interface LbPoolInput {
 /** LBP specific params for v3 pools only. */
 export interface LiquidityBootstrappingPoolV3Params {
     __typename?: 'LiquidityBootstrappingPoolV3Params';
-    description?: Maybe<Scalars['String']>;
-    discord?: Maybe<Scalars['String']>;
     endTime: Scalars['Int'];
-    farcaster?: Maybe<Scalars['String']>;
-    isProjectTokenSwapInBlocked: Scalars['Boolean'];
-    isSeedless: Scalars['Boolean'];
-    lbpName?: Maybe<Scalars['String']>;
-    lbpOwner: Scalars['String'];
-    projectToken: Scalars['String'];
-    projectTokenEndWeight: Scalars['Float'];
-    projectTokenIndex: Scalars['Int'];
-    projectTokenStartWeight: Scalars['Float'];
-    reserveToken: Scalars['String'];
-    reserveTokenEndWeight: Scalars['Float'];
-    reserveTokenIndex: Scalars['Int'];
-    reserveTokenStartWeight: Scalars['Float'];
     startTime: Scalars['Int'];
-    telegram?: Maybe<Scalars['String']>;
-    topTrades?: Maybe<Array<GqlLbpTopTrade>>;
-    website?: Maybe<Scalars['String']>;
-    x?: Maybe<Scalars['String']>;
 }
 
 /** Liquidity management settings for v3 pools. */
@@ -4741,27 +4722,8 @@ export type LiquidityBootstrappingPoolV3ParamsResolvers<
     ContextType = ResolverContext,
     ParentType extends ResolversParentTypes['LiquidityBootstrappingPoolV3Params'] = ResolversParentTypes['LiquidityBootstrappingPoolV3Params'],
 > = ResolversObject<{
-    description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-    discord?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     endTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-    farcaster?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-    isProjectTokenSwapInBlocked?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-    isSeedless?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-    lbpName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-    lbpOwner?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    projectToken?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    projectTokenEndWeight?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
-    projectTokenIndex?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-    projectTokenStartWeight?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
-    reserveToken?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-    reserveTokenEndWeight?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
-    reserveTokenIndex?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-    reserveTokenStartWeight?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
     startTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-    telegram?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-    topTrades?: Resolver<Maybe<Array<ResolversTypes['GqlLBPTopTrade']>>, ParentType, ContextType>;
-    website?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-    x?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 

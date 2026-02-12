@@ -2159,36 +2159,8 @@ export const aLiquidityBootstrappingPoolV3Params = (
     overrides?: Partial<LiquidityBootstrappingPoolV3Params>,
 ): LiquidityBootstrappingPoolV3Params => {
     return {
-        description: overrides && overrides.hasOwnProperty('description') ? overrides.description! : 'creator',
-        discord: overrides && overrides.hasOwnProperty('discord') ? overrides.discord! : 'cursus',
         endTime: overrides && overrides.hasOwnProperty('endTime') ? overrides.endTime! : 4758,
-        farcaster: overrides && overrides.hasOwnProperty('farcaster') ? overrides.farcaster! : 'quidem',
-        isProjectTokenSwapInBlocked:
-            overrides && overrides.hasOwnProperty('isProjectTokenSwapInBlocked')
-                ? overrides.isProjectTokenSwapInBlocked!
-                : false,
-        isSeedless: overrides && overrides.hasOwnProperty('isSeedless') ? overrides.isSeedless! : false,
-        lbpName: overrides && overrides.hasOwnProperty('lbpName') ? overrides.lbpName! : 'consequatur',
-        lbpOwner: overrides && overrides.hasOwnProperty('lbpOwner') ? overrides.lbpOwner! : 'culpa',
-        projectToken: overrides && overrides.hasOwnProperty('projectToken') ? overrides.projectToken! : 'paulatim',
-        projectTokenEndWeight:
-            overrides && overrides.hasOwnProperty('projectTokenEndWeight') ? overrides.projectTokenEndWeight! : 0,
-        projectTokenIndex:
-            overrides && overrides.hasOwnProperty('projectTokenIndex') ? overrides.projectTokenIndex! : 9663,
-        projectTokenStartWeight:
-            overrides && overrides.hasOwnProperty('projectTokenStartWeight') ? overrides.projectTokenStartWeight! : 0.2,
-        reserveToken: overrides && overrides.hasOwnProperty('reserveToken') ? overrides.reserveToken! : 'accommodo',
-        reserveTokenEndWeight:
-            overrides && overrides.hasOwnProperty('reserveTokenEndWeight') ? overrides.reserveTokenEndWeight! : 1.3,
-        reserveTokenIndex:
-            overrides && overrides.hasOwnProperty('reserveTokenIndex') ? overrides.reserveTokenIndex! : 432,
-        reserveTokenStartWeight:
-            overrides && overrides.hasOwnProperty('reserveTokenStartWeight') ? overrides.reserveTokenStartWeight! : 1.2,
         startTime: overrides && overrides.hasOwnProperty('startTime') ? overrides.startTime! : 1614,
-        telegram: overrides && overrides.hasOwnProperty('telegram') ? overrides.telegram! : 'tego',
-        topTrades: overrides && overrides.hasOwnProperty('topTrades') ? overrides.topTrades! : [aGqlLbpTopTrade()],
-        website: overrides && overrides.hasOwnProperty('website') ? overrides.website! : 'ad',
-        x: overrides && overrides.hasOwnProperty('x') ? overrides.x! : 'id',
     };
 };
 

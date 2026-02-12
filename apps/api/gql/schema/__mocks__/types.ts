@@ -2301,27 +2301,8 @@ export type LbPoolInput = {
 /** LBP specific params for v3 pools only. */
 export type LiquidityBootstrappingPoolV3Params = {
     __typename?: 'LiquidityBootstrappingPoolV3Params';
-    description?: Maybe<Scalars['String']>;
-    discord?: Maybe<Scalars['String']>;
     endTime: Scalars['Int'];
-    farcaster?: Maybe<Scalars['String']>;
-    isProjectTokenSwapInBlocked: Scalars['Boolean'];
-    isSeedless: Scalars['Boolean'];
-    lbpName?: Maybe<Scalars['String']>;
-    lbpOwner: Scalars['String'];
-    projectToken: Scalars['String'];
-    projectTokenEndWeight: Scalars['Float'];
-    projectTokenIndex: Scalars['Int'];
-    projectTokenStartWeight: Scalars['Float'];
-    reserveToken: Scalars['String'];
-    reserveTokenEndWeight: Scalars['Float'];
-    reserveTokenIndex: Scalars['Int'];
-    reserveTokenStartWeight: Scalars['Float'];
     startTime: Scalars['Int'];
-    telegram?: Maybe<Scalars['String']>;
-    topTrades?: Maybe<Array<GqlLbpTopTrade>>;
-    website?: Maybe<Scalars['String']>;
-    x?: Maybe<Scalars['String']>;
 };
 
 /** Liquidity management settings for v3 pools. */

@@ -199,28 +199,8 @@ type GqlPoolMinimal {
 LBP specific params for v3 pools only.
 """
 type LiquidityBootstrappingPoolV3Params {
-    lbpName: String
-    description: String
-    website: String
-    x: String
-    discord: String
-    telegram: String
-    farcaster: String
-
     startTime: Int!
     endTime: Int!
-    lbpOwner: String!
-    isProjectTokenSwapInBlocked: Boolean!
-    reserveToken: String!
-    reserveTokenStartWeight: Float!
-    reserveTokenEndWeight: Float!
-    reserveTokenIndex: Int!
-    projectToken: String!
-    projectTokenStartWeight: Float!
-    projectTokenEndWeight: Float!
-    projectTokenIndex: Int!
-    topTrades: [GqlLBPTopTrade!]
-    isSeedless: Boolean!
 }
 
 """

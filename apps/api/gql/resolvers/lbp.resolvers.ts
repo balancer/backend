@@ -53,6 +53,14 @@ export default {
                 });
             }
 
+            if (type && type !== 'LIQUIDITY_BOOTSTRAPPING' && type !== 'FIXED_LBP') {
+                throw new GraphQLError('Invalid pool type', {
+                    extensions: {
+                        code: 'BAD_USER_INPUT',
+                    },
+                });
+            }
+
             // Prepare DB data
             const { tokenData, poolData } = await lbPoolInputToDB(input, type ? type : 'LIQUIDITY_BOOTSTRAPPING');
 

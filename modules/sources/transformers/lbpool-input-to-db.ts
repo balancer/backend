@@ -57,7 +57,7 @@ export const lbPoolInputToDB = async (input: CreateLbpInput, type: GqlPoolType) 
         id: input.poolContract.address.toLowerCase(),
         address: input.poolContract.address.toLowerCase(),
         chain: input.poolContract.chain.toUpperCase() as Chain,
-        type: PrismaPoolType.LIQUIDITY_BOOTSTRAPPING,
+        type: type,
         createTime: Math.floor(+new Date() / 1000),
         protocolVersion: 3,
         typeData: {
