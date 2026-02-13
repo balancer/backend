@@ -88,8 +88,8 @@ export default {
                         },
                         data: {
                             typeData: {
-                                ...((currentPool.typeData as any) || {}),
                                 ...((poolData.typeData as any) || {}),
+                                ...((currentPool.typeData as any) || {}), // make sure that we dont allow to override the LBP metadata, otherwise anybody could override the pool with malicious metadata
                             },
                         },
                     });
