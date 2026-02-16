@@ -108,14 +108,6 @@ export class TokenPriceService {
         });
     }
 
-    public async getTokenPriceForRange(
-        tokenAddress: string,
-        range: GqlTokenChartDataRange,
-        chain: Chain,
-    ): Promise<PrismaTokenPrice[]> {
-        return this.getTokenPricesForRange([tokenAddress], range, chain);
-    }
-
     public async getRelativeDataForRange(
         tokenIn: string,
         tokenOut: string,

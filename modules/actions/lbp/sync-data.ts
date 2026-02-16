@@ -4,7 +4,7 @@ import { prisma } from '../../../prisma/prisma-client';
 import { multicallViem } from '../../web3/multicaller-viem';
 import { ViemClient } from '../../sources/types';
 import { eventsRepository } from '../../repositories/events/events-repository';
-import { formatEther } from 'viem';
+import { lbpCallsV3 } from '../../sources/contracts/pool-type-dynamic-data/lbp-calls-v3';
 
 /**
  * Fetches new weights and updates pool tokens
@@ -22,7 +22,7 @@ export const syncData = async (
                 type: PrismaPoolType.LIQUIDITY_BOOTSTRAPPING,
                 protocolVersion: 3,
             },
-            select: { id: true, typeData: true },
+            select: { id: true, version: true, typeData: true },
         }),
         prisma.prismaPoolToken
             .findMany({
@@ -52,8 +52,9 @@ export const syncData = async (
             .then((records) => Object.fromEntries(records.map((dd) => [dd.id, dd]))),
     ]);
 
-    const calls = pools.flatMap(({ id }) => lbpCalls(id, vaultAddress));
-    const onchainData = (await multicallViem(client, calls)) as Record<string, LBPCallsOutput>;
+    const calls = pools.filter((pool) => pool.version === 1 || pool.version === 2).flatMap(({ id }) => lbpCalls(id));
+    const callsV3 = pools.filter((pool) => pool.version === 3).flatMap(({ id }) => lbpCallsV3(id, vaultAddress));
+    const onchainData = (await multicallViem(client, [...calls, ...callsV3])) as Record<string, LBPCallsOutput>;
 
     const updates = Object.keys(onchainData).flatMap((id) => onchainData[id].poolToken);
 

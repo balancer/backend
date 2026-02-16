@@ -49,9 +49,7 @@ export interface NetworkData {
         balancerV3?: string;
         balancerPoolsV3?: string;
         reliquary?: string;
-        sftmx?: string;
         sts?: string;
-        beetsBar?: string;
         gauge?: string;
         aura?: string;
         cowAmm?: string;
@@ -59,16 +57,6 @@ export interface NetworkData {
     protocolToken: 'beets' | 'bal';
     beets?: {
         address: string;
-    };
-    fbeets?: {
-        address: string;
-        farmId: string;
-        poolId: string;
-        poolAddress: string;
-    };
-    sftmx?: {
-        stakingContractAddress: string;
-        sftmxAddress: string;
     };
     sts?: {
         address: string;
@@ -113,10 +101,6 @@ export interface NetworkData {
     hooks?: Record<string, GqlHookType>;
     multicall: string;
     multicall3: string;
-    masterchef?: {
-        address: string;
-        excludedFarmIds: string[];
-    };
     aprHandlers: AprHandlerConfigs;
     reliquary?: {
         address: string;

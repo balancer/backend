@@ -1,9 +1,6 @@
 import {
-    PrismaNestedPoolWithSingleLayerNesting,
     prismaPoolMinimal,
     PrismaPoolMinimal,
-    PrismaPoolTokenWithDynamicData,
-    PrismaPoolTokenWithExpandedNesting,
     prismaPoolWithExpandedNesting,
     PrismaPoolWithExpandedNesting,
     HookData,
@@ -11,20 +8,10 @@ import {
 import {
     GqlPoolDynamicData,
     GqlPoolFeaturedPool,
-    GqlPoolInvestConfig,
-    GqlPoolInvestOption,
     GqlPoolMinimal,
-    GqlPoolNestingType,
-    GqlPoolComposableStableNested,
     GqlPoolStaking,
-    GqlPoolToken,
-    GqlPoolTokenDisplay,
-    GqlPoolTokenExpanded,
-    GqlPoolTokenUnion,
     GqlPoolUnion,
     GqlPoolUserBalance,
-    GqlPoolWithdrawConfig,
-    GqlPoolWithdrawOption,
     QueryPoolGetPoolsArgs,
     GqlUserStakedBalance,
     GqlPoolFilterCategory,
@@ -36,16 +23,21 @@ import _ from 'lodash';
 import { prisma } from '../../../prisma/prisma-client';
 import { Chain, Prisma, PrismaUserStakedBalance, PrismaUserWalletBalance } from '@prisma/client';
 import { fixedNumber } from '../../view-helpers/fixed-number';
-import { ElementData, FxData, GyroData, StableData, QuantAmmWeightedData, ReclammData } from '../subgraph-mapper';
+import {
+    ElementData,
+    FxData,
+    GyroData,
+    StableData,
+    QuantAmmWeightedData,
+    ReclammData,
+    FixedLbpData,
+} from '../subgraph-mapper';
 import { LBPoolData } from '../pool-data';
 import { ZERO_ADDRESS } from '@balancer/sdk';
 import { mapHookToGqlHook } from '../../sources/transformers';
 import { GraphQLError } from 'graphql';
-import { isWeightedPoolV2 } from './pool-utils';
-import { addressesMatch } from '../../web3/addresses';
 import { getWeightSnapshots } from '../../actions/quant-amm/get-weight-snapshots';
 import { mapPoolToken, enrichWithErc4626Data, mapAprItems } from './pool-gql-mapper-helper';
-import { AllNetworkConfigsKeyedOnChain } from '../../network/network-config';
 import { ContentController } from '../../content/content-controller';
 
 const isToken = (text: string) => text.match(/^0x[0-9a-fA-F]{40}$/);
@@ -252,7 +244,7 @@ export class PoolGqlLoaderService {
     ): GqlPoolMinimal {
         return {
             ...pool,
-            ...(pool.protocolVersion === 3 && pool.type === 'LIQUIDITY_BOOTSTRAPPING'
+            ...(pool.protocolVersion === 3 && (pool.type === 'LIQUIDITY_BOOTSTRAPPING' || pool.type === 'FIXED_LBP')
                 ? { lbpParams: pool.typeData as unknown as LiquidityBootstrappingPoolV3Params }
                 : {}),
             liquidityManagement: (pool.liquidityManagement as LiquidityManagement) || undefined,
@@ -261,8 +253,6 @@ export class PoolGqlLoaderService {
             vaultVersion: pool.protocolVersion,
             decimals: 18,
             dynamicData: this.getPoolDynamicData(pool),
-            allTokens: this.mapAllTokens(pool),
-            displayTokens: this.mapDisplayTokens(pool),
             poolTokens: pool.tokens.map((token) => mapPoolToken(token, pool.protocolVersion)),
             staking: this.getStakingData(pool),
             userBalance: this.getUserBalance(pool, userWalletbalances, userStakedBalances),
@@ -526,12 +516,6 @@ export class PoolGqlLoaderService {
             owner: pool.swapFeeManager, // Keep for backwards compatibility
             staking: this.getStakingData(pool),
             dynamicData: this.getPoolDynamicData(pool),
-            investConfig: this.getPoolInvestConfig(pool), // TODO DEPRECATE
-            withdrawConfig: this.getPoolWithdrawConfig(pool), // TODO DEPRECATE
-            nestingType: this.getPoolNestingType(pool),
-            tokens: pool.tokens.map((token) => this.mapPoolTokenToGqlUnion(token)), // TODO DEPRECATE
-            allTokens: this.mapAllTokens(pool),
-            displayTokens: this.mapDisplayTokens(pool),
             poolTokens: pool.tokens.map((token) => mapPoolToken(token, pool.protocolVersion)),
             userBalance: this.getUserBalance(pool, userWalletbalances, userStakedBalances),
             vaultVersion: poolWithoutTypeData.protocolVersion,
@@ -548,7 +532,6 @@ export class PoolGqlLoaderService {
             ),
         };
 
-        //TODO: may need to build out the types here still
         switch (pool.type) {
             case 'STABLE':
                 return {
@@ -556,7 +539,6 @@ export class PoolGqlLoaderService {
                     ...poolWithoutTypeData,
                     ...(typeData as StableData),
                     ...mappedData,
-                    tokens: mappedData.tokens as GqlPoolToken[],
                 };
             case 'META_STABLE':
                 return {
@@ -564,7 +546,6 @@ export class PoolGqlLoaderService {
                     ...poolWithoutTypeData,
                     ...(typeData as StableData),
                     ...mappedData,
-                    tokens: mappedData.tokens as GqlPoolToken[],
                 };
             case 'COMPOSABLE_STABLE':
                 return {
@@ -579,7 +560,6 @@ export class PoolGqlLoaderService {
                     ...poolWithoutTypeData,
                     ...(typeData as ElementData),
                     ...mappedData,
-                    tokens: mappedData.tokens as GqlPoolToken[],
                 };
             case 'LIQUIDITY_BOOTSTRAPPING':
                 if (pool.protocolVersion === 3) {
@@ -604,6 +584,21 @@ export class PoolGqlLoaderService {
                         ...mappedData,
                     };
                 }
+            case 'FIXED_LBP':
+                return {
+                    __typename: 'GqlPoolFixedPriceLBP',
+                    ...poolWithoutTypeData,
+                    ...(typeData as LBPoolData & {
+                        lbpName?: string;
+                        description?: string;
+                        website?: string;
+                        x?: string;
+                        discord?: string;
+                        telegram?: string;
+                        farcaster?: string;
+                    }),
+                    ...mappedData,
+                };
             case 'GYRO':
             case 'GYRO3':
             case 'GYROE':
@@ -661,57 +656,6 @@ export class PoolGqlLoaderService {
             ...poolWithoutTypeData,
             ...mappedData,
         };
-    }
-
-    private mapAllTokens(pool: PrismaPoolMinimal): GqlPoolTokenExpanded[] {
-        return pool.allTokens.map((token) => {
-            const poolToken = pool.tokens.find((poolToken) => poolToken.address === token.token.address);
-            const isNested = !poolToken;
-            const isPhantomBpt = token.tokenAddress === pool.address;
-            const isMainToken = !token.token.types.some((type) => type.type === 'PHANTOM_BPT' || type.type === 'BPT');
-            const isErc4626 = token.token.types.some((type) => type.type === 'ERC4626');
-
-            return {
-                ...token.token,
-                id: `${pool.id}-${token.tokenAddress}`,
-                weight: poolToken?.weight,
-                isNested,
-                isPhantomBpt,
-                isMainToken,
-                isErc4626,
-            };
-        });
-    }
-
-    private mapDisplayTokens(pool: PrismaPoolMinimal): GqlPoolTokenDisplay[] {
-        return pool.tokens
-            .filter((token) => token.address !== pool.address)
-            .map((poolToken) => {
-                const allToken = pool.allTokens.find((allToken) => allToken.token.address === poolToken.address);
-                if (allToken?.nestedPool) {
-                    const mainTokens =
-                        allToken.nestedPool.allTokens.filter(
-                            (nestedToken) =>
-                                !nestedToken.token.types.some(
-                                    (type) => type.type === 'PHANTOM_BPT' || type.type === 'BPT',
-                                ),
-                        ) || [];
-
-                    return {
-                        id: `${pool.id}-${poolToken.token.address}`,
-                        ...poolToken.token,
-                        nestedTokens: mainTokens.map((mainToken) => ({
-                            id: `${pool.id}-${poolToken.token.address}-${mainToken.tokenAddress}`,
-                            ...mainToken.token,
-                        })),
-                    };
-                }
-
-                return {
-                    id: `${pool.id}-${poolToken.token.address}`,
-                    ...poolToken.token,
-                };
-            });
     }
 
     private getStakingData(pool: PrismaPoolMinimal): GqlPoolStaking | null {
@@ -896,177 +840,7 @@ export class PoolGqlLoaderService {
             protocolFees24h: `${fixedNumber(protocolFees24h || 0, 2)}`,
             protocolFees48h: `${fixedNumber(protocolFees48h || 0, 2)}`,
             aprItems: aprItems,
-            apr: {
-                apr: { __typename: 'GqlPoolAprTotal', total: '0' },
-                swapApr: '0',
-                nativeRewardApr: { __typename: 'GqlPoolAprTotal', total: '0' },
-                thirdPartyApr: { __typename: 'GqlPoolAprTotal', total: '0' },
-                items: [],
-                hasRewardApr: false,
-            },
         };
-    }
-
-    private getPoolInvestConfig(pool: PrismaPoolWithExpandedNesting): GqlPoolInvestConfig {
-        const poolTokens = pool.tokens.filter((token) => token.address !== pool.address);
-        const supportsNativeAssetDeposit = pool.type !== 'COMPOSABLE_STABLE';
-        let options: GqlPoolInvestOption[] = [];
-
-        for (const poolToken of poolTokens) {
-            options = [...options, ...this.getActionOptionsForPoolToken(pool, poolToken, supportsNativeAssetDeposit)];
-        }
-
-        return {
-            //TODO could flag these as disabled in sanity
-            proportionalEnabled: pool.type !== 'COMPOSABLE_STABLE' && pool.type !== 'META_STABLE',
-            singleAssetEnabled: true,
-            options,
-        };
-    }
-
-    private getPoolWithdrawConfig(pool: PrismaPoolWithExpandedNesting): GqlPoolWithdrawConfig {
-        const poolTokens = pool.tokens.filter((token) => token.address !== pool.address);
-        let options: GqlPoolWithdrawOption[] = [];
-
-        for (const poolToken of poolTokens) {
-            options = [...options, ...this.getActionOptionsForPoolToken(pool, poolToken, false, true)];
-        }
-
-        return {
-            //TODO could flag these as disabled in sanity
-            proportionalEnabled: true,
-            singleAssetEnabled: true,
-            options,
-        };
-    }
-
-    private getActionOptionsForPoolToken(
-        pool: PrismaPoolWithExpandedNesting,
-        poolToken: PrismaPoolTokenWithExpandedNesting,
-        supportsNativeAsset: boolean,
-        isWithdraw?: boolean,
-    ): { poolTokenAddress: string; poolTokenIndex: number; tokenOptions: GqlPoolToken[] }[] {
-        const networkconfig = AllNetworkConfigsKeyedOnChain[pool.chain];
-        const nestedPool = poolToken.nestedPool;
-        const options: GqlPoolInvestOption[] = [];
-
-        if (nestedPool && nestedPool.type === 'COMPOSABLE_STABLE') {
-            const nestedTokens = nestedPool.tokens.filter((token) => token.address !== nestedPool.address);
-
-            if (pool.type === 'COMPOSABLE_STABLE' || isWeightedPoolV2(pool)) {
-                //when nesting a composable stable inside a composable stable, all of the underlying tokens can be used when investing
-                //when withdrawing from a v2 weighted pool, we withdraw into all underlying assets.
-                // ie: USDC/DAI/USDT for nested bbaUSD
-                for (const nestedToken of nestedTokens) {
-                    options.push({
-                        poolTokenIndex: poolToken.index,
-                        poolTokenAddress: poolToken.address,
-                        tokenOptions: [this.mapPoolTokenToGql(nestedToken)],
-                    });
-                }
-            } else {
-                //if the parent pool does not have phantom bpt (ie: weighted), the user can only invest with 1 of the composable stable tokens
-                options.push({
-                    poolTokenIndex: poolToken.index,
-                    poolTokenAddress: poolToken.address,
-                    tokenOptions: nestedTokens.map((nestedToken) => {
-                        return this.mapPoolTokenToGql(nestedToken);
-                    }),
-                });
-            }
-        } else {
-            const isWrappedNativeAsset = addressesMatch(poolToken.address, networkconfig.data.weth.address);
-
-            options.push({
-                poolTokenIndex: poolToken.index,
-                poolTokenAddress: poolToken.address,
-                tokenOptions:
-                    isWrappedNativeAsset && supportsNativeAsset
-                        ? [
-                              this.mapPoolTokenToGql(poolToken),
-                              this.mapPoolTokenToGql({
-                                  ...poolToken,
-                                  token: {
-                                      ...poolToken.token,
-                                      symbol: networkconfig.data.eth.symbol,
-                                      address: networkconfig.data.eth.address,
-                                      name: networkconfig.data.eth.name,
-                                  },
-                                  id: `${pool.id}-${networkconfig.data.eth.address}`,
-                              }),
-                          ]
-                        : [this.mapPoolTokenToGql(poolToken)],
-            });
-        }
-
-        return options;
-    }
-
-    private mapPoolTokenToGqlUnion(token: PrismaPoolTokenWithExpandedNesting): GqlPoolTokenUnion {
-        const { nestedPool } = token;
-
-        if (nestedPool && nestedPool.type === 'COMPOSABLE_STABLE') {
-            const totalShares = parseFloat(nestedPool.dynamicData?.totalShares || '0');
-            const percentOfSupplyNested = totalShares > 0 ? parseFloat(token.balance || '0') / totalShares : 0;
-
-            //50_000_000_000_000
-            return {
-                ...this.mapPoolTokenToGql(token),
-                __typename: 'GqlPoolTokenComposableStable',
-                pool: this.mapNestedPoolToGqlPoolComposableStableNested(nestedPool, percentOfSupplyNested),
-            };
-        }
-
-        return this.mapPoolTokenToGql(token);
-    }
-
-    private mapPoolTokenToGql(poolToken: PrismaPoolTokenWithDynamicData): GqlPoolToken {
-        return {
-            id: poolToken.id,
-            ...poolToken.token,
-            __typename: 'GqlPoolToken',
-            priceRate: poolToken.priceRate || '1.0',
-            priceRateProvider: poolToken.priceRateProvider,
-            balance: poolToken.balance || '0',
-            index: poolToken.index,
-            weight: poolToken.weight,
-            totalBalance: poolToken.balance || '0',
-        };
-    }
-
-    private mapNestedPoolToGqlPoolComposableStableNested(
-        pool: PrismaNestedPoolWithSingleLayerNesting,
-        percentOfSupplyNested: number,
-    ): GqlPoolComposableStableNested {
-        const bpt = pool.tokens.find((token) => token.address === pool.address);
-
-        return {
-            __typename: 'GqlPoolComposableStableNested',
-            ...pool,
-            ...(pool.typeData as StableData)!,
-            owner: pool.swapFeeManager, // Keep for backwards compatibility
-            nestingType: this.getPoolNestingType(pool),
-            tokens: pool.tokens.map((token) => this.mapPoolTokenToGql(token)),
-            totalLiquidity: `${pool.dynamicData?.totalLiquidity || 0}`,
-            totalShares: pool.dynamicData?.totalShares || '0',
-            swapFee: pool.dynamicData?.swapFee || '0',
-            bptPriceRate: bpt?.priceRate || '1.0',
-            categories: pool.categories as GqlPoolFilterCategory[],
-            tags: pool.categories,
-        };
-    }
-
-    private getPoolNestingType(pool: PrismaNestedPoolWithSingleLayerNesting): GqlPoolNestingType {
-        const tokens = pool.tokens.filter((token) => token.address !== pool.address);
-        const numTokensWithNestedPool = tokens.filter((token) => !!token.nestedPool).length;
-
-        if (numTokensWithNestedPool === tokens.length) {
-            return 'HAS_ONLY_PHANTOM_BPT';
-        } else if (numTokensWithNestedPool > 0) {
-            return 'HAS_SOME_PHANTOM_BPT';
-        }
-
-        return 'NO_NESTING';
     }
 
     private getPoolMinimalInclude(userAddress?: string) {

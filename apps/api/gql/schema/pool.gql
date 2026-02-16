@@ -2,7 +2,7 @@ extend type Query {
     """
     Returns one pool. If a user address is provided, the user balances for the given pool will also be returned.
     """
-    poolGetPool(id: String!, chain: GqlChain, userAddress: String): GqlPoolBase!
+    poolGetPool(id: String!, chain: GqlChain!, userAddress: String): GqlPoolBase!
     """
     Returns all pools for a given filter
     """
@@ -32,7 +32,7 @@ extend type Query {
     """
     Gets all the snapshots for a given pool on a chain for a certain range
     """
-    poolGetSnapshots(id: String!, chain: GqlChain, range: GqlPoolSnapshotDataRange!): [GqlPoolSnapshot!]!
+    poolGetSnapshots(id: String!, chain: GqlChain!, range: GqlPoolSnapshotDataRange!): [GqlPoolSnapshot!]!
     """
     Getting swap, add and remove events with paging
     """
@@ -40,10 +40,10 @@ extend type Query {
 }
 
 extend type Mutation {
-    poolSyncAllPoolsFromSubgraph: [String!]!
-    poolUpdateLiquidityValuesForAllPools: String!
+    poolSyncAllPoolsFromSubgraph(chain: GqlChain!): [String!]!
+    poolUpdateLiquidityValuesForAllPools(chain: GqlChain!): String!
     poolReloadAllPoolAprs(chain: GqlChain!): String!
-    poolReloadStakingForAllPools(stakingTypes: [GqlPoolStakingType!]!): String!
+    poolReloadStakingForAllPools(stakingTypes: [GqlPoolStakingType!]!, chain: GqlChain!): String!
     poolLoadSnapshotsForPools(poolId: String!, chain: GqlChain!): String!
     poolLoadOnChainDataForAllPools(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
     poolReloadPools(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
@@ -150,14 +150,6 @@ type GqlPoolMinimal {
     """
     createTime: Int!
     """
-    Only returns main or underlying tokens, also known as leave tokens. Wont return any nested BPTs. Used for displaying the tokens that the pool consists of.
-    """
-    displayTokens: [GqlPoolTokenDisplay!]! @deprecated(reason: "Use poolTokens instead")
-    """
-    Returns all pool tokens, including any nested tokens and phantom BPTs
-    """
-    allTokens: [GqlPoolTokenExpanded!]! @deprecated(reason: "Use poolTokens instead")
-    """
     Returns all pool tokens, including BPTs and nested pools if there are any. Only one nested level deep.
     """
     poolTokens: [GqlPoolTokenDetail!]!
@@ -207,28 +199,8 @@ type GqlPoolMinimal {
 LBP specific params for v3 pools only.
 """
 type LiquidityBootstrappingPoolV3Params {
-    lbpName: String
-    description: String
-    website: String
-    x: String
-    discord: String
-    telegram: String
-    farcaster: String
-
     startTime: Int!
     endTime: Int!
-    lbpOwner: String!
-    isProjectTokenSwapInBlocked: Boolean!
-    reserveToken: String!
-    reserveTokenStartWeight: Float!
-    reserveTokenEndWeight: Float!
-    reserveTokenIndex: Int!
-    projectToken: String!
-    projectTokenStartWeight: Float!
-    projectTokenEndWeight: Float!
-    projectTokenIndex: Int!
-    topTrades: [GqlLBPTopTrade!]
-    isSeedless: Boolean!
 }
 
 """
@@ -321,6 +293,7 @@ enum GqlPoolType {
     COW_AMM
     QUANT_AMM_WEIGHTED
     RECLAMM
+    FIXED_LBP
 }
 
 """
@@ -391,22 +364,6 @@ interface GqlPoolBase {
     The version of the pool type.
     """
     version: Int!
-    """
-    Deprecated
-    """
-    investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
-    """
-    Deprecated
-    """
-    withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
-    """
-    Only returns main tokens, also known as leave tokens. Wont return any nested BPTs. Used for displaying the tokens that the pool consists of.
-    """
-    displayTokens: [GqlPoolTokenDisplay!]! @deprecated(reason: "Use poolTokens instead")
-    """
-    Returns all pool tokens, including any nested tokens and phantom BPTs as a flattened array.
-    """
-    allTokens: [GqlPoolTokenExpanded!]! @deprecated(reason: "Use poolTokens instead")
     """
     Returns pool tokens, including BPTs and nested pools and their pool tokens if there are any. Only one nested level deep.
     """
@@ -486,7 +443,6 @@ type GqlPoolDynamicData {
     protocolFees24h: BigDecimal!
     protocolYieldCapture24h: BigDecimal!
 
-    apr: GqlPoolApr! @deprecated(reason: "Use aprItems instead")
     aprItems: [GqlPoolAprItem!]!
 
     """
@@ -532,41 +488,6 @@ type GqlPoolDynamicData {
     fees24hAthTimestamp: Int! @deprecated
     fees24hAtl: BigDecimal! @deprecated
     fees24hAtlTimestamp: Int! @deprecated
-}
-
-type GqlPoolInvestConfig @deprecated(reason: "Removed without replacement") {
-    proportionalEnabled: Boolean!
-    singleAssetEnabled: Boolean!
-    options: [GqlPoolInvestOption!]!
-}
-
-type GqlPoolInvestOption @deprecated(reason: "Removed without replacement") {
-    #we include the index because it is useful for constructing contract calls
-    poolTokenIndex: Int!
-    poolTokenAddress: String!
-
-    # we use an array here for invest options where there are more than one option, but only one can be selected
-    # - FTM/wFTM or ETH/wETH
-    # - weighted boosted with nested composable stable (bb-yv-USD) where you can only invest with DAI or USDC, not both at the same time
-    tokenOptions: [GqlPoolToken!]!
-}
-
-type GqlPoolWithdrawConfig @deprecated(reason: "Removed without replacement") {
-    proportionalEnabled: Boolean!
-    singleAssetEnabled: Boolean!
-    options: [GqlPoolWithdrawOption!]!
-}
-
-type GqlPoolWithdrawOption @deprecated(reason: "Removed without replacement") {
-    poolTokenIndex: Int!
-    poolTokenAddress: String!
-    tokenOptions: [GqlPoolToken!]!
-}
-
-enum GqlPoolNestingType @deprecated(reason: "Removed without replacement") {
-    NO_NESTING
-    HAS_SOME_PHANTOM_BPT
-    HAS_ONLY_PHANTOM_BPT
 }
 
 type QuantAmmWeightedParams {
@@ -623,11 +544,7 @@ type GqlPoolQuantAmmWeighted implements GqlPoolBase {
     poolCreator: Bytes
     factory: Bytes
     createTime: Int!
-    investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
-    withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
     dynamicData: GqlPoolDynamicData!
-    displayTokens: [GqlPoolTokenDisplay!]! @deprecated(reason: "Use poolTokens instead")
-    allTokens: [GqlPoolTokenExpanded!]! @deprecated(reason: "Use poolTokens instead")
     poolTokens: [GqlPoolTokenDetail!]!
     categories: [GqlPoolFilterCategory]
     tags: [String]
@@ -637,11 +554,6 @@ type GqlPoolQuantAmmWeighted implements GqlPoolBase {
     hasAnyAllowedBuffer: Boolean!
     hook: GqlHook
 
-    """
-    All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
-    """
-    tokens: [GqlPoolTokenUnion!]! @deprecated(reason: "Use poolTokens instead")
-    nestingType: GqlPoolNestingType! @deprecated(reason: "Removed without replacement")
     staking: GqlPoolStaking
     type: GqlPoolType!
     version: Int!
@@ -679,11 +591,7 @@ type GqlPoolWeighted implements GqlPoolBase {
     poolCreator: Bytes
     factory: Bytes
     createTime: Int!
-    investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
-    withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
     dynamicData: GqlPoolDynamicData!
-    displayTokens: [GqlPoolTokenDisplay!]! @deprecated(reason: "Use poolTokens instead")
-    allTokens: [GqlPoolTokenExpanded!]! @deprecated(reason: "Use poolTokens instead")
     poolTokens: [GqlPoolTokenDetail!]!
     categories: [GqlPoolFilterCategory]
     tags: [String]
@@ -692,12 +600,6 @@ type GqlPoolWeighted implements GqlPoolBase {
     hasNestedErc4626: Boolean!
     hasAnyAllowedBuffer: Boolean!
     hook: GqlHook
-
-    """
-    All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
-    """
-    tokens: [GqlPoolTokenUnion!]! @deprecated(reason: "Use poolTokens instead")
-    nestingType: GqlPoolNestingType! @deprecated(reason: "Removed without replacement")
     staking: GqlPoolStaking
     type: GqlPoolType!
     version: Int!
@@ -733,11 +635,7 @@ type GqlPoolGyro implements GqlPoolBase {
     poolCreator: Bytes
     factory: Bytes
     createTime: Int!
-    investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
-    withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
     dynamicData: GqlPoolDynamicData!
-    displayTokens: [GqlPoolTokenDisplay!]! @deprecated(reason: "Use poolTokens instead")
-    allTokens: [GqlPoolTokenExpanded!]! @deprecated(reason: "Use poolTokens instead")
     poolTokens: [GqlPoolTokenDetail!]!
     categories: [GqlPoolFilterCategory]
     tags: [String]
@@ -765,11 +663,6 @@ type GqlPoolGyro implements GqlPoolBase {
     z: String!
     dSq: String!
 
-    """
-    All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
-    """
-    tokens: [GqlPoolTokenUnion!]! @deprecated(reason: "Use poolTokens instead")
-    nestingType: GqlPoolNestingType! @deprecated(reason: "Removed without replacement")
     staking: GqlPoolStaking
     version: Int!
 
@@ -812,10 +705,6 @@ type GqlPoolFx implements GqlPoolBase {
     poolCreator: Bytes
     factory: Bytes
     createTime: Int!
-    investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
-    withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
-    displayTokens: [GqlPoolTokenDisplay!]! @deprecated(reason: "Use poolTokens instead")
-    allTokens: [GqlPoolTokenExpanded!]! @deprecated(reason: "Use poolTokens instead")
     poolTokens: [GqlPoolTokenDetail!]!
     categories: [GqlPoolFilterCategory]
     tags: [String]
@@ -828,10 +717,6 @@ type GqlPoolFx implements GqlPoolBase {
     dynamicData: GqlPoolDynamicData!
     staking: GqlPoolStaking
     userBalance: GqlPoolUserBalance
-    """
-    All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
-    """
-    tokens: [GqlPoolTokenUnion!]! @deprecated(reason: "Use poolTokens instead")
 }
 
 type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
@@ -861,11 +746,7 @@ type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
     poolCreator: Bytes
     factory: Bytes
     createTime: Int!
-    investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
-    withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
     dynamicData: GqlPoolDynamicData!
-    displayTokens: [GqlPoolTokenDisplay!]! @deprecated(reason: "Use poolTokens instead")
-    allTokens: [GqlPoolTokenExpanded!]! @deprecated(reason: "Use poolTokens instead")
     poolTokens: [GqlPoolTokenDetail!]!
     categories: [GqlPoolFilterCategory]
     tags: [String]
@@ -875,11 +756,6 @@ type GqlPoolLiquidityBootstrapping implements GqlPoolBase {
     hasAnyAllowedBuffer: Boolean!
     hook: GqlHook
 
-    """
-    All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
-    """
-    tokens: [GqlPoolTokenUnion!]! @deprecated(reason: "Use poolTokens instead")
-    nestingType: GqlPoolNestingType! @deprecated(reason: "Removed without replacement")
     staking: GqlPoolStaking
     type: GqlPoolType!
     version: Int!
@@ -920,11 +796,7 @@ type GqlPoolLiquidityBootstrappingV3 implements GqlPoolBase {
     poolCreator: Bytes
     factory: Bytes
     createTime: Int!
-    investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
-    withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
     dynamicData: GqlPoolDynamicData!
-    displayTokens: [GqlPoolTokenDisplay!]! @deprecated(reason: "Use poolTokens instead")
-    allTokens: [GqlPoolTokenExpanded!]! @deprecated(reason: "Use poolTokens instead")
     poolTokens: [GqlPoolTokenDetail!]!
     categories: [GqlPoolFilterCategory]
     tags: [String]
@@ -967,6 +839,70 @@ type GqlPoolLiquidityBootstrappingV3 implements GqlPoolBase {
     userBalance: GqlPoolUserBalance
 }
 
+type GqlPoolFixedPriceLBP implements GqlPoolBase {
+    id: ID!
+    chain: GqlChain!
+    vaultVersion: Int! @deprecated(reason: "use protocolVersion instead")
+    protocolVersion: Int!
+    name: String!
+    symbol: String!
+    address: Bytes!
+    decimals: Int!
+    """
+    The wallet address of the owner of the pool. Pool owners can set certain properties like swapFees or AMP.
+    """
+    owner: Bytes @deprecated(reason: "Use swapFeeManager instead")
+    """
+    Account empowered to set static swap fees for a pool (when 0 on V2 swap fees are immutable, on V3 delegate to governance)
+    """
+    swapFeeManager: Bytes
+    """
+    Account empowered to pause/unpause the pool (or 0 to delegate to governance)
+    """
+    pauseManager: Bytes
+    """
+    Account empowered to set the pool creator fee percentage
+    """
+    poolCreator: Bytes
+    factory: Bytes
+    createTime: Int!
+    dynamicData: GqlPoolDynamicData!
+    poolTokens: [GqlPoolTokenDetail!]!
+    categories: [GqlPoolFilterCategory]
+    tags: [String]
+    liquidityManagement: LiquidityManagement
+    hasErc4626: Boolean!
+    hasNestedErc4626: Boolean!
+    hasAnyAllowedBuffer: Boolean!
+    hook: GqlHook
+
+    lbpName: String
+    description: String
+    website: String
+    x: String
+    discord: String
+    telegram: String
+    farcaster: String
+
+    startTime: Int!
+    endTime: Int!
+    lbpOwner: String!
+    reserveToken: String!
+    reserveTokenIndex: Int!
+    projectToken: String!
+    projectTokenIndex: Int!
+    topTrades: [GqlLBPTopTrade!]
+
+    """
+    All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
+    """
+    staking: GqlPoolStaking
+    type: GqlPoolType!
+    version: Int!
+
+    userBalance: GqlPoolUserBalance
+}
+
 type GqlPoolStable implements GqlPoolBase {
     id: ID!
     chain: GqlChain!
@@ -994,11 +930,7 @@ type GqlPoolStable implements GqlPoolBase {
     poolCreator: Bytes
     factory: Bytes
     createTime: Int!
-    investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
-    withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
     dynamicData: GqlPoolDynamicData!
-    displayTokens: [GqlPoolTokenDisplay!]! @deprecated(reason: "Use poolTokens instead")
-    allTokens: [GqlPoolTokenExpanded!]! @deprecated(reason: "Use poolTokens instead")
     poolTokens: [GqlPoolTokenDetail!]!
     categories: [GqlPoolFilterCategory]
     tags: [String]
@@ -1008,7 +940,6 @@ type GqlPoolStable implements GqlPoolBase {
     hasAnyAllowedBuffer: Boolean!
     hook: GqlHook
 
-    tokens: [GqlPoolToken!]! @deprecated(reason: "Use poolTokens instead")
     amp: BigInt!
     bptPriceRate: BigDecimal!
     staking: GqlPoolStaking
@@ -1045,11 +976,7 @@ type GqlPoolMetaStable implements GqlPoolBase {
     poolCreator: Bytes
     factory: Bytes
     createTime: Int!
-    investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
-    withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
     dynamicData: GqlPoolDynamicData!
-    displayTokens: [GqlPoolTokenDisplay!]! @deprecated(reason: "Use poolTokens instead")
-    allTokens: [GqlPoolTokenExpanded!]! @deprecated(reason: "Use poolTokens instead")
     poolTokens: [GqlPoolTokenDetail!]!
     categories: [GqlPoolFilterCategory]
     tags: [String]
@@ -1059,7 +986,6 @@ type GqlPoolMetaStable implements GqlPoolBase {
     hasAnyAllowedBuffer: Boolean!
     hook: GqlHook
 
-    tokens: [GqlPoolToken!]! @deprecated(reason: "Use poolTokens instead")
     amp: BigInt!
     staking: GqlPoolStaking
     type: GqlPoolType!
@@ -1095,11 +1021,7 @@ type GqlPoolComposableStable implements GqlPoolBase {
     poolCreator: Bytes
     factory: Bytes
     createTime: Int!
-    investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
-    withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
     dynamicData: GqlPoolDynamicData!
-    displayTokens: [GqlPoolTokenDisplay!]! @deprecated(reason: "Use poolTokens instead")
-    allTokens: [GqlPoolTokenExpanded!]! @deprecated(reason: "Use poolTokens instead")
     poolTokens: [GqlPoolTokenDetail!]!
     categories: [GqlPoolFilterCategory]
     tags: [String]
@@ -1109,11 +1031,6 @@ type GqlPoolComposableStable implements GqlPoolBase {
     hasAnyAllowedBuffer: Boolean!
     hook: GqlHook
 
-    """
-    All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
-    """
-    tokens: [GqlPoolTokenUnion!]! @deprecated(reason: "Use poolTokens instead")
-    nestingType: GqlPoolNestingType! @deprecated(reason: "Removed without replacement")
     amp: BigInt!
     bptPriceRate: BigDecimal!
     staking: GqlPoolStaking
@@ -1150,13 +1067,8 @@ type GqlPoolElement implements GqlPoolBase {
     poolCreator: Bytes
     factory: Bytes
     createTime: Int!
-    investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
-    withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
     dynamicData: GqlPoolDynamicData!
-    displayTokens: [GqlPoolTokenDisplay!]! @deprecated(reason: "Use poolTokens instead")
-    allTokens: [GqlPoolTokenExpanded!]! @deprecated(reason: "Use poolTokens instead")
     poolTokens: [GqlPoolTokenDetail!]!
-    tokens: [GqlPoolToken!]! @deprecated(reason: "Use poolTokens instead")
     categories: [GqlPoolFilterCategory]
     tags: [String]
     liquidityManagement: LiquidityManagement
@@ -1204,11 +1116,7 @@ type GqlPoolReClamm implements GqlPoolBase {
     poolCreator: Bytes
     factory: Bytes
     createTime: Int!
-    investConfig: GqlPoolInvestConfig! @deprecated(reason: "Removed without replacement")
-    withdrawConfig: GqlPoolWithdrawConfig! @deprecated(reason: "Removed without replacement")
     dynamicData: GqlPoolDynamicData!
-    displayTokens: [GqlPoolTokenDisplay!]! @deprecated(reason: "Use poolTokens instead")
-    allTokens: [GqlPoolTokenExpanded!]! @deprecated(reason: "Use poolTokens instead")
     poolTokens: [GqlPoolTokenDetail!]!
     categories: [GqlPoolFilterCategory]
     tags: [String]
@@ -1218,11 +1126,6 @@ type GqlPoolReClamm implements GqlPoolBase {
     hasAnyAllowedBuffer: Boolean!
     hook: GqlHook
 
-    """
-    All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
-    """
-    tokens: [GqlPoolTokenUnion!]! @deprecated(reason: "Use poolTokens instead")
-    nestingType: GqlPoolNestingType! @deprecated(reason: "Removed without replacement")
     staking: GqlPoolStaking
     version: Int!
 
@@ -1266,44 +1169,6 @@ type GqlPoolReClamm implements GqlPoolBase {
     priceRatioUpdateEndTime: Int!
 }
 
-type GqlPoolComposableStableNested @deprecated(reason: "use GqlPoolTokenDetail instead") {
-    id: ID!
-    name: String!
-    symbol: String!
-    address: Bytes!
-    """
-    The wallet address of the owner of the pool. Pool owners can set certain properties like swapFees or AMP.
-    """
-    owner: Bytes @deprecated(reason: "Use swapFeeManager instead")
-    """
-    Account empowered to set static swap fees for a pool (when 0 on V2 swap fees are immutable, on V3 delegate to governance)
-    """
-    swapFeeManager: Bytes
-    """
-    Account empowered to pause/unpause the pool (or 0 to delegate to governance)
-    """
-    pauseManager: Bytes
-    """
-    Account empowered to set the pool creator fee percentage
-    """
-    poolCreator: Bytes
-    factory: Bytes
-    createTime: Int!
-    tokens: [GqlPoolTokenComposableStableNestedUnion!]! @deprecated(reason: "Use poolTokens instead")
-    nestingType: GqlPoolNestingType! @deprecated(reason: "Removed without replacement")
-
-    totalShares: BigDecimal!
-    totalLiquidity: BigDecimal!
-    amp: BigInt!
-    swapFee: BigDecimal!
-    bptPriceRate: BigDecimal!
-
-    type: GqlPoolType!
-    version: Int!
-    categories: [GqlPoolFilterCategory]
-    tags: [String]
-}
-
 union GqlPoolUnion =
       GqlPoolWeighted
     | GqlPoolQuantAmmWeighted
@@ -1316,11 +1181,7 @@ union GqlPoolUnion =
     | GqlPoolGyro
     | GqlPoolFx
     | GqlPoolReClamm
-
-union GqlPoolNestedUnion @deprecated(reason: "use GqlPoolTokenDetail instead") = GqlPoolComposableStableNested
-
-union GqlPoolTokenUnion = GqlPoolToken | GqlPoolTokenComposableStable
-union GqlPoolTokenComposableStableNestedUnion @deprecated(reason: "use GqlPoolTokenDetail instead") = GqlPoolToken
+    | GqlPoolFixedPriceLBP
 
 """
 All info on the pool token. It will also include the nested pool if the token is a BPT. It will only support 1 level of nesting.
@@ -1545,76 +1406,6 @@ type GqlNestedPool {
     hook: GqlHook
 }
 
-interface GqlPoolTokenBase @deprecated(reason: "Use GqlPoolTokenDetail instead") {
-    id: ID!
-    address: String!
-    balance: BigDecimal!
-    decimals: Int!
-    name: String!
-    symbol: String!
-    index: Int!
-
-    priceRate: BigDecimal!
-    priceRateProvider: String
-    weight: BigDecimal
-    #the total balance in the pool, regardless of nesting
-    totalBalance: BigDecimal!
-}
-
-type GqlPoolToken implements GqlPoolTokenBase @deprecated(reason: "Use GqlPoolTokenDetail instead") {
-    id: ID!
-    address: String!
-    decimals: Int!
-    name: String!
-    symbol: String!
-    index: Int!
-
-    #dynamic data
-    balance: BigDecimal!
-    priceRate: BigDecimal!
-    priceRateProvider: String
-    weight: BigDecimal
-    #the total balance in the pool, regardless of nesting
-    totalBalance: BigDecimal!
-}
-
-type GqlPoolTokenComposableStable implements GqlPoolTokenBase @deprecated(reason: "Use GqlPoolTokenDetail instead") {
-    id: ID!
-    address: String!
-    balance: BigDecimal!
-    decimals: Int!
-    name: String!
-    symbol: String!
-    index: Int!
-    priceRate: BigDecimal!
-    priceRateProvider: String
-    weight: BigDecimal
-    #the total balance in the pool, regardless of nesting
-    totalBalance: BigDecimal!
-
-    pool: GqlPoolComposableStableNested!
-}
-
-type GqlPoolApr @deprecated(reason: "Use GqlPoolAprItem instead") {
-    apr: GqlPoolAprValue!
-    swapApr: BigDecimal! # we make the assumption swap apr will never have a range
-    nativeRewardApr: GqlPoolAprValue!
-    thirdPartyApr: GqlPoolAprValue!
-    items: [GqlBalancePoolAprItem!]!
-    hasRewardApr: Boolean!
-}
-
-union GqlPoolAprValue @deprecated(reason: "Use GqlPoolAprItem instead") = GqlPoolAprRange | GqlPoolAprTotal
-
-type GqlPoolAprRange @deprecated(reason: "Use GqlPoolAprItem instead") {
-    min: BigDecimal!
-    max: BigDecimal!
-}
-
-type GqlPoolAprTotal @deprecated(reason: "Use GqlPoolAprItem instead") {
-    total: BigDecimal!
-}
-
 input GqlPoolTimePeriod {
     gt: Int
     lt: Int
@@ -1675,55 +1466,6 @@ input GqlPoolFilter {
     protocolVersionIn: [Int!]
     minTvl: Float
     hasHook: Boolean @deprecated(reason: "use tags to filter instead")
-}
-
-type GqlPoolTokenExpanded {
-    id: ID!
-    address: String!
-    name: String!
-    symbol: String!
-    decimals: Int!
-    weight: String
-    isNested: Boolean!
-    isPhantomBpt: Boolean!
-    isMainToken: Boolean!
-    isErc4626: Boolean!
-}
-
-type GqlPoolSwap {
-    id: ID!
-    chain: GqlChain!
-    poolId: String!
-    userAddress: String!
-    tokenIn: String!
-    tokenOut: String!
-    tokenAmountIn: String!
-    tokenAmountOut: String!
-    timestamp: Int!
-    tx: String!
-    valueUSD: Float!
-}
-
-type GqlPoolJoinExit {
-    id: ID!
-    chain: GqlChain!
-    type: GqlPoolJoinExitType!
-    sender: String!
-    poolId: String!
-    timestamp: Int!
-    valueUSD: String
-    tx: String!
-    amounts: [GqlPoolJoinExitAmount!]!
-}
-
-enum GqlPoolJoinExitType {
-    Join
-    Exit
-}
-
-type GqlPoolJoinExitAmount {
-    address: String!
-    amount: String!
 }
 
 """
@@ -1843,57 +1585,11 @@ enum GqlPoolAprItemType {
     SURPLUS_30D
 }
 
-type GqlBalancePoolAprItem {
-    id: ID!
-    title: String!
-    apr: GqlPoolAprValue!
-    subItems: [GqlBalancePoolAprSubItem!]
-}
-
-type GqlBalancePoolAprSubItem {
-    id: ID!
-    title: String!
-    apr: GqlPoolAprValue!
-}
-
-input GqlUserSwapVolumeFilter {
-    tokenInIn: [String!]
-    tokenOutIn: [String!]
-    poolIdIn: [String!]
-}
-
-type GqlPoolUserSwapVolume {
-    userAddress: String!
-    swapVolumeUSD: BigDecimal!
-}
-
 type GqlPoolFeaturedPool {
     poolId: ID!
     primary: Boolean!
     pool: GqlPoolBase!
     description: String!
-}
-
-type GqlPoolFeaturedPoolGroup {
-    id: ID!
-    title: String!
-    icon: String!
-    items: [GqlPoolFeaturedPoolGroupItem!]!
-}
-
-union GqlPoolFeaturedPoolGroupItem = GqlPoolMinimal | GqlFeaturePoolGroupItemExternalLink
-
-type GqlFeaturePoolGroupItemExternalLink {
-    id: ID!
-    image: String!
-    buttonText: String!
-    buttonUrl: String!
-}
-
-enum GqlPoolEventsDataRange {
-    SEVEN_DAYS
-    THIRTY_DAYS
-    NINETY_DAYS
 }
 
 enum GqlPoolSnapshotDataRange {
@@ -1923,15 +1619,6 @@ type GqlPoolSnapshot {
     amounts: [String!]!
 }
 
-type GqlPoolTokenDisplay {
-    id: ID!
-    address: String!
-    name: String!
-    symbol: String!
-    weight: BigDecimal
-    nestedTokens: [GqlPoolTokenDisplay!]
-}
-
 type GqlPoolStaking {
     id: ID!
     chain: GqlChain!
@@ -1946,9 +1633,9 @@ type GqlPoolStaking {
 
 enum GqlPoolStakingType {
     GAUGE
+    RELIQUARY
     MASTER_CHEF
     FRESH_BEETS
-    RELIQUARY
     AURA
     VEBAL
 }

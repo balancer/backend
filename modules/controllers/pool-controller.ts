@@ -273,7 +273,7 @@ export function PoolController(tracer?: any) {
 
             const dbPools = (await prisma.prismaPool.findMany({
                 where: { chain, protocolVersion: 3, id: { in: changedIds } },
-                select: { id: true, type: true, hook: true, typeData: true },
+                select: { id: true, type: true, version: true, hook: true, typeData: true },
             })) as PoolWithMappedJsonFields[];
 
             const ids = await syncPoolsV3(dbPools, chain, vaultAddress, viemClient, latestBlock);

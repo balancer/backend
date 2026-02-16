@@ -42,5 +42,5 @@ type Query {
 }
 
 type Mutation {
-    createLBP(input: CreateLBPInput!): Boolean!
+    createLBP(input: CreateLBPInput!, type: GqlPoolType): Boolean!
 }

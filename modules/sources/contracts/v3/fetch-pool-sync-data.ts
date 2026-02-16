@@ -42,6 +42,7 @@ export const fetchPoolSyncData = async (
     pools: {
         id: string;
         type: PrismaPoolType;
+        version: number;
         hook?: HookData;
     }[],
     blockNumber: bigint,

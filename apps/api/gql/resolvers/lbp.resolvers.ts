@@ -1,6 +1,6 @@
 import { prisma } from '../../../../prisma/prisma-client';
 import { GraphQLError } from 'graphql';
-import { CreateLbpInput, Resolvers } from '../generated-schema';
+import { Resolvers } from '../generated-schema';
 import { validateLBPoolInput } from '../../../../modules/validators/lbpool-input-validator';
 import { lbPoolInputToDB } from '../../../../modules/sources/transformers/lbpool-input-to-db';
 import { priceChartData } from '../../../../modules/pool/lbp/price-chart-data';
@@ -41,7 +41,7 @@ export default {
         },
     },
     Mutation: {
-        createLBP: async (_: any, { input }: { input: CreateLbpInput }) => {
+        createLBP: async (_: any, { input, type }) => {
             // Validate input
             const parsedInput = await validateLBPoolInput(input);
             if (!parsedInput.success) {
@@ -53,8 +53,16 @@ export default {
                 });
             }
 
+            if (type && type !== 'LIQUIDITY_BOOTSTRAPPING' && type !== 'FIXED_LBP') {
+                throw new GraphQLError('Invalid pool type', {
+                    extensions: {
+                        code: 'BAD_USER_INPUT',
+                    },
+                });
+            }
+
             // Prepare DB data
-            const { tokenData, poolData } = await lbPoolInputToDB(input);
+            const { tokenData, poolData } = await lbPoolInputToDB(input, type ? type : 'LIQUIDITY_BOOTSTRAPPING');
 
             try {
                 // Create tokens
@@ -80,8 +88,8 @@ export default {
                         },
                         data: {
                             typeData: {
-                                ...((currentPool.typeData as any) || {}),
                                 ...((poolData.typeData as any) || {}),
+                                ...((currentPool.typeData as any) || {}), // make sure that we dont allow to override the LBP metadata, otherwise anybody could override the pool with malicious metadata
                             },
                         },
                     });

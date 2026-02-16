@@ -1,10 +1,16 @@
 import { Chain, Prisma, PrismaPoolType } from '@prisma/client';
-import { CreateLbpInput } from '../../../apps/api/gql/generated-schema';
-import { fetchLBPoolData } from '../contracts/fetch-lbpool-data';
+import { CreateLbpInput, GqlPoolType } from '../../../apps/api/gql/generated-schema';
+import { fetchLBPoolData, LBPoolData } from '../contracts/fetch-lbpool-data';
 import { prisma } from '../../../prisma/prisma-client';
+import { fetchFixedLBPoolData, FixedLBPoolData } from '../contracts';
 
-export const lbPoolInputToDB = async (input: CreateLbpInput) => {
-    const rpcData = await fetchLBPoolData(input.poolContract.address, input.poolContract.chain as Chain);
+export const lbPoolInputToDB = async (input: CreateLbpInput, type: GqlPoolType) => {
+    let rpcData: FixedLBPoolData | LBPoolData;
+    if (type === 'LIQUIDITY_BOOTSTRAPPING') {
+        rpcData = await fetchLBPoolData(input.poolContract.address, input.poolContract.chain as Chain);
+    } else {
+        rpcData = await fetchFixedLBPoolData(input.poolContract.address, input.poolContract.chain as Chain);
+    }
 
     // Get token prices
     const tokenPrices = await prisma.prismaTokenCurrentPrice.findMany({
@@ -34,14 +40,16 @@ export const lbPoolInputToDB = async (input: CreateLbpInput) => {
         },
         ...rpcData.tokens.map((token) => ({
             ...token,
+            address: token.address.toLowerCase(),
             chain: input.poolContract.chain as Chain,
-            logoURI: (token.address === projectToken ? input.metadata.tokenLogo : '') || '',
+            logoURI: (token.address.toLowerCase() === projectToken.toLowerCase() ? input.metadata.tokenLogo : '') || '',
         })),
     ];
 
     const poolTokensData: Prisma.PrismaPoolTokenCreateManyPoolInput[] = rpcData.pool.tokens.map((token, idx) => ({
         ...token,
         id: `${input.poolContract.address}-${token.address}`.toLowerCase(),
+        address: token.address.toLowerCase(),
         balanceUSD: Number(token.balance) * prices[idx],
         priceRate: '1',
     }));
@@ -51,7 +59,7 @@ export const lbPoolInputToDB = async (input: CreateLbpInput) => {
         id: input.poolContract.address.toLowerCase(),
         address: input.poolContract.address.toLowerCase(),
         chain: input.poolContract.chain.toUpperCase() as Chain,
-        type: PrismaPoolType.LIQUIDITY_BOOTSTRAPPING,
+        type: type,
         createTime: Math.floor(+new Date() / 1000),
         protocolVersion: 3,
         typeData: {

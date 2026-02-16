@@ -1,10 +1,10 @@
 extend type Query {
-    protocolMetricsChain(chain: GqlChain): GqlProtocolMetricsChain!
-    protocolMetricsAggregated(chains: [GqlChain!]): GqlProtocolMetricsAggregated!
+    protocolMetricsChain(chain: GqlChain!): GqlProtocolMetricsChain!
+    protocolMetricsAggregated(chains: [GqlChain!]!): GqlProtocolMetricsAggregated!
 }
 
 extend type Mutation {
-    protocolCacheMetrics: String!
+    protocolCacheMetrics(chain: GqlChain!): String!
 }
 
 type GqlProtocolMetricsAggregated {

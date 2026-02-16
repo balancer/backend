@@ -54,7 +54,54 @@ export default <NetworkData>{
             defaultYieldFeePercentage: '0.1',
         },
     },
-    aprHandlers: {},
+    aprHandlers: {
+        ybAprHandler: {
+            http: [
+                {
+                    url: 'https://defi-api.yuzu.money/proxy/apy',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x484be0540ad49f351eaa04eeb35df0f937d4e73f',
+                            path: '$.data.syzusd_apy',
+                        },
+                    ],
+                },
+                {
+                    url: 'https://yields.llama.fi/chart/ee40513c-9356-4c53-9f26-446b484a8ae2',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x1b68626dca36c7fe922fd2d55e4f631d962de19c',
+                            path: '$.data[-1:].apyBase',
+                        },
+                    ],
+                },
+                {
+                    name: 'gmon',
+                    url: 'https://indexer.hyperindex.xyz/a7dd119/v1/graphql',
+                    body: JSON.stringify({
+                        query: `{
+                            CoreVault_APY {
+                                totalAPR
+                            }
+                        }`,
+                    }),
+                    headers: { 'Content-Type': 'application/json' },
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x8498312a6b3cbd158bf0c93abdcf29e6e4f55081',
+                            path: '$.data.CoreVault_APY[0].totalAPR',
+                        },
+                    ],
+                },
+            ],
+        },
+    },
     multicall: '0xca11bde05977b3631167028862be2a173976ca11',
     multicall3: '0xca11bde05977b3631167028862be2a173976ca11',
     avgBlockSpeed: 1,

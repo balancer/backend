@@ -15,7 +15,7 @@ export default <NetworkData>{
     subgraphs: {
         startDate: '2019-04-20',
         cowAmm: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmQ3c9CTJBZdgy3uTLB929ARZucMUCf6piZBDxSgBKnf6m`,
-        balancer: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmQ5TT2yYBZgoUxsat3bKmNe5Fr9LW9YAtDs8aeuc1BRhj`,
+        balancer: `https://api.subgraph.ormilabs.com/api/public/717cf785-de57-4761-94dd-9ac51b019902/subgraphs/v2-mainnet-smol/latest/gn`,
         balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmUUDd95Pj2ijZn9NwmxuAd4ApVGtsZCEYLHE6U19dWoSm`,
         balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmWGugpAkdbw5CZLdCxmDzZCDNRik2bj4N9RYvuYiX7Mxs`,
         gauge: `https://api.subgraph.ormilabs.com/api/public/717cf785-de57-4761-94dd-9ac51b019902/subgraphs/balancer-gauges-mainnet/latest/gn`,
@@ -260,6 +260,27 @@ export default <NetworkData>{
                                 vault.address.toLowerCase(),
                                 vault.state.apy * (1 - vault.state.fee),
                             ],
+                        },
+                    ],
+                },
+                {
+                    url: 'https://blue-api.morpho.org/graphql',
+                    body: JSON.stringify({
+                        query: `{
+                            vaultV2s(first: 500, where: { chainId_in: [1], apy_gte: 0.00001 }) {
+                                items {
+                                    address
+                                    avgNetApy
+                                }
+                            }
+                        }`,
+                    }),
+                    headers: { 'Content-Type': 'application/json' },
+                    extractors: [
+                        {
+                            type: 'enumerate',
+                            path: '$.data.vaultV2s.items',
+                            entries: (vault: any): [string, number] => [vault.address.toLowerCase(), vault.avgNetApy],
                         },
                     ],
                 },
@@ -542,6 +563,16 @@ export default <NetworkData>{
                             type: 'path',
                             token: '0xc5d6a7b61d18afa11435a889557b068bb9f29930',
                             path: '$.data.ethApy',
+                        },
+                    ],
+                },
+                {
+                    url: 'https://api.alluvial.finance/eth/v0/protocol',
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x8c1bed5b9a0928467c9b1341da1d7bd5e10b6549',
+                            path: '$.a_srr_7d',
                         },
                     ],
                 },

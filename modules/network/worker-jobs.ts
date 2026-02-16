@@ -228,17 +228,6 @@ export const lbpWorkerJobs: WorkerJob[] = [
     },
 ];
 
-export const sftmxWorkerJobs: WorkerJob[] = [
-    {
-        name: 'sync-sftmx-staking-data',
-        interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(2, 'hours') : every(60, 'minutes'),
-    },
-    {
-        name: 'sync-sftmx-withdrawal-requests',
-        interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(2, 'hours') : every(45, 'minutes'),
-    },
-];
-
 export const loopsWorkerJobs: WorkerJob[] = [
     {
         name: 'sync-loops-data',

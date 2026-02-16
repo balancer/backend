@@ -1,5 +1,5 @@
 import { Express } from 'express';
-import { beetsGetCirculatingSupply, beetsGetTotalSupply } from '../../modules/beets/lib/beets';
+import { beetsGetCirculatingSupply, beetsGetTotalSupply } from '../../modules/beets/beets';
 
 export function loadRestRoutes(app: Express) {
     app.use('/health', (_, res) => res.sendStatus(200));

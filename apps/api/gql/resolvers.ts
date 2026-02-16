@@ -1,9 +1,7 @@
 import beetsResolver from './resolvers/beets.resolvers';
-import blocksResolver from './resolvers/blocks.resolvers';
 import poolResolver from './resolvers/pool.resolvers';
 import protocolResolver from './resolvers/protocol.resolvers';
 import scalarResolver from './resolvers/scalar.resolvers';
-import sftmxResolver from './resolvers/sftmx.resolvers';
 import stsResolver from './resolvers/sts.resolvers';
 import sorResolver from './resolvers/sor.resolvers';
 import tokenResolver from './resolvers/token.resolvers';
@@ -15,11 +13,9 @@ import loopsResolver from './resolvers/loops.resolvers';
 export const resolvers = {
     Query: {
         ...beetsResolver.Query,
-        ...blocksResolver.Query,
         ...poolResolver.Query,
         ...protocolResolver.Query,
         ...scalarResolver.Query,
-        ...sftmxResolver.Query,
         ...stsResolver.Query,
         ...sorResolver.Query,
         ...tokenResolver.Query,
@@ -31,7 +27,6 @@ export const resolvers = {
     Mutation: {
         ...poolResolver.Mutation,
         ...protocolResolver.Mutation,
-        ...sftmxResolver.Mutation,
         ...sorResolver.Mutation,
         ...tokenResolver.Mutation,
         ...userResolver.Mutation,
