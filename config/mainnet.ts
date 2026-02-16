@@ -264,6 +264,27 @@ export default <NetworkData>{
                     ],
                 },
                 {
+                    url: 'https://blue-api.morpho.org/graphql',
+                    body: JSON.stringify({
+                        query: `{
+                            vaultV2s(first: 500, where: { chainId_in: [1], apy_gte: 0.00001 }) {
+                                items {
+                                    address
+                                    avgNetApy
+                                }
+                            }
+                        }`,
+                    }),
+                    headers: { 'Content-Type': 'application/json' },
+                    extractors: [
+                        {
+                            type: 'enumerate',
+                            path: '$.data.vaultV2s.items',
+                            entries: (vault: any): [string, number] => [vault.address.toLowerCase(), vault.avgNetApy],
+                        },
+                    ],
+                },
+                {
                     url: 'https://api.fluid.instad.app/v2/lending/1/tokens',
                     extractors: [
                         {
