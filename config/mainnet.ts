@@ -546,6 +546,16 @@ export default <NetworkData>{
                     ],
                 },
                 {
+                    url: 'https://api.alluvial.finance/eth/v0/protocol',
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x8c1bed5b9a0928467c9b1341da1d7bd5e10b6549',
+                            path: '$.a_srr_7d',
+                        },
+                    ],
+                },
+                {
                     name: 'msYUsd',
                     scale: 100,
                     url: 'https://api.goldsky.com/api/public/project_cmcccb4vz1nhh01x888di8lgk/subgraphs/mainstreet-mainnet/0.0.2/gn',
