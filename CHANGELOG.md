@@ -1,5 +1,19 @@
 # backend
 
+## 2.0.0
+
+### Major Changes
+
+-   71472ae: remove all legacy code
+
+### Patch Changes
+
+-   b92531c: move v2 subgraphs to ormi
+-   c0f966e: fixed lbp support
+-   112e67a: search vector fix for v3
+-   830b479: add support for fixedprice lbp
+-   16f0223: new monad APRs
+
 ## 1.58.12
 
 ### Patch Changes
