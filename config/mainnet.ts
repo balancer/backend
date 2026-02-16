@@ -567,7 +567,9 @@ export default <NetworkData>{
                     ],
                 },
                 {
+                    name: 'lsETH',
                     url: 'https://api.alluvial.finance/eth/v0/protocol',
+                    scale: 100,
                     extractors: [
                         {
                             type: 'path',
