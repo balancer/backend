@@ -94,7 +94,7 @@ export class PoolService {
                     new GaugeSubgraphService(networkconfig.subgraphs.gauge),
                     networkconfig.bal.address,
                     chain,
-                    networkconfig.gaugeControllerAddress,
+                    networkconfig.gaugeControllerHelperAddress,
                 );
             }
             if (networkconfig.subgraphs.aura) {

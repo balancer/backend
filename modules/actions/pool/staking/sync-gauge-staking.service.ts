@@ -12,7 +12,7 @@ import { prisma } from '../../../../prisma/prisma-client';
 import { prismaBulkExecuteOperations } from '../../../../prisma/prisma-util';
 import { Chain, PrismaPoolStakingType } from '@prisma/client';
 import { GaugeSubgraphService, LiquidityGaugeStatus } from '../../../subgraphs/gauge-subgraph/gauge-subgraph.service';
-import gaugeControllerAbi from '../../../vebal/abi/gaugeController.json';
+import gaugeControllerHelperAbi from '../../../vebal/abi/gaugeControllerHelper.json';
 import childChainGaugeV2Abi from './abi/ChildChainGaugeV2.json';
 import childChainGaugeV1Abi from './abi/ChildChainGaugeV1.json';
 import mainnetLiquidityGaugeAbi from './abi/MainnetLiquidityGauge.json';
@@ -49,7 +49,7 @@ export const syncGaugeStakingForPools = async (
     gaugeSubgraphService: GaugeSubgraphService,
     balAddressInput: string,
     chain: Chain,
-    gaugeControllerAddress?: string,
+    gaugeControllerHelperAddress?: string,
 ): Promise<void> => {
     const balAddress = balAddressInput.toLowerCase();
 
@@ -58,7 +58,7 @@ export const syncGaugeStakingForPools = async (
         ...childChainGaugeV2Abi.filter((abi) => abi.name === 'working_supply'),
         ...childChainGaugeV2Abi.filter((abi) => abi.name === 'inflation_rate'),
         ...mainnetLiquidityGaugeAbi.filter((abi) => abi.name === 'getRelativeWeightCap'),
-        gaugeControllerAbi.find((abi) => abi.name === 'gauge_relative_weight'),
+        gaugeControllerHelperAbi.find((abi) => abi.name === 'gauge_relative_weight'),
     ] as JsonFragment[]);
 
     const rewardsMulticallerV1 = new Multicaller3Viem(chain, [
@@ -131,7 +131,7 @@ export const syncGaugeStakingForPools = async (
         rewardsMulticallerV1,
         rewardsMulticallerV2,
         chain,
-        gaugeControllerAddress,
+        gaugeControllerHelperAddress,
     );
 
     // Prepare DB operations
@@ -246,7 +246,7 @@ const getOnchainRewardTokensData = async (
     rewardsMulticallerV1: Multicaller3Viem,
     rewardsMulticallerV2: Multicaller3Viem,
     chain: Chain,
-    gaugeControllerAddress?: string,
+    gaugeControllerHelperAddress?: string,
 ): Promise<
     {
         id: string;
@@ -263,10 +263,10 @@ const getOnchainRewardTokensData = async (
         if (gauge.version === 2) {
             balMulticaller.call(`${gauge.id}.rate`, gauge.id, 'inflation_rate', [currentWeek], true);
             balMulticaller.call(`${gauge.id}.workingSupply`, gauge.id, 'working_supply', [], true);
-        } else if (chain === Chain.MAINNET && gaugeControllerAddress) {
+        } else if (chain === Chain.MAINNET && gaugeControllerHelperAddress) {
             balMulticaller.call(
                 `${gauge.id}.weight`,
-                gaugeControllerAddress,
+                gaugeControllerHelperAddress,
                 'gauge_relative_weight',
                 [gauge.id],
                 true,
