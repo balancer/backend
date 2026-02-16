@@ -1,6 +1,6 @@
 import { prisma } from '../../../../prisma/prisma-client';
 import { GraphQLError } from 'graphql';
-import { CreateLbpInput, GqlPoolType, Resolvers } from '../generated-schema';
+import { Resolvers } from '../generated-schema';
 import { validateLBPoolInput } from '../../../../modules/validators/lbpool-input-validator';
 import { lbPoolInputToDB } from '../../../../modules/sources/transformers/lbpool-input-to-db';
 import { priceChartData } from '../../../../modules/pool/lbp/price-chart-data';
