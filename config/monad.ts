@@ -99,6 +99,17 @@ export default <NetworkData>{
                         },
                     ],
                 },
+                {
+                    name: 'smon',
+                    url: 'https://kintsu.xyz/api/public/apy',
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0xa3227c5969757783154c60bf0bc1944180ed81b9',
+                            path: '$.data[0].apy',
+                        },
+                    ],
+                },
             ],
         },
     },
