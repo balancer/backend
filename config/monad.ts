@@ -90,7 +90,7 @@ export default <NetworkData>{
                         }`,
                     }),
                     headers: { 'Content-Type': 'application/json' },
-                    scale: 100,
+                    scale: 10000,
                     extractors: [
                         {
                             type: 'path',
