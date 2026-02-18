@@ -1,5 +1,11 @@
 # backend
 
+## 2.0.1
+
+### Patch Changes
+
+-   82952cb: smon and gmon aprs
+
 ## 2.0.0
 
 ### Major Changes
