@@ -90,12 +90,23 @@ export default <NetworkData>{
                         }`,
                     }),
                     headers: { 'Content-Type': 'application/json' },
-                    scale: 100,
+                    scale: 10000,
                     extractors: [
                         {
                             type: 'path',
                             token: '0x8498312a6b3cbd158bf0c93abdcf29e6e4f55081',
                             path: '$.data.CoreVault_APY[0].totalAPR',
+                        },
+                    ],
+                },
+                {
+                    name: 'smon',
+                    url: 'https://kintsu.xyz/api/public/apy',
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0xa3227c5969757783154c60bf0bc1944180ed81b9',
+                            path: '$.data[0].apy',
                         },
                     ],
                 },
