@@ -1,5 +1,11 @@
 # backend
 
+## 2.0.2
+
+### Patch Changes
+
+-   c42c1a3: neverlend aprs
+
 ## 2.0.1
 
 ### Patch Changes
