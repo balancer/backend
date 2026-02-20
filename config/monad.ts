@@ -113,6 +113,7 @@ export default <NetworkData>{
                 {
                     name: 'wnWMON',
                     url: 'https://app.neverland.money/api/pool-apy',
+                    scale: 100,
                     extractors: [
                         {
                             type: 'path',
@@ -124,6 +125,7 @@ export default <NetworkData>{
                 {
                     name: 'wnloAZND',
                     url: 'https://app.neverland.money/api/pool-apy',
+                    scale: 100,
                     extractors: [
                         {
                             type: 'path',
@@ -135,6 +137,7 @@ export default <NetworkData>{
                 {
                     name: 'wnAUSD',
                     url: 'https://app.neverland.money/api/pool-apy',
+                    scale: 100,
                     extractors: [
                         {
                             type: 'path',
@@ -146,6 +149,7 @@ export default <NetworkData>{
                 {
                     name: 'wnUSDC',
                     url: 'https://app.neverland.money/api/pool-apy',
+                    scale: 100,
                     extractors: [
                         {
                             type: 'path',
@@ -157,6 +161,7 @@ export default <NetworkData>{
                 {
                     name: 'wnUSDT0',
                     url: 'https://app.neverland.money/api/pool-apy',
+                    scale: 100,
                     extractors: [
                         {
                             type: 'path',
