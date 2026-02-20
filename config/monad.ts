@@ -110,6 +110,66 @@ export default <NetworkData>{
                         },
                     ],
                 },
+                {
+                    name: 'wnWMON',
+                    url: 'https://app.neverland.money/api/pool-apy',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0xdb39a9d4a1f1b4e93a5684d602207628ad60613c',
+                            path: '$.reserves.0x3bd359c1119da7da1d913d1c4d2b7c461115433a.supply.baseAPY',
+                        },
+                    ],
+                },
+                {
+                    name: 'wnloAZND',
+                    url: 'https://app.neverland.money/api/pool-apy',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0xd786f7569c39a9f64e6a54eb77db21364e90f279',
+                            path: '$.reserves.0x9c82eb49b51f7dc61e22ff347931ca32adc6cd90.supply.baseAPY',
+                        },
+                    ],
+                },
+                {
+                    name: 'wnAUSD',
+                    url: 'https://app.neverland.money/api/pool-apy',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x82c370ba90e38ef6acd8b1b078d34fd86fc6bac9',
+                            path: '$.reserves.0x00000000efe302beaa2b3e6e1b18d08d69a9012a.supply.baseAPY',
+                        },
+                    ],
+                },
+                {
+                    name: 'wnUSDC',
+                    url: 'https://app.neverland.money/api/pool-apy',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x8d5c2df3eef09088fcccf3376d8ecd0dd505f642',
+                            path: '$.reserves.0x754704bc059f8c67012fed69bc8a327a5aafb603.supply.baseAPY',
+                        },
+                    ],
+                },
+                {
+                    name: 'wnUSDT0',
+                    url: 'https://app.neverland.money/api/pool-apy',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x4e8aaecce10ad9394e96fe5f2bd4e587a7b04298',
+                            path: '$.reserves.0xe7cd86e13ac4309349f30b3435a9d337750fc82d.supply.baseAPY',
+                        },
+                    ],
+                },
             ],
         },
     },
