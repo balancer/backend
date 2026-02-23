@@ -1,7 +1,6 @@
 // bun vitest sor-debug.test.ts
-import { Chain } from '@prisma/client';
-import { initRequestScopedContext, setRequestScopedContextValue } from '../context/request-scoped-context';
-import { chainIdToChain } from '../network/chain-id-to-chain';
+import { GqlChain } from '../../apps/api/gql/generated-schema';
+import { chainToChainId } from '../network/chain-id-to-chain';
 import { sorService } from './sor.service';
 import { Address, Swap, SwapInput, SwapKind } from '@balancer/sdk';
 import { formatUnits } from 'viem';
@@ -9,11 +8,9 @@ import { formatUnits } from 'viem';
 describe('sor debugging', () => {
     it('sor v2', async () => {
         const useProtocolVersion = 2;
-        const chain = Chain.BASE;
+        const chain: GqlChain = 'BASE';
 
-        const chainId = Object.keys(chainIdToChain).find((key) => chainIdToChain[key] === chain) as string;
-        initRequestScopedContext();
-        setRequestScopedContextValue('chainId', chainId);
+        const chainId = chainToChainId[chain];
 
         // only do once before starting to debug
         // bun task sor-sync-v2 {chainId}
@@ -34,10 +31,10 @@ describe('sor debugging', () => {
             //     slippagePercentage: '0.1',
             // },
             poolIds: [
-                        "0x2db50a0e0310723ef0c2a165cb9a9f80d772ba2f00020000000000000000000d",
-                        "0x6fbfcf88db1aada31f34215b2a1df7fafb4883e900000000000000000000000c",
-                        "0x8f360baf899845441eccdc46525e26bb8860752a0002000000000000000001cd"
-                    ],
+                '0x2db50a0e0310723ef0c2a165cb9a9f80d772ba2f00020000000000000000000d',
+                '0x6fbfcf88db1aada31f34215b2a1df7fafb4883e900000000000000000000000c',
+                '0x8f360baf899845441eccdc46525e26bb8860752a0002000000000000000001cd',
+            ],
         });
 
         console.log('protocol version', swaps.protocolVersion);
@@ -77,27 +74,29 @@ describe('sor debugging', () => {
         expect(ratio).toBeCloseTo(1, 3);
     }, 5000000);
 
-    it('sor v3', async () => {
+    it.only('sor v3', async () => {
         const useProtocolVersion = 3;
-        const chain = Chain.SONIC;
+        const chain: GqlChain = 'MAINNET';
 
-        const chainId = Object.keys(chainIdToChain).find((key) => chainIdToChain[key] === chain) as string;
-        initRequestScopedContext();
-        setRequestScopedContextValue('chainId', chainId);
+        const chainId = chainToChainId[chain];
+
         // only do once before starting to debug
         // bun task sor-sync-v3 {chainId}
 
+        const tokenIn = '0xc86168d2424d28942ee0866f043c1206bc9e4900'; // jUSD
+        const tokenOut = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'; // USDC
+        const poolId = '0xb20fa48d028b5ba6de33e09c72643c1fe92f8fcd';
         const swapType = 'EXACT_IN';
         const swapKind: SwapKind = SwapKind.GivenIn;
 
         const swaps = await sorService.getSorSwapPaths({
             chain,
-            tokenIn: '0x0c4e186eae8acaa7f7de1315d5ad174be39ec987', // smsUSD
-            tokenOut: '0x039e2fb66102314ce7b64ce5ce3e5183bc94ad38', // USDC
+            tokenIn,
+            tokenOut,
             swapType,
-            swapAmount: '1000000',
+            swapAmount: '1',
             useProtocolVersion,
-            poolIds: ['0x944d4ae892de4bfd38742cc8295d6d5164c5593c'],
+            poolIds: [poolId],
         });
 
         swaps.paths.forEach((path, i) => {
