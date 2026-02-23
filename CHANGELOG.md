@@ -1,5 +1,11 @@
 # backend
 
+## 2.0.3
+
+### Patch Changes
+
+-   4d0745c: move gauge subgraphs to ormi
+
 ## 2.0.2
 
 ### Patch Changes
