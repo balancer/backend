@@ -1,5 +1,6 @@
 .idea/
 .vscode/
+.claude/
 .DS_Store
 .env.sample
 .env.dev
