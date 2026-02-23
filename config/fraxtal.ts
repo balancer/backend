@@ -12,9 +12,8 @@ export default <NetworkData>{
     },
     subgraphs: {
         startDate: '2024-05-22',
-        balancer:
-            'https://api.goldsky.com/api/public/project_cmcigparivg3z01yhbv14ddl8/subgraphs/v2-fraxtal-smol/latest/gn',
-        gauge: 'https://api.goldsky.com/api/public/project_clwhu1vopoigi01wmbn514m1z/subgraphs/balancer-gauges-fraxtal/latest/gn',
+        balancer: '',
+        gauge: '',
         aura: 'https://data.aura.finance/graphql',
     },
     eth: {

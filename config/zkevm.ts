@@ -12,8 +12,8 @@ export default <NetworkData>{
     },
     subgraphs: {
         startDate: '2023-05-17',
-        balancer: `https://api.goldsky.com/api/public/project_cmcigparivg3z01yhbv14ddl8/subgraphs/v2-zkevm-smol/latest/gn`,
-        gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmbarCL8ofjqRJVAuSvKpd99m9xetBEGixoEQHJx31WEdB`,
+        balancer: ``,
+        gauge: ``,
         aura: 'https://data.aura.finance/graphql',
     },
     eth: {
