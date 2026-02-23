@@ -14,8 +14,8 @@ export default <NetworkData>{
     subgraphs: {
         startDate: '2025-10-30',
         balancer: ``,
-        balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmX8LawQrPRVywFnjwZG57MomECJRZDw4nNBvwdEHJ3dS3`,
-        balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmUDXYphhmEJJSZij5ZwjgLXfz2bnS4Mwr8ZDhfrvbsBYf`,
+        balancerV3: `https://api.subgraph.ormilabs.com/api/public/717cf785-de57-4761-94dd-9ac51b019902/subgraphs/v3-vault-xlayer-smol/latest/gn`,
+        balancerPoolsV3: `https://api.subgraph.ormilabs.com/api/public/717cf785-de57-4761-94dd-9ac51b019902/subgraphs/v3-pools-xlayer-smol/latest/gn`,
         gauge: ``,
     },
     hooks: {

@@ -14,8 +14,8 @@ export default <NetworkData>{
         startDate: '2023-05-03',
         cowAmm: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmeqeR1YL7xfB2Z7DaykE5Xh1YGGS1AGuoF4qUxSa58K2D`,
         balancer: `https://api.subgraph.ormilabs.com/api/public/717cf785-de57-4761-94dd-9ac51b019902/subgraphs/v2-sepolia-smol/latest/gn`,
-        balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmQDGZWbqMkjfQeBSCZKcNzGQagoje6BbTdEMESosoTGqq`,
-        balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmUgs7oFMYjrN2pEb7LEBugZBpHwkfPEZMLkK2TFr1GbbY`,
+        balancerV3: `https://api.subgraph.ormilabs.com/api/public/717cf785-de57-4761-94dd-9ac51b019902/subgraphs/v3-vault-sepolia-smol/latest/gn`,
+        balancerPoolsV3: `https://api.subgraph.ormilabs.com/api/public/717cf785-de57-4761-94dd-9ac51b019902/subgraphs/v3-pools-sepolia-smol/latest/gn`,
         gauge: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/Qme7qpLpcR6VhzfJrCVsRxxRrLj9TqH6Skrg6EUWnRmTzU`,
     },
     eth: {

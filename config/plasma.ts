@@ -14,8 +14,8 @@ export default <NetworkData>{
     subgraphs: {
         startDate: '2025-09-12',
         balancer: ``,
-        balancerV3: `https://api.goldsky.com/api/public/project_cmcigparivg3z01yhbv14ddl8/subgraphs/balancer-v3-plasma/latest/gn`,
-        balancerPoolsV3: `https://api.goldsky.com/api/public/project_cmcigparivg3z01yhbv14ddl8/subgraphs/balancer-pools-v3-plasma/latest/gn`,
+        balancerV3: `https://api.subgraph.ormilabs.com/api/public/717cf785-de57-4761-94dd-9ac51b019902/subgraphs/v3-vault-plasma-smol/latest/gn`,
+        balancerPoolsV3: `https://api.subgraph.ormilabs.com/api/public/717cf785-de57-4761-94dd-9ac51b019902/subgraphs/v3-pools-plasma-smol/latest/gn`,
         gauge: ``,
     },
     hooks: {

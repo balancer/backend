@@ -13,8 +13,8 @@ export default <NetworkData>{
     subgraphs: {
         startDate: '2025-09-12',
         balancer: ``,
-        balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmUjY6FNcecCopHx5sWWMqWCq6yKEXsB2DAPryyBuAYKnT`,
-        balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmcJsNHBKWWBfF4ma8rMKjwBa1bwdsJdjvLEaKFzEdqP2q`,
+        balancerV3: `https://api.subgraph.ormilabs.com/api/public/717cf785-de57-4761-94dd-9ac51b019902/subgraphs/v3-pools-monad-smol/latest/gn`,
+        balancerPoolsV3: `https://api.subgraph.ormilabs.com/api/public/717cf785-de57-4761-94dd-9ac51b019902/subgraphs/v3-vault-monad-smol/latest/gn`,
         gauge: ``,
     },
     hooks: {
