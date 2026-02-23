@@ -19,6 +19,7 @@ import {
 import { PathWithAmount } from './lib/path';
 import { getInputAmount, getOutputAmount } from './lib/utils';
 import { PathGraphTraversalConfig } from './lib/pathGraph/pathGraphTypes';
+import { Chain } from '@prisma/client';
 
 const DEFAULT_MAX_DEPTH = 4;
 
@@ -27,12 +28,14 @@ export class SorService {
         const tokenIn = args.tokenIn.toLowerCase();
         const tokenOut = args.tokenOut.toLowerCase();
 
+        const chain = args.chain as Chain;
+
         // early returns for invalid requests
-        if (!isValidSwapRequest(tokenIn, tokenOut, args.swapAmount, args.chain!)) {
-            return swapPathsZeroResponse(args.tokenIn, args.tokenOut, args.chain);
+        if (!isValidSwapRequest(tokenIn, tokenOut, args.swapAmount, chain)) {
+            return swapPathsZeroResponse(args.tokenIn, args.tokenOut, chain);
         }
-        if (!(await validateTokens(tokenIn, tokenOut, args.chain))) {
-            return swapPathsZeroResponse(args.tokenIn, args.tokenOut, args.chain);
+        if (!(await validateTokens(tokenIn, tokenOut, chain))) {
+            return swapPathsZeroResponse(args.tokenIn, args.tokenOut, chain);
         }
 
         // map SOR Service inputs to SOR inputs
@@ -57,7 +60,7 @@ export class SorService {
         }
 
         // map SOR output to SOR Service output
-        const mappedPaths = await mapToSorSwapPaths(paths, args.swapType, args.chain, protocolVersion);
+        const mappedPaths = await mapToSorSwapPaths(paths, args.swapType, chain, protocolVersion);
 
         return mappedPaths;
     }

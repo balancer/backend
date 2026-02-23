@@ -19,6 +19,7 @@ export class BufferPool implements BasePoolMethodsV3 {
     public readonly maxWithdraw: bigint;
 
     private readonly tokenMap: Map<string, BasePoolToken>;
+    private readonly decimalDiff: number; // mainDecimals - underlyingDecimals
 
     private vault: Vault;
     private poolState: BufferState;
@@ -74,9 +75,30 @@ export class BufferPool implements BasePoolMethodsV3 {
         this.maxWithdraw = maxWithdraw;
         this.tokens = [mainToken, underlyingToken];
         this.tokenMap = new Map(this.tokens.map((token) => [token.token.address, token]));
+        this.decimalDiff = mainToken.token.decimals - underlyingToken.token.decimals;
 
         this.vault = new Vault();
         this.poolState = this.getPoolState();
+    }
+
+    /**
+     * Scales an amount from main token decimals to underlying token decimals.
+     * Used after rate multiplication (mulDownFixed) which preserves the input's decimal scale.
+     */
+    private toUnderlyingDecimals(amount: bigint): bigint {
+        if (this.decimalDiff > 0) return amount / 10n ** BigInt(this.decimalDiff);
+        if (this.decimalDiff < 0) return amount * 10n ** BigInt(-this.decimalDiff);
+        return amount;
+    }
+
+    /**
+     * Scales an amount from underlying token decimals to main token decimals.
+     * Used after rate division (divDownFixed) which preserves the input's decimal scale.
+     */
+    private toMainDecimals(amount: bigint): bigint {
+        if (this.decimalDiff > 0) return amount * 10n ** BigInt(this.decimalDiff);
+        if (this.decimalDiff < 0) return amount / 10n ** BigInt(-this.decimalDiff);
+        return amount;
     }
 
     public getNormalizedLiquidity(tokenIn: Token, tokenOut: Token): bigint {
@@ -93,11 +115,13 @@ export class BufferPool implements BasePoolMethodsV3 {
             // givenIn
             if (underlyingTokenAmount.token.isSameAddress(tIn.token.address)) {
                 // wrap - respective to amount in, which is underlying
-                const bufferWrapLimit = MathSol.mulDownFixed(mainTokenAmount.amount, this.rate); //  in terms of underlying
+                const mainAsUnderlying = this.toUnderlyingDecimals(
+                    MathSol.mulDownFixed(mainTokenAmount.amount, this.rate),
+                );
+                const bufferWrapLimit = mainAsUnderlying; // in terms of underlying
                 const lendingProtocolWrapLimit = this.maxDeposit;
                 const wrapRequiredToRebalance =
-                    (MathSol.mulDownFixed(mainTokenAmount.amount, this.rate) + underlyingTokenAmount.amount) / 2n -
-                    underlyingTokenAmount.amount; // in terms of underlying
+                    (mainAsUnderlying + underlyingTokenAmount.amount) / 2n - underlyingTokenAmount.amount; // in terms of underlying
                 const wrapLimit =
                     wrapRequiredToRebalance > lendingProtocolWrapLimit
                         ? bufferWrapLimit
@@ -105,11 +129,14 @@ export class BufferPool implements BasePoolMethodsV3 {
                 return wrapLimit;
             } else {
                 // unwrap - respective to amount in, which is main
-                const bufferUnwrapLimit = MathSol.divDownFixed(underlyingTokenAmount.amount, this.rate); // in terms of main
-                const lendingProtocolUnwrapLimit = MathSol.divDownFixed(this.maxWithdraw, this.rate); // in terms of main;
+                const underlyingAsMain = this.toMainDecimals(
+                    MathSol.divDownFixed(underlyingTokenAmount.amount, this.rate),
+                );
+                const bufferUnwrapLimit = underlyingAsMain; // in terms of main
+                const maxWithdrawAsMain = this.toMainDecimals(MathSol.divDownFixed(this.maxWithdraw, this.rate));
+                const lendingProtocolUnwrapLimit = maxWithdrawAsMain; // in terms of main
                 const unwrapRequiredToRebalance =
-                    (MathSol.divDownFixed(underlyingTokenAmount.amount, this.rate) + mainTokenAmount.amount) / 2n -
-                    mainTokenAmount.amount; // in terms of main
+                    (underlyingAsMain + mainTokenAmount.amount) / 2n - mainTokenAmount.amount; // in terms of main
                 const unwrapLimit =
                     unwrapRequiredToRebalance > lendingProtocolUnwrapLimit
                         ? bufferUnwrapLimit
@@ -120,11 +147,14 @@ export class BufferPool implements BasePoolMethodsV3 {
             // givenOut
             if (underlyingTokenAmount.token.isSameAddress(tIn.token.address)) {
                 // wrap - respective to amount out, which is main
+                const underlyingAsMain = this.toMainDecimals(
+                    MathSol.divDownFixed(underlyingTokenAmount.amount, this.rate),
+                );
                 const bufferWrapLimit = mainTokenAmount.amount; // in terms of main
-                const lendingProtocolWrapLimit = MathSol.divDownFixed(this.maxDeposit, this.rate); // in terms of main;
+                const maxDepositAsMain = this.toMainDecimals(MathSol.divDownFixed(this.maxDeposit, this.rate));
+                const lendingProtocolWrapLimit = maxDepositAsMain; // in terms of main
                 const wrapRequiredToRebalance =
-                    mainTokenAmount.amount -
-                    (MathSol.divDownFixed(underlyingTokenAmount.amount, this.rate) + mainTokenAmount.amount) / 2n; // in terms of main
+                    mainTokenAmount.amount - (underlyingAsMain + mainTokenAmount.amount) / 2n; // in terms of main
                 const wrapLimit =
                     wrapRequiredToRebalance > lendingProtocolWrapLimit
                         ? bufferWrapLimit
@@ -132,11 +162,13 @@ export class BufferPool implements BasePoolMethodsV3 {
                 return wrapLimit;
             } else {
                 // unwrap - respective to amount out, which is underlying
+                const mainAsUnderlying = this.toUnderlyingDecimals(
+                    MathSol.mulDownFixed(mainTokenAmount.amount, this.rate),
+                );
                 const bufferUnwrapLimit = underlyingTokenAmount.amount; // in terms of underlying
                 const lendingProtocolUnwrapLimit = this.maxWithdraw;
                 const unwrapRequiredToRebalance =
-                    underlyingTokenAmount.amount -
-                    (underlyingTokenAmount.amount + MathSol.mulDownFixed(mainTokenAmount.amount, this.rate)) / 2n; // in terms of underlying
+                    underlyingTokenAmount.amount - (underlyingTokenAmount.amount + mainAsUnderlying) / 2n; // in terms of underlying
                 const unwrapLimit =
                     unwrapRequiredToRebalance > lendingProtocolUnwrapLimit
                         ? bufferUnwrapLimit
@@ -159,13 +191,19 @@ export class BufferPool implements BasePoolMethodsV3 {
             this.poolState,
         );
 
-        return TokenAmount.fromRawAmount(tOut.token, calculatedAmount);
+        // Vault rate math preserves input decimal scale, so we need to scale the result
+        // to the output token's decimals
+        const isUnwrap = tIn.token.isSameAddress(this.tokens[0].token.address);
+        const scaledAmount = isUnwrap
+            ? this.toUnderlyingDecimals(calculatedAmount) // main→underlying
+            : this.toMainDecimals(calculatedAmount); // underlying→main
+
+        return TokenAmount.fromRawAmount(tOut.token, scaledAmount);
     }
 
     public swapGivenOut(tokenIn: Token, tokenOut: Token, swapAmount: TokenAmount): TokenAmount {
         const { tIn, tOut } = this.getPoolTokens(tokenIn, tokenOut);
 
-        // swap
         const calculatedAmount = this.vault.swap(
             {
                 amountRaw: swapAmount.amount,
@@ -175,7 +213,15 @@ export class BufferPool implements BasePoolMethodsV3 {
             },
             this.poolState,
         );
-        return TokenAmount.fromRawAmount(tIn.token, calculatedAmount);
+
+        // Vault rate math preserves input (amountOut) decimal scale, so we need to
+        // scale the result to the input token's decimals
+        const isUnwrap = tIn.token.isSameAddress(this.tokens[0].token.address);
+        const scaledAmount = isUnwrap
+            ? this.toMainDecimals(calculatedAmount) // underlyingDec→mainDec
+            : this.toUnderlyingDecimals(calculatedAmount); // mainDec→underlyingDec
+
+        return TokenAmount.fromRawAmount(tIn.token, scaledAmount);
     }
 
     public getPoolState(): BufferState {
@@ -219,10 +265,14 @@ export class BufferPool implements BasePoolMethodsV3 {
         const underlyingTokenAmount = this.tokens[1];
 
         if (tIn.token.isSameAddress(underlyingTokenAmount.token.address)) {
-            const bufferWrapLimit = MathSol.mulDownFixed(mainTokenAmount.amount, this.rate);
+            // wrap: swapAmount is in underlying decimals, so convert limit to underlying decimals
+            const bufferWrapLimit = this.toUnderlyingDecimals(MathSol.mulDownFixed(mainTokenAmount.amount, this.rate));
             return swapAmount.amount > bufferWrapLimit;
         } else {
-            const bufferUnwrapLimit = MathSol.divDownFixed(underlyingTokenAmount.amount, this.rate);
+            // unwrap: swapAmount is in main decimals, so convert limit to main decimals
+            const bufferUnwrapLimit = this.toMainDecimals(
+                MathSol.divDownFixed(underlyingTokenAmount.amount, this.rate),
+            );
             return swapAmount.amount > bufferUnwrapLimit;
         }
     }
