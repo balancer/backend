@@ -14,7 +14,7 @@ export default <NetworkData>{
     subgraphs: {
         startDate: '2021-06-16',
         balancer: `https://api.subgraph.ormilabs.com/api/public/717cf785-de57-4761-94dd-9ac51b019902/subgraphs/v2-polygon-smol/latest/gn`,
-        gauge: `https://gateway-arbitrum.network.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmewSgLJf9TZt8trr61dECJhEGGyHxKFWbNQ3AnNZAdYyU`,
+        gauge: `https://api.subgraph.ormilabs.com/api/public/717cf785-de57-4761-94dd-9ac51b019902/subgraphs/balancer-gauges-polygon/latest/gn`,
         aura: 'https://data.aura.finance/graphql',
     },
     eth: {
