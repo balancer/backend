@@ -3,8 +3,8 @@ import { prisma } from '../../../prisma/prisma-client';
 import { CowAmmSubgraphClient } from '../../sources/subgraphs';
 import { AddRemove_OrderBy, OrderDirection } from '../../sources/subgraphs/cow-amm/generated/types';
 import { joinExitsUsd } from '../../sources/enrichers/join-exits-usd';
-import { joinExitV3Transformer } from '../../sources/transformers/join-exit-v3-transformer';
 import { eventsRepository, EventStoreRepository } from '../../repositories/events';
+import { joinExitCowTransformer } from '../../sources/transformers/join-exit-cow-transformer';
 
 /**
  * Get the join and exit events from the subgraph and store them in the database
@@ -35,7 +35,7 @@ export const syncJoinExits = async (
     });
 
     // Prepare DB entries
-    const dbEntries = await joinExitV3Transformer(addRemoves, chain, 1);
+    const dbEntries = await joinExitCowTransformer(addRemoves, chain, 1);
 
     console.log(`Syncing Cow AMM ${dbEntries.length} join/exit events`);
 

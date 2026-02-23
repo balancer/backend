@@ -1,18 +1,18 @@
 import _ from 'lodash';
-import { AddRemoveFragment } from '../subgraphs/balancer-v3-vault/generated/types';
 import { Chain, PoolEventType } from '@prisma/client';
 import { JoinExitEvent } from '../../../prisma/prisma-types';
+import { CowAmmAddRemoveFragment } from '../subgraphs/cow-amm/generated/types';
 
 /**
- * Takes V3 subgraph swaps and transforms them into DB entries
+ * Takes COW subgraph join/exit events and transforms them into DB entries
  *
- * @param swaps
+ * @param events
  * @param chain
  * @param protocolVersion
  * @returns
  */
-export async function joinExitV3Transformer(
-    events: AddRemoveFragment[],
+export async function joinExitCowTransformer(
+    events: CowAmmAddRemoveFragment[],
     chain: Chain,
     protocolVersion = 3,
 ): Promise<JoinExitEvent[]> {
@@ -23,7 +23,7 @@ export async function joinExitV3Transformer(
         type: event.type === 'Add' ? PoolEventType.JOIN : PoolEventType.EXIT,
         poolId: event.pool.id,
         chain: chain,
-        userAddress: event.user,
+        userAddress: event.user.id,
         blockNumber: Number(event.blockNumber),
         blockTimestamp: Number(event.blockTimestamp),
         logIndex: Number(event.logIndex),

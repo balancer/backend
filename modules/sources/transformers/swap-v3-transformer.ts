@@ -18,7 +18,7 @@ export function swapV3Transformer(swaps: SwapFragment[], chain: Chain): SwapEven
         poolId: swap.pool,
         chain: chain,
         protocolVersion: 3,
-        userAddress: swap.user.id,
+        userAddress: swap.user,
         blockNumber: Number(swap.blockNumber),
         blockTimestamp: Number(swap.blockTimestamp),
         logIndex: Number(swap.logIndex),
