@@ -5,13 +5,12 @@ import { fetchBufferBalances } from '../../sources/contracts/v3/fetch-buffer-bal
 import { fetchMaxValues } from '../../sources/contracts/v3/fetch-erc4626-max-values';
 import { fetchUnwrapRates } from '../../sources/contracts/v3/fetch-unwrap-rates';
 import _ from 'lodash';
+import { formatEther } from 'viem';
 
 /**
  * Syncs onchain data for ERC4626 tokens and stores them in the database
  */
 export const syncErc4626OnchainData = async (vaultExplorerAddress: string, viemClient: ViemClient, chain: Chain) => {
-    console.log(`[ERC4626 ${chain}] Starting ERC4626 data sync...`);
-
     // Get all ERC4626 tokens for the chain
     const erc4626Tokens = await prisma.prismaToken.findMany({
         where: {
@@ -30,11 +29,8 @@ export const syncErc4626OnchainData = async (vaultExplorerAddress: string, viemC
     const erc4626TokensMap = Object.fromEntries(erc4626Tokens.map((token) => [token.address, token]));
 
     if (erc4626Tokens.length === 0) {
-        console.log(`[ERC4626 ${chain}] No ERC4626 tokens found`);
         return;
     }
-
-    console.log(`[ERC4626 ${chain}] Found ${erc4626Tokens.length} ERC4626 tokens`);
 
     // Get all underlying tokens for the ERC4626 tokens
     const underlyingTokenAddresses = erc4626Tokens
@@ -65,6 +61,20 @@ export const syncErc4626OnchainData = async (vaultExplorerAddress: string, viemC
 
         // Merge onchain data into one object
         const onchainData = _.merge({}, maxValues, unwrapRates, bufferBalances);
+
+        // workaround for morphov2 vaults, set maxWithdraw and maxDeposit to maxInt
+        const morphoV2Vaults = [
+            '0x4ef53d2caa51c447fdfeeedee8f07fd1962c9ee6',
+            '0x8c1bed5b9a0928467c9b1341da1d7bd5e10b6549',
+        ];
+        morphoV2Vaults.forEach((vault) => {
+            if (onchainData[vault]) {
+                onchainData[vault].maxDeposit =
+                    formatEther(115792089237316195423570985008687907853269984665640564039457584007913129639935n);
+                onchainData[vault].maxWithdraw =
+                    formatEther(115792089237316195423570985008687907853269984665640564039457584007913129639935n);
+            }
+        });
 
         // Update database with the new buffer balances in a single transaction
         await prisma.$transaction(async (tx) => {

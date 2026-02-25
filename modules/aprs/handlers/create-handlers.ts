@@ -17,7 +17,6 @@ export function createHandlers(chain: Chain): AprHandler[] {
     // handlerList.push(new handlers.QuantAmmAprHandler());
     handlerList.push(new handlers.LiquidityGaugeAprHandler(tokenService));
     handlerList.push(new handlers.MerklAprHandler());
-    handlerList.push(new handlers.FuulHypurrAprHandler());
 
     // Mainnet specific handlers
     if (chain === Chain.MAINNET) {
@@ -34,6 +33,10 @@ export function createHandlers(chain: Chain): AprHandler[] {
 
     if (config[chain].aprHandlers.ybAprHandler) {
         handlerList.push(new handlers.YbTokensAprHandler());
+    }
+
+    if (config[chain].aprHandlers.fuulHypurrAprHandler) {
+        handlerList.push(new handlers.FuulHypurrAprHandler());
     }
 
     if (config[chain].aprHandlers.morphoRewardsAprHandler) {

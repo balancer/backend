@@ -1,21 +1,9 @@
-import { $Enums, PrismaPoolAprItem, PrismaPoolAprType } from '@prisma/client';
+import { PrismaPoolAprItem, PrismaPoolAprType } from '@prisma/client';
 import { AprHandler, PoolAPRData } from '../../types';
 import { chainIdToChain } from '../../../network/chain-id-to-chain';
+import { env } from '../../../../apps/env';
 
 const baseURL = 'https://api.fuul.xyz/api/v1/conversions';
-
-interface MerklOpportunity {
-    chainId: number;
-    identifier: string;
-    dailyRewards: number;
-    explorerAddress: string;
-    apr: number;
-    campaigns: {
-        params: {
-            whitelist: string[];
-        };
-    }[];
-}
 
 export class FuulHypurrAprHandler implements AprHandler {
     public getAprServiceName(): string {
@@ -27,7 +15,7 @@ export class FuulHypurrAprHandler implements AprHandler {
     ): Promise<Omit<PrismaPoolAprItem, 'createdAt' | 'updatedAt'>[]> {
         const apiResponse = await fetch(baseURL, {
             method: 'GET',
-            headers: { Authorization: `Bearer ${process.env.FUUL_HYPURR_API_KEY}`, 'Content-Type': 'application/json' },
+            headers: { Authorization: `Bearer ${env.FUUL_HYPURR_API_KEY}`, 'Content-Type': 'application/json' },
         });
 
         const data = (await apiResponse.json()) as {
@@ -57,7 +45,7 @@ export class FuulHypurrAprHandler implements AprHandler {
                         aprMap.set(id, {
                             id,
                             title: 'Fuul Hypurr',
-                            type: PrismaPoolAprType.THIRD_PARTY_REWARD,
+                            type: PrismaPoolAprType.FUUL,
                             chain,
                             poolId,
                             apr,

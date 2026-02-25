@@ -5,6 +5,7 @@ export interface AprHandlerConfigs {
     aaveRewardsAprHandler?: boolean;
     maBeetsAprHandler?: MaBeetsAprConfig;
     morphoRewardsAprHandler?: boolean;
+    fuulHypurrAprHandler?: boolean;
 }
 
 export interface MaBeetsAprConfig {
