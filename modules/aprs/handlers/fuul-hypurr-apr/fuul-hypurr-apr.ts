@@ -45,7 +45,7 @@ export class FuulHypurrAprHandler implements AprHandler {
                         aprMap.set(id, {
                             id,
                             title: 'Fuul Hypurr',
-                            type: PrismaPoolAprType.THIRD_PARTY_REWARD,
+                            type: PrismaPoolAprType.FUUL,
                             chain,
                             poolId,
                             apr,
