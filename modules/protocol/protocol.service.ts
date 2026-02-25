@@ -109,8 +109,7 @@ export class ProtocolService {
             !pool.dynamicData ? 0 : pool.dynamicData.protocolYieldCapture24h,
         );
 
-        // const balancerV1Tvl = await this.getBalancerV1Tvl(chain);
-        const balancerV1Tvl = 0;
+        const balancerV1Tvl = await this.getBalancerV1Tvl(chain);
         const sftmxTvl = await this.getSftmXTVL(chain);
         const stsTVL = await this.getStsTVL(chain);
 
@@ -172,6 +171,9 @@ export class ProtocolService {
         }
 
         const response = await fetch('https://api.llama.fi/tvl/balancer-v1');
+        if (response.status !== 200) {
+            return 0;
+        }
         const data = (await response.json()) as number;
 
         return data;
