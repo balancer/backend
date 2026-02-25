@@ -58,6 +58,7 @@ export default <NetworkData>{
         },
     },
     aprHandlers: {
+        fuulHypurrAprHandler: true,
         ybAprHandler: {
             http: [
                 {
