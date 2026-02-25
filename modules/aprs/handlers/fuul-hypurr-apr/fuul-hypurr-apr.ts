@@ -26,7 +26,7 @@ export class FuulHypurrAprHandler implements AprHandler {
         pools: PoolAPRData[],
     ): Promise<Omit<PrismaPoolAprItem, 'createdAt' | 'updatedAt'>[]> {
         const apiResponse = await fetch(baseURL, {
-            method: 'POST',
+            method: 'GET',
             headers: { Authorization: `Bearer ${process.env.FUUL_HYPURR_API_KEY}`, 'Content-Type': 'application/json' },
         });
 
@@ -34,7 +34,7 @@ export class FuulHypurrAprHandler implements AprHandler {
             id: string;
             name: string;
             enabled: boolean;
-            context: { token_address: string; chainId: number };
+            triggers: { context: { token_address: string; chain_id: number } }[];
             metrics: { apr: string };
         }[];
 
@@ -42,9 +42,9 @@ export class FuulHypurrAprHandler implements AprHandler {
 
         // we need to map the response to our internal format and sum aprs for the same pool (in case there are multiple triggers for the same pool)
         for (const item of data) {
-            if (item.enabled && item.context && parseFloat(item.metrics.apr) > 0) {
-                const chain = chainIdToChain[`${item.context.chainId}`];
-                const poolId = item.context.token_address.toLowerCase();
+            if (item.enabled && item.triggers.length > 0 && parseFloat(item.metrics.apr) > 0) {
+                const chain = chainIdToChain[`${item.triggers[0].context.chain_id}`];
+                const poolId = item.triggers[0].context.token_address.toLowerCase();
                 if (pools.map((p) => p.id).includes(poolId)) {
                     const apr = parseFloat(item.metrics.apr);
 
