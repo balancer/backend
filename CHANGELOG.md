@@ -1,5 +1,11 @@
 # backend
 
+## 2.0.5
+
+### Patch Changes
+
+-   77fd26e: safe call llama api for v1 tvl
+
 ## 2.0.4
 
 ### Patch Changes
