@@ -149,7 +149,6 @@ export class PoolGqlLoaderService {
                 args.skip = undefined;
             }
             // const includeQuery = args.where.userAddress ? prismaPoolMinimal.include.staking.include.
-            console.log(this.mapQueryArgsToPoolQuery(args).where?.allTokens);
             const pools = await prisma.prismaPool.findMany({
                 ...this.mapQueryArgsToPoolQuery(args),
                 include: {
