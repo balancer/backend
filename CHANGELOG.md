@@ -1,5 +1,12 @@
 # backend
 
+## 2.0.4
+
+### Patch Changes
+
+-   9d2e460: deprecat fraxtal, mode and zkevm
+-   af06f96: SOR - Fix buffer maths to handle rates as 1e18
+
 ## 2.0.3
 
 ### Patch Changes
