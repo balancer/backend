@@ -1564,6 +1564,10 @@ enum GqlPoolAprItemType {
     """
     MERKL
     """
+    Rewards distributed by fuul.xyz
+    """
+    FUUL
+    """
     APR calculated for QUANT-AMM pools based on performance measurements over a month
     """
     QUANT_AMM_UPLIFT

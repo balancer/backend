@@ -65,10 +65,6 @@ export async function reloadSnapshots(chain: Chain, poolId: string): Promise<voi
         const currentTimestamp = roundToMidnight(block.timestamp);
         const totalShares = totalSharesForBlocks[block.timestamp] ?? '0';
 
-        if (currentTimestamp > 1756425600) {
-            console.log('Debug here');
-        }
-
         // find closest bpt price, array is sorted timestamp asc
         const bptPriceAtTimestamp = bptPriceSinceFirstSnapshot.find(
             (price) => price.timestamp >= currentTimestamp,

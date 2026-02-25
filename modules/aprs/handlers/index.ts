@@ -9,5 +9,6 @@ export { QuantAmmAprHandler } from './quant-amm-apr';
 export { LiquidityGaugeAprHandler } from './liquidity-gauge-apr';
 export { VeBalProtocolAprHandler, VeBalVotingAprHandler } from './vebal-apr';
 export { MerklAprHandler } from './merkl-apr';
+export { FuulHypurrAprHandler } from './fuul-hypurr-apr';
 
 export { createHandlers } from './create-handlers';

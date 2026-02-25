@@ -109,7 +109,8 @@ export class ProtocolService {
             !pool.dynamicData ? 0 : pool.dynamicData.protocolYieldCapture24h,
         );
 
-        const balancerV1Tvl = await this.getBalancerV1Tvl(chain);
+        // const balancerV1Tvl = await this.getBalancerV1Tvl(chain);
+        const balancerV1Tvl = 0;
         const sftmxTvl = await this.getSftmXTVL(chain);
         const stsTVL = await this.getStsTVL(chain);
 

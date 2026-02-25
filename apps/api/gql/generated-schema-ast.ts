@@ -744,6 +744,11 @@ export const schema = gql`
         DYNAMIC_SWAP_FEE_24H
 
         """
+        Rewards distributed by fuul.xyz
+        """
+        FUUL
+
+        """
         Represents the yield from an IB (Interest-Bearing) asset APR in a pool.
         """
         IB_YIELD
