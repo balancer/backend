@@ -432,6 +432,8 @@ export type GqlPoolAprItemType =
     | 'AURA'
     /** Dynamic swap fee APR based on data from the last 24h */
     | 'DYNAMIC_SWAP_FEE_24H'
+    /** Rewards distributed by fuul.xyz */
+    | 'FUUL'
     /** Represents the yield from an IB (Interest-Bearing) asset APR in a pool. */
     | 'IB_YIELD'
     /** APR in a pool that can be earned through locking, i.e. veBAL */

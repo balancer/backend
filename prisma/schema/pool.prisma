@@ -188,6 +188,7 @@ enum PrismaPoolAprType {
     LOCKING
     AURA
     MERKL
+    FUUL
     QUANT_AMM_UPLIFT
     SURPLUS
     SURPLUS_24H
