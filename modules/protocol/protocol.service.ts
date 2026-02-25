@@ -109,9 +109,8 @@ export class ProtocolService {
             !pool.dynamicData ? 0 : pool.dynamicData.protocolYieldCapture24h,
         );
 
-        // const balancerV1Tvl = await this.getBalancerV1Tvl(chain);
-        const balancerV1Tvl = 0;
-        const sftmxTvl = await this.getSftmXTVL(chain);
+        const balancerV1Tvl = await this.getBalancerV1Tvl(chain);
+        const sftmxTvl = 0;
         const stsTVL = await this.getStsTVL(chain);
 
         const protocolData = {
@@ -132,19 +131,6 @@ export class ProtocolService {
         this.cache.put(`${PROTOCOL_METRICS_CACHE_KEY}:${chain}`, protocolData, 60 * 30 * 1000);
 
         return protocolData;
-    }
-
-    private async getSftmXTVL(chain: Chain): Promise<number> {
-        if (chain !== 'FANTOM') {
-            return 0;
-        }
-
-        const tokenAddress = config[chain].weth.address;
-        const ftmPrice = await prisma.prismaTokenCurrentPrice.findFirst({
-            where: { tokenAddress, chain: 'FANTOM' },
-        });
-
-        return 0;
     }
 
     private async getStsTVL(chain: Chain): Promise<number> {
@@ -172,6 +158,9 @@ export class ProtocolService {
         }
 
         const response = await fetch('https://api.llama.fi/tvl/balancer-v1');
+        if (response.status !== 200) {
+            return 0;
+        }
         const data = (await response.json()) as number;
 
         return data;
