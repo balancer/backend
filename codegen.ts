@@ -41,7 +41,7 @@ const files = {
         ...defaults.types,
     },
     ['modules/subgraphs/reliquary-subgraph/generated/reliquary-subgraph-types.ts']: {
-        schema: config.FANTOM.subgraphs.reliquary,
+        schema: config.SONIC.subgraphs.reliquary,
         documents: 'modules/subgraphs/reliquary-subgraph/reliquary-subgraph-queries.graphql',
         ...defaults.types,
         config: {
