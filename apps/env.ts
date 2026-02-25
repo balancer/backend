@@ -25,10 +25,6 @@ export const schema = {
         optional: true,
         type: String,
     },
-    ALCHEMY_API_KEY: {
-        optional: true,
-        type: String,
-    },
     DRPC_API_KEY: {
         optional: true,
         type: String,
@@ -46,10 +42,6 @@ export const schema = {
         type: String,
     },
     THEGRAPH_API_KEY_BALANCER: {
-        optional: true,
-        type: String,
-    },
-    SATSUMA_API_KEY: {
         optional: true,
         type: String,
     },
