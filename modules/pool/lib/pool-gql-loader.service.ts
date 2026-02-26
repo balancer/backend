@@ -423,7 +423,7 @@ export class PoolGqlLoaderService {
                 gt: where?.createTime?.gt || undefined,
                 lt: where?.createTime?.lt || undefined,
             },
-            AND: allTokensFilter,
+            OR: allTokensFilter,
             id: {
                 in: where?.idIn?.map((id) => id.toLowerCase()) || undefined,
                 notIn: where?.idNotIn?.map((id) => id.toLowerCase()) || undefined,
