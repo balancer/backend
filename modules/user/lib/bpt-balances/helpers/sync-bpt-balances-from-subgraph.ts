@@ -1,4 +1,4 @@
-import { Chain } from '@prisma/client';
+import { Chain, PrismaLastBlockSyncedCategory } from '@prisma/client';
 import { prisma } from '../../../../../prisma/prisma-client';
 import { zeroAddress } from 'viem';
 import _ from 'lodash';
@@ -20,11 +20,11 @@ export const syncBptBalancesFromSubgraph = async (
     poolIds: string[],
     subgraphClient: UserBalancesSubgraphClient,
     chain: Chain,
-    syncCategory?: 'BPT_BALANCES_V2' | 'BPT_BALANCES_V3' | 'BPT_BALANCES_COW_AMM' | 'BPT_BALANCES_FBEETS',
+    syncCategory?: PrismaLastBlockSyncedCategory,
 ) => {
     // Must have poolIds to sync
     if (poolIds.length === 0) {
-        console.log(`syncBptBalancesFromSubgraph ${syncCategory || ''} on ${chain} no pools provided`);
+        console.log(`syncBptBalancesFromSubgraph ${syncCategory} on ${chain} no pools provided`);
         return 0;
     }
 
@@ -36,7 +36,7 @@ export const syncBptBalancesFromSubgraph = async (
     const latestBlock = await viemClient.getBlockNumber();
     if (Number(latestBlock) - endBlock > 60) {
         throw new Error(
-            `syncBptBalancesFromSubgraph ${syncCategory || ''} on ${chain} subgraph lagging behind by ${
+            `syncBptBalancesFromSubgraph ${syncCategory} on ${chain} subgraph lagging behind by ${
                 Number(latestBlock) - endBlock
             } blocks`,
         );
@@ -53,7 +53,7 @@ export const syncBptBalancesFromSubgraph = async (
     const poolShares = await subgraphClient.getAllPoolSharesWithBalance(poolIds, [zeroAddress], fromBlock);
     console.timeEnd(benchMessage);
     console.log(`syncBptBalancesFromSubgraph ${syncCategory || ''} on ${chain} got ${poolShares.length} poolShares`);
-    const operations = balancesToDb(poolShares, endBlock, syncCategory);
+    const operations = balancesToDb(poolShares, chain, endBlock, syncCategory);
     try {
         await prisma.$transaction(operations);
     } catch (e: any) {

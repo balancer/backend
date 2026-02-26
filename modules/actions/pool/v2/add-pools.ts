@@ -1,4 +1,4 @@
-import { Chain, PrismaPool } from '@prisma/client';
+import { Chain, PrismaLastBlockSyncedCategory, PrismaPool } from '@prisma/client';
 import { prisma } from '../../../../prisma/prisma-client';
 import { nestedPoolWithSingleLayerNesting } from '../../../../prisma/prisma-types';
 import { V2SubgraphClient } from '../../../subgraphs/balancer-subgraph';
