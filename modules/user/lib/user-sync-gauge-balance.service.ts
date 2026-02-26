@@ -21,7 +21,7 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
         }
 
         const { balances, blockNumber } = await this.balancesFromSG(chain);
-        return this.saveBalances(balances, blockNumber);
+        return this.saveBalances(balances, blockNumber, chain);
     }
 
     public async syncChangedStakedBalances(chain: Chain): Promise<void> {
@@ -40,7 +40,7 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
             latestBlock - sgBlock > acceptableSGLag
                 ? await this.balancesFromRPC(chain, client, lastSyncedBlock)
                 : await this.balancesFromSG(chain, lastSyncedBlock);
-        return this.saveBalances(balances, blockNumber);
+        return this.saveBalances(balances, blockNumber, chain);
     }
 
     private async balancesFromSG(chain: Chain, lastSyncedBlock?: number) {
@@ -174,16 +174,12 @@ export class UserSyncGaugeBalanceService implements UserStakedBalanceService {
             stakingId: string;
         }[],
         blockNumber: number,
+        chain: Chain,
     ) {
-        if (balances.length === 0) {
-            return;
-        }
-
         const obsoleteIDs = balances.filter((share) => share.balanceNum === 0).map(({ id }) => id);
         const userAddresses = _.uniq(balances.map((share) => share.userAddress)).map((userAddress) => ({
             address: userAddress,
         }));
-        const chain = balances[0].chain;
 
         return prismaBulkExecuteOperations(
             [
