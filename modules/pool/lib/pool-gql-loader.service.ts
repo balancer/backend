@@ -344,7 +344,6 @@ export class PoolGqlLoaderService {
         }
 
         const allTokensFilter: { allTokens: { some: { token: { address: { equals: string } } } } }[] = [];
-        const allTokensFilterNot = [];
         where?.tokensIn?.forEach((token) => {
             allTokensFilter.push({
                 allTokens: {
@@ -359,19 +358,19 @@ export class PoolGqlLoaderService {
             });
         });
 
-        if (where?.tokensNotIn) {
-            allTokensFilterNot.push({
-                allTokens: {
-                    every: {
-                        token: {
-                            address: {
-                                notIn: where.tokensNotIn.map((t) => t.toLowerCase()) || undefined,
-                            },
-                        },
-                    },
-                },
-            });
-        }
+        // if (where?.tokensNotIn) {
+        //     allTokensFilter.push({
+        //         allTokens: {
+        //             every: {
+        //                 token: {
+        //                     address: {
+        //                         notIn: where.tokensNotIn.map((t) => t.toLowerCase()) || undefined,
+        //                     },
+        //                 },
+        //             },
+        //         },
+        //     });
+        // }
 
         const userArgs: Prisma.PrismaPoolWhereInput = userAddress
             ? {
@@ -425,7 +424,6 @@ export class PoolGqlLoaderService {
                 lt: where?.createTime?.lt || undefined,
             },
             OR: allTokensFilter,
-            AND: allTokensFilterNot,
             id: {
                 in: where?.idIn?.map((id) => id.toLowerCase()) || undefined,
                 notIn: where?.idNotIn?.map((id) => id.toLowerCase()) || undefined,
