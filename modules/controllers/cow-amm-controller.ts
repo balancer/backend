@@ -123,17 +123,5 @@ export function CowAmmController(tracer?: any) {
                 .filter((value, index, self) => self.indexOf(value) === index);
             return poolIds;
         },
-        async syncBalances(chain: Chain) {
-            let subgraphClient: ReturnType<typeof getSubgraphClient>;
-            try {
-                subgraphClient = getSubgraphClient(chain);
-            } catch (e) {
-                return false;
-            }
-
-            await syncBptBalancesFromSubgraph([], subgraphClient, chain);
-
-            return true;
-        },
     };
 }

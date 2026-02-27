@@ -1,9 +1,10 @@
-import { Prisma, PrismaLastBlockSyncedCategory } from '@prisma/client';
+import { Chain, Prisma, PrismaLastBlockSyncedCategory } from '@prisma/client';
 import { prisma } from '../../../../../prisma/prisma-client';
 import _ from 'lodash';
 
 export const balancesToDb = (
     balances: Prisma.PrismaUserWalletBalanceCreateManyInput[],
+    chain: Chain,
     endBlock: number,
     syncType?: PrismaLastBlockSyncedCategory,
 ) => {
@@ -12,12 +13,7 @@ export const balancesToDb = (
         throw new Error('Balances should be from the same chain');
     }
 
-    if (balances.length === 0) {
-        return [];
-    }
-
     const obsoleteIDs = balances.filter((balance) => balance.balanceNum === 0).map(({ id }) => id);
-    const chain = balances[0].chain;
 
     return [
         // Wallet balances are related to users table, so we need to create all users records first

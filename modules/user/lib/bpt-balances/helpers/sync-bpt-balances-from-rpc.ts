@@ -24,7 +24,7 @@ export const syncBptBalancesFromRpc = async (
         return 0;
     }
 
-    const endBlock = await client.getBlockNumber().then(Number);
+    const toBlock = await client.getBlockNumber().then(Number);
 
     // Get the balances synced block from the DB
     const startBlock = await getLastSyncedBlock(chain, syncCategory);
@@ -38,7 +38,7 @@ export const syncBptBalancesFromRpc = async (
     const fromBlock = startBlock - 5; // Using just 5 blocks here, because we rely on the subgraph 1st
 
     // no new blocks have been minted, needed for slow networks
-    if (fromBlock > endBlock) {
+    if (fromBlock > toBlock) {
         console.log(`syncBptBalancesFromRpc ${syncCategory} on ${chain} start block is greater than end block`);
         return 0;
     }
@@ -50,7 +50,7 @@ export const syncBptBalancesFromRpc = async (
     const range = rpcMaxBlockRange(chain);
 
     // Split the range into smaller chunks to avoid RPC limits, setting up to 5 times max block range
-    const toBlock = Math.min(fromBlock + 5 * range, endBlock);
+    // const toBlock = Math.min(fromBlock + 5 * range, endBlock);
     console.log(`syncBptBalancesFromRpc ${syncCategory} on ${chain} syncing from ${fromBlock} to ${toBlock}`);
     console.log(`syncBptBalancesFromRpc ${syncCategory} on ${chain} getLogs for ${poolAddresses.length} pools`);
 
@@ -108,12 +108,12 @@ export const syncBptBalancesFromRpc = async (
 
     console.log(`syncBptBalancesFromRpc ${syncCategory} on ${chain} got ${poolShares.length} poolShares`);
 
-    const operations = balancesToDb(poolShares, endBlock, syncCategory);
+    const operations = balancesToDb(poolShares, chain, toBlock, syncCategory);
     try {
         await prisma.$transaction(operations);
     } catch (e: any) {
         console.error(`syncBptBalancesFromRpc ${syncCategory} on ${chain}`, e.message);
     }
 
-    return endBlock - startBlock;
+    return toBlock - startBlock;
 };

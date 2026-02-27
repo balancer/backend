@@ -124,8 +124,6 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
         return CowAmmController().syncSwaps(chain);
     } else if (job === 'sync-cow-amm-join-exits') {
         return CowAmmController().syncJoinExits(chain);
-    } else if (job === 'sync-cow-amm-balances') {
-        return CowAmmController().syncBalances(chain);
     } else if (job === 'sync-categories') {
         return ContentController().syncCategories();
     } else if (job === 'sync-latest-fx-prices') {

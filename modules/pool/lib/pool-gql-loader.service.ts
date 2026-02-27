@@ -343,7 +343,8 @@ export class PoolGqlLoaderService {
             textSearch = { contains: args.textSearch, mode: 'insensitive' as const };
         }
 
-        const allTokensFilter = [];
+        const allTokensFilter: { allTokens: { some: { token: { address: { equals: string } } } } }[] = [];
+        const allTokensFilterNot = [];
         where?.tokensIn?.forEach((token) => {
             allTokensFilter.push({
                 allTokens: {
@@ -359,7 +360,7 @@ export class PoolGqlLoaderService {
         });
 
         if (where?.tokensNotIn) {
-            allTokensFilter.push({
+            allTokensFilterNot.push({
                 allTokens: {
                     every: {
                         token: {
@@ -423,7 +424,7 @@ export class PoolGqlLoaderService {
                 gt: where?.createTime?.gt || undefined,
                 lt: where?.createTime?.lt || undefined,
             },
-            AND: allTokensFilter,
+            AND: [{ OR: allTokensFilter }, { OR: allTokensFilterNot }],
             id: {
                 in: where?.idIn?.map((id) => id.toLowerCase()) || undefined,
                 notIn: where?.idNotIn?.map((id) => id.toLowerCase()) || undefined,
