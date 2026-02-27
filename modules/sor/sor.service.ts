@@ -118,9 +118,11 @@ export class SorService {
             const allTokens = [
                 ...new Set(
                     poolsFromDb
-                        .flatMap((pool) =>
-                            pool.tokens.flatMap((t) => [t.token.address, t.token.underlyingTokenAddress]),
-                        )
+                        .flatMap((pool) => [
+                            ...pool.tokens.flatMap((t) => [t.token.address, t.token.underlyingTokenAddress]),
+                            // v3 supports add/remove liquidity paths, so BPT addresses are valid swap tokens
+                            ...(input.protocolVersion === 3 ? [pool.address] : []),
+                        ])
                         .filter((t) => t !== null),
                 ),
             ];
