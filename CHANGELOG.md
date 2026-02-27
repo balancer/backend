@@ -1,5 +1,11 @@
 # backend
 
+## 2.0.7
+
+### Patch Changes
+
+-   eb0888c: use merkl provided aprs
+
 ## 2.0.6
 
 ### Patch Changes
