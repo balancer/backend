@@ -541,11 +541,6 @@ export default <NetworkData>{
                     ],
                 },
                 {
-                    url: 'https://api-v2.streamprotocol.money/vaults/xUSD/apy',
-                    scale: 100,
-                    extractors: [{ type: 'path', token: '0xe2fc85bfb48c4cf147921fbe110cf92ef9f26f94', path: '$.apy' }],
-                },
-                {
                     url: 'https://app-integration.rocksolid.network/api/vaults/0x936facdf10c8c36294e7b9d28345255539d81bc7/apr',
                     scale: 100,
                     extractors: [
@@ -595,6 +590,18 @@ export default <NetworkData>{
                             type: 'path',
                             token: '0x890a5122aa1da30fec4286de7904ff808f0bd74a',
                             path: '$.data.msYUsdStats.apy',
+                        },
+                    ],
+                },
+                {
+                    name: 'sjUSD',
+                    url: 'https://api.aegis.im/api/current-jusd-apr',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x4aa8949bb47da4b4f27345404ba1e5e7ea90bdb3',
+                            path: '$.data.apr',
                         },
                     ],
                 },
