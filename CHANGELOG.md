@@ -1,5 +1,11 @@
 # backend
 
+## 2.0.8
+
+### Patch Changes
+
+-   9747fee: SOR - Fix paths with add/remove steps
+
 ## 2.0.7
 
 ### Patch Changes
