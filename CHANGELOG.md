@@ -1,5 +1,11 @@
 # backend
 
+## 2.0.6
+
+### Patch Changes
+
+-   60f4a22: fix rpc syncs
+
 ## 2.0.5
 
 ### Patch Changes
