@@ -238,7 +238,7 @@ export class MerklAprHandler implements AprHandler {
                 title: `Merkl Rewards`,
                 chain: chainIdToChain[opportunity.chainId],
                 poolId: pool.id,
-                apr: (opportunity.dailyRewards * 365) / pool.dynamicData.totalLiquidity,
+                apr: opportunity.apr / 100,
             });
         }
 
