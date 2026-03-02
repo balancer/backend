@@ -170,6 +170,42 @@ export default <NetworkData>{
                         },
                     ],
                 },
+                {
+                    name: 'wnGMON',
+                    url: 'https://app.neverland.money/api/pool-apy',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x29d2075e5151b1a6863bdc40ea86bd5e8afd1705',
+                            path: '$.reserves.0x8498312a6b3cbd158bf0c93abdcf29e6e4f55081.supply.baseAPY',
+                        },
+                    ],
+                },
+                {
+                    name: 'wnSMON',
+                    url: 'https://app.neverland.money/api/pool-apy',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x08139339dd9a480ceb84d9c7cce48be436db20b3',
+                            path: '$.reserves.0xa3227c5969757783154c60bf0bc1944180ed81b9.supply.baseAPY',
+                        },
+                    ],
+                },
+                {
+                    name: 'wnSHMON',
+                    url: 'https://app.neverland.money/api/pool-apy',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x5e073494678fb7fa4a05bb17d45941dd9dc469c1',
+                            path: '$.reserves.0x1b68626dca36c7fe922fd2d55e4f631d962de19c.supply.baseAPY',
+                        },
+                    ],
+                },
             ],
         },
     },
