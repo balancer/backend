@@ -126,6 +126,15 @@ export default <NetworkData>{
                     name: 'wnloAZND',
                     url: 'https://app.neverland.money/api/pool-apy',
                     scale: 100,
+                    convert: async (baseAPY: number) => {
+                        const res = await (
+                            await fetch('https://app.neverland.money/api/pool-apy')
+                        ).json();
+                        const externalAPY =
+                            (res as any).reserves['0x9c82eb49b51f7dc61e22ff347931ca32adc6cd90']
+                                .supply.externalAPY / 100;
+                        return baseAPY + externalAPY;
+                    },
                     extractors: [
                         {
                             type: 'path',
