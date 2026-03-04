@@ -1,5 +1,11 @@
 # backend
 
+## 2.0.9
+
+### Patch Changes
+
+-   8b869a8: APR - Fix wnLOAZND APY
+
 ## 2.0.8
 
 ### Patch Changes
