@@ -1,5 +1,11 @@
 # backend
 
+## 2.0.10
+
+### Patch Changes
+
+-   02f9203: deprecate tokenGetTokensDynamicData
+
 ## 2.0.9
 
 ### Patch Changes
