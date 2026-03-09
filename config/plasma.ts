@@ -163,7 +163,7 @@ export default <NetworkData>{
                         {
                             type: 'path',
                             token: '0xa9c251f8304b1b3fc2b9e8fcae78d94eff82ac66',
-                            path: '$.vault.apyCurrent',
+                            path: '$.apyCurrent',
                         },
                     ],
                 },
@@ -175,7 +175,7 @@ export default <NetworkData>{
                         {
                             type: 'path',
                             token: '0x9c46ee1f01d2b551048f5ff99a4659d98d04bed1',
-                            path: '$.vault.apyCurrent',
+                            path: '$.apyCurrent',
                         },
                     ],
                 },
