@@ -605,6 +605,18 @@ export default <NetworkData>{
                         },
                     ],
                 },
+                {
+                    name: 'svzchf',
+                    url: 'https://api.frankencoin.com/savings/core/info',
+                    scale: 1000000,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0xe5f130253ff137f9917c0107659a4c5262abf6b0',
+                            path: '$.status.1.0x27d9ad987bde08a0d083ef7e0e4043c857a17b38.rate',
+                        },
+                    ],
+                },
             ],
             contract: {
                 calls: [
