@@ -14,7 +14,7 @@ export default <NetworkData>{
         startDate: '2025-09-12',
         balancer: ``,
         balancerV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmUjY6FNcecCopHx5sWWMqWCq6yKEXsB2DAPryyBuAYKnT`,
-        balancerPoolsV3: `https://gateway.thegraph.com/api/${env.THEGRAPH_API_KEY_BALANCER}/deployments/id/QmcJsNHBKWWBfF4ma8rMKjwBa1bwdsJdjvLEaKFzEdqP2q`,
+        balancerPoolsV3: `https://api.subgraph.ormilabs.com/api/public/717cf785-de57-4761-94dd-9ac51b019902/subgraphs/v3-pools-monad-smol/latest/gn`,
         gauge: ``,
     },
     hooks: {
@@ -127,12 +127,10 @@ export default <NetworkData>{
                     url: 'https://app.neverland.money/api/pool-apy',
                     scale: 100,
                     convert: async (baseAPY: number) => {
-                        const res = await (
-                            await fetch('https://app.neverland.money/api/pool-apy')
-                        ).json();
+                        const res = await (await fetch('https://app.neverland.money/api/pool-apy')).json();
                         const externalAPY =
-                            (res as any).reserves['0x9c82eb49b51f7dc61e22ff347931ca32adc6cd90']
-                                .supply.externalAPY / 100;
+                            (res as any).reserves['0x9c82eb49b51f7dc61e22ff347931ca32adc6cd90'].supply.externalAPY /
+                            100;
                         return baseAPY + externalAPY;
                     },
                     extractors: [
