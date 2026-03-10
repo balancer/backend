@@ -2490,11 +2490,17 @@ export interface Query {
     tokenGetHistoricalPrices: Array<GqlHistoricalTokenPrice>;
     /** Returns the price of a token priced in another token for a given range. */
     tokenGetRelativePriceChartData: Array<GqlTokenPriceChartDataItem>;
-    /** Returns dynamic data of a token such as price, market cap, etc. */
+    /**
+     * Returns dynamic data of a token such as price, market cap, etc.
+     * @deprecated Removed without replacement
+     */
     tokenGetTokenDynamicData?: Maybe<GqlTokenDynamicData>;
     /** Returns all allowed tokens for a given chain or chains */
     tokenGetTokens: Array<GqlToken>;
-    /** Returns dynamic data of a set of tokens such as price, market cap, etc. */
+    /**
+     * Returns dynamic data of a set of tokens such as price, market cap, etc.
+     * @deprecated Removed without replacement
+     */
     tokenGetTokensDynamicData: Array<GqlTokenDynamicData>;
     veBalGetTotalSupply: Scalars['AmountHumanReadable'];
     veBalGetUser: GqlVeBalUserData;

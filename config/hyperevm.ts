@@ -14,7 +14,7 @@ export default <NetworkData>{
         startDate: '2025-06-18',
         balancer: ``,
         balancerV3: `https://api.goldsky.com/api/public/project_cmcigparivg3z01yhbv14ddl8/subgraphs/balancer-v3-hyperevm/latest/gn`,
-        balancerPoolsV3: `https://api.goldsky.com/api/public/project_cmcigparivg3z01yhbv14ddl8/subgraphs/balancer-pools-v3-hyperevm/latest/gn`,
+        balancerPoolsV3: `https://api.subgraph.ormilabs.com/api/public/717cf785-de57-4761-94dd-9ac51b019902/subgraphs/v3-pools-hyperevm-smol/latest/gn`,
         gauge: ``,
     },
     hooks: {

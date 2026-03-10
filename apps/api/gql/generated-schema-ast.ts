@@ -3853,6 +3853,7 @@ export const schema = gql`
         Returns dynamic data of a token such as price, market cap, etc.
         """
         tokenGetTokenDynamicData(address: String!, chain: GqlChain!): GqlTokenDynamicData
+            @deprecated(reason: "Removed without replacement")
 
         """
         Returns all allowed tokens for a given chain or chains
@@ -3863,6 +3864,7 @@ export const schema = gql`
         Returns dynamic data of a set of tokens such as price, market cap, etc.
         """
         tokenGetTokensDynamicData(addresses: [String!]!, chain: GqlChain!): [GqlTokenDynamicData!]!
+            @deprecated(reason: "Removed without replacement")
         veBalGetTotalSupply(chain: GqlChain!): AmountHumanReadable!
         veBalGetUser(address: String!, chain: GqlChain!): GqlVeBalUserData!
         veBalGetUserBalance(address: String!, chain: GqlChain!): AmountHumanReadable!
