@@ -1,5 +1,11 @@
 # backend
 
+## 2.0.11
+
+### Patch Changes
+
+-   e8a700a: ormi v3-pools subgraph
+
 ## 2.0.10
 
 ### Patch Changes
