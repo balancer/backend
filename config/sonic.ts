@@ -219,6 +219,13 @@ export default <NetworkData>{
                         { type: 'path', token: '0x92ebf5a1fb4061b45222a6d76accf4698bde4b95', path: '$.supplyApr' },
                     ],
                 },
+                {
+                    url: 'https://v2.silo.finance/api/detailed-vault/sonic-0x423a7a5709213dea0f0c2368e5fb16338c87bba7',
+                    scale: 1e18,
+                    extractors: [
+                        { type: 'path', token: '0x423a7a5709213dea0f0c2368e5fb16338c87bba7', path: '$.supplyApr' },
+                    ],
+                },
             ],
         },
     },
