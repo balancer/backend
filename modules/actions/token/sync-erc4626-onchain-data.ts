@@ -6,6 +6,7 @@ import { fetchMaxValues } from '../../sources/contracts/v3/fetch-erc4626-max-val
 import { fetchUnwrapRates } from '../../sources/contracts/v3/fetch-unwrap-rates';
 import _ from 'lodash';
 import { formatEther } from 'viem';
+import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 
 /**
  * Syncs onchain data for ERC4626 tokens and stores them in the database
@@ -76,31 +77,26 @@ export const syncErc4626OnchainData = async (vaultExplorerAddress: string, viemC
             }
         });
 
-        // Update database with the new buffer balances in a single transaction
-        await prisma.$transaction(async (tx) => {
-            const updatePromises = Object.entries(onchainData)
-                .map(([tokenAddress, newData]) => {
-                    // Check if it needs an update
-                    const currentToken = erc4626TokensMap[tokenAddress];
-                    const data = {
-                        ...(newData.bufferBalanceUnderlying &&
-                        currentToken.bufferBalanceUnderlying !== newData.bufferBalanceUnderlying
-                            ? { bufferBalanceUnderlying: newData.bufferBalanceUnderlying }
-                            : {}),
-                        ...(newData.bufferBalanceWrapped &&
-                        currentToken.bufferBalanceWrapped !== newData.bufferBalanceWrapped
-                            ? { bufferBalanceWrapped: newData.bufferBalanceWrapped }
-                            : {}),
-                        ...(currentToken.maxDeposit !== newData.maxDeposit ? { maxDeposit: newData.maxDeposit } : {}),
-                        ...(currentToken.maxWithdraw !== newData.maxWithdraw
-                            ? { maxWithdraw: newData.maxWithdraw }
-                            : {}),
-                        ...(currentToken.unwrapRate !== newData.unwrapRate ? { unwrapRate: newData.unwrapRate } : {}),
-                    };
+        const operations: any[] = [];
+        Object.entries(onchainData).map(([tokenAddress, newData]) => {
+            // Check if it needs an update
+            const currentToken = erc4626TokensMap[tokenAddress];
+            const data = {
+                ...(newData.bufferBalanceUnderlying &&
+                currentToken.bufferBalanceUnderlying !== newData.bufferBalanceUnderlying
+                    ? { bufferBalanceUnderlying: newData.bufferBalanceUnderlying }
+                    : {}),
+                ...(newData.bufferBalanceWrapped && currentToken.bufferBalanceWrapped !== newData.bufferBalanceWrapped
+                    ? { bufferBalanceWrapped: newData.bufferBalanceWrapped }
+                    : {}),
+                ...(currentToken.maxDeposit !== newData.maxDeposit ? { maxDeposit: newData.maxDeposit } : {}),
+                ...(currentToken.maxWithdraw !== newData.maxWithdraw ? { maxWithdraw: newData.maxWithdraw } : {}),
+                ...(currentToken.unwrapRate !== newData.unwrapRate ? { unwrapRate: newData.unwrapRate } : {}),
+            };
 
-                    if (Object.keys(data).length === 0) return;
-
-                    return tx.prismaToken.update({
+            if (Object.keys(data).length > 0) {
+                operations.push(
+                    prisma.prismaToken.update({
                         where: {
                             address_chain: {
                                 address: tokenAddress,
@@ -108,12 +104,12 @@ export const syncErc4626OnchainData = async (vaultExplorerAddress: string, viemC
                             },
                         },
                         data,
-                    });
-                })
-                .filter((op): op is NonNullable<typeof op> => !!op);
-
-            await Promise.all(updatePromises);
+                    }),
+                );
+            }
         });
+
+        await prismaBulkExecuteOperations(operations);
 
         console.log(`[ERC4626 ${chain}] Successfully updated ERC4626 data for ${erc4626Tokens.length} tokens`);
     } catch (error) {
