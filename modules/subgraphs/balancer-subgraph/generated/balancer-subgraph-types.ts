@@ -189,6 +189,7 @@ export type Balancer = {
     id: Scalars['ID'];
     poolCount: Scalars['Int'];
     pools?: Maybe<Array<Pool>>;
+    protocolFeesCollector?: Maybe<Scalars['Bytes']>;
 };
 
 export type BalancerPoolsArgs = {
@@ -221,12 +222,23 @@ export type Balancer_Filter = {
     poolCount_not?: InputMaybe<Scalars['Int']>;
     poolCount_not_in?: InputMaybe<Array<Scalars['Int']>>;
     pools_?: InputMaybe<Pool_Filter>;
+    protocolFeesCollector?: InputMaybe<Scalars['Bytes']>;
+    protocolFeesCollector_contains?: InputMaybe<Scalars['Bytes']>;
+    protocolFeesCollector_gt?: InputMaybe<Scalars['Bytes']>;
+    protocolFeesCollector_gte?: InputMaybe<Scalars['Bytes']>;
+    protocolFeesCollector_in?: InputMaybe<Array<Scalars['Bytes']>>;
+    protocolFeesCollector_lt?: InputMaybe<Scalars['Bytes']>;
+    protocolFeesCollector_lte?: InputMaybe<Scalars['Bytes']>;
+    protocolFeesCollector_not?: InputMaybe<Scalars['Bytes']>;
+    protocolFeesCollector_not_contains?: InputMaybe<Scalars['Bytes']>;
+    protocolFeesCollector_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
 };
 
 export enum Balancer_OrderBy {
     Id = 'id',
     PoolCount = 'poolCount',
     Pools = 'pools',
+    ProtocolFeesCollector = 'protocolFeesCollector',
 }
 
 export type BlockChangedFilter = {
@@ -1822,6 +1834,7 @@ export enum Pool_OrderBy {
     VaultId = 'vaultID',
     VaultIdId = 'vaultID__id',
     VaultIdPoolCount = 'vaultID__poolCount',
+    VaultIdProtocolFeesCollector = 'vaultID__protocolFeesCollector',
     W = 'w',
     WrappedIndex = 'wrappedIndex',
     Z = 'z',
