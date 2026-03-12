@@ -84,6 +84,7 @@ export const syncData = async (
     const operations = updates
         // Check if the weights are different
         .filter((update) => {
+            if (!update) return false;
             const token = tokens[update.id];
             if (!token) return false;
             return token.weight !== update.weight;
