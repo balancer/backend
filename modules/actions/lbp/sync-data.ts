@@ -19,17 +19,17 @@ export const syncData = async (
         prisma.prismaPool.findMany({
             where: {
                 chain,
-                type: PrismaPoolType.LIQUIDITY_BOOTSTRAPPING,
+                type: { in: [PrismaPoolType.LIQUIDITY_BOOTSTRAPPING, PrismaPoolType.FIXED_LBP] },
                 protocolVersion: 3,
             },
-            select: { id: true, version: true, typeData: true },
+            select: { id: true, type: true, version: true, typeData: true },
         }),
         prisma.prismaPoolToken
             .findMany({
                 where: {
                     pool: {
                         chain,
-                        type: PrismaPoolType.LIQUIDITY_BOOTSTRAPPING,
+                        type: { in: [PrismaPoolType.LIQUIDITY_BOOTSTRAPPING, PrismaPoolType.FIXED_LBP] },
                         protocolVersion: 3,
                     },
                 },
@@ -46,15 +46,38 @@ export const syncData = async (
             ),
         prisma.prismaPoolDynamicData
             .findMany({
-                where: { chain, pool: { chain, type: PrismaPoolType.LIQUIDITY_BOOTSTRAPPING, protocolVersion: 3 } },
+                where: {
+                    chain,
+                    pool: {
+                        chain,
+                        type: { in: [PrismaPoolType.LIQUIDITY_BOOTSTRAPPING, PrismaPoolType.FIXED_LBP] },
+                        protocolVersion: 3,
+                    },
+                },
                 select: { id: true, swapEnabled: true },
             })
             .then((records) => Object.fromEntries(records.map((dd) => [dd.id, dd]))),
     ]);
 
-    const calls = pools.filter((pool) => pool.version === 1 || pool.version === 2).flatMap(({ id }) => lbpCalls(id));
-    const callsV3 = pools.filter((pool) => pool.version === 3).flatMap(({ id }) => lbpCallsV3(id, vaultAddress));
-    const onchainData = (await multicallViem(client, [...calls, ...callsV3])) as Record<string, LBPCallsOutput>;
+    const calls = pools
+        .filter(
+            (pool) =>
+                pool.type === PrismaPoolType.LIQUIDITY_BOOTSTRAPPING && (pool.version === 1 || pool.version === 2),
+        )
+        .flatMap(({ id }) => lbpCalls(id));
+
+    const callsV3 = pools
+        .filter((pool) => pool.type === PrismaPoolType.LIQUIDITY_BOOTSTRAPPING && pool.version === 3)
+        .flatMap(({ id }) => lbpCallsV3(id, vaultAddress));
+
+    const callsFixedLBP = pools
+        .filter((pool) => pool.type === PrismaPoolType.FIXED_LBP)
+        .flatMap(({ id }) => lbpCallsV3(id, vaultAddress));
+
+    const onchainData = (await multicallViem(client, [...calls, ...callsV3, ...callsFixedLBP])) as Record<
+        string,
+        LBPCallsOutput
+    >;
 
     const updates = Object.keys(onchainData).flatMap((id) => onchainData[id].poolToken);
 
