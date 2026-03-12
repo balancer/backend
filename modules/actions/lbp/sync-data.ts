@@ -1,5 +1,5 @@
 import { Chain, PrismaPoolType } from '@prisma/client';
-import { lbpCalls, LBPCallsOutput } from '../../sources/contracts/pool-type-dynamic-data';
+import { fixedLbpCalls, lbpCalls, LBPCallsOutput } from '../../sources/contracts/pool-type-dynamic-data';
 import { prisma } from '../../../prisma/prisma-client';
 import { multicallViem } from '../../web3/multicaller-viem';
 import { ViemClient } from '../../sources/types';
@@ -72,7 +72,7 @@ export const syncData = async (
 
     const callsFixedLBP = pools
         .filter((pool) => pool.type === PrismaPoolType.FIXED_LBP)
-        .flatMap(({ id }) => lbpCallsV3(id, vaultAddress));
+        .flatMap(({ id }) => fixedLbpCalls(id));
 
     const onchainData = (await multicallViem(client, [...calls, ...callsV3, ...callsFixedLBP])) as Record<
         string,
