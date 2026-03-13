@@ -124,40 +124,7 @@ export default <NetworkData>{
                     args: [market],
                 })),
             },
-            avalon: [
-                {
-                    subgraphUrl: `https://api.studio.thegraph.com/query/102993/avalon-defi-lending-v3/version/latest`,
-                    tokens: {
-                        SOLVBTC: {
-                            underlyingAssetAddress: '0x541fd749419ca806a8bc7da8ac23d346f2df8b77',
-                            aTokenAddress: '0x6c56ddccb3726faa089a5e9e29b712525cf916d7',
-                            wrappedTokens: {
-                                waSOLVBTC: '0xd31e89ffb929b38ba60d1c7dbeb68c7712eaab0a',
-                            },
-                        },
-                        SOLVBTCBBN: {
-                            underlyingAssetAddress: '0xcc0966d8418d412c599a6421b760a847eb169a8c',
-                            aTokenAddress: '0xe3a97c4cc6725b96fb133c636d2e88cc3d6cfdbe',
-                            wrappedTokens: {
-                                waSOLVBTCBBN: '0xa28d4dbcc90c849e3249d642f356d85296a12954',
-                            },
-                        },
-                    },
-                },
-            ],
             http: [
-                {
-                    name: 'sdusd',
-                    url: 'https://app.dtrinity.org/v1/api/dstake/latest?chainId=146',
-                    scale: 100,
-                    extractors: [
-                        {
-                            type: 'path',
-                            token: '0x41a5477364bf60d8936b90310fecfda79593304e',
-                            path: '$.data.netApy',
-                        },
-                    ],
-                },
                 {
                     url: 'https://api.beefy.finance/apy/',
                     extractors: [
