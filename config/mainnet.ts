@@ -524,7 +524,7 @@ export default <NetworkData>{
                 },
                 {
                     url: 'https://info-sky.blockanalitica.com/api/v1/savings-rate/?format=json',
-                    scale: 100,
+                    scale: 1,
                     extractors: [
                         { type: 'path', token: '0xa3931d71877c0e7a3148cb7eb4463524fec27fbd', path: '$[0].ssr_rate' },
                     ],
