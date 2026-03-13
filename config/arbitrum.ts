@@ -394,11 +394,6 @@ export default <NetworkData>{
                     ],
                 },
                 {
-                    url: 'https://api-v2.streamprotocol.money/vaults/xUSD/apy',
-                    scale: 100,
-                    extractors: [{ type: 'path', token: '0x6eaf19b2fc24552925db245f9ff613157a7dbb4c', path: '$.apy' }],
-                },
-                {
                     url: 'https://kong.yearn.farm/api/gql',
                     body: JSON.stringify({
                         query: `{
