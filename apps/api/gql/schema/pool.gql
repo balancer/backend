@@ -891,6 +891,7 @@ type GqlPoolFixedPriceLBP implements GqlPoolBase {
     reserveTokenIndex: Int!
     projectToken: String!
     projectTokenIndex: Int!
+    projectTokenRate: BigDecimal!
     topTrades: [GqlLBPTopTrade!]
 
     """
