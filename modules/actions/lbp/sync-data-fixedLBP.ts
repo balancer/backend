@@ -1,57 +1,35 @@
 import { Chain, PrismaPoolType } from '@prisma/client';
-import { fixedLbpCalls, lbpCalls, LBPCallsOutput } from '../../sources/contracts/pool-type-dynamic-data';
+import { fixedLbpCalls, LBPCallsOutput } from '../../sources/contracts/pool-type-dynamic-data';
 import { prisma } from '../../../prisma/prisma-client';
 import { multicallViem } from '../../web3/multicaller-viem';
 import { ViemClient } from '../../sources/types';
 import { eventsRepository } from '../../repositories/events/events-repository';
-import { lbpCallsV3 } from '../../sources/contracts/pool-type-dynamic-data/lbp-calls-v3';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 
 /**
  * Fetches new weights and updates pool tokens
  */
-export const syncData = async (
+export const syncDataFixedLBP = async (
     chain: Chain,
     client: ViemClient,
-    vaultAddress: string,
     eventRepo = eventsRepository,
 ): Promise<void> => {
-    const [pools, tokens, dynamicDataMap] = await Promise.all([
+    const [pools, dynamicDataMap] = await Promise.all([
         prisma.prismaPool.findMany({
             where: {
                 chain,
-                type: PrismaPoolType.LIQUIDITY_BOOTSTRAPPING,
+                type: PrismaPoolType.FIXED_LBP,
                 protocolVersion: 3,
             },
             select: { id: true, version: true, typeData: true },
         }),
-        prisma.prismaPoolToken
-            .findMany({
-                where: {
-                    pool: {
-                        chain,
-                        type: PrismaPoolType.LIQUIDITY_BOOTSTRAPPING,
-                        protocolVersion: 3,
-                    },
-                },
-                select: {
-                    id: true,
-                    weight: true,
-                },
-            })
-            .then((records) =>
-                records.reduce((acc, token) => {
-                    acc[token.id] = token;
-                    return acc;
-                }, {} as Record<string, (typeof records)[0]>),
-            ),
         prisma.prismaPoolDynamicData
             .findMany({
                 where: {
                     chain,
                     pool: {
                         chain,
-                        type: PrismaPoolType.LIQUIDITY_BOOTSTRAPPING,
+                        type: PrismaPoolType.FIXED_LBP,
                         protocolVersion: 3,
                     },
                 },
@@ -60,30 +38,9 @@ export const syncData = async (
             .then((records) => Object.fromEntries(records.map((dd) => [dd.id, dd]))),
     ]);
 
-    const calls = pools.flatMap(({ id }) => lbpCalls(id));
+    const callsFixedLBP = pools.flatMap(({ id }) => fixedLbpCalls(id));
 
-    const callsV3 = pools.flatMap(({ id }) => lbpCallsV3(id, vaultAddress));
-
-    const onchainData = (await multicallViem(client, [...calls, ...callsV3])) as Record<string, LBPCallsOutput>;
-
-    const updates = Object.keys(onchainData).flatMap((id) => onchainData[id].poolToken);
-
-    const operations = updates
-        // Check if the weights are different
-        .filter((update) => {
-            if (!update) return false;
-            const token = tokens[update.id];
-            if (!token) return false;
-            return token.weight !== update.weight;
-        })
-        .flatMap((update) =>
-            prisma.prismaPoolToken.update({
-                where: { id_chain: { id: update.id, chain } },
-                data: {
-                    weight: update.weight,
-                },
-            }),
-        );
+    const onchainData = (await multicallViem(client, callsFixedLBP)) as Record<string, LBPCallsOutput>;
 
     // Update swapEnabled as well
     const swapEnabledUpdates = Object.keys(onchainData)
@@ -131,7 +88,7 @@ export const syncData = async (
         }),
     );
 
-    await prismaBulkExecuteOperations([...operations, ...swapEnabledUpdates, ...holdersUpdates]);
+    await prismaBulkExecuteOperations([...swapEnabledUpdates, ...holdersUpdates]);
 
     return;
 };

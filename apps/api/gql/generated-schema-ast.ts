@@ -1324,6 +1324,7 @@ export const schema = gql`
         poolTokens: [GqlPoolTokenDetail!]!
         projectToken: String!
         projectTokenIndex: Int!
+        projectTokenRate: BigDecimal!
         protocolVersion: Int!
         reserveToken: String!
         reserveTokenIndex: Int!
