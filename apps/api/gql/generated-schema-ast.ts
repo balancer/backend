@@ -1302,6 +1302,7 @@ export const schema = gql`
         hasNestedErc4626: Boolean!
         hook: GqlHook
         id: ID!
+        isProjectTokenSwapInBlocked: Boolean!
         lbpName: String
         lbpOwner: String!
         liquidityManagement: LiquidityManagement
@@ -1324,6 +1325,7 @@ export const schema = gql`
         poolTokens: [GqlPoolTokenDetail!]!
         projectToken: String!
         projectTokenIndex: Int!
+        projectTokenRate: BigDecimal!
         protocolVersion: Int!
         reserveToken: String!
         reserveTokenIndex: Int!

@@ -23,16 +23,8 @@ import _ from 'lodash';
 import { prisma } from '../../../prisma/prisma-client';
 import { Chain, Prisma, PrismaUserStakedBalance, PrismaUserWalletBalance } from '@prisma/client';
 import { fixedNumber } from '../../view-helpers/fixed-number';
-import {
-    ElementData,
-    FxData,
-    GyroData,
-    StableData,
-    QuantAmmWeightedData,
-    ReclammData,
-    FixedLbpData,
-} from '../subgraph-mapper';
-import { LBPoolData } from '../pool-data';
+import { ElementData, FxData, GyroData, StableData, QuantAmmWeightedData, ReclammData } from '../subgraph-mapper';
+import { LBPoolData, FixedLBPData } from '../pool-data';
 import { ZERO_ADDRESS } from '@balancer/sdk';
 import { mapHookToGqlHook } from '../../sources/transformers';
 import { GraphQLError } from 'graphql';
@@ -589,7 +581,7 @@ export class PoolGqlLoaderService {
                 return {
                     __typename: 'GqlPoolFixedPriceLBP',
                     ...poolWithoutTypeData,
-                    ...(typeData as LBPoolData & {
+                    ...(typeData as FixedLBPData & {
                         lbpName?: string;
                         description?: string;
                         website?: string;
