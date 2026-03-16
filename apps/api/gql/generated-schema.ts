@@ -804,6 +804,7 @@ export interface GqlPoolFixedPriceLbp extends GqlPoolBase {
     hasNestedErc4626: Scalars['Boolean'];
     hook?: Maybe<GqlHook>;
     id: Scalars['ID'];
+    isProjectTokenSwapInBlocked: Scalars['Boolean'];
     lbpName?: Maybe<Scalars['String']>;
     lbpOwner: Scalars['String'];
     liquidityManagement?: Maybe<LiquidityManagement>;
@@ -3565,6 +3566,7 @@ export type GqlPoolFixedPriceLbpResolvers<
     hasNestedErc4626?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
     hook?: Resolver<Maybe<ResolversTypes['GqlHook']>, ParentType, ContextType>;
     id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+    isProjectTokenSwapInBlocked?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
     lbpName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     lbpOwner?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     liquidityManagement?: Resolver<Maybe<ResolversTypes['LiquidityManagement']>, ParentType, ContextType>;

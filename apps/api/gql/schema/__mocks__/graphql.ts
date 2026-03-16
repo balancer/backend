@@ -788,6 +788,10 @@ export const aGqlPoolFixedPriceLbp = (overrides?: Partial<GqlPoolFixedPriceLbp>)
             overrides && overrides.hasOwnProperty('hasNestedErc4626') ? overrides.hasNestedErc4626! : false,
         hook: overrides && overrides.hasOwnProperty('hook') ? overrides.hook! : aGqlHook(),
         id: overrides && overrides.hasOwnProperty('id') ? overrides.id! : '7508ef5f-7a1e-4843-8a47-5b93f9fe5b5c',
+        isProjectTokenSwapInBlocked:
+            overrides && overrides.hasOwnProperty('isProjectTokenSwapInBlocked')
+                ? overrides.isProjectTokenSwapInBlocked!
+                : false,
         lbpName: overrides && overrides.hasOwnProperty('lbpName') ? overrides.lbpName! : 'pecco',
         lbpOwner: overrides && overrides.hasOwnProperty('lbpOwner') ? overrides.lbpOwner! : 'curto',
         liquidityManagement:
