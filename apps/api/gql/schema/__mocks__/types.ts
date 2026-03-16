@@ -819,6 +819,7 @@ export type GqlPoolFixedPriceLbp = GqlPoolBase & {
     poolTokens: Array<GqlPoolTokenDetail>;
     projectToken: Scalars['String'];
     projectTokenIndex: Scalars['Int'];
+    projectTokenRate: Scalars['BigDecimal'];
     protocolVersion: Scalars['Int'];
     reserveToken: Scalars['String'];
     reserveTokenIndex: Scalars['Int'];

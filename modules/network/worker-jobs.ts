@@ -224,7 +224,11 @@ export const quantAmmWorkerJobs: WorkerJob[] = [
 export const lbpWorkerJobs: WorkerJob[] = [
     {
         name: 'sync-lbps',
-        interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(1, 'minutes'),
+        interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(2, 'minutes'),
+    },
+    {
+        name: 'sync-fixed-lbps',
+        interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(2, 'minutes'),
     },
 ];
 

@@ -887,10 +887,12 @@ type GqlPoolFixedPriceLBP implements GqlPoolBase {
     startTime: Int!
     endTime: Int!
     lbpOwner: String!
+    isProjectTokenSwapInBlocked: Boolean!
     reserveToken: String!
     reserveTokenIndex: Int!
     projectToken: String!
     projectTokenIndex: Int!
+    projectTokenRate: BigDecimal!
     topTrades: [GqlLBPTopTrade!]
 
     """

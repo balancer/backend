@@ -352,6 +352,9 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
         case 'sync-lbps':
             await runIfNotAlreadyRunning(name, chainId, () => LBPController.syncData(chain), res, next);
             break;
+        case 'sync-fixed-lbps':
+            await runIfNotAlreadyRunning(name, chainId, () => LBPController.syncDataFixedLBP(chain), res, next);
+            break;
         case 'sync-token-tvl':
             await runIfNotAlreadyRunning(name, chainId, () => TokenController().syncTvl(), res, next);
             break;

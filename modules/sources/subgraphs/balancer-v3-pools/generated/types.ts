@@ -1919,6 +1919,7 @@ export type TypePoolFragment = {
         isProjectTokenSwapInBlocked: boolean;
         reserveToken: string;
         projectToken: string;
+        projectTokenRate: string;
     } | null;
     reClammParams?: {
         __typename?: 'ReClammParams';
@@ -2015,6 +2016,7 @@ export type PoolsQuery = {
             isProjectTokenSwapInBlocked: boolean;
             reserveToken: string;
             projectToken: string;
+            projectTokenRate: string;
         } | null;
         reClammParams?: {
             __typename?: 'ReClammParams';
@@ -2120,6 +2122,7 @@ export const TypePoolFragmentDoc = gql`
             isProjectTokenSwapInBlocked
             reserveToken
             projectToken
+            projectTokenRate
         }
         reClammParams {
             lastTimestamp

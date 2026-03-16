@@ -820,6 +820,7 @@ export interface GqlPoolFixedPriceLbp extends GqlPoolBase {
     poolTokens: Array<GqlPoolTokenDetail>;
     projectToken: Scalars['String'];
     projectTokenIndex: Scalars['Int'];
+    projectTokenRate: Scalars['BigDecimal'];
     protocolVersion: Scalars['Int'];
     reserveToken: Scalars['String'];
     reserveTokenIndex: Scalars['Int'];
@@ -3574,6 +3575,7 @@ export type GqlPoolFixedPriceLbpResolvers<
     poolTokens?: Resolver<Array<ResolversTypes['GqlPoolTokenDetail']>, ParentType, ContextType>;
     projectToken?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     projectTokenIndex?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+    projectTokenRate?: Resolver<ResolversTypes['BigDecimal'], ParentType, ContextType>;
     protocolVersion?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     reserveToken?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
     reserveTokenIndex?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;

@@ -27,7 +27,6 @@ export const sonicNetworkConfig: NetworkConfig = {
         ...activeChainWorkerJobsV2,
         ...activeChainWorkerJobsV3,
         ...quantAmmWorkerJobs,
-        ...lbpWorkerJobs,
         ...stsWorkerJobs,
         ...loopsWorkerJobs,
         ...datastudioWorkerJobs,

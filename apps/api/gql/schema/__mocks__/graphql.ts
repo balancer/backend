@@ -803,6 +803,8 @@ export const aGqlPoolFixedPriceLbp = (overrides?: Partial<GqlPoolFixedPriceLbp>)
         projectToken: overrides && overrides.hasOwnProperty('projectToken') ? overrides.projectToken! : 'magnam',
         projectTokenIndex:
             overrides && overrides.hasOwnProperty('projectTokenIndex') ? overrides.projectTokenIndex! : 5153,
+        projectTokenRate:
+            overrides && overrides.hasOwnProperty('projectTokenRate') ? overrides.projectTokenRate! : 'absum',
         protocolVersion: overrides && overrides.hasOwnProperty('protocolVersion') ? overrides.protocolVersion! : 7659,
         reserveToken: overrides && overrides.hasOwnProperty('reserveToken') ? overrides.reserveToken! : 'terreo',
         reserveTokenIndex:
