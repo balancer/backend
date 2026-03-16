@@ -14,7 +14,7 @@ export const fixedLBP = (pool: TypePoolFragment & VaultPoolFragment) => {
         lbpOwner: params.owner.toLowerCase(),
         isProjectTokenSwapInBlocked: params.isProjectTokenSwapInBlocked,
         projectToken: params.projectToken.toLowerCase(),
-        projectTokenRate: params.projectTokenRate,
+        projectTokenRate: formatEther(BigInt(params.projectTokenRate)),
         projectTokenIndex: tokens.find((token) => token.address === params.projectToken)!.index,
         reserveToken: params.reserveToken.toLowerCase(),
         reserveTokenIndex: tokens.find((token) => token.address === params.reserveToken)!.index,
