@@ -1,5 +1,11 @@
 # backend
 
+## 2.0.12
+
+### Patch Changes
+
+-   5a19a7d: make fixed LBP its own type
+
 ## 2.0.11
 
 ### Patch Changes
