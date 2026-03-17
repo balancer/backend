@@ -17,7 +17,7 @@ const typeToParamsType = {
     NFTLIQUIDITY_POSITION: undefined,
     RECLAMM: undefined,
     LBP: undefined,
-    FixedLBP: undefined,
+    FIXED_LBP: undefined,
     UNKNOWN: undefined,
 };
 
@@ -45,7 +45,7 @@ export const hookTransformer = (poolData: V3JoinedSubgraphPool, chain: Chain): H
                 type = 'LBP';
                 break;
             case 'FixedLBP':
-                type = 'FixedLBP';
+                type = 'FIXED_LBP';
                 break;
             default:
                 type = 'UNKNOWN';

@@ -116,6 +116,6 @@ enum GqlHookType {
     NFTLIQUIDITY_POSITION
     RECLAMM
     LBP
-    FIXEDLBP
+    FIXED_LBP
     UNKNOWN
 }
