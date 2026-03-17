@@ -367,6 +367,7 @@ export type HookData = {
         | 'VEBAL_DISCOUNT'
         | 'RECLAMM'
         | 'LBP'
+        | 'FixedLBP'
         | 'UNKNOWN';
     enableHookAdjustedAmounts: boolean;
     shouldCallAfterSwap: boolean;
