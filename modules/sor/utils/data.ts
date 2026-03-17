@@ -90,6 +90,7 @@ async function getPools(chain: Chain, poolIds?: string[]): Promise<SORDbPool[]> 
             'QUANT_AMM_WEIGHTED',
             'RECLAMM',
             'LIQUIDITY_BOOTSTRAPPING',
+            'FIXED_LBP',
         ] as PrismaPoolType[],
     };
 
