@@ -76,16 +76,16 @@ describe('sor debugging', () => {
 
     it.only('sor v3', async () => {
         const useProtocolVersion = 3;
-        const chain: GqlChain = 'MAINNET';
+        const chain: GqlChain = 'SEPOLIA';
 
         const chainId = chainToChainId[chain];
 
         // only do once before starting to debug
         // bun task sor-sync-v3 {chainId}
 
-        const tokenIn = '0xc86168d2424d28942ee0866f043c1206bc9e4900'; // jUSD
-        const tokenOut = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'; // USDC
-        const poolId = '0xb20fa48d028b5ba6de33e09c72643c1fe92f8fcd';
+        const tokenIn = '0x80d6d3946ed8a1da4e226aa21ccddc32bd127d1a'; // jUSD
+        const tokenOut = '0x212f34a319d901f6958e6df2b7d295d5a82635ba'; // USDC
+        const poolId = '0x398a13d3d44e4825f997cc7aee4c7016878ba244';
         const swapType = 'EXACT_IN';
         const swapKind: SwapKind = SwapKind.GivenIn;
 

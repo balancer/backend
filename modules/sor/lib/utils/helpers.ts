@@ -57,6 +57,7 @@ export function getHookState(pool: PrismaPoolAndHookWithDynamic): HookState | un
     switch (hookData.type) {
         case 'MEV_TAX':
         case 'RECLAMM':
+        case 'FIXED_LBP':
             return undefined;
         case 'AKRON': {
             return {
