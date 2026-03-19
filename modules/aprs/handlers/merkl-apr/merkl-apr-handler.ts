@@ -4,9 +4,9 @@ import { chainIdToChain } from '../../../network/chain-id-to-chain';
 import { AaveV3Plasma } from '@bgd-labs/aave-address-book';
 
 const opportunityUrl =
-    'https://api.merkl.xyz/v4/opportunities/?test=false&status=LIVE&campaigns=true&mainProtocolId=balancer&page=0&items=100';
+    'https://api-merkl.angle.money/v4/opportunities/?test=false&status=LIVE&campaigns=true&mainProtocolId=balancer&page=0&items=100';
 
-const tokenOpportunityUrlBase = `https://api.merkl.xyz/v4/opportunities/?status=LIVE&explorerAddress=`;
+const tokenOpportunityUrlBase = `https://api-merkl.angle.money/v4/opportunities/?status=LIVE&explorerAddress=`;
 
 interface MerklOpportunity {
     chainId: number;
