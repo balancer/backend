@@ -12,7 +12,11 @@ export function SubgraphMonitorController(tracer?: any) {
                 const viemClient = getViemClient(config.data.chain.prismaId);
 
                 for (const [subgraphName, subgraphUrl] of Object.entries(config.data.subgraphs)) {
-                    if (!subgraphUrl.includes('thegraph') && !subgraphUrl.includes('goldsky')) {
+                    if (
+                        !subgraphUrl.includes('thegraph') &&
+                        !subgraphUrl.includes('goldsky') &&
+                        !subgraphUrl.includes('ormi')
+                    ) {
                         continue;
                     }
 
