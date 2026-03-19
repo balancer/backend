@@ -1,5 +1,15 @@
 # backend
 
+## 2.1.0
+
+### Minor Changes
+
+-   513a2eb: SOR - Add support to FixedPriceLBP
+
+### Patch Changes
+
+-   784b1c9: add fixedLBP hook type
+
 ## 2.0.12
 
 ### Patch Changes
