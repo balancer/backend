@@ -23,10 +23,14 @@ export async function createAlerts(chainId: string): Promise<void> {
 
     for (const [subgraphName, subgraphUrl] of subgraphs) {
         let subgraphUrlClean = subgraphUrl;
-        if (subgraphUrl.includes('gateway')) {
+        if (subgraphUrl.includes('gateway') || subgraphUrl.includes('ormi')) {
             const parts = subgraphUrl.split('/');
             parts.splice(4, 1);
             subgraphUrlClean = parts.join('/');
+        }
+
+        if (subgraphUrl.includes('ormi')) {
+            subgraphUrlClean = subgraphUrl;
         }
 
         subgraphsToAlert.push({ subgraphName, subgraphUrl: subgraphUrlClean });
