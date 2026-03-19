@@ -28,6 +28,7 @@ import {
 } from './poolsV3';
 import { LiquidityBootstrappingPoolV3 } from './poolsV3/liquidityBootstrapping/liquidityBootstrapping';
 import { BufferPoolData } from '../utils/data';
+import { FixedPriceLBPPoolV3 } from './poolsV3/fixedPriceLBP/fixedPriceLBP';
 
 export class SOR {
     static async getPathsWithPools(
@@ -64,7 +65,8 @@ export class SOR {
             if (prismaPool.protocolVersion === 3) {
                 if (
                     !isLiquidityManagement(prismaPool.liquidityManagement) &&
-                    prismaPool.type !== 'LIQUIDITY_BOOTSTRAPPING'
+                    prismaPool.type !== 'LIQUIDITY_BOOTSTRAPPING' &&
+                    prismaPool.type !== 'FIXED_LBP'
                 ) {
                     console.log('LiquidityManagement incorrect for pool', prismaPool.id);
                     continue;
@@ -80,6 +82,9 @@ export class SOR {
                                 basePools.push(WeightedPoolV3.fromPrismaPool(prismaPool));
                             }
                         }
+                        break;
+                    case 'FIXED_LBP':
+                        basePools.push(FixedPriceLBPPoolV3.fromPrismaPool(prismaPool, currentTimestamp));
                         break;
                     case 'LIQUIDITY_BOOTSTRAPPING': {
                         /// LBPs use weighted math
