@@ -2251,8 +2251,6 @@ export interface LbpPriceChartData {
     cumulativeFees: Scalars['Float'];
     cumulativeVolume: Scalars['Float'];
     fees: Scalars['Float'];
-    /** @deprecated Field no longer supported */
-    intervalTimestamp: Scalars['Int'];
     projectTokenBalance: Scalars['Float'];
     projectTokenPrice: Scalars['Float'];
     reservePrice: Scalars['Float'];
@@ -2459,6 +2457,7 @@ export interface Query {
     /** Returns all pools for a given filter, specific for aggregators */
     aggregatorPools: Array<GqlPoolAggregator>;
     beetsPoolGetReliquaryFarmSnapshots: Array<GqlReliquaryFarmSnapshot>;
+    fixedLbpPriceChart?: Maybe<Array<LbpPriceChartData>>;
     lbpPriceChart?: Maybe<Array<LbpPriceChartData>>;
     /** Get the LoopS data */
     loopsGetData: GqlLoopsData;
@@ -2527,11 +2526,16 @@ export interface QueryBeetsPoolGetReliquaryFarmSnapshotsArgs {
     range: GqlPoolSnapshotDataRange;
 }
 
+export interface QueryFixedLbpPriceChartArgs {
+    chain: GqlChain;
+    dataPoints?: InputMaybe<Scalars['Int']>;
+    id: Scalars['String'];
+}
+
 export interface QueryLbpPriceChartArgs {
     chain: GqlChain;
     dataPoints?: InputMaybe<Scalars['Int']>;
     id: Scalars['String'];
-    interval?: InputMaybe<Scalars['Int']>;
 }
 
 export interface QueryPoolEventsArgs {
@@ -4718,7 +4722,6 @@ export type LbpPriceChartDataResolvers<
     cumulativeFees?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
     cumulativeVolume?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
     fees?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
-    intervalTimestamp?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     projectTokenBalance?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
     projectTokenPrice?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
     reservePrice?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
@@ -4960,6 +4963,12 @@ export type QueryResolvers<
         ParentType,
         ContextType,
         RequireFields<QueryBeetsPoolGetReliquaryFarmSnapshotsArgs, 'chain' | 'id' | 'range'>
+    >;
+    fixedLbpPriceChart?: Resolver<
+        Maybe<Array<ResolversTypes['LBPPriceChartData']>>,
+        ParentType,
+        ContextType,
+        RequireFields<QueryFixedLbpPriceChartArgs, 'chain' | 'id'>
     >;
     lbpPriceChart?: Resolver<
         Maybe<Array<ResolversTypes['LBPPriceChartData']>>,
