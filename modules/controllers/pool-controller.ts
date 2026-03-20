@@ -169,11 +169,7 @@ export function PoolController(tracer?: any) {
 
             let poolsToSync: V3JoinedSubgraphPool[] = [];
             if (syncNewPoolsOnly) {
-                // always sync LBPs and FixedLBPs factories, as they can be created without being registered in the vault
-                poolsToSync = pools.filter(
-                    (pool) =>
-                        pool.factory.type === 'LBP' || pool.factory.type === 'FixedLBP' || !dbIds.includes(pool.id),
-                );
+                poolsToSync = pools.filter((pool) => !dbIds.includes(pool.id));
             } else {
                 poolsToSync = pools;
             }
