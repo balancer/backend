@@ -822,6 +822,7 @@ type GqlPoolLiquidityBootstrappingV3 implements GqlPoolBase {
     reserveTokenStartWeight: Float!
     reserveTokenEndWeight: Float!
     reserveTokenIndex: Int!
+    reserveTokenVirtualBalance: Float!
     projectToken: String!
     projectTokenStartWeight: Float!
     projectTokenEndWeight: Float!

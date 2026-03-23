@@ -39,10 +39,8 @@ export type AddRemove_Filter = {
     _change_block?: InputMaybe<BlockChangedFilter>;
     amounts?: InputMaybe<Array<Scalars['BigDecimal']>>;
     amounts_contains?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    amounts_contains_nocase?: InputMaybe<Array<Scalars['BigDecimal']>>;
     amounts_not?: InputMaybe<Array<Scalars['BigDecimal']>>;
     amounts_not_contains?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    amounts_not_contains_nocase?: InputMaybe<Array<Scalars['BigDecimal']>>;
     and?: InputMaybe<Array<InputMaybe<AddRemove_Filter>>>;
     blockNumber?: InputMaybe<Scalars['BigInt']>;
     blockNumber_gt?: InputMaybe<Scalars['BigInt']>;
@@ -171,6 +169,14 @@ export enum AddRemove_OrderBy {
     Type = 'type',
     User = 'user',
     UserId = 'user__id',
+}
+
+/** Indicates whether the current, partially filled bucket should be included in the response. Defaults to `exclude` */
+export enum Aggregation_Current {
+    /** Exclude the current, partially filled bucket from the response */
+    Exclude = 'exclude',
+    /** Include the current, partially filled bucket in the response */
+    Include = 'include',
 }
 
 export enum Aggregation_Interval {
@@ -396,10 +402,8 @@ export type PoolSnapshot_Filter = {
     and?: InputMaybe<Array<InputMaybe<PoolSnapshot_Filter>>>;
     balances?: InputMaybe<Array<Scalars['BigDecimal']>>;
     balances_contains?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    balances_contains_nocase?: InputMaybe<Array<Scalars['BigDecimal']>>;
     balances_not?: InputMaybe<Array<Scalars['BigDecimal']>>;
     balances_not_contains?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    balances_not_contains_nocase?: InputMaybe<Array<Scalars['BigDecimal']>>;
     holdersCount?: InputMaybe<Scalars['BigInt']>;
     holdersCount_gt?: InputMaybe<Scalars['BigInt']>;
     holdersCount_gte?: InputMaybe<Scalars['BigInt']>;
@@ -466,22 +470,16 @@ export type PoolSnapshot_Filter = {
     totalShares_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
     totalSurpluses?: InputMaybe<Array<Scalars['BigDecimal']>>;
     totalSurpluses_contains?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    totalSurpluses_contains_nocase?: InputMaybe<Array<Scalars['BigDecimal']>>;
     totalSurpluses_not?: InputMaybe<Array<Scalars['BigDecimal']>>;
     totalSurpluses_not_contains?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    totalSurpluses_not_contains_nocase?: InputMaybe<Array<Scalars['BigDecimal']>>;
     totalSwapFees?: InputMaybe<Array<Scalars['BigDecimal']>>;
     totalSwapFees_contains?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    totalSwapFees_contains_nocase?: InputMaybe<Array<Scalars['BigDecimal']>>;
     totalSwapFees_not?: InputMaybe<Array<Scalars['BigDecimal']>>;
     totalSwapFees_not_contains?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    totalSwapFees_not_contains_nocase?: InputMaybe<Array<Scalars['BigDecimal']>>;
     totalSwapVolumes?: InputMaybe<Array<Scalars['BigDecimal']>>;
     totalSwapVolumes_contains?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    totalSwapVolumes_contains_nocase?: InputMaybe<Array<Scalars['BigDecimal']>>;
     totalSwapVolumes_not?: InputMaybe<Array<Scalars['BigDecimal']>>;
     totalSwapVolumes_not_contains?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    totalSwapVolumes_not_contains_nocase?: InputMaybe<Array<Scalars['BigDecimal']>>;
 };
 
 export enum PoolSnapshot_OrderBy {
@@ -877,10 +875,8 @@ export type Pool_Filter = {
     transactionHash_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
     weights?: InputMaybe<Array<Scalars['BigDecimal']>>;
     weights_contains?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    weights_contains_nocase?: InputMaybe<Array<Scalars['BigDecimal']>>;
     weights_not?: InputMaybe<Array<Scalars['BigDecimal']>>;
     weights_not_contains?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    weights_not_contains_nocase?: InputMaybe<Array<Scalars['BigDecimal']>>;
 };
 
 export enum Pool_OrderBy {

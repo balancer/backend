@@ -1043,6 +1043,10 @@ export const aGqlPoolLiquidityBootstrappingV3 = (
             overrides && overrides.hasOwnProperty('reserveTokenIndex') ? overrides.reserveTokenIndex! : 8092,
         reserveTokenStartWeight:
             overrides && overrides.hasOwnProperty('reserveTokenStartWeight') ? overrides.reserveTokenStartWeight! : 5.5,
+        reserveTokenVirtualBalance:
+            overrides && overrides.hasOwnProperty('reserveTokenVirtualBalance')
+                ? overrides.reserveTokenVirtualBalance!
+                : 6.3,
         staking: overrides && overrides.hasOwnProperty('staking') ? overrides.staking! : aGqlPoolStaking(),
         startTime: overrides && overrides.hasOwnProperty('startTime') ? overrides.startTime! : 3725,
         swapFeeManager:
