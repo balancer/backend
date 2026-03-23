@@ -37,12 +37,12 @@ export const lbPoolInputToDB = async (input: CreateLbpInput, type: GqlPoolType) 
     });
     const version = JSON.parse(versionString) as {
         name: string;
-        version: string;
+        version: number;
         deployment: string;
     };
 
     let reserveTokenVirtualBalance = '0';
-    if (version.version > '3') {
+    if (version.version >= 3) {
         const initialReserveTokenVirtualBalanceRaw = await viemClient.readContract({
             address: input.poolContract.address as `0x${string}`,
             abi: [
@@ -109,7 +109,7 @@ export const lbPoolInputToDB = async (input: CreateLbpInput, type: GqlPoolType) 
 
     const poolData: Prisma.PrismaPoolUpsertArgs['create'] = {
         ...rpcData.pool,
-        version: parseFloat(version.version),
+        version: version.version,
         id: input.poolContract.address.toLowerCase(),
         address: input.poolContract.address.toLowerCase(),
         chain: input.poolContract.chain.toUpperCase() as Chain,
