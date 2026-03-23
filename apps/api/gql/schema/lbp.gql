@@ -43,4 +43,6 @@ type Query {
 
 type Mutation {
     createLBP(input: CreateLBPInput!, type: GqlPoolType): Boolean!
+    lbpReloadLbps(chains: [GqlChain!]!): String!
+    lbpReloadFixedLbps(chains: [GqlChain!]!): String!
 }

@@ -3632,6 +3632,8 @@ export const schema = gql`
     type Mutation {
         beetsPoolLoadReliquarySnapshotsForAllFarms(chain: GqlChain!): String!
         createLBP(input: CreateLBPInput!, type: GqlPoolType): Boolean!
+        lbpReloadFixedLbps(chains: [GqlChain!]!): String!
+        lbpReloadLbps(chains: [GqlChain!]!): String!
         poolLoadOnChainDataForAllPools(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
         poolLoadSnapshotsForPools(chain: GqlChain!, poolId: String!): String!
         poolReloadAllPoolAprs(chain: GqlChain!): String!

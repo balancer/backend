@@ -2212,6 +2212,9 @@ export const aMutation = (overrides?: Partial<Mutation>): Mutation => {
                 ? overrides.beetsPoolLoadReliquarySnapshotsForAllFarms!
                 : 'culpo',
         createLBP: overrides && overrides.hasOwnProperty('createLBP') ? overrides.createLBP! : true,
+        lbpReloadFixedLbps:
+            overrides && overrides.hasOwnProperty('lbpReloadFixedLbps') ? overrides.lbpReloadFixedLbps! : 'clamo',
+        lbpReloadLbps: overrides && overrides.hasOwnProperty('lbpReloadLbps') ? overrides.lbpReloadLbps! : 'summa',
         poolLoadOnChainDataForAllPools:
             overrides && overrides.hasOwnProperty('poolLoadOnChainDataForAllPools')
                 ? overrides.poolLoadOnChainDataForAllPools!

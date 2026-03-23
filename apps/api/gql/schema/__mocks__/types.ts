@@ -2336,6 +2336,8 @@ export type Mutation = {
     __typename?: 'Mutation';
     beetsPoolLoadReliquarySnapshotsForAllFarms: Scalars['String'];
     createLBP: Scalars['Boolean'];
+    lbpReloadFixedLbps: Scalars['String'];
+    lbpReloadLbps: Scalars['String'];
     poolLoadOnChainDataForAllPools: Array<GqlPoolMutationResult>;
     poolLoadSnapshotsForPools: Scalars['String'];
     poolReloadAllPoolAprs: Scalars['String'];
@@ -2367,6 +2369,14 @@ export type MutationBeetsPoolLoadReliquarySnapshotsForAllFarmsArgs = {
 export type MutationCreateLbpArgs = {
     input: CreateLbpInput;
     type?: InputMaybe<GqlPoolType>;
+};
+
+export type MutationLbpReloadFixedLbpsArgs = {
+    chains: Array<GqlChain>;
+};
+
+export type MutationLbpReloadLbpsArgs = {
+    chains: Array<GqlChain>;
 };
 
 export type MutationPoolLoadOnChainDataForAllPoolsArgs = {

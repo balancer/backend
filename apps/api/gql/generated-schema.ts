@@ -2302,6 +2302,8 @@ export interface Mutation {
     __typename?: 'Mutation';
     beetsPoolLoadReliquarySnapshotsForAllFarms: Scalars['String'];
     createLBP: Scalars['Boolean'];
+    lbpReloadFixedLbps: Scalars['String'];
+    lbpReloadLbps: Scalars['String'];
     poolLoadOnChainDataForAllPools: Array<GqlPoolMutationResult>;
     poolLoadSnapshotsForPools: Scalars['String'];
     poolReloadAllPoolAprs: Scalars['String'];
@@ -2333,6 +2335,14 @@ export interface MutationBeetsPoolLoadReliquarySnapshotsForAllFarmsArgs {
 export interface MutationCreateLbpArgs {
     input: CreateLbpInput;
     type?: InputMaybe<GqlPoolType>;
+}
+
+export interface MutationLbpReloadFixedLbpsArgs {
+    chains: Array<GqlChain>;
+}
+
+export interface MutationLbpReloadLbpsArgs {
+    chains: Array<GqlChain>;
 }
 
 export interface MutationPoolLoadOnChainDataForAllPoolsArgs {
@@ -4778,6 +4788,18 @@ export type MutationResolvers<
         ParentType,
         ContextType,
         RequireFields<MutationCreateLbpArgs, 'input'>
+    >;
+    lbpReloadFixedLbps?: Resolver<
+        ResolversTypes['String'],
+        ParentType,
+        ContextType,
+        RequireFields<MutationLbpReloadFixedLbpsArgs, 'chains'>
+    >;
+    lbpReloadLbps?: Resolver<
+        ResolversTypes['String'],
+        ParentType,
+        ContextType,
+        RequireFields<MutationLbpReloadLbpsArgs, 'chains'>
     >;
     poolLoadOnChainDataForAllPools?: Resolver<
         Array<ResolversTypes['GqlPoolMutationResult']>,
