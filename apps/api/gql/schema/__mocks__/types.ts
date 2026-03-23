@@ -1025,7 +1025,6 @@ export type GqlPoolLiquidityBootstrappingV3 = GqlPoolBase & {
     reserveTokenEndWeight: Scalars['Float'];
     reserveTokenIndex: Scalars['Int'];
     reserveTokenStartWeight: Scalars['Float'];
-    reserveTokenVirtualBalance: Scalars['Float'];
     /** All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again. */
     staking?: Maybe<GqlPoolStaking>;
     startTime: Scalars['Int'];
@@ -1040,6 +1039,7 @@ export type GqlPoolLiquidityBootstrappingV3 = GqlPoolBase & {
     /** @deprecated use protocolVersion instead */
     vaultVersion: Scalars['Int'];
     version: Scalars['Int'];
+    virtualReserveTokenBalance: Scalars['Float'];
     website?: Maybe<Scalars['String']>;
     x?: Maybe<Scalars['String']>;
 };

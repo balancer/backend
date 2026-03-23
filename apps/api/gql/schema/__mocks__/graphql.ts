@@ -1043,10 +1043,6 @@ export const aGqlPoolLiquidityBootstrappingV3 = (
             overrides && overrides.hasOwnProperty('reserveTokenIndex') ? overrides.reserveTokenIndex! : 8092,
         reserveTokenStartWeight:
             overrides && overrides.hasOwnProperty('reserveTokenStartWeight') ? overrides.reserveTokenStartWeight! : 5.5,
-        reserveTokenVirtualBalance:
-            overrides && overrides.hasOwnProperty('reserveTokenVirtualBalance')
-                ? overrides.reserveTokenVirtualBalance!
-                : 6.3,
         staking: overrides && overrides.hasOwnProperty('staking') ? overrides.staking! : aGqlPoolStaking(),
         startTime: overrides && overrides.hasOwnProperty('startTime') ? overrides.startTime! : 3725,
         swapFeeManager:
@@ -1060,6 +1056,10 @@ export const aGqlPoolLiquidityBootstrappingV3 = (
             overrides && overrides.hasOwnProperty('userBalance') ? overrides.userBalance! : aGqlPoolUserBalance(),
         vaultVersion: overrides && overrides.hasOwnProperty('vaultVersion') ? overrides.vaultVersion! : 4833,
         version: overrides && overrides.hasOwnProperty('version') ? overrides.version! : 9337,
+        virtualReserveTokenBalance:
+            overrides && overrides.hasOwnProperty('virtualReserveTokenBalance')
+                ? overrides.virtualReserveTokenBalance!
+                : 3.2,
         website: overrides && overrides.hasOwnProperty('website') ? overrides.website! : 'terror',
         x: overrides && overrides.hasOwnProperty('x') ? overrides.x! : 'sint',
     };

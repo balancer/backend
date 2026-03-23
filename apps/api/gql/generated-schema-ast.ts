@@ -1561,7 +1561,6 @@ export const schema = gql`
         reserveTokenEndWeight: Float!
         reserveTokenIndex: Int!
         reserveTokenStartWeight: Float!
-        reserveTokenVirtualBalance: Float!
 
         """
         All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
@@ -1581,6 +1580,7 @@ export const schema = gql`
         userBalance: GqlPoolUserBalance
         vaultVersion: Int! @deprecated(reason: "use protocolVersion instead")
         version: Int!
+        virtualReserveTokenBalance: Float!
         website: String
         x: String
     }
