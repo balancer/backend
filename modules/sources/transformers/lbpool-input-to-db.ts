@@ -1,8 +1,9 @@
-import { Chain, Prisma, PrismaPoolType } from '@prisma/client';
+import { Chain, Prisma } from '@prisma/client';
 import { CreateLbpInput, GqlPoolType } from '../../../apps/api/gql/generated-schema';
 import { fetchLBPoolData, LBPoolData } from '../contracts/fetch-lbpool-data';
 import { prisma } from '../../../prisma/prisma-client';
 import { fetchFixedLBPoolData, FixedLBPoolData } from '../contracts';
+import { getViemClient } from '../../sources/viem-client';
 
 export const lbPoolInputToDB = async (input: CreateLbpInput, type: GqlPoolType) => {
     let rpcData: FixedLBPoolData | LBPoolData;
@@ -11,6 +12,33 @@ export const lbPoolInputToDB = async (input: CreateLbpInput, type: GqlPoolType) 
     } else {
         rpcData = await fetchFixedLBPoolData(input.poolContract.address, input.poolContract.chain as Chain);
     }
+
+    // we need to query the version of the LBP via onchain call
+    const viemClient = getViemClient(input.poolContract.chain as Chain);
+    const versionString = await viemClient.readContract({
+        address: input.poolContract.address as `0x${string}`,
+        abi: [
+            {
+                inputs: [],
+                stateMutability: 'view',
+                type: 'function',
+                name: 'version',
+                outputs: [
+                    {
+                        internalType: 'string',
+                        name: '',
+                        type: 'string',
+                    },
+                ],
+            },
+        ],
+        functionName: 'version',
+    });
+    const version = JSON.parse(versionString) as {
+        name: string;
+        version: string;
+        deployment: string;
+    };
 
     // Get token prices
     const tokenPrices = await prisma.prismaTokenCurrentPrice.findMany({
@@ -56,6 +84,7 @@ export const lbPoolInputToDB = async (input: CreateLbpInput, type: GqlPoolType) 
 
     const poolData: Prisma.PrismaPoolUpsertArgs['create'] = {
         ...rpcData.pool,
+        version: parseFloat(version.version),
         id: input.poolContract.address.toLowerCase(),
         address: input.poolContract.address.toLowerCase(),
         chain: input.poolContract.chain.toUpperCase() as Chain,
