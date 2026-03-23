@@ -41,7 +41,7 @@ export type LBPCallsOutput = {
     }[];
     pool: {
         typeData: {
-            virtualReserveTokenBalance: string;
+            reserveTokenVirtualBalance: string;
             isSeedless: boolean;
         };
     };
@@ -120,19 +120,19 @@ export const lbpCallsV3 = (poolAddress: string, vaultAddress: string): ViemMulti
 
             const decimals = decodeDecimalDiffs(BigInt(config.tokenDecimalDiffs), poolTokenInfo[0].length ?? 0);
 
-            const virtualReserveTokenBalanceRaw = results[index - 4].result
+            const reserveTokenVirtualBalanceRaw = results[index - 4].result
                 ? (results[index - 4].result[0] as bigint)
                 : 0n;
             const reserveTokenAddress = results[index - 3].result as `0x${string}`;
 
             const poolToken = [];
-            let virtualReserveTokenBalance = '0';
+            let reserveTokenVirtualBalance = '0';
 
             // adjust balance for the reserve token by adding the virtual balance to the pool balance
             // const poolToken = poolTokenInfo[0].map((token: string, i: number) => ({
             for (const [i, token] of poolTokenInfo[0].entries()) {
                 if (token.toLowerCase() === reserveTokenAddress.toLowerCase()) {
-                    virtualReserveTokenBalance = formatUnits(virtualReserveTokenBalanceRaw, decimals[i]);
+                    reserveTokenVirtualBalance = formatUnits(reserveTokenVirtualBalanceRaw, decimals[i]);
                 }
 
                 poolToken.push({
@@ -141,7 +141,7 @@ export const lbpCallsV3 = (poolAddress: string, vaultAddress: string): ViemMulti
                     address: token.toLowerCase(),
                     balance:
                         token.toLowerCase() === reserveTokenAddress.toLowerCase()
-                            ? formatUnits(virtualReserveTokenBalanceRaw + poolTokenInfo[2][i], decimals[i])
+                            ? formatUnits(reserveTokenVirtualBalanceRaw + poolTokenInfo[2][i], decimals[i])
                             : formatUnits(poolTokenInfo[2][i], decimals[i]),
                     exemptFromProtocolYieldFee: !poolTokenInfo[1][i].paysYieldFees,
                     priceRateProvider: poolTokenInfo[1][i].rateProvider.toLowerCase(),
@@ -153,7 +153,7 @@ export const lbpCallsV3 = (poolAddress: string, vaultAddress: string): ViemMulti
             return {
                 poolToken,
                 pool: {
-                    typeData: { virtualReserveTokenBalance, isSeedless: Number(virtualReserveTokenBalance) > 0 },
+                    typeData: { reserveTokenVirtualBalance, isSeedless: Number(reserveTokenVirtualBalance) > 0 },
                 },
             };
         },

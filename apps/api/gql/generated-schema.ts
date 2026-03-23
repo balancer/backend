@@ -1026,6 +1026,7 @@ export interface GqlPoolLiquidityBootstrappingV3 extends GqlPoolBase {
     reserveTokenEndWeight: Scalars['Float'];
     reserveTokenIndex: Scalars['Int'];
     reserveTokenStartWeight: Scalars['Float'];
+    reserveTokenVirtualBalance: Scalars['Float'];
     /** All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again. */
     staking?: Maybe<GqlPoolStaking>;
     startTime: Scalars['Int'];
@@ -1040,7 +1041,6 @@ export interface GqlPoolLiquidityBootstrappingV3 extends GqlPoolBase {
     /** @deprecated use protocolVersion instead */
     vaultVersion: Scalars['Int'];
     version: Scalars['Int'];
-    virtualReserveTokenBalance: Scalars['Float'];
     website?: Maybe<Scalars['String']>;
     x?: Maybe<Scalars['String']>;
 }
@@ -3772,6 +3772,7 @@ export type GqlPoolLiquidityBootstrappingV3Resolvers<
     reserveTokenEndWeight?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
     reserveTokenIndex?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     reserveTokenStartWeight?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+    reserveTokenVirtualBalance?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
     staking?: Resolver<Maybe<ResolversTypes['GqlPoolStaking']>, ParentType, ContextType>;
     startTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     swapFeeManager?: Resolver<Maybe<ResolversTypes['Bytes']>, ParentType, ContextType>;
@@ -3783,7 +3784,6 @@ export type GqlPoolLiquidityBootstrappingV3Resolvers<
     userBalance?: Resolver<Maybe<ResolversTypes['GqlPoolUserBalance']>, ParentType, ContextType>;
     vaultVersion?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     version?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-    virtualReserveTokenBalance?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
     website?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     x?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
     __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;

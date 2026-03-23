@@ -5,7 +5,6 @@ import { prisma } from '../../../prisma/prisma-client';
 import { fetchFixedLBPoolData, FixedLBPoolData } from '../contracts';
 import { getViemClient } from '../../sources/viem-client';
 import { formatUnits } from 'viem';
-import { initial } from 'lodash';
 
 export const lbPoolInputToDB = async (input: CreateLbpInput, type: GqlPoolType) => {
     let rpcData: FixedLBPoolData | LBPoolData;
@@ -61,7 +60,7 @@ export const lbPoolInputToDB = async (input: CreateLbpInput, type: GqlPoolType) 
 
     const reserveDecimals =
         rpcData.tokens.find((token) => token.address === rpcData.pool.typeData.reserveToken)?.decimals ?? 18;
-    const virtualReserveTokenBalance = formatUnits(initialReserveTokenVirtualBalanceRaw[0] ?? 0n, reserveDecimals);
+    const reserveTokenVirtualBalance = formatUnits(initialReserveTokenVirtualBalanceRaw[0] ?? 0n, reserveDecimals);
 
     // Get token prices
     const tokenPrices = await prisma.prismaTokenCurrentPrice.findMany({
@@ -117,8 +116,8 @@ export const lbPoolInputToDB = async (input: CreateLbpInput, type: GqlPoolType) 
         typeData: {
             ...rpcData.pool.typeData,
             ...input.metadata,
-            virtualReserveTokenBalance,
-            initialVirtualReserveTokenBalance: virtualReserveTokenBalance,
+            reserveTokenVirtualBalance,
+            initialReserveTokenVirtualBalance: reserveTokenVirtualBalance,
         },
         tokens: {
             createMany: {

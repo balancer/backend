@@ -16,7 +16,6 @@ export type LBPoolData = {
     reserveTokenStartWeight: number;
     reserveTokenEndWeight: number;
     reserveTokenVirtualBalance: number;
-    initialReserveTokenVirtualBalance?: string;
     isSeedless: boolean;
 };
 

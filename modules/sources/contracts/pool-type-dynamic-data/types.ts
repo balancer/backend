@@ -8,5 +8,5 @@ export type StableTypeData = {
 };
 
 export type SeedlessLBPTypeData = {
-    virtualReserveTokenBalance: string;
+    reserveTokenVirtualBalance: string;
 };
