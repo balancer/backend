@@ -41,26 +41,29 @@ export const lbPoolInputToDB = async (input: CreateLbpInput, type: GqlPoolType) 
         deployment: string;
     };
 
-    const initialReserveTokenVirtualBalanceRaw = await viemClient.readContract({
-        address: input.poolContract.address as `0x${string}`,
-        abi: [
-            {
-                inputs: [],
-                name: 'getReserveTokenVirtualBalance',
-                outputs: [
-                    { internalType: 'uint256', name: '', type: 'uint256' },
-                    { internalType: 'uint256', name: '', type: 'uint256' },
-                ],
-                stateMutability: 'view',
-                type: 'function',
-            },
-        ],
-        functionName: 'getReserveTokenVirtualBalance',
-    });
+    let reserveTokenVirtualBalance = '0';
+    if (version.version > '3') {
+        const initialReserveTokenVirtualBalanceRaw = await viemClient.readContract({
+            address: input.poolContract.address as `0x${string}`,
+            abi: [
+                {
+                    inputs: [],
+                    name: 'getReserveTokenVirtualBalance',
+                    outputs: [
+                        { internalType: 'uint256', name: '', type: 'uint256' },
+                        { internalType: 'uint256', name: '', type: 'uint256' },
+                    ],
+                    stateMutability: 'view',
+                    type: 'function',
+                },
+            ],
+            functionName: 'getReserveTokenVirtualBalance',
+        });
 
-    const reserveDecimals =
-        rpcData.tokens.find((token) => token.address === rpcData.pool.typeData.reserveToken)?.decimals ?? 18;
-    const reserveTokenVirtualBalance = formatUnits(initialReserveTokenVirtualBalanceRaw[0] ?? 0n, reserveDecimals);
+        const reserveDecimals =
+            rpcData.tokens.find((token) => token.address === rpcData.pool.typeData.reserveToken)?.decimals ?? 18;
+        reserveTokenVirtualBalance = formatUnits(initialReserveTokenVirtualBalanceRaw[0] ?? 0n, reserveDecimals);
+    }
 
     // Get token prices
     const tokenPrices = await prisma.prismaTokenCurrentPrice.findMany({
@@ -118,6 +121,7 @@ export const lbPoolInputToDB = async (input: CreateLbpInput, type: GqlPoolType) 
             ...input.metadata,
             reserveTokenVirtualBalance,
             initialReserveTokenVirtualBalance: reserveTokenVirtualBalance,
+            isSeedless: Number(reserveTokenVirtualBalance) > 0,
         },
         tokens: {
             createMany: {
