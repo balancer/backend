@@ -42,13 +42,15 @@ export const priceChartDataFixedLBP = async (
 
     if (flows.length === 0) return [];
 
-    // Get the prices
+    // Get the prices, use current price if LBP has not started yet. Subtract 4 hours from start
+    const now = Math.floor(Date.now() / 1000);
+    const startPriceTime = now < pool.startTime ? now : pool.startTime;
     const prices = await prisma.prismaTokenPrice.findMany({
         where: {
             chain,
             tokenAddress: reserveToken,
             timestamp: {
-                gte: pool.startTime,
+                gte: startPriceTime - 4 * 60 * 60, // Subtract 4 hours from start
                 lte: pool.endTime,
             },
         },
