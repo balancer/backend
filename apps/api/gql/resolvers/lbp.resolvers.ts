@@ -3,6 +3,9 @@ import { GraphQLError } from 'graphql';
 import { Resolvers } from '../generated-schema';
 import { validateLBPoolInput } from '../../../../modules/validators/lbpool-input-validator';
 import { lbPoolInputToDB } from '../../../../modules/sources/transformers/lbpool-input-to-db';
+import { priceChartData } from '../../../../modules/pool/lbp/price-chart-data';
+import { LBPoolData } from '../../../../modules/pool/pool-data';
+import { isAdminRoute } from '../../../../modules/auth/auth-context';
 import { LBPController } from '../../../../modules/controllers/lbp-controller';
 
 export default {
@@ -86,6 +89,30 @@ export default {
                     },
                 });
             }
+        },
+        lbpReloadLbps: async (parent, { chains }, context) => {
+            isAdminRoute(context);
+
+            for (const chain of chains) {
+                try {
+                    await LBPController.reloadLbps(chain);
+                } catch (e) {
+                    throw new Error(`Could not reload LBPs pools for chain ${chain}: ${e}`);
+                }
+            }
+            return 'ok';
+        },
+        lbpReloadFixedLbps: async (parent, { chains }, context) => {
+            isAdminRoute(context);
+
+            for (const chain of chains) {
+                try {
+                    await LBPController.reloadFixedLbps(chain);
+                } catch (e) {
+                    throw new Error(`Could not reload Fixed LBPs pools for chain ${chain}: ${e}`);
+                }
+            }
+            return 'ok';
         },
     },
 } as Resolvers;

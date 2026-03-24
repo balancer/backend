@@ -18,7 +18,6 @@ export type LBPCallsOutput = {
         id: string;
         weight: string;
     }[];
-    virtualReserveTokenBalanceRaw: string;
 };
 
 export const lbpCalls = (poolAddress: string): ViemMulticallCall[] => [

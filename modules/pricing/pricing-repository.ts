@@ -98,14 +98,29 @@ export class PricingRepository {
             return [];
         }
 
+        const validPriceItems = priceItems.filter(
+            (item) => typeof item.price === 'number' && Number.isFinite(item.price),
+        );
+
+        if (validPriceItems.length === 0) {
+            return [];
+        }
+
         // Create latest price map
-        const latestPrices = Object.fromEntries(tokensForPricing.map((token) => [token.address, token.currentPrice]));
+        const latestPrices = Object.fromEntries(
+            tokensForPricing.map((token) => [
+                token.address,
+                typeof token.currentPrice === 'number' && Number.isFinite(token.currentPrice)
+                    ? token.currentPrice
+                    : undefined,
+            ]),
+        );
 
         const hourlyTimestamp = timestampRoundedUpToNearestHour();
 
         const operations: any[] = [];
 
-        for (const item of priceItems) {
+        for (const item of validPriceItems) {
             // Update or create hourly price in TokenPrice table
             operations.push(
                 prisma.prismaTokenPrice.upsert({
@@ -170,7 +185,7 @@ export class PricingRepository {
 
         await prismaBulkExecuteOperations(operations);
 
-        return priceItems.map((item) => item.address);
+        return validPriceItems.map((item) => item.address);
     }
 
     private collectAllTokenAddresses(tokens: { address: string; underlyingTokenAddress?: string | null }[]): string[] {

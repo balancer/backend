@@ -1026,6 +1026,7 @@ export interface GqlPoolLiquidityBootstrappingV3 extends GqlPoolBase {
     reserveTokenEndWeight: Scalars['Float'];
     reserveTokenIndex: Scalars['Int'];
     reserveTokenStartWeight: Scalars['Float'];
+    reserveTokenVirtualBalance: Scalars['Float'];
     /** All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again. */
     staking?: Maybe<GqlPoolStaking>;
     startTime: Scalars['Int'];
@@ -2299,6 +2300,8 @@ export interface Mutation {
     __typename?: 'Mutation';
     beetsPoolLoadReliquarySnapshotsForAllFarms: Scalars['String'];
     createLBP: Scalars['Boolean'];
+    lbpReloadFixedLbps: Scalars['String'];
+    lbpReloadLbps: Scalars['String'];
     poolLoadOnChainDataForAllPools: Array<GqlPoolMutationResult>;
     poolLoadSnapshotsForPools: Scalars['String'];
     poolReloadAllPoolAprs: Scalars['String'];
@@ -2330,6 +2333,14 @@ export interface MutationBeetsPoolLoadReliquarySnapshotsForAllFarmsArgs {
 export interface MutationCreateLbpArgs {
     input: CreateLbpInput;
     type?: InputMaybe<GqlPoolType>;
+}
+
+export interface MutationLbpReloadFixedLbpsArgs {
+    chains: Array<GqlChain>;
+}
+
+export interface MutationLbpReloadLbpsArgs {
+    chains: Array<GqlChain>;
 }
 
 export interface MutationPoolLoadOnChainDataForAllPoolsArgs {
@@ -3765,6 +3776,7 @@ export type GqlPoolLiquidityBootstrappingV3Resolvers<
     reserveTokenEndWeight?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
     reserveTokenIndex?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     reserveTokenStartWeight?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+    reserveTokenVirtualBalance?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
     staking?: Resolver<Maybe<ResolversTypes['GqlPoolStaking']>, ParentType, ContextType>;
     startTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     swapFeeManager?: Resolver<Maybe<ResolversTypes['Bytes']>, ParentType, ContextType>;
@@ -4779,6 +4791,18 @@ export type MutationResolvers<
         ParentType,
         ContextType,
         RequireFields<MutationCreateLbpArgs, 'input'>
+    >;
+    lbpReloadFixedLbps?: Resolver<
+        ResolversTypes['String'],
+        ParentType,
+        ContextType,
+        RequireFields<MutationLbpReloadFixedLbpsArgs, 'chains'>
+    >;
+    lbpReloadLbps?: Resolver<
+        ResolversTypes['String'],
+        ParentType,
+        ContextType,
+        RequireFields<MutationLbpReloadLbpsArgs, 'chains'>
     >;
     poolLoadOnChainDataForAllPools?: Resolver<
         Array<ResolversTypes['GqlPoolMutationResult']>,

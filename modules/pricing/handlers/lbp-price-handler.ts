@@ -122,6 +122,11 @@ export class LbpPriceHandler implements PriceHandler {
                 const projectPrice = reserveBalance / reserveWeight / (projectBalance / projectWeight);
                 const price = projectPrice * reservePrices[reserveTokenAddress];
 
+                //check if price is a number
+                if (isNaN(price) || !isFinite(price)) {
+                    continue;
+                }
+
                 priceItems.push({
                     address: token.address,
                     chain: token.chain,

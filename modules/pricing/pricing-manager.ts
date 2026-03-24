@@ -11,7 +11,7 @@ export class PricingManager {
         // Build initial price map from tokens' currentPrice
         const allPrices = new Map<string, { price: number; updatedBy: string }>();
         tokens.forEach((token) => {
-            if (token.currentPrice) {
+            if (typeof token.currentPrice === 'number' && Number.isFinite(token.currentPrice)) {
                 allPrices.set(token.address, {
                     price: token.currentPrice,
                     updatedBy: token.pricedBy || '',

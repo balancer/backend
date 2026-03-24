@@ -31,6 +31,8 @@ import { LoopsService } from '../../modules/loops/service';
 import { ContentController } from '../../modules/content/content-controller';
 import { StakedSonicController } from '../../modules/sts/sts-controller';
 import { UserBalancesController } from '../../modules/user/user-balances-controller';
+import { ca } from '@bgd-labs/aave-address-book/dist/ChainlinkEthereum-CbJoeh6P';
+import { error } from 'console';
 
 const runningJobs: Set<string> = new Set();
 
@@ -128,8 +130,17 @@ const setupJobHandlers = async (name: string, chainId: string, res: any, next: N
                 async () => {
                     const chains = Object.keys(config) as Chain[];
                     const service = new PricingService(chains);
+                    const errors: Error[] = [];
                     for (const chain of chains) {
-                        await service.updatePrices(chain);
+                        try {
+                            await service.updatePrices(chain);
+                        } catch (error) {
+                            console.log(`Error updating prices for chain ${chain}:`, error);
+                            errors.push(error instanceof Error ? error : new Error(`Unknown error: ${error}`));
+                        }
+                    }
+                    if (errors.length > 0) {
+                        throw new Error(errors.map((e) => e.message).join(', '));
                     }
                     return 'OK';
                 },

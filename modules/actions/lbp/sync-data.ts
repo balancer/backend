@@ -1,5 +1,5 @@
 import { Chain, PrismaPoolType } from '@prisma/client';
-import { fixedLbpCalls, lbpCalls, LBPCallsOutput } from '../../sources/contracts/pool-type-dynamic-data';
+import { lbpCalls, LBPCallsOutput } from '../../sources/contracts/pool-type-dynamic-data';
 import { prisma } from '../../../prisma/prisma-client';
 import { multicallViem } from '../../web3/multicaller-viem';
 import { ViemClient } from '../../sources/types';

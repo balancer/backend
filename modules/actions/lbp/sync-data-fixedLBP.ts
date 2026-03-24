@@ -6,9 +6,6 @@ import { ViemClient } from '../../sources/types';
 import { eventsRepository } from '../../repositories/events/events-repository';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 
-/**
- * Fetches new weights and updates pool tokens
- */
 export const syncDataFixedLBP = async (
     chain: Chain,
     client: ViemClient,

@@ -15,6 +15,7 @@ interface PriceChartLPB {
     reserveToken: string;
     reserveTokenStartWeight: number;
     reserveTokenEndWeight: number;
+    initialReserveTokenVirtualBalance?: string;
 }
 
 interface TokenFlowData {
@@ -42,17 +43,25 @@ export const priceChartData = async (
     const allEvents = await repo.getAllEventsForTimeRange(chain, id, undefined, pool.endTime);
 
     // Aggregate events by timeline points
-    const flows = aggregateEventsByTimeline(allEvents, timeline, projectToken, reserveToken);
+    const flows = aggregateEventsByTimeline(
+        allEvents,
+        timeline,
+        projectToken,
+        reserveToken,
+        pool.initialReserveTokenVirtualBalance,
+    );
 
     if (flows.length === 0) return [];
 
-    // Get the prices
+    // Get the prices, use current price if LBP has not started yet. Subtract 4 hours from start
+    const now = Math.floor(Date.now() / 1000);
+    const startPriceTime = now < pool.startTime ? now : pool.startTime;
     const prices = await prisma.prismaTokenPrice.findMany({
         where: {
             chain,
             tokenAddress: reserveToken,
             timestamp: {
-                gte: pool.startTime,
+                gte: startPriceTime - 4 * 60 * 60, // Subtract 4 hours from start
                 lte: pool.endTime,
             },
         },
@@ -137,6 +146,7 @@ const aggregateEventsByTimeline = (
     timeline: number[],
     projectToken: string,
     reserveToken: string,
+    initialReserveTokenVirtualBalance?: string,
 ): TokenFlowData[] => {
     // Reverse events in-place to get ascending order for cumulative calculations
     // (events come from DB in descending order due to index optimization)
@@ -155,7 +165,7 @@ const aggregateEventsByTimeline = (
 
         // Calculate cumulative token flows
         let projectTokenFlow = 0;
-        let reserveTokenFlow = 0;
+        let reserveTokenFlow = initialReserveTokenVirtualBalance ? parseFloat(initialReserveTokenVirtualBalance) : 0;
 
         eventsUpToTimestamp.forEach((event) => {
             if (event.type === 'SWAP') {

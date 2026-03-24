@@ -1043,6 +1043,10 @@ export const aGqlPoolLiquidityBootstrappingV3 = (
             overrides && overrides.hasOwnProperty('reserveTokenIndex') ? overrides.reserveTokenIndex! : 8092,
         reserveTokenStartWeight:
             overrides && overrides.hasOwnProperty('reserveTokenStartWeight') ? overrides.reserveTokenStartWeight! : 5.5,
+        reserveTokenVirtualBalance:
+            overrides && overrides.hasOwnProperty('reserveTokenVirtualBalance')
+                ? overrides.reserveTokenVirtualBalance!
+                : 6.3,
         staking: overrides && overrides.hasOwnProperty('staking') ? overrides.staking! : aGqlPoolStaking(),
         startTime: overrides && overrides.hasOwnProperty('startTime') ? overrides.startTime! : 3725,
         swapFeeManager:
@@ -2206,6 +2210,9 @@ export const aMutation = (overrides?: Partial<Mutation>): Mutation => {
                 ? overrides.beetsPoolLoadReliquarySnapshotsForAllFarms!
                 : 'culpo',
         createLBP: overrides && overrides.hasOwnProperty('createLBP') ? overrides.createLBP! : true,
+        lbpReloadFixedLbps:
+            overrides && overrides.hasOwnProperty('lbpReloadFixedLbps') ? overrides.lbpReloadFixedLbps! : 'clamo',
+        lbpReloadLbps: overrides && overrides.hasOwnProperty('lbpReloadLbps') ? overrides.lbpReloadLbps! : 'summa',
         poolLoadOnChainDataForAllPools:
             overrides && overrides.hasOwnProperty('poolLoadOnChainDataForAllPools')
                 ? overrides.poolLoadOnChainDataForAllPools!

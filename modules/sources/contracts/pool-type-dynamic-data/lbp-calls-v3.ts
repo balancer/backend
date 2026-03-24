@@ -39,7 +39,12 @@ export type LBPCallsOutput = {
         id: string;
         weight: string;
     }[];
-    virtualReserveTokenBalanceRaw: string;
+    pool: {
+        typeData: {
+            reserveTokenVirtualBalance: string;
+            isSeedless: boolean;
+        };
+    };
 };
 
 export const lbpCallsV3 = (poolAddress: string, vaultAddress: string): ViemMulticallCall[] => [
@@ -97,7 +102,7 @@ export const lbpCallsV3 = (poolAddress: string, vaultAddress: string): ViemMulti
         }),
     },
     {
-        path: `${poolAddress}.poolToken`,
+        path: `${poolAddress}`,
         address: vaultAddress as `0x${string}`,
         abi: VaultV3Abi,
         functionName: 'getPoolTokenInfo',
@@ -115,25 +120,42 @@ export const lbpCallsV3 = (poolAddress: string, vaultAddress: string): ViemMulti
 
             const decimals = decodeDecimalDiffs(BigInt(config.tokenDecimalDiffs), poolTokenInfo[0].length ?? 0);
 
-            const virtualReserveTokenBalanceRaw = results[index - 4].result
+            const reserveTokenVirtualBalanceRaw = results[index - 4].result
                 ? (results[index - 4].result[0] as bigint)
                 : 0n;
             const reserveTokenAddress = results[index - 3].result as `0x${string}`;
 
+            const poolToken = [];
+            let reserveTokenVirtualBalance = '0';
+
             // adjust balance for the reserve token by adding the virtual balance to the pool balance
-            return poolTokenInfo[0].map((token: string, i: number) => ({
-                id: `${poolAddress}-${token.toLowerCase()}`,
-                index: i,
-                address: token.toLowerCase(),
-                balance:
-                    token.toLowerCase() === reserveTokenAddress.toLowerCase()
-                        ? formatUnits(virtualReserveTokenBalanceRaw + poolTokenInfo[2][i], decimals[i])
-                        : formatUnits(poolTokenInfo[2][i], decimals[i]),
-                exemptFromProtocolYieldFee: !poolTokenInfo[1][i].paysYieldFees,
-                priceRateProvider: poolTokenInfo[1][i].rateProvider.toLowerCase(),
-                priceRate: formatEther(poolTokenRates ? poolTokenRates[1][i] : 1000000000000000000n),
-                scalingFactor: String(poolTokenRates ? poolTokenRates[0][i] : 1000000000000000000n),
-            }));
+            // const poolToken = poolTokenInfo[0].map((token: string, i: number) => ({
+            for (const [i, token] of poolTokenInfo[0].entries()) {
+                if (token.toLowerCase() === reserveTokenAddress.toLowerCase()) {
+                    reserveTokenVirtualBalance = formatUnits(reserveTokenVirtualBalanceRaw, decimals[i]);
+                }
+
+                poolToken.push({
+                    id: `${poolAddress}-${token.toLowerCase()}`,
+                    index: i,
+                    address: token.toLowerCase(),
+                    balance:
+                        token.toLowerCase() === reserveTokenAddress.toLowerCase()
+                            ? formatUnits(reserveTokenVirtualBalanceRaw + poolTokenInfo[2][i], decimals[i])
+                            : formatUnits(poolTokenInfo[2][i], decimals[i]),
+                    exemptFromProtocolYieldFee: !poolTokenInfo[1][i].paysYieldFees,
+                    priceRateProvider: poolTokenInfo[1][i].rateProvider.toLowerCase(),
+                    priceRate: formatEther(poolTokenRates ? poolTokenRates[1][i] : 1000000000000000000n),
+                    scalingFactor: String(poolTokenRates ? poolTokenRates[0][i] : 1000000000000000000n),
+                });
+            }
+
+            return {
+                poolToken,
+                pool: {
+                    typeData: { reserveTokenVirtualBalance, isSeedless: Number(reserveTokenVirtualBalance) > 0 },
+                },
+            };
         },
     },
     {
