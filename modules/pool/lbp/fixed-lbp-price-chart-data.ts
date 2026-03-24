@@ -84,6 +84,7 @@ export const priceChartDataFixedLBP = async (
             projectTokenPrice: projectTokenPrice,
             reservePrice: reservePrice,
             buyVolume: flow.buyVolume,
+            sellVolume: flow.sellVolume,
             volume: flow.volume,
             swapCount: flow.swapCount,
             tvl: tvl,
