@@ -3570,7 +3570,6 @@ export const schema = gql`
         cumulativeFees: Float!
         cumulativeVolume: Float!
         fees: Float!
-        intervalTimestamp: Int! @deprecated
         projectTokenBalance: Float!
         projectTokenPrice: Float!
         reservePrice: Float!
@@ -3701,7 +3700,8 @@ export const schema = gql`
             id: String!
             range: GqlPoolSnapshotDataRange!
         ): [GqlReliquaryFarmSnapshot!]!
-        lbpPriceChart(chain: GqlChain!, dataPoints: Int, id: String!, interval: Int @deprecated): [LBPPriceChartData!]
+        fixedLbpPriceChart(chain: GqlChain!, dataPoints: Int, id: String!): [LBPPriceChartData!]
+        lbpPriceChart(chain: GqlChain!, dataPoints: Int, id: String!): [LBPPriceChartData!]
 
         """
         Get the LoopS data

@@ -2141,8 +2141,6 @@ export const aLbpPriceChartData = (overrides?: Partial<LbpPriceChartData>): LbpP
         cumulativeFees: overrides && overrides.hasOwnProperty('cumulativeFees') ? overrides.cumulativeFees! : 4.7,
         cumulativeVolume: overrides && overrides.hasOwnProperty('cumulativeVolume') ? overrides.cumulativeVolume! : 0.6,
         fees: overrides && overrides.hasOwnProperty('fees') ? overrides.fees! : 9.3,
-        intervalTimestamp:
-            overrides && overrides.hasOwnProperty('intervalTimestamp') ? overrides.intervalTimestamp! : 7321,
         projectTokenBalance:
             overrides && overrides.hasOwnProperty('projectTokenBalance') ? overrides.projectTokenBalance! : 9.7,
         projectTokenPrice:
@@ -2362,6 +2360,10 @@ export const aQuery = (overrides?: Partial<Query>): Query => {
             overrides && overrides.hasOwnProperty('beetsPoolGetReliquaryFarmSnapshots')
                 ? overrides.beetsPoolGetReliquaryFarmSnapshots!
                 : [aGqlReliquaryFarmSnapshot()],
+        fixedLbpPriceChart:
+            overrides && overrides.hasOwnProperty('fixedLbpPriceChart')
+                ? overrides.fixedLbpPriceChart!
+                : [aLbpPriceChartData()],
         lbpPriceChart:
             overrides && overrides.hasOwnProperty('lbpPriceChart') ? overrides.lbpPriceChart! : [aLbpPriceChartData()],
         loopsGetData: overrides && overrides.hasOwnProperty('loopsGetData') ? overrides.loopsGetData! : aGqlLoopsData(),

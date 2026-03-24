@@ -24,7 +24,6 @@ type LBPPriceChartData {
     timestamp: Int!
     projectTokenBalance: Float!
     reserveTokenBalance: Float!
-    intervalTimestamp: Int! @deprecated
     projectTokenPrice: Float!
     reservePrice: Float!
     volume: Float!
@@ -38,7 +37,8 @@ type LBPPriceChartData {
 }
 
 type Query {
-    lbpPriceChart(id: String!, chain: GqlChain!, interval: Int @deprecated, dataPoints: Int): [LBPPriceChartData!]
+    lbpPriceChart(id: String!, chain: GqlChain!, dataPoints: Int): [LBPPriceChartData!]
+    fixedLbpPriceChart(id: String!, chain: GqlChain!, dataPoints: Int): [LBPPriceChartData!]
 }
 
 type Mutation {

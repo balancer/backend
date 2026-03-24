@@ -14,32 +14,10 @@ export default {
          * Get LB Pool price chart data
          */
         lbpPriceChart: async (parent: any, { id, chain, dataPoints }) => {
-            try {
-                const pool = await prisma.prismaPool.findFirst({
-                    where: {
-                        id,
-                        chain,
-                        type: 'LIQUIDITY_BOOTSTRAPPING',
-                        protocolVersion: 3,
-                    },
-                });
-                if (!pool) {
-                    throw new GraphQLError('Pool with id does not exist', { extensions: { code: 'NOT_FOUND' } });
-                }
-                const input = {
-                    id: pool.id,
-                    chain: pool.chain,
-                    createTime: pool.createTime,
-                    ...(pool.typeData as LBPoolData),
-                };
-
-                const chartData = await priceChartData(input, dataPoints || undefined);
-
-                return chartData.map((d) => ({ ...d, intervalTimestamp: d.timestamp }));
-            } catch (error) {
-                console.error('Error fetching LB Pool chart:', error);
-                return null;
-            }
+            return LBPController.lbpPriceChart(id, chain, dataPoints ? dataPoints : undefined);
+        },
+        fixedLbpPriceChart: async (parent: any, { id, chain, dataPoints }) => {
+            return LBPController.fixedLbpPriceChart(id, chain, dataPoints ? dataPoints : undefined);
         },
     },
     Mutation: {

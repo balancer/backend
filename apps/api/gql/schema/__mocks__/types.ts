@@ -2286,8 +2286,6 @@ export type LbpPriceChartData = {
     cumulativeFees: Scalars['Float'];
     cumulativeVolume: Scalars['Float'];
     fees: Scalars['Float'];
-    /** @deprecated Field no longer supported */
-    intervalTimestamp: Scalars['Int'];
     projectTokenBalance: Scalars['Float'];
     projectTokenPrice: Scalars['Float'];
     reservePrice: Scalars['Float'];
@@ -2504,6 +2502,7 @@ export type Query = {
     /** Returns all pools for a given filter, specific for aggregators */
     aggregatorPools: Array<GqlPoolAggregator>;
     beetsPoolGetReliquaryFarmSnapshots: Array<GqlReliquaryFarmSnapshot>;
+    fixedLbpPriceChart?: Maybe<Array<LbpPriceChartData>>;
     lbpPriceChart?: Maybe<Array<LbpPriceChartData>>;
     /** Get the LoopS data */
     loopsGetData: GqlLoopsData;
@@ -2572,11 +2571,16 @@ export type QueryBeetsPoolGetReliquaryFarmSnapshotsArgs = {
     range: GqlPoolSnapshotDataRange;
 };
 
+export type QueryFixedLbpPriceChartArgs = {
+    chain: GqlChain;
+    dataPoints?: InputMaybe<Scalars['Int']>;
+    id: Scalars['String'];
+};
+
 export type QueryLbpPriceChartArgs = {
     chain: GqlChain;
     dataPoints?: InputMaybe<Scalars['Int']>;
     id: Scalars['String'];
-    interval?: InputMaybe<Scalars['Int']>;
 };
 
 export type QueryPoolEventsArgs = {
