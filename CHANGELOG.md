@@ -1,5 +1,11 @@
 # backend
 
+## 2.1.1
+
+### Patch Changes
+
+-   524a77d: add price chart for fixed lbp
+
 ## 2.1.0
 
 ### Minor Changes
