@@ -10,9 +10,7 @@ fragment Swap on Swap {
     swapFeeAmount
     swapFeeToken
     swapFeeDeltaAmount
-    user {
-        id
-    }
+    user
     blockNumber
     logIndex
     blockTimestamp
