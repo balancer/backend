@@ -36,7 +36,7 @@ export default <NetworkData>{
         platformId: 'x-layer',
         excludedTokenAddresses: [],
     },
-    rpcUrl: env.DRPC_API_KEY ? `https://lb.drpc.live/xlayer/${env.DRPC_API_KEY}` : 'https://rpc.xlayer.tech',
+    rpcUrl: 'https://rpc.xlayer.tech',
     rpcMaxBlockRange: 1000,
     acceptableSGLag: 30, // ~1min
     protocolToken: 'bal',

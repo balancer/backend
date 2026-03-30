@@ -30,9 +30,7 @@ export default <NetworkData>{
         platformId: 'mode',
         excludedTokenAddresses: [],
     },
-    rpcUrl: env.DRPC_API_KEY
-        ? `https://lb.drpc.org/ogrpc?network=mode&dkey=${env.DRPC_API_KEY}`
-        : 'https://mainnet.mode.network',
+    rpcUrl: 'https://mainnet.mode.network',
     rpcMaxBlockRange: 5000,
     acceptableSGLag: 30, // ~1min
     protocolToken: 'bal',

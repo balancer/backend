@@ -31,7 +31,7 @@ export default <NetworkData>{
         platformId: 'polygon-zkevm',
         excludedTokenAddresses: [],
     },
-    rpcUrl: env.DRPC_API_KEY ? `https://lb.drpc.live/polygon-zkevm/${env.DRPC_API_KEY}` : 'https://zkevm-rpc.com',
+    rpcUrl: 'https://zkevm-rpc.com',
     rpcMaxBlockRange: 1000,
     acceptableSGLag: 30, // ~1min
     protocolToken: 'bal',
