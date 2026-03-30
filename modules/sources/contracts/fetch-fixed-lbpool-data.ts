@@ -5,6 +5,7 @@ import { getViemClient } from '../viem-client';
 import config from '../../../config';
 import { AbiParametersToPrimitiveTypes, ExtractAbiFunction } from 'abitype';
 import { fetchErc20Headers } from './fetch-erc20-headers';
+import { formatEther } from 'viem';
 
 type ImmutableData = AbiParametersToPrimitiveTypes<
     ExtractAbiFunction<typeof abi, 'getFixedPriceLBPoolImmutableData'>['outputs']
@@ -34,6 +35,7 @@ export type FixedLBPoolData = {
             isProjectTokenSwapInBlocked: boolean;
             projectToken: string;
             projectTokenIndex: number;
+            projectTokenRate: string;
             reserveToken: string;
             reserveTokenIndex: number;
         };
@@ -129,6 +131,7 @@ export async function fetchFixedLBPoolData(pool: string, chain: Chain): Promise<
                 projectTokenIndex: Number(immutableData.projectTokenIndex),
                 reserveToken: immutableData.tokens[Number(immutableData.reserveTokenIndex)].toLowerCase(),
                 reserveTokenIndex: Number(immutableData.reserveTokenIndex),
+                projectTokenRate: formatEther(BigInt(immutableData.projectTokenRate)),
             },
             tokens: immutableData.tokens.map((address, i) => ({
                 address: address.toLowerCase(),
