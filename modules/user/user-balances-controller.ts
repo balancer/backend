@@ -14,9 +14,11 @@ export function UserBalancesController() {
 
             // Run all syncs in parallel
             await Promise.all([
-                syncBptBalancesV2(chain, balancer),
-                syncBptBalancesV3(chain, balancerV3),
-                syncBptBalancesCowAmm(chain, cowAmm),
+                config[chain].balancer.v2.vaultAddress !== '' ? syncBptBalancesV2(chain, balancer) : Promise.resolve(),
+                config[chain].balancer.v3.vaultAddress !== ''
+                    ? syncBptBalancesV3(chain, balancerV3)
+                    : Promise.resolve(),
+                cowAmm ? syncBptBalancesCowAmm(chain, cowAmm) : Promise.resolve(),
             ]);
 
             return true;
