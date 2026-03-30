@@ -178,6 +178,10 @@ export function PoolController(tracer?: any) {
                 return [];
             }
 
+            // we filter out LBPs because it would otherwise override the metadata that has been stored when the create mutation was called
+            // we sync LBPs on a different schedule and with a different function that only updates the onchain data, not the metadata
+            poolsToSync = poolsToSync.filter((pool) => pool.factory.type !== 'LBP' && pool.factory.type !== 'FixedLBP');
+
             const inserts = await addPoolsV3(poolsToSync, viemClient, vaultAddress, chain, latestBlock);
             await syncBptBalancesFromSubgraph(
                 poolsToSync.map((pool) => pool.id),

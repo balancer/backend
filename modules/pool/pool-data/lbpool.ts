@@ -2,7 +2,22 @@ import { VaultPoolFragment } from '../../sources/subgraphs/balancer-v3-vault/gen
 import { TypePoolFragment } from '../../sources/subgraphs/balancer-v3-pools/generated/types';
 import { formatEther } from 'viem';
 
-export type LBPoolData = ReturnType<typeof lbPool>;
+export type LBPoolData = {
+    startTime: number;
+    endTime: number;
+    lbpOwner: string;
+    isProjectTokenSwapInBlocked: boolean;
+    projectToken: string;
+    projectTokenIndex: number;
+    projectTokenStartWeight: number;
+    projectTokenEndWeight: number;
+    reserveToken: string;
+    reserveTokenIndex: number;
+    reserveTokenStartWeight: number;
+    reserveTokenEndWeight: number;
+    reserveTokenVirtualBalance: number;
+    isSeedless: boolean;
+};
 
 export const lbPool = (pool: TypePoolFragment & VaultPoolFragment) => {
     const params = pool.lbpParams!;
@@ -21,6 +36,7 @@ export const lbPool = (pool: TypePoolFragment & VaultPoolFragment) => {
         reserveTokenIndex: tokens.find((token) => token.address === params.reserveToken)!.index,
         reserveTokenStartWeight: Number(formatEther(BigInt(params.reserveTokenStartWeight))),
         reserveTokenEndWeight: Number(formatEther(BigInt(params.reserveTokenEndWeight))),
+        reserveTokenVirtualBalance: Number(formatEther(BigInt(params.reserveTokenVirtualBalance))),
         isSeedless: Number(formatEther(BigInt(params.reserveTokenVirtualBalance))) > 0,
     };
 };

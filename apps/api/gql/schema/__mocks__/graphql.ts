@@ -1043,6 +1043,10 @@ export const aGqlPoolLiquidityBootstrappingV3 = (
             overrides && overrides.hasOwnProperty('reserveTokenIndex') ? overrides.reserveTokenIndex! : 8092,
         reserveTokenStartWeight:
             overrides && overrides.hasOwnProperty('reserveTokenStartWeight') ? overrides.reserveTokenStartWeight! : 5.5,
+        reserveTokenVirtualBalance:
+            overrides && overrides.hasOwnProperty('reserveTokenVirtualBalance')
+                ? overrides.reserveTokenVirtualBalance!
+                : 6.3,
         staking: overrides && overrides.hasOwnProperty('staking') ? overrides.staking! : aGqlPoolStaking(),
         startTime: overrides && overrides.hasOwnProperty('startTime') ? overrides.startTime! : 3725,
         swapFeeManager:
@@ -2137,8 +2141,6 @@ export const aLbpPriceChartData = (overrides?: Partial<LbpPriceChartData>): LbpP
         cumulativeFees: overrides && overrides.hasOwnProperty('cumulativeFees') ? overrides.cumulativeFees! : 4.7,
         cumulativeVolume: overrides && overrides.hasOwnProperty('cumulativeVolume') ? overrides.cumulativeVolume! : 0.6,
         fees: overrides && overrides.hasOwnProperty('fees') ? overrides.fees! : 9.3,
-        intervalTimestamp:
-            overrides && overrides.hasOwnProperty('intervalTimestamp') ? overrides.intervalTimestamp! : 7321,
         projectTokenBalance:
             overrides && overrides.hasOwnProperty('projectTokenBalance') ? overrides.projectTokenBalance! : 9.7,
         projectTokenPrice:
@@ -2208,6 +2210,9 @@ export const aMutation = (overrides?: Partial<Mutation>): Mutation => {
                 ? overrides.beetsPoolLoadReliquarySnapshotsForAllFarms!
                 : 'culpo',
         createLBP: overrides && overrides.hasOwnProperty('createLBP') ? overrides.createLBP! : true,
+        lbpReloadFixedLbps:
+            overrides && overrides.hasOwnProperty('lbpReloadFixedLbps') ? overrides.lbpReloadFixedLbps! : 'clamo',
+        lbpReloadLbps: overrides && overrides.hasOwnProperty('lbpReloadLbps') ? overrides.lbpReloadLbps! : 'summa',
         poolLoadOnChainDataForAllPools:
             overrides && overrides.hasOwnProperty('poolLoadOnChainDataForAllPools')
                 ? overrides.poolLoadOnChainDataForAllPools!
@@ -2355,6 +2360,10 @@ export const aQuery = (overrides?: Partial<Query>): Query => {
             overrides && overrides.hasOwnProperty('beetsPoolGetReliquaryFarmSnapshots')
                 ? overrides.beetsPoolGetReliquaryFarmSnapshots!
                 : [aGqlReliquaryFarmSnapshot()],
+        fixedLbpPriceChart:
+            overrides && overrides.hasOwnProperty('fixedLbpPriceChart')
+                ? overrides.fixedLbpPriceChart!
+                : [aLbpPriceChartData()],
         lbpPriceChart:
             overrides && overrides.hasOwnProperty('lbpPriceChart') ? overrides.lbpPriceChart! : [aLbpPriceChartData()],
         loopsGetData: overrides && overrides.hasOwnProperty('loopsGetData') ? overrides.loopsGetData! : aGqlLoopsData(),

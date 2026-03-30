@@ -1561,6 +1561,7 @@ export const schema = gql`
         reserveTokenEndWeight: Float!
         reserveTokenIndex: Int!
         reserveTokenStartWeight: Float!
+        reserveTokenVirtualBalance: Float!
 
         """
         All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again.
@@ -3569,7 +3570,6 @@ export const schema = gql`
         cumulativeFees: Float!
         cumulativeVolume: Float!
         fees: Float!
-        intervalTimestamp: Int! @deprecated
         projectTokenBalance: Float!
         projectTokenPrice: Float!
         reservePrice: Float!
@@ -3631,6 +3631,8 @@ export const schema = gql`
     type Mutation {
         beetsPoolLoadReliquarySnapshotsForAllFarms(chain: GqlChain!): String!
         createLBP(input: CreateLBPInput!, type: GqlPoolType): Boolean!
+        lbpReloadFixedLbps(chains: [GqlChain!]!): String!
+        lbpReloadLbps(chains: [GqlChain!]!): String!
         poolLoadOnChainDataForAllPools(chains: [GqlChain!]!): [GqlPoolMutationResult!]!
         poolLoadSnapshotsForPools(chain: GqlChain!, poolId: String!): String!
         poolReloadAllPoolAprs(chain: GqlChain!): String!
@@ -3698,7 +3700,8 @@ export const schema = gql`
             id: String!
             range: GqlPoolSnapshotDataRange!
         ): [GqlReliquaryFarmSnapshot!]!
-        lbpPriceChart(chain: GqlChain!, dataPoints: Int, id: String!, interval: Int @deprecated): [LBPPriceChartData!]
+        fixedLbpPriceChart(chain: GqlChain!, dataPoints: Int, id: String!): [LBPPriceChartData!]
+        lbpPriceChart(chain: GqlChain!, dataPoints: Int, id: String!): [LBPPriceChartData!]
 
         """
         Get the LoopS data

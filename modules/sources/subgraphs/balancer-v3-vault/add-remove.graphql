@@ -10,9 +10,7 @@ fragment AddRemove on AddRemove {
             address
         }
     }
-    user {
-        id
-    }
+    user
     blockNumber
     logIndex
     blockTimestamp

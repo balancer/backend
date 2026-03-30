@@ -41,7 +41,7 @@ export type AddRemove = {
     /** Type of investment (Add or Remove) */
     type: InvestType;
     /** User who performed the add or remove action */
-    user: User;
+    user: Scalars['Bytes'];
 };
 
 export type AddRemove_Filter = {
@@ -134,27 +134,16 @@ export type AddRemove_Filter = {
     type_in?: InputMaybe<Array<InvestType>>;
     type_not?: InputMaybe<InvestType>;
     type_not_in?: InputMaybe<Array<InvestType>>;
-    user?: InputMaybe<Scalars['String']>;
-    user_?: InputMaybe<User_Filter>;
-    user_contains?: InputMaybe<Scalars['String']>;
-    user_contains_nocase?: InputMaybe<Scalars['String']>;
-    user_ends_with?: InputMaybe<Scalars['String']>;
-    user_ends_with_nocase?: InputMaybe<Scalars['String']>;
-    user_gt?: InputMaybe<Scalars['String']>;
-    user_gte?: InputMaybe<Scalars['String']>;
-    user_in?: InputMaybe<Array<Scalars['String']>>;
-    user_lt?: InputMaybe<Scalars['String']>;
-    user_lte?: InputMaybe<Scalars['String']>;
-    user_not?: InputMaybe<Scalars['String']>;
-    user_not_contains?: InputMaybe<Scalars['String']>;
-    user_not_contains_nocase?: InputMaybe<Scalars['String']>;
-    user_not_ends_with?: InputMaybe<Scalars['String']>;
-    user_not_ends_with_nocase?: InputMaybe<Scalars['String']>;
-    user_not_in?: InputMaybe<Array<Scalars['String']>>;
-    user_not_starts_with?: InputMaybe<Scalars['String']>;
-    user_not_starts_with_nocase?: InputMaybe<Scalars['String']>;
-    user_starts_with?: InputMaybe<Scalars['String']>;
-    user_starts_with_nocase?: InputMaybe<Scalars['String']>;
+    user?: InputMaybe<Scalars['Bytes']>;
+    user_contains?: InputMaybe<Scalars['Bytes']>;
+    user_gt?: InputMaybe<Scalars['Bytes']>;
+    user_gte?: InputMaybe<Scalars['Bytes']>;
+    user_in?: InputMaybe<Array<Scalars['Bytes']>>;
+    user_lt?: InputMaybe<Scalars['Bytes']>;
+    user_lte?: InputMaybe<Scalars['Bytes']>;
+    user_not?: InputMaybe<Scalars['Bytes']>;
+    user_not_contains?: InputMaybe<Scalars['Bytes']>;
+    user_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
 };
 
 export enum AddRemove_OrderBy {
@@ -191,7 +180,6 @@ export enum AddRemove_OrderBy {
     TransactionHash = 'transactionHash',
     Type = 'type',
     User = 'user',
-    UserId = 'user__id',
 }
 
 export enum Aggregation_Interval {
@@ -234,7 +222,7 @@ export type BufferShare = {
     /** Unique identifier for the BufferShare */
     id: Scalars['Bytes'];
     /** The user who owns this share */
-    user: User;
+    user: Scalars['Bytes'];
 };
 
 export type BufferShare_Filter = {
@@ -281,27 +269,16 @@ export type BufferShare_Filter = {
     id_not_contains?: InputMaybe<Scalars['Bytes']>;
     id_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
     or?: InputMaybe<Array<InputMaybe<BufferShare_Filter>>>;
-    user?: InputMaybe<Scalars['String']>;
-    user_?: InputMaybe<User_Filter>;
-    user_contains?: InputMaybe<Scalars['String']>;
-    user_contains_nocase?: InputMaybe<Scalars['String']>;
-    user_ends_with?: InputMaybe<Scalars['String']>;
-    user_ends_with_nocase?: InputMaybe<Scalars['String']>;
-    user_gt?: InputMaybe<Scalars['String']>;
-    user_gte?: InputMaybe<Scalars['String']>;
-    user_in?: InputMaybe<Array<Scalars['String']>>;
-    user_lt?: InputMaybe<Scalars['String']>;
-    user_lte?: InputMaybe<Scalars['String']>;
-    user_not?: InputMaybe<Scalars['String']>;
-    user_not_contains?: InputMaybe<Scalars['String']>;
-    user_not_contains_nocase?: InputMaybe<Scalars['String']>;
-    user_not_ends_with?: InputMaybe<Scalars['String']>;
-    user_not_ends_with_nocase?: InputMaybe<Scalars['String']>;
-    user_not_in?: InputMaybe<Array<Scalars['String']>>;
-    user_not_starts_with?: InputMaybe<Scalars['String']>;
-    user_not_starts_with_nocase?: InputMaybe<Scalars['String']>;
-    user_starts_with?: InputMaybe<Scalars['String']>;
-    user_starts_with_nocase?: InputMaybe<Scalars['String']>;
+    user?: InputMaybe<Scalars['Bytes']>;
+    user_contains?: InputMaybe<Scalars['Bytes']>;
+    user_gt?: InputMaybe<Scalars['Bytes']>;
+    user_gte?: InputMaybe<Scalars['Bytes']>;
+    user_in?: InputMaybe<Array<Scalars['Bytes']>>;
+    user_lt?: InputMaybe<Scalars['Bytes']>;
+    user_lte?: InputMaybe<Scalars['Bytes']>;
+    user_not?: InputMaybe<Scalars['Bytes']>;
+    user_not_contains?: InputMaybe<Scalars['Bytes']>;
+    user_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
 };
 
 export enum BufferShare_OrderBy {
@@ -313,7 +290,6 @@ export enum BufferShare_OrderBy {
     BufferWrappedBalance = 'buffer__wrappedBalance',
     Id = 'id',
     User = 'user',
-    UserId = 'user__id',
 }
 
 export type Buffer_Filter = {
@@ -797,8 +773,6 @@ export type Pool = {
     protocolYieldFee: Scalars['BigDecimal'];
     /** Rate providers associated with this Pool */
     rateProviders: Array<RateProvider>;
-    /** Snapshots of this Pool's state over time */
-    snapshots: Array<PoolSnapshot>;
     /** Swap fee percentage for this Pool */
     swapFee: Scalars['BigDecimal'];
     /** Account empowered to set static swap fees for a pool */
@@ -825,14 +799,6 @@ export type PoolRateProvidersArgs = {
     where?: InputMaybe<RateProvider_Filter>;
 };
 
-export type PoolSnapshotsArgs = {
-    first?: InputMaybe<Scalars['Int']>;
-    orderBy?: InputMaybe<PoolSnapshot_OrderBy>;
-    orderDirection?: InputMaybe<OrderDirection>;
-    skip?: InputMaybe<Scalars['Int']>;
-    where?: InputMaybe<PoolSnapshot_Filter>;
-};
-
 export type PoolTokensArgs = {
     first?: InputMaybe<Scalars['Int']>;
     orderBy?: InputMaybe<PoolToken_OrderBy>;
@@ -850,7 +816,7 @@ export type PoolShare = {
     /** The Pool this share is for */
     pool: Pool;
     /** The user who owns this share */
-    user: User;
+    user: Scalars['Bytes'];
 };
 
 export type PoolShare_Filter = {
@@ -895,27 +861,16 @@ export type PoolShare_Filter = {
     pool_not_starts_with_nocase?: InputMaybe<Scalars['String']>;
     pool_starts_with?: InputMaybe<Scalars['String']>;
     pool_starts_with_nocase?: InputMaybe<Scalars['String']>;
-    user?: InputMaybe<Scalars['String']>;
-    user_?: InputMaybe<User_Filter>;
-    user_contains?: InputMaybe<Scalars['String']>;
-    user_contains_nocase?: InputMaybe<Scalars['String']>;
-    user_ends_with?: InputMaybe<Scalars['String']>;
-    user_ends_with_nocase?: InputMaybe<Scalars['String']>;
-    user_gt?: InputMaybe<Scalars['String']>;
-    user_gte?: InputMaybe<Scalars['String']>;
-    user_in?: InputMaybe<Array<Scalars['String']>>;
-    user_lt?: InputMaybe<Scalars['String']>;
-    user_lte?: InputMaybe<Scalars['String']>;
-    user_not?: InputMaybe<Scalars['String']>;
-    user_not_contains?: InputMaybe<Scalars['String']>;
-    user_not_contains_nocase?: InputMaybe<Scalars['String']>;
-    user_not_ends_with?: InputMaybe<Scalars['String']>;
-    user_not_ends_with_nocase?: InputMaybe<Scalars['String']>;
-    user_not_in?: InputMaybe<Array<Scalars['String']>>;
-    user_not_starts_with?: InputMaybe<Scalars['String']>;
-    user_not_starts_with_nocase?: InputMaybe<Scalars['String']>;
-    user_starts_with?: InputMaybe<Scalars['String']>;
-    user_starts_with_nocase?: InputMaybe<Scalars['String']>;
+    user?: InputMaybe<Scalars['Bytes']>;
+    user_contains?: InputMaybe<Scalars['Bytes']>;
+    user_gt?: InputMaybe<Scalars['Bytes']>;
+    user_gte?: InputMaybe<Scalars['Bytes']>;
+    user_in?: InputMaybe<Array<Scalars['Bytes']>>;
+    user_lt?: InputMaybe<Scalars['Bytes']>;
+    user_lte?: InputMaybe<Scalars['Bytes']>;
+    user_not?: InputMaybe<Scalars['Bytes']>;
+    user_not_contains?: InputMaybe<Scalars['Bytes']>;
+    user_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
 };
 
 export enum PoolShare_OrderBy {
@@ -946,186 +901,6 @@ export enum PoolShare_OrderBy {
     PoolTotalShares = 'pool__totalShares',
     PoolTransactionHash = 'pool__transactionHash',
     User = 'user',
-    UserId = 'user__id',
-}
-
-export type PoolSnapshot = {
-    __typename?: 'PoolSnapshot';
-    /** Balances of each token in the Pool at the time of the snapshot */
-    balances: Array<Scalars['BigDecimal']>;
-    /** Number of unique holders of the Pool's tokens at the time of the snapshot */
-    holdersCount: Scalars['BigInt'];
-    /** Unique identifier for the PoolSnapshot */
-    id: Scalars['ID'];
-    /** The Pool this snapshot is for */
-    pool: Pool;
-    /** Number of swaps performed in the Pool at the time of the snapshot */
-    swapsCount: Scalars['BigInt'];
-    /** Timestamp when this snapshot was taken */
-    timestamp: Scalars['Int'];
-    /** Total dynamic swap fees collected for each token at the time of the snapshot */
-    totalDynamicSwapFees: Array<Scalars['BigDecimal']>;
-    /** Total protocol swap fees collected for each token at the time of the snapshot */
-    totalProtocolSwapFees: Array<Scalars['BigDecimal']>;
-    /** Total protocol yield fees collected for each token at the time of the snapshot */
-    totalProtocolYieldFees: Array<Scalars['BigDecimal']>;
-    /** Total shares of the Pool at the time of the snapshot */
-    totalShares: Scalars['BigDecimal'];
-    /** Total static swap fees collected for each token at the time of the snapshot */
-    totalStaticSwapFees: Array<Scalars['BigDecimal']>;
-    /** Total swap fees collected for each token at the time of the snapshot */
-    totalSwapFees: Array<Scalars['BigDecimal']>;
-    /** Total swap volumes for each token at the time of the snapshot */
-    totalSwapVolumes: Array<Scalars['BigDecimal']>;
-};
-
-export type PoolSnapshot_Filter = {
-    /** Filter for the block changed event. */
-    _change_block?: InputMaybe<BlockChangedFilter>;
-    and?: InputMaybe<Array<InputMaybe<PoolSnapshot_Filter>>>;
-    balances?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    balances_contains?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    balances_contains_nocase?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    balances_not?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    balances_not_contains?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    balances_not_contains_nocase?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    holdersCount?: InputMaybe<Scalars['BigInt']>;
-    holdersCount_gt?: InputMaybe<Scalars['BigInt']>;
-    holdersCount_gte?: InputMaybe<Scalars['BigInt']>;
-    holdersCount_in?: InputMaybe<Array<Scalars['BigInt']>>;
-    holdersCount_lt?: InputMaybe<Scalars['BigInt']>;
-    holdersCount_lte?: InputMaybe<Scalars['BigInt']>;
-    holdersCount_not?: InputMaybe<Scalars['BigInt']>;
-    holdersCount_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
-    id?: InputMaybe<Scalars['ID']>;
-    id_gt?: InputMaybe<Scalars['ID']>;
-    id_gte?: InputMaybe<Scalars['ID']>;
-    id_in?: InputMaybe<Array<Scalars['ID']>>;
-    id_lt?: InputMaybe<Scalars['ID']>;
-    id_lte?: InputMaybe<Scalars['ID']>;
-    id_not?: InputMaybe<Scalars['ID']>;
-    id_not_in?: InputMaybe<Array<Scalars['ID']>>;
-    or?: InputMaybe<Array<InputMaybe<PoolSnapshot_Filter>>>;
-    pool?: InputMaybe<Scalars['String']>;
-    pool_?: InputMaybe<Pool_Filter>;
-    pool_contains?: InputMaybe<Scalars['String']>;
-    pool_contains_nocase?: InputMaybe<Scalars['String']>;
-    pool_ends_with?: InputMaybe<Scalars['String']>;
-    pool_ends_with_nocase?: InputMaybe<Scalars['String']>;
-    pool_gt?: InputMaybe<Scalars['String']>;
-    pool_gte?: InputMaybe<Scalars['String']>;
-    pool_in?: InputMaybe<Array<Scalars['String']>>;
-    pool_lt?: InputMaybe<Scalars['String']>;
-    pool_lte?: InputMaybe<Scalars['String']>;
-    pool_not?: InputMaybe<Scalars['String']>;
-    pool_not_contains?: InputMaybe<Scalars['String']>;
-    pool_not_contains_nocase?: InputMaybe<Scalars['String']>;
-    pool_not_ends_with?: InputMaybe<Scalars['String']>;
-    pool_not_ends_with_nocase?: InputMaybe<Scalars['String']>;
-    pool_not_in?: InputMaybe<Array<Scalars['String']>>;
-    pool_not_starts_with?: InputMaybe<Scalars['String']>;
-    pool_not_starts_with_nocase?: InputMaybe<Scalars['String']>;
-    pool_starts_with?: InputMaybe<Scalars['String']>;
-    pool_starts_with_nocase?: InputMaybe<Scalars['String']>;
-    swapsCount?: InputMaybe<Scalars['BigInt']>;
-    swapsCount_gt?: InputMaybe<Scalars['BigInt']>;
-    swapsCount_gte?: InputMaybe<Scalars['BigInt']>;
-    swapsCount_in?: InputMaybe<Array<Scalars['BigInt']>>;
-    swapsCount_lt?: InputMaybe<Scalars['BigInt']>;
-    swapsCount_lte?: InputMaybe<Scalars['BigInt']>;
-    swapsCount_not?: InputMaybe<Scalars['BigInt']>;
-    swapsCount_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
-    timestamp?: InputMaybe<Scalars['Int']>;
-    timestamp_gt?: InputMaybe<Scalars['Int']>;
-    timestamp_gte?: InputMaybe<Scalars['Int']>;
-    timestamp_in?: InputMaybe<Array<Scalars['Int']>>;
-    timestamp_lt?: InputMaybe<Scalars['Int']>;
-    timestamp_lte?: InputMaybe<Scalars['Int']>;
-    timestamp_not?: InputMaybe<Scalars['Int']>;
-    timestamp_not_in?: InputMaybe<Array<Scalars['Int']>>;
-    totalDynamicSwapFees?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    totalDynamicSwapFees_contains?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    totalDynamicSwapFees_contains_nocase?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    totalDynamicSwapFees_not?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    totalDynamicSwapFees_not_contains?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    totalDynamicSwapFees_not_contains_nocase?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    totalProtocolSwapFees?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    totalProtocolSwapFees_contains?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    totalProtocolSwapFees_contains_nocase?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    totalProtocolSwapFees_not?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    totalProtocolSwapFees_not_contains?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    totalProtocolSwapFees_not_contains_nocase?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    totalProtocolYieldFees?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    totalProtocolYieldFees_contains?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    totalProtocolYieldFees_contains_nocase?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    totalProtocolYieldFees_not?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    totalProtocolYieldFees_not_contains?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    totalProtocolYieldFees_not_contains_nocase?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    totalShares?: InputMaybe<Scalars['BigDecimal']>;
-    totalShares_gt?: InputMaybe<Scalars['BigDecimal']>;
-    totalShares_gte?: InputMaybe<Scalars['BigDecimal']>;
-    totalShares_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    totalShares_lt?: InputMaybe<Scalars['BigDecimal']>;
-    totalShares_lte?: InputMaybe<Scalars['BigDecimal']>;
-    totalShares_not?: InputMaybe<Scalars['BigDecimal']>;
-    totalShares_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    totalStaticSwapFees?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    totalStaticSwapFees_contains?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    totalStaticSwapFees_contains_nocase?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    totalStaticSwapFees_not?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    totalStaticSwapFees_not_contains?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    totalStaticSwapFees_not_contains_nocase?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    totalSwapFees?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    totalSwapFees_contains?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    totalSwapFees_contains_nocase?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    totalSwapFees_not?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    totalSwapFees_not_contains?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    totalSwapFees_not_contains_nocase?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    totalSwapVolumes?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    totalSwapVolumes_contains?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    totalSwapVolumes_contains_nocase?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    totalSwapVolumes_not?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    totalSwapVolumes_not_contains?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    totalSwapVolumes_not_contains_nocase?: InputMaybe<Array<Scalars['BigDecimal']>>;
-};
-
-export enum PoolSnapshot_OrderBy {
-    Balances = 'balances',
-    HoldersCount = 'holdersCount',
-    Id = 'id',
-    Pool = 'pool',
-    PoolAddress = 'pool__address',
-    PoolBlockNumber = 'pool__blockNumber',
-    PoolBlockTimestamp = 'pool__blockTimestamp',
-    PoolFactory = 'pool__factory',
-    PoolHoldersCount = 'pool__holdersCount',
-    PoolId = 'pool__id',
-    PoolIsInRecoveryMode = 'pool__isInRecoveryMode',
-    PoolIsInitialized = 'pool__isInitialized',
-    PoolIsPaused = 'pool__isPaused',
-    PoolName = 'pool__name',
-    PoolPauseManager = 'pool__pauseManager',
-    PoolPauseWindowEndTime = 'pool__pauseWindowEndTime',
-    PoolPoolCreator = 'pool__poolCreator',
-    PoolPoolCreatorSwapFee = 'pool__poolCreatorSwapFee',
-    PoolPoolCreatorYieldFee = 'pool__poolCreatorYieldFee',
-    PoolProtocolSwapFee = 'pool__protocolSwapFee',
-    PoolProtocolYieldFee = 'pool__protocolYieldFee',
-    PoolSwapFee = 'pool__swapFee',
-    PoolSwapFeeManager = 'pool__swapFeeManager',
-    PoolSwapsCount = 'pool__swapsCount',
-    PoolSymbol = 'pool__symbol',
-    PoolTotalShares = 'pool__totalShares',
-    PoolTransactionHash = 'pool__transactionHash',
-    SwapsCount = 'swapsCount',
-    Timestamp = 'timestamp',
-    TotalDynamicSwapFees = 'totalDynamicSwapFees',
-    TotalProtocolSwapFees = 'totalProtocolSwapFees',
-    TotalProtocolYieldFees = 'totalProtocolYieldFees',
-    TotalShares = 'totalShares',
-    TotalStaticSwapFees = 'totalStaticSwapFees',
-    TotalSwapFees = 'totalSwapFees',
-    TotalSwapVolumes = 'totalSwapVolumes',
 }
 
 export type PoolToken = {
@@ -1734,7 +1509,6 @@ export type Pool_Filter = {
     protocolYieldFee_not?: InputMaybe<Scalars['BigDecimal']>;
     protocolYieldFee_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
     rateProviders_?: InputMaybe<RateProvider_Filter>;
-    snapshots_?: InputMaybe<PoolSnapshot_Filter>;
     swapFee?: InputMaybe<Scalars['BigDecimal']>;
     swapFeeManager?: InputMaybe<Scalars['Bytes']>;
     swapFeeManager_contains?: InputMaybe<Scalars['Bytes']>;
@@ -1863,7 +1637,6 @@ export enum Pool_OrderBy {
     ProtocolSwapFee = 'protocolSwapFee',
     ProtocolYieldFee = 'protocolYieldFee',
     RateProviders = 'rateProviders',
-    Snapshots = 'snapshots',
     SwapFee = 'swapFee',
     SwapFeeManager = 'swapFeeManager',
     SwapsCount = 'swapsCount',
@@ -1899,8 +1672,6 @@ export type Query = {
     pool?: Maybe<Pool>;
     poolShare?: Maybe<PoolShare>;
     poolShares: Array<PoolShare>;
-    poolSnapshot?: Maybe<PoolSnapshot>;
-    poolSnapshots: Array<PoolSnapshot>;
     poolToken?: Maybe<PoolToken>;
     poolTokens: Array<PoolToken>;
     pools: Array<Pool>;
@@ -1910,8 +1681,6 @@ export type Query = {
     swaps: Array<Swap>;
     token?: Maybe<Token>;
     tokens: Array<Token>;
-    user?: Maybe<User>;
-    users: Array<User>;
     vault?: Maybe<Vault>;
     vaults: Array<Vault>;
 };
@@ -2038,22 +1807,6 @@ export type QueryPoolSharesArgs = {
     where?: InputMaybe<PoolShare_Filter>;
 };
 
-export type QueryPoolSnapshotArgs = {
-    block?: InputMaybe<Block_Height>;
-    id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
-};
-
-export type QueryPoolSnapshotsArgs = {
-    block?: InputMaybe<Block_Height>;
-    first?: InputMaybe<Scalars['Int']>;
-    orderBy?: InputMaybe<PoolSnapshot_OrderBy>;
-    orderDirection?: InputMaybe<OrderDirection>;
-    skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
-    where?: InputMaybe<PoolSnapshot_Filter>;
-};
-
 export type QueryPoolTokenArgs = {
     block?: InputMaybe<Block_Height>;
     id: Scalars['ID'];
@@ -2126,22 +1879,6 @@ export type QueryTokensArgs = {
     skip?: InputMaybe<Scalars['Int']>;
     subgraphError?: _SubgraphErrorPolicy_;
     where?: InputMaybe<Token_Filter>;
-};
-
-export type QueryUserArgs = {
-    block?: InputMaybe<Block_Height>;
-    id: Scalars['ID'];
-    subgraphError?: _SubgraphErrorPolicy_;
-};
-
-export type QueryUsersArgs = {
-    block?: InputMaybe<Block_Height>;
-    first?: InputMaybe<Scalars['Int']>;
-    orderBy?: InputMaybe<User_OrderBy>;
-    orderDirection?: InputMaybe<OrderDirection>;
-    skip?: InputMaybe<Scalars['Int']>;
-    subgraphError?: _SubgraphErrorPolicy_;
-    where?: InputMaybe<User_Filter>;
 };
 
 export type QueryVaultArgs = {
@@ -2331,7 +2068,7 @@ export type Swap = {
     /** Hash of the transaction containing the swap */
     transactionHash: Scalars['Bytes'];
     /** User who performed the swap */
-    user: User;
+    user: Scalars['Bytes'];
 };
 
 export type Swap_Filter = {
@@ -2515,27 +2252,16 @@ export type Swap_Filter = {
     transactionHash_not?: InputMaybe<Scalars['Bytes']>;
     transactionHash_not_contains?: InputMaybe<Scalars['Bytes']>;
     transactionHash_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
-    user?: InputMaybe<Scalars['String']>;
-    user_?: InputMaybe<User_Filter>;
-    user_contains?: InputMaybe<Scalars['String']>;
-    user_contains_nocase?: InputMaybe<Scalars['String']>;
-    user_ends_with?: InputMaybe<Scalars['String']>;
-    user_ends_with_nocase?: InputMaybe<Scalars['String']>;
-    user_gt?: InputMaybe<Scalars['String']>;
-    user_gte?: InputMaybe<Scalars['String']>;
-    user_in?: InputMaybe<Array<Scalars['String']>>;
-    user_lt?: InputMaybe<Scalars['String']>;
-    user_lte?: InputMaybe<Scalars['String']>;
-    user_not?: InputMaybe<Scalars['String']>;
-    user_not_contains?: InputMaybe<Scalars['String']>;
-    user_not_contains_nocase?: InputMaybe<Scalars['String']>;
-    user_not_ends_with?: InputMaybe<Scalars['String']>;
-    user_not_ends_with_nocase?: InputMaybe<Scalars['String']>;
-    user_not_in?: InputMaybe<Array<Scalars['String']>>;
-    user_not_starts_with?: InputMaybe<Scalars['String']>;
-    user_not_starts_with_nocase?: InputMaybe<Scalars['String']>;
-    user_starts_with?: InputMaybe<Scalars['String']>;
-    user_starts_with_nocase?: InputMaybe<Scalars['String']>;
+    user?: InputMaybe<Scalars['Bytes']>;
+    user_contains?: InputMaybe<Scalars['Bytes']>;
+    user_gt?: InputMaybe<Scalars['Bytes']>;
+    user_gte?: InputMaybe<Scalars['Bytes']>;
+    user_in?: InputMaybe<Array<Scalars['Bytes']>>;
+    user_lt?: InputMaybe<Scalars['Bytes']>;
+    user_lte?: InputMaybe<Scalars['Bytes']>;
+    user_not?: InputMaybe<Scalars['Bytes']>;
+    user_not_contains?: InputMaybe<Scalars['Bytes']>;
+    user_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
 };
 
 export enum Swap_OrderBy {
@@ -2558,7 +2284,6 @@ export enum Swap_OrderBy {
     TokenOutSymbol = 'tokenOutSymbol',
     TransactionHash = 'transactionHash',
     User = 'user',
-    UserId = 'user__id',
 }
 
 export type Token = {
@@ -2656,69 +2381,6 @@ export enum Token_OrderBy {
     Id = 'id',
     Name = 'name',
     Symbol = 'symbol',
-}
-
-export type User = {
-    __typename?: 'User';
-    /** Add/Remove liquidity events performed by this user */
-    addRemoves?: Maybe<Array<AddRemove>>;
-    /** Unique identifier for the User (typically their address) */
-    id: Scalars['Bytes'];
-    /** Pool shares owned by this user */
-    shares?: Maybe<Array<PoolShare>>;
-    /** Swaps performed by this user */
-    swaps?: Maybe<Array<Swap>>;
-};
-
-export type UserAddRemovesArgs = {
-    first?: InputMaybe<Scalars['Int']>;
-    orderBy?: InputMaybe<AddRemove_OrderBy>;
-    orderDirection?: InputMaybe<OrderDirection>;
-    skip?: InputMaybe<Scalars['Int']>;
-    where?: InputMaybe<AddRemove_Filter>;
-};
-
-export type UserSharesArgs = {
-    first?: InputMaybe<Scalars['Int']>;
-    orderBy?: InputMaybe<PoolShare_OrderBy>;
-    orderDirection?: InputMaybe<OrderDirection>;
-    skip?: InputMaybe<Scalars['Int']>;
-    where?: InputMaybe<PoolShare_Filter>;
-};
-
-export type UserSwapsArgs = {
-    first?: InputMaybe<Scalars['Int']>;
-    orderBy?: InputMaybe<Swap_OrderBy>;
-    orderDirection?: InputMaybe<OrderDirection>;
-    skip?: InputMaybe<Scalars['Int']>;
-    where?: InputMaybe<Swap_Filter>;
-};
-
-export type User_Filter = {
-    /** Filter for the block changed event. */
-    _change_block?: InputMaybe<BlockChangedFilter>;
-    addRemoves_?: InputMaybe<AddRemove_Filter>;
-    and?: InputMaybe<Array<InputMaybe<User_Filter>>>;
-    id?: InputMaybe<Scalars['Bytes']>;
-    id_contains?: InputMaybe<Scalars['Bytes']>;
-    id_gt?: InputMaybe<Scalars['Bytes']>;
-    id_gte?: InputMaybe<Scalars['Bytes']>;
-    id_in?: InputMaybe<Array<Scalars['Bytes']>>;
-    id_lt?: InputMaybe<Scalars['Bytes']>;
-    id_lte?: InputMaybe<Scalars['Bytes']>;
-    id_not?: InputMaybe<Scalars['Bytes']>;
-    id_not_contains?: InputMaybe<Scalars['Bytes']>;
-    id_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
-    or?: InputMaybe<Array<InputMaybe<User_Filter>>>;
-    shares_?: InputMaybe<PoolShare_Filter>;
-    swaps_?: InputMaybe<Swap_Filter>;
-};
-
-export enum User_OrderBy {
-    AddRemoves = 'addRemoves',
-    Id = 'id',
-    Shares = 'shares',
-    Swaps = 'swaps',
 }
 
 export type Vault = {
@@ -2835,6 +2497,7 @@ export type _Meta_ = {
      * will be null if the _meta field has a block constraint that asks for
      * a block number. It will be filled if the _meta field has no block constraint
      * and therefore asks for the latest  block
+     *
      */
     block: _Block_;
     /** The deployment ID */
@@ -2856,6 +2519,7 @@ export type AddRemoveFragment = {
     type: InvestType;
     sender: string;
     amounts: Array<string>;
+    user: string;
     blockNumber: string;
     logIndex: string;
     blockTimestamp: string;
@@ -2865,7 +2529,6 @@ export type AddRemoveFragment = {
         id: string;
         tokens: Array<{ __typename?: 'PoolToken'; index: number; address: string }>;
     };
-    user: { __typename?: 'User'; id: string };
 };
 
 export type AddRemoveQueryVariables = Exact<{
@@ -2885,6 +2548,7 @@ export type AddRemoveQuery = {
         type: InvestType;
         sender: string;
         amounts: Array<string>;
+        user: string;
         blockNumber: string;
         logIndex: string;
         blockTimestamp: string;
@@ -2894,7 +2558,6 @@ export type AddRemoveQuery = {
             id: string;
             tokens: Array<{ __typename?: 'PoolToken'; index: number; address: string }>;
         };
-        user: { __typename?: 'User'; id: string };
     }>;
 };
 
@@ -3132,11 +2795,11 @@ export type SwapFragment = {
     swapFeeAmount: string;
     swapFeeToken: string;
     swapFeeDeltaAmount: string;
+    user: string;
     blockNumber: string;
     logIndex: string;
     blockTimestamp: string;
     transactionHash: string;
-    user: { __typename?: 'User'; id: string };
 };
 
 export type SwapsQueryVariables = Exact<{
@@ -3163,71 +2826,11 @@ export type SwapsQuery = {
         swapFeeAmount: string;
         swapFeeToken: string;
         swapFeeDeltaAmount: string;
+        user: string;
         blockNumber: string;
         logIndex: string;
         blockTimestamp: string;
         transactionHash: string;
-        user: { __typename?: 'User'; id: string };
-    }>;
-};
-
-export type UserFragment = {
-    __typename?: 'User';
-    id: string;
-    swaps?: Array<{
-        __typename?: 'Swap';
-        id: string;
-        pool: string;
-        tokenIn: string;
-        tokenOut: string;
-        tokenAmountIn: string;
-        tokenAmountOut: string;
-        swapFeeAmount: string;
-        blockNumber: string;
-        blockTimestamp: string;
-        transactionHash: string;
-    }> | null;
-    shares?: Array<{
-        __typename?: 'PoolShare';
-        id: string;
-        balance: string;
-        pool: { __typename?: 'Pool'; id: string };
-    }> | null;
-};
-
-export type UsersQueryVariables = Exact<{
-    skip?: InputMaybe<Scalars['Int']>;
-    first?: InputMaybe<Scalars['Int']>;
-    orderBy?: InputMaybe<User_OrderBy>;
-    orderDirection?: InputMaybe<OrderDirection>;
-    where?: InputMaybe<User_Filter>;
-    block?: InputMaybe<Block_Height>;
-}>;
-
-export type UsersQuery = {
-    __typename?: 'Query';
-    users: Array<{
-        __typename?: 'User';
-        id: string;
-        swaps?: Array<{
-            __typename?: 'Swap';
-            id: string;
-            pool: string;
-            tokenIn: string;
-            tokenOut: string;
-            tokenAmountIn: string;
-            tokenAmountOut: string;
-            swapFeeAmount: string;
-            blockNumber: string;
-            blockTimestamp: string;
-            transactionHash: string;
-        }> | null;
-        shares?: Array<{
-            __typename?: 'PoolShare';
-            id: string;
-            balance: string;
-            pool: { __typename?: 'Pool'; id: string };
-        }> | null;
     }>;
 };
 
@@ -3244,9 +2847,7 @@ export const AddRemoveFragmentDoc = gql`
                 address
             }
         }
-        user {
-            id
-        }
+        user
         blockNumber
         logIndex
         blockTimestamp
@@ -3354,37 +2955,11 @@ export const SwapFragmentDoc = gql`
         swapFeeAmount
         swapFeeToken
         swapFeeDeltaAmount
-        user {
-            id
-        }
+        user
         blockNumber
         logIndex
         blockTimestamp
         transactionHash
-    }
-`;
-export const UserFragmentDoc = gql`
-    fragment User on User {
-        id
-        swaps(first: 1000) {
-            id
-            pool
-            tokenIn
-            tokenOut
-            tokenAmountIn
-            tokenAmountOut
-            swapFeeAmount
-            blockNumber
-            blockTimestamp
-            transactionHash
-        }
-        shares(first: 1000) {
-            id
-            pool {
-                id
-            }
-            balance
-        }
     }
 `;
 export const AddRemoveDocument = gql`
@@ -3515,28 +3090,6 @@ export const SwapsDocument = gql`
     }
     ${SwapFragmentDoc}
 `;
-export const UsersDocument = gql`
-    query Users(
-        $skip: Int
-        $first: Int
-        $orderBy: User_orderBy
-        $orderDirection: OrderDirection
-        $where: User_filter
-        $block: Block_height
-    ) {
-        users(
-            skip: $skip
-            first: $first
-            orderBy: $orderBy
-            orderDirection: $orderDirection
-            where: $where
-            block: $block
-        ) {
-            ...User
-        }
-    }
-    ${UserFragmentDoc}
-`;
 
 export type SdkFunctionWrapper = <T>(
     action: (requestHeaders?: Record<string, string>) => Promise<T>,
@@ -3637,17 +3190,6 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
                         ...wrappedRequestHeaders,
                     }),
                 'Swaps',
-                'query',
-            );
-        },
-        Users(variables?: UsersQueryVariables, requestHeaders?: Dom.RequestInit['headers']): Promise<UsersQuery> {
-            return withWrapper(
-                (wrappedRequestHeaders) =>
-                    client.request<UsersQuery>(UsersDocument, variables, {
-                        ...requestHeaders,
-                        ...wrappedRequestHeaders,
-                    }),
-                'Users',
                 'query',
             );
         },

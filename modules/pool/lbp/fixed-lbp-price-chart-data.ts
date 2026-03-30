@@ -3,19 +3,15 @@ import { prisma } from '../../../prisma/prisma-client';
 import { eventsRepository, TokenFlowsRepository } from '../../repositories/events';
 import { SwapEvent, JoinExitEvent } from '../../../prisma/prisma-types';
 
-interface PriceChartLPB {
+interface PriceChartFixedLPB {
     id: string;
     chain: Chain;
     createTime: number;
     startTime: number;
     endTime: number;
     projectToken: string;
-    projectTokenStartWeight: number;
-    projectTokenEndWeight: number;
+    projectTokenRate: string;
     reserveToken: string;
-    reserveTokenStartWeight: number;
-    reserveTokenEndWeight: number;
-    initialReserveTokenVirtualBalance?: string;
 }
 
 interface TokenFlowData {
@@ -26,11 +22,10 @@ interface TokenFlowData {
     cumulativeVolume: number;
     fees: number;
     buyVolume: number;
-    sellVolume: number;
 }
 
-export const priceChartData = async (
-    pool: PriceChartLPB,
+export const priceChartDataFixedLBP = async (
+    pool: PriceChartFixedLPB,
     dataPoints = 30,
     repo: TokenFlowsRepository = eventsRepository,
 ) => {
@@ -43,13 +38,7 @@ export const priceChartData = async (
     const allEvents = await repo.getAllEventsForTimeRange(chain, id, undefined, pool.endTime);
 
     // Aggregate events by timeline points
-    const flows = aggregateEventsByTimeline(
-        allEvents,
-        timeline,
-        projectToken,
-        reserveToken,
-        pool.initialReserveTokenVirtualBalance,
-    );
+    const flows = aggregateEventsByTimeline(allEvents, timeline, projectToken, reserveToken);
 
     if (flows.length === 0) return [];
 
@@ -81,15 +70,7 @@ export const priceChartData = async (
         // Find closest price by timestamp
         const reservePrice = findReservePriceForTimestamp(sortedPrices, flow.timestamp);
 
-        // Calculate current weights and price
-        const weights = calculateWeightsAtTime(pool, flow.timestamp);
-
-        const projectTokenPrice = calculatePrice(
-            balanceProject,
-            balanceReserve,
-            weights.projectWeight,
-            weights.reserveWeight,
-        );
+        const projectTokenPrice = reservePrice * parseFloat(pool.projectTokenRate);
 
         // Calculate TVL (Total Value Locked) in USD
         const projectTokenValueUSD = balanceProject * projectTokenPrice;
@@ -146,7 +127,6 @@ const aggregateEventsByTimeline = (
     timeline: number[],
     projectToken: string,
     reserveToken: string,
-    initialReserveTokenVirtualBalance?: string,
 ): TokenFlowData[] => {
     // Reverse events in-place to get ascending order for cumulative calculations
     // (events come from DB in descending order due to index optimization)
@@ -165,7 +145,7 @@ const aggregateEventsByTimeline = (
 
         // Calculate cumulative token flows
         let projectTokenFlow = 0;
-        let reserveTokenFlow = initialReserveTokenVirtualBalance ? parseFloat(initialReserveTokenVirtualBalance) : 0;
+        let reserveTokenFlow = 0;
 
         eventsUpToTimestamp.forEach((event) => {
             if (event.type === 'SWAP') {
@@ -250,55 +230,6 @@ const aggregateEventsByTimeline = (
             cumulativeFees,
         };
     });
-};
-
-/**
- * Calculate weights at a specific timestamp using linear interpolation
- */
-const calculateWeightsAtTime = (config: PriceChartLPB, timestamp: number) => {
-    if (timestamp <= config.startTime) {
-        return {
-            projectWeight: config.projectTokenStartWeight,
-            reserveWeight: config.reserveTokenStartWeight,
-        };
-    }
-
-    if (timestamp >= config.endTime) {
-        return {
-            projectWeight: config.projectTokenEndWeight,
-            reserveWeight: config.reserveTokenEndWeight,
-        };
-    }
-
-    // Linear interpolation
-    const duration = config.endTime - config.startTime;
-    const progress = (timestamp - config.startTime) / duration;
-
-    const projectWeight =
-        config.projectTokenStartWeight + (config.projectTokenEndWeight - config.projectTokenStartWeight) * progress;
-
-    const reserveWeight =
-        config.reserveTokenStartWeight + (config.reserveTokenEndWeight - config.reserveTokenStartWeight) * progress;
-
-    return { projectWeight, reserveWeight };
-};
-
-/**
- * Calculate price from balances and weights using weighted pool formula
- */
-const calculatePrice = (
-    projectBalance: number,
-    reserveBalance: number,
-    projectWeight: number,
-    reserveWeight: number,
-): number => {
-    if (projectBalance <= 0 || reserveBalance <= 0) return 0;
-
-    // Weighted pool formula: price = (reserveBalance / reserveWeight) / (projectBalance / projectWeight)
-    const reserveRatio = reserveBalance / reserveWeight;
-    const projectRatio = projectBalance / projectWeight;
-
-    return reserveRatio / projectRatio;
 };
 
 /**

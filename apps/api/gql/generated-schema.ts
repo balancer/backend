@@ -1026,6 +1026,7 @@ export interface GqlPoolLiquidityBootstrappingV3 extends GqlPoolBase {
     reserveTokenEndWeight: Scalars['Float'];
     reserveTokenIndex: Scalars['Int'];
     reserveTokenStartWeight: Scalars['Float'];
+    reserveTokenVirtualBalance: Scalars['Float'];
     /** All tokens of the pool. If it is a nested pool, the nested pool is expanded with its own tokens again. */
     staking?: Maybe<GqlPoolStaking>;
     startTime: Scalars['Int'];
@@ -2251,8 +2252,6 @@ export interface LbpPriceChartData {
     cumulativeFees: Scalars['Float'];
     cumulativeVolume: Scalars['Float'];
     fees: Scalars['Float'];
-    /** @deprecated Field no longer supported */
-    intervalTimestamp: Scalars['Int'];
     projectTokenBalance: Scalars['Float'];
     projectTokenPrice: Scalars['Float'];
     reservePrice: Scalars['Float'];
@@ -2301,6 +2300,8 @@ export interface Mutation {
     __typename?: 'Mutation';
     beetsPoolLoadReliquarySnapshotsForAllFarms: Scalars['String'];
     createLBP: Scalars['Boolean'];
+    lbpReloadFixedLbps: Scalars['String'];
+    lbpReloadLbps: Scalars['String'];
     poolLoadOnChainDataForAllPools: Array<GqlPoolMutationResult>;
     poolLoadSnapshotsForPools: Scalars['String'];
     poolReloadAllPoolAprs: Scalars['String'];
@@ -2332,6 +2333,14 @@ export interface MutationBeetsPoolLoadReliquarySnapshotsForAllFarmsArgs {
 export interface MutationCreateLbpArgs {
     input: CreateLbpInput;
     type?: InputMaybe<GqlPoolType>;
+}
+
+export interface MutationLbpReloadFixedLbpsArgs {
+    chains: Array<GqlChain>;
+}
+
+export interface MutationLbpReloadLbpsArgs {
+    chains: Array<GqlChain>;
 }
 
 export interface MutationPoolLoadOnChainDataForAllPoolsArgs {
@@ -2459,6 +2468,7 @@ export interface Query {
     /** Returns all pools for a given filter, specific for aggregators */
     aggregatorPools: Array<GqlPoolAggregator>;
     beetsPoolGetReliquaryFarmSnapshots: Array<GqlReliquaryFarmSnapshot>;
+    fixedLbpPriceChart?: Maybe<Array<LbpPriceChartData>>;
     lbpPriceChart?: Maybe<Array<LbpPriceChartData>>;
     /** Get the LoopS data */
     loopsGetData: GqlLoopsData;
@@ -2527,11 +2537,16 @@ export interface QueryBeetsPoolGetReliquaryFarmSnapshotsArgs {
     range: GqlPoolSnapshotDataRange;
 }
 
+export interface QueryFixedLbpPriceChartArgs {
+    chain: GqlChain;
+    dataPoints?: InputMaybe<Scalars['Int']>;
+    id: Scalars['String'];
+}
+
 export interface QueryLbpPriceChartArgs {
     chain: GqlChain;
     dataPoints?: InputMaybe<Scalars['Int']>;
     id: Scalars['String'];
-    interval?: InputMaybe<Scalars['Int']>;
 }
 
 export interface QueryPoolEventsArgs {
@@ -3761,6 +3776,7 @@ export type GqlPoolLiquidityBootstrappingV3Resolvers<
     reserveTokenEndWeight?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
     reserveTokenIndex?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     reserveTokenStartWeight?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+    reserveTokenVirtualBalance?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
     staking?: Resolver<Maybe<ResolversTypes['GqlPoolStaking']>, ParentType, ContextType>;
     startTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     swapFeeManager?: Resolver<Maybe<ResolversTypes['Bytes']>, ParentType, ContextType>;
@@ -4718,7 +4734,6 @@ export type LbpPriceChartDataResolvers<
     cumulativeFees?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
     cumulativeVolume?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
     fees?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
-    intervalTimestamp?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
     projectTokenBalance?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
     projectTokenPrice?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
     reservePrice?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
@@ -4776,6 +4791,18 @@ export type MutationResolvers<
         ParentType,
         ContextType,
         RequireFields<MutationCreateLbpArgs, 'input'>
+    >;
+    lbpReloadFixedLbps?: Resolver<
+        ResolversTypes['String'],
+        ParentType,
+        ContextType,
+        RequireFields<MutationLbpReloadFixedLbpsArgs, 'chains'>
+    >;
+    lbpReloadLbps?: Resolver<
+        ResolversTypes['String'],
+        ParentType,
+        ContextType,
+        RequireFields<MutationLbpReloadLbpsArgs, 'chains'>
     >;
     poolLoadOnChainDataForAllPools?: Resolver<
         Array<ResolversTypes['GqlPoolMutationResult']>,
@@ -4960,6 +4987,12 @@ export type QueryResolvers<
         ParentType,
         ContextType,
         RequireFields<QueryBeetsPoolGetReliquaryFarmSnapshotsArgs, 'chain' | 'id' | 'range'>
+    >;
+    fixedLbpPriceChart?: Resolver<
+        Maybe<Array<ResolversTypes['LBPPriceChartData']>>,
+        ParentType,
+        ContextType,
+        RequireFields<QueryFixedLbpPriceChartArgs, 'chain' | 'id'>
     >;
     lbpPriceChart?: Resolver<
         Maybe<Array<ResolversTypes['LBPPriceChartData']>>,
