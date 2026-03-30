@@ -1,5 +1,13 @@
 # backend
 
+## 2.1.1
+
+### Patch Changes
+
+-   f8951e1: move to public rpcs for deprecated networks
+-   0215ffc: move to ormi vaults subgraph
+-   524a77d: add price chart for fixed lbp
+
 ## 2.1.0
 
 ### Minor Changes
