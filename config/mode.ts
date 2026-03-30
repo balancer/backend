@@ -50,8 +50,8 @@ export default <NetworkData>{
             balancerQueriesAddress: '0x36cac20dd805d128c1a6dd16eea845c574b5a17c',
         },
         v3: {
-            vaultAddress: '0xba12222222228d8ba445958a75a0704d566bf2c8',
-            routerAddress: '0xba12222222228d8ba445958a75a0704d566bf2c8',
+            vaultAddress: '',
+            routerAddress: '',
             defaultSwapFeePercentage: '0.5',
             defaultYieldFeePercentage: '0.5',
         },
