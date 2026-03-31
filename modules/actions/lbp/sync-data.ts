@@ -150,6 +150,7 @@ export const syncData = async (
             data: {
                 typeData: {
                     ...(typeDataMap[poolId] as any),
+                    ...(onchainData[poolId]?.pool.typeData || {}),
                     topTrades: trades[poolId],
                 },
             },

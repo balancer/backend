@@ -25,11 +25,17 @@ export class TokenYieldsService {
 
             console.log(`Fetched ${tokenAprs.length} token yields for chain ${chain}`);
 
+            const validTokenAprs = tokenAprs.filter((t) => Number.isFinite(t.apr));
+            const invalidAprs = tokenAprs.filter((t) => !Number.isFinite(t.apr));
+            for (const invalidApr of invalidAprs) {
+                console.log(`Invalid APR for token ${invalidApr.address} on chain ${chain}: ${invalidApr.apr}`);
+            }
+
             // Group by source (we'll need to track which handler provided which data)
             // For now, we'll store all as 'yb-handlers' source
-            await this.tokenYieldRepository.storeTokenYields(chain, tokenAprs);
+            await this.tokenYieldRepository.storeTokenYields(chain, validTokenAprs);
 
-            console.log(`Successfully stored ${tokenAprs.length} token yields for chain ${chain}`);
+            console.log(`Successfully stored ${validTokenAprs.length} token yields for chain ${chain}`);
         } catch (error) {
             throw `Failed to fetch and store yields for chain ${chain}: ${error}`;
         }
