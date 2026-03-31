@@ -38,7 +38,7 @@ export default <NetworkData>{
     },
     rpcUrl: 'https://rpc.xlayer.tech',
     rpcMaxBlockRange: 100,
-    acceptableSGLag: 60, // ~1min
+    acceptableSGLag: 90,
     protocolToken: 'bal',
     balancer: {
         v2: {
