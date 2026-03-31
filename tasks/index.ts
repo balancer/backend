@@ -177,6 +177,9 @@ async function run(job: string = process.argv[2], chainId: string = process.argv
     } else if (job === 'sync-lbps') {
         await LBPController.syncData(chain);
         return 'OK';
+    } else if (job === 'reload-lbps') {
+        await LBPController.reloadLbps(chain);
+        return 'OK';
     } else if (job === 'sync-token-yields') {
         await TokenYieldsController().fetchAndStoreAllYields();
         return 'OK';

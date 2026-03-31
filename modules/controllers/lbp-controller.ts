@@ -9,14 +9,28 @@ import { PoolWithMappedJsonFields } from '../../prisma/prisma-types';
 import { LBPoolData, FixedLBPData } from '../pool/pool-data';
 import { priceChartData } from '../pool/lbp/price-chart-data';
 import { priceChartDataFixedLBP } from '../pool/lbp/fixed-lbp-price-chart-data';
+import { getPoolsSubgraphClient, getV3JoinedSubgraphClient, getVaultSubgraphClient } from '../sources/subgraphs';
 
 export const LBPController = {
     async syncData(chain: Chain) {
         const client = getViemClient(chain);
-        const vaultAddress = config[chain].balancer.v3.vaultAddress;
-        if (!vaultAddress) return;
 
-        await syncData(chain, client, vaultAddress);
+        const {
+            subgraphs: { balancerV3, balancerPoolsV3 },
+            balancer: {
+                v3: { vaultAddress },
+            },
+        } = config[chain];
+
+        if (!vaultAddress) return;
+        // Guard against unconfigured chains
+        if (!balancerV3 || !balancerPoolsV3) {
+            throw new Error(`Chain not configured: ${chain}`);
+        }
+
+        const poolsSubgraphClient = getPoolsSubgraphClient(balancerPoolsV3, chain);
+
+        await syncData(chain, client, vaultAddress, poolsSubgraphClient);
     },
     async syncDataFixedLBP(chain: Chain) {
         const client = getViemClient(chain);
