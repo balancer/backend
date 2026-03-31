@@ -6,6 +6,7 @@ import { ViemClient } from '../../sources/types';
 import { eventsRepository } from '../../repositories/events/events-repository';
 import { lbpCallsV3 } from '../../sources/contracts/pool-type-dynamic-data/lbp-calls-v3';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
+import { getPoolsSubgraphClient } from '../../sources/subgraphs';
 
 /**
  * Fetches new weights and updates pool tokens
@@ -14,6 +15,7 @@ export const syncData = async (
     chain: Chain,
     client: ViemClient,
     vaultAddress: string,
+    poolsSubgraphClient: ReturnType<typeof getPoolsSubgraphClient>,
     eventRepo = eventsRepository,
 ): Promise<void> => {
     const [pools, tokens, dynamicDataMap] = await Promise.all([
@@ -23,7 +25,7 @@ export const syncData = async (
                 type: PrismaPoolType.LIQUIDITY_BOOTSTRAPPING,
                 protocolVersion: 3,
             },
-            select: { id: true, version: true, typeData: true },
+            select: { id: true, version: true, typeData: true, factory: true },
         }),
         prisma.prismaPoolToken
             .findMany({
@@ -67,6 +69,29 @@ export const syncData = async (
     const onchainData = (await multicallViem(client, [...calls, ...callsV3])) as Record<string, LBPCallsOutput>;
 
     const updates = Object.keys(onchainData).flatMap((id) => onchainData[id].poolToken);
+
+    const subgraphPools = await poolsSubgraphClient.getAllPools({
+        id_in: pools.map((pool) => pool.id),
+    });
+
+    // compare version and factory of subgraph pools and db pools and update the db if different.
+    const factoryVersionUpdates = subgraphPools
+        .filter((subgraphPool) => {
+            const dbPool = pools.find((pool) => pool.id === subgraphPool.id);
+            if (!dbPool) return false;
+            if (dbPool.version !== subgraphPool.factory.version) return true;
+            if (dbPool.factory !== subgraphPool.factory.id) return true;
+            return false;
+        })
+        .map((pool) =>
+            prisma.prismaPool.update({
+                where: { id_chain: { id: pool.id, chain } },
+                data: {
+                    version: pool.factory.version,
+                    factory: pool.factory.id,
+                },
+            }),
+        );
 
     const operations = updates
         // Check if the weights are different
@@ -131,7 +156,12 @@ export const syncData = async (
         }),
     );
 
-    await prismaBulkExecuteOperations([...operations, ...swapEnabledUpdates, ...holdersUpdates]);
+    await prismaBulkExecuteOperations([
+        ...operations,
+        ...swapEnabledUpdates,
+        ...holdersUpdates,
+        ...factoryVersionUpdates,
+    ]);
 
     return;
 };
