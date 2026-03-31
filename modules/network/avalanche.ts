@@ -6,7 +6,6 @@ import {
     activeChainWorkerJobsGeneric,
     activeChainWorkerJobsV2,
     activeChainWorkerJobsV3,
-    lbpWorkerJobs,
     vebalWorkerJobs,
     fxWorkerJobs,
 } from './worker-jobs';
@@ -20,7 +19,6 @@ export const avalancheNetworkConfig: NetworkConfig = {
         ...activeChainWorkerJobsGeneric,
         ...activeChainWorkerJobsV2,
         ...activeChainWorkerJobsV3,
-        ...lbpWorkerJobs,
         ...fxWorkerJobs,
         ...vebalWorkerJobs,
     ],

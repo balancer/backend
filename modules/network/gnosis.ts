@@ -8,7 +8,6 @@ import {
     activeChainWorkerJobsV3,
     vebalWorkerJobs,
     cowAmmWorkerJobs,
-    lbpWorkerJobs,
 } from './worker-jobs';
 
 const gnosisNetworkData: NetworkData = config.GNOSIS;
@@ -22,6 +21,5 @@ export const gnosisNetworkConfig: NetworkConfig = {
         ...activeChainWorkerJobsV3,
         ...vebalWorkerJobs,
         ...cowAmmWorkerJobs,
-        ...lbpWorkerJobs,
     ],
 };

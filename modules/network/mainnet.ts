@@ -10,7 +10,6 @@ import {
     activeChainWorkerJobsV3,
     cowAmmWorkerJobs,
     fxWorkerJobs,
-    lbpWorkerJobs,
     quantAmmWorkerJobs,
     vebalWorkerJobs,
 } from './worker-jobs';
@@ -31,7 +30,6 @@ export const mainnetNetworkConfig: NetworkConfig = {
         ...cowAmmWorkerJobs,
         ...vebalWorkerJobs,
         ...quantAmmWorkerJobs,
-        ...lbpWorkerJobs,
         ...fxWorkerJobs,
         ...activeChainWorkerJobsGlobal,
     ],

@@ -7,7 +7,6 @@ import {
     activeChainWorkerJobsV3,
     cowAmmWorkerJobs,
     quantAmmWorkerJobs,
-    lbpWorkerJobs,
 } from './worker-jobs';
 
 export const sepoliaNetworkData = config.SEPOLIA;
@@ -21,6 +20,5 @@ export const sepoliaNetworkConfig: NetworkConfig = {
         ...activeChainWorkerJobsV3,
         ...cowAmmWorkerJobs,
         ...quantAmmWorkerJobs,
-        ...lbpWorkerJobs,
     ],
 };

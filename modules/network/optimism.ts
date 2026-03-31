@@ -7,7 +7,6 @@ import {
     activeChainWorkerJobsV2,
     activeChainWorkerJobsV3,
     vebalWorkerJobs,
-    lbpWorkerJobs,
     datastudioWorkerJobs,
 } from './worker-jobs';
 
@@ -21,7 +20,6 @@ export const optimismNetworkConfig: NetworkConfig = {
         ...activeChainWorkerJobsV2,
         ...activeChainWorkerJobsV3,
         ...vebalWorkerJobs,
-        ...lbpWorkerJobs,
         ...datastudioWorkerJobs,
     ],
 };
