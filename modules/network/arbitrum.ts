@@ -7,7 +7,6 @@ import {
     activeChainWorkerJobsV2,
     activeChainWorkerJobsV3,
     cowAmmWorkerJobs,
-    lbpWorkerJobs,
     quantAmmWorkerJobs,
     vebalWorkerJobs,
 } from './worker-jobs';
@@ -23,7 +22,6 @@ export const arbitrumNetworkConfig: NetworkConfig = {
         ...activeChainWorkerJobsV3,
         ...cowAmmWorkerJobs,
         ...quantAmmWorkerJobs,
-        ...lbpWorkerJobs,
         ...vebalWorkerJobs,
     ],
 };

@@ -18,6 +18,12 @@ export type LBPCallsOutput = {
         id: string;
         weight: string;
     }[];
+    pool: {
+        typeData: {
+            reserveTokenVirtualBalance: string;
+            isSeedless: boolean;
+        };
+    };
 };
 
 export const lbpCalls = (poolAddress: string): ViemMulticallCall[] => [
@@ -45,7 +51,11 @@ export const lbpCalls = (poolAddress: string): ViemMulticallCall[] => [
                 swapEnabled: result.isSwapEnabled,
             };
 
-            return { poolToken, poolDynamicData };
+            return {
+                poolToken,
+                poolDynamicData,
+                pool: { typeData: { reserveTokenVirtualBalance: '0', isSeedless: false } },
+            };
         },
     },
 ];

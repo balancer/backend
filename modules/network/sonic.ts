@@ -7,7 +7,6 @@ import {
     activeChainWorkerJobsV2,
     activeChainWorkerJobsV3,
     datastudioWorkerJobs,
-    lbpWorkerJobs,
     loopsWorkerJobs,
     quantAmmWorkerJobs,
     reliquaryWorkerJobs,

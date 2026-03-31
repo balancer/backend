@@ -179,6 +179,14 @@ export const activeChainWorkerJobsGlobal: WorkerJob[] = [
         name: 'sync-token-content-data',
         interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(5, 'minutes'),
     },
+    {
+        name: 'sync-lbps',
+        interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(2, 'minutes'),
+    },
+    {
+        name: 'sync-fixed-lbps',
+        interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(2, 'minutes'),
+    },
 ];
 
 export const vebalWorkerJobs: WorkerJob[] = [
@@ -218,17 +226,6 @@ export const quantAmmWorkerJobs: WorkerJob[] = [
     {
         name: 'sync-weights',
         interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(60, 'minutes') : every(10, 'minutes'),
-    },
-];
-
-export const lbpWorkerJobs: WorkerJob[] = [
-    {
-        name: 'sync-lbps',
-        interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(2, 'minutes'),
-    },
-    {
-        name: 'sync-fixed-lbps',
-        interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(5, 'minutes') : every(2, 'minutes'),
     },
 ];
 
