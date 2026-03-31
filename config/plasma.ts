@@ -146,9 +146,11 @@ export default <NetworkData>{
                     ],
                 },
                 {
-                    url: 'https://api-platform-analytics.metastreet.xyz/v2/usdai/dashboard/apy',
+                    url: 'https://api.usd.ai/usdai/dashboard/current-apy',
                     scale: 100,
-                    extractors: [{ type: 'path', token: '0x0b2b2b2076d95dda7817e785989fe353fe955ef9', path: '$' }],
+                    extractors: [
+                        { type: 'path', token: '0x0b2b2b2076d95dda7817e785989fe353fe955ef9', path: '$.result' },
+                    ],
                 },
                 {
                     name: 'tcUSDT0',
