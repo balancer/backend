@@ -184,12 +184,15 @@ export default <NetworkData>{
                     '0x2c910f67dbf81099e6f8e126e7265d7595dc20ad', // hyUSD₮0-hwHLP
                 ],
             },
+            hypurrfiPrime: {
+                vaults: [
+                    '0xc200aab602cd7046389b5c8fb088884323f8dd0f', // EVK Vault eUSDC-3
+                ],
+            },
             morphoVaultHyperevm: {
                 vaults: [
                     '0xfc5126377f0efc0041c0969ef9ba903ce67d151e', // feUSDT0
                     '0x9c59a9389d8f72de2cdaf1126f36ea4790e2275e', // feUSDhl
-                    '0x5eec795d919fa97688fb9844eeb0072e6b846f9d', // gtUSDe
-                    '0xd3a9cb7312b9c29113290758f5adfe12304cd16a', // mcUSR
                     '0x3bcc0a5a66bb5bdceef5dd8a659a4ec75f3834d8', // mcUSDT
                     '0xd19e3d00f8547f7d108abfd4bbb015486437b487', // mcHYPE
                     '0x53a333e51e96fe288bc9add7cdc4b1ead2cd2ffa', // gtUSDT0

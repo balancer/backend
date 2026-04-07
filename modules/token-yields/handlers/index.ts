@@ -9,6 +9,7 @@ const sourceToHandler = {
     teth: sources.treehouseYieldHandler,
     sts: sources.stsYieldHandler,
     hypurrfi: sources.hypurrFiYieldhandler,
+    hypurrfiPrime: sources.hypurrFiPrimeYieldHandler,
     morphoVaultHyperevm: sources.morphoHyperevmYieldHandler,
     http: sources.httpTokenYieldHandler,
     contract: sources.contractTokenYieldHandler,

@@ -59,21 +59,25 @@ export const morphoHyperevmYieldHandler: TokenYieldHandler = async (
         const morphoBlueCaller = new Multicaller3Viem('HYPEREVM', MorphoBlueAbi);
         // for each vault, get the supply data for each market in the supply queue
         config!.vaults.forEach((vaultAddress) => {
-            for (const marketId of vaultResult[vaultAddress].supplyQueue) {
-                if (marketId === undefined) {
-                    throw new Error(`Market data for vault ${vaultAddress} is undefined`);
+            if (vaultResult[vaultAddress].supplyQueue) {
+                for (const marketId of vaultResult[vaultAddress].supplyQueue) {
+                    if (marketId === undefined) {
+                        throw new Error(`Market data for vault ${vaultAddress} is undefined`);
+                    }
+                    morphoBlueCaller.call(`${vaultAddress}.position.${marketId}`, MORPHO_BLUE_ADDRESS, 'position', [
+                        marketId,
+                        vaultAddress as `0x${string}`,
+                    ]);
+                    morphoBlueCaller.call(`${vaultAddress}.market.${marketId}`, MORPHO_BLUE_ADDRESS, 'market', [
+                        marketId,
+                    ]);
+                    morphoBlueCaller.call(
+                        `${vaultAddress}.idToMarketParams.${marketId}`,
+                        MORPHO_BLUE_ADDRESS,
+                        'idToMarketParams',
+                        [marketId],
+                    );
                 }
-                morphoBlueCaller.call(`${vaultAddress}.position.${marketId}`, MORPHO_BLUE_ADDRESS, 'position', [
-                    marketId,
-                    vaultAddress as `0x${string}`,
-                ]);
-                morphoBlueCaller.call(`${vaultAddress}.market.${marketId}`, MORPHO_BLUE_ADDRESS, 'market', [marketId]);
-                morphoBlueCaller.call(
-                    `${vaultAddress}.idToMarketParams.${marketId}`,
-                    MORPHO_BLUE_ADDRESS,
-                    'idToMarketParams',
-                    [marketId],
-                );
             }
         });
 
@@ -100,15 +104,17 @@ export const morphoHyperevmYieldHandler: TokenYieldHandler = async (
         const morphoIrmCaller = new Multicaller3Viem('HYPEREVM', MorphoIrmAbi);
         //for each vault, get the borrow rate for each market in the supply queue
         config!.vaults.forEach((vaultAddress) => {
-            for (const marketId of vaultResult[vaultAddress].supplyQueue) {
-                const market = positionResult[vaultAddress].market[marketId];
-                const [loanToken, collateralToken, oracle, irm, lltv] =
-                    positionResult[vaultAddress].idToMarketParams[marketId];
-                if (irm !== ZERO_ADDRESS) {
-                    morphoIrmCaller.call(`${vaultAddress}.${marketId}`, irm, 'borrowRateView', [
-                        [loanToken, collateralToken, oracle, irm, lltv],
-                        market,
-                    ]);
+            if (vaultResult[vaultAddress].supplyQueue) {
+                for (const marketId of vaultResult[vaultAddress].supplyQueue) {
+                    const market = positionResult[vaultAddress].market[marketId];
+                    const [loanToken, collateralToken, oracle, irm, lltv] =
+                        positionResult[vaultAddress].idToMarketParams[marketId];
+                    if (irm !== ZERO_ADDRESS) {
+                        morphoIrmCaller.call(`${vaultAddress}.${marketId}`, irm, 'borrowRateView', [
+                            [loanToken, collateralToken, oracle, irm, lltv],
+                            market,
+                        ]);
+                    }
                 }
             }
         });
