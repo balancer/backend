@@ -1,5 +1,11 @@
 # backend
 
+## 2.1.2
+
+### Patch Changes
+
+-   88cb046: add hypurrfi prime vault apr
+
 ## 2.1.1
 
 ### Patch Changes
