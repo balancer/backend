@@ -1,0 +1,125 @@
+// ABI for the Euler EVK Vault Lens at 0x0eaDDE9EfCf1540dcA8f94e813E12db55f8405a8
+// Used to fetch lend vault info including supply/borrow APY from the IRM.
+// The full struct definition is required for correct ABI decoding.
+
+const assetPriceInfoComponents = [
+    { name: 'queryFailure', type: 'bool' },
+    { name: 'queryFailureReason', type: 'bytes' },
+    { name: 'timestamp', type: 'uint256' },
+    { name: 'oracle', type: 'address' },
+    { name: 'asset', type: 'address' },
+    { name: 'unitOfAccount', type: 'address' },
+    { name: 'amountIn', type: 'uint256' },
+    { name: 'amountOutMid', type: 'uint256' },
+    { name: 'amountOutBid', type: 'uint256' },
+    { name: 'amountOutAsk', type: 'uint256' },
+] as const;
+
+const oracleDetailedInfoComponents = [
+    { name: 'oracle', type: 'address' },
+    { name: 'name', type: 'string' },
+    { name: 'oracleInfo', type: 'bytes' },
+] as const;
+
+export const hypurrfiVaultLensAbi = [
+    {
+        type: 'function',
+        name: 'getVaultInfoFull',
+        inputs: [{ name: 'vault', type: 'address' }],
+        outputs: [
+            {
+                name: '',
+                type: 'tuple',
+                components: [
+                    { name: 'timestamp', type: 'uint256' },
+                    { name: 'vault', type: 'address' },
+                    { name: 'vaultName', type: 'string' },
+                    { name: 'vaultSymbol', type: 'string' },
+                    { name: 'vaultDecimals', type: 'uint256' },
+                    { name: 'asset', type: 'address' },
+                    { name: 'assetName', type: 'string' },
+                    { name: 'assetSymbol', type: 'string' },
+                    { name: 'assetDecimals', type: 'uint256' },
+                    { name: 'unitOfAccount', type: 'address' },
+                    { name: 'unitOfAccountName', type: 'string' },
+                    { name: 'unitOfAccountSymbol', type: 'string' },
+                    { name: 'unitOfAccountDecimals', type: 'uint256' },
+                    { name: 'totalShares', type: 'uint256' },
+                    { name: 'totalCash', type: 'uint256' },
+                    { name: 'totalBorrowed', type: 'uint256' },
+                    { name: 'totalAssets', type: 'uint256' },
+                    { name: 'accumulatedFeesShares', type: 'uint256' },
+                    { name: 'accumulatedFeesAssets', type: 'uint256' },
+                    { name: 'governorFeeReceiver', type: 'address' },
+                    { name: 'protocolFeeReceiver', type: 'address' },
+                    { name: 'protocolFeeShare', type: 'uint256' },
+                    { name: 'interestFee', type: 'uint256' },
+                    { name: 'hookedOperations', type: 'uint256' },
+                    { name: 'configFlags', type: 'uint256' },
+                    { name: 'supplyCap', type: 'uint256' },
+                    { name: 'borrowCap', type: 'uint256' },
+                    { name: 'maxLiquidationDiscount', type: 'uint256' },
+                    { name: 'liquidationCoolOffTime', type: 'uint256' },
+                    { name: 'dToken', type: 'address' },
+                    { name: 'oracle', type: 'address' },
+                    { name: 'interestRateModel', type: 'address' },
+                    { name: 'hookTarget', type: 'address' },
+                    { name: 'evc', type: 'address' },
+                    { name: 'protocolConfig', type: 'address' },
+                    { name: 'balanceTracker', type: 'address' },
+                    { name: 'permit2', type: 'address' },
+                    { name: 'creator', type: 'address' },
+                    { name: 'governorAdmin', type: 'address' },
+                    {
+                        name: 'irmInfo',
+                        type: 'tuple',
+                        components: [
+                            { name: 'queryFailure', type: 'bool' },
+                            { name: 'queryFailureReason', type: 'bytes' },
+                            { name: 'vault', type: 'address' },
+                            { name: 'interestRateModel', type: 'address' },
+                            {
+                                name: 'interestRateInfo',
+                                type: 'tuple[]',
+                                components: [
+                                    { name: 'cash', type: 'uint256' },
+                                    { name: 'borrows', type: 'uint256' },
+                                    { name: 'borrowSPY', type: 'uint256' },
+                                    { name: 'borrowAPY', type: 'uint256' },
+                                    { name: 'supplyAPY', type: 'uint256' },
+                                ],
+                            },
+                            {
+                                name: 'interestRateModelInfo',
+                                type: 'tuple',
+                                components: [
+                                    { name: 'interestRateModel', type: 'address' },
+                                    { name: 'interestRateModelType', type: 'uint8' },
+                                    { name: 'interestRateModelParams', type: 'bytes' },
+                                ],
+                            },
+                        ],
+                    },
+                    {
+                        name: 'collateralLTVInfo',
+                        type: 'tuple[]',
+                        components: [
+                            { name: 'collateral', type: 'address' },
+                            { name: 'borrowLTV', type: 'uint256' },
+                            { name: 'liquidationLTV', type: 'uint256' },
+                            { name: 'initialLiquidationLTV', type: 'uint256' },
+                            { name: 'targetTimestamp', type: 'uint256' },
+                            { name: 'rampDuration', type: 'uint256' },
+                        ],
+                    },
+                    { name: 'liabilityPriceInfo', type: 'tuple', components: assetPriceInfoComponents },
+                    { name: 'collateralPriceInfo', type: 'tuple[]', components: assetPriceInfoComponents },
+                    { name: 'oracleInfo', type: 'tuple', components: oracleDetailedInfoComponents },
+                    { name: 'backupAssetPriceInfo', type: 'tuple', components: assetPriceInfoComponents },
+                    { name: 'backupAssetOracleInfo', type: 'tuple', components: oracleDetailedInfoComponents },
+                ],
+            },
+        ],
+        stateMutability: 'view',
+    },
+] as const;
