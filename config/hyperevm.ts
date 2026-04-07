@@ -184,6 +184,11 @@ export default <NetworkData>{
                     '0x2c910f67dbf81099e6f8e126e7265d7595dc20ad', // hyUSD₮0-hwHLP
                 ],
             },
+            hypurrfiPrime: {
+                vaults: [
+                    '0xc200aab602cd7046389b5c8fb088884323f8dd0f', // EVK Vault eUSDC-3
+                ],
+            },
             morphoVaultHyperevm: {
                 vaults: [
                     '0xfc5126377f0efc0041c0969ef9ba903ce67d151e', // feUSDT0

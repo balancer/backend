@@ -89,6 +89,9 @@ export interface TokenYieldConfig {
     hypurrfi?: {
         markets: string[];
     };
+    hypurrfiPrime?: {
+        vaults: string[];
+    };
     morphoVaultHyperevm?: {
         vaults: string[];
     };
