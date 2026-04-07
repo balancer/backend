@@ -21,11 +21,11 @@ export const initApiSentry = () => {
 
         // Add Tracing by setting tracesSampleRate
         // Send 1% of transactions to Sentry
-        tracesSampleRate: Number(env.SENTRY_TRACES_SAMPLE_RATE || 0.01),
+        tracesSampleRate: Number(env.SENTRY_TRACES_SAMPLE_RATE || 0.001),
 
         // Set sampling rate for profiling
         // This is relative to tracesSampleRate
-        profilesSampleRate: Number(env.SENTRY_PROFILES_SAMPLE_RATE || 0.01),
+        profilesSampleRate: Number(env.SENTRY_PROFILES_SAMPLE_RATE || 0.001),
 
         beforeSend(event, hint) {
             const error = hint.originalException;
