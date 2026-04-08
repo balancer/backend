@@ -7,6 +7,7 @@ import { eventsRepository } from '../../repositories/events/events-repository';
 import { lbpCallsV3 } from '../../sources/contracts/pool-type-dynamic-data/lbp-calls-v3';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
 import { getPoolsSubgraphClient } from '../../sources/subgraphs';
+import { updateLiquidityValuesForPools } from '../pool/update-liquidity';
 
 /**
  * Fetches new weights and updates pool tokens
@@ -163,6 +164,11 @@ export const syncData = async (
         ...holdersUpdates,
         ...factoryVersionUpdates,
     ]);
+
+    await updateLiquidityValuesForPools(
+        chain,
+        pools.map((pool) => pool.id),
+    );
 
     return;
 };

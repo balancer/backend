@@ -32,7 +32,7 @@ export const fetchUnwrapRates = async (
     }
 
     if (missingTokens.length) {
-        console.error(
+        console.log(
             'Missing underlying token in ERC4626 tokens',
             missingTokens.map(({ address, chain }) => [address, chain]),
         );
