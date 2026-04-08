@@ -5,6 +5,7 @@ import { multicallViem } from '../../web3/multicaller-viem';
 import { ViemClient } from '../../sources/types';
 import { eventsRepository } from '../../repositories/events/events-repository';
 import { prismaBulkExecuteOperations } from '../../../prisma/prisma-util';
+import { updateLiquidityValuesForPools } from '../pool/update-liquidity';
 
 export const syncDataFixedLBP = async (
     chain: Chain,
@@ -86,6 +87,11 @@ export const syncDataFixedLBP = async (
     );
 
     await prismaBulkExecuteOperations([...swapEnabledUpdates, ...holdersUpdates]);
+
+    await updateLiquidityValuesForPools(
+        chain,
+        pools.map((pool) => pool.id),
+    );
 
     return;
 };
