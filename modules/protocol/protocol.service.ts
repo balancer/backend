@@ -58,12 +58,11 @@ export class ProtocolService {
     }
 
     public async cacheProtocolMetrics(chain: Chain): Promise<GqlProtocolMetricsChain> {
-        const oneDayAgo = moment().subtract(24, 'hours').unix();
-
         const [dbPools, dynamicData] = await Promise.all([
             prisma.prismaPool.findMany({
                 where: {
                     NOT: { categories: { has: 'BLACK_LISTED' } },
+                    type: { not: 'LIQUIDITY_BOOTSTRAPPING' },
                     dynamicData: {
                         totalSharesNum: {
                             gt: 0.000000000001,
