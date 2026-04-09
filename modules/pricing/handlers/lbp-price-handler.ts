@@ -23,6 +23,7 @@ interface LbpDB {
                 type: PrismaPoolType;
                 protocolVersion: number;
                 chain: { in: Chain[] };
+                NOT: { categories: { has: 'BLACK_LISTED' } };
             };
             include: { tokens: true };
         }): Promise<PoolWithTokens[]>;
@@ -68,7 +69,12 @@ export class LbpPriceHandler implements PriceHandler {
 
             // Fetch LBP pools
             const lbps = await this.db.prismaPool.findMany({
-                where: { type: 'LIQUIDITY_BOOTSTRAPPING', protocolVersion: 3, chain: { in: chains } },
+                where: {
+                    type: 'LIQUIDITY_BOOTSTRAPPING',
+                    protocolVersion: 3,
+                    chain: { in: chains },
+                    NOT: { categories: { has: 'BLACK_LISTED' } },
+                },
                 include: { tokens: true },
             });
 
