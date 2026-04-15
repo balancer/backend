@@ -31,8 +31,6 @@ import { LoopsService } from '../../modules/loops/service';
 import { ContentController } from '../../modules/content/content-controller';
 import { StakedSonicController } from '../../modules/sts/sts-controller';
 import { UserBalancesController } from '../../modules/user/user-balances-controller';
-import { ca } from '@bgd-labs/aave-address-book/dist/ChainlinkEthereum-CbJoeh6P';
-import { error } from 'console';
 
 const runningJobs: Set<string> = new Set();
 
@@ -66,14 +64,14 @@ async function runIfNotAlreadyRunning(
         const durationSuccess = moment.duration(moment().diff(startJobTime)).asSeconds();
         if (process.env.AWS_ALERTS === 'true') {
             await cronsMetricPublisher.publish(`${jobId}-done`);
-            await cronsDurationMetricPublisher.publish(`${jobId}-done`, durationSuccess);
+            // await cronsDurationMetricPublisher.publish(`${jobId}-done`, durationSuccess);
         }
         console.log(`Successful job ${jobId}-done`, durationSuccess);
     } catch (error: any) {
         const durationError = moment.duration(moment().diff(startJobTime)).asSeconds();
         if (process.env.AWS_ALERTS === 'true') {
             await cronsMetricPublisher.publish(`${jobId}-error`);
-            await cronsDurationMetricPublisher.publish(`${jobId}-error`, durationError);
+            // await cronsDurationMetricPublisher.publish(`${jobId}-error`, durationError);
         }
         const duration = moment.duration(moment().diff(startJobTime)).asSeconds();
         console.log(`Error job ${jobId}-error`, duration, error.message || error);
