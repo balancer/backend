@@ -80,7 +80,7 @@ export default <NetworkData>{
                 markets: [AaveV3Avalanche],
             },
             euler: {
-                url: 'https://raw.githubusercontent.com/euler-xyz/euler-labels/refs/heads/master/43114/vaults.json',
+                url: 'https://raw.githubusercontent.com/euler-xyz/euler-labels/refs/heads/master/43114/products.json',
                 lens: '0xc820c24905c210aefe21dae40723ec28d62c1544',
                 chain: 'AVALANCHE',
             },
