@@ -9,9 +9,11 @@ import { Multicaller3Call } from '../../../web3/types';
 import { AbiParametersToPrimitiveTypes, ExtractAbiFunction } from 'abitype';
 import { formatUnits } from 'viem';
 
-type VaultsResponse = {
-    [address: string]: {
+type ProductsResponse = {
+    [productKey: string]: {
         name: string;
+        vaults: string[];
+        deprecatedVaults?: string[];
     };
 };
 
@@ -39,23 +41,36 @@ type ComputeAPYs = AbiParametersToPrimitiveTypes<ExtractAbiFunction<typeof euler
 export const eulerYieldHandler: TokenYieldHandler = async (config: { chain: Chain; url: string; lens: string }) => {
     try {
         // find vaults that we have in our pools
-        const vaults = await fetch(config.url).then((response) => response.json() as Promise<VaultsResponse>);
+        const products = await fetch(config.url).then((response) => response.json() as Promise<ProductsResponse>);
 
-        const vaultsAddresses = Object.keys(vaults).map((address) => address.toLowerCase());
+        const activeAddresses = new Set<string>();
+        const deprecatedAddresses = new Set<string>();
+        for (const product of Object.values(products)) {
+            for (const address of product.vaults ?? []) {
+                activeAddresses.add(address.toLowerCase());
+            }
+            for (const address of product.deprecatedVaults ?? []) {
+                deprecatedAddresses.add(address.toLowerCase());
+            }
+        }
+        const allAddresses = [...activeAddresses, ...deprecatedAddresses];
 
         const poolTokens = await prisma.prismaPoolToken
             .findMany({
                 where: {
                     chain: config.chain,
-                    address: { in: vaultsAddresses },
+                    address: { in: allAddresses },
                 },
                 select: { address: true },
             })
             .then((pts) => [...new Set(pts.map((pt) => pt.address))]);
 
-        // query the required data for each vault on chain
+        const activePoolTokens = poolTokens.filter((a) => activeAddresses.has(a));
+        const deprecatedPoolTokens = poolTokens.filter((a) => deprecatedAddresses.has(a));
+
+        // query the required data for each active vault on chain
         const calls: Multicaller3Call[] = [];
-        for (const vault of poolTokens) {
+        for (const vault of activePoolTokens) {
             calls.push({
                 path: `${vault}.interestRate`,
                 address: vault as `0x${string}`,
@@ -86,9 +101,9 @@ export const eulerYieldHandler: TokenYieldHandler = async (config: { chain: Chai
 
         const vaultsResponse = await multicallViem(client, calls);
 
-        // compute APY on chain for each vault
+        // compute APY on chain for each active vault
         const apyCalls: Multicaller3Call[] = [];
-        for (const vault of poolTokens) {
+        for (const vault of activePoolTokens) {
             apyCalls.push({
                 path: `${vault}.computeAPYs`,
                 address: config.lens as `0x${string}`,
@@ -108,8 +123,13 @@ export const eulerYieldHandler: TokenYieldHandler = async (config: { chain: Chai
 
         const aprs: TokenApr[] = [];
 
-        // get the APY for each vault and return it
-        for (const vault of poolTokens) {
+        // deprecated vaults get APR 0
+        for (const vault of deprecatedPoolTokens) {
+            aprs.push({ address: vault, apr: 0 });
+        }
+
+        // get the APY for each active vault and return it
+        for (const vault of activePoolTokens) {
             const apy = apyResponse[vault].computeAPYs;
             if (apy) {
                 aprs.push({ address: vault, apr: parseFloat(apy) });

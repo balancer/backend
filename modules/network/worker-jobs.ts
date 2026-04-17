@@ -177,7 +177,7 @@ export const activeChainWorkerJobsGlobal: WorkerJob[] = [
     },
     {
         name: 'post-subgraph-lag-metrics',
-        interval: every(2, 'minutes'),
+        interval: every(15, 'minutes'),
     },
     {
         name: 'sync-token-tvl',

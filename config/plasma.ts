@@ -189,7 +189,7 @@ export default <NetworkData>{
             },
             euler: {
                 chain: 'PLASMA',
-                url: 'https://raw.githubusercontent.com/euler-xyz/euler-labels/refs/heads/master/9745/vaults.json',
+                url: 'https://raw.githubusercontent.com/euler-xyz/euler-labels/refs/heads/master/9745/products.json',
                 lens: '0xc55f6e262FE21Da068ece5D3fa015D8451bAf625',
             },
         },
