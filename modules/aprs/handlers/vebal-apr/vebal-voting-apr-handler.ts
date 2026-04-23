@@ -76,6 +76,7 @@ export class VeBalVotingAprHandler implements AprHandler {
     }
 
     async getApr(): Promise<number> {
+        return 0;
         // Get APRs for last 3 weeks, if available
         const round = await fetchLatestStakeDaoRound();
 
