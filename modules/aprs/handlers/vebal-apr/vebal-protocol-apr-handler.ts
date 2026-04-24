@@ -87,35 +87,36 @@ export class VeBalProtocolAprHandler implements AprHandler {
     }
 
     async getApr(): Promise<number> {
-        const revenue = await fetchRevenue(Date.now(), config['MAINNET'].rpcUrl);
+        return 0;
+        // const revenue = await fetchRevenue(Date.now(), config['MAINNET'].rpcUrl);
 
-        // Prices
-        const balPrice = await prisma.prismaTokenCurrentPrice.findFirst({
-            where: { tokenAddress: balAddress, chain: 'MAINNET' },
-            select: { price: true },
-        });
+        // // Prices
+        // const balPrice = await prisma.prismaTokenCurrentPrice.findFirst({
+        //     where: { tokenAddress: balAddress, chain: 'MAINNET' },
+        //     select: { price: true },
+        // });
 
-        const usdcPrice = await prisma.prismaTokenCurrentPrice.findFirst({
-            where: { tokenAddress: usdcAddress, chain: 'MAINNET' },
-            select: { price: true },
-        });
+        // const usdcPrice = await prisma.prismaTokenCurrentPrice.findFirst({
+        //     where: { tokenAddress: usdcAddress, chain: 'MAINNET' },
+        //     select: { price: true },
+        // });
 
-        const bptPrice = await prisma.prismaTokenCurrentPrice.findFirst({
-            where: { tokenAddress: vebalPoolAddress, chain: 'MAINNET' },
-            select: { price: true },
-        });
+        // const bptPrice = await prisma.prismaTokenCurrentPrice.findFirst({
+        //     where: { tokenAddress: vebalPoolAddress, chain: 'MAINNET' },
+        //     select: { price: true },
+        // });
 
-        if (!balPrice || !usdcPrice || !bptPrice) {
-            return 0;
-        }
+        // if (!balPrice || !usdcPrice || !bptPrice) {
+        //     return 0;
+        // }
 
-        const lastWeekBalRevenue = revenue.balAmount * balPrice.price;
-        const lastWeekUsdcRevenue = revenue.usdcAmount * usdcPrice.price;
+        // const lastWeekBalRevenue = revenue.balAmount * balPrice.price;
+        // const lastWeekUsdcRevenue = revenue.usdcAmount * usdcPrice.price;
 
-        const dailyRevenue = (lastWeekBalRevenue + lastWeekUsdcRevenue) / 7;
-        const apr = (365 * dailyRevenue) / (bptPrice.price * revenue.veBalSupply);
+        // const dailyRevenue = (lastWeekBalRevenue + lastWeekUsdcRevenue) / 7;
+        // const apr = (365 * dailyRevenue) / (bptPrice.price * revenue.veBalSupply);
 
-        return apr;
+        // return apr;
     }
 
     public async calculateAprForPools(
