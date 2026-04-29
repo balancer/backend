@@ -1,5 +1,11 @@
 # backend
 
+## 2.1.6
+
+### Patch Changes
+
+-   4d2a7a4: change default swap protocol fee for v3
+
 ## 2.1.5
 
 ### Patch Changes
