@@ -50,7 +50,7 @@ export default <NetworkData>{
             vaultAddress: '0xba1333333333a1ba1108e8412f11850a5c319ba9',
             protocolFeeController: '0xcacc7e1efeea8bb3af6d5720d12c1876aa6ee76b',
             routerAddress: '0x9da18982a33fd0c7051b19f0d7c76f2d5e7e017c',
-            defaultSwapFeePercentage: '0.5',
+            defaultSwapFeePercentage: '0.25',
             defaultYieldFeePercentage: '0.1',
         },
     },
