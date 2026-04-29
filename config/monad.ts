@@ -69,6 +69,28 @@ export default <NetworkData>{
                     ],
                 },
                 {
+                    url: 'https://www.ether.fi/api/dapp/protocol/protocol-detail',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0xa3d68b74bf0528fdd07263c60d6488749044914b',
+                            path: '$.7_day_apr',
+                        },
+                    ],
+                },
+                {
+                    url: 'https://api.rocketpool.net/mainnet/reth/apr',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0xc50f2e735edd9dcd8ccd41ecfe9894e679e3195f',
+                            path: '$.yearlyAPR',
+                        },
+                    ],
+                },
+                {
                     url: 'https://yields.llama.fi/chart/ee40513c-9356-4c53-9f26-446b484a8ae2',
                     scale: 100,
                     extractors: [
@@ -162,6 +184,18 @@ export default <NetworkData>{
                             type: 'path',
                             token: '0x8d5c2df3eef09088fcccf3376d8ecd0dd505f642',
                             path: '$.reserves.0x754704bc059f8c67012fed69bc8a327a5aafb603.supply.baseAPY',
+                        },
+                    ],
+                },
+                {
+                    name: 'wnwETH',
+                    url: 'https://app.neverland.money/api/pool-apy',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0xb3b850ac62b89fe9f4efb652b516108a8aeb8848',
+                            path: '$.reserves.0xee8c0e9f1bffb4eb878d8f15f368a02a35481242.supply.baseAPY',
                         },
                     ],
                 },
