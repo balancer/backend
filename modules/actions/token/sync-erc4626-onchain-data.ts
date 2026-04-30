@@ -65,8 +65,10 @@ export const syncErc4626OnchainData = async (vaultExplorerAddress: string, viemC
 
         // workaround for morphov2 vaults, set maxWithdraw and maxDeposit to maxInt
         const morphoV2Vaults = [
-            '0x4ef53d2caa51c447fdfeeedee8f07fd1962c9ee6',
-            '0x8c1bed5b9a0928467c9b1341da1d7bd5e10b6549',
+            '0x4ef53d2caa51c447fdfeeedee8f07fd1962c9ee6', // kpk usdc prime v2
+            '0xbb50a5341368751024ddf33385ba8cf61fe65ff9', // kpk eth prime v2
+            '0x8c106eedad96553e64287a5a6839c3cc78afa3d0', // gauntlet usdc prime
+            '0x870f0bf29a25a40e7cc087cd5c53e70c11f2c8a8', // kpk usdt prime v2
         ];
         morphoV2Vaults.forEach((vault) => {
             if (onchainData[vault]) {
