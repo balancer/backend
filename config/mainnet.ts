@@ -617,6 +617,17 @@ export default <NetworkData>{
                         },
                     ],
                 },
+                {
+                    url: 'https://app.saturn.credit/api/analytics/staking',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0xd166337499e176bbc38a1fbd113ab144e5bd2df7',
+                            path: '$.stakingApy[-1:].value',
+                        },
+                    ],
+                },
             ],
             contract: {
                 calls: [
