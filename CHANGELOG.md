@@ -1,5 +1,12 @@
 # backend
 
+## 2.1.8
+
+### Patch Changes
+
+-   79ef0df: run v3 tokenpair updates in parallel
+-   2b61153: flag to filter unreviewed rps
+
 ## 2.1.7
 
 ### Patch Changes
