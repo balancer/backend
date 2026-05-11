@@ -1,5 +1,11 @@
 # backend
 
+## 2.1.9
+
+### Patch Changes
+
+-   fb661fd: remove option for multichain events for now
+
 ## 2.1.8
 
 ### Patch Changes
