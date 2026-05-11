@@ -1469,6 +1469,10 @@ input GqlPoolFilter {
     protocolVersionIn: [Int!]
     minTvl: Float
     hasHook: Boolean @deprecated(reason: "use tags to filter instead")
+    """
+    Only returns pools where the rateproviders are reviewed. Default: false
+    """
+    reviewedOnly: Boolean
 }
 
 """

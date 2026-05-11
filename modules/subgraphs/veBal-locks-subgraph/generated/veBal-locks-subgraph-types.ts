@@ -20,6 +20,14 @@ export type Scalars = {
     Timestamp: any;
 };
 
+/** Indicates whether the current, partially filled bucket should be included in the response. Defaults to `exclude` */
+export enum Aggregation_Current {
+    /** Exclude the current, partially filled bucket from the response */
+    exclude = 'exclude',
+    /** Include the current, partially filled bucket in the response */
+    include = 'include',
+}
+
 export enum Aggregation_Interval {
     day = 'day',
     hour = 'hour',
@@ -661,10 +669,8 @@ export type LiquidityGauge_Filter = {
     relativeWeightCap_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
     rewardTokensList?: InputMaybe<Array<Scalars['Bytes']>>;
     rewardTokensList_contains?: InputMaybe<Array<Scalars['Bytes']>>;
-    rewardTokensList_contains_nocase?: InputMaybe<Array<Scalars['Bytes']>>;
     rewardTokensList_not?: InputMaybe<Array<Scalars['Bytes']>>;
     rewardTokensList_not_contains?: InputMaybe<Array<Scalars['Bytes']>>;
-    rewardTokensList_not_contains_nocase?: InputMaybe<Array<Scalars['Bytes']>>;
     shares_?: InputMaybe<GaugeShare_Filter>;
     streamer?: InputMaybe<Scalars['Bytes']>;
     streamer_contains?: InputMaybe<Scalars['Bytes']>;
@@ -995,10 +1001,8 @@ export type Pool_Filter = {
     and?: InputMaybe<Array<InputMaybe<Pool_Filter>>>;
     gaugesList?: InputMaybe<Array<Scalars['Bytes']>>;
     gaugesList_contains?: InputMaybe<Array<Scalars['Bytes']>>;
-    gaugesList_contains_nocase?: InputMaybe<Array<Scalars['Bytes']>>;
     gaugesList_not?: InputMaybe<Array<Scalars['Bytes']>>;
     gaugesList_not_contains?: InputMaybe<Array<Scalars['Bytes']>>;
-    gaugesList_not_contains_nocase?: InputMaybe<Array<Scalars['Bytes']>>;
     gauges_?: InputMaybe<LiquidityGauge_Filter>;
     id?: InputMaybe<Scalars['ID']>;
     id_gt?: InputMaybe<Scalars['ID']>;
@@ -2003,7 +2007,6 @@ export type _Meta_ = {
      * will be null if the _meta field has a block constraint that asks for
      * a block number. It will be filled if the _meta field has no block constraint
      * and therefore asks for the latest  block
-     *
      */
     block: _Block_;
     /** The deployment ID */

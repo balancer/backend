@@ -627,6 +627,7 @@ export default <NetworkData>{
                             path: '$.stakingApy[-1:].value',
                         },
                     ],
+                    skipSSL: true,
                 },
             ],
             contract: {

@@ -1258,6 +1258,11 @@ export const schema = gql`
         protocolVersionIn: [Int!]
 
         """
+        Only returns pools where the rateprovider or ERC4626 are reviewed. Default: false
+        """
+        reviewedOnly: Boolean
+
+        """
         For list of tags see: https://github.com/balancer/metadata/blob/main/pools/index.json
         Use uppercase
         """

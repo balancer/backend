@@ -20,6 +20,14 @@ export type Scalars = {
     Timestamp: any;
 };
 
+/** Indicates whether the current, partially filled bucket should be included in the response. Defaults to `exclude` */
+export enum Aggregation_Current {
+    /** Exclude the current, partially filled bucket from the response */
+    exclude = 'exclude',
+    /** Include the current, partially filled bucket in the response */
+    include = 'include',
+}
+
 export enum Aggregation_Interval {
     day = 'day',
     hour = 'hour',
@@ -414,7 +422,6 @@ export type _Meta_ = {
      * will be null if the _meta field has a block constraint that asks for
      * a block number. It will be filled if the _meta field has no block constraint
      * and therefore asks for the latest  block
-     *
      */
     block: _Block_;
     /** The deployment ID */

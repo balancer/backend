@@ -756,6 +756,7 @@ export const aGqlPoolFilter = (overrides?: Partial<GqlPoolFilter>): GqlPoolFilte
                 : [GqlPoolType.COMPOSABLE_STABLE],
         protocolVersionIn:
             overrides && overrides.hasOwnProperty('protocolVersionIn') ? overrides.protocolVersionIn! : [508],
+        reviewedOnly: overrides && overrides.hasOwnProperty('reviewedOnly') ? overrides.reviewedOnly! : false,
         tagIn: overrides && overrides.hasOwnProperty('tagIn') ? overrides.tagIn! : ['totam'],
         tagNotIn: overrides && overrides.hasOwnProperty('tagNotIn') ? overrides.tagNotIn! : ['cuppedia'],
         tokensIn: overrides && overrides.hasOwnProperty('tokensIn') ? overrides.tokensIn! : ['tabella'],

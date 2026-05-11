@@ -758,6 +758,8 @@ export type GqlPoolFilter = {
     poolTypeIn?: InputMaybe<Array<GqlPoolType>>;
     poolTypeNotIn?: InputMaybe<Array<GqlPoolType>>;
     protocolVersionIn?: InputMaybe<Array<Scalars['Int']>>;
+    /** Only returns pools where the rateprovider or ERC4626 are reviewed. Default: false */
+    reviewedOnly?: InputMaybe<Scalars['Boolean']>;
     /**
      * For list of tags see: https://github.com/balancer/metadata/blob/main/pools/index.json
      * Use uppercase
