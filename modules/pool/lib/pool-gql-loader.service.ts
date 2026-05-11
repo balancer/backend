@@ -178,8 +178,24 @@ export class PoolGqlLoaderService {
                 return first ? sortedPools.slice(skip, skip + first) : sortedPools.slice(skip, undefined);
             }
 
+            if (args.where.reviewedOnly) {
+                // if a pool has a rateprovider that is non-zero address, it needs to have a review to be included in the results
+                return gqlPools.filter((pool) => {
+                    for (const token of pool.poolTokens) {
+                        if (token.priceRateProvider && token.priceRateProvider !== ZERO_ADDRESS) {
+                            if (!token.priceRateProviderData) {
+                                return false;
+                            }
+                        }
+                    }
+                    return true;
+                });
+            }
+
             return gqlPools;
         }
+
+        const reviewedOnly = args.where?.reviewedOnly;
 
         // Use full-text search using search_vector
         if (args.textSearch && args.textSearch.trim().length > 0) {
@@ -224,6 +240,20 @@ export class PoolGqlLoaderService {
 
             // load underlying token info into PoolTokenDetail
             await enrichWithErc4626Data(mappedPool.poolTokens, mappedPool.chain);
+        }
+
+        if (reviewedOnly) {
+            // if a pool has a rateprovider that is non-zero address, it needs to have a review to be included in the results
+            return gqlPools.filter((pool) => {
+                for (const token of pool.poolTokens) {
+                    if (token.priceRateProvider && token.priceRateProvider !== ZERO_ADDRESS) {
+                        if (!token.priceRateProviderData) {
+                            return false;
+                        }
+                    }
+                }
+                return true;
+            });
         }
 
         return gqlPools;

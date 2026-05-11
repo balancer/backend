@@ -49,10 +49,8 @@ export type AddRemove_Filter = {
     _change_block?: InputMaybe<BlockChangedFilter>;
     amounts?: InputMaybe<Array<Scalars['BigDecimal']>>;
     amounts_contains?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    amounts_contains_nocase?: InputMaybe<Array<Scalars['BigDecimal']>>;
     amounts_not?: InputMaybe<Array<Scalars['BigDecimal']>>;
     amounts_not_contains?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    amounts_not_contains_nocase?: InputMaybe<Array<Scalars['BigDecimal']>>;
     and?: InputMaybe<Array<InputMaybe<AddRemove_Filter>>>;
     blockNumber?: InputMaybe<Scalars['BigInt']>;
     blockNumber_gt?: InputMaybe<Scalars['BigInt']>;
@@ -180,6 +178,14 @@ export enum AddRemove_OrderBy {
     TransactionHash = 'transactionHash',
     Type = 'type',
     User = 'user',
+}
+
+/** Indicates whether the current, partially filled bucket should be included in the response. Defaults to `exclude` */
+export enum Aggregation_Current {
+    /** Exclude the current, partially filled bucket from the response */
+    Exclude = 'exclude',
+    /** Include the current, partially filled bucket in the response */
+    Include = 'include',
 }
 
 export enum Aggregation_Interval {
@@ -2497,7 +2503,6 @@ export type _Meta_ = {
      * will be null if the _meta field has a block constraint that asks for
      * a block number. It will be filled if the _meta field has no block constraint
      * and therefore asks for the latest  block
-     *
      */
     block: _Block_;
     /** The deployment ID */

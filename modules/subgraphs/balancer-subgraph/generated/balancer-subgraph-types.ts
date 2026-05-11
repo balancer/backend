@@ -20,6 +20,14 @@ export type Scalars = {
     Timestamp: any;
 };
 
+/** Indicates whether the current, partially filled bucket should be included in the response. Defaults to `exclude` */
+export enum Aggregation_Current {
+    /** Exclude the current, partially filled bucket from the response */
+    Exclude = 'exclude',
+    /** Include the current, partially filled bucket in the response */
+    Include = 'include',
+}
+
 export enum Aggregation_Interval {
     Day = 'day',
     Hour = 'hour',
@@ -302,10 +310,8 @@ export type FxOracle_Filter = {
     or?: InputMaybe<Array<InputMaybe<FxOracle_Filter>>>;
     tokens?: InputMaybe<Array<Scalars['Bytes']>>;
     tokens_contains?: InputMaybe<Array<Scalars['Bytes']>>;
-    tokens_contains_nocase?: InputMaybe<Array<Scalars['Bytes']>>;
     tokens_not?: InputMaybe<Array<Scalars['Bytes']>>;
     tokens_not_contains?: InputMaybe<Array<Scalars['Bytes']>>;
-    tokens_not_contains_nocase?: InputMaybe<Array<Scalars['Bytes']>>;
 };
 
 export enum FxOracle_OrderBy {
@@ -338,10 +344,8 @@ export type JoinExit_Filter = {
     _change_block?: InputMaybe<BlockChangedFilter>;
     amounts?: InputMaybe<Array<Scalars['BigDecimal']>>;
     amounts_contains?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    amounts_contains_nocase?: InputMaybe<Array<Scalars['BigDecimal']>>;
     amounts_not?: InputMaybe<Array<Scalars['BigDecimal']>>;
     amounts_not_contains?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    amounts_not_contains_nocase?: InputMaybe<Array<Scalars['BigDecimal']>>;
     and?: InputMaybe<Array<InputMaybe<JoinExit_Filter>>>;
     block?: InputMaybe<Scalars['BigInt']>;
     block_gt?: InputMaybe<Scalars['BigInt']>;
@@ -1628,10 +1632,8 @@ export type Pool_Filter = {
     tauBetaY_not_in?: InputMaybe<Array<Scalars['BigDecimal']>>;
     tokensList?: InputMaybe<Array<Scalars['Bytes']>>;
     tokensList_contains?: InputMaybe<Array<Scalars['Bytes']>>;
-    tokensList_contains_nocase?: InputMaybe<Array<Scalars['Bytes']>>;
     tokensList_not?: InputMaybe<Array<Scalars['Bytes']>>;
     tokensList_not_contains?: InputMaybe<Array<Scalars['Bytes']>>;
-    tokensList_not_contains_nocase?: InputMaybe<Array<Scalars['Bytes']>>;
     tokens_?: InputMaybe<PoolToken_Filter>;
     totalAumFeeCollectedInBPT?: InputMaybe<Scalars['BigDecimal']>;
     totalAumFeeCollectedInBPT_gt?: InputMaybe<Scalars['BigDecimal']>;
@@ -2796,7 +2798,6 @@ export type _Meta_ = {
      * will be null if the _meta field has a block constraint that asks for
      * a block number. It will be filled if the _meta field has no block constraint
      * and therefore asks for the latest  block
-     *
      */
     block: _Block_;
     /** The deployment ID */

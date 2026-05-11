@@ -20,6 +20,14 @@ export type Scalars = {
     Timestamp: any;
 };
 
+/** Indicates whether the current, partially filled bucket should be included in the response. Defaults to `exclude` */
+export enum Aggregation_Current {
+    /** Exclude the current, partially filled bucket from the response */
+    Exclude = 'exclude',
+    /** Include the current, partially filled bucket in the response */
+    Include = 'include',
+}
+
 export enum Aggregation_Interval {
     Day = 'day',
     Hour = 'hour',
@@ -1160,10 +1168,8 @@ export type QuantAmmWeightedParams_Filter = {
     epsilonMax_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
     gradientIntermediates?: InputMaybe<Array<Scalars['BigInt']>>;
     gradientIntermediates_contains?: InputMaybe<Array<Scalars['BigInt']>>;
-    gradientIntermediates_contains_nocase?: InputMaybe<Array<Scalars['BigInt']>>;
     gradientIntermediates_not?: InputMaybe<Array<Scalars['BigInt']>>;
     gradientIntermediates_not_contains?: InputMaybe<Array<Scalars['BigInt']>>;
-    gradientIntermediates_not_contains_nocase?: InputMaybe<Array<Scalars['BigInt']>>;
     id?: InputMaybe<Scalars['Bytes']>;
     id_contains?: InputMaybe<Scalars['Bytes']>;
     id_gt?: InputMaybe<Scalars['Bytes']>;
@@ -1176,10 +1182,8 @@ export type QuantAmmWeightedParams_Filter = {
     id_not_in?: InputMaybe<Array<Scalars['Bytes']>>;
     lambda?: InputMaybe<Array<Scalars['BigInt']>>;
     lambda_contains?: InputMaybe<Array<Scalars['BigInt']>>;
-    lambda_contains_nocase?: InputMaybe<Array<Scalars['BigInt']>>;
     lambda_not?: InputMaybe<Array<Scalars['BigInt']>>;
     lambda_not_contains?: InputMaybe<Array<Scalars['BigInt']>>;
-    lambda_not_contains_nocase?: InputMaybe<Array<Scalars['BigInt']>>;
     lastInterpolationTimePossible?: InputMaybe<Scalars['BigInt']>;
     lastInterpolationTimePossible_gt?: InputMaybe<Scalars['BigInt']>;
     lastInterpolationTimePossible_gte?: InputMaybe<Scalars['BigInt']>;
@@ -1206,10 +1210,8 @@ export type QuantAmmWeightedParams_Filter = {
     maxTradeSizeRatio_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
     movingAverageIntermediates?: InputMaybe<Array<Scalars['BigInt']>>;
     movingAverageIntermediates_contains?: InputMaybe<Array<Scalars['BigInt']>>;
-    movingAverageIntermediates_contains_nocase?: InputMaybe<Array<Scalars['BigInt']>>;
     movingAverageIntermediates_not?: InputMaybe<Array<Scalars['BigInt']>>;
     movingAverageIntermediates_not_contains?: InputMaybe<Array<Scalars['BigInt']>>;
-    movingAverageIntermediates_not_contains_nocase?: InputMaybe<Array<Scalars['BigInt']>>;
     or?: InputMaybe<Array<InputMaybe<QuantAmmWeightedParams_Filter>>>;
     oracleStalenessThreshold?: InputMaybe<Scalars['BigInt']>;
     oracleStalenessThreshold_gt?: InputMaybe<Scalars['BigInt']>;
@@ -1257,16 +1259,12 @@ export type QuantAmmWeightedParams_Filter = {
     updateInterval_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
     weightBlockMultipliers?: InputMaybe<Array<Scalars['BigInt']>>;
     weightBlockMultipliers_contains?: InputMaybe<Array<Scalars['BigInt']>>;
-    weightBlockMultipliers_contains_nocase?: InputMaybe<Array<Scalars['BigInt']>>;
     weightBlockMultipliers_not?: InputMaybe<Array<Scalars['BigInt']>>;
     weightBlockMultipliers_not_contains?: InputMaybe<Array<Scalars['BigInt']>>;
-    weightBlockMultipliers_not_contains_nocase?: InputMaybe<Array<Scalars['BigInt']>>;
     weightsAtLastUpdateInterval?: InputMaybe<Array<Scalars['BigInt']>>;
     weightsAtLastUpdateInterval_contains?: InputMaybe<Array<Scalars['BigInt']>>;
-    weightsAtLastUpdateInterval_contains_nocase?: InputMaybe<Array<Scalars['BigInt']>>;
     weightsAtLastUpdateInterval_not?: InputMaybe<Array<Scalars['BigInt']>>;
     weightsAtLastUpdateInterval_not_contains?: InputMaybe<Array<Scalars['BigInt']>>;
-    weightsAtLastUpdateInterval_not_contains_nocase?: InputMaybe<Array<Scalars['BigInt']>>;
 };
 
 export enum QuantAmmWeightedParams_OrderBy {
@@ -1605,10 +1603,8 @@ export type ReClammParams_Filter = {
     lastTimestamp_not_in?: InputMaybe<Array<Scalars['BigInt']>>;
     lastVirtualBalances?: InputMaybe<Array<Scalars['BigInt']>>;
     lastVirtualBalances_contains?: InputMaybe<Array<Scalars['BigInt']>>;
-    lastVirtualBalances_contains_nocase?: InputMaybe<Array<Scalars['BigInt']>>;
     lastVirtualBalances_not?: InputMaybe<Array<Scalars['BigInt']>>;
     lastVirtualBalances_not_contains?: InputMaybe<Array<Scalars['BigInt']>>;
-    lastVirtualBalances_not_contains_nocase?: InputMaybe<Array<Scalars['BigInt']>>;
     or?: InputMaybe<Array<InputMaybe<ReClammParams_Filter>>>;
     priceRatioUpdateEndTime?: InputMaybe<Scalars['BigInt']>;
     priceRatioUpdateEndTime_gt?: InputMaybe<Scalars['BigInt']>;
@@ -1773,10 +1769,8 @@ export type WeightedParams_Filter = {
     or?: InputMaybe<Array<InputMaybe<WeightedParams_Filter>>>;
     weights?: InputMaybe<Array<Scalars['BigDecimal']>>;
     weights_contains?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    weights_contains_nocase?: InputMaybe<Array<Scalars['BigDecimal']>>;
     weights_not?: InputMaybe<Array<Scalars['BigDecimal']>>;
     weights_not_contains?: InputMaybe<Array<Scalars['BigDecimal']>>;
-    weights_not_contains_nocase?: InputMaybe<Array<Scalars['BigDecimal']>>;
 };
 
 export enum WeightedParams_OrderBy {
@@ -1804,7 +1798,6 @@ export type _Meta_ = {
      * will be null if the _meta field has a block constraint that asks for
      * a block number. It will be filled if the _meta field has no block constraint
      * and therefore asks for the latest  block
-     *
      */
     block: _Block_;
     /** The deployment ID */
