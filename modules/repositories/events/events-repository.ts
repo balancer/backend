@@ -219,6 +219,21 @@ export const eventsRepository = {
 
         return swaps as SwapEvent[];
     },
+    getAllEventsForTimeRange: async (chain: Chain, poolId: string, startTime?: number, endTime?: number) => {
+        const events = await prisma.prismaPoolEvent.findMany({
+            where: {
+                chain,
+                poolId,
+                blockTimestamp: {
+                    ...(startTime ? { gte: startTime } : {}),
+                    ...(endTime ? { lte: endTime } : {}),
+                },
+            },
+            orderBy,
+        });
+
+        return events as (SwapEvent | JoinExitEvent)[];
+    },
     getTokenFlows: async (
         chain: Chain,
         poolId: string,
