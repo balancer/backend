@@ -72,8 +72,8 @@ const getMultichainEvents = async (chainIn: Chain[], limit: number = 100) => {
                 event.type === 'SWAP' && (event as SwapEvent).payload?.surplus
                     ? parseCowAmmSwap(event as SwapEvent)
                     : event.type === 'SWAP'
-                      ? parseSwap(event as SwapEvent)
-                      : parseJoinExit(event as JoinExitEvent),
+                    ? parseSwap(event as SwapEvent)
+                    : parseJoinExit(event as JoinExitEvent),
             );
         }),
     );
@@ -114,9 +114,9 @@ export function EventsQueryController(env = process.env) {
             }
 
             // Table is partitioned by chain, so querying by many chains is extermenly inefficient.
-            if (chainIn && chainIn.length > 1) {
-                return getMultichainEvents(chainIn as Chain[], first);
-            }
+            // if (chainIn && chainIn.length > 1) {
+            //     return getMultichainEvents(chainIn as Chain[], first);
+            // }
 
             const conditions = {
                 chain: chainIn[0] as Chain,
@@ -137,8 +137,8 @@ export function EventsQueryController(env = process.env) {
                 event.type === 'SWAP' && (event as SwapEvent).payload?.surplus
                     ? parseCowAmmSwap(event as SwapEvent)
                     : event.type === 'SWAP'
-                      ? parseSwap(event as SwapEvent)
-                      : parseJoinExit(event as JoinExitEvent),
+                    ? parseSwap(event as SwapEvent)
+                    : parseJoinExit(event as JoinExitEvent),
             );
 
             return results;
