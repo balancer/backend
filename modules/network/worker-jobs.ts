@@ -210,7 +210,7 @@ export const fxWorkerJobs: WorkerJob[] = [
 export const cowAmmWorkerJobs: WorkerJob[] = [
     {
         name: 'sync-cow-amm-pools',
-        interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(30, 'seconds'),
+        interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(60, 'seconds'),
     },
     {
         name: 'sync-cow-amm-swaps',

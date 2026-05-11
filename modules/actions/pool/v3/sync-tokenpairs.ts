@@ -2,6 +2,7 @@ import { Chain } from '@prisma/client';
 import { prisma } from '../../../../prisma/prisma-client';
 import { ViemClient } from '../../../sources/viem-client';
 import { fetchTokenPairData } from '../../../sources/contracts/v3/fetch-tokenpair-data';
+import { prismaBulkExecuteOperations } from '../../../../prisma/prisma-util';
 
 /**
  * Syncs all the token pair data for the given pool ids
@@ -30,24 +31,29 @@ export const syncTokenPairs = async (
     });
     const tokenPairData = await fetchTokenPairData(routerAddress, tokenPairInputPools, viemClient);
 
+    const operations = [];
     // Update token pair data to the database
     for (const poolId of ids) {
         try {
-            await prisma.prismaPoolDynamicData.update({
-                where: {
-                    poolId_chain: {
-                        poolId: poolId,
-                        chain: chain,
+            operations.push(
+                prisma.prismaPoolDynamicData.update({
+                    where: {
+                        poolId_chain: {
+                            poolId: poolId,
+                            chain: chain,
+                        },
                     },
-                },
-                data: {
-                    tokenPairsData: tokenPairData[poolId].tokenPairs,
-                },
-            });
+                    data: {
+                        tokenPairsData: tokenPairData[poolId].tokenPairs,
+                    },
+                }),
+            );
         } catch (e) {
             console.error('Error upserting pool', e);
         }
     }
+
+    await prismaBulkExecuteOperations(operations, false);
 
     return ids;
 };
