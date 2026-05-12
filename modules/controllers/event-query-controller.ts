@@ -114,9 +114,21 @@ export function EventsQueryController(env = process.env) {
             }
 
             // Table is partitioned by chain, so querying by many chains is extermenly inefficient.
-            // if (chainIn && chainIn.length > 1) {
-            //     return getMultichainEvents(chainIn as Chain[], first);
-            // }
+            if (chainIn && chainIn.length > 1) {
+                console.error(
+                    `Querying events for multiple chains at once is not supported. Params: ${JSON.stringify({
+                        chainIn,
+                        poolIdIn,
+                        poolId,
+                        type,
+                        typeIn,
+                        userAddress,
+                        first,
+                        skip,
+                    })}`,
+                );
+                // return getMultichainEvents(chainIn as Chain[], first);
+            }
 
             const conditions = {
                 chain: chainIn[0] as Chain,
