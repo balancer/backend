@@ -100,10 +100,12 @@ export class MerklAprHandler implements AprHandler {
     private async findTokenOpportunities(pools: PoolAPRData[]) {
         const aaveMarkets = [AaveV3Plasma];
         const aaveMarketForChain = aaveMarkets.find((market) => chainIdToChain[market.CHAIN_ID] === pools[0].chain);
-        if (!aaveMarketForChain) {
-            return [];
+        let aaveTokenMappings: Map<string, string>;
+        if (aaveMarketForChain) {
+            aaveTokenMappings = await this.getTokenMappings(Object.values(aaveMarketForChain.ASSETS));
+        } else {
+            aaveTokenMappings = new Map<string, string>();
         }
-        const aaveTokenMappings = await this.getTokenMappings(Object.values(aaveMarketForChain.ASSETS));
 
         const tokensWithUnderlying: string[] = [];
         pools.forEach((pool) => {
