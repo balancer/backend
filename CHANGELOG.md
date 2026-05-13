@@ -1,5 +1,11 @@
 # backend
 
+## 2.1.10
+
+### Patch Changes
+
+-   e4a3fa9: handle all merkl token opportunities for boosted pools
+
 ## 2.1.9
 
 ### Patch Changes
