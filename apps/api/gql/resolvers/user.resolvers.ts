@@ -6,6 +6,8 @@ const resolvers: Resolvers = {
     Query: {},
     Mutation: {
         userSyncChangedWalletBalancesForAllPools: async (parent, { chain }, context) => {
+            isAdminRoute(context);
+
             await UserBalancesController().syncBalances(chain);
 
             return 'success';

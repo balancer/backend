@@ -1,5 +1,6 @@
 import { Resolvers } from '../generated-schema';
 import { protocolService } from '../../../../modules/protocol/protocol.service';
+import { isAdminRoute } from '../../../../modules/auth/auth-context';
 
 const protocolResolvers: Resolvers = {
     Query: {
@@ -12,6 +13,8 @@ const protocolResolvers: Resolvers = {
     },
     Mutation: {
         protocolCacheMetrics: async (parent, { chain }, context): Promise<string> => {
+            isAdminRoute(context);
+
             await protocolService.cacheProtocolMetrics(chain);
             return 'success';
         },
