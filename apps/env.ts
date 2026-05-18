@@ -74,6 +74,10 @@ export const schema = {
         type: String,
         optional: true,
     },
+    MERKL_API_KEY: {
+        type: String,
+        optional: true,
+    },
 };
 
 export const env: Env = load(schema, {

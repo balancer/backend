@@ -2,11 +2,12 @@ import { $Enums, PrismaPoolAprItem, PrismaPoolAprType } from '@prisma/client';
 import { AprHandler, PoolAPRData } from '../../types';
 import { chainIdToChain } from '../../../network/chain-id-to-chain';
 import { AaveV3Plasma } from '@bgd-labs/aave-address-book';
+import { env } from '../../../../apps/env';
 
 const opportunityUrl =
-    'https://api.merkl.fr/v4/opportunities/?test=false&status=LIVE&campaigns=true&mainProtocolId=balancer&page=0&items=100';
+    'https://api.merkl.xyz/v4/opportunities/?test=false&status=LIVE&campaigns=true&mainProtocolId=balancer&page=0&items=100';
 
-const tokenOpportunityUrlBase = `https://api.merkl.fr/v4/opportunities/?status=LIVE&explorerAddress=`;
+const tokenOpportunityUrlBase = `https://api.merkl.xyz/v4/opportunities/?status=LIVE&explorerAddress=`;
 
 interface MerklOpportunity {
     chainId: number;
@@ -27,7 +28,7 @@ export class MerklAprHandler implements AprHandler {
     }
 
     private async fetchMerklOpportunities() {
-        const response = await fetch(opportunityUrl);
+        const response = await this.merklFetch(opportunityUrl);
         const data = (await response.json()) as MerklOpportunity[];
 
         // remove opportunities with whitelist
@@ -128,7 +129,7 @@ export class MerklAprHandler implements AprHandler {
             // Fetch opportunities for the unique tokens
             const tokenOpportunityResponses = await Promise.all(
                 uniqueTokensWithUnderlying.map((tokenAddress) =>
-                    fetch(`${tokenOpportunityUrlBase}${tokenAddress}`).then(
+                    this.merklFetch(`${tokenOpportunityUrlBase}${tokenAddress}`).then(
                         (res) => res.json() as unknown as MerklOpportunity[],
                     ),
                 ),
@@ -258,5 +259,10 @@ export class MerklAprHandler implements AprHandler {
             }
         }
         return wrapperToATokenMap;
+    }
+    private async merklFetch(url: string): Promise<Response> {
+        const apiKey = env.MERKL_API_KEY;
+        const headers: Record<string, string> = apiKey ? { 'X-API-Key': apiKey } : {};
+        return fetch(url, { headers });
     }
 }
