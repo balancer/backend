@@ -108,6 +108,11 @@ export default <NetworkData>{
                             token: '0x06fd9d03b3d0f18e4919919b72d30c582f0a97e5',
                             path: '$["0x06Fd9D03b3d0F18E4919919b72D30c582f0a97E5"].supplyAPR',
                         },
+                        {
+                            type: 'path',
+                            token: '0xb2a2104d9fc202a38d74d8f6c3c45da6eef8f5e0',
+                            path: '$["0xfD739d4e423301CE9385c1fb8850539D657C296D"].supplyAPR',
+                        },
                     ],
                 },
                 {
@@ -142,6 +147,17 @@ export default <NetworkData>{
                             type: 'path',
                             token: '0xfd739d4e423301ce9385c1fb8850539d657c296d',
                             path: '$.apy',
+                        },
+                    ],
+                },
+                {
+                    url: 'https://protocol-api.treehouse.finance/protocol_mey',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0xb83d27f0f4133a7b0377a88089583131a903fdc7',
+                            path: '$[?(@.tasset=="tHYPE")].sma_mey',
                         },
                     ],
                 },
