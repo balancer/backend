@@ -153,6 +153,13 @@ export default <NetworkData>{
                 {
                     url: 'https://protocol-api.treehouse.finance/protocol_mey',
                     scale: 100,
+                    convert: async (val: number) => {
+                        const khype = (
+                            (await (await fetch('https://kinetiq.xyz/api/khype')).json()) as { apy_14d: number }
+                        ).apy_14d;
+
+                        return khype + val;
+                    },
                     extractors: [
                         {
                             type: 'path',
