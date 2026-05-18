@@ -1,5 +1,11 @@
 # backend
 
+## 2.1.11
+
+### Patch Changes
+
+-   d9952e7: use merkl api key
+
 ## 2.1.10
 
 ### Patch Changes
