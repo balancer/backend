@@ -127,13 +127,22 @@ export class MerklAprHandler implements AprHandler {
 
         if (uniqueTokensWithUnderlying.length > 0) {
             // Fetch opportunities for the unique tokens
-            const tokenOpportunityResponses = await Promise.all(
-                uniqueTokensWithUnderlying.map((tokenAddress) =>
-                    this.merklFetch(`${tokenOpportunityUrlBase}${tokenAddress}`).then(
-                        (res) => res.json() as unknown as MerklOpportunity[],
+            // rewrite to fetch in batches of 10 to avoid hitting ratelimits
+            const batchSize = 10;
+            const tokenOpportunityResponses: MerklOpportunity[][] = [];
+            for (let i = 0; i < uniqueTokensWithUnderlying.length; i += batchSize) {
+                const batch = uniqueTokensWithUnderlying.slice(i, i + batchSize);
+                const batchResponses = await Promise.all(
+                    batch.map((tokenAddress) =>
+                        this.merklFetch(`${tokenOpportunityUrlBase}${tokenAddress}`).then(
+                            (res) => res.json() as unknown as MerklOpportunity[],
+                        ),
                     ),
-                ),
-            );
+                );
+                tokenOpportunityResponses.push(...batchResponses);
+                // Add a small delay between batches to avoid hitting rate limits
+                await new Promise((resolve) => setTimeout(resolve, 1000));
+            }
 
             // Flatten the array of arrays and filter out opportunities with whitelist
             tokenOpportunities = tokenOpportunityResponses.flat();
