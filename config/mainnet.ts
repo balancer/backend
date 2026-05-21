@@ -630,6 +630,17 @@ export default <NetworkData>{
                     ],
                     skipSSL: true,
                 },
+                {
+                    url: 'https://www.inverse.finance/api/inv-staking',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x08d23468a467d2bb86fae0e32f247a26c7e2e994',
+                            path: '$.apr',
+                        },
+                    ],
+                },
             ],
             contract: {
                 calls: [
