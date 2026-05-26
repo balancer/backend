@@ -20,8 +20,6 @@ import {
     syncReliquaryStakingForPools,
 } from '../actions/pool/staking';
 import { GaugeSubgraphService } from '../subgraphs/gauge-subgraph/gauge-subgraph.service';
-import { deleteAuraStakingForAllPools, syncAuraStakingForPools } from '../actions/pool/staking/sync-aura-staking';
-import { AuraSubgraphService } from '../sources/subgraphs/aura/aura.service';
 import { syncVebalStakingForPools } from '../actions/pool/staking/sync-vebal-staking';
 import config from '../../config';
 
@@ -65,7 +63,6 @@ export class PoolService {
     public async reloadStakingForAllPools(stakingTypes: PrismaPoolStakingType[], chain: Chain): Promise<void> {
         await deleteReliquaryStakingForAllPools(stakingTypes, chain);
         await deleteGaugeStakingForAllPools(stakingTypes, chain);
-        await deleteAuraStakingForAllPools(stakingTypes, chain);
 
         // if we reload staking for reliquary, we also need to reload the snapshots because they are deleted while reloading
         if (stakingTypes.includes('RELIQUARY')) {
@@ -96,9 +93,6 @@ export class PoolService {
                     chain,
                     networkconfig.gaugeControllerHelperAddress,
                 );
-            }
-            if (networkconfig.subgraphs.aura) {
-                await syncAuraStakingForPools(chain, new AuraSubgraphService(networkconfig.subgraphs.aura));
             }
 
             if (chain === 'MAINNET') {

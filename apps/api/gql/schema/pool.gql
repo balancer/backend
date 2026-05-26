@@ -1565,7 +1565,7 @@ enum GqlPoolAprItemType {
     """
     APR that pools earns when BPT is staked on AURA.
     """
-    AURA
+    AURA @deprecated(reason: "Aura no longer available")
     """
     Rewards distributed by merkl.xyz
     """
@@ -1638,7 +1638,7 @@ type GqlPoolStaking {
     gauge: GqlPoolStakingGauge
     farm: GqlPoolStakingMasterChefFarm
     reliquary: GqlPoolStakingReliquaryFarm
-    aura: GqlPoolStakingAura
+    aura: GqlPoolStakingAura @deprecated(reason: "Aura no longer available")
     vebal: GqlPoolStakingVebal
 }
 
@@ -1647,7 +1647,7 @@ enum GqlPoolStakingType {
     RELIQUARY
     MASTER_CHEF
     FRESH_BEETS
-    AURA
+    AURA @deprecated(reason: "Aura no longer available")
     VEBAL
 }
 
@@ -1696,7 +1696,7 @@ type GqlPoolStakingFarmRewarder {
     rewardPerSecond: String!
 }
 
-type GqlPoolStakingAura {
+type GqlPoolStakingAura @deprecated(reason: "Aura no longer available") {
     id: ID!
     auraPoolAddress: String!
     auraPoolId: String!

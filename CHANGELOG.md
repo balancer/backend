@@ -1,5 +1,11 @@
 # backend
 
+## 2.1.12
+
+### Patch Changes
+
+-   8a9f3d9: remove aura
+
 ## 2.1.11
 
 ### Patch Changes
