@@ -247,6 +247,17 @@ export default <NetworkData>{
                         },
                     ],
                 },
+                {
+                    url: 'https://eth-api.lido.fi/v1/protocol/steth/apr/sma',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x10aeaf63194db8d453d4d85a06e5efe1dd0b5417',
+                            path: '$.data.smaApr',
+                        },
+                    ],
+                },
             ],
         },
     },
