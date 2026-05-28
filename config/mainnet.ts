@@ -641,6 +641,17 @@ export default <NetworkData>{
                         },
                     ],
                 },
+                {
+                    url: 'https://api.tangent.finance/savingAccounts/apy',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0xf17d6f98a5c6eaa99d149079984119e0a4ef6900',
+                            path: '$[0].value',
+                        },
+                    ],
+                },
             ],
             contract: {
                 calls: [
