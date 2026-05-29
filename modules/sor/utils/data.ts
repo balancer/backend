@@ -46,26 +46,15 @@ export async function getBasePoolsFromDb(
         cached = cache.put(cacheKey, { pools, bufferPools }, parseInt(env.SOR_POOLS_CACHE_TTL_SECONDS) * 1000);
     }
 
-    // Filter
+    // Filter by protocol version and hook preferences
     const pools = cached.pools
         .filter((pool) => pool.protocolVersion === protocolVersion)
         .filter((pool) => {
+            if (considerPoolsWithHooks) return true;
+            // When not considering hooks, only keep pools without hooks or with always-allowed hook types
             if (!pool.hook || Object.keys(pool.hook).length === 0) return true;
-
             const hook = pool.hook as HookData;
-            if (hook.type === 'MEV_TAX') return true;
-            if (hook.type === 'RECLAMM') return true;
-            if (hook.type === 'LBP') return true;
-            if (!considerPoolsWithHooks) return false;
-
-            // non-STABLE pools with STABLE_SURGE hooks are not supported
-            if (pool.type !== 'STABLE' && hook.type === 'STABLE_SURGE') return false;
-
-            const isSupportedHookType = hook.type !== undefined && hook.type !== 'UNKNOWN';
-            if (!isSupportedHookType) {
-                console.log('Pool has unsupported hook type', pool.id, hook.type);
-            }
-            return isSupportedHookType;
+            return hook.type === 'MEV_TAX' || hook.type === 'RECLAMM' || hook.type === 'LBP';
         });
 
     const requestedPoolIds = pools.map((pool) => pool.id);
@@ -155,7 +144,30 @@ async function getPools(chain: Chain, poolIds?: string[]): Promise<SORDbPool[]> 
         });
     }
 
-    return pools;
+    // Remove pools with unsupported hooks (invariant regardless of caller preferences)
+    pools = pools.filter((pool) => {
+        if (!pool.hook || Object.keys(pool.hook).length === 0) return true;
+        const hook = pool.hook as HookData;
+        if (hook.type === 'MEV_TAX' || hook.type === 'RECLAMM' || hook.type === 'LBP') return true;
+        // non-STABLE pools with STABLE_SURGE hooks are never supported
+        if (pool.type !== 'STABLE' && hook.type === 'STABLE_SURGE') return false;
+        const isSupportedHookType = hook.type !== undefined && hook.type !== 'UNKNOWN';
+        if (!isSupportedHookType) {
+            console.log('Pool has unsupported hook type', pool.id, hook.type);
+        }
+        return isSupportedHookType;
+    });
+
+    // Only allow pools where every token with a rate provider has been explicitly reviewed
+    const reviewedProviders = await prisma.prismaPriceRateProviderData.findMany({
+        where: { chain, reviewed: true },
+        select: { rateProviderAddress: true },
+    });
+    const reviewedAddresses = new Set(reviewedProviders.map((p) => p.rateProviderAddress.toLowerCase()));
+
+    return pools.filter((pool) =>
+        pool.tokens.every((t) => !t.priceRateProvider || reviewedAddresses.has(t.priceRateProvider.toLowerCase())),
+    );
 
     // This is alternative in case the DB gets too high CPU usage
     // const [pools, dynamicData, poolTokens, tokens] = await Promise.all([
