@@ -1,5 +1,11 @@
 # backend
 
+## 2.1.14
+
+### Patch Changes
+
+-   8e07a22: filter pools without rp reviews from sor
+
 ## 2.1.13
 
 ### Patch Changes
