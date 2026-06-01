@@ -9,6 +9,7 @@ import { poolsToIgnore } from './constants';
 import _ from 'lodash';
 import { tokenService } from '../../token/token.service';
 import { env } from '../../../apps/env';
+import { ZERO_ADDRESS } from '@balancer/sdk';
 
 export type BufferPoolData = {
     poolId: string;
@@ -166,7 +167,12 @@ async function getPools(chain: Chain, poolIds?: string[]): Promise<SORDbPool[]> 
     const reviewedAddresses = new Set(reviewedProviders.map((p) => p.rateProviderAddress.toLowerCase()));
 
     return pools.filter((pool) =>
-        pool.tokens.every((t) => !t.priceRateProvider || reviewedAddresses.has(t.priceRateProvider.toLowerCase())),
+        pool.tokens.every(
+            (t) =>
+                !t.priceRateProvider ||
+                t.priceRateProvider === ZERO_ADDRESS ||
+                reviewedAddresses.has(t.priceRateProvider.toLowerCase()),
+        ),
     );
 
     // This is alternative in case the DB gets too high CPU usage

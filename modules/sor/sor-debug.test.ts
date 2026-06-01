@@ -76,16 +76,16 @@ describe('sor debugging', () => {
 
     it.only('sor v3', async () => {
         const useProtocolVersion = 3;
-        const chain: GqlChain = 'SEPOLIA';
+        const chain: GqlChain = 'MAINNET';
 
         const chainId = chainToChainId[chain];
 
         // only do once before starting to debug
         // bun task sor-sync-v3 {chainId}
 
-        const tokenIn = '0x80d6d3946ed8a1da4e226aa21ccddc32bd127d1a'; // jUSD
-        const tokenOut = '0x212f34a319d901f6958e6df2b7d295d5a82635ba'; // USDC
-        const poolId = '0x398a13d3d44e4825f997cc7aee4c7016878ba244';
+        const tokenIn = '0x4ba01f22827018b4772cd326c7627fb4956a7c00'; // jUSD
+        const tokenOut = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'; // USDC
+        // const poolId = '0x398a13d3d44e4825f997cc7aee4c7016878ba244';
         const swapType = 'EXACT_IN';
         const swapKind: SwapKind = SwapKind.GivenIn;
 
@@ -94,9 +94,9 @@ describe('sor debugging', () => {
             tokenIn,
             tokenOut,
             swapType,
-            swapAmount: '1',
+            swapAmount: '10',
             useProtocolVersion,
-            poolIds: [poolId],
+            // poolIds: [poolId],
         });
 
         swaps.paths.forEach((path, i) => {
