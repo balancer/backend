@@ -129,6 +129,17 @@ export default <NetworkData>{
                     ],
                 },
                 {
+                    url: 'https://yields.llama.fi/chart/19d024ed-9c70-4323-9a81-fe873ea5f0e0',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0xe1753f2e00940cc31213dd92013cf019dfe4ca1d',
+                            path: '$.data[-1:].apyBase',
+                        },
+                    ],
+                },
+                {
                     url: 'https://yields.llama.fi/chart/46f3828a-cbf6-419e-8399-a83b905bf556',
                     scale: 100,
                     extractors: [
