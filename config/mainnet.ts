@@ -42,7 +42,6 @@ export default <NetworkData>{
         excludedTokenAddresses: [
             '0x04c154b66cb340f3ae24111cc767e0184ed00cc6', // pxETH, has Coingecko entry but no price
             '0xb45ad160634c528cc3d2926d9807104fa3157305', // sDOLA, has Coingecko entry but no price
-            '0x4ba01f22827018b4772cd326c7627fb4956a7c00', // msUSD, bug in Coingecko pricing
         ],
     },
     rpcUrl: env.DRPC_API_KEY
