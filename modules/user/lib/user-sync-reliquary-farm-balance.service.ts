@@ -12,7 +12,7 @@ import { UserStakedBalanceService } from '../user-types';
 import { ReliquarySubgraphService } from '../../subgraphs/reliquary-subgraph/reliquary.service';
 import { BALANCES_SYNC_BLOCKS_MARGIN } from '../../../config';
 import { floatToExactString } from '../../common/numbers';
-import { AllNetworkConfigsKeyedOnChain } from '../../network/network-config';
+import config from '../../../config';
 import { getEvents } from '../../web3/events';
 import { getViemClient } from '../../sources/viem-client';
 import { Multicaller3Viem } from '../../web3/multicaller-viem';
@@ -55,8 +55,8 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
     constructor(private readonly reliquaryAddress: string) {}
 
     public async syncChangedStakedBalances(chain: Chain): Promise<void> {
-        const networkConfig = AllNetworkConfigsKeyedOnChain[chain];
-        const reliquarySubgraphService = new ReliquarySubgraphService(networkConfig.data.subgraphs.reliquary!);
+        const networkData = config[chain];
+        const reliquarySubgraphService = new ReliquarySubgraphService(networkData.subgraphs.reliquary!);
         const viemClient = getViemClient(chain);
 
         const status = await prisma.prismaUserBalanceSyncStatus.findUnique({
@@ -81,13 +81,13 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
         const latestBlock = (await viemClient.getBlockNumber()).toString();
         const farms = await reliquarySubgraphService.getAllFarms({});
         const filteredFarms = farms.filter(
-            (farm) => !networkConfig.data.reliquary!.excludedFarmIds.includes(farm.pid.toString()),
+            (farm) => !networkData.reliquary!.excludedFarmIds.includes(farm.pid.toString()),
         );
 
         const startBlock = status.blockNumber - BALANCES_SYNC_BLOCKS_MARGIN;
         const endBlock =
-            parseFloat(latestBlock) - startBlock > networkConfig.data.rpcMaxBlockRange
-                ? startBlock + networkConfig.data.rpcMaxBlockRange
+            parseFloat(latestBlock) - startBlock > networkData.rpcMaxBlockRange
+                ? startBlock + networkData.rpcMaxBlockRange
                 : parseFloat(latestBlock);
 
         const amountUpdates = await this.getAmountsForUsersWithBalanceChangesSinceStartBlock(
@@ -105,7 +105,7 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
 
         const filteredAmountUpdates = amountUpdates.filter(
             (update) =>
-                !networkConfig.data.reliquary!.excludedFarmIds.includes(update.farmId.toString()) &&
+                !networkData.reliquary!.excludedFarmIds.includes(update.farmId.toString()) &&
                 update.amount !== '0.0',
         );
 
@@ -167,14 +167,14 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
             return;
         }
 
-        const networkConfig = AllNetworkConfigsKeyedOnChain[chain];
-        const reliquarySubgraphService = new ReliquarySubgraphService(networkConfig.data.subgraphs.reliquary!);
+        const networkData = config[chain];
+        const reliquarySubgraphService = new ReliquarySubgraphService(networkData.subgraphs.reliquary!);
 
         const blockNumber = await reliquarySubgraphService.lastSyncedBlock();
         console.log('initStakedReliquaryBalances: loading subgraph relics...');
         const relics = await reliquarySubgraphService.getAllRelicsWithPaging({});
         const filteredRelics = relics.filter(
-            (relic) => !networkConfig.data.reliquary?.excludedFarmIds.includes(`${relic.pid}`),
+            (relic) => !networkData.reliquary?.excludedFarmIds.includes(`${relic.pid}`),
         );
         console.log('initStakedReliquaryBalances: finished loading subgraph relics...');
         console.log('initStakedReliquaryBalances: loading pools...');
@@ -239,15 +239,15 @@ export class UserSyncReliquaryFarmBalanceService implements UserStakedBalanceSer
         endBlock: number,
         chain: Chain,
     ): Promise<{ farmId: string; userAddress: string; amount: AmountHumanReadable }[]> {
-        const networkConfig = AllNetworkConfigsKeyedOnChain[chain];
+        const networkData = config[chain];
 
         const viemEvents = await getEvents(
             startBlock,
             endBlock,
             [reliquaryAddress],
             ['Transfer', 'Deposit', 'Withdraw', 'EmergencyWithdraw', 'Shift'],
-            networkConfig.data.rpcUrl,
-            networkConfig.data.rpcMaxBlockRange,
+            networkData.rpcUrl,
+            networkData.rpcMaxBlockRange,
             ReliquaryAbi,
         );
 

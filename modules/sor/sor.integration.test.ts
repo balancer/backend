@@ -11,7 +11,7 @@ import { PrismaPoolAndHookWithDynamic } from '../../prisma/prisma-types';
 import { getTokensFromPrismaPools } from '../../test/utils';
 import { formatUnits } from 'viem';
 import { BufferPoolData, getTokenPricesMap } from './utils/data';
-import { chainIdToChain } from '../network/chain-id-to-chain';
+import { chainIdToChain } from '../../config/chain-id-to-chain';
 
 // This test will run against all files added to test/testData/read
 // In order to add new scenarios, please add them to test/testData/config.json

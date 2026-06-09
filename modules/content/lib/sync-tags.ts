@@ -1,7 +1,7 @@
 import { Chain } from '@prisma/client';
 import { prisma } from '../../../prisma/prisma-client';
 import _ from 'lodash';
-import { chainIdToChain } from '../../network/chain-id-to-chain';
+import { chainIdToChain } from '../../../config/chain-id-to-chain';
 import { HookData } from '../../../prisma/prisma-types';
 
 const POOL_TAGS_URL = 'https://raw.githubusercontent.com/balancer/metadata/refs/heads/main/pools/tags/index.json';

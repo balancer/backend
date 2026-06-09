@@ -1,5 +1,5 @@
 import config from '../../config';
-import { chainIdToChain } from '../../modules/network/chain-id-to-chain';
+import { chainIdToChain } from '../../config/chain-id-to-chain';
 import { generateSwapPathTestData } from './generate/generateSwapPathTestData';
 import type { Config } from './types';
 

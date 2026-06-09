@@ -2,7 +2,6 @@
 
 import { expect, test } from 'vitest';
 import { initRequestScopedContext, setRequestScopedContextValue } from '../context/request-scoped-context';
-import { AllNetworkConfigs } from '../network/network-config';
 import { tokenService } from './token.service';
 import {
     SftmxController,

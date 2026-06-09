@@ -1,5 +1,6 @@
 import { env } from '../apps/env';
-import { NetworkData } from '../modules/network/network-config-types';
+import { NetworkData } from './types';
+import { deprecatedChainWorkerJobs, vebalWorkerJobs } from './worker-jobs';
 
 export default <NetworkData>{
     chain: {
@@ -136,4 +137,6 @@ export default <NetworkData>{
             emissionDataTabName: 'EmissionData',
         },
     },
+    stakingServices: ['gauge'],
+    workerJobs: [...deprecatedChainWorkerJobs, ...vebalWorkerJobs],
 };

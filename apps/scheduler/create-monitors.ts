@@ -1,7 +1,8 @@
 import { env } from '../env';
-import { AllNetworkConfigs } from '../../modules/network/network-config';
+import config from '../../config';
+import { chainIdToChain } from '../../config/chain-id-to-chain';
 import { sleep } from '../../modules/common/promise';
-import { WorkerJob } from '../../modules/network/network-config-types';
+import { WorkerJob } from '../../config/types';
 
 type SentryMonitorRetrieve = {
     name: string;
@@ -35,7 +36,7 @@ const SENTRY_BASE_URL = 'https://sentry.io/api/0/organizations/skloon/monitors/'
 const SENTRY_PROJECT_NAME = 'backend-v3-balancer';
 
 export async function createMonitors(chainId: string): Promise<void> {
-    await createMonitorsIfNotExist(chainId, AllNetworkConfigs[chainId].workerJobs);
+    await createMonitorsIfNotExist(chainId, config[chainIdToChain[chainId]].workerJobs);
 }
 
 async function createMonitorsIfNotExist(chainId: string, jobs: WorkerJob[]): Promise<void> {

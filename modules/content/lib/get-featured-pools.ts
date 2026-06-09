@@ -1,4 +1,4 @@
-import { chainIdToChain } from '../../network/chain-id-to-chain';
+import { chainIdToChain } from '../../../config/chain-id-to-chain';
 import { Chain } from '@prisma/client';
 import { GqlChain } from '../../../apps/api/gql/generated-schema';
 

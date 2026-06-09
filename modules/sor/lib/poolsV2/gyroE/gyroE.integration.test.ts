@@ -9,7 +9,7 @@ import { PrismaPoolAndHookWithDynamic } from '../../../../../prisma/prisma-types
 import { PathWithAmount } from '../../path';
 import { SOR } from '../../sor';
 import { getOutputAmount, getInputAmount } from '../../utils/helpers';
-import { chainToChainId as chainToIdMap } from '../../../../network/chain-id-to-chain';
+import { chainToChainId as chainToIdMap } from '../../../../../config/chain-id-to-chain';
 
 import { ANVIL_NETWORKS, startFork, stopAnvilForks } from '../../../../../test/anvil/anvil-global-setup';
 import { prismaPoolDynamicDataFactory, prismaPoolFactory, prismaPoolTokenFactory } from '../../../../../test/factories';

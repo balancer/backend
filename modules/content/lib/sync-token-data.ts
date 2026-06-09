@@ -1,5 +1,5 @@
 import { prisma } from '../../../prisma/prisma-client';
-import { chainIdToChain, chainToChainId as chainToIdMap } from '../../network/chain-id-to-chain';
+import { chainIdToChain, chainToChainId as chainToIdMap } from '../../../config/chain-id-to-chain';
 import { Chain, PrismaTokenTypeOption } from '@prisma/client';
 
 const TOKEN_LIST_URL = 'https://raw.githubusercontent.com/balancer/tokenlists/main/generated/balancer.tokenlist.json';

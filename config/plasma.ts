@@ -1,6 +1,7 @@
 import { AaveV3Plasma } from '@bgd-labs/aave-address-book';
 import { env } from '../apps/env';
-import { NetworkData } from '../modules/network/network-config-types';
+import { NetworkData } from './types';
+import { activeChainWorkerJobsGeneric, activeChainWorkerJobsV3 } from './worker-jobs';
 
 export default <NetworkData>{
     chain: {
@@ -205,4 +206,6 @@ export default <NetworkData>{
             alarmTopicArn: 'arn:aws:sns:eu-central-1:118697801881:api_alarms',
         },
     },
+    stakingServices: [],
+    workerJobs: [...activeChainWorkerJobsGeneric, ...activeChainWorkerJobsV3],
 };

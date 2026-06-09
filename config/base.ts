@@ -1,6 +1,7 @@
 import { AaveV3Base } from '@bgd-labs/aave-address-book';
 import { env } from '../apps/env';
-import { NetworkData } from '../modules/network/network-config-types';
+import { NetworkData } from './types';
+import { activeChainWorkerJobsGeneric, activeChainWorkerJobsV2, activeChainWorkerJobsV3, cowAmmWorkerJobs, quantAmmWorkerJobs, vebalWorkerJobs } from './worker-jobs';
 
 export default <NetworkData>{
     chain: {
@@ -342,4 +343,6 @@ export default <NetworkData>{
             emissionDataTabName: 'EmissionData',
         },
     },
+    stakingServices: ['gauge'],
+    workerJobs: [...activeChainWorkerJobsGeneric, ...activeChainWorkerJobsV2, ...activeChainWorkerJobsV3, ...cowAmmWorkerJobs, ...vebalWorkerJobs, ...quantAmmWorkerJobs],
 };
