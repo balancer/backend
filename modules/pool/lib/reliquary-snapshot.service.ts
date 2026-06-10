@@ -7,7 +7,7 @@ import { ReliquarySubgraphService } from '../../subgraphs/reliquary-subgraph/rel
 import { oneDayInMinutes } from '../../common/time';
 import { Chain, PrismaReliquaryFarmSnapshot, PrismaReliquaryLevelSnapshot } from '@prisma/client';
 import { blockNumbers } from '../../block-numbers';
-import { AllNetworkConfigs, AllNetworkConfigsKeyedOnChain } from '../../network/network-config';
+import config from '../../../config';
 
 export class ReliquarySnapshotService {
     constructor(private readonly reliquarySubgraphService: ReliquarySubgraphService) {}
@@ -30,7 +30,7 @@ export class ReliquarySnapshotService {
         });
         const filteredSnapshots = allSnapshots.filter(
             (farm) =>
-                !AllNetworkConfigsKeyedOnChain[chain].data.reliquary!.excludedFarmIds.includes(farm.farmId.toString()),
+                !config[chain].reliquary!.excludedFarmIds.includes(farm.farmId.toString()),
         );
         const farmIdsInSubgraphSnapshots = _.uniq(filteredSnapshots.map((snapshot) => snapshot.farmId));
 

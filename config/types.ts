@@ -1,13 +1,6 @@
 import type { Chain } from '@prisma/client';
-import type { UserStakedBalanceService } from '../user/user-types';
-import type { GqlChain, GqlHookType } from '../../apps/api/gql/generated-schema';
-import { AprHandlerConfigs } from '../aprs/handlers/types';
-
-export interface NetworkConfig {
-    data: NetworkData;
-    userStakedBalanceServices: UserStakedBalanceService[];
-    workerJobs: WorkerJob[];
-}
+import type { GqlChain, GqlHookType } from '../apps/api/gql/generated-schema';
+import { AprHandlerConfigs } from '../modules/aprs/handlers/types';
 
 export interface WorkerJob {
     name: string;
@@ -15,6 +8,8 @@ export interface WorkerJob {
 }
 
 export type DeploymentEnv = 'canary' | 'main';
+
+export type StakingServiceType = 'gauge' | 'vebal' | 'reliquary';
 
 export interface NetworkData {
     chain: {
@@ -121,4 +116,6 @@ export interface NetworkData {
             alarmTopicArn: string;
         };
     };
+    stakingServices: StakingServiceType[];
+    workerJobs: WorkerJob[];
 }

@@ -5,7 +5,7 @@ import { _calcInGivenOut, _calcOutGivenIn, _calculateInvariant, _findVirtualPara
 import { MathSol, WAD } from '../../utils/math';
 import { SWAP_LIMIT_FACTOR } from '../../utils/gyroHelpers/math';
 import { PoolType, SwapKind, Token, TokenAmount, BigintIsh } from '@balancer/sdk';
-import { chainToChainId as chainToIdMap } from '../../../../network/chain-id-to-chain';
+import { chainToChainId as chainToIdMap } from '../../../../../config/chain-id-to-chain';
 import { GyroData } from '../../../../pool/subgraph-mapper';
 import { TokenPairData } from '../../../../pool/lib/pool-on-chain-tokenpair-data';
 import { BasePool } from '../basePool';

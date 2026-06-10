@@ -12,7 +12,7 @@ import { ContentController } from '../content/content-controller';
 import { PoolController } from '../controllers';
 import { Prisma, PrismaLastBlockSyncedCategory } from '@prisma/client';
 import { tokensTransformer } from '../sources/transformers';
-import { chainToChainId } from '../network/chain-id-to-chain';
+import { chainToChainId } from '../../config/chain-id-to-chain';
 import { upsertLastSyncedBlock } from '../actions/last-synced-block';
 
 test('debug aprs', async () => {

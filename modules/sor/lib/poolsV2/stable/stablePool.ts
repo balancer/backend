@@ -4,7 +4,7 @@ import { PrismaPoolAndHookWithDynamic } from '../../../../../prisma/prisma-types
 import { _calcInGivenOut, _calcOutGivenIn, _calculateInvariant } from '../composableStable/stableMath';
 import { MathSol } from '../../utils/math';
 import { PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
-import { chainToChainId as chainToIdMap } from '../../../../network/chain-id-to-chain';
+import { chainToChainId as chainToIdMap } from '../../../../../config/chain-id-to-chain';
 import { StableData } from '../../../../pool/subgraph-mapper';
 import { TokenPairData } from '../../../../pool/lib/pool-on-chain-tokenpair-data';
 import { BasePool } from '../basePool';

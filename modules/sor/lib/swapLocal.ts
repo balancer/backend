@@ -15,7 +15,7 @@ import { PathWithAmount } from './path';
 import { cloneDeep } from 'lodash';
 import { Address, Hex, createPublicClient, encodeFunctionData, getContract, http } from 'viem';
 import { MathSol, abs } from './utils/math';
-import { chainIdToChain } from '../../network/chain-id-to-chain';
+import { chainIdToChain } from '../../../config/chain-id-to-chain';
 import config from '../../../config';
 
 // A Swap can be a single or multiple paths

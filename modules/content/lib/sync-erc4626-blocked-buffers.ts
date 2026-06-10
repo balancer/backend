@@ -1,5 +1,5 @@
 import { prisma } from '../../../prisma/prisma-client';
-import { chainIdToChain } from '../../network/chain-id-to-chain';
+import { chainIdToChain } from '../../../config/chain-id-to-chain';
 
 export const syncBlockedBuffers = async (): Promise<void> => {
     const blockedBuffers = await getBlockedBuffers();

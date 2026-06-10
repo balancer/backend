@@ -8,14 +8,14 @@ import { GqlVeBalBalance, GqlVeBalUserData } from '../../apps/api/gql/generated-
 import mainnet from '../../config/mainnet';
 import VeBalABI from './abi/vebal';
 import { Chain } from '@prisma/client';
-import { AllNetworkConfigsKeyedOnChain } from '../network/network-config';
+import config from '../../config';
 import { Multicaller3Viem } from '../web3/multicaller-viem';
 import { getViemClient } from '../sources/viem-client';
 import { formatEther } from 'viem';
 
 export class VeBalService {
     public async getVeBalUserBalance(chain: Chain, userAddress: string): Promise<AmountHumanReadable> {
-        if (AllNetworkConfigsKeyedOnChain[chain].data.veBal) {
+        if (config[chain].veBal) {
             const veBalUser = await prisma.prismaVeBalUserBalance.findFirst({
                 where: { chain: chain, userAddress: userAddress.toLowerCase() },
             });
@@ -45,7 +45,7 @@ export class VeBalService {
         let rank = 1;
         let balance = '0.0';
         let locked = '0.0';
-        if (AllNetworkConfigsKeyedOnChain[chain].data.veBal) {
+        if (config[chain].veBal) {
             const veBalUsers = await prisma.prismaVeBalUserBalance.findMany({
                 where: { chain: chain },
             });
@@ -91,7 +91,7 @@ export class VeBalService {
     }
 
     public async getVeBalTotalSupply(chain: Chain): Promise<AmountHumanReadable> {
-        if (AllNetworkConfigsKeyedOnChain[chain].data.veBal) {
+        if (config[chain].veBal) {
             const veBal = await prisma.prismaVeBalTotalSupply.findFirst({
                 where: { chain: chain },
             });
@@ -128,13 +128,13 @@ export class VeBalService {
             for (const holder of subgraphVeBalHolders) {
                 multicall3.call(
                     `${holder.user}.balance`,
-                    AllNetworkConfigsKeyedOnChain[chain].data.veBal!.address,
+                    config[chain].veBal!.address,
                     'balanceOf',
                     [holder.user],
                 );
                 multicall3.call(
                     `${holder.user}.locked`,
-                    AllNetworkConfigsKeyedOnChain[chain].data.veBal!.address,
+                    config[chain].veBal!.address,
                     'locked',
                     [holder.user],
                 );
@@ -167,7 +167,7 @@ export class VeBalService {
             for (const holder of subgraphVeBalHolders) {
                 multicall3.call(
                     holder.user,
-                    AllNetworkConfigsKeyedOnChain[chain].data.veBal!.delegationProxy,
+                    config[chain].veBal!.delegationProxy,
                     'adjustedBalanceOf',
                     [holder.user],
                 );
@@ -233,11 +233,11 @@ export class VeBalService {
     }
 
     public async syncVeBalTotalSupply(chain: Chain): Promise<void> {
-        if (AllNetworkConfigsKeyedOnChain[chain].data.veBal) {
+        if (config[chain].veBal) {
             const veBalAddress =
                 chain === 'MAINNET'
-                    ? AllNetworkConfigsKeyedOnChain[chain].data.veBal.address
-                    : AllNetworkConfigsKeyedOnChain[chain].data.veBal.delegationProxy;
+                    ? config[chain].veBal.address
+                    : config[chain].veBal.delegationProxy;
 
             const viemClient = getViemClient(chain);
             const totalSupply = await viemClient.readContract({

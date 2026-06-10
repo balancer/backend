@@ -4,7 +4,7 @@ import { Chain, PrismaPoolType, PrismaToken } from '@prisma/client';
 
 import { prisma } from '../../../prisma/prisma-client';
 import { PrismaPoolAndHookWithDynamic, HookData } from '../../../prisma/prisma-types';
-import { chainToChainId } from '../../network/chain-id-to-chain';
+import { chainToChainId } from '../../../config/chain-id-to-chain';
 import { poolsToIgnore } from './constants';
 import _ from 'lodash';
 import { tokenService } from '../../token/token.service';

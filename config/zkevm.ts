@@ -1,5 +1,6 @@
 import { env } from '../apps/env';
-import { DeploymentEnv, NetworkData } from '../modules/network/network-config-types';
+import { DeploymentEnv, NetworkData } from './types';
+import { deprecatedChainWorkerJobs, vebalWorkerJobs } from './worker-jobs';
 
 export default <NetworkData>{
     chain: {
@@ -126,4 +127,6 @@ export default <NetworkData>{
             alarmTopicArn: 'arn:aws:sns:eu-central-1:118697801881:api_alarms',
         },
     },
+    stakingServices: ['gauge'],
+    workerJobs: [...deprecatedChainWorkerJobs, ...vebalWorkerJobs],
 };

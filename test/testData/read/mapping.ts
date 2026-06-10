@@ -15,7 +15,7 @@ import {
     LiquidityBootstrappingPool,
     ReClammV2Pool,
 } from './readTestData';
-import { chainIdToChain } from '../../../modules/network/chain-id-to-chain';
+import { chainIdToChain } from '../../../config/chain-id-to-chain';
 
 export function mapGyroPoolStateToPrismaPool(
     poolState: GyroEPool,

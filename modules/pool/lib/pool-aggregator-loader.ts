@@ -9,7 +9,7 @@ import {
 import _ from 'lodash';
 import { FxData, GyroData, StableData, QuantAmmWeightedData, ReclammData } from '../subgraph-mapper';
 import { mapHookToGqlHook } from '../../sources/transformers';
-import { chainToChainId } from '../../network/chain-id-to-chain';
+import { chainToChainId } from '../../../config/chain-id-to-chain';
 import { zeroAddress } from 'viem';
 
 const aggregatorPrismaValidator = Prisma.validator<Prisma.PrismaPoolDefaultArgs>()({

@@ -2,7 +2,7 @@ import { Chain, PrismaPoolStakingType } from '@prisma/client';
 import config from '../../config';
 import { syncBptBalancesCowAmm } from './lib/bpt-balances/sync-bpt-balances-cow-amm';
 import { syncBptBalancesV2 } from './lib/bpt-balances/sync-bpt-balances-v2';
-import { AllNetworkConfigsKeyedOnChain } from '../network/network-config';
+import { createUserStakedBalanceServices } from './lib/user-staked-balance-service.factory';
 import { syncBptBalancesV3 } from './lib/bpt-balances/sync-bpt-balances-v3';
 
 export function UserBalancesController() {
@@ -51,19 +51,13 @@ export function UserBalancesController() {
         },
 
         async initStakedBalances(stakingTypes: PrismaPoolStakingType[], chain: Chain) {
-            await Promise.all(
-                AllNetworkConfigsKeyedOnChain[chain].userStakedBalanceServices.map((service) =>
-                    service.initStakedBalances(stakingTypes, chain),
-                ),
-            );
+            const services = createUserStakedBalanceServices(chain);
+            await Promise.all(services.map((service) => service.initStakedBalances(stakingTypes, chain)));
         },
 
         async syncChangedStakedBalances(chain: Chain) {
-            await Promise.all(
-                AllNetworkConfigsKeyedOnChain[chain].userStakedBalanceServices.map((service) =>
-                    service.syncChangedStakedBalances(chain),
-                ),
-            );
+            const services = createUserStakedBalanceServices(chain);
+            await Promise.all(services.map((service) => service.syncChangedStakedBalances(chain)));
         },
     };
 }

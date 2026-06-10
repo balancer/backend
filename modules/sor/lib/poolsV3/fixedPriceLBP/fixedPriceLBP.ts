@@ -6,7 +6,7 @@ import { WeightedPoolTokenWithRate } from '../weighted/weightedPoolTokenWithRate
 import { LiquidityManagement } from '../../../types';
 
 import { BasePoolV3 } from '../basePoolV3';
-import { chainToChainId as chainToIdMap } from '../../../../network/chain-id-to-chain';
+import { chainToChainId as chainToIdMap } from '../../../../../config/chain-id-to-chain';
 import { getHookState } from '../../utils/helpers';
 
 import { Chain } from '@prisma/client';
