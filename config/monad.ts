@@ -103,6 +103,17 @@ export default <NetworkData>{
                     ],
                 },
                 {
+                    url: 'https://yields.llama.fi/chart/d711af54-e736-470f-8a22-431a23de76df',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0xe1bca19baa63894d374578320551633320436523',
+                            path: '$.data[-1:].apyBase',
+                        },
+                    ],
+                },
+                {
                     name: 'gmon',
                     url: 'https://indexer.hyperindex.xyz/a7dd119/v1/graphql',
                     body: JSON.stringify({
