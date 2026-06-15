@@ -1,5 +1,5 @@
 import beetsAbi from '../sources/contracts/abis/ERC20';
-import { AllNetworkConfigsKeyedOnChain } from '../network/network-config';
+import config from '../../config';
 import { Chain } from '@prisma/client';
 import { getViemClient } from '../sources/viem-client';
 import { formatEther, parseEther } from 'viem';
@@ -29,7 +29,7 @@ export async function beetsGetCirculatingSupply(chain: Chain) {
     if (chain === 'FANTOM') {
         for (const address of NON_CIRCULATING_ADDRESSES) {
             const balance = await viemClient.readContract({
-                address: AllNetworkConfigsKeyedOnChain[chain].data.beets!.address as `0x${string}`,
+                address: config[chain].beets!.address as `0x${string}`,
                 abi: beetsAbi,
                 functionName: 'balanceOf',
                 args: [address as `0x${string}`],
@@ -39,7 +39,7 @@ export async function beetsGetCirculatingSupply(chain: Chain) {
     } else {
         for (const address of NON_CIRCULATING_ADDRESSES_SONIC) {
             const balance = await viemClient.readContract({
-                address: AllNetworkConfigsKeyedOnChain[chain].data.beets!.address as `0x${string}`,
+                address: config[chain].beets!.address as `0x${string}`,
                 abi: beetsAbi,
                 functionName: 'balanceOf',
                 args: [address as `0x${string}`],
@@ -53,7 +53,7 @@ export async function beetsGetCirculatingSupply(chain: Chain) {
 
 export async function beetsGetTotalSupply(chain: Chain) {
     const viemClient = getViemClient(chain);
-    const address = AllNetworkConfigsKeyedOnChain[chain].data.beets!.address as `0x${string}`;
+    const address = config[chain].beets!.address as `0x${string}`;
 
     let totalSupply = await viemClient.readContract({
         address: address,

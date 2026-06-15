@@ -1,4 +1,5 @@
-import { AllNetworkConfigs } from '../../modules/network/network-config';
+import config from '../../config';
+import { chainIdToChain } from '../../config/chain-id-to-chain';
 import { SendMessageCommand, SendMessageCommandInput, SQSClient } from '@aws-sdk/client-sqs';
 import { env } from '../env';
 
@@ -59,7 +60,7 @@ class WokerQueue {
 const workerQueue = new WokerQueue(new SQSClient({}), env.WORKER_QUEUE_URL);
 
 export async function scheduleJobs(chainId: string): Promise<void> {
-    for (const job of AllNetworkConfigs[chainId].workerJobs) {
+    for (const job of config[chainIdToChain[chainId]].workerJobs) {
         console.log(`Initializing job ${job.name}-${chainId}-init`);
         await workerQueue.sendWithInterval(JSON.stringify({ name: job.name, chain: chainId }), job.interval);
     }

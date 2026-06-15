@@ -1,6 +1,6 @@
 import { parseEther } from 'viem';
 import config from '../../../config';
-import { chainIdToChain } from '../../../modules/network/chain-id-to-chain';
+import { chainIdToChain } from '../../../config/chain-id-to-chain';
 import { fetchHookData } from '../../../modules/sources/contracts/v3/fetch-hook-data';
 import { getViemClient } from '../../../modules/sources/viem-client';
 import { HookData } from '../../../prisma/prisma-types';

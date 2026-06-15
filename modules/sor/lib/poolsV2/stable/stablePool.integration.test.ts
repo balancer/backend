@@ -27,7 +27,7 @@ import { mainnet } from 'viem/chains';
 import { PathWithAmount } from '../../path';
 import { SOR } from '../../sor';
 import { getOutputAmount } from '../../utils/helpers';
-import { chainToChainId } from '../../../../network/chain-id-to-chain';
+import { chainToChainId } from '../../../../../config/chain-id-to-chain';
 import { ANVIL_NETWORKS, startFork } from '../../../../../test/anvil/anvil-global-setup';
 import { prismaPoolDynamicDataFactory, prismaPoolFactory, prismaPoolTokenFactory } from '../../../../../test/factories';
 import { Chain } from '@prisma/client';

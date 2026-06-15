@@ -1,5 +1,5 @@
 import { Chain } from '@prisma/client';
-import { env } from '../../apps/env';
+import { env } from '../apps/env';
 
 export const chainIdToChain: { [id: string]: Chain } = {
     '1': Chain.MAINNET,

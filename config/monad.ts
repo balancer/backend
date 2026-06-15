@@ -1,5 +1,6 @@
 import { env } from '../apps/env';
-import { NetworkData } from '../modules/network/network-config-types';
+import { NetworkData } from './types';
+import { activeChainWorkerJobsGeneric, activeChainWorkerJobsV3 } from './worker-jobs';
 
 export default <NetworkData>{
     chain: {
@@ -97,6 +98,17 @@ export default <NetworkData>{
                         {
                             type: 'path',
                             token: '0x1b68626dca36c7fe922fd2d55e4f631d962de19c',
+                            path: '$.data[-1:].apyBase',
+                        },
+                    ],
+                },
+                {
+                    url: 'https://yields.llama.fi/chart/d711af54-e736-470f-8a22-431a23de76df',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0xe1bca19baa63894d374578320551633320436523',
                             path: '$.data[-1:].apyBase',
                         },
                     ],
@@ -272,4 +284,6 @@ export default <NetworkData>{
             alarmTopicArn: 'arn:aws:sns:eu-central-1:118697801881:api_alarms',
         },
     },
+    stakingServices: [],
+    workerJobs: [...activeChainWorkerJobsGeneric, ...activeChainWorkerJobsV3],
 };

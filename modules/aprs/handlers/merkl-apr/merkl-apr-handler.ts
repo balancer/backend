@@ -1,6 +1,6 @@
 import { $Enums, PrismaPoolAprItem, PrismaPoolAprType } from '@prisma/client';
 import { AprHandler, PoolAPRData } from '../../types';
-import { chainIdToChain } from '../../../network/chain-id-to-chain';
+import { chainIdToChain } from '../../../../config/chain-id-to-chain';
 import { AaveV3Plasma } from '@bgd-labs/aave-address-book';
 import { env } from '../../../../apps/env';
 

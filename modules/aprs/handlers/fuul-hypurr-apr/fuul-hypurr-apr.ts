@@ -1,6 +1,6 @@
 import { PrismaPoolAprItem, PrismaPoolAprType } from '@prisma/client';
 import { AprHandler, PoolAPRData } from '../../types';
-import { chainIdToChain } from '../../../network/chain-id-to-chain';
+import { chainIdToChain } from '../../../../config/chain-id-to-chain';
 import { env } from '../../../../apps/env';
 
 const baseURL = 'https://api.fuul.xyz/api/v1/conversions';

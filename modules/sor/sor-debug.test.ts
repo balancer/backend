@@ -1,6 +1,6 @@
 // bun vitest sor-debug.test.ts
 import { GqlChain } from '../../apps/api/gql/generated-schema';
-import { chainToChainId } from '../network/chain-id-to-chain';
+import { chainToChainId } from '../../config/chain-id-to-chain';
 import { sorService } from './sor.service';
 import { Address, Swap, SwapInput, SwapKind } from '@balancer/sdk';
 import { formatUnits } from 'viem';

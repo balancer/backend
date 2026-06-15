@@ -10,7 +10,7 @@ import { cronsMetricPublisher } from '../../modules/metrics/metrics.client';
 import moment from 'moment';
 import { cronsDurationMetricPublisher } from '../../modules/metrics/cron-duration-metrics.client';
 import { syncLatestFXPrices } from '../../modules/token/latest-fx-price';
-import { chainIdToChain } from '../../modules/network/chain-id-to-chain';
+import { chainIdToChain } from '../../config/chain-id-to-chain';
 import { Chain } from '@prisma/client';
 import {
     CowAmmController,

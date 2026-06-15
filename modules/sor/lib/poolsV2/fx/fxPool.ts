@@ -8,7 +8,7 @@ import { _calcInGivenOut, _calcOutGivenIn } from './fxMath';
 import { RAY } from '../../utils/math';
 import { FxPoolPairData } from './types';
 import { PoolType, SwapKind, Token, TokenAmount } from '@balancer/sdk';
-import { chainToChainId as chainToIdMap } from '../../../../network/chain-id-to-chain';
+import { chainToChainId as chainToIdMap } from '../../../../../config/chain-id-to-chain';
 import { TokenPairData } from '../../../../pool/lib/pool-on-chain-tokenpair-data';
 import { BasePool } from '../basePool';
 

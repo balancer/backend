@@ -1,6 +1,7 @@
 import { AaveV3Gnosis } from '@bgd-labs/aave-address-book';
 import { env } from '../apps/env';
-import { NetworkData } from '../modules/network/network-config-types';
+import { NetworkData } from './types';
+import { activeChainWorkerJobsGeneric, activeChainWorkerJobsV2, activeChainWorkerJobsV3, vebalWorkerJobs, cowAmmWorkerJobs } from './worker-jobs';
 
 export default <NetworkData>{
     chain: {
@@ -163,4 +164,6 @@ export default <NetworkData>{
             alarmTopicArn: 'arn:aws:sns:eu-central-1:118697801881:api_alarms',
         },
     },
+    stakingServices: ['gauge'],
+    workerJobs: [...activeChainWorkerJobsGeneric, ...activeChainWorkerJobsV2, ...activeChainWorkerJobsV3, ...vebalWorkerJobs, ...cowAmmWorkerJobs],
 };

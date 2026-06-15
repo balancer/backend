@@ -5,17 +5,18 @@ import {
     PutMetricAlarmCommand,
 } from '@aws-sdk/client-cloudwatch';
 import { env } from '../env';
-import { AllNetworkConfigs } from '../../modules/network/network-config';
-import { DeploymentEnv, WorkerJob } from '../../modules/network/network-config-types';
+import networkConfigs from '../../config';
+import { chainIdToChain } from '../../config/chain-id-to-chain';
+import { DeploymentEnv, WorkerJob } from '../../config/types';
 import { secondsPerDay } from '../../modules/common/time';
 import { sleep } from '../../modules/common/promise';
 import { cronsMetricPublisher, subgraphMetricPublisher } from '../../modules/metrics/metrics.client';
 
 export async function createAlerts(chainId: string): Promise<void> {
-    const config = AllNetworkConfigs[chainId];
-    await createCronAlertsIfNotExist(chainId, config.workerJobs);
+    const networkConfig = networkConfigs[chainIdToChain[chainId]];
+    await createCronAlertsIfNotExist(chainId, networkConfig.workerJobs);
 
-    const subgraphs = Object.entries(config.data.subgraphs).filter(
+    const subgraphs = Object.entries(networkConfig.subgraphs).filter(
         ([subgraphName, subgraphUrl]) =>
             subgraphUrl.includes('thegraph') || subgraphUrl.includes('goldsky') || subgraphUrl.includes('ormi'),
     );
@@ -33,7 +34,7 @@ export async function createAlerts(chainId: string): Promise<void> {
         subgraphsToAlert.push({ subgraphName, subgraphUrl: subgraphUrlClean });
     }
 
-    await createSubgraphLagAlertsIfNotExist(chainId, config.data.chain.slug, subgraphsToAlert);
+    await createSubgraphLagAlertsIfNotExist(chainId, networkConfig.chain.slug, subgraphsToAlert);
 }
 
 async function createCronAlertsIfNotExist(chainId: string, jobs: WorkerJob[]): Promise<void> {
@@ -105,9 +106,9 @@ async function createCronAlertsIfNotExist(chainId: string, jobs: WorkerJob[]): P
             } seconds.`,
             ActionsEnabled: true,
             AlarmActions: [
-                AllNetworkConfigs[chainId].data.monitoring[env.DEPLOYMENT_ENV as DeploymentEnv].alarmTopicArn,
+                networkConfigs[chainIdToChain[chainId]].monitoring[env.DEPLOYMENT_ENV as DeploymentEnv].alarmTopicArn,
             ],
-            OKActions: [AllNetworkConfigs[chainId].data.monitoring[env.DEPLOYMENT_ENV as DeploymentEnv].alarmTopicArn],
+            OKActions: [networkConfigs[chainIdToChain[chainId]].monitoring[env.DEPLOYMENT_ENV as DeploymentEnv].alarmTopicArn],
             MetricName: `${cronJob.name}-${chainId}-done`,
             Statistic: 'Sum',
             Dimensions: [{ Name: 'Environment', Value: env.DEPLOYMENT_ENV }],
@@ -181,9 +182,9 @@ async function createSubgraphLagAlertsIfNotExist(
             } minutes`,
             ActionsEnabled: true,
             AlarmActions: [
-                AllNetworkConfigs[chainId].data.monitoring[env.DEPLOYMENT_ENV as DeploymentEnv].alarmTopicArn,
+                networkConfigs[chainIdToChain[chainId]].monitoring[env.DEPLOYMENT_ENV as DeploymentEnv].alarmTopicArn,
             ],
-            OKActions: [AllNetworkConfigs[chainId].data.monitoring[env.DEPLOYMENT_ENV as DeploymentEnv].alarmTopicArn],
+            OKActions: [networkConfigs[chainIdToChain[chainId]].monitoring[env.DEPLOYMENT_ENV as DeploymentEnv].alarmTopicArn],
             MetricName: metricName,
             Statistic: 'Maximum',
             Dimensions: [{ Name: 'Environment', Value: env.DEPLOYMENT_ENV }],

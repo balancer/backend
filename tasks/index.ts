@@ -9,7 +9,7 @@ import {
     QuantAmmController,
     TokenYieldsController,
 } from '../modules/controllers';
-import { chainIdToChain } from '../modules/network/chain-id-to-chain';
+import { chainIdToChain } from '../config/chain-id-to-chain';
 import { VeBalVotingListService } from '../modules/vebal/vebal-voting-list.service';
 import { Chain, PrismaLastBlockSyncedCategory } from '@prisma/client';
 import { upsertLastSyncedBlock } from '../modules/actions/last-synced-block';

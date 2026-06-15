@@ -14,7 +14,7 @@ import {
     PrismaPoolMinimal,
 } from '../../../prisma/prisma-types';
 import { floatToExactString } from '../../common/numbers';
-import { chainToChainId } from '../../network/chain-id-to-chain';
+import { chainToChainId } from '../../../config/chain-id-to-chain';
 import { StableData } from '../subgraph-mapper';
 import { prisma } from '../../../prisma/prisma-client';
 import { tokenService } from '../../token/token.service';

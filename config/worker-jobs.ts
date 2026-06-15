@@ -1,6 +1,6 @@
-import { env } from '../../apps/env';
-import { every } from '../../apps/scheduler/intervals';
-import { DeploymentEnv, WorkerJob } from './network-config-types';
+import { env } from '../apps/env';
+import { every } from '../apps/scheduler/intervals';
+import { DeploymentEnv, WorkerJob } from './types';
 
 /*
     For sub-minute jobs we set the alarmEvaluationPeriod and alarmDatapointsToAlarm to 1 instead of the default 3.

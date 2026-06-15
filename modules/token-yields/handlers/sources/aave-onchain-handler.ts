@@ -2,7 +2,7 @@ import { TokenApr, TokenYieldHandler, AaveAddressBookEntry } from '../../types';
 import aaveUiPoolDataProvider from './abis/aave-ui-pool-data-provider';
 import aaveUiPoolDataProviderPlasma from './abis/aave-ui-pool-data-provider-plasma';
 import { getViemClient } from '../../../sources/viem-client';
-import { chainIdToChain } from '../../../network/chain-id-to-chain';
+import { chainIdToChain } from '../../../../config/chain-id-to-chain';
 
 export const aaveOnchainHandler: TokenYieldHandler = async ({ markets }: { markets: AaveAddressBookEntry[] }) => {
     const tokenAprs: TokenApr[] = [];

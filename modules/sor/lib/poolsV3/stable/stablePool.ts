@@ -4,7 +4,7 @@ import { StableState, HookState } from '@balancer-labs/balancer-maths';
 import { Chain } from '@prisma/client';
 
 import { PrismaPoolAndHookWithDynamic } from '../../../../../prisma/prisma-types';
-import { chainToChainId as chainToIdMap } from '../../../../network/chain-id-to-chain';
+import { chainToChainId as chainToIdMap } from '../../../../../config/chain-id-to-chain';
 import { StableData } from '../../../../pool/subgraph-mapper';
 import { TokenPairData } from '../../../../sources/contracts/v3/fetch-tokenpair-data';
 

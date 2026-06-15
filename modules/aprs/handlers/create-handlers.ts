@@ -2,7 +2,7 @@ import { Chain } from '@prisma/client';
 import { AprHandler } from '../types';
 import * as handlers from '.';
 import config from '../../../config';
-import { chainToChainId } from '../../network/chain-id-to-chain';
+import { chainToChainId } from '../../../config/chain-id-to-chain';
 import { tokenService } from '../../token/token.service';
 
 /**

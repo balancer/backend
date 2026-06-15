@@ -6,7 +6,7 @@ import { BasePool } from './poolsV2/basePool';
 import { PathLocal, PathWithAmount } from './path';
 import { formatUnits, parseEther } from 'viem';
 import { Chain } from '@prisma/client';
-import { chainToChainId } from '../../network/chain-id-to-chain';
+import { chainToChainId } from '../../../config/chain-id-to-chain';
 
 const SWAPS_GREATER_THAN_BUFFER_LIMIT_THRESHOLD = 2;
 export class Router {
