@@ -1,5 +1,11 @@
 # backend
 
+## 2.1.15
+
+### Patch Changes
+
+-   586c6a6: consolidate configs and move chain-id mappers
+
 ## 2.1.14
 
 ### Patch Changes
