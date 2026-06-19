@@ -78,6 +78,10 @@ export const schema = {
         type: String,
         optional: true,
     },
+    DIRECT_API_KEY: {
+        type: String,
+        optional: true,
+    },
 };
 
 export const env: Env = load(schema, {
