@@ -1,7 +1,16 @@
 import { BigNumber } from 'ethers';
 import { env } from '../apps/env';
 import { NetworkData } from './types';
-import { activeChainWorkerJobsGeneric, activeChainWorkerJobsGlobal, activeChainWorkerJobsV2, activeChainWorkerJobsV3, cowAmmWorkerJobs, fxWorkerJobs, quantAmmWorkerJobs, vebalWorkerJobs } from './worker-jobs';
+import {
+    activeChainWorkerJobsGeneric,
+    activeChainWorkerJobsGlobal,
+    activeChainWorkerJobsV2,
+    activeChainWorkerJobsV3,
+    cowAmmWorkerJobs,
+    fxWorkerJobs,
+    quantAmmWorkerJobs,
+    vebalWorkerJobs,
+} from './worker-jobs';
 import { AaveV3Ethereum, AaveV3EthereumLido } from '@bgd-labs/aave-address-book';
 
 export default <NetworkData>{
@@ -124,6 +133,17 @@ export default <NetworkData>{
                         {
                             type: 'path',
                             token: '0x6dc3ce9c57b20131347fdc9089d740daf6eb34c5',
+                            path: '$.data[-1:].apyBase',
+                        },
+                    ],
+                },
+                {
+                    url: 'https://yields.llama.fi/chart/76bb34c2-e68a-4398-9fba-d8a14c0caa44',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x19ebb35279a16207ec4ba82799cc64715065f7f6',
                             path: '$.data[-1:].apyBase',
                         },
                     ],
@@ -707,5 +727,14 @@ export default <NetworkData>{
         },
     },
     stakingServices: ['gauge', 'vebal'],
-    workerJobs: [...activeChainWorkerJobsGeneric, ...activeChainWorkerJobsV2, ...activeChainWorkerJobsV3, ...cowAmmWorkerJobs, ...vebalWorkerJobs, ...quantAmmWorkerJobs, ...fxWorkerJobs, ...activeChainWorkerJobsGlobal],
+    workerJobs: [
+        ...activeChainWorkerJobsGeneric,
+        ...activeChainWorkerJobsV2,
+        ...activeChainWorkerJobsV3,
+        ...cowAmmWorkerJobs,
+        ...vebalWorkerJobs,
+        ...quantAmmWorkerJobs,
+        ...fxWorkerJobs,
+        ...activeChainWorkerJobsGlobal,
+    ],
 };

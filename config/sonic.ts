@@ -1,7 +1,16 @@
 import { AaveV3Sonic } from '@bgd-labs/aave-address-book';
 import { env } from '../apps/env';
 import { NetworkData } from './types';
-import { activeChainWorkerJobsGeneric, activeChainWorkerJobsV2, activeChainWorkerJobsV3, quantAmmWorkerJobs, stsWorkerJobs, loopsWorkerJobs, datastudioWorkerJobs, reliquaryWorkerJobs } from './worker-jobs';
+import {
+    activeChainWorkerJobsGeneric,
+    activeChainWorkerJobsV2,
+    activeChainWorkerJobsV3,
+    quantAmmWorkerJobs,
+    stsWorkerJobs,
+    loopsWorkerJobs,
+    datastudioWorkerJobs,
+    reliquaryWorkerJobs,
+} from './worker-jobs';
 
 export default <NetworkData>{
     chain: {
@@ -36,7 +45,7 @@ export default <NetworkData>{
         platformId: 'sonic-mainnet',
         excludedTokenAddresses: [],
     },
-    rpcUrl: `https://lb.drpc.org/ogrpc?network=sonic&dkey=${env.DRPC_BEETS_API_KEY}`,
+    rpcUrl: `https://prod.rpc.direct.dev/v1/${env.DIRECT_API_KEY}/sonic`,
     rpcMaxBlockRange: 5000,
     acceptableSGLag: 150, // ~1min
     protocolToken: 'beets',
@@ -212,5 +221,14 @@ export default <NetworkData>{
         },
     },
     stakingServices: ['gauge', 'reliquary'],
-    workerJobs: [...activeChainWorkerJobsGeneric, ...activeChainWorkerJobsV2, ...activeChainWorkerJobsV3, ...quantAmmWorkerJobs, ...stsWorkerJobs, ...loopsWorkerJobs, ...datastudioWorkerJobs, ...reliquaryWorkerJobs],
+    workerJobs: [
+        ...activeChainWorkerJobsGeneric,
+        ...activeChainWorkerJobsV2,
+        ...activeChainWorkerJobsV3,
+        ...quantAmmWorkerJobs,
+        ...stsWorkerJobs,
+        ...loopsWorkerJobs,
+        ...datastudioWorkerJobs,
+        ...reliquaryWorkerJobs,
+    ],
 };

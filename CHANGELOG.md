@@ -1,5 +1,11 @@
 # backend
 
+## 2.1.16
+
+### Patch Changes
+
+-   b6aabd5: switch to direct rpc for sonic
+
 ## 2.1.15
 
 ### Patch Changes
