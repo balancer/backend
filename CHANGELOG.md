@@ -1,5 +1,11 @@
 # backend
 
+## 2.1.17
+
+### Patch Changes
+
+-   1eccf24: remove direct rpc sdk
+
 ## 2.1.16
 
 ### Patch Changes
