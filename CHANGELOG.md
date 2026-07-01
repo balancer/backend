@@ -1,5 +1,11 @@
 # backend
 
+## 2.1.18
+
+### Patch Changes
+
+-   92490a4: update balancer maths
+
 ## 2.1.17
 
 ### Patch Changes
