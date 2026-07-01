@@ -9,7 +9,7 @@ import {
     TokenAmount,
     ZERO_ADDRESS,
     balancerQueriesAbiExtended,
-    vaultV2Abi,
+    vaultAbi_V2 as vaultV2Abi,
 } from '@balancer/sdk';
 import { PathWithAmount } from './path';
 import { cloneDeep } from 'lodash';

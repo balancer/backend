@@ -5,7 +5,6 @@ import { JoinExitEvent } from '../../../prisma/prisma-types';
 import { getViemClient } from '../viem-client';
 import { parseAbiItem } from 'abitype';
 import { decodeEventLog } from 'viem';
-import { vaultV2Abi } from '@balancer/sdk';
 
 /**
  * Takes V3 subgraph swaps and transforms them into DB entries
