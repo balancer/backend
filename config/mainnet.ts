@@ -133,7 +133,7 @@ export default <NetworkData>{
                         {
                             type: 'path',
                             token: '0x098697ba3fee4ea76294c5d6a466a4e3b3e95fe6',
-                            path: '$.data[-1:].weeklyValue',
+                            path: '$[-1:].weeklyValue',
                         },
                     ],
                 },
