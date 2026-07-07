@@ -127,6 +127,28 @@ export default <NetworkData>{
             },
             http: [
                 {
+                    url: 'https://piku.co/api/apy/chart?scale=week',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x098697ba3fee4ea76294c5d6a466a4e3b3e95fe6',
+                            path: '$[-1:].weeklyValue',
+                        },
+                    ],
+                },
+                {
+                    url: 'https://piku.co/api/vaults',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x827ce7e8e35861d9ac7fe002755767b695a5594a',
+                            path: '$[?(@.midasTokenAddress=="0x827Ce7E8e35861D9Ac7fE002755767b695A5594a")].apy7d',
+                        },
+                    ],
+                },
+                {
                     url: 'https://yields.llama.fi/chart/5a9c2073-2190-4002-9654-8c245d1e8534',
                     scale: 100,
                     extractors: [
