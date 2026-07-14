@@ -237,6 +237,50 @@ export default <NetworkData>{
                     ],
                 },
                 {
+                    url: 'https://yields.llama.fi/chart/4ac1a968-68ab-4da8-87e3-8f1e15e3dae2',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x531e90a2376902de8915789fcc1075e3b0c153e7',
+                            path: '$.data[-1:].apyBase',
+                        },
+                    ],
+                },
+                {
+                    url: 'https://yields.llama.fi/chart/517f3a7a-a3b0-4af9-be8e-bcb0fb549744',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x5ec44a70f309854fe04d495cfe1b5da63dd1cc73',
+                            path: '$.data[-1:].apyBase',
+                        },
+                    ],
+                },
+                {
+                    url: 'https://yields.llama.fi/chart/71411cad-9bda-49a9-baeb-670f03eee045',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x58c14a5e061c9bc6926c5b853445290f296c2f7b',
+                            path: '$.data[-1:].apyBase',
+                        },
+                    ],
+                },
+                {
+                    url: 'https://yields.llama.fi/chart/411707d7-0293-4ad3-982d-72125e1f5de7',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0xac2435e3c25e8246870d33ce0a26988a46d5db68',
+                            path: '$.data[-1:].apyBase',
+                        },
+                    ],
+                },
+                {
                     url: 'https://graphs.stakewise.io/mainnet/subgraphs/name/stakewise/prod',
                     body: JSON.stringify({
                         query: `{
