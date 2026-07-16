@@ -33,6 +33,10 @@ export class PathWithAmount extends PathLocal {
     private readonly mutateBalances: boolean;
     private readonly printPath: any = [];
     public readonly swapStepsGreaterThanBufferLimit: number = 0;
+    // Steps whose amount exceeds the buffer's executable limit (buffer balance + wrap/unwrap
+    // capacity on the lending protocol, i.e. erc4626 maxDeposit/maxWithdraw). Such steps
+    // revert onchain, so paths containing them must not be quoted.
+    public readonly swapStepsExceedingBufferCapacity: number = 0;
 
     public constructor(
         tokens: Token[],
@@ -65,15 +69,22 @@ export class PathWithAmount extends PathLocal {
                         this.mutateBalances,
                     );
                     amounts[i + 1] = outputAmount;
-                    if (
-                        pool.poolType === 'Buffer' &&
-                        (pool as BufferPool).swapGivenInGreaterThanBufferLimit(
-                            this.tokens[i],
-                            this.tokens[i + 1],
-                            amounts[i],
-                        )
-                    ) {
-                        this.swapStepsGreaterThanBufferLimit++;
+                    if (pool.poolType === 'Buffer') {
+                        if (
+                            (pool as BufferPool).swapGivenInGreaterThanBufferLimit(
+                                this.tokens[i],
+                                this.tokens[i + 1],
+                                amounts[i],
+                            )
+                        ) {
+                            this.swapStepsGreaterThanBufferLimit++;
+                        }
+                        if (
+                            amounts[i].amount >
+                            pool.getLimitAmountSwap(this.tokens[i], this.tokens[i + 1], SwapKind.GivenIn)
+                        ) {
+                            this.swapStepsExceedingBufferCapacity++;
+                        }
                     }
                     this.printPath.push({
                         pool: pool.id,
@@ -94,15 +105,22 @@ export class PathWithAmount extends PathLocal {
                         amounts[i],
                         this.mutateBalances,
                     );
-                    if (
-                        pool.poolType === 'Buffer' &&
-                        (pool as BufferPool).swapGivenOutGreaterThanBufferLimit(
-                            this.tokens[i - 1],
-                            this.tokens[i],
-                            amounts[i],
-                        )
-                    ) {
-                        this.swapStepsGreaterThanBufferLimit++;
+                    if (pool.poolType === 'Buffer') {
+                        if (
+                            (pool as BufferPool).swapGivenOutGreaterThanBufferLimit(
+                                this.tokens[i - 1],
+                                this.tokens[i],
+                                amounts[i],
+                            )
+                        ) {
+                            this.swapStepsGreaterThanBufferLimit++;
+                        }
+                        if (
+                            amounts[i].amount >
+                            pool.getLimitAmountSwap(this.tokens[i - 1], this.tokens[i], SwapKind.GivenOut)
+                        ) {
+                            this.swapStepsExceedingBufferCapacity++;
+                        }
                     }
                     amounts[i - 1] = inputAmount;
                     this.printPath.push({
