@@ -70,6 +70,10 @@ export const schema = {
         type: String,
         optional: true,
     },
+    TOKENLOGIC_API_KEY: {
+        type: String,
+        optional: true,
+    },
     FUUL_HYPURR_API_KEY: {
         type: String,
         optional: true,
