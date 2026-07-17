@@ -1,3 +1,4 @@
+import { AaveV3Monad } from '@aave-dao/aave-address-book';
 import { env } from '../apps/env';
 import { NetworkData } from './types';
 import { activeChainWorkerJobsGeneric, activeChainWorkerJobsV3 } from './worker-jobs';
@@ -57,7 +58,21 @@ export default <NetworkData>{
     },
     aprHandlers: {
         ybAprHandler: {
+            aave: {
+                markets: [AaveV3Monad],
+            },
             http: [
+                {
+                    url: 'https://app.avantprotocol.com/api/savusdApy',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x9648db94f1e6b19e7d755585542981f97dc806c6',
+                            path: '$.savusdApy',
+                        },
+                    ],
+                },
                 {
                     url: 'https://defi-api.yuzu.money/proxy/apy',
                     scale: 100,

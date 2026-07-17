@@ -1,7 +1,7 @@
 import { env } from '../apps/env';
 import { NetworkData } from './types';
 import { activeChainWorkerJobsGeneric, activeChainWorkerJobsV2, activeChainWorkerJobsV3, fxWorkerJobs, vebalWorkerJobs } from './worker-jobs';
-import { AaveV3Avalanche } from '@bgd-labs/aave-address-book';
+import { AaveV3Avalanche } from '@aave-dao/aave-address-book';
 
 export default <NetworkData>{
     chain: {

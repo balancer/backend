@@ -1,6 +1,5 @@
 import { TokenApr, TokenYieldHandler, AaveAddressBookEntry } from '../../types';
 import aaveUiPoolDataProvider from './abis/aave-ui-pool-data-provider';
-import aaveUiPoolDataProviderPlasma from './abis/aave-ui-pool-data-provider-plasma';
 import { getViemClient } from '../../../sources/viem-client';
 import { chainIdToChain } from '../../../../config/chain-id-to-chain';
 
@@ -22,7 +21,7 @@ export const aaveOnchainHandler: TokenYieldHandler = async ({ markets }: { marke
             const liquidityRates = await client
                 .readContract({
                     address: market.UI_POOL_DATA_PROVIDER,
-                    abi: chain === 'PLASMA' ? aaveUiPoolDataProviderPlasma : aaveUiPoolDataProvider,
+                    abi: aaveUiPoolDataProvider,
                     functionName: 'getReservesData',
                     args: [market.POOL_ADDRESSES_PROVIDER],
                 })
