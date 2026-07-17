@@ -1,4 +1,4 @@
-import { AaveV3Sonic } from '@bgd-labs/aave-address-book';
+import { AaveV3Sonic } from '@aave-dao/aave-address-book';
 import { env } from '../apps/env';
 import { NetworkData } from './types';
 import {

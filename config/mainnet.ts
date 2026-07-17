@@ -11,7 +11,7 @@ import {
     quantAmmWorkerJobs,
     vebalWorkerJobs,
 } from './worker-jobs';
-import { AaveV3Ethereum, AaveV3EthereumLido } from '@bgd-labs/aave-address-book';
+import { AaveV3Ethereum, AaveV3EthereumLido } from '@aave-dao/aave-address-book';
 
 export default <NetworkData>{
     chain: {

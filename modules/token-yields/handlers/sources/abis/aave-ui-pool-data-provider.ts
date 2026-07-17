@@ -2,18 +2,23 @@ export default [
     {
         inputs: [
             {
-                internalType: 'contract IEACAggregatorProxy',
+                internalType: 'contract AggregatorInterface',
                 name: '_networkBaseTokenPriceInUsdProxyAggregator',
                 type: 'address',
             },
             {
-                internalType: 'contract IEACAggregatorProxy',
+                internalType: 'contract AggregatorInterface',
                 name: '_marketReferenceCurrencyPriceInUsdProxyAggregator',
                 type: 'address',
             },
         ],
         stateMutability: 'nonpayable',
         type: 'constructor',
+    },
+    {
+        inputs: [],
+        name: 'InvalidReserveIndex',
+        type: 'error',
     },
     {
         inputs: [],
@@ -102,7 +107,6 @@ export default [
                     { internalType: 'bool', name: 'isPaused', type: 'bool' },
                     { internalType: 'bool', name: 'isSiloedBorrowing', type: 'bool' },
                     { internalType: 'uint128', name: 'accruedToTreasury', type: 'uint128' },
-                    { internalType: 'uint128', name: 'unbacked', type: 'uint128' },
                     { internalType: 'uint128', name: 'isolationModeTotalDebt', type: 'uint128' },
                     { internalType: 'bool', name: 'flashLoanEnabled', type: 'bool' },
                     { internalType: 'uint256', name: 'debtCeiling', type: 'uint256' },
@@ -110,8 +114,8 @@ export default [
                     { internalType: 'uint256', name: 'borrowCap', type: 'uint256' },
                     { internalType: 'uint256', name: 'supplyCap', type: 'uint256' },
                     { internalType: 'bool', name: 'borrowableInIsolation', type: 'bool' },
-                    { internalType: 'bool', name: 'virtualAccActive', type: 'bool' },
                     { internalType: 'uint128', name: 'virtualUnderlyingBalance', type: 'uint128' },
+                    { internalType: 'uint128', name: 'deficit', type: 'uint128' },
                 ],
                 internalType: 'struct IUiPoolDataProviderV3.AggregatedReserveData[]',
                 name: '',
@@ -165,14 +169,14 @@ export default [
     {
         inputs: [],
         name: 'marketReferenceCurrencyPriceInUsdProxyAggregator',
-        outputs: [{ internalType: 'contract IEACAggregatorProxy', name: '', type: 'address' }],
+        outputs: [{ internalType: 'contract AggregatorInterface', name: '', type: 'address' }],
         stateMutability: 'view',
         type: 'function',
     },
     {
         inputs: [],
         name: 'networkBaseTokenPriceInUsdProxyAggregator',
-        outputs: [{ internalType: 'contract IEACAggregatorProxy', name: '', type: 'address' }],
+        outputs: [{ internalType: 'contract AggregatorInterface', name: '', type: 'address' }],
         stateMutability: 'view',
         type: 'function',
     },
