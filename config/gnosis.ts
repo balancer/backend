@@ -1,4 +1,4 @@
-import { AaveV3Gnosis } from '@bgd-labs/aave-address-book';
+import { AaveV3Gnosis } from '@aave-dao/aave-address-book';
 import { env } from '../apps/env';
 import { NetworkData } from './types';
 import { activeChainWorkerJobsGeneric, activeChainWorkerJobsV2, activeChainWorkerJobsV3, vebalWorkerJobs, cowAmmWorkerJobs } from './worker-jobs';

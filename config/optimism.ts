@@ -1,4 +1,4 @@
-import { AaveV3Optimism } from '@bgd-labs/aave-address-book';
+import { AaveV3Optimism } from '@aave-dao/aave-address-book';
 import { env } from '../apps/env';
 import { NetworkData } from './types';
 import { activeChainWorkerJobsGeneric, activeChainWorkerJobsV2, activeChainWorkerJobsV3, vebalWorkerJobs, datastudioWorkerJobs } from './worker-jobs';

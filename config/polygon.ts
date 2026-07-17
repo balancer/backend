@@ -1,4 +1,4 @@
-import { AaveV3Polygon } from '@bgd-labs/aave-address-book';
+import { AaveV3Polygon } from '@aave-dao/aave-address-book';
 import { env } from '../apps/env';
 import { NetworkData } from './types';
 import { activeChainWorkerJobsGeneric, activeChainWorkerJobsV2, vebalWorkerJobs, fxWorkerJobs } from './worker-jobs';

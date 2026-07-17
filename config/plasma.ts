@@ -1,4 +1,4 @@
-import { AaveV3Plasma } from '@bgd-labs/aave-address-book';
+import { AaveV3Plasma } from '@aave-dao/aave-address-book';
 import { env } from '../apps/env';
 import { NetworkData } from './types';
 import { activeChainWorkerJobsGeneric, activeChainWorkerJobsV3 } from './worker-jobs';
