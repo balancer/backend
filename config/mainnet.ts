@@ -237,46 +237,46 @@ export default <NetworkData>{
                     ],
                 },
                 {
-                    url: 'https://yields.llama.fi/chart/4ac1a968-68ab-4da8-87e3-8f1e15e3dae2',
-                    scale: 100,
+                    url: 'https://api.tokenlogic.xyz/v1/aave/reserves/main-ethereum-core-v4/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48/latest',
+                    headers: { Authorization: `Bearer ${env.TOKENLOGIC_API_KEY}` },
                     extractors: [
                         {
                             type: 'path',
                             token: '0x531e90a2376902de8915789fcc1075e3b0c153e7',
-                            path: '$.data[-1:].apyBase',
+                            path: '$.data[-1:].supply_apy',
                         },
                     ],
                 },
                 {
-                    url: 'https://yields.llama.fi/chart/517f3a7a-a3b0-4af9-be8e-bcb0fb549744',
-                    scale: 100,
+                    url: 'https://api.tokenlogic.xyz/v1/aave/reserves/main-ethereum-core-v4/0xdac17f958d2ee523a2206206994597c13d831ec7/latest',
+                    headers: { Authorization: `Bearer ${env.TOKENLOGIC_API_KEY}` },
                     extractors: [
                         {
                             type: 'path',
                             token: '0x5ec44a70f309854fe04d495cfe1b5da63dd1cc73',
-                            path: '$.data[-1:].apyBase',
+                            path: '$.data[-1:].supply_apy',
                         },
                     ],
                 },
                 {
-                    url: 'https://yields.llama.fi/chart/71411cad-9bda-49a9-baeb-670f03eee045',
-                    scale: 100,
+                    url: 'https://api.tokenlogic.xyz/v1/aave/reserves/main-ethereum-core-v4/0x40d16fc0246ad3160ccc09b8d0d3a2cd28ae6c2f/latest',
+                    headers: { Authorization: `Bearer ${env.TOKENLOGIC_API_KEY}` },
                     extractors: [
                         {
                             type: 'path',
                             token: '0x58c14a5e061c9bc6926c5b853445290f296c2f7b',
-                            path: '$.data[-1:].apyBase',
+                            path: '$.data[-1:].supply_apy',
                         },
                     ],
                 },
                 {
-                    url: 'https://yields.llama.fi/chart/411707d7-0293-4ad3-982d-72125e1f5de7',
-                    scale: 100,
+                    url: 'https://api.tokenlogic.xyz/v1/aave/reserves/main-ethereum-core-v4/0xe343167631d89b6ffc58b88d6b7fb0228795491d/latest',
+                    headers: { Authorization: `Bearer ${env.TOKENLOGIC_API_KEY}` },
                     extractors: [
                         {
                             type: 'path',
                             token: '0xac2435e3c25e8246870d33ce0a26988a46d5db68',
-                            path: '$.data[-1:].apyBase',
+                            path: '$.data[-1:].supply_apy',
                         },
                     ],
                 },
