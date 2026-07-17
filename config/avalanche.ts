@@ -239,6 +239,28 @@ export default <NetworkData>{
                         },
                     ],
                 },
+                {
+                    url: 'https://api.tokenlogic.xyz/v1/aave/reserves/main-avalanche-core-v4/0xb97ef9ef8734c71904d8002f8b6bc66dd9c48a6e/latest',
+                    headers: { Authorization: `Bearer ${env.TOKENLOGIC_API_KEY}` },
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x01d7f7b7ce2123192fecc20bd1caf3e4d9e4c10d',
+                            path: '$.data[-1:].supply_apy',
+                        },
+                    ],
+                },
+                {
+                    url: 'https://api.tokenlogic.xyz/v1/aave/reserves/main-avalanche-core-v4/0x9702230a8ea53601f5cd2dc00fdbc13d4df4a8c7/latest',
+                    headers: { Authorization: `Bearer ${env.TOKENLOGIC_API_KEY}` },
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x2e4ba06ff97e10d09fa4f5a270e97301eae729a9',
+                            path: '$.data[-1:].supply_apy',
+                        },
+                    ],
+                },
             ],
         },
     },
