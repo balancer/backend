@@ -1,7 +1,7 @@
 import { $Enums, PrismaPoolAprItem, PrismaPoolAprType } from '@prisma/client';
 import { AprHandler, PoolAPRData } from '../../types';
 import { chainIdToChain } from '../../../../config/chain-id-to-chain';
-import { AaveV3Plasma } from '@bgd-labs/aave-address-book';
+import { AaveV3Plasma } from '@aave-dao/aave-address-book';
 import { env } from '../../../../apps/env';
 
 const opportunityUrl =

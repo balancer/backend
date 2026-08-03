@@ -11,7 +11,7 @@ import {
     quantAmmWorkerJobs,
     vebalWorkerJobs,
 } from './worker-jobs';
-import { AaveV3Ethereum, AaveV3EthereumLido } from '@bgd-labs/aave-address-book';
+import { AaveV3Ethereum, AaveV3EthereumLido } from '@aave-dao/aave-address-book';
 
 export default <NetworkData>{
     chain: {
@@ -233,6 +233,50 @@ export default <NetworkData>{
                             type: 'path',
                             token: '0xc8cf6d7991f15525488b2a83df53468d682ba4b0',
                             path: '$.data[-1:].apyBase',
+                        },
+                    ],
+                },
+                {
+                    url: 'https://api.tokenlogic.xyz/v1/aave/reserves/main-ethereum-core-v4/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48/latest',
+                    headers: { Authorization: `Bearer ${env.TOKENLOGIC_API_KEY}` },
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x531e90a2376902de8915789fcc1075e3b0c153e7',
+                            path: '$.data[-1:].supply_apy',
+                        },
+                    ],
+                },
+                {
+                    url: 'https://api.tokenlogic.xyz/v1/aave/reserves/main-ethereum-core-v4/0xdac17f958d2ee523a2206206994597c13d831ec7/latest',
+                    headers: { Authorization: `Bearer ${env.TOKENLOGIC_API_KEY}` },
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x5ec44a70f309854fe04d495cfe1b5da63dd1cc73',
+                            path: '$.data[-1:].supply_apy',
+                        },
+                    ],
+                },
+                {
+                    url: 'https://api.tokenlogic.xyz/v1/aave/reserves/main-ethereum-core-v4/0x40d16fc0246ad3160ccc09b8d0d3a2cd28ae6c2f/latest',
+                    headers: { Authorization: `Bearer ${env.TOKENLOGIC_API_KEY}` },
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x58c14a5e061c9bc6926c5b853445290f296c2f7b',
+                            path: '$.data[-1:].supply_apy',
+                        },
+                    ],
+                },
+                {
+                    url: 'https://api.tokenlogic.xyz/v1/aave/reserves/main-ethereum-core-v4/0xe343167631d89b6ffc58b88d6b7fb0228795491d/latest',
+                    headers: { Authorization: `Bearer ${env.TOKENLOGIC_API_KEY}` },
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0xac2435e3c25e8246870d33ce0a26988a46d5db68',
+                            path: '$.data[-1:].supply_apy',
                         },
                     ],
                 },
