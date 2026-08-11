@@ -69,5 +69,6 @@ export default <NetworkData>{
         },
     },
     stakingServices: [],
-    workerJobs: [...activeChainWorkerJobsGeneric, ...activeChainWorkerJobsV3],
+    // workerJobs: [...activeChainWorkerJobsGeneric, ...activeChainWorkerJobsV3],
+    workerJobs: [],
 };

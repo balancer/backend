@@ -128,5 +128,5 @@ export default <NetworkData>{
         },
     },
     stakingServices: ['gauge'],
-    workerJobs: [...deprecatedChainWorkerJobs, ...vebalWorkerJobs],
+    workerJobs: [],
 };
