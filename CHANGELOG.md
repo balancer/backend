@@ -1,5 +1,11 @@
 # backend
 
+## 2.1.19
+
+### Patch Changes
+
+-   5e21ae1: disable xlayer and zkevm
+
 ## 2.1.18
 
 ### Patch Changes
