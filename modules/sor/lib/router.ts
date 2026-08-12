@@ -84,6 +84,10 @@ export class Router {
                         isHyperEvm &&
                         pathWithAmount.swapStepsGreaterThanBufferLimit > SWAPS_GREATER_THAN_BUFFER_LIMIT_THRESHOLD;
 
+                    // remove paths with buffer steps that would revert onchain because the swap
+                    // amount exceeds the buffer's capacity (buffer balance + erc4626 maxDeposit/maxWithdraw)
+                    const exceedsBufferCapacity = pathWithAmount.swapStepsExceedingBufferCapacity > 0;
+
                     /**
                      * Remove paths that return 0 amount
                      * It usually happens when low swapAmounts are provided and return amounts rounded down to zero
@@ -92,7 +96,7 @@ export class Router {
                         pathWithAmount.swapKind === SwapKind.GivenIn
                             ? pathWithAmount.outputAmount
                             : pathWithAmount.inputAmount;
-                    if (calculatedAmount.amount > 0n && !gasCostTooHigh) {
+                    if (calculatedAmount.amount > 0n && !gasCostTooHigh && !exceedsBufferCapacity) {
                         quotePathsByRatio[i].push(pathWithAmount);
                         selectedPaths.push(path);
                     }
