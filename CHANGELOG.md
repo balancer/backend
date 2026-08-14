@@ -1,5 +1,12 @@
 # backend
 
+## 2.1.20
+
+### Patch Changes
+
+-   40df958: add maple syrupUSDC and ethena sUSDe APRs on monad
+-   403f9cf: SOR - drop swap paths with buffer steps that exceed wrap/unwrap capacity (erc4626 maxDeposit/maxWithdraw) instead of quoting swaps that revert onchain
+
 ## 2.1.19
 
 ### Patch Changes
