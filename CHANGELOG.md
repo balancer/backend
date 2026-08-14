@@ -1,5 +1,11 @@
 # backend
 
+## 2.1.21
+
+### Patch Changes
+
+-   7e60cd4: deprecate mode and fraxtal from updating
+
 ## 2.1.20
 
 ### Patch Changes
