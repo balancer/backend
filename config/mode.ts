@@ -1,6 +1,4 @@
-import { env } from '../apps/env';
 import { NetworkData } from './types';
-import { deprecatedChainWorkerJobs, vebalWorkerJobs } from './worker-jobs';
 
 export default <NetworkData>{
     chain: {
@@ -114,5 +112,6 @@ export default <NetworkData>{
         },
     },
     stakingServices: ['gauge'],
-    workerJobs: [...deprecatedChainWorkerJobs, ...vebalWorkerJobs],
+    // workerJobs: [...deprecatedChainWorkerJobs, ...vebalWorkerJobs],
+    workerJobs: [],
 };

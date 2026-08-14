@@ -1,6 +1,4 @@
-import { env } from '../apps/env';
 import { DeploymentEnv, NetworkData } from './types';
-import { deprecatedChainWorkerJobs, vebalWorkerJobs } from './worker-jobs';
 
 export default <NetworkData>{
     chain: {
