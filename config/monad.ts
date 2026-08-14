@@ -285,6 +285,36 @@ export default <NetworkData>{
                         },
                     ],
                 },
+                {
+                    url: 'https://api.maple.finance/v2/graphql',
+                    body: JSON.stringify({
+                        query: `{
+                      syrupGlobals {
+                        apy
+                      }
+                    }`,
+                    }),
+                    headers: { 'Content-Type': 'application/json' },
+                    scale: 1e30,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0xab6e5a0c3799d020c790d34f7b2c02639e238af7',
+                            path: '$.data.syrupGlobals.apy',
+                        },
+                    ],
+                },
+                {
+                    url: 'https://ethena.fi/api/yields/protocol-and-staking-yield',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x211cc4dd073734da055fbf44a2b4667d5e5fe5d2',
+                            path: '$.stakingYield.value',
+                        },
+                    ],
+                },
             ],
         },
     },
