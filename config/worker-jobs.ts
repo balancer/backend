@@ -253,10 +253,3 @@ export const reliquaryWorkerJobs: WorkerJob[] = [
         interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(2, 'hours') : every(1, 'hours'),
     },
 ];
-
-export const datastudioWorkerJobs: WorkerJob[] = [
-    {
-        name: 'feed-data-to-datastudio',
-        interval: (env.DEPLOYMENT_ENV as DeploymentEnv) === 'canary' ? every(10, 'minutes') : every(10, 'minutes'),
-    },
-];

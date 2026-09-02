@@ -1,5 +1,11 @@
 # backend
 
+## 2.1.22
+
+### Patch Changes
+
+-   9ec15ff: add Monday.trade aBIL APR on monad
+
 ## 2.1.21
 
 ### Patch Changes
