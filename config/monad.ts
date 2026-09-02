@@ -315,6 +315,18 @@ export default <NetworkData>{
                         },
                     ],
                 },
+                {
+                    name: 'aBIL',
+                    url: 'https://mainnet-api.monday.trade/rwa/api/v2/stock-yield/aBIL',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x4fc5b9f8933597d3ecf84d0611687e1dc8dd576f',
+                            path: '$.data.apr',
+                        },
+                    ],
+                },
             ],
         },
     },
