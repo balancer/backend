@@ -1,7 +1,12 @@
 import { AaveV3Optimism } from '@aave-dao/aave-address-book';
 import { env } from '../apps/env';
 import { NetworkData } from './types';
-import { activeChainWorkerJobsGeneric, activeChainWorkerJobsV2, activeChainWorkerJobsV3, vebalWorkerJobs, datastudioWorkerJobs } from './worker-jobs';
+import {
+    activeChainWorkerJobsGeneric,
+    activeChainWorkerJobsV2,
+    activeChainWorkerJobsV3,
+    vebalWorkerJobs,
+} from './worker-jobs';
 
 export default <NetworkData>{
     chain: {
@@ -264,5 +269,10 @@ export default <NetworkData>{
         },
     },
     stakingServices: ['gauge'],
-    workerJobs: [...activeChainWorkerJobsGeneric, ...activeChainWorkerJobsV2, ...activeChainWorkerJobsV3, ...vebalWorkerJobs, ...datastudioWorkerJobs],
+    workerJobs: [
+        ...activeChainWorkerJobsGeneric,
+        ...activeChainWorkerJobsV2,
+        ...activeChainWorkerJobsV3,
+        ...vebalWorkerJobs,
+    ],
 };

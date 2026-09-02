@@ -8,7 +8,6 @@ import {
     quantAmmWorkerJobs,
     stsWorkerJobs,
     loopsWorkerJobs,
-    datastudioWorkerJobs,
     reliquaryWorkerJobs,
 } from './worker-jobs';
 
@@ -228,7 +227,6 @@ export default <NetworkData>{
         ...quantAmmWorkerJobs,
         ...stsWorkerJobs,
         ...loopsWorkerJobs,
-        ...datastudioWorkerJobs,
         ...reliquaryWorkerJobs,
     ],
 };
