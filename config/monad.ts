@@ -160,6 +160,30 @@ export default <NetworkData>{
                     ],
                 },
                 {
+                    name: 'blbUSDC',
+                    url: 'https://api2.curvance.com/snapshots/latest/token/0x7f779f7f5316f6164dc5a25422a5ee51504b284a',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x215394b5677cb7a18b6fa8cc2cd155c024ee6b2e',
+                            path: '$.percent_supply_apy',
+                        },
+                    ],
+                },
+                {
+                    name: 'blbAUSD',
+                    url: 'https://api2.curvance.com/snapshots/latest/token/0xbde2459a033f20442ce18483cdd48643d80c6c93',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0xc2ddc1004ca0d6cc4bfd1dcd03dcf855bed8e670',
+                            path: '$.percent_supply_apy',
+                        },
+                    ],
+                },
+                {
                     name: 'wnWMON',
                     url: 'https://app.neverland.money/api/pool-apy',
                     scale: 100,
@@ -211,6 +235,30 @@ export default <NetworkData>{
                             type: 'path',
                             token: '0x8d5c2df3eef09088fcccf3376d8ecd0dd505f642',
                             path: '$.reserves.0x754704bc059f8c67012fed69bc8a327a5aafb603.supply.baseAPY',
+                        },
+                    ],
+                },
+                {
+                    name: 'wnWBTC',
+                    url: 'https://app.neverland.money/api/pool-apy',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x8959f4e6ed1f4567a464959793d5f8f6f33c1c8b',
+                            path: '$.reserves.0x0555e30da8f98308edb960aa94c0db47230d2b9c.supply.baseAPY',
+                        },
+                    ],
+                },
+                {
+                    name: 'wnCBBTC',
+                    url: 'https://app.neverland.money/api/pool-apy',
+                    scale: 100,
+                    extractors: [
+                        {
+                            type: 'path',
+                            token: '0x98a297e6424787e57af119949d7e00b721f832bb',
+                            path: '$.reserves.0xd18b7ec58cdf4876f6afebd3ed1730e4ce10414b.supply.baseAPY',
                         },
                     ],
                 },
