@@ -1,5 +1,11 @@
 # backend
 
+## 2.1.23
+
+### Patch Changes
+
+-   f583ac7: add Curvance and Neverland wrapper APRs on Monad
+
 ## 2.1.22
 
 ### Patch Changes
