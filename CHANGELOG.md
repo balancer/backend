@@ -1,5 +1,11 @@
 # backend
 
+## 2.1.24
+
+### Patch Changes
+
+-   4208c62: deprecate sonic from updating
+
 ## 2.1.23
 
 ### Patch Changes
