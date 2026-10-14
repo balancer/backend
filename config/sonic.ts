@@ -1,15 +1,6 @@
 import { AaveV3Sonic } from '@aave-dao/aave-address-book';
 import { env } from '../apps/env';
 import { NetworkData } from './types';
-import {
-    activeChainWorkerJobsGeneric,
-    activeChainWorkerJobsV2,
-    activeChainWorkerJobsV3,
-    quantAmmWorkerJobs,
-    stsWorkerJobs,
-    loopsWorkerJobs,
-    reliquaryWorkerJobs,
-} from './worker-jobs';
 
 export default <NetworkData>{
     chain: {
@@ -220,13 +211,14 @@ export default <NetworkData>{
         },
     },
     stakingServices: ['gauge', 'reliquary'],
-    workerJobs: [
-        ...activeChainWorkerJobsGeneric,
-        ...activeChainWorkerJobsV2,
-        ...activeChainWorkerJobsV3,
-        ...quantAmmWorkerJobs,
-        ...stsWorkerJobs,
-        ...loopsWorkerJobs,
-        ...reliquaryWorkerJobs,
-    ],
+    // workerJobs: [
+    //     ...activeChainWorkerJobsGeneric,
+    //     ...activeChainWorkerJobsV2,
+    //     ...activeChainWorkerJobsV3,
+    //     ...quantAmmWorkerJobs,
+    //     ...stsWorkerJobs,
+    //     ...loopsWorkerJobs,
+    //     ...reliquaryWorkerJobs,
+    // ],
+    workerJobs: [],
 };
